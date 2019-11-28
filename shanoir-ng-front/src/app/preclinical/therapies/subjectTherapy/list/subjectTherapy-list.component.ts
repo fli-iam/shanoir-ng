@@ -1,4 +1,18 @@
-import {Input, ViewChild, Component} from '@angular/core'
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core'
 
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -10,39 +24,64 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ControlValueAccessor } from '@angular/forms';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Mode } from '../../../../shared/components/entity/entity.component.abstract';
+import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 
 @Component({
     selector: 'subject-therapy-list',
-    templateUrl: 'subjectTherapy-list.component.html',
-    styleUrls: ['subjectTherapy-list.component.css'],
-    providers: [SubjectTherapyService]
+    templateUrl: './subjectTherapy-list.component.html',
+    providers: [
+	{ 
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => SubjectTherapiesListComponent),
+          multi: true
+        },
+        SubjectTherapyService
+    ]
 })
 
-
 @ModesAware
-export class SubjectTherapiesListComponent  extends BrowserPaginEntityListComponent<SubjectTherapy>{
-    @Input() canModify: Boolean = false;
-    @Input() preclinicalSubject: PreclinicalSubject; 
-    public toggleFormST: boolean = false;
-    public createSTMode: boolean = false;
-    public therapySelected: SubjectTherapy;
-   @ViewChild('subjectTherapiesTable') table: TableComponent;
+export class SubjectTherapiesListComponent extends SubjectAbstractListInput<SubjectTherapy> {
 
     constructor(
         private subjectTherapyService: SubjectTherapyService) {
             super('preclinical-subject-therapy');
     }
+    
+    public getEntityName() {
+        return ('Therapy');
+    }
+
+    protected getEntity() {
+        return new SubjectTherapy();
+    }
+
+    protected getEntityList() {
+        return this.preclinicalSubject.therapies;
+    }
 
     getEntities(): Promise<SubjectTherapy[]> {
         let subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
-            this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
-                subjectTherapies = st;
-            })
+            // Initialize from breadcrumbs cache if existing
+            let ts: SubjectTherapy[];
+            if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies != null) {
+                ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies;
+                this.preclinicalSubject.therapies = ts;
+            } else {
+                return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
+                    this.preclinicalSubject.therapies = st;
+                    return st;
+                });
+            }
+            return Promise.resolve(this.preclinicalSubject.therapies);
         }
         return Promise.resolve(subjectTherapies);
     }
-    
+
     getColumnDefs(): any[] {
         function dateRenderer(date) {
             if (date) {
@@ -65,7 +104,7 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
             }
             return '';
         };
-        let colDef: any[] = [
+        let colDef: any[] = [  
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", type: "Enum", cellRenderer: function(params: any) {
@@ -98,68 +137,14 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
                 }
             }     
         ];
+        setTimeout(() => {
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                colDef.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectEntity(item) });
+            }
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                colDef.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectEntity(item) });
+            }
+        }, 100)
         return colDef;       
     }
-
-    getCustomActionsDefs(): any[] {
-        return [];
-    }
-    
-    
-
-    refreshList(newSubTherapy: SubjectTherapy) {
-        this.getEntities(),
-        this.refreshDisplay(true);
-    }
-
-    refreshDisplay(cancel: boolean) {
-        this.toggleFormST = false;
-        this.createSTMode = false;
-    }
-
-    
-    protected openDeleteConfirmDialog = (entity: SubjectTherapy) => {
-        if (this.keycloakService.isUserGuest()) return;
-        this.confirmDialogService
-            .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject-therapy n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
-                if (res) {
-                    this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, entity).then(() => {
-                        this.onDelete.next(entity);
-                        this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-subject-therapy sucessfully deleted');
-                    }).catch(reason => {
-                        if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
-                            if (reason.error.code != 422) throw Error(reason);
-                        }
-                    });                    
-                }
-            })
-    }
-    
-
-
-    viewSubjectTherapy = (therapy: SubjectTherapy) => {
-        this.toggleFormST = true;
-        this.createSTMode = false;
-        this.therapySelected = therapy;
-    }
-
-    toggleSubjectTherapyForm() {
-        if (this.toggleFormST == false) {
-            this.toggleFormST = true;
-        } else if (this.toggleFormST == true) {
-            this.toggleFormST = false;
-        } else {
-            this.toggleFormST = true;
-        }
-        this.createSTMode = true;
-        this.therapySelected = new SubjectTherapy();
-    }
-
-    
-
 }

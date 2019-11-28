@@ -5,6 +5,7 @@
 *~
 *.swp
 *.map
+*.pyc
 *.metadata.json
 *.settings/
 .DS_Store
@@ -16,3 +17,6 @@ shanoir-ng-nginx/webapp
 shanoir-ng-resource-server.log
 target
 **/.classpath
+.factorypath
+.project
+bin/

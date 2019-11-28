@@ -49,12 +49,12 @@ export class SubjectStudyListComponent extends AbstractInput {
         super.writeValue(obj);
         if (this.model && this.selectableList) {
             if (this.compMode == 'study') {
-                for (let item of this.selectableList) {
-                    item.selected = this.model.find(subStu => subStu.subject.id == item.id) 
+                for (let selectableItem of this.selectableList) {
+                    if(this.model.find(subStu => subStu.subject.id == selectableItem.id)) selectableItem.selected = true; 
                 }
             } else if (this.compMode == 'subject') {
-                for (let item of this.selectableList) {
-                    item.selected = this.model.find(subStu => subStu.study.id == item.id) 
+                for (let selectableItem of this.selectableList) {
+                    if(this.model.find(subStu => subStu.study.id == selectableItem.id)) selectableItem.selected = true;
                 }
             }
         }
@@ -87,13 +87,35 @@ export class SubjectStudyListComponent extends AbstractInput {
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
+        this.propagateChange(this.model);
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
-            this.model[index].selected = false;
             this.model.splice(index, 1);
+            this.propagateChange(this.model);
+            if (this.compMode == 'study') {
+                for (let selectableItem of this.selectableList) {
+                    if (selectableItem.id == subjectStudy.subject.id) {
+                        selectableItem.selected = false;
+                    }
+                }
+            } else if (this.compMode == 'subject') {
+                for (let selectableItem of this.selectableList) {
+                    if (selectableItem.id == subjectStudy.study.id) {
+                        selectableItem.selected = false;
+                    }
+                }
+            }
         }
+    }
+
+    onChange() {
+        this.propagateChange(this.model);
+    }
+
+    onTouch() {
+        this.propagateTouched();
     }
 }

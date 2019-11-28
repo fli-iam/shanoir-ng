@@ -1,5 +1,5 @@
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
+< * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -15,18 +15,32 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.validation.Valid;
 
+import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
+import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
+import org.shanoir.ng.importer.eeg.edf.EDFParser;
+import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
+import org.shanoir.ng.importer.model.Channel;
+import org.shanoir.ng.importer.model.EegDataset;
+import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.Event;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -39,12 +53,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,8 +97,14 @@ public class ImporterApiController implements ImporterApi {
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
 
+	@Value("${ms.url.shanoir-ng-datasets-eeg}")
+	private String datasetsMsUrl;
+	
 	@Value("${shanoir.import.directory}")
 	private String importDir;
+	
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	@Autowired
 	private DicomDirToModelService dicomDirToModel;
@@ -115,6 +138,7 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
+	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException {
@@ -136,7 +160,7 @@ public class ImporterApiController implements ImporterApi {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile, true);
 	
 			/**
 			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
@@ -159,14 +183,10 @@ public class ImporterApiController implements ImporterApi {
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
 			// Work folder is always relative to general import directory and userId (not shown to outside world)
-			importJob.setWorkFolder(File.separator + importJobDir.getName());
+			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
 			importJob.setPatients(patients);
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
-		} catch (ShanoirException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
@@ -186,7 +206,7 @@ public class ImporterApiController implements ImporterApi {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile, true);
 			File importJobFile = new File(importJobDir.getAbsolutePath() + File.separator + IMPORTJOB);
 			ImportJob importJob = null;
 			if (importJobFile.exists()) {
@@ -214,10 +234,6 @@ public class ImporterApiController implements ImporterApi {
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
 			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
-		} catch (ShanoirException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Authentication issue.", null));
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
@@ -250,7 +266,10 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							e.getMessage(), null));
-		}	
+		}
+		if (importJob.getPatients() == null || importJob.getPatients().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 		return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 	}
 
@@ -294,9 +313,9 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws IOException
 	 * @throws RestServiceException
 	 */
-	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile) throws IOException, RestServiceException {
+	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile, final boolean fromDicom) throws IOException, RestServiceException {
 		File tempFile = saveTempFile(userImportDir, dicomZipFile);
-		if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+		if (fromDicom && !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"DICOMDIR is missing in .zip file.", null));
 		String fileName = tempFile.getName();
@@ -385,14 +404,10 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setFromDicomZip(true);
 			// Work folder is always relative to general import directory and userId (not
 			// shown to outside world)
-			importJob.setWorkFolder(File.separator + importJobDir.getName());
+			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
 			importJob.setPatients(patients);
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
-		} catch (ShanoirException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
@@ -449,6 +464,206 @@ public class ImporterApiController implements ImporterApi {
 		File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
 		Files.move(file.toPath(), uploadFile.toPath());
 		return uploadFile;
+	}
+
+	@Override
+	/**
+	 * This method load an EEG file, unzip it and load an import job with the informations collected
+	 */
+	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegFile)
+			throws RestServiceException {
+		try {
+			// Do some checks about the file, must be != null and must be a .zip file
+			if (eegFile == null) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+			}
+			if (!isZipFile(eegFile)) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip or .edf required.", null));
+			}
+			/**
+			 * 1. STEP: Handle file management.
+			 * Always create a userId specific folder in the import work folder (the root of everything):
+			 * split imports to clearly separate them into separate folders for each user
+			 */
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs(); // create if not yet existing
+			}
+
+			// Unzip the file and get the elements
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegFile, false);
+
+			EegImportJob importJob = new EegImportJob();
+			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+
+			List<EegDataset> datasets = new ArrayList<>();
+
+			File dataFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegFile.getOriginalFilename().replace(".zip", ""));
+
+			// Get .VHDR file
+			File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.endsWith("vhdr");
+			    }
+			});
+			
+			// Get .edf file
+			File[] edfMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.endsWith("edf");
+			    }
+			});
+
+			if (bvMatchingFiles != null && bvMatchingFiles.length > 0) {
+				// Manage multiple vhdr files
+				// read .vhdr files
+				readBrainvisionFiles(bvMatchingFiles, dataFileDir, datasets);
+			} else if (edfMatchingFiles != null && edfMatchingFiles.length > 0) {
+				// read .edf files
+				readEdfFiles(edfMatchingFiles, dataFileDir, datasets);
+			} else {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr or .edf file.", null));
+			}
+
+			importJob.setDatasets(datasets);
+			
+			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
+		} catch (IOException ioe) {
+			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
+		}
+	}
+
+	/**
+	 * Reads a list of .edf files to generate a bunch of datasets.
+	 * @param datasets the list of datasets to import 
+	 * @param dataFileDir the file directory where we are working
+	 * @param edfMatchingFiles the list of .edf files
+	 * @throws IOException when parsing fails
+	 */
+	private void readEdfFiles(File[] edfMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+		for (File edfFile : edfMatchingFiles) {
+			
+			// Parse the file
+			EDFParserResult result = EDFParser.parseEDF(new FileInputStream(edfFile));
+
+			// Create channels
+			List<Channel> channels = new ArrayList<>();
+			for (int i = 0; i < result.getHeader().getNumberOfChannels(); i++) {
+				Channel chan = new Channel();
+				Pattern p = Pattern.compile("HP:(\\d+)k?Hz\\sLP:(\\d+)k?Hz(\\sN:(\\d+)k?Hz)?");
+				Matcher m = p.matcher(result.getHeader().getPrefilterings()[i].trim());
+				if (m.matches()) {
+					chan.setHighCutoff(Integer.parseInt(m.group(1)));
+					chan.setLowCutoff(Integer.parseInt(m.group(2)));
+					if (m.groupCount() > 2) {
+						chan.setNotch(Integer.parseInt(m.group(4)));
+					}
+				}
+				chan.setName(result.getHeader().getChannelLabels()[i].trim());
+				chan.setReferenceUnits(result.getHeader().getDimensions()[i].trim());
+
+				channels.add(chan);
+			}
+			
+			// NOT SURE OF THIS AT ALL
+			double samplingfrequency = result.getHeader().getNumberOfRecords() / result.getHeader().getDurationOfRecords();
+
+			// Create events
+			List<Event> events = new ArrayList<>();
+			for (EDFAnnotation annotation : result.getAnnotations()) {
+				Event event = new Event();
+				
+				// This is done by default
+				event.setChannelNumber(0);
+				event.setPosition(String.valueOf((float)(samplingfrequency / annotation.getOnSet())));
+				event.setPoints((int) annotation.getDuration()); 
+				events.add(event);
+			}
+
+			EegDataset dataset = new EegDataset();
+			dataset.setEvents(events);
+			dataset.setChannels(channels);
+			dataset.setChannelCount(result.getHeader().getNumberOfChannels());
+
+			// Get dataset name from EDF file name
+			String fileNameWithOutExt = FilenameUtils.removeExtension(edfFile.getName());
+			dataset.setName(fileNameWithOutExt);
+			
+			dataset.setSamplingFrequency((int)samplingfrequency);
+			//dataset.setCoordinatesSystem(??);
+			
+			// Get the list of file to save from reader
+			List<String> files = new ArrayList<>();
+			
+			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.startsWith(fileNameWithOutExt);
+			    }
+			});
+			for (File fi : filesToSave) {
+				files.add(fi.getCanonicalPath());
+			}
+			dataset.setFiles(files);
+			datasets.add(dataset);
+		};
+	}
+
+	/**
+	 * Reads a list of .vhdr files to generate a bunch of datasets.
+	 * @param dataFileDir the file directory where we are working
+	 * @param bvMatchingFiles  the list of vhdr files
+	 * @param datasets the list of datasets to import
+	 * @return a list of datasets generated from the informations of the .vhdr files
+	 * @throws IOException when parsing fails
+	 */
+	private void readBrainvisionFiles(File[] bvMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+		for (File vhdrFile : bvMatchingFiles) {
+			
+			// Parse the file
+			BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
+
+			EegDataset dataset = new EegDataset();
+			dataset.setEvents(bvr.getEvents());
+			dataset.setChannels(bvr.getChannels());
+			dataset.setChannelCount(bvr.getNbchan());
+			// Get dataset name from VHDR file name
+			String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
+			dataset.setName(fileNameWithOutExt);
+			dataset.setSamplingFrequency(bvr.getSamplingFrequency());
+			dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
+			
+			// Get the list of file to save from reader
+			List<String> files = new ArrayList<>();
+			
+			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.startsWith(fileNameWithOutExt);
+			    }
+			});
+			for (File fi : filesToSave) {
+				files.add(fi.getCanonicalPath());
+			}
+			dataset.setFiles(files);
+			datasets.add(dataset);
+		};
+	}
+
+	/**
+	 * Here we had all the informations we needed (metadata, examination, study, subject, ect...) so we make a call to dataset API to create it.
+	 */
+	@Override
+	public ResponseEntity<Void> startImportEEGJob( @ApiParam(value = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
+		// For .EDF, anonymisation could be done here.
+		// Comment: BIDS translation will be done during export and not during import.
+
+		// HttpEntity represents the request
+		final HttpEntity<EegImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
+		// Post to dataset MS to finish import and create associated datasets
+		ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+		return new ResponseEntity<>(response.getStatusCode());
 	}
 
 }

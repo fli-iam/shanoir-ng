@@ -1,12 +1,26 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { ImportJob } from '../../../import/dicom-data.model';
-import { DicomArchiveService } from '../../../import/dicom-archive.service';
+import { ImportJob } from '../../../import/shared/dicom-data.model';
+import { DicomArchiveService } from '../../../import/shared/dicom-archive.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { slideDown } from '../../../shared/animations/animations';
-import { ImportService } from '../../../import/import.service';
+import { ImportService } from '../../../import/shared/import.service';
 import { Router } from '../../../breadcrumbs/router';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ImportDataService } from '../../../import/import.data-service';
+import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
 
 
@@ -15,7 +29,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 @Component({
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
-    styleUrls: ['bruker-upload.component.css', '../../..//import/import.step.css'],
+    styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
     animations: [slideDown]
 })
 export class BrukerUploadComponent {

@@ -23,17 +23,18 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { IdName } from '../../shared/models/id-name.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
-import { StudyUserType } from '../shared/study-user-type.enum';
+import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'study-detail',
@@ -46,15 +47,17 @@ export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable') table: TableComponent;
 
-    private centers: IdNameObject[];
-    private subjects: IdNameObject[];
-    private selectedCenter: IdNameObject;
+    private centers: IdName[];
+    private subjects: IdName[];
+    private selectedCenter: IdName;
     
     private browserPaging: BrowserPaging<StudyUser>;
     private columnDefs: any[];
     private users: User[] = [];
     
     private studyUsersPromise: Promise<any>;
+    private freshlyAddedMe: boolean = false;
+    private studyUserBackup: StudyUser[] = [];
 
     constructor(
             private route: ActivatedRoute, 
@@ -87,6 +90,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.userService.getAll().then(users => this.users = users)
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
+            this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
         });
         Promise.all([
             studyPromise,
@@ -109,7 +113,12 @@ export class StudyComponent extends EntityComponent<Study> {
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
 
-        this.userService.getAll().then(users => this.users = users);
+        this.userService.getAll().then(users => {
+            this.users = users;
+            // Add the connected user by default
+            let connectedUser: User = users.find(user => this.isMe(user));
+            this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
+        });
         return Promise.resolve();
     }
 
@@ -137,6 +146,14 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
+    public hasEditRight(): boolean {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.find(su => su.userId == KeycloakService.auth.userId);
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;
@@ -147,7 +164,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return study;
     }
 
-    private getCenters(): Promise<IdNameObject[]> {
+    private getCenters(): Promise<IdName[]> {
         return this.centerService
             .getCentersNames()
             .then(centers => this.centers = centers);
@@ -173,15 +190,18 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onCenterAdd(): void {
+        if (!this.selectedCenter) return;
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = new Center();
         studyCenter.center.id = this.selectedCenter.id;
         studyCenter.center.name = this.selectedCenter.name;
         this.study.studyCenterList.push(studyCenter);
+        this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private onCenterChange(): void {
+    private onCenterChange(center: IdName): void {
+        this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []
             this.onCenterAdd();
@@ -219,10 +239,8 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         return false;
     }
-    
-    
-    /** StudyUser management **/
 
+    /** StudyUser management **/
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
         return new Promise((resolve) => {
             this.studyUsersPromise.then(() => {
@@ -230,43 +248,96 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         });
     }
+
+    isMe(user: User): boolean {
+        return user.id == KeycloakService.auth.userId;
+    }
+
+    disableEdit(studyUser: StudyUser): boolean {
+        return !this.freshlyAddedMe && studyUser.userId == KeycloakService.auth.userId;
+    }
         
     private createColumnDefs() {
         this.columnDefs = [
-            { headerName: "Username", field: "userName" },
-            { headerName: "First Name", field: "user.firstName" },
-            { headerName: "Last Name", field: "user.lastName" },
-            { headerName: "Email", field: "user.email", width: "200%" },
-            { headerName: "Role", field: "user.role.displayName", width: "63px" },
-            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.getValueLabelJsonArray(), width: "300%"},
-            { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
-            { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
-            { headerName: "", type: "button", awesome: "fa-trash", action: this.removeStudyUser }
+            { headerName: 'Username', field: 'userName' },
+            { headerName: 'First Name', field: 'user.firstName' },
+            { headerName: 'Last Name', field: 'user.lastName' },
+            { headerName: 'Email', field: 'user.email', width: '200%' },
+            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
+            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
+                //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
+            { headerName: 'Can download', type: 'boolean', editable: true, width: '54px', suppressSorting: true, 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
+            { headerName: 'Can import', type: 'boolean', editable: true, width: '54px', suppressSorting: true, 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
+            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
+            { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Received Anonymization Mail', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser }
         ];
     }
 
-    private onUserSelect(selectedUser: User) {
+    /**
+     * On select/unselect given right for the given study user 
+     */
+    private onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
+        if (!su.studyUserRights.includes(right) && selected) {
+            su.studyUserRights.push(right);
+        }
+        else if (su.studyUserRights.includes(right) && !selected) {
+            const index = su.studyUserRights.indexOf(right, 0);
+            if (index > -1) su.studyUserRights.splice(index, 1);
+        }
+    }
+
+    private onUserAdd(selectedUser: User) {
+        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+        this.addUser(selectedUser);
+    }
+
+    private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         selectedUser.selected = true;
-        let studyUser: StudyUser = new StudyUser();
-        studyUser.userId = selectedUser.id;
-        studyUser.userName = selectedUser.username;
-        studyUser.receiveAnonymizationReport = false;
-        studyUser.receiveNewImportReport = false;
-        studyUser.studyUserType = StudyUserType.NOT_SEE_DOWNLOAD;
-        studyUser.completeMember(this.users);
-        this.study.studyUserList.push(studyUser);
+
+        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.userId == selectedUser.id);
+        if (backedUpStudyUser) {
+            this.study.studyUserList.push(backedUpStudyUser);
+        } else {
+            let studyUser: StudyUser = new StudyUser();
+            studyUser.userId = selectedUser.id;
+            studyUser.userName = selectedUser.username;
+            studyUser.receiveAnonymizationReport = false;
+            studyUser.receiveNewImportReport = false;
+            studyUser.studyUserRights = rights;
+            studyUser.completeMember(this.users);
+            this.study.studyUserList.push(studyUser);
+        }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     private removeStudyUser = (item: StudyUser) => {
         const index: number = this.study.studyUserList.indexOf(item);
-        item.user.selected = false;
         if (index !== -1) {
             this.study.studyUserList.splice(index, 1);
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
+        StudyUser.completeMember(item, this.users);
+        item.user.selected = false;
+    }
+
+    private onStudyUserEdit() {
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     private studyStatusStr(studyStatus: string) {

@@ -34,6 +34,15 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         super('coil');
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     getEntities(): Promise<Coil[]> {
         return this.coilService.getAll();
     }

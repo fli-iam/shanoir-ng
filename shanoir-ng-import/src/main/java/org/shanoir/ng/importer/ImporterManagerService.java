@@ -115,7 +115,7 @@ public class ImporterManagerService {
 				// convert instances to images, as already done after zip file upload
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
 			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
-				importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getWorkFolder());
+				importJobDir = new File(importJob.getWorkFolder());
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
@@ -123,7 +123,12 @@ public class ImporterManagerService {
 				Patient patient = (Patient) patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
 				final String subjectName = patient.getSubject().getName();
-				ANONYMIZER.anonymizeForShanoir(dicomFiles, "Shanoir Profile", subjectName, subjectName);
+				try {
+					ANONYMIZER.anonymizeForShanoir(dicomFiles, "Profile Neurinfo", subjectName, subjectName);
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+					throw new ShanoirException("Error during anonymization.");
+				}
 				Long converterId = importJob.getFrontConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}

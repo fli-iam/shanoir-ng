@@ -1,19 +1,33 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component } from '@angular/core';
 
-import { ImportDataService, ContextData } from '../../../import/import.data-service';
+import { ImportDataService, ContextData } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../../breadcrumbs/router';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
-import { ImportJob, PatientDicom } from '../../../import/dicom-data.model';
-import { ImportService } from '../../../import/import.service';
+import { ImportJob, PatientDicom } from '../../../import/shared/dicom-data.model';
+import { ImportService } from '../../../import/shared/import.service';
 
 @Component({
     selector: 'bruker-finish-import',
     templateUrl: 'bruker-finish.component.html',
-    styleUrls: ['bruker-finish.component.css', '../../../import/import.step.css']
+    styleUrls: ['bruker-finish.component.css', '../../../import/shared/import.step.css']
 })
 export class BrukerFinishImportComponent {
 
@@ -78,7 +92,7 @@ export class BrukerFinishImportComponent {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
             this.patient.subject = Subject.makeSubject(
                     this.context.subject.id, 
                     this.context.subject.name, 

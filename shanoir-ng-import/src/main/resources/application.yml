@@ -51,6 +51,8 @@ spring:
   rabbitmq:
     host: rabbitmq
     port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
   http:
@@ -82,6 +84,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://datasets:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://datasets:9904/datasetacquisition_eeg
   dicom2nifti: http://preclinical-bruker2dicom:5000/dicom2nifti
 # logging configuration
 logging:
@@ -89,6 +92,7 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+    org.shanoir: DEBUG
 # Shanoir configurations
 shanoir:
   import:
@@ -104,6 +108,7 @@ shanoir:
           name: DCM4CHEE
           host: dcm4chee-arc
           port: 11112
+        maxPatients: 10
       store:
         aet.called:
           name: SHANOIR-SCP

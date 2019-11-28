@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="AnestheticFormComponent content-component">
     <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
@@ -32,9 +46,9 @@
 										{{enumUtils.getEnumValue(anestheticTypes,anesthetic.anestheticType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="anestheticType" required formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()">
-										<option *ngFor="let anestheticType of anestheticTypes" [value]="anestheticType.key">{{anestheticType.value}}</option>
-									</select>
+                                    <select-box formControlName="anestheticType" required [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()">
+                                        <select-option *ngFor="let anestheticType of anestheticTypes" [value]="anestheticType.key">{{anestheticType.value}}</select-option>
+                                    </select-box>
 									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
 								</ng-template>
 							</span>
@@ -82,13 +96,13 @@
 				</td>
 			</tr>
 		</table>
-    </form>
-    
-    <form-footer
-			[state]="footerState"
-			(save)="save()"
-			(edit)="goToEdit()"
-			(back)="goBack()">
-	</form-footer>
+	   	<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()">
+		</form-footer>
+	</form>
     
 </div>

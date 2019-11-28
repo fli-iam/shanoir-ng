@@ -20,6 +20,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 import { ImagesUrlUtil } from '../../utils/images-url.util';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
 
 const noop = () => {
 };
@@ -41,25 +42,22 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     @Input() label: string;
     @Input() pictoUrl: string;
+    @Input() awesome: string;
     @Input() deploy: boolean;
     @Input() hasBox: boolean;
-    @Input() buttonPicto: string;
     @Input() nodeParams: any;
     @Input() editable: boolean = false;
-    @Input() link: boolean = false;
     @Input() tooltip: string;
     @Input() dataRequest: boolean = false;
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
     @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>;
     public dataLoading: boolean = false;
-    public isOpen: boolean = false;
+    private isOpen: boolean = false;
     public loaded: boolean = false;
-    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
-    public checked: boolean;
-    @ViewChild('box') boxElt: ElementRef;
+    public checked: boolean | 'indeterminate';
+    @ViewChild('box') boxElt: CheckboxComponent;
     @Output() labelChange = new EventEmitter();
-    @Output() buttonClick = new EventEmitter();
     @Output() labelClick = new EventEmitter();
     @Output() chkbxChange = new EventEmitter();
     @Output() openClick = new EventEmitter();
@@ -102,7 +100,10 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     public toggle() {
         if (this.isOpen) this.close();
-        else this.open();
+        else {
+            if (!this.hasChildren && this.dataRequest) this.openClick.emit(this);
+            this.open();
+        }
     }
 
     public updateChildren(): void {
@@ -114,11 +115,11 @@ export class TreeNodeComponent implements ControlValueAccessor {
         });
     }
 
-    get value(): boolean {
+    get value(): boolean | 'indeterminate' {
         return this.checked;
     };
 
-    set value(value: boolean) {
+    set value(value: boolean | 'indeterminate') {
         if (value !== this.checked) {
             this.checked = value;
             this.onChangeCallback(value);
@@ -127,7 +128,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
                     node.value = value;
                 }
             });
-            this.notifyParent();
+            if (this.notifyParent != undefined) this.notifyParent();
         }
     }
 
@@ -147,11 +148,11 @@ export class TreeNodeComponent implements ControlValueAccessor {
         });
         if (allOff) this.setBox(false);
         else if (allOn) this.setBox(true);
-        else this.setBox(null);
+        else this.setBox('indeterminate');
     };
 
-    setBox(value: Boolean) {
-        if (this.boxElt) this.boxElt.nativeElement.indeterminate = value == null;
+    setBox(value: boolean | 'indeterminate') {
+        if (this.boxElt) this.boxElt.ngModel = value;
         this.writeValue(value != null && value);
     }
 
@@ -172,5 +173,4 @@ export class TreeNodeComponent implements ControlValueAccessor {
     registerOnTouched(fn: any) {
         this.onTouchedCallback = fn;
     }
-
 } 

@@ -52,8 +52,12 @@ export class NavbarComponent {
         return this.keycloakService.isUserAdmin();
     }
 
-    isUserGuest(): boolean {
-        return this.keycloakService.isUserGuest();
+    isUserAdminOrExpert(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+    
+    canUserImportFromPACS(): boolean {
+        return this.keycloakService.canUserImportFromPACS();
     }
 
     togglePink() {

@@ -13,15 +13,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ng-template ngFor let-studySubjectRel [ngForOf]="subject.subjectStudyList">
-            <node [label]="studySubjectRel | studyNamePipe: studies" [pictoUrl]="folderIconPath" [nodeParams]="studySubjectRel" [dataRequest]="true"
-            (openClick)="getStudyDetails($event)">
-            <ng-template ngFor let-examination [ngForOf]="studySubjectRel.examinations">
-                 <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails(examination.id)">
-                    <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" [pictoUrl]="xRay2IconPath">
-                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath">
-                        </node>
+    <node [label]="studySubjectRel | studyNamePipe: studies" awesome="far fa-folder" [nodeParams]="studySubjectRel" [dataRequest]="true"
+        (openClick)="getStudyDetails($event)" (labelClick)="showStudyDetails(studySubjectRel.study.id)" class="study-node"> 
+        <ng-template ngFor let-examination [ngForOf]="studySubjectRel.examinations">
+            <node [label]="examination | subjectExaminationLabel" awesome="fas fa-diagnoses" (labelClick)="showExaminationDetails(examination.id)" class="examination-node">
+                <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" awesome="fas fa-laptop-medical" class="acquisition-node">
+                    <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" awesome="fas fa-brain" (labelClick)="showDatasetDetails(dataset.id)" class="dataset-node">
                     </node>
-                </node> 
-            </ng-template>
-        </node>
+                </node>
+            </node> 
+        </ng-template>
+    </node>
 </ng-template>

@@ -36,16 +36,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()">
-									<option *ngFor="let cat of ImagedObjectCategory.allPreClinical(false)" [value]="cat" [ngSwitch]="cat"
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()">
+									<select-option *ngFor="let cat of ImagedObjectCategory.allPreClinical(false)" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Human cadaver</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANIMAL_CADAVER">Animal cadaver</ng-template>
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
-									</option>
-								</select>
+									</select-option>
+								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
@@ -103,10 +105,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.sex}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="sex" formControlName="sex" [(ngModel)]="subject.sex">
-									<option [value]="'F'">Female</option>
-									<option [value]="'M'">Male</option>
-								</select>
+								<select-box formControlName="sex" [(ngModel)]="subject.sex">
+									<select-option [value]="'F'">Female</select-option>
+									<select-option [value]="'M'">Male</select-option>
+								</select-box>
 							</ng-template>
 						</span>
 					</li>
@@ -117,10 +119,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.manualHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="manualHemisphericDominance" formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<option [value]="'Left'">Left</option>
-									<option [value]="'Right'">Right</option>
-								</select>
+								<select-box formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
+									<select-option [value]="'Left'">Left</select-option>
+									<select-option [value]="'Right'">Right</select-option>
+								</select-box>
 							</ng-template>
 						</span>
 					</li>
@@ -131,10 +133,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.languageHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="languageHemisphericDominance" formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<option [value]="'Left'">Left</option>
-									<option [value]="'Right'">Right</option>
-								</select>
+								<select-box formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
+									<select-option [value]="'Left'">Left</select-option>
+									<select-option [value]="'Right'">Right</select-option>
+								</select-box>
 							</ng-template>
 						</span>
 					</li>
@@ -191,6 +193,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 		</div>

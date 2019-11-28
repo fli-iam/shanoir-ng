@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, ViewChild} from '@angular/core';
 import { Validators, FormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
@@ -171,7 +185,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editIngredient(item) });
         }
-        if (this.mode != 'view' && !this.keycloakService.isUserGuest()) {
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeIngredient(item) });
         }
     }

@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Injectable } from '@angular/core';
 
 import { AnimalSubject } from './animalSubject.model';
@@ -55,14 +69,14 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
     
 
     createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
+        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, animalSubject.stringify())
             .map(res => res).toPromise();
     }
 
     
     
     createSubject(subject: Subject): Promise<Subject> {
-        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
+        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, subject.stringify())
             .toPromise();
     }
     

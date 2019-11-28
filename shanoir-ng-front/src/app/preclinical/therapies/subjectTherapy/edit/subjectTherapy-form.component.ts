@@ -1,5 +1,19 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, Input, Output, EventEmitter} from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
@@ -12,6 +26,7 @@ import { Reference }    from '../../../reference/shared/reference.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Enum } from "../../../../shared/utils/enum";
+import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
@@ -107,8 +122,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         });
     }
     
-    
-    
     loadTherapies() {
         this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
@@ -116,8 +129,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     loadUnits() {
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => this.units = units);
     }
-
-   
 
     getEnums(): void {
         this.frequencies = this.enumUtils.getEnumArrayFor('Frequency');
@@ -158,6 +169,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
         if (this.toggleForm) {
             this.buildForm();
+            this.form.markAsUntouched();
         }
     }
 
@@ -194,7 +206,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             if (this.preclinicalSubject.therapies === undefined) {
                 this.preclinicalSubject.therapies = [];
             }
-            this.preclinicalSubject.therapies.push(this.subjectTherapy);
             if (this.onCreated.observers.length > 0) {
                 this.onCreated.emit(this.subjectTherapy);
             }
@@ -235,21 +246,21 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if(this.preclinicalSubject.therapies === undefined){
             this.preclinicalSubject.therapies = [];
         }
-        this.preclinicalSubject.therapies.push(this.subjectTherapy);
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectTherapy);
+            this.onEvent.emit([this.subjectTherapy, true]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
     }
     
     updateTherapy(): void {
-        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, this.subjectTherapy)
-            .then(st =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.subjectTherapy);
-                }    
-            });
+        if (!this.subjectTherapy) { 
+            console.log('nothing to update');
+            return; 
+        }
+        if (this.onEvent.observers.length > 0) {
+            this.onEvent.emit([this.subjectTherapy, false]);
+        }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
     }

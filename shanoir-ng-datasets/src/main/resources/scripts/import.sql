@@ -81,14 +81,16 @@ INSERT INTO dataset_metadata
 VALUES 
 	(1, 1, 'MRDataset1'),
 	(2, 1, 'PETDataset1'),
-	(3, 1, 'CTDataset1');
+	(3, 1, 'CTDataset1'),
+    (4, 1, 'EEGDataset');
 
 INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id) 
+	(id, dataset_acquisition_id, origin_metadata_id, study_id, subject_id) 
 VALUES 
-	(1, 1, 1),
-	(2, 2, 2),
-	(3, 3, 3);
+	(1, 1, 1, 1, 1),
+	(2, 2, 2, 1, 1),
+	(3, 3, 3, 1, 1),
+	(4, NULL, 4, 1, 1);
 
 INSERT INTO mr_dataset_metadata
 	(id, mr_dataset_nature) 
@@ -109,3 +111,18 @@ INSERT INTO ct_dataset
 	(id) 
 VALUES 
 	(3);
+
+INSERT INTO eeg_dataset
+    (id, channel_count, sampling_frequency)
+VALUES
+    (4, 1, 1);
+
+INSERT INTO event
+    (id, type, description, channel_number, points, dataset_id)
+VALUES
+    (1, "type", "description", 1, 1, 4);
+
+INSERT INTO channel
+    (id, name, reference_type, reference_units, resolution, x, y, z, high_cutoff, low_cutoff, notch, dataset_id)
+VALUES
+    (1, "test", 1, "reference_unit", 1, 1, 1, 1, 1, 1, 1, 4);

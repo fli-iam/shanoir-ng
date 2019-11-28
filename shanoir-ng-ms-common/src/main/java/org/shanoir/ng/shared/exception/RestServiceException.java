@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.shared.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * REST service exception.
  * 
@@ -51,6 +54,15 @@ public class RestServiceException extends Exception {
 	 */
 	public ErrorModel getErrorModel() {
 		return errorModel;
+	}
+	
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(errorModel);
+		} catch (JsonProcessingException e) {
+			return "error while serializing errorModel : " + e.toString();
+		}
 	}
 
 }

@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component detail" [@preventInitialChildAnimations]>
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
@@ -20,26 +34,21 @@
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<div [ngSwitch]="preclinicalSubject.subject.imagedObjectCategory">
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.ANIMAL_CADAVER">Animal cadaver</ng-template>
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
-									<ng-template ngSwitchDefault>{{preclinicalSubject?.subject?.imagedObjectCategory}}</ng-template>
-								
-								</div>
+								{{preclinicalSubject.subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" (change)="onChangeImagedObjectCategory()">
-									<option *ngFor="let cat of ImagedObjectCategory.allPreClinical(true)" [value]="cat" [ngSwitch]="cat" 
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" (change)="buildForm()">
+									<select-option *ngFor="let cat of ImagedObjectCategory.allPreClinical(true)" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Human cadaver</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANIMAL_CADAVER">Animal cadaver</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
-									</option>
-								</select>
+									</select-option>
+								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
@@ -86,13 +95,9 @@
 									{{preclinicalSubject?.animalSubject?.specie?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="specie" required formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
-									<option *ngFor="let specie of species" [ngValue]="specie">{{specie.value}}</option>
-								</select>
-								<button  *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new species" (click)="goToRefPage('subject','specie')">
-									<i class="fas fa-plus-square"></i>
-									new species
-								</button>
+								<select-box (onNewClick)="goToRefPage('subject','specie')" formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
+									<select-option *ngFor="let specie of species" [value]="specie">{{specie.value}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('specie', ['required'])" [@slideDown]="hasError('specie', ['required'])" class="form-validation-alert" i18n="Edit subjectSpecie|Specie required error@@animalSubjectDetailSpecieRequiredError">Species is required!</label>
 							</ng-template>
 						</span>
@@ -104,13 +109,9 @@
 									{{preclinicalSubject?.animalSubject?.strain?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="strain" required formControlName="strain" [(ngModel)]="preclinicalSubject.animalSubject.strain">
-									<option *ngFor="let strain of strains" [ngValue]="strain">{{strain.value}}</option>
-								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new strain" (click)="goToRefPage('subject','strain')">
-										<i class="fas fa-plus-square"></i>
-									new strain
-								</button>
+								<select-box (onNewClick)="goToRefPage('subject','strain')" formControlName="strain" [(ngModel)]="preclinicalSubject.animalSubject.strain">
+									<select-option *ngFor="let strain of strains" [value]="strain">{{strain.value}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('strain', ['required'])" [@slideDown]="hasError('strain', ['required'])" class="form-validation-alert" i18n="Edit subjectStrain|Strain required error@@animalSubjectDetailStrainRequiredError">Strain is required!</label>
 							</ng-template>
 						</span>
@@ -122,13 +123,9 @@
 									{{preclinicalSubject?.animalSubject?.biotype?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="biotype" required formControlName="biotype" [(ngModel)]="preclinicalSubject.animalSubject.biotype">
-									<option *ngFor="let biotype of biotypes" [ngValue]="biotype">{{biotype.value}}</option>
-								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new biotype" (click)="goToRefPage('subject','biotype')">
-										<i class="fas fa-plus-square"></i>
-									new biological type
-								</button>
+								<select-box (onNewClick)="goToRefPage('subject','biotype')" formControlName="biotype" [(ngModel)]="preclinicalSubject.animalSubject.biotype">
+									<select-option *ngFor="let biotype of biotypes" [value]="biotype">{{biotype.value}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('biotype', ['required'])" [@slideDown]="hasError('biotype', ['required'])" class="form-validation-alert" i18n="Edit subjectBiotype|Biotype required error@@animalSubjectDetailBiotypeRequiredError">Biological type is required!</label>
 							</ng-template>
 						</span>							
@@ -140,13 +137,9 @@
 									{{preclinicalSubject?.animalSubject?.provider?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="provider" required formControlName="provider" [(ngModel)]="preclinicalSubject.animalSubject.provider">
-									<option *ngFor="let provider of providers" [ngValue]="provider">{{provider.value}}</option>
-								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a provider" (click)="goToRefPage('subject','provider')">
-										<i class="fas fa-plus-square"></i>
-									new provider
-								</button>
+								<select-box (onNewClick)="goToRefPage('subject','provider')" formControlName="provider" [(ngModel)]="preclinicalSubject.animalSubject.provider">
+									<select-option *ngFor="let provider of providers" [value]="provider">{{provider.value}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('provider', ['required'])" [@slideDown]="hasError('provider', ['required'])" class="form-validation-alert" i18n="Edit subjectProvider|Provider required error@@animalSubjectDetailProviderRequiredError">Provider is required!</label>
 							</ng-template>
 						</span>
@@ -158,13 +151,9 @@
 									{{preclinicalSubject?.animalSubject?.stabulation?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="stabulation" required formControlName="stabulation" [(ngModel)]="preclinicalSubject.animalSubject.stabulation">
-									<option *ngFor="let stabulation of stabulations" [ngValue]="stabulation">{{stabulation.value}}</option>
-								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a stabulation" (click)="goToRefPage('subject','stabulation')">
-										<i class="fas fa-plus-square"></i>
-									new stabulation
-								</button>
+								<select-box (onNewClick)="goToRefPage('subject','stabulation')" formControlName="stabulation" [(ngModel)]="preclinicalSubject.animalSubject.stabulation">
+									<select-option *ngFor="let stabulation of stabulations" [value]="stabulation">{{stabulation.value}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('stabulation', ['required'])" [@slideDown]="hasError('stabulation', ['required'])" class="form-validation-alert" i18n="Edit subjectStabulation|Stabulation required error@@animalSubjectDetailStabulationRequiredError">Stabulation is required!</label>
 							</ng-template>
 						</span>
@@ -182,61 +171,18 @@
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>
 					<legend i18n="AniamlSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
-				</fieldset>		
-				<div [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'edit'">
-							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
-								<i class="fas fa-plus-square"></i>
-								new pathology
-							</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
-							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
-								<i class="fas fa-plus-square"></i>
-								new pathology
-							</button>
-						</ng-template>
-					</div>
-				<div>
-					<subject-pathology-form [preclinicalSubject]="preclinicalSubject"  [createSPMode]="createSPMode"
-								[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected"  (onEvent)="refreshDisplayPathology($event)">
-					</subject-pathology-form>
-				</div>
-				<shanoir-table #subjectPathologiesTable
-    				[getPage]="getPagePathology.bind(this)" 
-    				[columnDefs]="columnDefsPathologies" >
-				</shanoir-table> 
-				<fieldset>
-					<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
 				</fieldset>
-				<div [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'edit'">
-							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new therapy" (click)="goToAddTherapy()">
-								<i class="fas fa-plus-square"></i>
-								new therapy
-							</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
-							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new therapy" (click)="goToAddTherapy()">
-								<i class="fas fa-plus-square"></i>
-								new therapy
-							</button>
-						</ng-template>
-					</div>
-				<div>
-					<subject-therapy-form [preclinicalSubject]="preclinicalSubject"  [createSTMode]="createSTMode"
-								[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event)">
-					</subject-therapy-form>
-				</div>
-				<shanoir-table #subjectTherapiesTable
-    				[getPage]="getPageTherapy.bind(this)" 
-    				[columnDefs]="columnDefsTherapies" >
-				</shanoir-table> 
-			</div>
+                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.pathologies" formControlName="pathologies" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
+    			<fieldset>
+    				<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
+    			</fieldset>
+                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.therapies" formControlName="therapies" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
+            </div>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+				(cancel)="goToView(this.entity.animalSubject.id)"
 				(back)="goBack()">
 			</form-footer>
 		</div>

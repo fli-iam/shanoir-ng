@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component detail max-content">
+<div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate>
 			<span [ngSwitch]="mode">
@@ -30,13 +30,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
 					<li>
-						<label i18n="Study detail|Name label@@studyDetailName" class="required-label">Name</label>
+						<label i18n="Study detail|Name label@@studyDetailName">Name</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{study.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
+								<input type="text" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
@@ -69,32 +69,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus" class="required-label">Status</label>
+						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="studyStatus" required formControlName="studyStatus" [(ngModel)]="study.studyStatus">
-									<option value="IN_PROGRESS">In Progress</option>
-									<option value="FINISHED">Finished</option>
-								</select>
+								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus">
+									<select-option value="IN_PROGRESS">In Progress</select-option>
+									<select-option value="FINISHED">Finished</select-option>
+								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Clinical label@@studyDetailClinical" class="required-label">Is clinical</label>
+						<label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.clinical" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.clinical" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.clinical" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.clinical" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.clinical" />Yes
-								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.clinical" />No
+								<checkbox [(ngModel)]="study.clinical" formControlName="clinical"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -102,14 +99,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.withExamination" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.withExamination" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.withExamination" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.withExamination" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.withExamination" />Yes
-								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.withExamination" />No
+								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -122,14 +116,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible by default</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.visibleByDefault" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.visibleByDefault" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.visibleByDefault" />Yes
-								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.visibleByDefault" />No
+								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -137,14 +128,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data downloadable by default</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.downloadableByDefault" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.downloadableByDefault" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.downloadableByDefault" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.downloadableByDefault" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.downloadableByDefault" />Yes
-								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.downloadableByDefault" />No
+								<checkbox [(ngModel)]="study.downloadableByDefault" formControlName="downloadableByDefault"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -157,30 +145,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
 				<ol>
 					<li>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" [class.required-label]="mode != view">Multi / single center</label>
+						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="study.monoCenter">Single center</span>
 								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono">
-									<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
-										[checked]="study.monoCenter" />Single center
-								</span>
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
-									[checked]="!study.monoCenter" />Multicenter
+								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true"></toggle-switch>
+								<span>Multicenter</span>
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select [(ngModel)]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange()">
-								<option *ngIf="!study.studyCenterList || study.studyCenterList.length == 0" [ngValue]="null" disabled>Select a center...</option>
-								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
-							</select>
-							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="onCenterAdd()"><i class="fas fa-plus"></i></span>
+							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" formcontrolname="center" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
+								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
+							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
@@ -209,22 +192,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode != 'view'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
-
 				<ol>
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select id="title" [ngModel]="selectedUser" [ngModelOptions]="{standalone: true}" (ngModelChange)="onUserSelect($event)">
-								<option disabled>Please select...</option>
-								<option *ngFor="let user of users" [ngValue]="user" [disabled]="user?.selected">{{user.username}}</option>
-							</select>
+							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)">
+								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
+							</select-box>
 						</span>
 					</li>
 					<li>
 						<shanoir-table #memberTable
 							[getPage]="getPage.bind(this)" 
 							[columnDefs]="columnDefs"
-							[editMode]="true">
+							[editMode]="true"
+							[disableCondition]="disableEdit.bind(this)"
+							(rowEdit)="onStudyUserEdit()">
 						</shanoir-table>
 					</li>
 				</ol>
@@ -236,6 +219,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 		</form>

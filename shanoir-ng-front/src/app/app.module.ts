@@ -12,22 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import '../assets/css/common.css';
+import '../assets/css/papaya.css';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
-import { AcquisitionEquipmentListComponent } from "./acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component";
-import { AcquisitionEquipmentComponent } from "./acquisition-equipments/acquisition-equipment/acquisition-equipment.component";
+
+import {
+    AcquisitionEquipmentListComponent,
+} from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
+import {
+    AcquisitionEquipmentComponent,
+} from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
-import { AcquisitionEquipmentPipe } from "./acquisition-equipments/shared/acquisition-equipment.pipe";
-import { AcquisitionEquipmentService } from "./acquisition-equipments/shared/acquisition-equipment.service";
+import { AcquisitionEquipmentPipe } from './acquisition-equipments/shared/acquisition-equipment.pipe';
+import { AcquisitionEquipmentService } from './acquisition-equipments/shared/acquisition-equipment.service';
 import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufacturer-model.pipe';
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
@@ -46,6 +51,7 @@ import { CoilService } from './coils/shared/coil.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { DatasetService } from './datasets/shared/dataset.service';
@@ -62,44 +68,54 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
-import { DicomArchiveService } from './import/dicom-archive.service';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
+import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
-import { ImportDataService } from './import/import.data-service';
-import { ImportService } from './import/import.service';
+import { ImportDataService } from './import/shared/import.data-service';
+import { ImportService } from './import/shared/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
-import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
+import { CheckboxComponent } from './shared/checkbox/checkbox.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
-import { ModalComponent } from "./shared/components/modal/modal.component";
-//import { ModalService} from './shared/components/modal/modal.service';
+import { ModalComponent } from './shared/components/modal/modal.component';
 import { ModalService } from './shared/components/modals/modal.service';
-import { ModalsComponent } from "./shared/components/modals/modals.component";
+import { ModalsComponent } from './shared/components/modals/modals.component';
 import { PapayaComponent } from './shared/components/papaya/papaya.component';
-import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
+import { SubjectStudyListComponent } from './shared/components/subject-study-list/subject-study-list.component';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
-import { TableComponent } from "./shared/components/table/table.component";
+import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ConsoleComponent } from './shared/console/console.line.component';
-import { DatepickerComponent } from './shared/date/date.component';
+import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
-import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";
-import { KeycloakService } from "./shared/keycloak/keycloak.service";
+import { KeycloakHttpInterceptor } from './shared/keycloak/keycloak.http.interceptor';
+import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
-import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
+import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
+import { SelectBoxComponent } from './shared/select/select.component';
+import { SelectOptionComponent } from './shared/select/select.option.component';
+import { GlobalService } from './shared/services/global.service';
+import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
@@ -111,8 +127,8 @@ import { SubjectService } from './subjects/shared/subject.service';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
-import { AccountRequestInfoComponent } from "./users/account-request-info/account-request-info.component";
-import { AccountRequestComponent } from "./users/account-request/account-request.component";
+import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
+import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
@@ -120,6 +136,10 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { TaskService } from './async-tasks/task.service';
+import { StudyRightsService } from './studies/shared/study-rights.service';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -232,6 +252,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SubjectTreeComponent,
         StudyNamePipe,
         DatasetComponent,
+        EegDatasetComponent,
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
@@ -242,16 +263,28 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ExploredEntityComponent,
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
+        EegSelectSeriesComponent,
         DicomUploadComponent,
+        EegUploadComponent,
+        QueryPacsComponent,
         ClinicalContextComponent,
+        EegClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
         FormFooterComponent,
         ModalsComponent,
         BreadcrumbsComponent,
+        SelectBoxComponent,
+        SelectOptionComponent,
         FinishImportComponent,
+        FinishEegImportComponent,
         UploaderComponent,
+        HelpMessageComponent,
+        NotificationsComponent,
+        AsyncTasksComponent,
+        ToggleSwitchComponent,
+        CheckboxComponent,
         HelpMessageComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
@@ -296,7 +329,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
-        AuthNotGuestGuard,
+        AuthAdminOrExpertGuard,
+        CanImportFromPACSGuard,
         CenterService,
         ConfirmDialogService,
         ExaminationService,
@@ -340,8 +374,11 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         },
         BreadcrumbsService,
         Router,
+        GlobalService,
         ImportDataService,
-        NiftiConverterService
+        NiftiConverterService,
+        TaskService,
+        StudyRightsService
     ],
     bootstrap: [AppComponent],
 })

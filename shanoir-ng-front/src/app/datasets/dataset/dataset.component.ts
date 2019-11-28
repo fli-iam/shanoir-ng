@@ -13,14 +13,15 @@
  */
 
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { DatepickerComponent } from '../../shared/date/date.component';
-
-import { DicomArchiveService } from '../../import/dicom-archive.service';
+import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+
 
 @Component({
     selector: 'dataset-detail',
@@ -33,29 +34,44 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private papayaParams: any;
     private blob: Blob;
     private filename: string;
+    private hasDownloadRight: boolean = false;
+    private hasAdministrateRight: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
             private route: ActivatedRoute,
-            private dicomArchiveService: DicomArchiveService) {
+            private dicomArchiveService: DicomArchiveService,
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'dataset');
     }
 
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
-
-    ngOnInit(): void {
-        super.ngOnInit();
-        this.loadDicomInMemory();
-    }
-
+    
     initView(): Promise<void> {
-        return this.fetchDataset().then(() => null);
+        return this.fetchDataset().then(dataset => {
+            if (this.keycloakService.isUserAdmin()) {
+                this.hasAdministrateRight = true;
+                this.hasDownloadRight = true;
+                this.loadDicomInMemory();
+                this.dataset = dataset;
+                return;
+            } else {
+                return this.studyRightsService.getMyRightsForStudy(dataset.studyId).then(rights => {
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                    if (this.hasDownloadRight) this.loadDicomInMemory();
+                    this.dataset = dataset;
+                });
+            }
+        });
     }
 
     initEdit(): Promise<void> {
-        return this.fetchDataset().then(() => null);
+        return this.fetchDataset().then(dataset => {
+            this.dataset = dataset;
+        });
     }
 
     initCreate(): Promise<void> {
@@ -66,12 +82,10 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.formBuilder.group({});
     }
     
-
     private fetchDataset(): Promise<Dataset> {
         if (this.mode != 'create') {
             return this.datasetService.get(this.id).then((dataset: Dataset) => {
                 if (!dataset.updatedMetadata) dataset.updatedMetadata = new DatasetMetadata();
-                this.dataset = dataset;
                 return dataset;
             });
         }
@@ -107,4 +121,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
 }

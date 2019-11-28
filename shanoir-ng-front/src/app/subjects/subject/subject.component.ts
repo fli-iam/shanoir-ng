@@ -18,8 +18,8 @@ import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
@@ -36,7 +36,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdNameObject[] = [];
+    private studies: IdName[] = [];
     private isAlreadyAnonymized: boolean;
     private firstName: string = "";
     private lastName: string = "";
@@ -61,6 +61,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     initView(): Promise<void> {
+        this.loadAllStudies();
         return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
     }
 
@@ -118,6 +119,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
         formGroup.get('birthDate').updateValueAndValidity();
+        this.reloadRequiredStyles();
     }
 
     save(): Promise<void> {
@@ -166,5 +168,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private setSubjectBirthDateToFirstOfJanuary(): void {
         let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
+    }
+
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdmin();
     }
 }

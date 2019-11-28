@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
@@ -16,7 +30,6 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
-
 
 @Component({
     selector: 'subject-pathology-form',
@@ -108,8 +121,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         });
     }
     
-    
-
     loadPathologies() {
         this.pathologyService.getAll().then(pathologies => this.pathologies = pathologies);
     }
@@ -121,8 +132,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     loadReferences() {
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_ANATOMY, PreclinicalUtils.PRECLINICAL_ANATOMY_LOCATION).then(locations => this.locations = locations);
     }
- 
-    
 
     toggleFormSP(creation: boolean): void {
         if (this.toggleForm == false) {
@@ -134,7 +143,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             this.toggleForm = false;
             this.onCancel.emit(false);
         }
-
         this.createSPMode = creation;
     }
     
@@ -160,8 +168,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         }
         if (this.toggleForm) {
             this.buildForm();
+            this.form.markAsUntouched();
         }
-    }
+   }
 
     //AS we need to have the same object reference in select and model, w have to set them from loaded lists 
     loadSubjectPathologyAttributesForSelect(selectedPatho: SubjectPathology) {
@@ -202,7 +211,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             if (this.preclinicalSubject.pathologies === undefined) {
                 this.preclinicalSubject.pathologies = [];
             }
-            this.preclinicalSubject.pathologies.push(this.subjectPathology);
             if (this.onCreated.observers.length > 0) {
                 this.onCreated.emit(this.subjectPathology);
             }
@@ -268,21 +276,21 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if(this.preclinicalSubject.pathologies === undefined){
             this.preclinicalSubject.pathologies = [];
         }
-        this.preclinicalSubject.pathologies.push(this.subjectPathology);
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectPathology);
+            this.onEvent.emit([this.subjectPathology, true]);
         }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
     }
     
     updatePathology(): void {
-        this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, this.subjectPathology)
-            .then(st =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.subjectPathology);
-                }    
-            });
+        if (!this.subjectPathology) { 
+            console.log('nothing to update');
+            return; 
+        }
+        if (this.onEvent.observers.length > 0) {
+            this.onEvent.emit([this.subjectPathology, false]);
+        }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
     }

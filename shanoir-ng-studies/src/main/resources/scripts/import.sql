@@ -149,9 +149,7 @@ VALUES
 	(131, '\0', NULL, '\0', NULL, 1, 'UTE4EEG', '2017-03-21 00:00:00', 1, 1, '\0', 1),
 	(132, '\0', NULL, '\0', NULL, 1, 'FastMicroDiff', NULL, 1, 1, '\0', 1),
 	(133, '\0', 191, '\0', NULL, '\0', 'CaractRF', NULL, 1, 1, '\0', 1),
-	(134, '\0', NULL, '\0', NULL, 1, 'Sharing_SynesthesiaData', NULL, 1, 1, '\0', 1),
-	(135, '\0', NULL, '\0', NULL, 1, 'Appning', NULL, 1, 1, '\0', 1);
-
+	(134, '\0', NULL, '\0', NULL, 1, 'Sharing_SynesthesiaData', NULL, 1, 1, '\0', 1);
 
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES
@@ -469,8 +467,7 @@ VALUES
 	(285, 1, 132),
 	(286, 1, 133),
 	(287, 68, 133),
-	(288, 15, 134), 
-    (289, 15, 135);
+	(288, 15, 134);
 
 INSERT INTO study_examination
 	(examination_id, study_id)
@@ -480,10 +477,6 @@ VALUES
 	(2, 2),
 	(3, 3),
 	(4, 3);
-
-INSERT INTO study_user
-	(id, study_id, user_id, user_name, receive_anonymization_report, receive_new_import_report, study_user_type)
-VALUES (1, 1, 3, 'yyao', 1, 1, 1), (2, 135, 8, 'mbodin', 1, 1, 1);
 
 INSERT INTO pseudonymus_hash_values
  (id, birth_name_hash1, birth_name_hash2, birth_name_hash3, last_name_hash1, last_name_hash2, last_name_hash3, first_name_hash1, first_name_hash2, first_name_hash3, birth_date_hash)
@@ -501,12 +494,11 @@ VALUES
     'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
 
 INSERT INTO subject
-	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id, preclinical)
+	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01', 2, 1, 1, 2, 1, false),
-	(2,'subject2', 'sub2', '2001/02/01', 2, 2, 1, 2, 1, false),
-	(3,'0010001', 'sub3', '2001/02/01', 2, 1, 2, 2, 1, false),
-    (4,'rat2', 'rat2', NULL, 5, 1, 1, 1, 1, true);
+	(1,'subject1', 'sub1', '2013/01/01', 2, 1, 1, 2, 1),
+	(2,'subject2', 'sub2', '2001/02/01', 2, 2, 1, 2, 1),
+	(3,'0010001', 'sub3', '2001/02/01', 2, 1, 2, 2, 1);
 
 
 INSERT INTO subject_study
@@ -514,8 +506,7 @@ INSERT INTO subject_study
 VALUES
 	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
 	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
-	(3, 0, 2, 1, 'Subject 1 for study 2', 2),
-    (4, 0, 135, 4, 'rat2 for appning', 2);
+	(3, 0, 2, 1, 'Subject 1 for study 2', 2);
 
 INSERT INTO group_of_subjects
 	(id, dtype, group_name, study_id)
@@ -535,8 +526,7 @@ VALUES
 	(2, 'Philips Medical Systems'),
 	(3, 'SIEMENS'),
 	(5, 'Philips Healthcare'),
-	(6, 'AXIOM ARTIS DBA'),
-    (7, 'Bruker BioSpin MRI GmbH');
+	(6, 'AXIOM ARTIS DBA');
 
 INSERT INTO `manufacturer_model`
 	(id, dataset_modality_type, name, magnetic_field, manufacturer_id)
@@ -594,8 +584,7 @@ VALUES
 	(55,1,'Optima CT 660',0,1),
 	(56,1,'Optima CT660',0,1),
 	(57,1,'Revolution EVO',0,1),
-	(58,1,'Integris V',0,2), 
-	(59,1,'Biospec 94/20USR',0,7);
+	(58,1,'Integris V',0,2);
 
 INSERT INTO `acquisition_equipment`
 	(id, serial_number, center_id, manufacturer_model_id)
@@ -754,8 +743,7 @@ VALUES
 	(166,'0',2,44),
 	(167,'0001',2,48),
 	(168,'000010',28,58),
-	(169,'141228',63,6),
-	(170, '10100191', 15,59);
+	(169,'141228',63,6);
 
 INSERT INTO `coil`
 	(id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number)

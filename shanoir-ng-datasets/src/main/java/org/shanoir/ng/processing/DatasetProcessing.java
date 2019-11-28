@@ -25,9 +25,9 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
-import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Dataset Processing.
@@ -35,7 +35,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * @author msimon
  */
 @Entity
-public class DatasetProcessing extends AbstractGenericItem {
+public class DatasetProcessing extends AbstractEntity {
 
 	/**
 	 * UID

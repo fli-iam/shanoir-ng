@@ -26,24 +26,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject" class="required-label">Subject</label>
+			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getSubjectName(dataset.subjectId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.subjectId" formControlName="subject" >
-						<option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</option>
-					</select>
+					<select-box [(ngModel)]="dataset.subjectId" formControlName="subject" >
+						<select-option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</select-option>
+					</select-box>
 				</ng-template>
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy" class="required-label">Study</label>
+			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getStudyName(dataset.studyId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.studyId" formControlName="study">
-						<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
-					</select>
+					<select-box [(ngModel)]="dataset.studyId" formControlName="study">
+						<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+					</select-box>
 				</ng-template>
 			</span>
 		</li>
@@ -57,16 +57,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset type@@datasetDetailType" class="required-label">Modality type</label>
+			<label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
 			{{dataset.type}}
 			<!-- <select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type" [ngModelOptions]="{standalone: true}" ></select-dataset-type> -->
 		</li>
 		<!-- <li>
-			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition" class="required-label">Acquisition</label>
+			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition">Acquisition</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.acquisitionId}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select required [(ngModel)]="dataset.acquisitionId" [ngModelOptions]="{standalone: true}" >
+					<select [(ngModel)]="dataset.acquisitionId" [ngModelOptions]="{standalone: true}" >
 						<option *ngFor="" [value]="">{{}}</option>
 					</select>
 				</ng-template>
@@ -86,11 +86,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		
 		<!-- <li>
-			<label i18n="Dataset detail|Dataset group fo subject@@datasetDetailGroupOfSubject" class="required-label">Group of subjects</label>
+			<label i18n="Dataset detail|Dataset group fo subject@@datasetDetailGroupOfSubject">Group of subjects</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.groupOfSubjectId}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select required [(ngModel)]="dataset.groupOfSubjectId" [ngModelOptions]="{standalone: true}" >
+					<select [(ngModel)]="dataset.groupOfSubjectId" [ngModelOptions]="{standalone: true}" >
 						<option *ngFor="" [value]="">{{}}</option>
 					</select>
 				</ng-template>

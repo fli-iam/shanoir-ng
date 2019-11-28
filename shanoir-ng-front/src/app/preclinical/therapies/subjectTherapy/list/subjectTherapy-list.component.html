@@ -1,22 +1,27 @@
-<h2 i18n="Manage subjectTherapies|Title@@subjectTherapiesListTitle">Manage subject therapies</h2>
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
 
- <div [ngSwitch]="mode">
-		<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-			<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-		</ng-template>
-		<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-			<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-		</ng-template>
-	</div>
-    
-    <div>
-    	<subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createSTMode"  
-			[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected" (onCreated)="refreshList($event)" (onCancel)="refreshDisplay($event)"></subject-therapy-form>
-	</div>	
-	
-<shanoir-table  #subjectTherapiesTable
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<div *ngIf="mode == 'edit'">
+    <button *ngIf="toggleForm==false" (click)="toggleSubjectItemForm()">Add a {{getEntityName()}}</button>
+</div>
+<div>
+    <subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createMode"
+                [toggleForm]="toggleForm" [subTherapySelected]="selectedEntity"  (onEvent)="refreshDisplayEntity($event[0], $event[1])">
+    </subject-therapy-form>
+</div>
+
+<shanoir-table  #subjectEntityTable
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    (rowClick)="onRowClick($event)">
+    [customActionDefs]="customActionDefs" >
 </shanoir-table> 

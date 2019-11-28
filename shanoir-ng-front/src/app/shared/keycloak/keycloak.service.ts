@@ -51,7 +51,6 @@ export class KeycloakService {
         KeycloakService.auth.authz.logout();
     }
     
-
     getToken(): Promise<string> {
         if (!this.gettingToken) {
             this.gettingToken = true;
@@ -81,8 +80,7 @@ export class KeycloakService {
         return this.isUserAdmin() || this.isUserExpert();
     }
 
-    isUserGuest(): boolean {
-        return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
+    canUserImportFromPACS(): boolean {
+        return this.isUserAdmin() || KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed.canImportFromPACS;
     }
-
 }

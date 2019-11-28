@@ -54,8 +54,8 @@ services:
   database:
     container_name: database
     build: ./docker-compose/database
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
+    env_file:
+      - ./docker-compose/database/variables.env
     volumes:
       - "database-data:/var/lib/mysql"
     ports:

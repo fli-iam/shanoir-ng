@@ -11,14 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+
 
 @Component({
     selector: 'study-list',
@@ -31,8 +32,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     @ViewChild('table') table: TableComponent;
     
     constructor(
-            private studyService: StudyService) {
-        
+        private studyService: StudyService) {
+            
         super('study');
     }
 
@@ -76,5 +77,25 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    getOptions() {
+        return {
+            new: this.keycloakService.isUserAdminOrExpert(),
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canEdit(study: Study): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            study.studyUserList && 
+            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
+        );
+    }
+
+    canDelete(study: Study): boolean {
+        return this.canEdit(study);
     }
 }
