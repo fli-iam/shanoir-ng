@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <menu-item label="From files ..." i18n-label="Import data menu|From files@@navbarFromFiles" link="" [icon]="ImagesUrlUtil.FOLDER_7_ICON_PATH"></menu-item>
             </dropdown-menu>
 
-            <dropdown-menu label="Administration" *ngIf="isUserAdminOrExpert()">
+            <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
                 <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" [icon]="ImagesUrlUtil.CONTROLS_ICON_PATH">
