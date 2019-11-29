@@ -36,7 +36,7 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
   getOptions() {
     return {
       new: false,
-      view: true, 
+      view: false, 
       edit: false, 
       delete: false
     };

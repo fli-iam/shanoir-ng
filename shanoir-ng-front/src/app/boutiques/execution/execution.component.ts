@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class ExecutionComponent implements OnInit {
   
-  tool: ToolInfo = null
+  @Input() tool: ToolInfo;
   generatedCommand: string = null
   invocation: any = null
   output: string = null
@@ -29,10 +29,6 @@ export class ExecutionComponent implements OnInit {
 
   ngOnDestroy() {
     // this.topicSubscription.unsubscribe();
-  }
-
-  onToolSelected(toolInfo: ToolInfo) {
-    this.tool = toolInfo;
   }
 
   onInvocationChanged(invocation: any) {

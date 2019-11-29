@@ -181,9 +181,11 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - BOUTIQUES_DATA_PATH=/tmp
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:

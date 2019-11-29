@@ -144,6 +144,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { BoutiquesComponent } from './boutiques/boutiques.component';
 import { ParameterComponent } from './boutiques/invocation-gui/parameter/parameter.component';
 import { ParameterGroupComponent } from './boutiques/invocation-gui/parameter-group/parameter-group.component';
+import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
 import { InvocationComponent } from './boutiques/invocation/invocation.component';
 import { InvocationGuiComponent } from './boutiques/invocation-gui/invocation-gui.component';
 import { ExecutionComponent } from './boutiques/execution/execution.component';
@@ -258,7 +259,8 @@ import { ReplaceSpacePipe } from './utils/pipes';
         ParameterComponent,
         ParameterGroupComponent,
         ToolDescriptorInfoComponent,
-        ReplaceSpacePipe
+        ReplaceSpacePipe,
+        InvocationExecutionComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

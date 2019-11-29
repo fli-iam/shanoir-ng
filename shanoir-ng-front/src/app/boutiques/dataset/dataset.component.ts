@@ -47,6 +47,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
 
         super(route, 'dataset');
         this.mode = "view";
+        this.breadcrumbsService.nameStep('Select dataset');
     }
 
     get dataset(): Dataset { return this.entity; }
@@ -95,26 +96,29 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
     initFiles(urls) {
         // Type of urls is: { 'dcm': urlsOfDicomFiles[], 'nii': urlsOfNiftiFiles[] }
         for(let format in urls) {
-            let formatFile = new File(format, true);
+            let formatFile = new File(format, format, true);
             for(let url of urls[format]) {
-                formatFile.files.push(new File(url, false))
+                formatFile.files.push(new File(url, format, false))
             }
             this.files.push(formatFile);
         }
     }
 
-    onFileSelected(file: File) {
+    setFile(path) {
         // find Boutiques steps and give appropriate data
         for(let step of this.breadcrumbsService.steps) {
-            if(step.label == 'Boutiques') {
-                step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = file;
-                this.breadcrumbsService.goBack();
-                this.breadcrumbsService.goBack();
+            if(step.data.boutiques) {
+                step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = path;
+                history.go(-2);
                 break;
             }
         }
-        // this.router.navigate(['boutiques/'], {replaceUrl: false });
+    }
 
+    onFileSelected(file: File) {
+        // Request dataset to prepare the file
+        // Then set the invocation parameter to the returned id
+        this.datasetService.prepareUrl(this.dataset.id, file.url, file.format).subscribe( (path)=> this.setFile(path + '/' + file.name) );
     }
 
     buildForm(): FormGroup {

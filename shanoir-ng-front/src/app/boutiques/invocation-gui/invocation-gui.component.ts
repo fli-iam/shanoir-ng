@@ -35,7 +35,12 @@ export class InvocationGuiComponent implements OnInit {
     };
     this.form = this.pcs.createFormGroupFromDescriptor(descriptor, this.parameterGroups);
     if(this.form != null) {
-      this.form.valueChanges.subscribe( (value)=> this.onChange(value) );
+      if(this.breadcrumbsService.currentStep.data.boutiquesInvocation != null) {
+        this.pcs.setFormFromInvocation(this.breadcrumbsService.currentStep.data.boutiquesInvocation, this.form);
+        let invocation = this.pcs.generateInvocation(this.form);
+        this.invocationChanged.emit(invocation);
+      }
+      this.form.valueChanges.subscribe( (value)=> this.onChange(value) ); 
     }
   }
 
@@ -68,6 +73,7 @@ export class InvocationGuiComponent implements OnInit {
 
   onSelectData(parameter: Parameter<any>) {
     // store which data we clicked on
+    this.breadcrumbsService.currentStep.data.boutiques = true;
     this.breadcrumbsService.currentStep.data.boutiquesInvocation = this.pcs.generateInvocation(this.form);
     this.breadcrumbsService.currentStep.data.boutiquesCurrentParameterID = parameter.id;
     this.breadcrumbsService.replace = false;

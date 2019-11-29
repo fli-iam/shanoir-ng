@@ -128,7 +128,23 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<DatasetUrlsDTO> getDatasetUrlsById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws RestServiceException, MalformedURLException, IOException;
-    
+
+    @ApiOperation(value = "", nickname = "prepareDatasetUrl", notes = "If exists, copy the dataset file at URL in the Boutiques directory", response = Resource.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "urls", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @RequestMapping(value = "/prepare-url/{datasetId}", produces = { "application/json" }, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
+	ResponseEntity<String> prepareDatasetUrl(
+			@ApiParam(value = "url to prepare", required = true) @Valid @RequestBody ObjectNode urlObject,
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
+			throws RestServiceException, IOException;
+	
     @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),

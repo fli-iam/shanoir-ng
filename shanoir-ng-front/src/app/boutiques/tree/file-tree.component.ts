@@ -24,9 +24,11 @@ export class File {
     name: string
     url: string
     isDirectory: boolean
+    format: string
     files: File[] = []
-    constructor(url: string, isDirectory=false, files: File[] = []) {
+    constructor(url: string, format: string, isDirectory=false, files: File[] = []) {
         this.url = url;
+        this.format = format;
         this.name = this.url.substring(this.url.lastIndexOf('/') + 1);
         this.isDirectory = isDirectory;
         this.files = files;

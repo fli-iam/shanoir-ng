@@ -166,13 +166,18 @@ export class ParameterControlService {
         let group = form.value[superGroupName][groupId]
         let formGroup: FormGroup = (form.controls[superGroupName] as FormGroup).controls[groupId] as FormGroup
         for(let parameterId in group) {
-          // let parameterValue = group[parameterId];
-          // let parameter: Parameter<any> = this.idToParameter.get(parameterId);
-          // let dirty = (formGroup.controls[parameterId] as FormControl).dirty
-          // if(dirty) {
-          //   invocation[parameterId] = parameter.parseValue(parameterValue);
-          // }
-          formGroup.setValue(invocation[parameterId]);
+          let parameter: Parameter<any> = this.idToParameter.get(parameterId);
+          let formControl = (formGroup.controls[parameterId] as FormControl);
+          let value = invocation[parameterId];
+          if(value != null) {
+            parameter.value = value;
+            formControl.setValue(invocation[parameterId]);
+            formControl.markAsDirty();
+          } else {
+            formControl.markAsPristine();
+            parameter.value = null;
+            formControl.setValue(null);
+          }
         }
       }
     }

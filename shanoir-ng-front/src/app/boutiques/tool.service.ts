@@ -52,7 +52,7 @@ export class ToolService extends EntityService<ToolInfo> {
 
   generateCommand(toolId: number, invocation: any): Promise<string> {
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions ).toPromise();
+    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions).toPromise();
   }
 
   execute(toolId: number, invocation: any): Promise<string> {

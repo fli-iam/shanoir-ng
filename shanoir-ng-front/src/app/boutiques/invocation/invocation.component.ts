@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 })
 export class InvocationComponent implements OnInit {
   
-  tool: ToolInfo = null
+  @Input() tool: ToolInfo;
   
   @Output() invocationChanged = new EventEmitter<any>();
 
@@ -26,7 +26,8 @@ export class InvocationComponent implements OnInit {
 
   private invocationSubject = new Subject<string>();
 
-  constructor(private toolService: ToolService) { }
+  constructor(private toolService: ToolService) {
+  }
 
   ngOnInit(): void {
     this.invocationSubject.pipe(
@@ -35,7 +36,13 @@ export class InvocationComponent implements OnInit {
 
       // ignore new term if same as previous term
       distinctUntilChanged()
-    ).subscribe(this.updateInvocation);
+    ).subscribe((invocationValue: string)=> this.updateInvocation(invocationValue));
+
+    this.toolService.getDescriptor(this.tool.id).then((descriptor)=> this.descriptor = descriptor);
+    this.toolService.getInvocation(this.tool.id).then((invocation)=> {
+      this.invocation = invocation;
+      this.invocationChanged.emit(this.invocation);
+    });
   }
 
   updateInvocation(invocationValue: string) {
@@ -44,25 +51,22 @@ export class InvocationComponent implements OnInit {
       this.invocationChanged.emit(this.invocation);
     } catch(e) {
       console.log('error occored while you were typing the JSON');
+      console.log(e);
     };
-  }
-
-  onToolSelected(toolInfo: ToolInfo) {
-    this.tool = toolInfo
-    this.toolService.getDescriptor(this.tool.id).then((descriptor)=> this.descriptor = descriptor);
-    this.toolService.getInvocation(this.tool.id).then((invocation)=> {
-      this.invocation = invocation;
-      this.invocationChanged.emit(this.invocation);
-    });
   }
 
   onInvocationChanged(invocation) {
     this.invocation = invocation;
     this.invocationChanged.emit(this.invocation);
+    this.invocationValue = this.getInvocationValue();
+  }
+
+  getInvocationValue() {
+    return this.invocation ? JSON.stringify(this.invocation, null, 2) : '';
   }
 
   get invocationValue() {
-    return this.invocation ? JSON.stringify(this.invocation, null, 2) : '';
+    return this.getInvocationValue();
   }
 
   set invocationValue(v) {
