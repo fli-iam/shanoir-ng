@@ -9,7 +9,8 @@ import { ServiceLocator } from '../utils/locator.service';
 })
 export class ToolService extends EntityService<ToolInfo> {
 
-  API_URL = 'http://localhost:9906/tool';
+  // API_URL = 'http://localhost:9906/tool';
+  API_URL = 'http://shanoir-ng/boutiques/tool';
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

@@ -1,5 +1,7 @@
 <div *ngIf="descriptor">
 
+	<h3>Tool description</h3>
+
 	<ol>
 		<li>
 			<label i18n="Name:|Boutiques tool name label@@boutiquesToolName">Name:</label>
@@ -11,7 +13,7 @@
 		</li> 
 		<li>
 			<label i18n="Tags:|Boutiques tool tags label@@boutiquesToolTags">Tags:</label>
-			<span id="tool-tags" class="right-col">{{descriptor.tags}}</span>
+			<span id="tool-tags" class="right-col">{{getTags()}}</span>
 		</li>
 	</ol>
 	

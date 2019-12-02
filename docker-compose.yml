@@ -186,6 +186,7 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - shanoir_ng_network
     ports:

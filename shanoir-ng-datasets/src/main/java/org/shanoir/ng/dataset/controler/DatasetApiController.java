@@ -256,12 +256,19 @@ public class DatasetApiController implements DatasetApi {
 			List<URL> pathURLs = new ArrayList<URL>();
 			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-				urls.dcm.add(iterator.next().toString());
+				URL url = iterator.next();
+				String urlString = url.toString();
+				System.out.println(urlString);
+				urls.dcm.add(urlString);
 			}
 			pathURLs.clear();
 			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-				urls.nii.add(iterator.next().toString());
+				URL url = iterator.next();
+				urls.nii.add(url.toString());
+				String urlString = url.toString();
+				System.out.println(urlString);
+				urls.nii.add(urlString);
 			}
 			
 		} catch (IOException e) {

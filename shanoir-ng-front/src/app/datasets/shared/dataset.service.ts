@@ -86,7 +86,7 @@ export class DatasetService extends EntityService<Dataset> {
         // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
 
         let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-        return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url, format: format }, httpOptions);
+        return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
     private getFilename(response: HttpResponse<any>): string {
