@@ -31,8 +31,7 @@ VALUES
 	(1, 1, now(), false, 1, 'examination1', 1, 1, 'examination1', false),
 	(2, 1, now(), false, 1, 'examination2', 1, 2, 'examination2', false),
 	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3', false),
-	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4', false),
-	(5, 15, now(), false, 1, 'examination5', 2, 15, 'examination5', true);
+	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4', false);
 
 INSERT INTO mr_protocol_metadata
 	(dtype, id, name)

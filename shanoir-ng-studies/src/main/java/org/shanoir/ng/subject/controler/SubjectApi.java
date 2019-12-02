@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -125,7 +126,8 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSimpleSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subject", response = SubjectDTO.class),

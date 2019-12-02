@@ -194,7 +194,7 @@ export class AnimalClinicalContextComponent  {
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
             this.studyService
-                .findSubjectsByStudyId(this.study.id)
+                .findSubjectsByStudyIdPreclinical(this.study.id, true)
                 .then(subjects => this.subjects = subjects);
         }
         this.onContextChange();

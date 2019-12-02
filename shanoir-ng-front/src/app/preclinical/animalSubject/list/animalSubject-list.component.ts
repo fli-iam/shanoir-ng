@@ -46,7 +46,6 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             super('preclinical-subject');
     }
 
-
     getEntities(): Promise<PreclinicalSubject[]> {
         return new  Promise<PreclinicalSubject[]>(resolve => {
             this.preclinicalSubjects = [];

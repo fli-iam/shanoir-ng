@@ -73,6 +73,7 @@ export class SubjectDTO {
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: Id[] = [];
+    preclinical: boolean;
 	
     constructor(subject: Subject) {
         this.id = subject.id;
@@ -85,6 +86,7 @@ export class SubjectDTO {
         this.imagedObjectCategory = subject.imagedObjectCategory;
         this.sex = subject.sex;
         this.selected = subject.selected;
+        this.preclinical = subject.preclinical;
         this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
             let dto = new SubjectStudyDTO(ss);
             dto.subject = null;

@@ -70,7 +70,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</ng-template>	
 						</span>
 					</li>
-					<li *ngIf="displaySex()">
+                    </ol>
+                    <ol *ngIf="animalSelected()" [@slideDown]="animalSelected()">
+					<li>
 						<label i18n="Subject detail|Sex label@@subjectDetailSex" class="required-label">Sex</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 

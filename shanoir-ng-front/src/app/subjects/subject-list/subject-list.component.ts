@@ -44,7 +44,7 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
     }
 
     getEntities(): Promise<Subject[]> {
-        return this.subjectService.getAll();
+        return this.subjectService.getAll().then(result => result.filter(subj => !subj.preclinical));
     }
 
     // Grid columns definition
