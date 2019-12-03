@@ -118,6 +118,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             'dose_unit': [this.subjectTherapy.dose_unit],
             'frequency': [this.subjectTherapy.frequency],
             'startDate': [this.subjectTherapy.startDate],
+            'molecule': [this.subjectTherapy.molecule],
             'endDate': [this.subjectTherapy.endDate]
         });
     }

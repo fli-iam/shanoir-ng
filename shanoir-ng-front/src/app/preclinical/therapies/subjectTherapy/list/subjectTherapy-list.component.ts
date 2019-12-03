@@ -117,6 +117,11 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
                 }
             },
             {
+                headerName: "Molecule", field: "molecule", type: "string", cellRenderer: function(params: any) {
+                    return checkNullValue(params.data.molecule);
+                }
+            },
+            {
                 headerName: "Dose Unit", field: "dose_unit.value", type: "reference", cellRenderer: function(params: any) {
                     return checkNullValueReference(params.data.dose_unit);
                 }

@@ -76,6 +76,9 @@ public class SubjectTherapy extends HalEntity {
 	@JsonProperty("frequency")
 	private String frequency;
 
+	@JsonProperty("molecule")
+	private String molecule;
+
 	/**
 	 * Init HATEOAS links
 	 */
@@ -187,6 +190,20 @@ public class SubjectTherapy extends HalEntity {
 
 	public void setFrequency(String frequency) {
 		this.frequency = frequency;
+	}
+
+	/**
+	 * @return the molecule
+	 */
+	public String getMolecule() {
+		return molecule;
+	}
+
+	/**
+	 * @param molecule the molecule to set
+	 */
+	public void setMolecule(String molecule) {
+		this.molecule = molecule;
 	}
 
 	@Override

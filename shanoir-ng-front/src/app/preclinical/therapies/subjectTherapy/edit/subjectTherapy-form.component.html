@@ -73,6 +73,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									</ng-template>
 								</span>								
 							</li>
+                            <li class="required">
+                                <label i18n="Edit subjectTherapy|Molecule label" class="required-label">Molecule</label>
+                                <span class="right-col" [ngSwitch]="mode">
+                                    <ng-template [ngSwitchCase]="'view'"> 
+                                            {{subjectTherapy?.molecule}}
+                                    </ng-template>
+                                    <ng-template ngSwitchDefault>
+                                        <input type="text" id="molecule" formControlName="molecule" [(ngModel)]="subjectTherapy.molecule"/>
+                                    </ng-template>
+                                </span>                             
+                            </li>
 							<li class="required">
 								<label i18n="Edit subjectTherapy|Frequency label" class="required-label">Frequency</label>
 								<span class="right-col" [ngSwitch]="mode">
