@@ -72,10 +72,17 @@ export class InvocationGuiComponent implements OnInit {
   }
 
   onSelectData(parameter: Parameter<any>) {
-    // store which data we clicked on
     this.breadcrumbsService.currentStep.data.boutiques = true;
-    this.breadcrumbsService.currentStep.data.boutiquesInvocation = this.pcs.generateInvocation(this.form);
-    this.breadcrumbsService.currentStep.data.boutiquesCurrentParameterID = parameter.id;
+
+    let invocation = this.pcs.generateInvocation(this.form);
+
+    // Set the boutiques data in all boutiques steps (there might be multiple boutiques steps in navigation history) 
+    for(let step of this.breadcrumbsService.steps) {
+      if(step.data.boutiques) {
+        step.data.boutiquesInvocation = invocation;
+        step.data.boutiquesCurrentParameterID = parameter.id;
+      }
+    }
     this.breadcrumbsService.replace = false;
     // this.breadcrumbsService.nameStep('Boutiques');
     this.router.navigate(['boutiques/dataset/list'], {replaceUrl: false });

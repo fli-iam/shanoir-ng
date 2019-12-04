@@ -25,11 +25,13 @@ export class File {
     url: string
     isDirectory: boolean
     format: string
+    parent: File
     files: File[] = []
-    constructor(url: string, format: string, isDirectory=false, files: File[] = []) {
+    constructor(url: string, parentFormat: string, isDirectory=false, parent:File=null, files: File[] = []) {
         this.url = url;
-        this.format = format;
         this.name = this.url.substring(this.url.lastIndexOf('/') + 1);
+        this.format = parentFormat == "nii" ? this.name.substring(this.name.lastIndexOf('.') + 1) : parentFormat;
+        this.parent = parent;
         this.isDirectory = isDirectory;
         this.files = files;
     }

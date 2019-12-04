@@ -182,10 +182,11 @@ services:
       - front.server.url
       - front.server.address
       - BOUTIQUES_DATA_PATH=/tmp
+      - BOUTIQUES_OUTPUT_PATH=/output
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "tmp:/tmp"
+      - "tmp:/tmp:ro"
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - shanoir_ng_network

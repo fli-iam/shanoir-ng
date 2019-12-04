@@ -3,14 +3,16 @@ import { HttpClient, HttpHeaders, HttpParams, HttpUrlEncodingCodec } from '@angu
 import { ToolInfo } from './tool.model';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import { ServiceLocator } from '../utils/locator.service';
+import * as AppUtils from '../utils/app.utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ToolService extends EntityService<ToolInfo> {
 
-  // API_URL = 'http://localhost:9906/tool';
-  API_URL = 'https://shanoir-ng/boutiques/tool';
+  API_URL = 'http://localhost:9906/tool';
+  // API_URL = 'https://shanoir-ng/boutiques/tool';
+  // API_URL = AppUtils.BACKEND_API_BOUTIQUES_TOOL_URL;
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -59,5 +61,13 @@ export class ToolService extends EntityService<ToolInfo> {
   execute(toolId: number, invocation: any): Promise<string> {
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
     return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/`, invocation, httpOptions).toPromise();
+  }
+
+  getExecutionOutput(toolId: number): Promise<any> {
+    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/`).toPromise();
+  }
+
+  downloadOutput(toolId: number): Promise<any> {
+    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/`).toPromise();
   }
 }

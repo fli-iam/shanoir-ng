@@ -4,8 +4,8 @@
 
   <input #parameterInput [formControlName]="parameter.id" [id]="'invocation-gui-parameter-' + parameter.id" [type]="parameter.getInputType()" [checked]="parameter.value" (change)="onChange($event.target)" [min]="parameter.getMinimum()" [max]="parameter.getMaximum()">
 
-  <button class="select-data" *ngIf="parameter.type == 'File'" (click)="selectData($event)">{{displaySelectData()}}</button>
+  <button type="button" class="select-data" *ngIf="parameter.type == 'File'" (click)="selectData($event)">{{displaySelectData()}}</button>
 
-  <button class="unset" *ngIf="parameter.optional" (click)="unset($event)">Unset</button>
+  <button type="button" class="unset" *ngIf="parameter.optional" (click)="unset($event)">Unset</button>
 
 </div>

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { File } from '../tree/file-tree.component';
@@ -22,7 +22,8 @@ import { Dataset, DatasetMetadata } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
+import { TableComponent } from '../../shared/components/table/table.component';
 
 @Component({
     selector: 'boutiques-dataset-detail',
@@ -38,6 +39,16 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
     private hasAdministrateRight: boolean = false;
     files: File[] = [];                                    // JSON structure which describes the files associated with the dataset:
                                                            //  type File: { name: string, path: string, files: File[] }} 
+    filesArray: File[] = [];                               // Flattened version of the file tree to display a table
+    
+    // Table columns definition
+    columnDefs = [
+        {headerName: "Name", field: "name"},
+        {headerName: "URL", field: "url"},
+        {headerName: "Format", field: "format"}
+    ];
+
+    @ViewChild('fileTable', { static: false }) table: TableComponent;
     
     constructor(
             private datasetService: DatasetService,
@@ -98,10 +109,17 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         for(let format in urls) {
             let formatFile = new File(format, format, true);
             for(let url of urls[format]) {
-                formatFile.files.push(new File(url, format, false))
+                formatFile.files.push(new File(url, format, false, formatFile))
+            }
+            // this.filesArray = this.filesArray.concat(formatFile.files);
+            if(format == "dcm") {
+                this.filesArray.push(new File("DICOM", "dcm"));
+            } else {
+                this.filesArray = this.filesArray.concat(formatFile.files);
             }
             this.files.push(formatFile);
         }
+        this.table.refresh();
     }
 
     setFile(path) {
@@ -109,16 +127,15 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         for(let step of this.breadcrumbsService.steps) {
             if(step.data.boutiques) {
                 step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = path;
-                history.go(-2);
-                break;
             }
         }
+        history.go(-2);
     }
 
     onFileSelected(file: File) {
         // Request dataset to prepare the file
         // Then set the invocation parameter to the returned id
-        this.datasetService.prepareUrl(this.dataset.id, file.url, file.format).subscribe( (path)=> this.setFile(path + '/' + file.name) );
+        this.datasetService.prepareUrl(this.dataset.id, file.url, file.parent.format).subscribe( (path)=> this.setFile(path + '/' + file.name) );
     }
 
     buildForm(): FormGroup {
@@ -166,5 +183,16 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
 
     public hasEditRight(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+
+    getPage(pageable: Pageable): Promise<Page<File>> {
+        let page = new Page<File>();
+        page.number = pageable.pageNumber;
+        page.size = pageable.pageSize;
+        page.numberOfElements = pageable.pageSize;
+        page.totalElements = this.filesArray.length;
+        page.totalPages = Math.ceil(this.filesArray.length / pageable.pageSize);
+        page.content = this.filesArray.slice( (pageable.pageNumber - 1) * pageable.pageSize, pageable.pageNumber * pageable.pageSize);
+        return Promise.resolve(page);
     }
 }

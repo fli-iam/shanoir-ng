@@ -16,6 +16,8 @@ export class ExecutionComponent implements OnInit {
   generatedCommand: string = null
   invocation: any = null
   output: string = null
+  executionIntervalId = null;
+  processFinished: boolean = false;
   // private topicSubscription: Subscription;
 
   constructor(private toolService: ToolService/*, private rxStompService: RxStompService*/) { }
@@ -49,6 +51,28 @@ export class ExecutionComponent implements OnInit {
       console.log('Invocation is empty.') // TODO: display a real message
       return;
     }
-    this.toolService.execute(this.tool.id, this.invocation).then((output)=> this.output = output);
+    this.toolService.execute(this.tool.id, this.invocation).then((output)=> {
+      this.output = output;
+      this.executionIntervalId = setInterval(this.getOutput, 500);
+    });
+  }
+
+  getOutput() {
+    this.toolService.getExecutionOutput(this.tool.id).then((output:any)=> {
+      if(output.input) {
+        this.output += output.input;
+      }
+      if(output.error) {
+        this.output += "Error: " + output.error;
+      }
+      if(output.finished) {
+        clearInterval(this.executionIntervalId);
+        this.processFinished = true;
+      }
+    });
+  }
+
+  onDownloadResults(link: string) {
+    this.toolService.downloadOutput(this.tool.id);
   }
 }
