@@ -25,19 +25,21 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "6.0.0 - 2019-08-28";
+	public static final String SHANOIR_UPLOADER_VERSION = "v6.0.1";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public static final String GENERAL_PROPERTIES = "/general.properties";
 
-	private static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
+	public static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
 	
-	private static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
+	public static final String MODE_PSEUDONYMUS_KEY_FILE = "/key";
 	
-	private static final String MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT = "auto-increment";
+	public static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
 	
-	private static final String MODE_SUBJECT_COMMON_NAME_MANUAL = "manual";
+	public static final String MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT = "auto-increment";
+	
+	public static final String MODE_SUBJECT_COMMON_NAME_MANUAL = "manual";
 	
 	public static final String LANGUAGE_PROPERTIES = "/language.properties";
 
