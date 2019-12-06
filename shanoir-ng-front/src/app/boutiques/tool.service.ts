@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpUrlEncodingCodec } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse, HttpUrlEncodingCodec } from '@angular/common/http';
 import { ToolInfo } from './tool.model';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import { ServiceLocator } from '../utils/locator.service';
@@ -64,10 +64,22 @@ export class ToolService extends EntityService<ToolInfo> {
   }
 
   getExecutionOutput(toolId: number): Promise<any> {
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/`).toPromise();
+    return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/`).toPromise();
   }
 
-  downloadOutput(toolId: number): Promise<any> {
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/`).toPromise();
+  downloadOutput(toolId: number): void {
+    if (!toolId) throw Error('Cannot download a dataset without an id');
+    let httpOptions = Object.assign( { observe: 'response', responseType: 'blob' }, this.httpOptions);
+    this.httpClient.get<HttpResponse<Blob>>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));
+  }
+
+  private getFilename(response: HttpResponse<any>): string {
+    const prefix = 'attachment;filename=';
+    let contentDispHeader: string = response.headers.get('Content-Disposition');
+    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+  }
+
+  private downloadIntoBrowser(response: HttpResponse<Blob>){
+      AppUtils.browserDownloadFile(response.body, this.getFilename(response));
   }
 }

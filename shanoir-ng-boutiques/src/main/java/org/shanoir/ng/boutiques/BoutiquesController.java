@@ -13,11 +13,17 @@ import java.util.zip.ZipOutputStream;
 //import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 //import javax.validation.Valid;
+import javax.servlet.http.HttpServletResponse;
 
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.boutiques.model.BoutiquesTool;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.utils.KeycloakUtil;
+//import org.shanoir.ng.shared.exception.TokenNotFoundException;
+//import org.shanoir.ng.utils.ShanoirStudiesException;
+//import org.shanoir.ng.shared.exception.ErrorModel;
+//import org.shanoir.ng.shared.exception.RestServiceException;
+//import org.shanoir.ng.utils.KeycloakUtil;
 //import org.shanoir.ng.dataset.model.Dataset;
 //import org.shanoir.ng.dataset.model.DatasetExpression;
 //import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -28,19 +34,24 @@ import org.shanoir.ng.utils.KeycloakUtil;
 //import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,6 +110,43 @@ public class BoutiquesController {
 //	
 //	@Autowired
 //	private WADODownloaderService downloader;
+
+	public static final String USER_ID_TOKEN_ATT = "userId";
+	
+	/**
+	 * Get current access token.
+	 * 
+	 * @return access token.
+	 * @throws SecurityException
+	 */
+	@SuppressWarnings("rawtypes")
+	private static KeycloakSecurityContext getKeycloakSecurityContext() throws SecurityException {
+		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
+			throw new SecurityException("Anonymous user");
+		}
+		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+		return principal.getKeycloakSecurityContext();
+	}
+	
+	/**
+	 * Get current user id from Keycloak token.
+	 * 
+	 * @return user id.
+	 * @throws RuntimeException
+	 */
+	public static Long getTokenUserId() {
+		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+		final AccessToken accessToken = context.getToken();
+		if (accessToken == null) {
+			throw new RuntimeException("Access token not found");
+		}
+		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
+		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
+			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
+		}
+		return null;
+	}
 	
 	@Autowired
 	private SimpMessagingTemplate brokerMessagingTemplate;
@@ -205,7 +253,7 @@ public class BoutiquesController {
     }
 
     private String getProcessId(String id) {
-		final Long userId = KeycloakUtil.getTokenUserId();
+		final Long userId = getTokenUserId();
 		return id + Long.toString(userId);
     }
 
@@ -236,12 +284,76 @@ public class BoutiquesController {
 			if (!outputDir.exists()) {
 				outputDir.mkdirs(); // create if not yet existing
 			}
-			
-//        	ObjectNode descriptor = getDescriptorById(id);
-//        	for() {
-//        		
-//        	}
-        	
+
+		    // See the description of how the output files are generated: "Boutiques: a flexible framework for automatedapplication integration in computing platforms"
+		    //                                                            https://arxiv.org/pdf/1711.09713.pdf
+
+		    // For all inputs: if the parameter is a File or a String and has a "value-key":
+		    //      check if an "output-file" has a "path-template" containing this "value-key",
+		    //      remove all "path-template-stripped-extensions" from the input parameter value (which is a file name),
+		    //      then replace this "value-key" in the "path-template" with the file name (= the input parameter value)
+//		    for (auto& idAndInputObject: idToInputObject)
+//		    {
+//		        const QString &inputId = idAndInputObject.first;
+//		        InputObject &inputObject = idAndInputObject.second;
+//		        const QString &inputType = inputObject.description["type"].toString();
+//
+//		        if((inputType == "File" || inputType == "String") && invocationJSON.contains(inputId))
+//		        {
+//		            // For all output files: check if one has "path-template" containing the "value-key" of the current input
+//		            QString fileName = invocationJSON[inputId].toString();
+//		            for (int i = 0 ; i<this->outputFiles.size() ; ++i)
+//		            {
+//		                const QJsonObject &outputFilesDescription = this->outputFiles[i].toObject();
+//		                QString pathTemplate = outputFilesDescription["path-template"].toString();
+//
+//		                // If the input is a File, remove the "path-template-stripped-extensions"
+//		                if(inputType == "File" && outputFilesDescription.contains("path-template-stripped-extensions"))
+//		                {
+//		                    const QJsonArray &pathTemplateStrippedExtensions = outputFilesDescription["path-template-stripped-extensions"].toArray();
+//
+//		                    for (int j = 0 ; j<pathTemplateStrippedExtensions.size() ; ++j)
+//		                    {
+//		                        const QString &pathTemplateStrippedExtension = pathTemplateStrippedExtensions[j].toString();
+//		                        fileName.remove(pathTemplateStrippedExtension);
+//		                    }
+//		                }
+//
+//		                const QString &valueKey = inputObject.description["value-key"].toString();
+//		                if(pathTemplate.contains(valueKey))
+//		                {
+//		                    // If the current output file has a "path-template" containing the current input "value-key": replace the "value-key" by the file name (!input value)
+//		                    pathTemplate.replace(valueKey, fileName);
+//
+//		                    // Make sure the path is absolute (ask user to set the current directory if necessary)
+//		                    QFileInfo fileInfo(pathTemplate);
+//		                    if(fileInfo.isRelative())
+//		                    {
+//		                        if(!hasChangedCurrentDirectory)
+//		                        {
+//		                            this->askChangeCurrentDirectory();
+//		                            hasChangedCurrentDirectory = true;
+//		                        }
+//		                    }
+//
+//		                    // Add the absolute path to the list of directories to mount
+//		                    const QString &absolutePath = fileInfo.isRelative() ? fileInfo.absolutePath() : fileInfo.path();
+//		                    const QString &normalizedPath = this->fileHandler->normalizePath(absolutePath);
+//		                    if(!directories.contains(normalizedPath))
+//		                    {
+//		                        directories.append(normalizedPath);
+//		                    }
+//
+//		                    // Set the output file name (to automatically open it in medInria when the process is over)
+//		                    if(outputFilesDescription["id"].toString() == this->selectedOutputId)
+//		                    {
+//		                        this->outputFileName = fileInfo.absoluteFilePath();
+//		                    }
+//		                }
+//		            }
+//		        }
+//		    }
+//        	
         	String invocationFilePath = BoutiquesUtils.writeTemporaryFile("invocation.json", invocation.toString());
         	
         	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + id + " " + invocationFilePath + " -v " + dataPath + ":/tmp/";
@@ -301,11 +413,14 @@ public class BoutiquesController {
 	
     private String zipOutput(String processId) throws IOException {
     	String outputPath = getOutputPath(processId);
-    	zip(outputPath, outputPath + ".zip");
+    	String outputPathZip = outputPath + ".zip";
+    	File file = new File(outputPathZip);
+    	file.deleteOnExit();
+    	zip(outputPath, outputPathZip);
     	return outputPath + ".zip";
     }
     
-    @PostMapping("/tool/{id}/output/")
+    @GetMapping("/tool/{id}/output/")
     public ObjectNode getExecutionOutputById(@PathVariable String id) {
 
     	final String processId = getProcessId(id);
@@ -331,52 +446,32 @@ public class BoutiquesController {
     	}
     	return null;
     }
-
-    @PostMapping("/tool/{id}/download-output/")
-    public ResponseEntity<ByteArrayResource> downloadOutputById(@PathVariable String id) throws RestServiceException {
+    
+    @GetMapping("/tool/{id}/download-output/")
+    public ResponseEntity<ByteArrayResource> downloadOutputById(@PathVariable String id) throws ResponseStatusException {
 
 		try {
 	    	final String processId = getProcessId(id);
-	    	File zipFile;
-				zipFile = new File(zipOutput(processId));
-	    	
+	    	File zipFile = new File(zipOutput(processId));
+
 			byte[] data = Files.readAllBytes(zipFile.toPath());
 			ByteArrayResource resource = new ByteArrayResource(data);
 	
 			// Try to determine file's content type
 			String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-			
+
 			return ResponseEntity.ok()
+					.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
 					.contentType(MediaType.parseMediaType(contentType))
 					.contentLength(data.length)
 					.body(resource);
+
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating zip file.", null));
+			throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while creating zip file.", e);
 		}
     }
-    
-//    public Map<String, Object> listDirectoryFilesAndFolders( File dir ) {
-//    	File[] content = dir.listFiles(); 
-//
-//    	List<File> files = new LinkedList<>();
-//    	List<Map<String, Object>> folders = new LinkedList<>();
-//
-//    	for( File f : content ) {
-//    		if( f.isDirectory() ) {
-//    			Map<String, Object> subList = listDirectoryFilesAndFolders( f );
-//    			folders.add( subList );
-//    		} else {
-//    				files.add( f );
-//    		}
-//    	}
-//    	Map<String, Object> result = new HashMap<>();
-//    	result.put( "folders", folders );
-//    	result.put( "files", files );
-//    	return result;
-//    }
     
    public Map<String, Object> listDirectoryTree( File dir ) {
    	File[] content = dir.listFiles(); 
@@ -430,123 +525,6 @@ public class BoutiquesController {
    	return files;
    }
    
-//   @PostMapping("/dataset/{id}/urls")
-//	public List<String> listDatasetUrlsById(
-//			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-//			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
-//			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
-//			throws RestServiceException, IOException {
-//
-//		final Dataset dataset = datasetService.findById(datasetId);
-//
-//		List<URL> pathURLs = new ArrayList<URL>();
-//		
-//		try {
-//			if ("dcm".equals(format)) {
-//				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-//			} else if ("nii".equals(format)) {
-//				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-//			} else {
-//				throw new RestServiceException(
-//						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-//			}
-//		} catch (IOException e) {
-//			throw new RestServiceException(
-//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while listing dataset urls.", null));
-//		} 
-//
-//		List<String> urls = new ArrayList<String>();
-//		
-//		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-//			URL url =  (URL) iterator.next();
-//			urls.add(url.getPath());
-//		}
-//		
-//		return urls;
-//	}
-//   
-//   @PostMapping("/dataset/{id}/files")
-//	public ArrayNode downloadDatasetById(
-//			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-//			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
-//			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
-//			throws RestServiceException, IOException {
-//
-//		final Dataset dataset = datasetService.findById(datasetId);
-//		if (dataset == null) {
-//			throw new RestServiceException(
-//					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
-//		}
-//		
-//		/* Create folder and file */
-//		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-//		long n = RANDOM.nextLong();
-//		if (n == Long.MIN_VALUE) {
-//			n = 0; // corner case
-//		} else {
-//			n = Math.abs(n);
-//		}
-//		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
-//		File workFolder = new File(tmpFilePath + DOWNLOAD);
-//		workFolder.mkdirs();
-//
-//		try {
-//			List<URL> pathURLs = new ArrayList<URL>();
-//			if ("dcm".equals(format)) {
-//				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-//				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
-//			} else if ("nii".equals(format)) {
-//				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-//				copyNiftiFilesForURLs	copyNiftiFilesForURLs(pathURLs, workFolder);
-//			} else {
-//				throw new RestServiceException(
-//						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-//			}
-//		} catch (IOException | MessagingException e) {
-//			throw new RestServiceException(
-//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
-//		} 
-//
-//		return listDirectoryObjectNode(workFolder);
-//	}
-//
-//	/**
-//	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-//	 * @param urls
-//	 * @param workFolder
-//	 * @throws IOException
-//	 * @throws MessagingException
-//	 */
-//	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder) throws IOException {
-//		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-//			URL url =  (URL) iterator.next();
-//			File srcFile = new File(url.getPath());
-//			File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
-//			Files.copy(srcFile.toPath(), destFile.toPath());
-//		}
-//	}
-//	
-//	/**
-//	 * Reads all dataset files depending on the format attached to one dataset.
-//	 * @param dataset
-//	 * @param pathURLs
-//	 * @throws MalformedURLException
-//	 */
-//	private void getDatasetFilePathURLs(final Dataset dataset, List<URL> pathURLs, DatasetExpressionFormat format) throws MalformedURLException {
-//		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-//		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
-//			DatasetExpression datasetExpression = (DatasetExpression) itExpressions.next();
-//			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
-//				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-//				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
-//					DatasetFile datasetFile = (DatasetFile) itFiles.next();
-//					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-//					pathURLs.add(url);
-//				}
-//			}
-//		}
-//	}
-//	
     @PostMapping("/tool/update-database/")
     public String updateDatabase() {
     	BoutiquesUtils.updateToolDatabase();

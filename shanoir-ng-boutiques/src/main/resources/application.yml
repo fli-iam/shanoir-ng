@@ -20,14 +20,14 @@ server:
       enabled: false
 spring:
 ##### Database #####
-  # datasource:
-  #   url: jdbc:mysql://database:3306/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-  #   username: users
-  #   password: password
-  #   # The SQL dialect makes Hibernate generate better SQL for the chosen database
-  #   driver-class-name: com.mysql.jdbc.Driver
-  #   initialize: false
-  #   data: classpath:/scripts/import.sql
+  datasource:
+     url: jdbc:mysql://database:3306/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+     username: boutiques
+     password: password
+     # The SQL dialect makes Hibernate generate better SQL for the chosen database
+     driver-class-name: com.mysql.jdbc.Driver
+#      initialize: false
+     data: classpath:/scripts/import.sql
 ##### Others #####
   jackson:
     mapper:

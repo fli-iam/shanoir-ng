@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { RxStompService } from '@stomp/ng2-stompjs';
 import { ToolService } from '../tool.service';
 import { ToolInfo } from '../tool.model';
@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class ExecutionComponent implements OnInit {
   
+  @ViewChild('outputTextarea', { static: false }) private outputTextarea: ElementRef<HTMLElement>;
   @Input() tool: ToolInfo;
   generatedCommand: string = null
   invocation: any = null
@@ -53,17 +54,20 @@ export class ExecutionComponent implements OnInit {
     }
     this.toolService.execute(this.tool.id, this.invocation).then((output)=> {
       this.output = output;
-      this.executionIntervalId = setInterval(this.getOutput, 500);
+      this.executionIntervalId = setInterval(()=> this.getOutput(), 500);
     });
   }
 
   getOutput() {
     this.toolService.getExecutionOutput(this.tool.id).then((output:any)=> {
-      if(output.input) {
-        this.output += output.input;
+      if(output.input != null) {
+        this.output += output.input + "\n\n";
       }
-      if(output.error) {
-        this.output += "Error: " + output.error;
+      if(output.error != null) {
+        this.output += "Error: " + output.error + "\n";
+      }
+      if(output.input != null || output.error != null) {
+        this.outputTextarea.nativeElement.scrollTop = this.outputTextarea.nativeElement.scrollHeight;
       }
       if(output.finished) {
         clearInterval(this.executionIntervalId);

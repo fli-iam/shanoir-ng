@@ -4,6 +4,6 @@
 
 <button id="execute" (click)="onExecuteTool()">Execute tool</button>
 
-<textarea id="output">{{ output }}</textarea>
+<textarea #outputTextarea id="output">{{ output }}</textarea>
 
 <button id="download" *ngIf="processFinished" (click)="onDownloadResults()">Download results</button>
