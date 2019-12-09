@@ -58,10 +58,10 @@ public class KeycloakClient {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${kc.admin.client.username}")
+	@Value("${KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${kc.admin.client.password}")
+	@Value("${KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 	
 	@Value("${keycloak.realm}")
@@ -88,7 +88,7 @@ public class KeycloakClient {
 	 * @param password
 	 *            user password.
 	 * @return keycloak user id.
-	 * @throws SecurityException 
+	 * @throws SecurityException
 	 */
 	public String createUserWithPassword(final User user, final String password) throws SecurityException {
 		try {
@@ -120,7 +120,7 @@ public class KeycloakClient {
 	 * @param user
 	 *            user to create.
 	 * @return keycloak user id.
-	 * @throws SecurityException 
+	 * @throws SecurityException
 	 */
 	public String createUserWithPassword(final User user) throws SecurityException {
 		return createUserWithPassword(user, user.getPassword());

@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import groovyjarjarcommonscli.MissingArgumentException;
@@ -98,10 +97,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${kc.admin.client.username}")
+	@Value("${KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${kc.admin.client.password}")
+	@Value("${KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
 	@Value("${keycloak.realm}")
@@ -117,7 +116,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	
 	@Override
-	public void run(ApplicationArguments args) throws Exception { 
+	public void run(final ApplicationArguments args) throws Exception {
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
@@ -142,10 +141,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 						LOG.error(msg); // users logs
 						System.out.println(msg); // docker compose console
 						TimeUnit.SECONDS.sleep(5);
-					} 
+					}
 				}
 				if (!success) {
-					throw new IllegalStateException("Could not export users to Keycloak.");		
+					throw new IllegalStateException("Could not export users to Keycloak.");
 				}
 			}
 		}
