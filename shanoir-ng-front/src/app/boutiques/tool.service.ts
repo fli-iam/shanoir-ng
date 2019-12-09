@@ -45,29 +45,29 @@ export class ToolService extends EntityService<ToolInfo> {
     return this.httpClient.get<Array<ToolInfo>>(`${this.API_URL}/all`).toPromise();
   }
 
-  getDescriptor(toolId: number): Promise<any> {
+  getDescriptor(toolId: string): Promise<any> {
     return this.httpClient.get<any>(`${this.API_URL}/${encodeURIComponent(toolId)}/descriptor/`).toPromise();
   }
 
-  getInvocation(toolId: number): Promise<string> {
+  getInvocation(toolId: string): Promise<string> {
     return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/invocation/`).toPromise();
   }
 
-  generateCommand(toolId: number, invocation: any): Promise<string> {
+  generateCommand(toolId: string, invocation: any): Promise<string> {
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
     return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions).toPromise();
   }
 
-  execute(toolId: number, invocation: any): Promise<string> {
+  execute(toolId: string, invocation: any): Promise<string> {
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
     return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/`, invocation, httpOptions).toPromise();
   }
 
-  getExecutionOutput(toolId: number): Promise<any> {
+  getExecutionOutput(toolId: string): Promise<any> {
     return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/`).toPromise();
   }
 
-  downloadOutput(toolId: number): void {
+  downloadOutput(toolId: string): void {
     if (!toolId) throw Error('Cannot download a dataset without an id');
     let httpOptions = Object.assign( { observe: 'response', responseType: 'blob' }, this.httpOptions);
     this.httpClient.get<HttpResponse<Blob>>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));

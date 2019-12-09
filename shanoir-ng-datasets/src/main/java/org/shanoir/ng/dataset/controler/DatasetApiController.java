@@ -306,10 +306,12 @@ public class DatasetApiController implements DatasetApi {
 		String url = urlObject.get("url").asText();
 		try {
 			List<URL> pathURLs = new ArrayList<URL>();
-			pathURLs.add(new URL(url));
+
 			if ("dcm".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
 			} else if ("nii".equals(format)) {
+				pathURLs.add(new URL(url));
 				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} else {
 				throw new RestServiceException(

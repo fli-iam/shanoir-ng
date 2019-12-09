@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 })
 export class InvocationComponent implements OnInit {
   
-  @Input() tool: ToolInfo;
+  @Input() toolId: string;
   
   @Output() invocationChanged = new EventEmitter<any>();
 
@@ -38,11 +38,22 @@ export class InvocationComponent implements OnInit {
       distinctUntilChanged()
     ).subscribe((invocationValue: string)=> this.updateInvocation(invocationValue));
 
-    this.toolService.getDescriptor(this.tool.id).then((descriptor)=> this.descriptor = descriptor);
-    this.toolService.getInvocation(this.tool.id).then((invocation)=> {
+    this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor);
+    this.toolService.getInvocation(this.toolId).then((invocation)=> {
       this.invocation = invocation;
       this.invocationChanged.emit(this.invocation);
     });
+  }
+
+  openInvocation(event: any) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      // console.log('file content: ', e.target.result);
+      this.updateInvocation(e.target.result);
+    };
+    reader.readAsText(event.target.files[0]);
+
+    this.invocationGUI.setInvocation(this.invocation);
   }
 
   updateInvocation(invocationValue: string) {
@@ -73,7 +84,4 @@ export class InvocationComponent implements OnInit {
     this.invocationSubject.next(v);
   }
 
-  testInvocation() {
-    this.invocationGUI.testInvocation(this.invocation);
-  }
 }

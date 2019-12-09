@@ -88,7 +88,7 @@ export class InvocationGuiComponent implements OnInit {
     this.router.navigate(['boutiques/dataset/list'], {replaceUrl: false });
   }
 
-  testInvocation(invocation: any) {
+  setInvocation(invocation: any) {
     this.pcs.setFormFromInvocation(invocation, this.form);
   }
 }

@@ -2,7 +2,9 @@
 
 <invocation-gui #invocationGUI [descriptor]="descriptor" (invocationChanged)="onInvocationChanged($event)"></invocation-gui>
 
-<button>Open invocation</button>
+<input #openInvocationInput id="open-invocation" type="file" (change)="openInvocation($event)" />
+<button (click)="openInvocationInput.click()">Open invocation</button>
+
 <textarea id="invocation" [(ngModel)]="invocationValue"></textarea>
-<button (click)="testInvocation()">Test invocation</button>
+<!-- <button (click)="setInvocation()">Set invocation</button> -->
 <button>Save invocation</button>

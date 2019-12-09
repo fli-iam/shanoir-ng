@@ -113,7 +113,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
             }
             // this.filesArray = this.filesArray.concat(formatFile.files);
             if(format == "dcm") {
-                this.filesArray.push(new File("DICOM", "dcm"));
+                this.filesArray.push(new File("DICOM", "dcm", false, formatFile));
             } else {
                 this.filesArray = this.filesArray.concat(formatFile.files);
             }
@@ -135,7 +135,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
     onFileSelected(file: File) {
         // Request dataset to prepare the file
         // Then set the invocation parameter to the returned id
-        this.datasetService.prepareUrl(this.dataset.id, file.url, file.parent.format).subscribe( (path)=> this.setFile(path + '/' + file.name) );
+        this.datasetService.prepareUrl(this.dataset.id, file.url, file.parent.format).subscribe( (path)=> this.setFile(path + '/' + (file.name != "DICOM" ? file.name : "")) );
     }
 
     buildForm(): FormGroup {

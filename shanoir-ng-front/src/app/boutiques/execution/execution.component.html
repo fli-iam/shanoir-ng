@@ -1,9 +1,11 @@
 <h2 i18n="Execute|Execute tool title@@ExecuteToolTitle">Execute</h2>
 
-<textarea readonly id="generatedCommand">{{ generatedCommand }}</textarea>
+<pre>{{ generatedCommand }}</pre>
 
-<button id="execute" (click)="onExecuteTool()">Execute tool</button>
+<button id="execute" (click)="onExecuteTool()">{{ executeToolButton() }}</button>
 
-<textarea #outputTextarea id="output">{{ output }}</textarea>
+<ul id="outputLines">
+  <li *ngFor="let outputLine of outputLines"><pre [innerHtml]="outputLine"></pre></li>
+</ul>
 
 <button id="download" *ngIf="processFinished" (click)="onDownloadResults()">Download results</button>

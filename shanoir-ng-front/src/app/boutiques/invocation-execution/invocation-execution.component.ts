@@ -10,16 +10,17 @@ import { ToolInfo } from '../tool.model';
 })
 export class InvocationExecutionComponent implements OnInit {
 
-  tool: ToolInfo = null
+  toolId: string = null
 
   constructor(private activatedRoute: ActivatedRoute, private breadcrumbService: BreadcrumbsService) {
-    // let toolId = this.activatedRoute.snapshot.params['toolId'];
-    for(let step of this.breadcrumbService.steps) {
-      if(step.data.boutiquesToolInfo) {
-        this.tool = step.data.boutiquesToolInfo;
-        break;
-      }
-    }
+    this.toolId = this.activatedRoute.snapshot.params['toolId'];
+
+    // for(let step of this.breadcrumbService.steps) {
+    //   if(step.data.boutiquesToolInfo) {
+    //     this.tool = step.data.boutiquesToolInfo;
+    //     break;
+    //   }
+    // }
   }
 
   ngOnInit() {

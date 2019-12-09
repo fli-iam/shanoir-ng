@@ -96,6 +96,8 @@ public class BoutiquesController {
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 	
+	private static final int MAX_OUTPUT_LINES = 25;
+	
 	public static final Map<String, BoutiquesProcess> processes = new HashMap<String, BoutiquesProcess>();
 
     private final HttpServletRequest request;
@@ -284,7 +286,16 @@ public class BoutiquesController {
 			if (!outputDir.exists()) {
 				outputDir.mkdirs(); // create if not yet existing
 			}
-
+			
+			ObjectNode descriptor = getDescriptorById(id);
+			ArrayNode inputs = (ArrayNode) descriptor.get("inputs");
+			
+			HashMap<String, JsonNode> idToInputObject = new HashMap<String, JsonNode>(); 
+	        for (int i = 0; i < inputs.size(); i++) {
+	            JsonNode input = inputs.get(i);
+	            idToInputObject.put(input.get("id").asText(), input);
+	        }
+	        
 		    // See the description of how the output files are generated: "Boutiques: a flexible framework for automatedapplication integration in computing platforms"
 		    //                                                            https://arxiv.org/pdf/1711.09713.pdf
 
@@ -292,68 +303,52 @@ public class BoutiquesController {
 		    //      check if an "output-file" has a "path-template" containing this "value-key",
 		    //      remove all "path-template-stripped-extensions" from the input parameter value (which is a file name),
 		    //      then replace this "value-key" in the "path-template" with the file name (= the input parameter value)
-//		    for (auto& idAndInputObject: idToInputObject)
-//		    {
-//		        const QString &inputId = idAndInputObject.first;
-//		        InputObject &inputObject = idAndInputObject.second;
-//		        const QString &inputType = inputObject.description["type"].toString();
-//
-//		        if((inputType == "File" || inputType == "String") && invocationJSON.contains(inputId))
-//		        {
-//		            // For all output files: check if one has "path-template" containing the "value-key" of the current input
-//		            QString fileName = invocationJSON[inputId].toString();
-//		            for (int i = 0 ; i<this->outputFiles.size() ; ++i)
-//		            {
-//		                const QJsonObject &outputFilesDescription = this->outputFiles[i].toObject();
-//		                QString pathTemplate = outputFilesDescription["path-template"].toString();
-//
-//		                // If the input is a File, remove the "path-template-stripped-extensions"
-//		                if(inputType == "File" && outputFilesDescription.contains("path-template-stripped-extensions"))
-//		                {
-//		                    const QJsonArray &pathTemplateStrippedExtensions = outputFilesDescription["path-template-stripped-extensions"].toArray();
-//
-//		                    for (int j = 0 ; j<pathTemplateStrippedExtensions.size() ; ++j)
-//		                    {
-//		                        const QString &pathTemplateStrippedExtension = pathTemplateStrippedExtensions[j].toString();
-//		                        fileName.remove(pathTemplateStrippedExtension);
-//		                    }
-//		                }
-//
-//		                const QString &valueKey = inputObject.description["value-key"].toString();
-//		                if(pathTemplate.contains(valueKey))
-//		                {
-//		                    // If the current output file has a "path-template" containing the current input "value-key": replace the "value-key" by the file name (!input value)
-//		                    pathTemplate.replace(valueKey, fileName);
-//
-//		                    // Make sure the path is absolute (ask user to set the current directory if necessary)
-//		                    QFileInfo fileInfo(pathTemplate);
-//		                    if(fileInfo.isRelative())
-//		                    {
-//		                        if(!hasChangedCurrentDirectory)
-//		                        {
-//		                            this->askChangeCurrentDirectory();
-//		                            hasChangedCurrentDirectory = true;
-//		                        }
-//		                    }
-//
-//		                    // Add the absolute path to the list of directories to mount
-//		                    const QString &absolutePath = fileInfo.isRelative() ? fileInfo.absolutePath() : fileInfo.path();
-//		                    const QString &normalizedPath = this->fileHandler->normalizePath(absolutePath);
-//		                    if(!directories.contains(normalizedPath))
-//		                    {
-//		                        directories.append(normalizedPath);
-//		                    }
-//
-//		                    // Set the output file name (to automatically open it in medInria when the process is over)
-//		                    if(outputFilesDescription["id"].toString() == this->selectedOutputId)
-//		                    {
-//		                        this->outputFileName = fileInfo.absoluteFilePath();
-//		                    }
-//		                }
-//		            }
-//		        }
-//		    }
-//        	
+		    //      check that the resulting output paths are not absolute and do not contain double dot symbols (../)			
+			for (Map.Entry<String, JsonNode> idAndInputObject : idToInputObject.entrySet()) {
+		        String inputId = idAndInputObject.getKey();
+		        JsonNode inputObject = idAndInputObject.getValue();
+		        String inputType = inputObject.get("type").asText();
+		        
+		        if((inputType == "File" || inputType == "String") && invocation.has(inputId)) {
+		            // For all output files: check if one has "path-template" containing the "value-key" of the current input
+		            String fileName = invocation.get(inputId).asText();
+		            
+					ArrayNode outputFiles = (ArrayNode) descriptor.get("output-files");
+		            
+		    	    for (int i = 0; i < outputFiles.size(); i++) {
+
+		                JsonNode outputFilesDescription = outputFiles.get(i);
+		                String pathTemplate = outputFilesDescription.get("path-template").asText();
+
+		                // If the input is a File, remove the "path-template-stripped-extensions"
+		                if(inputType == "File" && outputFilesDescription.has("path-template-stripped-extensions")) {
+		                	ArrayNode pathTemplateStrippedExtensions = (ArrayNode) outputFilesDescription.get("path-template-stripped-extensions");
+
+		                    for (int j = 0 ; j<pathTemplateStrippedExtensions.size() ; ++j) {
+		                        String pathTemplateStrippedExtension = pathTemplateStrippedExtensions.get(j).asText();
+		                        fileName.replace(pathTemplateStrippedExtension, "");
+		                    }
+		                }
+
+		                String valueKey = inputObject.get("value-key").asText();
+		                
+		                if(pathTemplate.contains(valueKey)) {
+		                    // If the current output file has a "path-template" containing the current input "value-key": replace the "value-key" by the file name (!input value)
+		                    pathTemplate.replace(valueKey, fileName);
+
+		                    // Make sure the path is not absolute and does not contain ../
+		                    if(pathTemplate.contains("../"))
+		                    {
+		                        return "Error: Output paths must not contain double-dot symbols (../).";
+		                    }
+		                    if(pathTemplate.startsWith("/")) {
+		                    	return "Error: Output paths must not be absolute.";
+		                    }
+		                }
+		            }
+		        }
+		    }
+        	
         	String invocationFilePath = BoutiquesUtils.writeTemporaryFile("invocation.json", invocation.toString());
         	
         	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + id + " " + invocationFilePath + " -v " + dataPath + ":/tmp/";
@@ -431,13 +426,34 @@ public class BoutiquesController {
 			ObjectNode results = objectMapper.createObjectNode();
 			
     		try {
-    			String inputLine = boutiquesProcess.inputBufferedReader.readLine();
-    			String errorLine = boutiquesProcess.errorBufferedReader.readLine();
-    			results.put("input", inputLine);
-    			results.put("error", errorLine);
-    			if(inputLine == null && errorLine == null && !boutiquesProcess.process.isAlive()) {
-        			results.put("finished", true);
+    			ArrayNode inputLines = objectMapper.createArrayNode();
+    			ArrayNode errorLines = objectMapper.createArrayNode();
+    			boolean isAlive = boutiquesProcess.process.isAlive();
+    			
+//    			// Not really blocking version (but the first readLine seems to block):
+//    			String inputLine = boutiquesProcess.inputBufferedReader.readLine();
+//    			String errorLine = boutiquesProcess.errorBufferedReader.readLine();
+//    			
+//    			if(inputLine != null) {
+//    				inputLines.add(inputLine);    				
+//    			}
+//    			if(errorLine != null) {
+//    				errorLines.add(errorLine);    				
+//    			}
+
+    			// Blocking version
+    			String inputLine = null;
+    			String errorLine = null;
+    			while((isAlive && inputLines.size() == 0 || !isAlive && inputLines.size() < MAX_OUTPUT_LINES) && (inputLine = boutiquesProcess.inputBufferedReader.readLine()) != null) {
+    				inputLines.add(inputLine);
     			}
+    			while((isAlive && errorLines.size() == 0 || !isAlive && errorLines.size() < MAX_OUTPUT_LINES) && (errorLine = boutiquesProcess.errorBufferedReader.readLine()) != null) {
+    				errorLines.add(errorLine);
+    			}
+    			
+    			results.set("input", inputLines);
+    			results.set("error", errorLines);
+    			results.put("finished", !isAlive && inputLine == null && errorLine == null);
     	    } catch (IOException ex) {
                 System.out.println("Server error: " + ex.getMessage());
     			results.put("server error", "Server error while executing process.");
