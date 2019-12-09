@@ -141,7 +141,7 @@ export class ClinicalContextComponent {
                 for (let study of allStudies) {
                     if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
-                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
                             if (center) {
                                 if (this.importMode == 'DICOM') {
                                     /* calculate compatibilites only if import from dicom zip */
@@ -365,12 +365,12 @@ export class ClinicalContextComponent {
     }
 
     private get hasCompatibleCenters(): boolean {
-        return this.centers.find(center => center.compatible) != undefined;
+        return this.centers.filter(center => center.compatible)[0] != undefined;
     }
 
     
     private get hasCompatibleEquipments(): boolean {
-        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+        return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 
     private showStudyDetails() {

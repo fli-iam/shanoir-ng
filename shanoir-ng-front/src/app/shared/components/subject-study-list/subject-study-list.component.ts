@@ -50,11 +50,11 @@ export class SubjectStudyListComponent extends AbstractInput {
         if (this.model && this.selectableList) {
             if (this.compMode == 'study') {
                 for (let selectableItem of this.selectableList) {
-                    if(this.model.find(subStu => subStu.subject.id == selectableItem.id)) selectableItem.selected = true; 
+                    if(this.model.filter(subStu => subStu.subject.id == selectableItem.id)[0]) selectableItem.selected = true; 
                 }
             } else if (this.compMode == 'subject') {
                 for (let selectableItem of this.selectableList) {
-                    if(this.model.find(subStu => subStu.study.id == selectableItem.id)) selectableItem.selected = true;
+                    if(this.model.filter(subStu => subStu.study.id == selectableItem.id)[0]) selectableItem.selected = true;
                 }
             }
         }

@@ -139,7 +139,7 @@ export class AnimalClinicalContextComponent  {
             .then(([allStudies, allCenters]) => {
                 for (let study of allStudies) {
                     for (let studyCenter of study.studyCenterList) {
-                        let center = allCenters.find(center => center.id === studyCenter.center.id);
+                        let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
                         if (center) {
                             let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
                                 && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
@@ -373,7 +373,7 @@ export class AnimalClinicalContextComponent  {
 
     
     private get hasCompatibleEquipments(): boolean {
-        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+        return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 
     private showStudyDetails() {

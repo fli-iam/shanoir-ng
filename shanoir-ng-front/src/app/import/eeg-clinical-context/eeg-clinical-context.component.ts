@@ -96,7 +96,7 @@ export class EegClinicalContextComponent implements OnInit {
             
             for (let study of allStudies) {
                 for (let studyCenter of study.studyCenterList) {
-                    let center = allCenters.find(center => center.id === studyCenter.center.id);
+                    let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
                     if (center) {
                         studyCenter.center = center;
                     }

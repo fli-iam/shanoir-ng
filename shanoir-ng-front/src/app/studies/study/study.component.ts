@@ -149,7 +149,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public hasEditRight(): boolean {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
-        let studyUser: StudyUser = this.study.studyUserList.find(su => su.userId == KeycloakService.auth.userId);
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
@@ -181,7 +181,7 @@ export class StudyComponent extends EntityComponent<Study> {
     /** Center section management  **/
     private onMonoMultiChange() {
         if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
-            this.selectedCenter = this.centers.find(center => center.id == this.study.studyCenterList[0].center.id);
+            this.selectedCenter = this.centers.filter(center => center.id == this.study.studyCenterList[0].center.id)[0];
         }
     }
 
@@ -303,7 +303,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         selectedUser.selected = true;
 
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.userId == selectedUser.id);
+        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.study.studyUserList.push(backedUpStudyUser);
         } else {
