@@ -122,10 +122,11 @@ public class ImporterApiController implements ImporterApi {
 	private QueryPACSService queryPACSService;
 	
 	public ResponseEntity<Void> uploadFiles(
-			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
-		if (files.length == 0)
+			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files) throws RestServiceException {
+		if (files.length == 0) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+		}
 		try {
 			// not used currently
 			for (int i = 0; i < files.length; i++) {
@@ -140,14 +141,16 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
-			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
 			throws RestServiceException {
-		if (dicomZipFile == null)
+		if (dicomZipFile == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
-		if (!isZipFile(dicomZipFile))
+		}
+		if (!isZipFile(dicomZipFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
+		}
 		try {
 			/**
 			 * 1. STEP: Handle file management.
@@ -194,11 +197,12 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
 			throws RestServiceException, ShanoirException {
-		if (dicomZipFile == null)
+		if (dicomZipFile == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+		}
 		try {
 			final Long userId = KeycloakUtil.getTokenUserId();
 			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
@@ -222,7 +226,7 @@ public class ImporterApiController implements ImporterApi {
 				}
 			} else {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-						"Error missing importJob.json in upload from ShUp.", null));				
+						"Error missing importJob.json in upload from ShUp.", null));
 			}
 			importJob.setFromShanoirUploader(true);
 			importJob.setWorkFolder(File.separator + importJobDir.getName());
@@ -315,9 +319,10 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile, final boolean fromDicom) throws IOException, RestServiceException {
 		File tempFile = saveTempFile(userImportDir, dicomZipFile);
-		if (fromDicom && !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+		if (fromDicom && !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"DICOMDIR is missing in .zip file.", null));
+		}
 		String fileName = tempFile.getName();
 		int pos = fileName.lastIndexOf(FILE_POINT);
 		if (pos > 0) {
@@ -339,7 +344,7 @@ public class ImporterApiController implements ImporterApi {
 	 *
 	 * @param file
 	 */
-	private boolean isZipFile(MultipartFile file) {
+	private boolean isZipFile(final MultipartFile file) {
 		if (file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
 				|| file.getOriginalFilename().endsWith(ZIP_FILE_SUFFIX)) {
 			return true;
@@ -348,20 +353,23 @@ public class ImporterApiController implements ImporterApi {
 	}
 	
 	
+	@Override
 	public ResponseEntity<ImportJob> importDicomZipFile(
-			@ApiParam(value = "file detail") @RequestBody String dicomZipFilename) throws RestServiceException {
-		if (dicomZipFilename == null)
+			@ApiParam(value = "file detail") @RequestBody final String dicomZipFilename) throws RestServiceException {
+		if (dicomZipFilename == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+		}
 
 		File tempFile = new File(dicomZipFilename);
 		return importDicomZipFile(tempFile);
 	}
 	
-	private ResponseEntity<ImportJob> importDicomZipFile(File dicomZipFile) throws RestServiceException {
-		if (!isZipFileFromFile(dicomZipFile))
+	private ResponseEntity<ImportJob> importDicomZipFile(final File dicomZipFile) throws RestServiceException {
+		if (!isZipFileFromFile(dicomZipFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
+		}
 		try {
 			LOG.info("importDicomZipFile step1 unzip file ");
 			/**
@@ -414,7 +422,7 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 	
-	private boolean isZipFileFromFile(File file) {
+	private boolean isZipFileFromFile(final File file) {
 		if (file != null && file.getName().endsWith(ZIP_FILE_SUFFIX)) {
 			return true;
 		}
@@ -433,9 +441,10 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	private File saveTempFileCreateFolderAndUnzipFromFile(final File userImportDir, final File dicomZipFile) throws IOException, RestServiceException {
 		File tempFile = saveTempFileFromFile(userImportDir, dicomZipFile);
-		if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+		if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"DICOMDIR is missing in .zip file.", null));
+		}
 		String fileName = tempFile.getName();
 		int pos = fileName.lastIndexOf(FILE_POINT);
 		if (pos > 0) {
@@ -470,7 +479,7 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * This method load an EEG file, unzip it and load an import job with the informations collected
 	 */
-	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegFile)
+	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile eegFile)
 			throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
@@ -504,18 +513,21 @@ public class ImporterApiController implements ImporterApi {
 
 			// Get .VHDR file
 			File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
-			    public boolean accept(File dir, String name) {
+			    @Override
+				public boolean accept(final File dir, final String name) {
 			        return name.endsWith("vhdr");
 			    }
 			});
 			
 			// Get .edf file
 			File[] edfMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
-			    public boolean accept(File dir, String name) {
+			    @Override
+				public boolean accept(final File dir, final String name) {
 			        return name.endsWith("edf");
 			    }
 			});
 
+			// TODO: Manage .edf AND .vhdr files ?
 			if (bvMatchingFiles != null && bvMatchingFiles.length > 0) {
 				// Manage multiple vhdr files
 				// read .vhdr files
@@ -537,12 +549,12 @@ public class ImporterApiController implements ImporterApi {
 
 	/**
 	 * Reads a list of .edf files to generate a bunch of datasets.
-	 * @param datasets the list of datasets to import 
+	 * @param datasets the list of datasets to import
 	 * @param dataFileDir the file directory where we are working
 	 * @param edfMatchingFiles the list of .edf files
 	 * @throws IOException when parsing fails
 	 */
-	private void readEdfFiles(File[] edfMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+	private void readEdfFiles(final File[] edfMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws IOException {
 		for (File edfFile : edfMatchingFiles) {
 			
 			// Parse the file
@@ -578,7 +590,7 @@ public class ImporterApiController implements ImporterApi {
 				// This is done by default
 				event.setChannelNumber(0);
 				event.setPosition(String.valueOf((float)(samplingfrequency / annotation.getOnSet())));
-				event.setPoints((int) annotation.getDuration()); 
+				event.setPoints((int) annotation.getDuration());
 				events.add(event);
 			}
 
@@ -598,7 +610,8 @@ public class ImporterApiController implements ImporterApi {
 			List<String> files = new ArrayList<>();
 			
 			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
-			    public boolean accept(File dir, String name) {
+			    @Override
+				public boolean accept(final File dir, final String name) {
 			        return name.startsWith(fileNameWithOutExt);
 			    }
 			});
@@ -607,7 +620,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 			dataset.setFiles(files);
 			datasets.add(dataset);
-		};
+		}
 	}
 
 	/**
@@ -618,7 +631,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @return a list of datasets generated from the informations of the .vhdr files
 	 * @throws IOException when parsing fails
 	 */
-	private void readBrainvisionFiles(File[] bvMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+	private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws IOException {
 		for (File vhdrFile : bvMatchingFiles) {
 			
 			// Parse the file
@@ -631,14 +644,22 @@ public class ImporterApiController implements ImporterApi {
 			// Get dataset name from VHDR file name
 			String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
 			dataset.setName(fileNameWithOutExt);
-			dataset.setSamplingFrequency(bvr.getSamplingFrequency());
+
+			// Manage when we have a sampling interval but no sampling frequency
+			int samplingFrequency = bvr.getSamplingFrequency();
+			if (samplingFrequency == 0 && bvr.getSamplingIntervall() != 0) {
+				samplingFrequency = Math.round(1000/bvr.getSamplingIntervall());
+			}
+
+			dataset.setSamplingFrequency(samplingFrequency);
 			dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
 			
 			// Get the list of file to save from reader
 			List<String> files = new ArrayList<>();
 			
 			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
-			    public boolean accept(File dir, String name) {
+			    @Override
+				public boolean accept(final File dir, final String name) {
 			        return name.startsWith(fileNameWithOutExt);
 			    }
 			});
@@ -647,7 +668,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 			dataset.setFiles(files);
 			datasets.add(dataset);
-		};
+		}
 	}
 
 	/**
