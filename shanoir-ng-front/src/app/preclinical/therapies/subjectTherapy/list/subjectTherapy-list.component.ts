@@ -63,6 +63,13 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return this.preclinicalSubject.therapies;
     }
 
+    protected getOptions(): any {
+        // Specify that we can't view a pathology'
+        return {
+            view: false
+        };
+    }
+
     getEntities(): Promise<SubjectTherapy[]> {
         let subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {

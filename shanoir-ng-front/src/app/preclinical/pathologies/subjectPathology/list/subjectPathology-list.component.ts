@@ -55,6 +55,13 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     protected getEntity() {
         return new SubjectPathology();
     }
+    
+    protected getOptions(): any {
+        // Specify that we can't view a pathology'
+        return {
+            view: false
+        };
+    }
 
     protected getEntityList() {
         return this.preclinicalSubject.pathologies;

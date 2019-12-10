@@ -44,7 +44,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Entity
 @Table(name = "subject_therapy")
-@JsonPropertyOrder({ "_links", "therapy", "startDate", "endDate", "dose", "frequency", "animalSubject" })
+@JsonPropertyOrder({ "_links", "therapy", "startDate", "endDate", "dose", "frequency", "animalSubject", "molecule" })
 public class SubjectTherapy extends HalEntity {
 
 	@JsonProperty("animalSubject")
@@ -94,7 +94,7 @@ public class SubjectTherapy extends HalEntity {
 		return super.getId();
 	}
 
-	public SubjectTherapy subject(AnimalSubject animalSubject) {
+	public SubjectTherapy subject(final AnimalSubject animalSubject) {
 		this.animalSubject = animalSubject;
 		return this;
 	}
@@ -104,11 +104,11 @@ public class SubjectTherapy extends HalEntity {
 		return animalSubject;
 	}
 
-	public void setAnimalSubject(AnimalSubject animalSubject) {
+	public void setAnimalSubject(final AnimalSubject animalSubject) {
 		this.animalSubject = animalSubject;
 	}
 
-	public SubjectTherapy therapy(Therapy therapy) {
+	public SubjectTherapy therapy(final Therapy therapy) {
 		this.therapy = therapy;
 		return this;
 	}
@@ -118,11 +118,11 @@ public class SubjectTherapy extends HalEntity {
 		return therapy;
 	}
 
-	public void setTherapy(Therapy therapy) {
+	public void setTherapy(final Therapy therapy) {
 		this.therapy = therapy;
 	}
 
-	public SubjectTherapy startDate(Date startDate) {
+	public SubjectTherapy startDate(final Date startDate) {
 		this.startDate = startDate;
 		return this;
 	}
@@ -132,11 +132,11 @@ public class SubjectTherapy extends HalEntity {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(final Date startDate) {
 		this.startDate = startDate;
 	}
 
-	public SubjectTherapy endDate(Date endDate) {
+	public SubjectTherapy endDate(final Date endDate) {
 		this.endDate = endDate;
 		return this;
 	}
@@ -146,11 +146,11 @@ public class SubjectTherapy extends HalEntity {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(final Date endDate) {
 		this.endDate = endDate;
 	}
 
-	public SubjectTherapy dose(Double dose) {
+	public SubjectTherapy dose(final Double dose) {
 		this.dose = dose;
 		return this;
 	}
@@ -160,11 +160,11 @@ public class SubjectTherapy extends HalEntity {
 		return dose;
 	}
 
-	public void setDose(Double dose) {
+	public void setDose(final Double dose) {
 		this.dose = dose;
 	}
 
-	public SubjectTherapy doseUnit(Reference unit) {
+	public SubjectTherapy doseUnit(final Reference unit) {
 		this.doseUnit = unit;
 		return this;
 	}
@@ -174,11 +174,11 @@ public class SubjectTherapy extends HalEntity {
 		return doseUnit;
 	}
 
-	public void setDoseUnit(Reference unit) {
+	public void setDoseUnit(final Reference unit) {
 		this.doseUnit = unit;
 	}
 
-	public SubjectTherapy frequency(String frequency) {
+	public SubjectTherapy frequency(final String frequency) {
 		this.frequency = frequency;
 		return this;
 	}
@@ -188,13 +188,14 @@ public class SubjectTherapy extends HalEntity {
 		return frequency;
 	}
 
-	public void setFrequency(String frequency) {
+	public void setFrequency(final String frequency) {
 		this.frequency = frequency;
 	}
 
 	/**
 	 * @return the molecule
 	 */
+	@ApiModelProperty(value = "none")
 	public String getMolecule() {
 		return molecule;
 	}
@@ -202,12 +203,12 @@ public class SubjectTherapy extends HalEntity {
 	/**
 	 * @param molecule the molecule to set
 	 */
-	public void setMolecule(String molecule) {
+	public void setMolecule(final String molecule) {
 		this.molecule = molecule;
 	}
 
 	@Override
-	public boolean equals(java.lang.Object o) {
+	public boolean equals(final java.lang.Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -235,6 +236,7 @@ public class SubjectTherapy extends HalEntity {
 		sb.append("    frequency: ").append(toIndentedString(frequency)).append("\n");
 		sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
 		sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+		sb.append("    molecule: ").append(toIndentedString(molecule)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
@@ -243,7 +245,7 @@ public class SubjectTherapy extends HalEntity {
 	 * Convert the given object to string with each line indented by 4 spaces
 	 * (except the first line).
 	 */
-	private String toIndentedString(java.lang.Object o) {
+	private String toIndentedString(final java.lang.Object o) {
 		if (o == null) {
 			return "null";
 		}
