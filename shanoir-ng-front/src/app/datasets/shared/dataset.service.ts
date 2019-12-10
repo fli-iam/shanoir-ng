@@ -67,6 +67,14 @@ export class DatasetService extends EntityService<Dataset> {
         ).subscribe(response => {this.downloadIntoBrowser(response);});
     }
 
+    exportBIDSByStudyId(studyId: number, studyName: string): void {
+        if (!studyId) throw Error('subject id is required');
+        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/studyId/' + studyId 
+            + '/studyName/' + studyName,
+            { observe: 'response', responseType: 'blob' }
+        ).subscribe(response => {this.downloadIntoBrowser(response);});
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');

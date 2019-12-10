@@ -35,6 +35,7 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { DatasetService } from '../../datasets/shared/dataset.service'
 
 @Component({
     selector: 'study-detail',
@@ -64,6 +65,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private centerService: CenterService, 
             private studyService: StudyService, 
             private subjectService: SubjectService,
+            private datasetService: DatasetService,
             private userService: UserService) {
 
         super(route, 'study');
@@ -344,7 +346,11 @@ export class StudyComponent extends EntityComponent<Study> {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
-        
+    private exportBIDS(study: Study) {
+        let studyName: string;
+        this.datasetService.exportBIDSByStudyId(study.id, study.name);
+    }
+
     // removeTimepoint(timepoint: Timepoint): void {
     //     const index: number = this.study.timepoints.indexOf(timepoint);
     //     if (index !== -1) {
