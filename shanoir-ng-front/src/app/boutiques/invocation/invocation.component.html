@@ -5,6 +5,7 @@
 <input #openInvocationInput id="open-invocation" type="file" (change)="openInvocation($event)" />
 <button (click)="openInvocationInput.click()">Open invocation</button>
 
-<textarea id="invocation" [(ngModel)]="invocationValue"></textarea>
+<textarea id="invocation" [(ngModel)]="invocationValue" (keyup)=invocationValueChanged($event)></textarea>
+
 <!-- <button (click)="setInvocation()">Set invocation</button> -->
-<button>Save invocation</button>
+<button (click)="saveInvocation($event)">Save invocation</button>

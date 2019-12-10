@@ -171,16 +171,17 @@ export class ParameterControlService {
           let value = invocation[parameterId];
           if(value != null) {
             parameter.value = value;
-            formControl.setValue(invocation[parameterId]);
+            formControl.setValue(invocation[parameterId], { emitEvent: false });
             formControl.markAsDirty();
           } else {
             formControl.markAsPristine();
             parameter.value = null;
-            formControl.setValue(null);
+            formControl.setValue(null, { emitEvent: false });
           }
         }
       }
     }
+    form.updateValueAndValidity({ onlySelf: false, emitEvent: true });
     return invocation;
   }
 }

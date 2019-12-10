@@ -40,7 +40,7 @@ export class InvocationGuiComponent implements OnInit {
         let invocation = this.pcs.generateInvocation(this.form);
         this.invocationChanged.emit(invocation);
       }
-      this.form.valueChanges.subscribe( (value)=> this.onChange(value) ); 
+      this.form.valueChanges.subscribe( (value)=> this.onChange(value) );
     }
   }
 

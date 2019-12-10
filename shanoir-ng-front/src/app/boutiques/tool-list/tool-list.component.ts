@@ -51,7 +51,7 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
       { headerName: "Name", field: "name" },
       { headerName: "Description", field: "description" },
       { headerName: "Id", field: "id" },
-      { headerName: "Downloads", field: "downloads" }
+      { headerName: "Downloads", field: "nDownloads" }
     ];
     return colDef;
   }
