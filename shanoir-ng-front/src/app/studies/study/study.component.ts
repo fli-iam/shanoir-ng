@@ -36,6 +36,8 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { DatasetService } from '../../datasets/shared/dataset.service'
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+
 
 @Component({
     selector: 'study-detail',
@@ -59,6 +61,11 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
+    
+    private readonly ImagesUrlUtil = ImagesUrlUtil;
+
+    
+    protected bidsLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute, 
@@ -348,7 +355,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private exportBIDS(study: Study) {
         let studyName: string;
-        this.datasetService.exportBIDSByStudyId(study.id, study.name);
+        this.bidsLoading = true;
+        this.datasetService.exportBIDSByStudyId(study.id, study.name).then(() => this.bidsLoading = false);
     }
 
     // removeTimepoint(timepoint: Timepoint): void {
