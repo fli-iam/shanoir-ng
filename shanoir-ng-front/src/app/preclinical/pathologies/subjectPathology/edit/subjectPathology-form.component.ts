@@ -201,30 +201,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if(this.subjectPathology && this.subjectPathology.pathology) this.loadModelsDisplay();
     }
 
-
-
-    addSubjectPathology() {
-        if (!this.subjectPathology) {
-            return;
-        }
-        if (this.mode == 'create' ) {
-            if (this.preclinicalSubject.pathologies === undefined) {
-                this.preclinicalSubject.pathologies = [];
-            }
-            if (this.onCreated.observers.length > 0) {
-                this.onCreated.emit(this.subjectPathology);
-            }
-        } else {
-            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, this.subjectPathology)
-                .then(subjectPathology => {
-                    if (this.onCreated.observers.length > 0) {
-                        this.onCreated.emit(subjectPathology);
-                    }
-                });
-        }
-        this.toggleFormSPAndReset(true);
-    }
-
     updateSubjectPathology(): void {
         this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, this.subjectPathology);
         this.toggleFormSPAndReset(false);
@@ -241,7 +217,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
                 	}
             	} 
             }           
-        }else{
+        } else {
             this.modelsDisplay = [];   
         }
     }
@@ -249,12 +225,11 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     
     refreshModelsByPathology() {
         this.loadModelsDisplay();
-        //must empty model value
-        if (this.subjectPathology) this.subjectPathology.pathologyModel = undefined;
+        // Set the value to the first avaiable
+        if (this.subjectPathology) this.subjectPathology.pathologyModel = this.modelsDisplay[0];
+        // this.form.markAsUntouched();
+        this.form.updateValueAndValidity();
     }
-
-
-
 
     canUpdatePathology(): boolean{
         return !this.createSPMode && this.keycloakService.isUserAdminOrExpert && this.mode != 'view';
