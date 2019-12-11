@@ -277,7 +277,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         let replace: boolean = this.breadcrumbsService.currentStep && (
                 this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToEdit(id)
-                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate());
+                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate()
+                // Create route can be contained in incoming route (more arguments for example)
+                || this.breadcrumbsService.currentStep.route.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
         this.router.navigate([this.entityRoutes.getRouteToView(id)], {replaceUrl: replace});
     }
 
