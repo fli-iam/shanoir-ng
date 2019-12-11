@@ -243,16 +243,6 @@ export class ClinicalContextComponent {
             this.subject, this.examination, this.niftiConverter, null);
     }
 
-    private openCreateCenter = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
-            });
-        });
-    }
-
     private getPrefilledCenter(): Center {
         let studyCenter = new StudyCenter();
         studyCenter.study = this.study;

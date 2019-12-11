@@ -40,7 +40,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
                     </select>
                     <button i18n="Import|CenterDetails label" [disabled]="!center" (click)="showCenterDetails()">details</button>
-                    <button [disabled]="!center || center?.compatible" (click)="openCreateCenter()">add</button>
                 </span>
             </li>
             <li class="info" *ngIf="center && !center?.compatible">
