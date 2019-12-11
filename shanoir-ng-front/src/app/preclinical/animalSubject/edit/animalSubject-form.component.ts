@@ -362,17 +362,26 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.preclinicalSubject.id = animalSubject.id;
                     this.preclinicalSubject.animalSubject = animalSubject;
                     //Then add pathologies
-                    if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                        for (let pathology of this.preclinicalSubject.pathologies) {
-                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                    // Create therapies and pathologies from breadcrumb cache
+                    if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                        for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                            this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                         }
-                    }
-                    //Then add therapies
-                    if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
+                    } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
                         for (let therapy of this.preclinicalSubject.therapies) {
                             this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                         }
                     }
+                    if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                        for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                        }
+                    } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
+                        for (let pathology of this.preclinicalSubject.pathologies) {
+                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                        }
+                    }
+
                     resolve();
                 });
             });
