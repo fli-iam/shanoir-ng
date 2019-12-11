@@ -43,7 +43,7 @@ export class BreadcrumbsComponent {
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'œ') {
+        if (event.key == ' ') {
             console.log('breadcrumbs', this.service.steps);
         }
     }

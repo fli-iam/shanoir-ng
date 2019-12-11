@@ -41,22 +41,22 @@ export class InvocationComponent implements OnInit {
       // ignore new term if same as previous term
       distinctUntilChanged()
     ).subscribe((invocationValue: string)=> { 
-      console.log("invocation subject changed", invocationValue);
       this.updateInvocationFromString(invocationValue);
     });
 
     this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor);
     
     if(this.breadcrumbsService.currentStep.data.boutiquesInvocation == null) {
-      this.toolService.getInvocation(this.toolId).then((invocation)=> this.onInvocationChanged(invocation) );
+      this.toolService.getInvocation(this.toolId).then((invocation)=> { 
+        this.onInvocationChanged(invocation);
+        this.invocationGUI.setInvocation(this.invocation);
+      });
     }
   }
 
   openInvocation(event: any) {
     const reader = new FileReader();
     reader.onload = (e: any) => {
-      console.log("openInvocation");
-      console.log('file content: ', e.target.result);
       this.updateInvocationFromString(e.target.result);
       this.invocationValue = this.getInvocationValue();
       this.invocationGUI.setInvocation(this.invocation);
@@ -71,7 +71,6 @@ export class InvocationComponent implements OnInit {
 
   updateInvocationFromString(invocationValue: string) {
     try{
-      console.log("updateInvocationFromString");
       this.updateInvocation(JSON.parse(invocationValue));
     } catch(e) {
       console.log('error occored while you were typing the JSON');
@@ -80,35 +79,21 @@ export class InvocationComponent implements OnInit {
   }
 
   updateInvocation(invocation: string) {
-    console.log("updateInvocation");
     this.invocation = invocation;
     this.invocationChanged.emit(this.invocation);
   }
 
   onInvocationChanged(invocation) {
-    console.log("onInvocationChanged");
     this.updateInvocation(invocation);
     this.invocationValue = this.getInvocationValue();
   }
 
   invocationValueChanged(event: any) {
-    console.log("invocationValueChanged", event.target.value);
     this.invocationSubject.next(event.target.value);
   }
 
   getInvocationValue() {
-    console.log("getInvocationValue");
     return this.invocation ? JSON.stringify(this.invocation, null, 2) : '';
   }
-
-  // get invocationValue() {
-  //   console.log("get invocationValue");
-  //   return this.getInvocationValue();
-  // }
-
-  // set invocationValue(v) {
-  //   console.log("set invocationValue", v);
-  //   this.invocationSubject.next(v);
-  // }
 
 }

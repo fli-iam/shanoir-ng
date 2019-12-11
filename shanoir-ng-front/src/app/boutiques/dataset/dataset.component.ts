@@ -126,7 +126,11 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         // find Boutiques steps and give appropriate data
         for(let step of this.breadcrumbsService.steps) {
             if(step.data.boutiques) {
-                step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = path;
+                if(step.data.boutiquesCurrentParameterIsList) {
+                    step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID].push(path)
+                } else {
+                    step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = path;
+                }
             }
         }
         history.go(-2);

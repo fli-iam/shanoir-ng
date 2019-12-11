@@ -12,8 +12,8 @@
 
 FROM openjdk:8-jdk-alpine
 
-RUN groupadd -r boutiques && useradd --no-log-init -r -g boutiques boutiques
-USER boutiques
+# RUN groupadd -r boutiques && useradd --no-log-init -r -g boutiques boutiques
+# USER boutiques
 
 RUN apk update && apk add bash && apk add docker && apk add python && apk add py-pip
 

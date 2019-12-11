@@ -4,6 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Parameter, ParameterDescription, StringParameter, FileParameter, NumberParameter } from './parameter/parameter';
 import { ParameterGroup, ParameterGroupDescription } from './parameter-group/parameter-group';
 import { Descriptor, OutputFile } from './descriptor';
+import { Subject } from 'rxjs/Subject';
 
 type ParameterGroups = {
   required: Map<string, ParameterGroup>
@@ -14,8 +15,11 @@ type ParameterGroups = {
 export class ParameterControlService {
 
   idToParameter: Map<string, Parameter<any>> = new Map();
+  parameterGroups: { required: Map<string, ParameterGroup>, optional: Map<string, ParameterGroup> } = null;
 
   readonly defaultGroupId = 'boutiques_gui_default_group';
+  private selectGroupSource = new Subject<void>();
+  public selectGroupChange = this.selectGroupSource.asObservable();
 
   constructor() { }
 
@@ -113,7 +117,12 @@ export class ParameterControlService {
     return formGroups;
   }
 
-  createFormGroupFromDescriptor(descriptor: Descriptor, parameterGroups: ParameterGroups) {
+  createFormGroupFromDescriptor(descriptor: Descriptor) {
+
+    this.parameterGroups = {
+      required: new Map<string, ParameterGroup>(),
+      optional: new Map<string, ParameterGroup>()
+    };
 
     if(descriptor == null) {
       return null;
@@ -132,7 +141,7 @@ export class ParameterControlService {
     // Create default groups for parameters not belonging to a group
     let defaultGroupMembers = this.createDefaultGroups(groups, ungroupedParameterIds, idToParameterDescription);
 
-    let formGroups: any = this.createFormGroups(groups, idToParameterDescription, parameterGroups);
+    let formGroups: any = this.createFormGroups(groups, idToParameterDescription, this.parameterGroups);
     
     // Convert the formGroups object to actual FormGroups
     formGroups['required'] = new FormGroup(formGroups['required']);
@@ -163,6 +172,7 @@ export class ParameterControlService {
   setFormFromInvocation(invocation: any, form: FormGroup) {
     for(let superGroupName of ['required', 'optional']) {
       for(let groupId in form.value[superGroupName]) {
+        let parameterGroup: ParameterGroup = this.parameterGroups[superGroupName].get(groupId);
         let group = form.value[superGroupName][groupId]
         let formGroup: FormGroup = (form.controls[superGroupName] as FormGroup).controls[groupId] as FormGroup
         for(let parameterId in group) {
@@ -171,12 +181,17 @@ export class ParameterControlService {
           let value = invocation[parameterId];
           if(value != null) {
             parameter.value = value;
-            formControl.setValue(invocation[parameterId], { emitEvent: false });
+            formControl.setValue(parameter.getValue(invocation[parameterId]), { emitEvent: false });
             formControl.markAsDirty();
           } else {
             formControl.markAsPristine();
             parameter.value = null;
             formControl.setValue(null, { emitEvent: false });
+          }
+          // If parameter is part of an exclusive group: select the corresponding option in the group
+          if(value != null && parameterGroup.exclusive) {
+            let group: any = { groupId: parameterGroup.id, parameterId: parameterId };
+            this.selectGroupSource.next(group);
           }
         }
       }

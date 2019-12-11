@@ -43,7 +43,7 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
   }
 
   getEntities(): Promise<ToolInfo[]> {
-    return this.toolService.getAll();
+    return this.toolService.getAll()
   }
 
   getColumnDefs(): any[] {
@@ -51,7 +51,7 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
       { headerName: "Name", field: "name" },
       { headerName: "Description", field: "description" },
       { headerName: "Id", field: "id" },
-      { headerName: "Downloads", field: "nDownloads" }
+      { headerName: "Downloads", field: "ndownloads" }
     ];
     return colDef;
   }

@@ -192,9 +192,9 @@ public class BoutiquesController {
 	            Entry<String, JsonNode> entry = iter.next();
 	            String toolId = entry.getKey();
 	            JsonNode toolDescriptor = entry.getValue();
-	            String name = toolDescriptor.findValue("name").asText();
-	            String description = toolDescriptor.findValue("description").asText();
-	            int nDownloads = toolDescriptor.findValue("nDownloads").asInt();
+	            String name = toolDescriptor.get("name").asText();
+	            String description = toolDescriptor.get("description").asText();
+	            int nDownloads = toolDescriptor.get("nDownloads").asInt();
 		        boutiquesTools.add(new BoutiquesTool(toolId, name, description, nDownloads));
 	        }
 	        
