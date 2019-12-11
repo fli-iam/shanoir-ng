@@ -100,6 +100,10 @@ export class AnimalClinicalContextComponent  {
                 this.onSelectCenter();
             }
             if (acquisitionEquipment) {
+                // reload acquisition equipments if we just added one acquisitionEquipment
+                if (this.acquisitionEquipments.indexOf(acquisitionEquipment) == -1) {
+                    this.acquisitionEquipments.push(acquisitionEquipment);
+                }
                 this.acquisitionEquipment = acquisitionEquipment;
                 this.onSelectAcquisitonEquipment();
             }
