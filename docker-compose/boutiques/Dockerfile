@@ -12,15 +12,11 @@
 
 FROM openjdk:8-jdk-alpine
 
-# RUN groupadd -r boutiques && useradd --no-log-init -r -g boutiques boutiques
-# USER boutiques
-
 RUN apk update && apk add bash && apk add docker && apk add python && apk add py-pip
 
 RUN pip install boutiques
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
-RUN mkdir -pv /output
 
 ADD shanoir-ng-boutiques.jar shanoir-ng-boutiques.jar
 

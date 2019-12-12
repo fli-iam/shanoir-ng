@@ -15,7 +15,7 @@ export class ToolDescriptorInfoComponent implements OnInit {
   }
 
   getTags() {
-    return JSON.stringify(this.descriptor.tags);
+    return JSON.stringify(this.descriptor.tags, null, 4);
   }
 
 }

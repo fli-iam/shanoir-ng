@@ -9,10 +9,16 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.boutiques.model.BoutiquesTool;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -28,10 +34,73 @@ interface SendMessage {
 public class BoutiquesUtils {
 
 	static final String BOUTIQUES_COMMAND = "bosh";
+	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 //	static final String BOUTIQUES_COMMAND = "python boutiques/bosh.py";
 
 	static boolean processStarted = false;
+
+	public static final String USER_ID_TOKEN_ATT = "userId";
 	
+	/**
+	 * Get current access token.
+	 * 
+	 * @return access token.
+	 * @throws SecurityException
+	 */
+	@SuppressWarnings("rawtypes")
+	private static KeycloakSecurityContext getKeycloakSecurityContext() throws SecurityException {
+		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
+			throw new SecurityException("Anonymous user");
+		}
+		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+		return principal.getKeycloakSecurityContext();
+	}
+	
+	/**
+	 * Get current user id from Keycloak token.
+	 * 
+	 * @return user id.
+	 * @throws RuntimeException
+	 */
+	public static Long getTokenUserId() {
+		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+		final AccessToken accessToken = context.getToken();
+		if (accessToken == null) {
+			throw new RuntimeException("Access token not found");
+		}
+		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
+		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
+			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
+		}
+		return null;
+	}
+
+    public static String getProcessId(String toolId, String sessionId) {
+		final Long userId = getTokenUserId();
+		return toolId + sessionId + Long.toString(userId);
+    }
+
+    public static String getOutputPath() {
+    	String outputPath = System.getenv("BOUTIQUES_OUTPUT_PATH");
+    	if(outputPath == null) {
+    		outputPath = System.getProperty(JAVA_IO_TMPDIR) + File.pathSeparator + "boutiques" + File.pathSeparator + "output";
+    	}
+    	return outputPath;
+    }
+
+    public static String getInputPath() {
+    	String inputPath = System.getenv("BOUTIQUES_INPUT_PATH");
+    	if(inputPath == null) {
+    		inputPath = System.getProperty(JAVA_IO_TMPDIR) + File.pathSeparator + "boutiques" + File.pathSeparator + "input";
+    	}
+    	return inputPath;
+    }
+
+    public static String getProcessOutputPath(String processId) {
+    	return getOutputPath() + File.pathSeparator + processId;
+    }
+    
 	public static String writeTemporaryFile(String pFilename, String content) throws IOException {
 	    File tempDir = new File(System.getProperty("java.io.tmpdir"));
 	    File tempFile = File.createTempFile(pFilename, ".tmp", tempDir);

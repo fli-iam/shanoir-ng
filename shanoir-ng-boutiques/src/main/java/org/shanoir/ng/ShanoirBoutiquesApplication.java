@@ -29,7 +29,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 public class ShanoirBoutiquesApplication {
-
+        
 	public static void main(String[] args) {
 		SpringApplication.run(ShanoirBoutiquesApplication.class, args);
         // Retrieve all tool descriptors (run `bosh.py search -m 1000`) to store them in ~/.cache/boutiques/zenodo-ID.json files

@@ -93,6 +93,7 @@ public class BoutiquesController {
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+	private static final String BOUTIQUES = "boutiques";
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 	
@@ -113,42 +114,6 @@ public class BoutiquesController {
 //	@Autowired
 //	private WADODownloaderService downloader;
 
-	public static final String USER_ID_TOKEN_ATT = "userId";
-	
-	/**
-	 * Get current access token.
-	 * 
-	 * @return access token.
-	 * @throws SecurityException
-	 */
-	@SuppressWarnings("rawtypes")
-	private static KeycloakSecurityContext getKeycloakSecurityContext() throws SecurityException {
-		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
-			throw new SecurityException("Anonymous user");
-		}
-		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal();
-		return principal.getKeycloakSecurityContext();
-	}
-	
-	/**
-	 * Get current user id from Keycloak token.
-	 * 
-	 * @return user id.
-	 * @throws RuntimeException
-	 */
-	public static Long getTokenUserId() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		final AccessToken accessToken = context.getToken();
-		if (accessToken == null) {
-			throw new RuntimeException("Access token not found");
-		}
-		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
-		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
-			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
-		}
-		return null;
-	}
 	
 	@Autowired
 	private SimpMessagingTemplate brokerMessagingTemplate;
@@ -253,47 +218,41 @@ public class BoutiquesController {
             return null;
         }
     }
-
-    private String getProcessId(String id) {
-		final Long userId = getTokenUserId();
-		return id + Long.toString(userId);
-    }
-
-    private String getOutputPath(String processId) {
-    	String outputPath = System.getenv("BOUTIQUES_OUTPUT_PATH");
-    	if(outputPath == null) {
-    		outputPath = "/output";
-    	}
-    	outputPath += "/" + processId;
-    	return outputPath;
-    }
     
 //    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/tool/{id}/execute/")
-    public String executeById(@RequestBody ObjectNode invocation, @PathVariable String id) {
+    @PostMapping("/tool/{toolId}/execute/{sessionId}")
+    public String executeById(@RequestBody ObjectNode invocation, @PathVariable String toolId, @PathVariable String sessionId) {
 
         try {
         	// Get data from data path, use -v to mount the data path to docker container
 
-        	String dataPath = System.getenv("BOUTIQUES_DATA_PATH");
-        	if(dataPath == null) {
-        		dataPath = "/tmp"; 		// "/var/lib/docker/volumes/shanoir-ng_tmp/_data";
-        	}
-        	final String processId = getProcessId(id);
-        	String outputPath = getOutputPath(processId);
+//        	ArrayList<String> output = new ArrayList<String>();
+//        	BoutiquesUtils.runCommandLineSync("docker volume inspect --format '{{.Mountpoint}}' shanoir-ng_tmp", null, output);
+//        	String tmpVolume = output.get(0);
+        	String tmpVolume = "tmp";
+        	
+        	String inputPath = BoutiquesUtils.getInputPath();
+        	
+        	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
+        	String outputPath = BoutiquesUtils.getProcessOutputPath(processId);
 
 			final File outputDir = new File(outputPath);
 			if (!outputDir.exists()) {
 				outputDir.mkdirs(); // create if not yet existing
 			}
 			
-			ObjectNode descriptor = getDescriptorById(id);
+			ObjectNode descriptor = getDescriptorById(toolId);
 			ArrayNode inputs = (ArrayNode) descriptor.get("inputs");
-			
+
 			HashMap<String, JsonNode> idToInputObject = new HashMap<String, JsonNode>(); 
 	        for (int i = 0; i < inputs.size(); i++) {
 	            JsonNode input = inputs.get(i);
-	            idToInputObject.put(input.get("id").asText(), input);
+	            String id = input.get("id").asText();
+	            idToInputObject.put(id, input);
+	            if(input.get("type").asText() == "File") {
+	            	String filePath = invocation.get(id).asText();
+	            	invocation.put(id, inputPath + File.separator + filePath);
+	            }
 	        }
 	        
 		    // See the description of how the output files are generated: "Boutiques: a flexible framework for automatedapplication integration in computing platforms"
@@ -351,7 +310,7 @@ public class BoutiquesController {
         	
         	String invocationFilePath = BoutiquesUtils.writeTemporaryFile("invocation.json", invocation.toString());
         	
-        	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + id + " " + invocationFilePath + " -v " + dataPath + ":/tmp/";
+        	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + toolId + " " + invocationFilePath + " -v " + tmpVolume + ":/tmp";
         	System.out.println(command);
         	BoutiquesProcess boutiquesProcess = processes.get(processId); 
         	if(boutiquesProcess != null) {
@@ -407,7 +366,7 @@ public class BoutiquesController {
 	}
 	
     private String zipOutput(String processId) throws IOException {
-    	String outputPath = getOutputPath(processId);
+    	String outputPath = BoutiquesUtils.getProcessOutputPath(processId);
     	String outputPathZip = outputPath + ".zip";
     	File file = new File(outputPathZip);
     	file.deleteOnExit();
@@ -415,10 +374,10 @@ public class BoutiquesController {
     	return outputPath + ".zip";
     }
     
-    @GetMapping("/tool/{id}/output/")
-    public ObjectNode getExecutionOutputById(@PathVariable String id) {
+    @GetMapping("/tool/{toolId}/output/{sessionId}")
+    public ObjectNode getExecutionOutputById(@PathVariable String toolId, @PathVariable String sessionId) {
 
-    	final String processId = getProcessId(id);
+    	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
     	
     	BoutiquesProcess boutiquesProcess = processes.get(processId);
     	if(boutiquesProcess != null) {
@@ -451,9 +410,14 @@ public class BoutiquesController {
     				errorLines.add(errorLine);
     			}
     			
+    			boolean finished = !isAlive && inputLine == null && errorLine == null;
+    			if(finished) {
+    				processes.remove(processId);
+    			}
+    			
     			results.set("input", inputLines);
     			results.set("error", errorLines);
-    			results.put("finished", !isAlive && inputLine == null && errorLine == null);
+    			results.put("finished", finished);
     	    } catch (IOException ex) {
                 System.out.println("Server error: " + ex.getMessage());
     			results.put("server error", "Server error while executing process.");
@@ -463,11 +427,11 @@ public class BoutiquesController {
     	return null;
     }
     
-    @GetMapping("/tool/{id}/download-output/")
-    public ResponseEntity<ByteArrayResource> downloadOutputById(@PathVariable String id) throws ResponseStatusException {
+    @GetMapping("/tool/{toolId}/download-output/{sessionId}")
+    public ResponseEntity<ByteArrayResource> downloadOutputById(@PathVariable String toolId, @PathVariable String sessionId) throws ResponseStatusException {
 
 		try {
-	    	final String processId = getProcessId(id);
+	    	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
 	    	File zipFile = new File(zipOutput(processId));
 
 			byte[] data = Files.readAllBytes(zipFile.toPath());

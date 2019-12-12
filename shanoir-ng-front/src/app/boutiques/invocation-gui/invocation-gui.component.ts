@@ -104,7 +104,7 @@ export class InvocationGuiComponent implements OnInit {
     } else if(invocation[parameter.id] == null) {
       invocation[parameter.id] = [];
     }
-
+    
     // Set the boutiques data in all boutiques steps (there might be multiple boutiques steps in navigation history) 
     for(let step of this.breadcrumbsService.steps) {
       if(step.data.boutiques) {
@@ -113,6 +113,7 @@ export class InvocationGuiComponent implements OnInit {
         step.data.boutiquesCurrentParameterIsList = parameter.list;
       }
     }
+
     this.breadcrumbsService.replace = false;
     // this.breadcrumbsService.nameStep('Boutiques');
     this.router.navigate(['boutiques/dataset/list'], {replaceUrl: false });

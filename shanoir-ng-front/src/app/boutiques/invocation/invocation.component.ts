@@ -80,7 +80,18 @@ export class InvocationComponent implements OnInit {
 
   updateInvocation(invocation: string) {
     this.invocation = invocation;
+    this.storeInvocation();
     this.invocationChanged.emit(this.invocation);
+  }
+
+  storeInvocation() {
+    // Set the boutiques data in all boutiques steps (there might be multiple boutiques steps in navigation history) 
+    for(let step of this.breadcrumbsService.steps) {
+      if(step.data.boutiques) {
+        step.data.boutiquesInvocation = this.invocation;
+      }
+    }
+    this.breadcrumbsService.saveSession();
   }
 
   onInvocationChanged(invocation) {

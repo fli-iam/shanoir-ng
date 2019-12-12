@@ -29,6 +29,7 @@ export class BreadcrumbsService {
     public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
+    private ignoreNavigationEnd: boolean = false;
 
     constructor(
             private router: Router, 
@@ -48,6 +49,10 @@ export class BreadcrumbsService {
 
         router.events.subscribe( (event: Event) => {
             if (event instanceof NavigationEnd) {
+                if(this.ignoreNavigationEnd) {
+                    this.ignoreNavigationEnd = false;
+                    return;
+                }
                 const timestamp: number = new Date().getTime();
                 if (this.replace) this.steps.pop();
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
@@ -161,12 +166,13 @@ export class BreadcrumbsService {
         this.currentStepIndex = json.currentStepIndex;
         this.nextLabel = json.nextLabel;
         this.nextMilestone = json.nextMilestone;
-
+        this.steps = [];
         for(let step of json.steps) {
             this.steps.push(Step.load(step));
         }
 
         this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
+        this.ignoreNavigationEnd = true;
     }
 }
 

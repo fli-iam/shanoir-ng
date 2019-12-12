@@ -58,19 +58,19 @@ export class ToolService extends EntityService<ToolInfo> {
     return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions).toPromise();
   }
 
-  execute(toolId: string, invocation: any): Promise<string> {
+  execute(toolId: string, invocation: any, sessionId: number): Promise<string> {
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/`, invocation, httpOptions).toPromise();
+    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/${encodeURIComponent(sessionId)}`, invocation, httpOptions).toPromise();
   }
 
-  getExecutionOutput(toolId: string): Promise<any> {
-    return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/`).toPromise();
+  getExecutionOutput(toolId: string, sessionId: number): Promise<any> {
+    return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/output/${encodeURIComponent(sessionId)}`).toPromise();
   }
 
-  downloadOutput(toolId: string): void {
+  downloadOutput(toolId: string, sessionId: number): void {
     if (!toolId) throw Error('Cannot download a dataset without an id');
     let httpOptions = Object.assign( { observe: 'response', responseType: 'blob' }, this.httpOptions);
-    this.httpClient.get<HttpResponse<Blob>>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));
+    this.httpClient.get<HttpResponse<Blob>>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/${encodeURIComponent(sessionId)}`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));
   }
 
   private getFilename(response: HttpResponse<any>): string {

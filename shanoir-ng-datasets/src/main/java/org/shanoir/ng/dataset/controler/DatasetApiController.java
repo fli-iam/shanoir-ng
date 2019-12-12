@@ -83,8 +83,10 @@ public class DatasetApiController implements DatasetApi {
 	private static final String ZIP = ".zip";
 
 	private static final String DOWNLOAD = ".download";
-	
-	private static final String BOUTIQUES = ".boutiques";
+
+	private static final String BOUTIQUES = "boutiques";
+
+	private static final String INPUT = "input";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 	
@@ -190,8 +192,7 @@ public class DatasetApiController implements DatasetApi {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset not found.", null));
 		}
 		
 		/* Create folder and file */
@@ -246,8 +247,7 @@ public class DatasetApiController implements DatasetApi {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset not found.", null));
 		}
 		
 		DatasetUrlsDTO urls = new DatasetUrlsDTO();
@@ -300,8 +300,9 @@ public class DatasetApiController implements DatasetApi {
 		} else {
 			n = Math.abs(n);
 		}
-		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
-		File workFolder = new File(tmpFilePath + BOUTIQUES);
+		String workFolderId = Long.toString(n);
+		String tmpFilePath = tmpDir + File.separator + BOUTIQUES + File.separator + INPUT + File.separator + workFolderId;
+		File workFolder = new File(tmpFilePath);
 		workFolder.mkdirs();
 		String url = urlObject.get("url").asText();
 		try {
@@ -322,7 +323,8 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
 		}
-		return new ResponseEntity<String>(workFolder.getPath(), HttpStatus.OK);
+//		return new ResponseEntity<String>(workFolder.getAbsolutePath(), HttpStatus.OK);
+		return new ResponseEntity<String>(workFolderId, HttpStatus.OK);
 	}
 	
 	/**

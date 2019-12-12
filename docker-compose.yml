@@ -181,12 +181,12 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
-      - BOUTIQUES_DATA_PATH=/tmp
-      - BOUTIQUES_OUTPUT_PATH=/output
+      - BOUTIQUES_INPUT_PATH=/tmp/boutiques/input
+      - BOUTIQUES_OUTPUT_PATH=/tmp/boutiques/output
     volumes:
-      - "logs:/var/log/shanoir-ng-logs"
+      - logs:/var/log/shanoir-ng-logs
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "tmp:/tmp"
+      - tmp:/tmp
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - shanoir_ng_network
