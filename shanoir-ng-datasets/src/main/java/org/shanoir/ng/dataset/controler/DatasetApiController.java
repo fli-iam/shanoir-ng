@@ -34,7 +34,6 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.modality.EegDataSetDescription;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -45,8 +44,6 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.eeg.model.Channel;
-import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.BIDSService;
@@ -72,8 +69,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiParam;
 
@@ -324,93 +319,16 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Examination found of subject Id.", null));
 		} else {
-			
+			// Create an adapted subject
 			Subject subject = new Subject();
 			subject.setId(subjectId);
 			subject.setName(subjectName);
-			File workFolder = bidsService.exportAsBids(subject, studyName, null);
-			File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
-
-			/**
-			// 1. Create folder
-			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-			long n = RANDOM.nextLong();
-			if (n == Long.MIN_VALUE) {
-				n = 0; // corner case
-			} else {
-				n = Math.abs(n);
-			}
-			String tmpFilePath = tmpDir + File.separator + Long.toString(n);
-
-			File zipFile = new File(tmpFilePath + ZIP);
-			zipFile.createNewFile();
-
-			// 2. Create dataset_description.json and README
-			DatasetDescription datasetDescription = new DatasetDescription();
-			datasetDescription.setName(studyName);
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
-			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
-
-			for (Examination examination: examinationList) {
-				final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
-				for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
-					final List<Dataset> datasetList = datasetAcquisition.getDatasets();
-					for (Dataset dataset: datasetList) {
-						// NB: Only for EEG for the moment
-						if (dataset instanceof EegDataset) {
-							String runId = dataset.getId().toString();
-							String sesLabel;
-							// If there is only one examination, but multiple datasets, split sessions by datasets
-							// If there is multiple examinations, split sessions by examinations
-							if (examinationList.size() == 1) {
-								sesLabel = runId;
-							} else {
-								sesLabel = examination.getId().toString();
-							}
-							List<URL> pathURLs = new ArrayList<URL>();
-							getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-							exportSpecificEegFiles((EegDataset)dataset, workFolder, pathURLs, subjectName, sesLabel, studyName, runId );
-						}
-					}
-				}
-			}
-
-			// 8. Get modality label, nii and json of dataset
-			final Dataset dataset = examinationList.get(0).getDatasetAcquisitions().get(0).getDatasets().get(0);
-			if (dataset == null) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Dataset found for subject Id.", null));
-			}
-
-			// Get modality label
-			String modalityLabel = "";
-			if (dataset instanceof MrDataset) {
-				if (MrDatasetNature.T1_WEIGHTED_MR_DATASET.equals(((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature())
-						|| MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET.equals(((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature())) {
-					modalityLabel = T1w;
-				}
-				if (StringUtils.isEmpty(modalityLabel)) {
-					throw new RestServiceException(
-							new ErrorModel(HttpStatus.NOT_FOUND.value(), "No MrDatasetNature, so could not define modality label and export BIDS!", null));
-				}
-			}
-
-			// Get nii and json files
-			else {
-				try {
-					List<URL> pathURLs = new ArrayList<URL>();
-					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyFilesForBIDSExport(pathURLs, workFolder, subjectName, examinationList.get(0).getId().toString(), modalityLabel);
-				} catch (IOException e) {
-					throw new RestServiceException(
-							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error exporting nifti files for subject in BIDS.", null));
-				}
-			}
 			
-			*/
+			// Export files as bids
+			File workFolder = bidsService.exportAsBids(subject, studyName, null);
 
-			// 9. Create zip file
+			// Create zip file
+			File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
 			zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 			// Try to determine file's content type
@@ -431,15 +349,18 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") final Long studyId,
+	public ResponseEntity<ByteArrayResource> exportBIDSByExaminationId(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") final String subjectName,
 			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
 					throws RestServiceException, MalformedURLException, IOException {
-		
-		File workFolder = bidsService.exportAsBids(studyId, studyName);
-		File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
+		// Get examination from ID
+		Examination exam = examinationService.findById(examinationId);
+
+		// Export files as bids
+		File workFolder = bidsService.exportAsBids(exam, null, studyName, subjectName);
 
 		// Create zip file
+		File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
@@ -458,118 +379,32 @@ public class DatasetApiController implements DatasetApi {
 				.body(resource);
 	}
 
-	/**
-	 * This methods export specific EEG files for BIDS export.
-	 * - channel.tsv -> A list of channels from dataset.channels
-	 * - event.tsv -> A list of events from dataset.events
-	 * - [..]_eeg.json -> Description of EEG methods used
-	 * - ? electrodes.tsv -> list of electrodes positions if existing
-	 * - ? coordsystem.json -> if electrodes are defined, sets the reference
-	 * See https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/03-electroencephalography.html
-	 * for more informations
-	 * @param dataset the dataset we want to export in BIDS
-	 * @param workFolder the work folder in which we are working
-	 * @param pathURLs list of file URL
-	 * @param studyName the name of associated study
-	 * @param subjectName the subject name associated
-	 * @param sessionId the session ID / examination ID associated
-	 * @param runId The run ID
-	 * @throws RestServiceException
-	 * @throws IOException
-	 */
-	private void exportSpecificEegFiles(final EegDataset dataset, final File workFolder, final List<URL> pathURLs, final String subjectName, final String sessionId, final String studyName, final String runId) throws RestServiceException, IOException {
-		// Create _eeg.json
-		String fileName = "task_" + studyName + "_eeg.json";
-		String destFile = workFolder + File.separator + fileName;
+	@Override
+	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") final Long studyId,
+			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
+					throws RestServiceException, MalformedURLException, IOException {
+		// Export Study files as BIDS
+		File workFolder = bidsService.exportAsBids(studyId, studyName);
 
-		EegDataSetDescription datasetDescription = new EegDataSetDescription();
-		datasetDescription.setTaskName(studyName);
-		datasetDescription.setSamplingFrequency(String.valueOf(dataset.getSamplingFrequency()));
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.writeValue(new File(destFile), datasetDescription);
+		// Create zip file
+		File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
+		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
-		// Create channels.tsv file
-		String destWorkFolderPath = workFolder.getAbsolutePath() + File.separator + "sub-" + subjectName + File.separator + "ses-" + sessionId + File.separator;
-		
-		// Create the folder where we are currently working
-		new File(destWorkFolderPath).mkdirs();
-		
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_channel.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
+		byte[] data = Files.readAllBytes(zipFile.toPath());
+		ByteArrayResource resource = new ByteArrayResource(data);
 
-		for (Channel chan: dataset.getChannels()) {
-			buffer.append(chan.getName()).append("\t")
-			.append(chan.getReferenceType().name()).append("\t")
-			.append(chan.getReferenceUnits()).append("\t")
-			.append(dataset.getSamplingFrequency()).append("\t")
-			.append(chan.getLowCutoff() == 0 ? "n/a" : chan.getLowCutoff()).append("\t")
-			.append(chan.getHighCutoff() == 0 ? "n/a" : chan.getHighCutoff()).append("\t")
-			.append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append("\n");
-		}
-		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-		
-		// Create events.tsv file
-		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
-
-		buffer = new StringBuffer();
-		buffer.append("onset \t duration \t sample \n");
-
-		for (Event event: dataset.getEvents()) {
-			float sample = Float.valueOf(event.getPosition());
-			float samplingFrequency = dataset.getSamplingFrequency();
-			float onset = sample / samplingFrequency;
-			int duration = event.getPoints();
-			buffer.append(onset).append("\t")
-			.append(duration == 0 ? "n/a" : String.valueOf(duration)).append("\t")
-			.append(sample).append("\n");
-		}
-		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-
-		// Copy files
-		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
-			File destFolder = new File(destWorkFolderPath);
-
-			Path pathToGo = Paths.get(destFolder.getAbsolutePath() + File.separator + srcFile.getName());
-			Files.copy(srcFile.toPath(), pathToGo);
-		}
-	
-		// If no coordinates system, don't create electrode.csv & _coordsystem.json files
-		if (dataset.getCoordinatesSystem() == null) {
-			return;
-		}
-
-		// Create electrode.csv file
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_electrodes.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
-
-		buffer = new StringBuffer();
-		buffer.append("name \t x \t y \t z \n");
-
-		for (Channel chan: dataset.getChannels()) {
-			buffer.append(chan.getName()).append("\t")
-			.append(chan.getX()).append("\t")
-			.append(chan.getY()).append("\t")
-			.append(chan.getZ()).append("\n");
-		}
-		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-		
-		// Create _coordsystem.json file
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_coordsystem.json";
-		destFile = destWorkFolderPath + File.separator + fileName;
-
-		buffer = new StringBuffer();
-		buffer.append("{\n")
-		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
-		.append("\"EEGCoordinateUnits\": ").append("\"" +CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
-		.append("}");
-		
-		Files.write(Paths.get(destFile), buffer.toString().getBytes());
+		return ResponseEntity.ok()
+				// Content-Disposition
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				// Content-Type
+				.contentType(MediaType.parseMediaType(contentType)) //
+				// Content-Length
+				.contentLength(data.length) //
+				.body(resource);
 	}
 
 	/**

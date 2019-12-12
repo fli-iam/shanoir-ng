@@ -68,8 +68,17 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     exportBIDSByStudyId(studyId: number, studyName: string): Promise<void> {
-        if (!studyId) throw Error('subject id is required');
+        if (!studyId) throw Error('study id is required');
         return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/studyId/' + studyId 
+            + '/studyName/' + studyName,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+    }
+
+    exportBIDSByExaminationId(examinationId: number, subjectName: string, studyName: string): Promise<void> {
+        if (!examinationId) throw Error('examination id is required');
+        return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/examinationId/' + examinationId
+            + '/subjectName/' + subjectName
             + '/studyName/' + studyName,
             { observe: 'response', responseType: 'blob' }
         ).toPromise().then(response => {this.downloadIntoBrowser(response);});

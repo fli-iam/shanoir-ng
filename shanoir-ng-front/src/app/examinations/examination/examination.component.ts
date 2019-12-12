@@ -25,6 +25,8 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { DatasetService } from '../../datasets/shared/dataset.service'
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 @Component({
     selector: 'examination',
@@ -40,12 +42,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     private subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private inImport: boolean; 
+    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    protected bidsLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
             private examinationService: ExaminationService,
             private centerService: CenterService,
-            private studyService: StudyService, 
+            private studyService: StudyService,
+            private datasetService: DatasetService,
             protected breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
@@ -119,6 +124,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.studyService
             .findSubjectsByStudyId(this.examination.study.id)
             .then(subjects => this.subjects = subjects);
+    }
+
+    private exportBIDS(exam: Examination) {
+        let studyName: string;
+        this.bidsLoading = true;
+        this.datasetService.exportBIDSByExaminationId(exam.id, exam.subject.name, exam.study.name).then(() => this.bidsLoading = false);
     }
 
     private onStudyChange() {

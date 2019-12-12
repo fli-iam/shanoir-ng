@@ -62,9 +62,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
-
-    
+    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
 
     constructor(

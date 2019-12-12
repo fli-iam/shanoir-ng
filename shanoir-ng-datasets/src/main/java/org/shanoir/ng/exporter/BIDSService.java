@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * This class is a service class for BIDS purpose.
  * Create BIDS files.
- * Export Data in BIDS format
+ * Export Data in BIDS format at different levels: Study, Subject, Examination, Dataset.
  * In a possible future: import Data from BIDS format
  * @author JcomeD
  *
@@ -217,7 +217,6 @@ public class BIDSService {
 		File subjectDir;
 		if (workDir == null) {
 			baseDir = createBaseBidsFolder(studyName);
-			// XXX: Get subject name from ID here ?
 			subjectDir = createSubjectFolder(subjectName == null ? examination.getSubjectId().toString() : subjectName, baseDir);
 		} else {
 			baseDir = workDir.getParentFile();
@@ -264,7 +263,6 @@ public class BIDSService {
 		File baseDir;
 		if (workDir == null) {
 			baseDir = createBaseBidsFolder(studyName);
-			// XXX: Get subject name from ID here ?
 			File subjectDir = createSubjectFolder(subjectName == null ? dataset.getSubjectId().toString() : subjectName, baseDir);
 			examDir = createExaminationFolder(dataset.getDatasetAcquisition().getExamination(), subjectDir);
 		} else {
