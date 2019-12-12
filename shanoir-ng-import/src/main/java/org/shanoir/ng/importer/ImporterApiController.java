@@ -360,9 +360,15 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
 		}
-
 		File tempFile = new File(dicomZipFilename);
-		return importDicomZipFile(tempFile);
+
+		// Import dicomfile
+		ResponseEntity<ImportJob> dicomFile = importDicomZipFile(tempFile);
+
+		// Delete temp file which is useless now
+		tempFile.delete();
+
+		return dicomFile;
 	}
 	
 	private ResponseEntity<ImportJob> importDicomZipFile(final File dicomZipFile) throws RestServiceException {

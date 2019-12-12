@@ -299,7 +299,11 @@ public class BIDSService {
 			File destFolder = new File(workDir.getAbsolutePath());
 
 			Path pathToGo = Paths.get(destFolder.getAbsolutePath() + File.separator + srcFile.getName());
+			try {
 			Files.copy(srcFile.toPath(), pathToGo);
+			} catch (IOException exception) {
+				System.out.println("File could not be treated (PACS): " + srcFile.getAbsolutePath());
+			}
 		}
 
 		// Create specific files (EEG, MS, MEG, etc..)
