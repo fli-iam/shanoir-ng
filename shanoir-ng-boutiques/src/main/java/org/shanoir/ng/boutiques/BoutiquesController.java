@@ -230,11 +230,13 @@ public class BoutiquesController {
 //        	BoutiquesUtils.runCommandLineSync("docker volume inspect --format '{{.Mountpoint}}' shanoir-ng_tmp", null, output);
 //        	String tmpVolume = output.get(0);
         	String tmpVolume = "tmp";
+        	String tmpVolumeOnHost = System.getenv("BOUTIQUES_TMP_PATH_ON_HOST");;
         	
         	String inputPath = BoutiquesUtils.getInputPath();
         	
         	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
         	String outputPath = BoutiquesUtils.getProcessOutputPath(processId);
+//        	String outputPath = tmpVolumeOnHost + File.separator + "boutiques" + File.separator + "output";
 
 			final File outputDir = new File(outputPath);
 			if (!outputDir.exists()) {
@@ -249,7 +251,7 @@ public class BoutiquesController {
 	            JsonNode input = inputs.get(i);
 	            String id = input.get("id").asText();
 	            idToInputObject.put(id, input);
-	            if(input.get("type").asText() == "File") {
+	            if(input.has("type") && input.get("type").asText().contentEquals("File") && invocation.has(id)) {
 	            	String filePath = invocation.get(id).asText();
 	            	invocation.put(id, inputPath + File.separator + filePath);
 	            }
@@ -266,9 +268,12 @@ public class BoutiquesController {
 			for (Map.Entry<String, JsonNode> idAndInputObject : idToInputObject.entrySet()) {
 		        String inputId = idAndInputObject.getKey();
 		        JsonNode inputObject = idAndInputObject.getValue();
+		        if(!inputObject.has("type")) {
+		        	continue;
+		        }
 		        String inputType = inputObject.get("type").asText();
 		        
-		        if((inputType == "File" || inputType == "String") && invocation.has(inputId)) {
+		        if((inputType.contentEquals("File") || inputType.contentEquals("String")) && invocation.has(inputId)) {
 		            // For all output files: check if one has "path-template" containing the "value-key" of the current input
 		            String fileName = invocation.get(inputId).asText();
 		            
@@ -280,7 +285,7 @@ public class BoutiquesController {
 		                String pathTemplate = outputFilesDescription.get("path-template").asText();
 
 		                // If the input is a File, remove the "path-template-stripped-extensions"
-		                if(inputType == "File" && outputFilesDescription.has("path-template-stripped-extensions")) {
+		                if(inputType.contentEquals("File") && outputFilesDescription.has("path-template-stripped-extensions")) {
 		                	ArrayNode pathTemplateStrippedExtensions = (ArrayNode) outputFilesDescription.get("path-template-stripped-extensions");
 
 		                    for (int j = 0 ; j<pathTemplateStrippedExtensions.size() ; ++j) {
@@ -293,7 +298,7 @@ public class BoutiquesController {
 		                
 		                if(pathTemplate.contains(valueKey)) {
 		                    // If the current output file has a "path-template" containing the current input "value-key": replace the "value-key" by the file name (!input value)
-		                    pathTemplate.replace(valueKey, fileName);
+		                	pathTemplate = pathTemplate.replace(valueKey, fileName);
 
 		                    // Make sure the path is not absolute and does not contain ../
 		                    if(pathTemplate.contains("../"))
@@ -310,7 +315,7 @@ public class BoutiquesController {
         	
         	String invocationFilePath = BoutiquesUtils.writeTemporaryFile("invocation.json", invocation.toString());
         	
-        	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + toolId + " " + invocationFilePath + " -v " + tmpVolume + ":/tmp";
+        	String command = BoutiquesUtils.BOUTIQUES_COMMAND + " exec launch -s " + toolId + " " + invocationFilePath + " -v " + tmpVolumeOnHost + ":/tmp";
         	System.out.println(command);
         	BoutiquesProcess boutiquesProcess = processes.get(processId); 
         	if(boutiquesProcess != null) {

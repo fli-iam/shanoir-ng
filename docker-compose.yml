@@ -183,6 +183,8 @@ services:
       - front.server.address
       - BOUTIQUES_INPUT_PATH=/tmp/boutiques/input
       - BOUTIQUES_OUTPUT_PATH=/tmp/boutiques/output
+      # - BOUTIQUES_TMP_PATH_ON_HOST=/var/lib/docker/volumes/shanoir-ng_tmp/_data
+      - BOUTIQUES_TMP_PATH_ON_HOST=/tmp
     volumes:
       - logs:/var/log/shanoir-ng-logs
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -317,6 +319,11 @@ volumes:
   solr-data:
   certificate-share-data:
   tmp:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /tmp
   logs:
 
 networks:

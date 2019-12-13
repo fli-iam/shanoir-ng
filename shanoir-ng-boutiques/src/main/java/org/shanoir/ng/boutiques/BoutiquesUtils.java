@@ -84,7 +84,7 @@ public class BoutiquesUtils {
     public static String getOutputPath() {
     	String outputPath = System.getenv("BOUTIQUES_OUTPUT_PATH");
     	if(outputPath == null) {
-    		outputPath = System.getProperty(JAVA_IO_TMPDIR) + File.pathSeparator + "boutiques" + File.pathSeparator + "output";
+    		outputPath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + "boutiques" + File.separator + "output";
     	}
     	return outputPath;
     }
@@ -92,13 +92,15 @@ public class BoutiquesUtils {
     public static String getInputPath() {
     	String inputPath = System.getenv("BOUTIQUES_INPUT_PATH");
     	if(inputPath == null) {
-    		inputPath = System.getProperty(JAVA_IO_TMPDIR) + File.pathSeparator + "boutiques" + File.pathSeparator + "input";
+    		inputPath = System.getProperty(JAVA_IO_TMPDIR) + File.separator + "boutiques" + File.separator + "input";
     	}
     	return inputPath;
     }
 
     public static String getProcessOutputPath(String processId) {
-    	return getOutputPath() + File.pathSeparator + processId;
+    	String outputPath = getOutputPath();
+    	String processOutputPath = outputPath + File.separator + processId;
+    	return processOutputPath;
     }
     
 	public static String writeTemporaryFile(String pFilename, String content) throws IOException {
