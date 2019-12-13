@@ -59,7 +59,7 @@ public class BrainVisionReader {
     private DataFormat dataFormat;
     private DataOrientation dataOrientation;
     private DataType dataType;
-    private int samplingIntervall;
+    private float samplingIntervall;
     private BinaryFormat binaryFormat;
     private boolean useBigEndianOrder;
     private int skipLines;
@@ -84,10 +84,10 @@ public class BrainVisionReader {
     private File eegFile;
     private List<Channel> channels;
     private List<Event> events;
-	private int samplingFrequency;
+	private int samplingFrequency = 0;
 	private boolean hasPosition;
 
-    public BrainVisionReader(File file) {
+    public BrainVisionReader(final File file) {
         this.file = file;
         hasPosition = false;
         if (file != null && file.exists() && file.getName().toLowerCase().endsWith(".vhdr")) {
@@ -107,7 +107,8 @@ public class BrainVisionReader {
         File parentDir = new File(file.getParent());
 		String fileNameWithOutExt = FilenameUtils.removeExtension(file.getName());
 		File[] matchingFiles = parentDir.listFiles(new FilenameFilter() {
-		    public boolean accept(File dir, String name) {
+		    @Override
+			public boolean accept(final File dir, final String name) {
 		        return name.equals(fileNameWithOutExt + ".pos");
 		    }
 		});
@@ -132,7 +133,7 @@ public class BrainVisionReader {
 
             if (pnts == 0 && dataFile != null) {
                 try {
-                    pnts = (int) (dataFile.length() / bytes / (long) nbchan);
+                    pnts = (int) (dataFile.length() / bytes / nbchan);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -188,15 +189,16 @@ public class BrainVisionReader {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(markerFile), StandardCharsets.UTF_8))) {
             String newLine = null;
             events = new ArrayList<>();
-            boolean description = false;
+            boolean description = true;
 
             // Construct a list of events
             while ((newLine = in.readLine()) != null) {
 
             	// Check if description line exists or not
+            	// Consider description is always true, but if not precised in comment
             	if (newLine.startsWith(";")) {
-            		if (newLine.contains("<Description>")) {
-            			description = true;
+            		if (newLine.contains("<Marker number>") && !newLine.contains("<Description>")) {
+            			description = false;
             		}
             	}
 
@@ -232,7 +234,7 @@ public class BrainVisionReader {
         } catch (ParseException e) {
             System.err.println("Problem with parsing, you can panic now.");
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	private void readHeaderFromVHDR() {
@@ -311,7 +313,7 @@ public class BrainVisionReader {
 
                 // Read sampling intervall
                 else if (zeile.startsWith("SamplingInterval")) {
-                    samplingIntervall = Integer.parseInt(zeile.substring(17));
+                    samplingIntervall = Float.parseFloat(zeile.substring(17));
                 }
                 
                 // Read sampling rate
@@ -396,14 +398,14 @@ public class BrainVisionReader {
                 }
                 
                 else if (zeile.startsWith("A m p l i f i e r  S e t u p")) {
-                	amplifier = true;                	
+                	amplifier = true;
                 }
                 
                 // Get the filter list
                 else if (zeile.startsWith(String.valueOf(channelIndex)) && amplifier) {
                 	/*
                 	 * #     Name      Phys. Chn.    Resolution / Unit   Low Cutoff [s]   High Cutoff [Hz]   Notch [Hz]    Series Res. [kOhm] Gradient         Offset
-					 * 1     Fp1         1                0.5 µV             DC             1000              Off                0  
+					 * 1     Fp1         1                0.5 µV             DC             1000              Off                0
                 	 */
                 	Channel channelToGet = channels.get(channelIndex - 1);
                 	// Split by spaces
@@ -459,7 +461,7 @@ public class BrainVisionReader {
         System.out.println("Found " + events == null ? 0 : events.size() + " events");
     }
 
-    public void read(int channel, long from, long to) {
+    public void read(final int channel, final long from, final long to) {
         //TODO: check bounds!
         int nSamples = (int) (to - from);
         if (this.nSamples != nSamples) {
@@ -486,7 +488,7 @@ public class BrainVisionReader {
      * @param epochToRead the epoch which have to be read.
      * @return
      */
-    private float[] readBinary(int channel, long from, long to) {
+    private float[] readBinary(final int channel, final long from, final long to) {
         try {
             FileChannel inChannel = dataFile.getChannel();
             // Set the start position in the file
@@ -498,7 +500,7 @@ public class BrainVisionReader {
                 inChannel.position((channel * pnts + from) * bytes);
             }
 
-            final int increment = (nbchan * bytes) - bytes;
+            final int increment = nbchan * bytes - bytes;
             final boolean flag = dataOrientation.equals(DataOrientation.MULTIPLEXED);
             final int bytes = this.bytes;
 
@@ -516,7 +518,7 @@ public class BrainVisionReader {
                     }
 
                     if (flag) {
-                        // This is the next sample in this epoch for the given channel  
+                        // This is the next sample in this epoch for the given channel
                         buf.position(buf.position() + increment);
                     }
                 }
@@ -527,7 +529,7 @@ public class BrainVisionReader {
         return data;
     }
 
-    private float[][] readAscii(File dataFileLocation) {
+    private float[][] readAscii(final File dataFileLocation) {
         float[][] out = null;
         try (BufferedReader in = new BufferedReader(new FileReader(dataFileLocation))) {
             out = in.lines()
@@ -545,7 +547,7 @@ public class BrainVisionReader {
         return out;
     }
 
-    private void prepareBuffers(int nSamples) {
+    private void prepareBuffers(final int nSamples) {
         this.nSamples = nSamples;
         data = new float[nSamples];
 
@@ -596,7 +598,7 @@ public class BrainVisionReader {
         return channelNames;
     }
 
-    public int getSamplingIntervall() {
+    public float getSamplingIntervall() {
         return samplingIntervall;
     }
     
@@ -636,7 +638,7 @@ public class BrainVisionReader {
         UNKNOWN, TIMEDOMAIN
     }
 
-    public static float[] doubleToFloat(double[] x) {
+    public static float[] doubleToFloat(final double[] x) {
         float[] y = new float[x.length];
         for (int i = 0; i < y.length; i++) {
             y[i] = (float) x[i];

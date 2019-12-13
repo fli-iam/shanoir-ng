@@ -243,14 +243,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 		subject.name = this.preclinicalSubject.subject.name;
 		return subject;
 	}
-	
-     displaySex(): boolean {
-        if (this.animalSelected()) {
-        	return true;
-        } else {
-            return false;
-        }
-    }
     
     public animalSelected(): boolean {
         return this.preclinicalSubject && this.preclinicalSubject.subject && this.preclinicalSubject.subject.imagedObjectCategory != null
@@ -279,14 +271,34 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'sex': sexFC,
             'subjectStudyList': []
         });
+        this.subscribtions.push(
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+                this.onChangeImagedObjectCategory(subjectForm);
+            })
+        );
         return subjectForm;
-
     }
-    
-    onChangeImagedObjectCategory(){
-    	if (!this.animalSelected()){
-        	this.setSex();
+
+    onChangeImagedObjectCategory(formGroup: FormGroup){
+        if (this.animalSelected() && this.mode == 'create') {
+            formGroup.get('specie').setValidators([Validators.required]);
+            formGroup.get('strain').setValidators([Validators.required]);
+            formGroup.get('biotype').setValidators([Validators.required]);
+            formGroup.get('provider').setValidators([Validators.required]);
+            formGroup.get('stabulation').setValidators([Validators.required]);
+        } else {
+            formGroup.get('specie').setValidators([]);
+            formGroup.get('strain').setValidators([]);
+            formGroup.get('biotype').setValidators([]);
+            formGroup.get('provider').setValidators([]);
+            formGroup.get('stabulation').setValidators([]);
         }
+        formGroup.get('specie').updateValueAndValidity();
+        formGroup.get('strain').updateValueAndValidity();
+        formGroup.get('biotype').updateValueAndValidity();
+        formGroup.get('provider').updateValueAndValidity();
+        formGroup.get('stabulation').updateValueAndValidity();
+        this.reloadRequiredStyles();
         this.buildForm();
     }
 
@@ -340,9 +352,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
         return new  Promise<void>(resolve => {
             this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
-            if (!this.animalSelected()){
-                this.setSex();
-            }
+            this.preclinicalSubject.subject.preclinical = true;
             Promise.resolve(this.animalSubjectService.createSubject(this.preclinicalSubject.subject))
             .then((subject) => {
                 this.preclinicalSubject.subject = subject;
@@ -352,17 +362,26 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.preclinicalSubject.id = animalSubject.id;
                     this.preclinicalSubject.animalSubject = animalSubject;
                     //Then add pathologies
-                    if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                        for (let pathology of this.preclinicalSubject.pathologies) {
-                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                    // Create therapies and pathologies from breadcrumb cache
+                    if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                        for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                            this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                         }
-                    }
-                    //Then add therapies
-                    if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
+                    } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
                         for (let therapy of this.preclinicalSubject.therapies) {
                             this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                         }
                     }
+                    if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                        for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                        }
+                    } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
+                        for (let pathology of this.preclinicalSubject.pathologies) {
+                            this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                        }
+                    }
+
                     resolve();
                 });
             });
@@ -417,10 +436,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 );
             }
         });
-    }
-    
-    setSex(): void {
-    	this.preclinicalSubject.subject.sex = 'M';
     }
 
     sortReferences() {

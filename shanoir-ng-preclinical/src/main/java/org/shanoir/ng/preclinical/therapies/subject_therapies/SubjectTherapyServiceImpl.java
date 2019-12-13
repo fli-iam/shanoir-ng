@@ -115,6 +115,7 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 		subtherapyDb.setDose(subtherapy.getDose());
 		subtherapyDb.setDoseUnit(subtherapy.getDoseUnit());
 		subtherapyDb.setFrequency(subtherapy.getFrequency());
+		subtherapyDb.setMolecule(subtherapy.getMolecule());
 		subtherapyDb.setStartDate(subtherapy.getStartDate());
 		subtherapyDb.setEndDate(subtherapy.getEndDate());
 		return subtherapyDb;

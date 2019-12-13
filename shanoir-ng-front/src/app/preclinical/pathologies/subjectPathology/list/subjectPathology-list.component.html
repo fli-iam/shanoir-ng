@@ -11,7 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<div *ngIf="mode == 'edit'">
+<div *ngIf="mode == 'edit' || mode == 'create'">
     <button *ngIf="toggleForm==false" (click)="toggleSubjectItemForm()">Add a {{getEntityName()}}</button>
 </div>
 <div>

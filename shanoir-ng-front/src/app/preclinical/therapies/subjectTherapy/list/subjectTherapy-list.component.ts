@@ -63,19 +63,28 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return this.preclinicalSubject.therapies;
     }
 
+    protected getOptions(): any {
+        // Specify that we can't view a therapy
+        return {
+            view: false
+        };
+    }
+
     getEntities(): Promise<SubjectTherapy[]> {
         let subjectTherapies: SubjectTherapy[] = [];
-        if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
+        if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
             // Initialize from breadcrumbs cache if existing
             let ts: SubjectTherapy[];
             if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies != null) {
                 ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies;
                 this.preclinicalSubject.therapies = ts;
-            } else {
+            } else if (this.preclinicalSubject.animalSubject.id) {
                 return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
                     this.preclinicalSubject.therapies = st;
                     return st;
                 });
+            } else {
+                this.preclinicalSubject.therapies = [];
             }
             return Promise.resolve(this.preclinicalSubject.therapies);
         }
@@ -114,6 +123,11 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
             {
                 headerName: "Dose", field: "dose", type: "dose", cellRenderer: function(params: any) {
                     return checkNullValue(params.data.dose);
+                }
+            },
+            {
+                headerName: "Molecule", field: "molecule", type: "string", cellRenderer: function(params: any) {
+                    return checkNullValue(params.data.molecule);
                 }
             },
             {

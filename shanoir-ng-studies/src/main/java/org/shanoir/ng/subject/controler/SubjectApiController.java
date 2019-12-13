@@ -38,6 +38,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.ApiParam;
 
@@ -120,8 +121,14 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<SimpleSubjectDTO> simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+		final List<SimpleSubjectDTO> simpleSubjectDTOList;
+		if (preclinical == "null") {
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+		} else {
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
+		}
 		if (simpleSubjectDTOList.isEmpty()) {
 			return new ResponseEntity<List<SimpleSubjectDTO>>(HttpStatus.NO_CONTENT);
 		}

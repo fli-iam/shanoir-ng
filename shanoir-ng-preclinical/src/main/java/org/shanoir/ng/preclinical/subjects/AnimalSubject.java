@@ -42,33 +42,28 @@ public class AnimalSubject extends HalEntity {
 	private Long subjectId;
 
 	@ManyToOne
-	@NotNull
 	@JsonProperty("specie")
 	// @RefValueExists
 	private Reference specie = null;
 
 	@JsonProperty("strain")
 	@ManyToOne
-	@NotNull
 	// @RefValueExists
 	private Reference strain = null;
 
 	@JsonProperty("biotype")
 	// @RefValueExists
 	@ManyToOne
-	@NotNull
 	private Reference biotype = null;
 
 	@JsonProperty("provider")
 	// @RefValueExists
 	@ManyToOne
-	@NotNull
 	private Reference provider = null;
 
 	@JsonProperty("stabulation")
 	// @RefValueExists
 	@ManyToOne
-	@NotNull
 	private Reference stabulation = null;
 
 	public AnimalSubject specie(Reference specie) {

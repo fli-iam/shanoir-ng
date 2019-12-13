@@ -103,7 +103,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
 
     initCreate(): Promise<void> {
-        this.entity = new SubjectTherapy();
+        this.subjectTherapy = new SubjectTherapy();
         this.getEnums();
         this.loadTherapies();
         this.loadUnits();
@@ -118,6 +118,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             'dose_unit': [this.subjectTherapy.dose_unit],
             'frequency': [this.subjectTherapy.frequency],
             'startDate': [this.subjectTherapy.startDate],
+            'molecule': [this.subjectTherapy.molecule],
             'endDate': [this.subjectTherapy.endDate]
         });
     }
@@ -193,31 +194,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     
     goToAddTherapy(){
         this.router.navigate(['/preclinical-therapy/create']);
-    }
-
-
-
-    addSubjectTherapy() {
-        if (!this.subjectTherapy) {
-            console.log('nothing to create');
-            return;
-        }
-        if (this.mode == 'create' ) {
-            if (this.preclinicalSubject.therapies === undefined) {
-                this.preclinicalSubject.therapies = [];
-            }
-            if (this.onCreated.observers.length > 0) {
-                this.onCreated.emit(this.subjectTherapy);
-            }
-        } else {
-            this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, this.subjectTherapy)
-                .then(subjectTherapy => {
-                    if (this.onCreated.observers.length > 0) {
-                        this.onCreated.emit(subjectTherapy);
-                    }
-                });
-        }
-        this.toggleFormSTAndReset(true);
     }
 
     updateSubjectTherapy(): void {

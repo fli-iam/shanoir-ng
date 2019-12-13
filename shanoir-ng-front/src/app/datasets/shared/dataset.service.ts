@@ -25,7 +25,7 @@ import { Dataset } from './dataset.model';
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
-
+    
     getEntityInstance(entity: Dataset) { 
         return AppUtils.getEntityInstance(entity);
     }
@@ -65,6 +65,23 @@ export class DatasetService extends EntityService<Dataset> {
             + '/subjectName/' + subjectName + '/studyName/' + studyName, 
             { observe: 'response', responseType: 'blob' }
         ).subscribe(response => {this.downloadIntoBrowser(response);});
+    }
+
+    exportBIDSByStudyId(studyId: number, studyName: string): Promise<void> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/studyId/' + studyId 
+            + '/studyName/' + studyName,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+    }
+
+    exportBIDSByExaminationId(examinationId: number, subjectName: string, studyName: string): Promise<void> {
+        if (!examinationId) throw Error('examination id is required');
+        return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/examinationId/' + examinationId
+            + '/subjectName/' + subjectName
+            + '/studyName/' + studyName,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
     }
 
     private getFilename(response: HttpResponse<any>): string {

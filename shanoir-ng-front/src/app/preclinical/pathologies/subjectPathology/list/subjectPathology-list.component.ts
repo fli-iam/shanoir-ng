@@ -55,6 +55,13 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     protected getEntity() {
         return new SubjectPathology();
     }
+    
+    protected getOptions(): any {
+        // Specify that we can't view a pathology'
+        return {
+            view: false
+        };
+    }
 
     protected getEntityList() {
         return this.preclinicalSubject.pathologies;
@@ -62,17 +69,19 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
 
     getEntities(): Promise<SubjectPathology[]> {
         let subjectPathologies: SubjectPathology[] = [];
-        if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
+        if (this.preclinicalSubject && this.preclinicalSubject.animalSubject) {
             // Initialize from breadcrumbs cache if existing
             let ts: SubjectPathology[];
             if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).pathologies != null) {
                 ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).pathologies;
                 this.preclinicalSubject.pathologies = ts;
-            } else {
+            } else if (this.preclinicalSubject.animalSubject.id) {
                 return this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(st => {
                     this.preclinicalSubject.pathologies = st;
                     return st;
                 });
+            } else {
+                this.preclinicalSubject.pathologies = [];
             }
             return Promise.resolve(this.preclinicalSubject.pathologies);
         }

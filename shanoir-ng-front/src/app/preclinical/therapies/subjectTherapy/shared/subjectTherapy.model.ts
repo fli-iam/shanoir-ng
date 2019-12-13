@@ -25,6 +25,7 @@ export class SubjectTherapy  extends Entity{
   dose: number;
   dose_unit: Reference;
   frequency: Frequency;
+  molecule: string;
   startDate: Date;
   endDate : Date;
 

@@ -68,7 +68,3 @@ INSERT INTO anesthetic_ingredient (id, concentration, anesthetic_id, concentrati
 (2, 54, 2, 21, 18), 
 (3, 52, 2, 21, 16), 
 (4, 34, 3, 21, 16);
-
-
-INSERT INTO animal_subject (id, subject_id, biotype_id, provider_id, specie_id, stabulation_id, strain_id) VALUES
-(1, 4, 3, 9, 1, 7, 23);

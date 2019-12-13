@@ -63,7 +63,6 @@ export class AnimalClinicalContextComponent  {
     private niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     
-    
     constructor(
             private studyService: StudyService,
             private centerService: CenterService,
@@ -100,6 +99,10 @@ export class AnimalClinicalContextComponent  {
                 this.onSelectCenter();
             }
             if (acquisitionEquipment) {
+                // reload acquisition equipments if we just added one acquisitionEquipment
+                if (this.acquisitionEquipments.indexOf(acquisitionEquipment) == -1) {
+                    this.acquisitionEquipments.push(acquisitionEquipment);
+                }
                 this.acquisitionEquipment = acquisitionEquipment;
                 this.onSelectAcquisitonEquipment();
             }
@@ -139,7 +142,7 @@ export class AnimalClinicalContextComponent  {
             .then(([allStudies, allCenters]) => {
                 for (let study of allStudies) {
                     for (let studyCenter of study.studyCenterList) {
-                        let center = allCenters.find(center => center.id === studyCenter.center.id);
+                        let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
                         if (center) {
                             let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
                                 && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
@@ -194,7 +197,7 @@ export class AnimalClinicalContextComponent  {
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
             this.studyService
-                .findSubjectsByStudyId(this.study.id)
+                .findSubjectsByStudyIdPreclinical(this.study.id, true)
                 .then(subjects => this.subjects = subjects);
         }
         this.onContextChange();
@@ -234,16 +237,6 @@ export class AnimalClinicalContextComponent  {
     private getContext(): ContextData {
         return new ContextData(this.study, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.niftiConverter, null);
-    }
-
-    private openCreateCenter = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
-            });
-        });
     }
 
     private getPrefilledCenter(): Center {
@@ -373,7 +366,7 @@ export class AnimalClinicalContextComponent  {
 
     
     private get hasCompatibleEquipments(): boolean {
-        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+        return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 
     private showStudyDetails() {

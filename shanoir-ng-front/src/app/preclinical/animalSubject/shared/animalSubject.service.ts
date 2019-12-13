@@ -54,7 +54,6 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
             .toPromise();
     }
 
-
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
       const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
       return this.http
@@ -66,21 +65,16 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
             .map(response => response).toPromise();
     }
-    
 
     createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
         return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, animalSubject.stringify())
             .map(res => res).toPromise();
     }
 
-    
-    
     createSubject(subject: Subject): Promise<Subject> {
         return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, subject.stringify())
             .toPromise();
     }
-    
-
     
     delete(id: number): Promise<void> {
         return this.http.delete<void>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL + '/' + id)

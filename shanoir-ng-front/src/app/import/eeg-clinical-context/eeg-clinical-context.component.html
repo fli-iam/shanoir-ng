@@ -32,8 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a center</label> 
             <span class="right-col">
                 <select-box [disabled]="!study || !centers" [(ngModel)]="center" (change)="onSelectCenter(); onContextChange();" 
-                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
-                        (onNewClick)="openCreateCenter()">
+                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center">
                     <select-option *ngFor="let center of centers" [value]="center">{{center?.name}}</select-option>
                 </select-box>
             </span>

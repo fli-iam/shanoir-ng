@@ -30,6 +30,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.BIDSService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,10 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
-	
+
+	@MockBean
+	private BIDSService bidsService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();

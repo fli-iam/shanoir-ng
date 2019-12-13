@@ -49,6 +49,11 @@ export class StudyService extends EntityService<Study> {
             .toPromise();
     }
 
+    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<SubjectWithSubjectStudy[]> {
+        return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
+            .toPromise();
+    }
+
     findStudiesIcanAdmin(): Promise<number[]> {
         return this.getAll().then(studies => {
             const myId: number = KeycloakService.auth.userId;
