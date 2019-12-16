@@ -1,6 +1,7 @@
 import { Component, Input, Output, OnInit, EventEmitter, ViewChildren, QueryList } from '@angular/core';
 import { FormGroup, FormControl }                 from '@angular/forms';
 import { Router as AngularRouter } from '@angular/router';
+import { ToolService }    from '../tool.service';
 import { ParameterControlService }    from './parameter-control.service';
 import { ParameterGroup }    from './parameter-group/parameter-group';
 import { ParameterGroupComponent }    from './parameter-group/parameter-group.component';
@@ -27,7 +28,8 @@ export class InvocationGuiComponent implements OnInit {
   private selectGroupChange: Subscription = null;
   private formChange: Subscription = null;
 
-  constructor(private pcs: ParameterControlService, 
+  constructor(private toolService: ToolService, 
+              private pcs: ParameterControlService, 
               private router: Router, 
               private angularRouter: AngularRouter, 
               private breadcrumbsService: BreadcrumbsService) {
@@ -46,10 +48,12 @@ export class InvocationGuiComponent implements OnInit {
 
   initializeInvocation() {
     if(this.form != null && this.parameterGroupComponents.length > 0) {
-      if(this.breadcrumbsService.currentStep.data.boutiquesInvocation != null) {
-        this.pcs.setFormFromInvocation(this.breadcrumbsService.currentStep.data.boutiquesInvocation, this.form);
-        let invocation = this.pcs.generateInvocation(this.form);
-        this.invocationChanged.emit(invocation);
+
+      let invocation = this.toolService.data.invocation;
+      if(invocation != null) {
+        this.pcs.setFormFromInvocation(invocation, this.form);
+        // let invocation = this.pcs.generateInvocation(this.form);
+        // this.invocationChanged.emit(invocation);
       }
       if(this.formChange == null) {
         this.formChange = this.form.valueChanges.subscribe( (value)=> this.onChange(value) );
@@ -95,8 +99,6 @@ export class InvocationGuiComponent implements OnInit {
   }
 
   onSelectData(parameter: Parameter<any>) {
-    this.breadcrumbsService.currentStep.data.boutiques = true;
-
     let invocation = this.pcs.generateInvocation(this.form);
     
     if(!parameter.list) {
@@ -105,14 +107,7 @@ export class InvocationGuiComponent implements OnInit {
       invocation[parameter.id] = [];
     }
     
-    // Set the boutiques data in all boutiques steps (there might be multiple boutiques steps in navigation history) 
-    for(let step of this.breadcrumbsService.steps) {
-      if(step.data.boutiques) {
-        step.data.boutiquesInvocation = invocation;
-        step.data.boutiquesCurrentParameterID = parameter.id;
-        step.data.boutiquesCurrentParameterIsList = parameter.list;
-      }
-    }
+    this.toolService.saveSession({ invocation: invocation, currentParameterId: parameter.id, currentParameterIsList: parameter.list });
 
     this.breadcrumbsService.replace = false;
     // this.breadcrumbsService.nameStep('Boutiques');

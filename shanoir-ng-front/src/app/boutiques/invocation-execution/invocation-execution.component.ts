@@ -14,13 +14,6 @@ export class InvocationExecutionComponent implements OnInit {
 
   constructor(private activatedRoute: ActivatedRoute, private breadcrumbService: BreadcrumbsService) {
     this.toolId = this.activatedRoute.snapshot.params['toolId'];
-
-    // for(let step of this.breadcrumbService.steps) {
-    //   if(step.data.boutiquesToolInfo) {
-    //     this.tool = step.data.boutiquesToolInfo;
-    //     break;
-    //   }
-    // }
   }
 
   ngOnInit() {

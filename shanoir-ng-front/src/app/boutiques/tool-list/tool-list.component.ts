@@ -50,8 +50,8 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
     let colDef: any[] = [
       { headerName: "Name", field: "name" },
       { headerName: "Description", field: "description" },
-      { headerName: "Id", field: "id" },
-      { headerName: "Downloads", field: "ndownloads" }
+      { headerName: "Id", field: "id", width: "100px" },
+      { headerName: "Downloads", field: "ndownloads", width: "60px" }
     ];
     return colDef;
   }

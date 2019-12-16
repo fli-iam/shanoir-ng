@@ -183,6 +183,7 @@ services:
       - front.server.address
       - BOUTIQUES_INPUT_PATH=/tmp/boutiques/input
       - BOUTIQUES_OUTPUT_PATH=/tmp/boutiques/output
+      # - BOUTIQUES_OUTPUT_PATH=/boutiques/
       # - BOUTIQUES_TMP_PATH_ON_HOST=/var/lib/docker/volumes/shanoir-ng_tmp/_data
       - BOUTIQUES_TMP_PATH_ON_HOST=/tmp
     volumes:
@@ -190,6 +191,7 @@ services:
       - certificate-share-data:/etc/ssl/certs/java:ro
       - tmp:/tmp
       - /var/run/docker.sock:/var/run/docker.sock
+      - boutiques:/boutiques
     networks:
       - shanoir_ng_network
     ports:
@@ -324,6 +326,12 @@ volumes:
       o: bind
       type: none
       device: /tmp
+  boutiques:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /boutiques
   logs:
 
 networks:

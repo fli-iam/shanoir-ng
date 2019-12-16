@@ -2,7 +2,7 @@
 
   <div *ngIf="parameterGroups['required'].size > 0" id="required-parameters">
     
-    <h3>Required parameters</h3>
+    <h3 i18n="Required parameters title@@RequiredParametersTitle">Required parameters</h3>
     
     <parameter-group #requiredParameterGroup *ngFor="let parameterGroup of parameterGroups['required'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['required'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase" (selectDataClicked)="onSelectData($event)"></parameter-group>
     
@@ -12,7 +12,7 @@
     
     <h3>
       <input id="toggle-optional-parameters" type="checkbox" (change)="onToggleOptionalParameters($event.target)" checked="true"> 
-      <label for="toggle-optional-parameters">Optional parameters</label>
+      <label for="toggle-optional-parameters" i18n="Optional parameters title@@OptionalParametersTitle">Optional parameters</label>
     </h3>
 
     <parameter-group #optionalParameterGroup *ngFor="let parameterGroup of parameterGroups['optional'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['optional'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase" (selectDataClicked)="onSelectData($event)"></parameter-group>

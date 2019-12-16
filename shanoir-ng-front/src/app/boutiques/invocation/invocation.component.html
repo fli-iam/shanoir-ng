@@ -3,9 +3,9 @@
 <invocation-gui #invocationGUI [descriptor]="descriptor" (invocationChanged)="onInvocationChanged($event)"></invocation-gui>
 
 <input #openInvocationInput id="open-invocation" type="file" (change)="openInvocation($event)" />
-<button (click)="openInvocationInput.click()">Open invocation</button>
+<button (click)="openInvocationInput.click()" i18n="Open invocation button@@OpenInvocationButton"><i class="fas fa-file-upload"></i> Open invocation</button>
 
 <textarea id="invocation" [(ngModel)]="invocationValue" (keyup)=invocationValueChanged($event)></textarea>
 
 <!-- <button (click)="setInvocation()">Set invocation</button> -->
-<button (click)="saveInvocation($event)">Save invocation</button>
+<button (click)="saveInvocation($event)" i18n="Save invocation button@@SaveInvocationButton"><i class="far fa-save"></i> Save invocation</button>

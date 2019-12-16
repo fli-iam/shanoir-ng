@@ -44,7 +44,7 @@ export class BreadcrumbsService {
                     break;
                 }
             }
-            this.saveSession();
+            // this.saveSession();
         });
 
         router.events.subscribe( (event: Event) => {
@@ -71,10 +71,10 @@ export class BreadcrumbsService {
                 this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                this.saveSession();
+                // this.saveSession();
             }
         });
-        this.loadSession();
+        // this.loadSession();
     }
 
     private focusStep(index: number) {
@@ -89,12 +89,12 @@ export class BreadcrumbsService {
 
     public nameStep(label: string) {
         this.nextLabel = label;
-        this.saveSession();
+        // this.saveSession();
     }
 
     public markMilestone() {
         this.nextMilestone = true;
-        this.saveSession();
+        // this.saveSession();
     }
     
     private processMilestone() {
@@ -141,39 +141,39 @@ export class BreadcrumbsService {
         return false;
     }
 
-    public saveSession() {
-        let stepsJSON = [];
-        for(let step of this.steps) {
-            stepsJSON.push(step.save())
-        }
+    // public saveSession() {
+    //     let stepsJSON = [];
+    //     for(let step of this.steps) {
+    //         stepsJSON.push(step.save())
+    //     }
 
-        sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
-            steps: stepsJSON, 
-            popFoundedStepIndex: this.popFoundedStepIndex,
-            replace: this.replace,
-            currentStepIndex: this.currentStepIndex,
-            nextLabel: this.nextLabel,
-            nextMilestone: this.nextMilestone }));
-    }
+    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
+    //         steps: stepsJSON, 
+    //         popFoundedStepIndex: this.popFoundedStepIndex,
+    //         replace: this.replace,
+    //         currentStepIndex: this.currentStepIndex,
+    //         nextLabel: this.nextLabel,
+    //         nextMilestone: this.nextMilestone }));
+    // }
 
-    public loadSession() {
-        let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
-        if(json == null) {
-            return;
-        }
-        this.popFoundedStepIndex = json.popFoundedStepIndex;
-        this.replace = json.replace;
-        this.currentStepIndex = json.currentStepIndex;
-        this.nextLabel = json.nextLabel;
-        this.nextMilestone = json.nextMilestone;
-        this.steps = [];
-        for(let step of json.steps) {
-            this.steps.push(Step.load(step));
-        }
+    // public loadSession() {
+    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
+    //     if(json == null) {
+    //         return;
+    //     }
+    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
+    //     this.replace = json.replace;
+    //     this.currentStepIndex = json.currentStepIndex;
+    //     this.nextLabel = json.nextLabel;
+    //     this.nextMilestone = json.nextMilestone;
+    //     this.steps = [];
+    //     for(let step of json.steps) {
+    //         this.steps.push(Step.load(step));
+    //     }
 
-        this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
-        this.ignoreNavigationEnd = true;
-    }
+    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
+    //     this.ignoreNavigationEnd = true;
+    // }
 }
 
 export class Step {
@@ -263,38 +263,38 @@ export class Step {
         this.waitStep = null;
     }
 
-    public save() {
-        return {
-            label: this.label,
-            route: this.route,
-            timestamp: this.timestamp,
-            id: this.id, 
-            subscribers: this.subscribers,
-            disabled: this.disabled,
-            displayWaitStatus: this.displayWaitStatus,
-            prefilled: this.prefilled,
-            waitStep: this.waitStep != null ? this.waitStep.id : null,
-            onSaveSubject: null,
-            milestone: this.milestone,
-            entity: this.entity != null ? this.entity.id : null,
-            data: this.data,
-            importStart: this.importStart
-        }
-    }
+    // public save() {
+    //     return {
+    //         label: this.label,
+    //         route: this.route,
+    //         timestamp: this.timestamp,
+    //         id: this.id, 
+    //         subscribers: this.subscribers,
+    //         disabled: this.disabled,
+    //         displayWaitStatus: this.displayWaitStatus,
+    //         prefilled: this.prefilled,
+    //         waitStep: this.waitStep != null ? this.waitStep.id : null,
+    //         onSaveSubject: null,
+    //         milestone: this.milestone,
+    //         entity: this.entity != null ? this.entity.id : null,
+    //         data: this.data,
+    //         importStart: this.importStart
+    //     }
+    // }
 
-    static load(json: any) {
-        let step = new Step(json.label, json.route, json.timestamp);
-        step.id = json.id;
-        step.subscribers = json.subscribers;
-        step.disabled = json.disabled;
-        step.displayWaitStatus = json.displayWaitStatus;
-        step.prefilled = json.prefilled;
-        step.waitStep = json.waitStep;
-        step.onSaveSubject = json.onSaveSubject;
-        step.milestone = json.milestone;
-        step.entity = json.entity;
-        step.data = json.data;
-        step.importStart = json.importStart;
-        return step;
-    }
+    // static load(json: any) {
+    //     let step = new Step(json.label, json.route, json.timestamp);
+    //     step.id = json.id;
+    //     step.subscribers = json.subscribers;
+    //     step.disabled = json.disabled;
+    //     step.displayWaitStatus = json.displayWaitStatus;
+    //     step.prefilled = json.prefilled;
+    //     step.waitStep = json.waitStep;
+    //     step.onSaveSubject = json.onSaveSubject;
+    //     step.milestone = json.milestone;
+    //     step.entity = json.entity;
+    //     step.data = json.data;
+    //     step.importStart = json.importStart;
+    //     return step;
+    // }
 }

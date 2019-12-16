@@ -14,6 +14,7 @@
 
 import { Component, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { ToolService } from '../tool.service';
 import { ActivatedRoute } from '@angular/router';
 import { File } from '../tree/file-tree.component';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
@@ -51,6 +52,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
     @ViewChild('fileTable', { static: false }) table: TableComponent;
     
     constructor(
+            private toolService: ToolService,
             private datasetService: DatasetService,
             private route: ActivatedRoute,
             private dicomArchiveService: DicomArchiveService,
@@ -124,15 +126,15 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
 
     setFile(path) {
         // find Boutiques steps and give appropriate data
-        for(let step of this.breadcrumbsService.steps) {
-            if(step.data.boutiques) {
-                if(step.data.boutiquesCurrentParameterIsList) {
-                    step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID].push(path)
-                } else {
-                    step.data.boutiquesInvocation[step.data.boutiquesCurrentParameterID] = path;
-                }
-            }
+
+        let parameterId = this.toolService.data.currentParameterId;
+        let invocation = this.toolService.data.invocation;
+        if(this.toolService.data.currentParameterIsList) {
+            invocation[parameterId].push(path);
+        } else {
+            invocation[parameterId] = path;
         }
+        this.toolService.saveSession({ invocation: invocation });
         history.go(-2);
     }
 

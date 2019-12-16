@@ -45,12 +45,20 @@ export class InvocationComponent implements OnInit {
     });
 
     this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor);
-    
-    if(this.breadcrumbsService.currentStep.data.boutiquesInvocation == null) {
-      this.toolService.getInvocation(this.toolId).then((invocation)=> { 
+
+    this.invocation = this.toolService.data.invocation;
+
+    if(this.invocation == null) {
+      this.toolService.getDefaultInvocation(this.toolId).then((invocation)=> { 
+        // If invocation has changed before the default one was retrieved from server: ignore default one
+        if(this.toolService.data.invocation) {
+          return;
+        }
         this.onInvocationChanged(invocation);
-        this.invocationGUI.setInvocation(this.invocation);
+        this.invocationGUI.setInvocation(invocation);
       });
+    } else {
+      this.invocationValue = this.getInvocationValue();
     }
   }
 
@@ -85,13 +93,7 @@ export class InvocationComponent implements OnInit {
   }
 
   storeInvocation() {
-    // Set the boutiques data in all boutiques steps (there might be multiple boutiques steps in navigation history) 
-    for(let step of this.breadcrumbsService.steps) {
-      if(step.data.boutiques) {
-        step.data.boutiquesInvocation = this.invocation;
-      }
-    }
-    this.breadcrumbsService.saveSession();
+    this.toolService.saveSession({ invocation: this.invocation});
   }
 
   onInvocationChanged(invocation) {

@@ -6,23 +6,30 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.boutiques.model.BoutiquesTool;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
@@ -104,7 +111,8 @@ public class BoutiquesUtils {
     }
     
 	public static String writeTemporaryFile(String pFilename, String content) throws IOException {
-	    File tempDir = new File(System.getProperty("java.io.tmpdir"));
+	    File tempDir = new File(System.getProperty(JAVA_IO_TMPDIR) + File.separator + "boutiques-tmp");
+	    tempDir.mkdirs();
 	    File tempFile = File.createTempFile(pFilename, ".tmp", tempDir);
 	    FileWriter fileWriter = new FileWriter(tempFile, true);
 	    System.out.println(tempFile.getAbsolutePath());
@@ -233,7 +241,7 @@ public class BoutiquesUtils {
 	    return filePath.toString();
     }
 
-    public static ArrayList<BoutiquesTool> getAllTools() {
+    public static ArrayList<BoutiquesTool> searchAllTools() {
 
         ArrayList<BoutiquesTool> searchResults = new ArrayList<BoutiquesTool>();
         try {
@@ -280,32 +288,158 @@ public class BoutiquesUtils {
 	    }
     }
     
-    public static void updateToolDatabase() {
-    	ArrayList<BoutiquesTool> searchResults = getAllTools();
+    public static void updateToolDatabase() throws Exception {
+    	ArrayList<BoutiquesTool> searchResults = searchAllTools();
     	String pullCommandLine = BOUTIQUES_COMMAND + " pull";
     	for (BoutiquesTool boutiquesTool : searchResults) {
     		pullCommandLine += " " + boutiquesTool.getId();
 		}
-        try {
-        	Process process = runCommandLineAsync(pullCommandLine, null);
+    	
+    	Process process = runCommandLineAsync(pullCommandLine, null);
 
-            Thread commandLineThread = new Thread(() -> {
-                try {
-					int exitCode = process.waitFor();
-					if(exitCode == 0) {
-						updateToolDatabaseFiles(searchResults);
-					} else {
-			            System.out.println("Error: bosh process ended with exit code " + exitCode);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+        Thread commandLineThread = new Thread(() -> {
+            try {
+				int exitCode = process.waitFor();
+				if(exitCode == 0) {
+					updateToolDatabaseFiles(searchResults);
+				} else {
+		            System.out.println("Error: bosh process ended with exit code " + exitCode);
 				}
-            });
-            
-            commandLineThread.start();
-            
-        } catch (Exception e) {
-            System.out.println("Error: " + e);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+        });
+        
+        commandLineThread.start();
+    }
+
+    
+    public static void createDirectory(String path) {
+		final File directory = new File(path);
+		if (!directory.exists()) {
+			directory.mkdirs();
+		}
+    }
+    
+    public static void setInputPaths(ObjectNode descriptor, ObjectNode invocation, String inputPath) {
+    	ArrayNode inputs = (ArrayNode) descriptor.get("inputs");
+        for (int i = 0; i < inputs.size(); i++) {
+            JsonNode input = inputs.get(i);
+            String id = input.get("id").asText();
+            if(input.has("type") && input.get("type").asText().contentEquals("File") && invocation.has(id)) {
+            	String filePath = invocation.get(id).asText();
+            	invocation.put(id, inputPath + File.separator + filePath);
+            }
         }
+    }
+
+    public static void checkOutputPaths(ObjectNode descriptor, ObjectNode invocation) throws ResponseStatusException {
+    	ArrayNode inputs = (ArrayNode) descriptor.get("inputs");
+    	// See the description of how the output files are generated: "Boutiques: a flexible framework for automatedapplication integration in computing platforms"
+	    //                                                            https://arxiv.org/pdf/1711.09713.pdf
+
+	    // For all inputs: if the parameter is a File or a String and has a "value-key":
+	    //      check if an "output-file" has a "path-template" containing this "value-key",
+	    //      remove all "path-template-stripped-extensions" from the input parameter value (which is a file name),
+	    //      then replace this "value-key" in the "path-template" with the file name (= the input parameter value)
+	    //      check that the resulting output paths are not absolute and do not contain double dot symbols (../)			
+        for (int i = 0; i < inputs.size(); i++) {
+            JsonNode inputObject = inputs.get(i);
+            String inputId = inputObject.get("id").asText();
+            
+	        if(!inputObject.has("type")) {
+	        	continue;
+	        }
+	        String inputType = inputObject.get("type").asText();
+	        
+	        if((inputType.contentEquals("File") || inputType.contentEquals("String")) && invocation.has(inputId)) {
+	            // For all output files: check if one has "path-template" containing the "value-key" of the current input
+	            String fileName = invocation.get(inputId).asText();
+	            
+				ArrayNode outputFiles = (ArrayNode) descriptor.get("output-files");
+	            
+	    	    for (int j = 0; j < outputFiles.size(); j++) {
+
+	                JsonNode outputFilesDescription = outputFiles.get(j);
+	                String pathTemplate = outputFilesDescription.get("path-template").asText();
+
+	                // If the input is a File, remove the "path-template-stripped-extensions"
+	                if(inputType.contentEquals("File") && outputFilesDescription.has("path-template-stripped-extensions")) {
+	                	ArrayNode pathTemplateStrippedExtensions = (ArrayNode) outputFilesDescription.get("path-template-stripped-extensions");
+
+	                    for (int k = 0 ; k<pathTemplateStrippedExtensions.size() ; ++k) {
+	                        String pathTemplateStrippedExtension = pathTemplateStrippedExtensions.get(k).asText();
+	                        fileName.replace(pathTemplateStrippedExtension, "");
+	                    }
+	                }
+
+	                String valueKey = inputObject.get("value-key").asText();
+	                
+	                if(pathTemplate.contains(valueKey)) {
+	                    // If the current output file has a "path-template" containing the current input "value-key": replace the "value-key" by the file name (!input value)
+	                	pathTemplate = pathTemplate.replace(valueKey, fileName);
+
+	                    // Make sure the path is not absolute and does not contain ../
+	                    if(pathTemplate.contains("../"))
+	                    {
+	                        throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "Output paths must not contain double-dot symbols (../).");
+	                    }
+	                    if(pathTemplate.startsWith("/")) {
+	                        throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "Output paths must not be absolute.");
+	                    }
+	                }
+	            }
+	        }
+	    }
+    }
+    
+	private static void zip(String sourceDirPath, String zipFilePath) throws IOException {
+		Path p = Paths.get(zipFilePath);
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
+			Path pp = Paths.get(sourceDirPath);
+			Files.walk(pp)
+				.filter(path -> !Files.isDirectory(path))
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+					try {
+						zos.putNextEntry(zipEntry);
+						Files.copy(path, zos);
+						zos.closeEntry();
+					} catch (IOException e) {
+//						LOG.error(e.getMessage(), e);
+					}
+				});
+            	zos.finish();
+            zos.close();
+		}
+	}
+	
+	public static String zipOutput(String processId) throws IOException {
+    	String outputPath = BoutiquesUtils.getProcessOutputPath(processId);
+    	String outputPathZip = outputPath + ".zip";
+    	File file = new File(outputPathZip);
+    	file.deleteOnExit();
+    	zip(outputPath, outputPathZip);
+    	return outputPath + ".zip";
+    }
+    
+    public ArrayNode listDirectoryObjectNode( File dir ) {
+    	File[] content = dir.listFiles(); 
+    	
+    	ObjectMapper mapper = new ObjectMapper();
+        ArrayNode files = mapper.createArrayNode();
+
+    	for( File f : content ) {
+    		ObjectNode fileObject = mapper.createObjectNode();
+    		fileObject.put("name", f.getName());
+    		fileObject.put("path", f.getAbsolutePath());
+    		fileObject.put("isDirectory", f.isDirectory());
+    		if(f.isDirectory()) {
+        		fileObject.set("files", listDirectoryObjectNode( f ));
+    		}
+    		files.add(fileObject);
+    	}
+
+    	return files;
     }
 }

@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<form *ngIf="dataset" class="max-content" [formGroup]="form">
 		<div class="layout">
 
-			<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Dataset files</h2>
+			<h2 class="header command-zone" i18n="Dataset files title|Title of the boutiques dataset files@@boutiquesDatasetFilesTitle">Dataset files</h2>
 
 			<shanoir-table #fileTable
 				[getPage]="getPage.bind(this)" 
@@ -25,12 +25,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[browserSearch]="false">
 			</shanoir-table>
 
-<!-- 			<fieldset *ngIf="mode=='view'">
+<!--
+		<fieldset *ngIf="mode=='view'">
 				<legend i18n="Subject data|Title@@subjectDetailDataTitle">File tree</legend>
 				<file-tree [files]="files" (fileSelected)="onFileSelected($event)"></file-tree>
-			</fieldset>
+		</fieldset>
  -->
-			<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Dataset details</h2>
+			<h2 class="header command-zone" i18n="Dataset view title|Title of the boutiques dataset view@@boutiquesDatasetDetailViewTitle">Dataset details</h2>
 
 			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>

@@ -22,7 +22,6 @@ export class BoutiquesComponent {
 
   onToolSelected(toolInfo: ToolInfo) {
     this.breadcrumbService.nameStep(toolInfo.name);
-    this.breadcrumbService.currentStep.data.boutiquesToolInfo = toolInfo;
     this.router.navigate(['boutiques/' + toolInfo.id], {replaceUrl: false });
   }
 }

@@ -323,7 +323,6 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
 		}
-//		return new ResponseEntity<String>(workFolder.getAbsolutePath(), HttpStatus.OK);
 		return new ResponseEntity<String>(workFolderId, HttpStatus.OK);
 	}
 	

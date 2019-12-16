@@ -24,7 +24,6 @@ export class ExecutionComponent implements OnInit {
   outputLines: SafeHtml[] = [];
   executionIntervalId = null;
   processFinished: boolean = null;
-  sessionId: number = Date.now();
   
   private invocationSubject = new Subject<string>();
 
@@ -41,9 +40,10 @@ export class ExecutionComponent implements OnInit {
     //   console.log(message.body);
     //   this.output += message.body + "\n";
     // });
-
-    if(this.breadcrumbsService.currentStep.data.boutiquesExecution != null) {
-      this.sessionId = this.breadcrumbsService.currentStep.data.boutiquesExecution;
+    
+    this.invocation = this.toolService.data.invocation;
+    
+    if(this.toolService.data.isProcessing) {
       this.setGetOutputInterval();
     }
 
@@ -60,6 +60,7 @@ export class ExecutionComponent implements OnInit {
       });
 
     });
+
   }
 
   ngOnDestroy() {
@@ -68,7 +69,6 @@ export class ExecutionComponent implements OnInit {
 
   onInvocationChanged(invocation: any) {
     if(this.toolId == null) {
-      this.msgBoxService.log('warn', 'No tool selected.');
       return;
     }
 
@@ -94,9 +94,8 @@ export class ExecutionComponent implements OnInit {
     }
     this.outputLines = [];
     this.processFinished = false;
-    this.breadcrumbsService.currentStep.data.boutiquesExecutionId = this.sessionId;
-    this.breadcrumbsService.saveSession();
-    this.toolService.execute(this.toolId, this.invocation, this.sessionId).then((output)=> {
+
+    this.toolService.execute(this.toolId, this.invocation).then((output)=> {
       // this.output = output;
       if(output.startsWith('Error')) {
         this.msgBoxService.log('warn', output);
@@ -111,7 +110,7 @@ export class ExecutionComponent implements OnInit {
   }
 
   getOutput() {
-    this.toolService.getExecutionOutput(this.toolId, this.sessionId).then((output:any)=> {
+    this.toolService.getExecutionOutput(this.toolId).then((output:any)=> {
       if(output != null && output.input != null) {
         for(let input of output.input) {
           this.outputLines.push(this.sanitizer.bypassSecurityTrustHtml(ExecutionComponent.ansi_up.ansi_to_html(input)));
@@ -125,11 +124,12 @@ export class ExecutionComponent implements OnInit {
       if(output == null || output.finished) {
         clearInterval(this.executionIntervalId);
         this.processFinished = true;
+        this.toolService.saveSession({ isProcessing: false });
       }
     });
   }
 
   onDownloadResults(link: string) {
-    this.toolService.downloadOutput(this.toolId, this.sessionId);
+    this.toolService.downloadOutput(this.toolId);
   }
 }
