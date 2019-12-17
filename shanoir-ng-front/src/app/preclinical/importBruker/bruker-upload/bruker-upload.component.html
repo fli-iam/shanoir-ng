@@ -55,4 +55,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span *ngIf="modality=='PET'">PET</span>
     </p>
 </fieldset>
+<div *ngIf="uploadProgress == 5">
+    <checkbox [(ngModel)]="keepArchive" (onChange)="storeArchiveChanged(event)"></checkbox>
+    <label i18n="Store bruker archive|Store bruker archive label@@StoreBrukerArchive"> Store bruker archive </label>
+</div>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

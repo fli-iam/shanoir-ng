@@ -63,7 +63,9 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                         preSubject.animalSubject = s;
                         preSubject.id = s.id;
                         preSubject.subject = this.getSubjectWithId(s.subjectId);
-                        this.preclinicalSubjects.push(preSubject);
+                        if (preSubject.subject) {
+                            this.preclinicalSubjects.push(preSubject);
+                        }
                     }
                 }
                 resolve(this.preclinicalSubjects);

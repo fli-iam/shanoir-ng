@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
@@ -31,5 +32,14 @@ export class AnimalExaminationService extends EntityService<Examination>{
             AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1', 
             { 'params': pageable.toParams() }
         ).toPromise();
-    }   
+    }
+
+    getBrukerArchive(examinationId): Promise<HttpResponse<Blob>> {
+        return this.http.get(
+            AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/examinationId/' + examinationId  + '/export',
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise();
+    }
+
+
 }

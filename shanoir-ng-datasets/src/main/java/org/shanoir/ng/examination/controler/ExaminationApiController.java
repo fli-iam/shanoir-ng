@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.examination.controler;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -31,9 +35,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -52,7 +60,16 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ExaminationService examinationService;
-	
+
+	private final HttpServletRequest request;
+
+	@Value("${datasets-data}")
+	private String niftiStorageDir;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExaminationApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
@@ -164,7 +181,7 @@ public class ExaminationApiController implements ExaminationApi {
 		//			return new ResponseEntity<Long>(HttpStatus.FOUND);
 		//		}
 		
-		// TODO : need to add a data Validation STEP 
+		// TODO : need to add a data Validation STEP
 
 		final Examination createdExamination = examinationService.save(examinationDTO);
 		LOG.warn("Subject service completed");
@@ -172,6 +189,44 @@ public class ExaminationApiController implements ExaminationApi {
 
 	}
 	
+	@Override
+	public ResponseEntity<ByteArrayResource> exportExaminationExportById(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+			throws RestServiceException {
+		// Get examination from ID
+		Examination exam = examinationService.findById(examinationId);
+		String archiveToExport = null;
+		for (String extraDataFile : exam.getExtraDataFilePathList()) {
+			if (extraDataFile.startsWith(niftiStorageDir + "/preclinical/")) {
+				archiveToExport = extraDataFile;
+				break;
+			}
+		}
+		if (archiveToExport == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		File archiveFile = new File(archiveToExport);
+		
+		byte[] data;
+		try {
+			data = Files.readAllBytes(archiveFile.toPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(archiveFile.getAbsolutePath());
+
+		return ResponseEntity.ok()
+				// Content-Disposition
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveFile.getName())
+				// Content-Type
+				.contentType(MediaType.parseMediaType(contentType)) //
+				// Content-Length
+				.contentLength(data.length) //
+				.body(resource);
+	}
 	
 	/**
 	 * Validate a dataset
@@ -184,7 +239,7 @@ public class ExaminationApiController implements ExaminationApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
 
 }

@@ -240,6 +240,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			(back)="goBack()"
 			(cancel)="goToView()"
 		></form-footer>
+        <button *ngIf="mode=='view' && examination && examination.extraDataFilePathList && examination.extraDataFilePathList[0]" (click)="exportBruker()">Download bruker archive</button>
 	</div>
 	</form>
   

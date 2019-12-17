@@ -34,6 +34,7 @@ export class Examination extends Entity {
     subjectWeight: number;
     preclinical: boolean;
     hasStudyCenterData: boolean = false;
+    extraDataFilePathList: String[];
     
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 }

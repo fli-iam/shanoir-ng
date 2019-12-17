@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -23,6 +24,8 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -158,5 +161,20 @@ public interface ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "If exists, returns the bruker archive of the examination corresponding to the given id", response = Resource.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examination", response = Examination.class),
+	        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+	        @ApiResponse(code = 401, message = "unauthorized"),
+	        @ApiResponse(code = 403, message = "forbidden"),
+	        @ApiResponse(code = 404, message = "no dataset found"),
+	        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/preclinical/examinationId/{examinationId}/export",
+		produces = { "application/json" },
+		method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<ByteArrayResource> exportExaminationExportById(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+			throws RestServiceException, IOException;
 
 }

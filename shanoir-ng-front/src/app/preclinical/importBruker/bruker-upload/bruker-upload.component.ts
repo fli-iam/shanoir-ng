@@ -34,6 +34,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class BrukerUploadComponent {
 
+    @Input() protected keepArchive: boolean;
+
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
@@ -41,7 +43,8 @@ export class BrukerUploadComponent {
     
     private readonly ImagesUrlUtil = ImagesUrlUtil;
     
-    public archive: string;
+    protected archive: string;
+    protected archiveFolder: string;
     fileToUpload: File = null;
     uploadProgress: number = 0;
 
@@ -84,6 +87,7 @@ export class BrukerUploadComponent {
         	.subscribe(res => {
     			this.archive = this.fileToUpload.name;
     			this.uploadProgress = 3;
+                        this.archiveFolder = res.substring(res.indexOf(".") + 1, res.indexOf(".converted.zip"));
     			this.importBrukerService.importDicomFile(res)
             		.subscribe((patientDicomList: ImportJob) => {
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
@@ -106,6 +110,17 @@ export class BrukerUploadComponent {
                 	this.setArchiveStatus('error');
                 }
             );
+    }
+
+    protected storeArchiveChanged() {
+        // Get the name of the file to get
+        if (this.keepArchive) {
+            let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
+            let archiveName  = '/tmp/bruker/convert/' + archiveFileName + '/' + this.archiveFolder + '/' + this.archive;
+            this.importDataService.archiveUploaded.archive = archiveName;
+        } else {
+            this.importDataService.archiveUploaded.archive = undefined;
+        }
     }
 
      private setArchiveStatus(status: Status) {

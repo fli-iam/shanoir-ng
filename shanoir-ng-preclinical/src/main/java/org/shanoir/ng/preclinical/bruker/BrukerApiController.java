@@ -72,6 +72,7 @@ public class BrukerApiController implements BrukerApi {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Override
 	public ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
 			throws RestServiceException {
 		if (uploadfiles == null || uploadfiles.length == 0) {
@@ -89,13 +90,15 @@ public class BrukerApiController implements BrukerApi {
 			}
 			LOG.info("upload bruker file [" + fileName + "]");
 			Path brukerDirFile = createBrukerTempFile(fileName);
+			String brukerDirString = brukerDirFile.getFileName().toString();
+
 			LOG.info("bruker temp file has been created " + brukerDirFile.toFile().getAbsolutePath());
 			Path uploadedFile = saveUploadedFileTmp(brukerFile, brukerDirFile);
 			LOG.info("bruker zip archive has been uploaded ");
 			unzipBrukerArchive(uploadedFile.toFile().getAbsolutePath(), brukerDirFile.toFile().getAbsolutePath());
 			LOG.info("bruker file has been unzipped into " + brukerDirFile);
 			boolean isValidBruker = checkBrukerCrawlFor2dseq(
-					Arrays.asList((new File(brukerDirFile.toAbsolutePath().toString())).listFiles()),
+					Arrays.asList(new File(brukerDirFile.toAbsolutePath().toString()).listFiles()),
 					RECONSTRUCTED_DATA_FILES);
 			LOG.info("isValidBruker for {" + fileName + "}? " + isValidBruker);
 
@@ -104,7 +107,7 @@ public class BrukerApiController implements BrukerApi {
 				LOG.info("START BRUKER 2 DICOM");
 				startBruker2Dicom(brukerDirFile);
 				LOG.info("ZIP DICOM FILES");
-				File destinationZip = File.createTempFile(destinationFilePath, ".converted.zip");
+				File destinationZip = File.createTempFile(destinationFilePath, "." + brukerDirString + ".converted.zip");
 				LOG.info("zip destinationFilePath = " + destinationFilePath + ", destinationZip = "
 						+ destinationZip.getAbsolutePath().toString() + ", rootFolderToRemove = " + RESULT_FOLDER);
 				zipFolder(destinationFilePath, destinationZip, RESULT_FOLDER);
@@ -133,7 +136,7 @@ public class BrukerApiController implements BrukerApi {
 	private void startBruker2Dicom(Path brukerDirFile) throws RestServiceException {
 		String sourceFilePath = brukerDirFile.toAbsolutePath().toString();
 		String destinationFilePath = brukerDirFile.toAbsolutePath().toString() + File.separator + RESULT_FOLDER;
-		String requestJson = "{\"source\":\"" + sourceFilePath 
+		String requestJson = "{\"source\":\"" + sourceFilePath
 				+ "\", \"destination\":\"" + destinationFilePath
 				+ "\", \"dicomdir\": true }";
 		HttpHeaders headers = new HttpHeaders();
@@ -170,12 +173,13 @@ public class BrukerApiController implements BrukerApi {
 	 * @throws IOException
 	 */
 	private Path createBrukerTempFile(String fileName) throws IOException {
+		int index = 0;
 		String pathFile = preclinicalConfig.getUploadBrukerFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
 				+ FOLDER_SEP + fileName;
 		Path path = Paths.get(pathFile);
 		// if the folder exists, create a new folder by adding a figure at the end of
 		// the folder name
-		int index = 0;
+		path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
 		while (Files.exists(path)) {
 			path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
 			index++;

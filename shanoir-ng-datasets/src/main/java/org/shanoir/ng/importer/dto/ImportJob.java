@@ -48,11 +48,22 @@ public class ImportJob {
 	@JsonProperty("workFolder")
 	private String workFolder;
     
+    @JsonProperty("archive")
+    private String archive;
+    
+	public String getArchive() {
+		return archive;
+	}
+
+	public void setArchive(final String archive) {
+		this.archive = archive;
+	}
+	
 	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
-	public void setFromDicomZip(boolean fromDicomZip) {
+	public void setFromDicomZip(final boolean fromDicomZip) {
 		this.fromDicomZip = fromDicomZip;
 	}
 
@@ -60,7 +71,7 @@ public class ImportJob {
 		return fromShanoirUploader;
 	}
 
-	public void setFromShanoirUploader(boolean fromShanoirUploader) {
+	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
 		this.fromShanoirUploader = fromShanoirUploader;
 	}
 
@@ -68,7 +79,7 @@ public class ImportJob {
 		return fromPacs;
 	}
 
-	public void setFromPacs(boolean fromPacs) {
+	public void setFromPacs(final boolean fromPacs) {
 		this.fromPacs = fromPacs;
 	}
 
@@ -76,7 +87,7 @@ public class ImportJob {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(final List<Patient> patients) {
 		this.patients = patients;
 	}
 
@@ -84,7 +95,7 @@ public class ImportJob {
 		return examinationId;
 	}
 
-	public void setExaminationId(Long examinationId) {
+	public void setExaminationId(final Long examinationId) {
 		this.examinationId = examinationId;
 	}
 
@@ -92,7 +103,7 @@ public class ImportJob {
 		return frontStudyId;
 	}
 
-	public void setFrontStudyId(Long frontStudyId) {
+	public void setFrontStudyId(final Long frontStudyId) {
 		this.frontStudyId = frontStudyId;
 	}
 
@@ -100,7 +111,7 @@ public class ImportJob {
 		return frontAcquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
+	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
 		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
 	}
 
@@ -108,7 +119,7 @@ public class ImportJob {
 		return workFolder;
 	}
 
-	public void setWorkFolder(String workFolder) {
+	public void setWorkFolder(final String workFolder) {
 		this.workFolder = workFolder;
 	}
 }

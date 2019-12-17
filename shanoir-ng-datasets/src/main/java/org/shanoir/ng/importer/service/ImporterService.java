@@ -48,6 +48,7 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class ImporterService {
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
-	@Autowired 
+	@Autowired
 	private DicomPersisterService dicomPersisterService;
 
 	private ImportJob importJob;
@@ -87,11 +88,11 @@ public class ImporterService {
 
 	private static final String EEG_PREFIX = "eeg";
 
-	public void setImportJob(ImportJob importJob) {
+	public void setImportJob(final ImportJob importJob) {
 		this.importJob = importJob;
 	}
 
-	// TODO 
+	// TODO
 	public void retrieveMetadataInDicom() {
 	}
 
@@ -113,9 +114,46 @@ public class ImporterService {
 				}
 			}
 		}
+		if (importJob.getArchive() == null) {
+			return;
+		}
+		// Copy archive
+		File archiveFile = new File(importJob.getArchive());
+		if (!archiveFile.exists()) {
+			System.out.println("Archive file not found, not saved: " + importJob.getArchive());
+			return;
+		}
+		String fileName = niftiStorageDir + File.separator + "preclinical" + File.separator + examination.getStudyId() + File.separator + examination.getId() + File.separator;
+
+		File archive = new File(fileName);
+		
+		// Create archive directory
+		if (!archive.exists()) {
+			archive.mkdirs();
+		}
+
+		fileName += importJob.getArchive().substring(importJob.getArchive().lastIndexOf(File.separator));
+		Path destPath = new File(fileName).toPath();
+
+		try {
+			Files.copy(archiveFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e1) {
+			System.out.println("Could not copy archive to destination, not saved: " + importJob.getArchive());
+			return;
+		}
+
+		// Keep archive informations in examination
+		List<String> archives = new ArrayList<String>();
+		archives.add(fileName);
+		examination.setExtraDataFilePathList(archives);
+		try {
+			examinationService.update(examination);
+		} catch (EntityNotFoundException e) {
+			System.out.println(e);
+		}
 	}
 
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
+	public void createDatasetAcquisitionForSerie(final Serie serie, final int rank, final Examination examination) {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
@@ -135,14 +173,14 @@ public class ImporterService {
 		}
 	}
 
-	public void cleanTempFiles(String workFolder) {
+	public void cleanTempFiles(final String workFolder) {
 
 		if (workFolder != null) {
 			// delete workFolder.upload file
 			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
 			uploadZipFile.delete();
 			// delete workFolder
-			final boolean success = Utils.deleteFolder((new File(workFolder)));
+			final boolean success = Utils.deleteFolder(new File(workFolder));
 			if (!success) {
 				if (new File(workFolder).exists()) {
 					LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
@@ -159,7 +197,7 @@ public class ImporterService {
 	 * Create a dataset acquisition, and associated dataset.
 	 * @param importJob the import job from importer MS.
 	 */
-	public void createEegDataset(EegImportJob importJob) {
+	public void createEegDataset(final EegImportJob importJob) {
 
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().size() == 0) {
 			return;

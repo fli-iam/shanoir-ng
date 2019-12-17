@@ -14,6 +14,7 @@
 
 import { Component, ViewChild, ElementRef, OnChanges, Input} from '@angular/core';
 import { FormGroup,  Validators } from '@angular/forms';
+import { HttpResponse } from '@angular/common/http';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
@@ -34,6 +35,7 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
+import * as AppUtils from '../../../utils/app.utils';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { ActivatedRoute } from '@angular/router';
@@ -331,6 +333,25 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData = new BloodGasData();
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
+    }
+    
+    protected exportBruker() {
+        this.animalExaminationService.getBrukerArchive(this.examination.id)
+            .then(response => {this.downloadIntoBrowser(response);});;
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        if (response.status == 200) {
+            AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+        } else {
+            this.msgBoxService.log('warn', 'Error: No bruker archive found');
+        }
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
     
     onExamAnestheticChange(event) {
