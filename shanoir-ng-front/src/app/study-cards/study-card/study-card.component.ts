@@ -24,6 +24,8 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
+import { Option } from '../../shared/select/select.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 @Component({
     selector: 'study-card',
@@ -34,7 +36,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     private centers: IdName[] = [];
     private studies: IdName[] = [];
-    private acquisitionEquipments: Map<string, AcquisitionEquipment[]> = new Map();
+    private acquisitionEquipments: Option<AcquisitionEquipment>[];
     private niftiConverters: IdName[] = [];
 
     constructor(
@@ -43,7 +45,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private centerService: CenterService,
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
-            private niftiConverterService: NiftiConverterService) {
+            private niftiConverterService: NiftiConverterService,
+            private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
         super(route, 'study-card');
     }
 
@@ -102,12 +105,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     private fetchAcqEq(studyId: number): Promise<void> {
         return this.acqEqService.getAllByStudy(studyId)
             .then(acqEqs => {
-                this.acquisitionEquipments = new Map();
+                this.acquisitionEquipments = [];
                 for (let acqEq of acqEqs) {
-                    if (!this.acquisitionEquipments.has(acqEq.center.name)) {
-                        this.acquisitionEquipments.set(acqEq.center.name, []);
-                    }
-                    this.acquisitionEquipments.get(acqEq.center.name).push(acqEq);
+                    let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq), acqEq.center.name);
+                    this.acquisitionEquipments.push(option);
                 }
             });
     }
@@ -121,15 +122,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
                 if (this.studyCard.acquisitionEquipment) {
-                    let found: boolean = false;
-                    this.acquisitionEquipments.forEach((acqEqList: AcquisitionEquipment[], centerName: string) => {
-                        for (let acqEq of acqEqList) {
-                            if (acqEq.id == this.studyCard.acquisitionEquipment.id) {
-                                found = true;
-                                return;
-                            }
-                        }
-                    });
+                    let found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
                     if (!found) this.studyCard.acquisitionEquipment = null;
                 }
             });
@@ -137,7 +130,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         } else {
             form.get('acquisitionEquipment').disable();
             this.studyCard.acquisitionEquipment = null;
-            this.acquisitionEquipments = new Map();
+            this.acquisitionEquipments = [];
         }
     }
 

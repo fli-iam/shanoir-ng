@@ -25,6 +25,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'coil',
@@ -43,7 +44,8 @@ export class CoilComponent extends EntityComponent<Coil> {
     constructor(
             private route: ActivatedRoute,
             private coilService: CoilService, 
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            private manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');
     }
 

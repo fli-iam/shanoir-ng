@@ -12,27 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    AfterContentInit,
     Component,
-    ComponentFactoryResolver,
-    ContentChildren,
     ElementRef,
     EventEmitter,
     forwardRef,
     HostBinding,
     HostListener,
     Input,
+    OnChanges,
     OnDestroy,
     Output,
-    QueryList,
-    Renderer2,
+    SimpleChanges,
     ViewChild,
+    PipeTransform,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { GlobalService } from '../services/global.service';
-import { SelectOptionComponent } from './select.option.component';
 
 
 @Component({
@@ -47,15 +44,20 @@ import { SelectOptionComponent } from './select.option.component';
         }]   
 })
 
-export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, AfterContentInit {
+export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges {
 
-    private model: any = null;
     @Output() change = new EventEmitter();
-    @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
-    @ContentChildren('optionSection') private sections: QueryList<ElementRef>;
+    @Input() options: Option<any>[];
+    @Input() optionArr: any[];
+    @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
+    @Input() pipe: PipeTransform;
+    private displayedOptions: Option<any>[] = [];
     @ViewChild('input') textInput: ElementRef;
-    private _selectedOption: SelectOptionComponent;
-    private openState: boolean = false;
+    @ViewChild('hiddenOption') hiddenOption: ElementRef;
+    private _selectedOptionIndex: number;
+    private focusedOptionIndex: number;
+    private _firstScrollOptionIndex: number;
+    private filteredOptions: FilteredOptions;
     private globalClickSubscription: Subscription;
     private optionChangeSubscription: Subscription;
     private way: 'up' | 'down' = 'down';
@@ -63,9 +65,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     private inputText: string;
+    private _searchText: string;
     @Input() disabled: boolean = false;
     @Input() placeholder: string;
-    
+    private maxWidth: number;
+
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
     @Input() newDisabled: boolean;
@@ -76,70 +80,141 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();
 
+    readonly LIST_LENGTH: number = 16;
+
     constructor(
             private element: ElementRef, 
-            private globalService: GlobalService,
-            private renderer: Renderer2,
-            private componentFactoryResolver: ComponentFactoryResolver) {}
+            private globalService: GlobalService) {}
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
         if (this.optionChangeSubscription) this.optionChangeSubscription.unsubscribe();
+        if (this.scrollButtonInterval) clearInterval(this.scrollButtonInterval);
     }
 
-    ngAfterContentInit() {
-        this.options.forEach((option) => {
-            option.parent = this;
-            if (this.valuesEqual(option.value, this.model)) this.selectedOption = option;
-        });
-        this.optionChangeSubscription = this.options.changes.subscribe(() => {
-            this.inputText = null;
-            let founded: boolean = false;
-            this.options.forEach((option) => {
-                option.parent = this;
-                if (this.valuesEqual(option.value, this.model)) {
-                    this.selectedOption = option;
-                    founded = true;
-                    return;
-                }
+    ngOnChanges(changes: SimpleChanges) {
+        this.searchText = null;
+        if (changes.options && this.options && this.selectedOption) {
+            this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+        } else if (changes.optionArr && this.optionArr) {
+            this.options = [];
+            this.optionArr.forEach(item => {
+                let label: string = '';
+                if (this.pipe) label = this.pipe.transform(item);
+                else if (typeof(item) == 'string') label = item;
+                else if (item.label) label = item.label;
+                else if (item.name) label = item.name;
+                this.options.push(new Option<any>(item, label));
             });
-            if (!founded) this.selectedOption = null;
-        })
+            if (this.selectedOption)
+                    this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+        } else if (changes.optionBuilder && this.optionBuilder) {
+            if (this.optionBuilder.list) {
+                this.options = [];
+                this.optionBuilder.list.forEach(item => {
+                    let label: string = '';
+                    if (this.optionBuilder.getLabel) {
+                        label = this.optionBuilder.getLabel(item);
+                    }
+                    else if (this.optionBuilder.labelField) {
+                        label = item[this.optionBuilder.labelField];
+                    } 
+                    this.options.push(new Option<any>(item, label));
+                });
+                if (this.selectedOption)
+                    this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+            }
+        }
     }
 
-    private get selectedOption(): SelectOptionComponent {
-        return this._selectedOption;
+    writeValue(obj: any): void {
+        this.searchText = null;
+        if (this.options && this.selectedOption) {
+            this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+        }
     }
 
-    private set selectedOption(option: SelectOptionComponent) {
-        this.model = option ? option.value : null;
-        if (this._selectedOption) this._selectedOption.selected = false;
-        this._selectedOption = option;
-        if (this._selectedOption) {
-            this._selectedOption.selected = true;
-            this.inputText = this.selectedOption.label;
+    private get selectedOption(): Option<any> {
+        return this.options ? this.options[this.selectedOptionIndex] : undefined;
+    }
+
+    private get selectedOptionIndex(): number {
+        return this._selectedOptionIndex;
+    }
+    
+    private set selectedOptionIndex(index: number) {
+        if (index != this._selectedOptionIndex) {
+            this._selectedOptionIndex = index;
+            if (this.selectedOption) {
+                this.inputText = this.selectedOption.label;
+                this.onChangeCallback(this.selectedOption.value);
+                this.change.emit(this.selectedOption.value);
+            }
         }
     }
     
-    public onSelectedOptionChange(option: SelectOptionComponent) {
-        if (!this.optionsEqual(option, this.selectedOption)) {
-            this.selectedOption = option;
-            if (!option) this.inputText = this.selectedOption.label;
-            this.onChangeCallback(option.value);
-            this.change.emit(option.value);
+    private hasSelectedOption(): boolean {
+        return this.selectedOptionIndex != undefined && this.selectedOptionIndex != null;
+    }
+    
+    private unSelectOption() {
+        if (this.selectedOptionIndex) {
+            this.selectedOptionIndex = null;
         }
-        this.open = false;
-        this.options.forEach(option => {
-            option.hidden = false;
-        });
-        this.sections.forEach(section => {
-            section.nativeElement.classList.remove('hidden');
-        });
+        this.firstScrollOptionIndex = 0;
+        this.focusedOptionIndex = null;
     }
 
-    private optionsEqual(option1: SelectOptionComponent, option2: SelectOptionComponent) {
-        return option1 == option2
-            || (option1 && option2 && this.valuesEqual(option1.value, option2.value));
+    private computeMinWidth() {
+        let maxOption: Option<any>;
+        if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
+            this.displayableOptions.forEach(opt => {
+                if (!maxOption || opt.label.length > maxOption.label.length) {
+                    maxOption = opt;
+                }
+            })
+            this.hiddenOption.nativeElement.innerText = maxOption.label;
+            this.maxWidth = this.hiddenOption.nativeElement.offsetWidth;
+            this.hiddenOption.nativeElement.innerText = '';
+        }
+    }
+
+    private set searchText(text: string) {
+        this.focusedOptionIndex = null;
+        if (!text) {
+            this._searchText = null;
+            this.filteredOptions = null;
+        } else {
+            this._searchText = text.trim().toLowerCase();
+            if (this.searchText.length <= 0) {
+                this.filteredOptions = null;
+            } else if (!this.filteredOptions || this.filteredOptions.searchText != this.searchText) {
+                this.filteredOptions = new FilteredOptions(this.searchText, this.options);
+            }
+        }
+        this.computeMinWidth();
+    }
+
+    private get searchText(): string {
+        return this._searchText;
+    }
+    
+    private computeDisplayedOptions() {
+        if (this.firstScrollOptionIndex == undefined || this.firstScrollOptionIndex == null || !this.options) {
+            this.displayedOptions = [];
+            return;
+        }
+        this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
+    }
+    
+    private onUserSelectedOption(option: Option<any>) {
+        this.searchText = null;
+        this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
+        this.close();
+    }
+
+    private isOptionSelected(option: Option<any>) {
+        return this.hasSelectedOption() && this.valuesEqual(this.selectedOption.value, option.value);
     }
 
     private valuesEqual(value1, value2) {
@@ -147,61 +222,41 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
             value1 && value2 && value1.id && value2.id && value1.id == value2.id
         );
     }
-    
-    public onOptionOver(option: SelectOptionComponent) {
-        let focusIndex = this.getFocusIndex();
-        if (focusIndex != -1) {
-            this.options.toArray()[focusIndex].focus = false;
-        }
-        option.focus = true;
-    }
 
-    private set open(open: boolean) {
-        if(this.open == open) return;
-        if (open && !this.openState && this.options.length > 0) { //open
+    private open() {
+        if (this.isOpen()) return;
+        if (this.options) {
             this.subscribeToGlobalClick();
-            this.openState = true;
-        } else if (!open && this.openState) { //close
-            this.unsubscribeToGlobalClick();
-            this.options.forEach(option => option.focus = false);
-            this.openState = false;
-        }
-        if (this.openState) {
+            this.scrollToSelected();
             this.chooseOpeningWay();
-            this.scrollToSelectedOption();
+        }  
+    }
+
+    private close () {
+        // this.unsubscribeToGlobalClick();
+        // this.firstScrollOptionIndex = null;
+        // this.focusedOptionIndex = null;
+    }
+    
+    private isOpen(): boolean {
+        return this.firstScrollOptionIndex != undefined && this.firstScrollOptionIndex != null;
+    }
+
+    private set firstScrollOptionIndex(index: number) {
+        this._firstScrollOptionIndex = index;
+        this.computeDisplayedOptions();
+    }
+
+    private get firstScrollOptionIndex(): number {
+        return this._firstScrollOptionIndex;
+    }
+    
+    private scrollToSelected() {
+        if (this.scrollable) {
+            this.firstScrollOptionIndex = this.selectedOptionIndex ? this.selectedOptionIndex : 0;
+        } else {
+            this.firstScrollOptionIndex = 0;
         }
-    }
-
-    private get open(): boolean {
-        return this.openState;
-    }
-
-    private scrollToSelectedOption() {
-        setTimeout(() => {
-            if (!this.selectedOption) return;
-            let top: number = this.selectedOption.elt.nativeElement.offsetTop;
-            let listElt = this.element.nativeElement.querySelector('.list');
-            if (listElt) listElt.scrollTop = top;
-        });  
-    }
-
-    private scrollToFocusedOption() {
-        let focusIndex = this.getFocusIndex();
-        if (focusIndex == -1) return;
-        let focusedOption = this.options.toArray()[focusIndex];
-        setTimeout(() => {
-            let listElt = this.element.nativeElement.querySelector('.list');
-            if (!listElt) return;
-            let top: number = focusedOption.elt.nativeElement.offsetTop;
-            let height: number = focusedOption.elt.nativeElement.offsetHeight;
-            let frameTop: number = listElt.scrollTop;
-            let frameHeight: number = listElt.offsetHeight;
-            if (top < frameTop) {
-                listElt.scrollTop = top;
-            } else if (top > frameTop + frameHeight - height) {
-                listElt.scrollTop = top - frameHeight + height;
-            }
-        });  
     }
 
     chooseOpeningWay() {
@@ -220,7 +275,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
     private subscribeToGlobalClick() {
         this.globalClickSubscription = this.globalService.onGlobalClick.subscribe((clickEvent: Event) => {
             if (!this.element.nativeElement.contains(clickEvent.target)) {
-                this.open = false;
+                this.close();
             }
         });
     }
@@ -229,43 +284,52 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
         if (this.globalClickSubscription) this.globalClickSubscription.unsubscribe();
     }
 
+    onWheel(event) {
+        if (event.wheelDelta < 0 && (this.firstScrollOptionIndex < this.length - this.LIST_LENGTH)) {
+            this.firstScrollOptionIndex ++;
+        }
+        if (event.wheelDelta > 0 && this.firstScrollOptionIndex > 0) {
+            this.firstScrollOptionIndex --;
+        }
+        event.preventDefault();
+      }
+
     @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
         if ('ArrowDown' == event.key) {
-            let optArr = this.options.toArray();
-            let focusIndex = this.getFocusIndex();
-            let nextFocusIndex = this.nextOptionIndex(focusIndex);
-            if (nextFocusIndex != -1) {
-                if (optArr[focusIndex]) optArr[focusIndex].focus = false;
-                optArr[nextFocusIndex].focus = true;
-                if (!this.open) this.onSelectedOptionChange(optArr[nextFocusIndex]);
-                else this.scrollToFocusedOption();
-            }
-            event.preventDefault();
-        } else if ('ArrowUp' == event.key) {
-            let optArr = this.options.toArray();
-            let focusIndex = this.getFocusIndex();
-            if (focusIndex == -1) focusIndex = optArr.length - 1;
-            let prevFocusIndex = this.prevOptionIndex(focusIndex);
-            if (prevFocusIndex != -1 ) {
-                if (optArr[focusIndex]) optArr[focusIndex].focus = false;
-                optArr[prevFocusIndex].focus = true;
-                if (!this.open) this.onSelectedOptionChange(optArr[prevFocusIndex]);
-                else this.scrollToFocusedOption();
-            }
-            event.preventDefault();
-        } else if ('Enter' == event.key) {
-            if (!this.open && !this.disabled) {
-                this.open = true;
+            if (this.isOpen()) {
+                this.scrollDownByOne();
             } else {
-                let focusIndex = this.getFocusIndex();
-                if (focusIndex != -1) {
-                    this.onSelectedOptionChange(this.options.toArray()[focusIndex]);
+                if (this.hasSelectedOption && this.selectedOptionIndex < this.options.length) {
+                    this.onUserSelectedOption(this.options[this.selectedOptionIndex + 1]);
+                } else {
+                    this.onUserSelectedOption(this.options[0]);
                 }
             }
             event.preventDefault();
-        } 
-        else if (event.keyCode >= 65 && event.keyCode <= 90) {
+        } else if ('ArrowUp' == event.key) {
+            if (this.isOpen()) {
+                this.scrollUpByOne();
+            } else {
+                if (this.hasSelectedOption && this.selectedOptionIndex > 0) {
+                    this.onUserSelectedOption(this.options[this.selectedOptionIndex - 1]);
+                } else {
+                    this.onUserSelectedOption(this.options[0]);
+                }
+            }
+            event.preventDefault();
+        } else if ('Enter' == event.key) {
+            if (!this.isOpen() && !this.disabled) {
+                this.open();
+            } else {
+                if (this.focusedOptionIndex != null) {
+                    this.onUserSelectedOption(this.displayedOptions[this.focusedOptionIndex]);
+                }
+            }
+            event.preventDefault();
+        } else if (' ' == event.key) {
+            if (!this.isOpen()) this.open();
+        }  else if (event.keyCode >= 65 && event.keyCode <= 90) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = '';
                 this.textInput.nativeElement.focus();
@@ -273,83 +337,112 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
         }       
     }
 
-    private nextOptionIndex(currentIndex: number): number {
-        if (currentIndex >= this.options.length - 1) return -1;
-        let optArr = this.options.toArray();
-        for (let i = currentIndex + 1; i < optArr.length; i++) {
-            if (!optArr[i].hidden && !optArr[i].disabled) return i;
+    private scrollDownByOne() {
+        if (this.focusedOptionIndex == null) {
+            this.focusedOptionIndex = 0;
+            return;
         }
-        return -1;
+        //let nextIndex: number = this.displayableOptions.slice(this.focusedOptionIndex).findIndex()
+        if (this.focusedOptionIndex + this.firstScrollOptionIndex + 1 < this.displayableOptions.length) {
+            if (this.scrollable && this.focusedOptionIndex + 1 == this.LIST_LENGTH) {
+                this.firstScrollOptionIndex ++;
+            } else {
+                this.focusedOptionIndex ++;
+            }
+        }
     }
 
-    private prevOptionIndex(currentIndex: number): number {
-        if (currentIndex <= 0) return -1;
-        let optArr = this.options.toArray();
-        for (let i = currentIndex - 1; i >= 0; i--) {
-            if (!optArr[i].hidden && !optArr[i].disabled) return i;
+    private scrollUpByOne() {
+        if (this.focusedOptionIndex == null) {
+            this.focusedOptionIndex = 0;
+            return;
         }
-        return -1;
+        if (this.focusedOptionIndex + this.firstScrollOptionIndex > 0) {
+            if (this.scrollable && this.focusedOptionIndex == 0) {
+                this.firstScrollOptionIndex --;
+            } else {
+                this.focusedOptionIndex --;
+            }
+        }
+    }
+
+    private scrollButtonInterval;
+    private scrollButtonTime: number;
+
+    scrollButtonOn(way: 'down' | 'up') {
+        let now: number = Date.now();
+        this.scrollButtonTime = now;
+        if (way == 'down') {
+            if (this.firstScrollOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
+                this.firstScrollOptionIndex ++;
+            }
+        } else if (way == 'up') {
+            if (this.firstScrollOptionIndex > 0) {
+                this.firstScrollOptionIndex --;
+            }
+        }
+        setTimeout(() => {
+            if (this.scrollButtonTime == now) {
+                this.scrollButtonInterval = setInterval(() => {
+                    if (way == 'down') {
+                        if (this.firstScrollOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
+                            this.firstScrollOptionIndex ++;
+                        }
+                    } else if (way == 'up') {
+                        if (this.firstScrollOptionIndex > 0) {
+                            this.firstScrollOptionIndex --;
+                        }
+                    }
+                }, 50);
+            }
+        }, 500)
+    }
+
+    scrollButtonOff() {
+        this.scrollButtonTime = null;
+        if (this.scrollButtonInterval) clearInterval(this.scrollButtonInterval);
+    }
+
+    private dragStartOffsetY: number;
+    private dragging: boolean = false;
+    onDragStart(event, data) {
+        this.dragging = true;
+        let img = new Image();
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+        event.dataTransfer.setDragImage(img, 0, 0);
+        this.dragStartOffsetY = event.clientY - event.srcElement.getBoundingClientRect().top;
+    }
+
+    private lastDropY: number = 0;
+    private lastScroll: number = 0;
+    allowDrop(event) {
+        let dropY: number = event.clientY;
+        if (dropY == this.lastDropY || (Date.now() - this.lastScroll) < 35) return;
+        this.lastDropY = dropY;
+        this.lastScroll = Date.now();
+        let listElt = this.element.nativeElement.querySelector('.list');
+        let listTop: number = listElt.getBoundingClientRect().top + 10;
+        let listHeight: number = listElt.getBoundingClientRect().height - 20;
+        let relativeDropY = Math.max(0, dropY - listTop - this.dragStartOffsetY);
+        
+        this.firstScrollOptionIndex = 
+        Math.min(
+            Math.round((this.displayableOptions.length - this.LIST_LENGTH) * (relativeDropY / (listHeight - 50))), 
+            this.displayableOptions.length - this.LIST_LENGTH
+            );
+            
+        //console.log(listHeight, relativeDropY, this.firstScrollOptionIndex)
     }
 
     private onTypeText(text: string) {
-        this.open = true;
-        if (this.selectedOption) {
-            this.selectedOption = null;
-            this.onChangeCallback(null);
-            this.change.emit(null);
-        }
-        if (text && text.length > 0) {
-            text = text.trim().toLowerCase();
-            this.options.forEach(option => {
-                option.hidden = !option.label.toLowerCase().includes(text);
-            });
-        } else {
-            this.options.forEach(option => {
-                option.hidden = false;
-            });
-        }
-        this.sections.forEach(section => {
-            section.nativeElement.classList.remove('hidden');
-            let hidden: boolean = true;
-            for (let optionElt of section.nativeElement.getElementsByTagName('select-option')) {
-                let option: SelectOptionComponent = this.options.find(opt => opt.elt.nativeElement == optionElt);
-                if (!option.hidden) {
-                    hidden = false;
-                    break;
-                }
-            }
-            if (hidden) section.nativeElement.classList.add('hidden');
-        });
+        this.searchText = text;
+        this.unSelectOption();
+        this.open();
     }
 
     private onInputFocus() {
         this.textInput.nativeElement.select();
     }    
-
-    private getFocusIndex(): number {
-        let foundedIndex = -1;
-        let selectedIndex = -1;
-            this.options.forEach((option, index) => {
-                if (option.focus) {
-                    foundedIndex = index;
-                    return;
-                }
-                if (option.selected && !option.disabled && !option.hidden) selectedIndex = index;
-            });
-        if (foundedIndex == -1 && selectedIndex != -1) return selectedIndex;
-        return foundedIndex;
-    }
-
-    writeValue(obj: any): void {
-        this.model = obj;
-        this.inputText = null;
-        if (this.options) {
-            this.options.forEach((option) => {
-                option.parent = this;
-                if (this.valuesEqual(option.value, this.model)) this.selectedOption = option;
-            });
-        }
-    }
     
     registerOnChange(fn: any): void {
         this.onChangeCallback = fn;
@@ -362,7 +455,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
     @HostListener('focusout', ['$event']) 
     private onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
-            this.open = false; 
+            this.close();
             this.onTouchedCallback();
         } 
     }
@@ -387,4 +480,61 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, Afte
     setDisabledState(isDisabled: boolean) {
         this.disabled = isDisabled;
     }
+
+    public get length(): number {
+        let opt: Option<any>[] = this.displayableOptions;
+        return opt ? opt.length : 0;
+    }
+
+    public get scrollable(): boolean {
+        return this.length > this.LIST_LENGTH;
+    }
+
+    public get liftHeight(): number {
+        return this.length > 0 ? this.firstScrollOptionIndex / (this.length - this.LIST_LENGTH) : 0;
+    }
+
+    private get displayableOptions(): Option<any>[] {
+        if (this.filteredOptions) return this.filteredOptions.filteredList;
+        else if (this.options) return this.options;
+        else return null;
+    }
+
+    
+}
+
+
+export class Option<T> {
+
+    disabled: boolean = false;
+      
+    constructor(
+        public value: T,
+        public label: string,
+        public section?: string) {}
+}
+
+export class FilteredOptions {
+
+    private _filteredList: Option<any>[];
+
+    constructor( 
+            private _searchText: string,
+            options: Option<any>[]) {
+        this._filteredList = options.filter(option => option.label.toLowerCase().includes(_searchText));
+    } 
+
+    public get filteredList(): Option<any>[] {
+        return this._filteredList;
+    }
+
+    public get searchText(): string {
+        return this._searchText;
+    }
+
+    public get length(): number {
+        return this.filteredList ? this.filteredList.length : 0;
+    }
+
+    
 }

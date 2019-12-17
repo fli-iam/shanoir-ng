@@ -15,6 +15,7 @@
 import { Component, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AbstractInput} from '../../../shared/form/input.abstract'
+import { Option } from '../../../shared/select/select.component';
 
 
 @Component({
@@ -22,13 +23,18 @@ import { AbstractInput} from '../../../shared/form/input.abstract'
     templateUrl: 'processed-dataset-type.component.html',
     providers: [
         { 
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => ProcessedDatasetTypeComponent),
-          multi: true
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ProcessedDatasetTypeComponent),
+            multi: true
         }
     ]
 })
 
 export class ProcessedDatasetTypeComponent extends AbstractInput {
+
+    options: Option<string>[] = [
+      new Option<string>('RECONSTRUCTEDDATASET', 'ReconstructedDataset'),
+      new Option<string>('NONRECONSTRUCTEDDATASET', 'NonReconstructedDataset')
+    ];
 
 }

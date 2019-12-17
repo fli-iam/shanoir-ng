@@ -21,19 +21,21 @@ import { BACKEND_API_STUDY_CARD_URL } from '../../utils/app.utils';
 @Injectable()
 export class DicomService {
 
-    private dicomTags: DicomTag[];
+    private tagRequested: boolean = false;
+    private tagPromiseResolve: (value?: DicomTag[] | PromiseLike<DicomTag[]>) => void;
+    private tagPromise: Promise<DicomTag[]> = new Promise((resolve, reject) => this.tagPromiseResolve = resolve);
 
     constructor(private http: HttpClient) {}
 
     getDicomTags(): Promise<DicomTag[]> {
-        if (this.dicomTags) return Promise.resolve(this.dicomTags);
-        else {
-            return this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags')
+        if (!this.tagRequested) {
+            this.tagRequested = true;
+            this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags')
                 .toPromise()
                 .then(tags => {
-                    this.dicomTags = tags;
-                    return this.dicomTags;
+                    this.tagPromiseResolve(tags);
                 });
         }
+        return this.tagPromise;
     }
 }

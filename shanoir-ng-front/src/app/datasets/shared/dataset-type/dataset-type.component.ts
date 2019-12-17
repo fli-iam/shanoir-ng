@@ -15,6 +15,7 @@
 import { Component, forwardRef, Output, EventEmitter } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AbstractInput} from '../../../shared/form/input.abstract'
+import { Option } from '../../../shared/select/select.component';
 
 
 @Component({
@@ -31,6 +32,11 @@ import { AbstractInput} from '../../../shared/form/input.abstract'
 
 export class DatasetTypeComponent extends AbstractInput {
 
-  @Output() change = new EventEmitter();
+    @Output() change = new EventEmitter();
+
+    options: Option<string>[] = [
+        new Option<string>('MR_DATASET', 'Mr'),
+        // Add other types here
+    ];
 
 }

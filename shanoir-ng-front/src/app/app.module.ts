@@ -106,7 +106,6 @@ import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { SelectBoxComponent } from './shared/select/select.component';
-import { SelectOptionComponent } from './shared/select/select.option.component';
 import { GlobalService } from './shared/services/global.service';
 import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
@@ -231,7 +230,6 @@ import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        SelectOptionComponent,
         FinishImportComponent,
         UploaderComponent,
         HelpMessageComponent,

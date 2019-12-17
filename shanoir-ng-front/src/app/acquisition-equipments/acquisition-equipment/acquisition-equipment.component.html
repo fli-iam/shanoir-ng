@@ -46,8 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()">
-									<select-option *ngFor="let manufacturerModel of manufModels" [value]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</select-option>
+								<select-box formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
 								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
@@ -68,8 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="center" [(ngModel)]="acqEquip.center" (onViewClick)="viewCenter($event)" [viewDisabled]="!acqEquip.center">
-									<select-option *ngFor="let center of centers" [value]="center">{{center.name}}</select-option>
+								<select-box formControlName="center" [(ngModel)]="acqEquip.center" (onViewClick)="viewCenter($event)" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
 							</ng-template>

@@ -1,4 +1,4 @@
-:host() { display: block; overflow: hidden; white-space: nowrap; color: purple; }
+:host() { display: block; white-space: nowrap; color: purple; }
 
 .var { color: blue; }
 .value { color: chocolate; }

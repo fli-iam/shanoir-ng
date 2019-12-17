@@ -23,6 +23,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 
 @Component({
@@ -40,7 +41,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private route: ActivatedRoute,
             private datasetAcquisitionService: DatasetAcquisitionService,
             private studyCardService: StudyCardService,
-            private acqEqService: AcquisitionEquipmentService) {
+            private acqEqService: AcquisitionEquipmentService,
+            private acqEqPipe: AcquisitionEquipmentPipe) {
         super(route, 'dataset-acquisition');
     }
     

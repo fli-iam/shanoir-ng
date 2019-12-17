@@ -75,9 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus">
-									<select-option value="IN_PROGRESS">In Progress</select-option>
-									<select-option value="FINISHED">Finished</select-option>
+								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus" [options]="studyStatusOptions">
 								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
@@ -161,8 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
-								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
+							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
@@ -196,8 +193,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)">
-								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
+							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)" [options]="userOptions">
 							</select-box>
 						</span>
 					</li>

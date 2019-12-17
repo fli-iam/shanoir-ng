@@ -23,7 +23,8 @@ export class DicomTagPipe implements PipeTransform {
         if (tag) {
             if (typeof tag.code != 'number') throw new Error('dicom tag code should be a number');
             let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
-            return tag.label + ' (' + hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ')';
+            return hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4);
+            //return tag.label + ' (' + hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ')';
         }
         return '';
     }

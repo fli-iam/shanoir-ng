@@ -26,6 +26,7 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
+import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -47,7 +48,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private route: ActivatedRoute, 
             private acqEquipService: AcquisitionEquipmentService, 
             private manufModelService: ManufacturerModelService,
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            private manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
     }

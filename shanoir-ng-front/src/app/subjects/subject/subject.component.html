@@ -36,15 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()">
-									<select-option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat"
-										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Human cadaver</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
-											<ng-template ngSwitchDefault>{{cat}}</ng-template>
-									</select-option>
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()" [options]="catOptions">
 								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
@@ -103,9 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.sex}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="sex" [(ngModel)]="subject.sex">
-									<select-option [value]="'F'">Female</select-option>
-									<select-option [value]="'M'">Male</select-option>
+								<select-box formControlName="sex" [(ngModel)]="subject.sex" [options]="genderOptions">
 								</select-box>
 							</ng-template>
 						</span>
@@ -117,9 +107,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.manualHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<select-option [value]="'Left'">Left</select-option>
-									<select-option [value]="'Right'">Right</select-option>
+								<select-box formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance" [optionArr]="['Left', 'Right']">
 								</select-box>
 							</ng-template>
 						</span>
@@ -131,9 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{subject.languageHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<select-option [value]="'Left'">Left</select-option>
-									<select-option [value]="'Right'">Right</select-option>
+								<select-box formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance" [optionArr]="['Left','Right']">
 								</select-box>
 							</ng-template>
 						</span>

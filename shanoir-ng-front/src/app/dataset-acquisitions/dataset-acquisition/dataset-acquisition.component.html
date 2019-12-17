@@ -41,10 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.type}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="type" [(ngModel)]="datasetAcquisition.type">
-									<select-option value="Mr">Mr</select-option>
-									<select-option value="Pet">Pet</select-option>
-									<select-option value="Ct">Ct</select-option>
+								<select-box formControlName="type" [(ngModel)]="datasetAcquisition.type" [optionArr]="['Mr', 'Pet', 'Ct']">
 								</select-box>
 							</ng-template>
 						</span>
@@ -56,8 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.studyCard?.name}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study-card" [(ngModel)]="datasetAcquisition.studyCard">
-									<select-option *ngFor="let studyCard of studyCards" [value]="studyCard">{{studyCard.name}}</select-option>
+								<select-box formControlName="study-card" [(ngModel)]="datasetAcquisition.studyCard" [optionArr]="studyCards">
 								</select-box>
 							</ng-template>
 						</span>
@@ -69,8 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment">
-									<select-option *ngFor="let acqEq of acquisitionEquipments" [value]="acqEq">{{acqEq | acqEqptLabel}}</select-option>
+								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
 								</select-box>
 							</ng-template>
 						</span>

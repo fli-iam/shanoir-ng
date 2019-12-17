@@ -16,6 +16,7 @@ import { Component, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { AbstractInput } from '../../../shared/form/input.abstract';
+import { Option } from '../../../shared/select/select.component';
 
 
 @Component({
@@ -23,13 +24,21 @@ import { AbstractInput } from '../../../shared/form/input.abstract';
     templateUrl: 'explored-entity.component.html',
     providers: [
         { 
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => ExploredEntityComponent),
-          multi: true
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ExploredEntityComponent),
+            multi: true
         }
     ]
 })
 
 export class ExploredEntityComponent extends AbstractInput {
     
+    typeOptions: Option<string>[] = [
+        new Option<string>('ANATOMICAL_DATASET', 'Anatomical Dataset'),
+        new Option<string>('FUNCTIONAL_DATASET', 'Functional Dataset'),
+        new Option<string>('HEMODYNAMIC_DATASET', 'Hemodynamic Dataset'),
+        new Option<string>('METABOLIC_DATASET', 'Metabolic Dataset'),
+        new Option<string>('CALIBRATION', 'Calibration')
+    ];
+
 }

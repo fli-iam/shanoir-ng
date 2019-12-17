@@ -46,8 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.study.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="studyCard.study">
-									<select-option *ngFor="let study of studies" [value]="study">{{study.name}}</select-option>
+								<select-box formControlName="study" [(ngModel)]="studyCard.study" [optionArr]="studies">
 								</select-box>
 							</ng-template>
 						</span>
@@ -59,11 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment">
-									<div #optionSection class="option-section" *ngFor="let acqEntry of acquisitionEquipments | getValues">
-										<caption>{{acqEntry.key}}</caption>
-										<select-option *ngFor="let acqEq of acqEntry.val" [value]="acqEq">{{acqEq | acqEqptLabel}}</select-option>
-									</div>
+								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" [options]="acquisitionEquipments">
 								</select-box>
 							</ng-template>
 						</span>
@@ -75,8 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.niftiConverter.name}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter">
-									<select-option *ngFor="let niftiConverter of niftiConverters" [value]="niftiConverter">{{niftiConverter.name}}</select-option>
+								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter" [optionArr]="niftiConverters">
 								</select-box>
 							</ng-template>
 						</span>
@@ -87,8 +81,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend>Rules</legend>
 				<ng-container *ngFor="let rule of studyCard.rules">
 					<study-card-rule *ngIf="rule.assignments && rule.assignments.length > 0">
-						<condition *ngFor="let condition of rule.conditions" [condition]="condition"></condition>
-						<action *ngFor="let action of rule.assignments" [assignment]="action"></action>
+						<condition *ngFor="let condition of rule.conditions" [condition]="condition" [mode]="mode"></condition>
+						<action *ngFor="let action of rule.assignments" [assignment]="action" [mode]="mode"></action>
 					</study-card-rule>
 				</ng-container>
 			</fieldset>

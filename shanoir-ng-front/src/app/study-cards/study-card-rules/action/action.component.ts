@@ -13,6 +13,7 @@
  */
 import { Component, Input } from '@angular/core';
 import { StudyCardAssignment } from '../../shared/study-card.model';
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 
 
 
@@ -24,5 +25,6 @@ import { StudyCardAssignment } from '../../shared/study-card.model';
 export class StudyCardActionComponent {
     
     @Input() assignment: StudyCardAssignment;
+    @Input() mode: Mode = 'view';
     
 }

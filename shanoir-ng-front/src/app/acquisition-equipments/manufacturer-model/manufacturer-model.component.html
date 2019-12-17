@@ -42,8 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()">
-									<select-option *ngFor="let manufacturer of manufs" [value]="manufacturer">{{manufacturer.name}}</select-option>
+								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>

@@ -21,11 +21,11 @@ import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.abstract';
-import { WindowService } from '../../services/window.service';
 
 
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
