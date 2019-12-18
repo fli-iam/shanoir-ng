@@ -5,38 +5,36 @@ import os
 import pymysql
 
 sourceConn = pymysql.connect(host="mysql", user="shanoir", password="shanoir", database="shanoirdb", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="shanoir", password="shanoir", database="users", charset="utf8")
+targetConn = pymysql.connect(host="localhost", user="shanoir", password="shanoir", database="shanoir_ng_users", charset="utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
 
 print("Import roles: start")
     
-sourceCursor.execute("SELECT ROLE_ID, DISPLAY_NAME, NAME FROM ROLE")
+sourceCursor.execute("SELECT ROLE_ID, ACCESS_LEVEL, DISPLAY_NAME, NAME FROM ROLE")
 
 def changeRoleName(x):
     return {
         'adminRole': 'ROLE_ADMIN',
         'expertRole': 'ROLE_EXPERT',
+        'guestRole': 'ROLE_GUEST',
         'userRole': 'ROLE_USER'
     }[x]
 
 roles = []
-guestRoleId = -1
 medicalRoleId = -1
 userRoleId = -1
 for row in sourceCursor.fetchall():
     role = list(row);
-    if "medicalRole" == role[2]:
-        medicalRoleId = role[0]
-    elif "guestRole" == role[2]:
-        guestRoleId = role[0]
-    else:
-        if "userRole" == role[2]: userRoleId = role[0]
-        role[2] = changeRoleName(role[2])
+    if "medicalRole" != role[3]:
+        if "userRole" == role[3]: userRoleId = role[0]
+        role[3] = changeRoleName(role[3])
         roles.append(role)
+    else:
+        medicalRoleId = role[0]
 
-query = "INSERT INTO role (id, display_name, name) VALUES (%s, %s, %s)"
+query = "INSERT INTO role (id, access_level, display_name, name) VALUES (%s, %s, %s, %s)"
 
 targetCursor.executemany(query, roles)
 targetConn.commit()
@@ -52,7 +50,7 @@ users = []
 emails= []
 for row in sourceCursor.fetchall():
     user = list(row);
-    if medicalRoleId == user[8] or guestRoleId == user[8]:
+    if medicalRoleId == user[8]:
         user[8] = userRoleId
     if row[3] not in emails:
         emails.append(row[3])

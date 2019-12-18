@@ -5,7 +5,7 @@ import os
 import pymysql
 
 sourceConn = pymysql.connect(host="mysql", user="shanoir", password="shanoir", database="shanoirdb", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="shanoir", password="shanoir", database="studies", charset="utf8")
+targetConn = pymysql.connect(host="localhost", user="shanoir", password="shanoir", database="shanoir_ng_studies", charset="utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
@@ -45,6 +45,17 @@ targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 print("Import study_center: end")
+
+print("Import study_study_card: start")
+    
+sourceCursor.execute("SELECT STUDY_ID, STUDY_CARD_ID FROM STUDY_CARD")
+
+query = "INSERT INTO study_study_card (study_id, study_card_id) VALUES (%s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import study_study_card: end")
 
 print("Import study_user: start")
     
