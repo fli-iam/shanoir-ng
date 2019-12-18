@@ -188,12 +188,16 @@ public class ExaminationApiController implements ExaminationApi {
 		return new ResponseEntity<Long>(createdExamination.getId(), HttpStatus.OK);
 
 	}
-	
+
 	@Override
-	public ResponseEntity<ByteArrayResource> exportExaminationExportById(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+	public ResponseEntity<ByteArrayResource> exportExaminationById(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException {
 		// Get examination from ID
 		Examination exam = examinationService.findById(examinationId);
+		if (exam.getExtraDataFilePathList() == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
 		String archiveToExport = null;
 		for (String extraDataFile : exam.getExtraDataFilePathList()) {
 			if (extraDataFile.startsWith(niftiStorageDir + "/preclinical/")) {

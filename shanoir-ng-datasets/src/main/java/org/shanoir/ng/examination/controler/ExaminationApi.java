@@ -173,7 +173,7 @@ public interface ExaminationApi {
 		produces = { "application/json" },
 		method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<ByteArrayResource> exportExaminationExportById(
+	ResponseEntity<ByteArrayResource> exportExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException, IOException;
 

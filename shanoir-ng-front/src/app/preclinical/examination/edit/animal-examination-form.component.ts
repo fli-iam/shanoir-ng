@@ -188,7 +188,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     private getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
-            .findSubjectsByStudyId(this.examination.study.id)
+            .findSubjectsByStudyIdPreclinical(this.examination.study.id, this.examination.preclinical)
             .then(subjects => this.subjects = subjects);
     }
 
@@ -371,5 +371,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.attachNewFilesModal.hide();
     }
     
+    public hasEditRight(): boolean {
+        return false;
+    }
 
 }
