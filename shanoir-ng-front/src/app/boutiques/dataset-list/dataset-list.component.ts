@@ -36,20 +36,12 @@ export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
     private studies: Study[] = [];
     @ViewChild('table', { static: false }) table: TableComponent;
 
-    // static initialize(privateBreadcrumbsService) {
-    //     privateBreadcrumbsService.markMilestone();
-    //     privateBreadcrumbsService.nameStep('Boutiques');
-    //     return 'dataset';
-    // } 
-
     constructor(
             private datasetService: DatasetService,
             private studyService: StudyService,
             private subjectService: SubjectService,
-            // private privateBreadcrumbsService: BreadcrumbsService) {
             ) {
                 
-        // super(BoutiquesDatasetListComponent.initialize(privateBreadcrumbsService));
         super('dataset', false);
         this.fetchStudies();
         this.fetchSubjects();
@@ -128,17 +120,10 @@ export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     canEdit(ds: Dataset): boolean {
-        // let study: Study = this.studies.find(study => study.id == ds.studyId);
-        // return this.keycloakService.isUserAdmin() || (
-        //     study &&
-        //     study.studyUserList && 
-        //     study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
-        // );
         return false;
     }
 
     canDelete(ds: Dataset): boolean {
-        // return this.canEdit(ds);
         return false;
     }
     

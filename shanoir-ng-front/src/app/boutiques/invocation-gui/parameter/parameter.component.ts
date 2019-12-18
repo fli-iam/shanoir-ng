@@ -17,9 +17,6 @@ export class ParameterComponent {
 
   constructor() { }
 
-  ngOnInit() {
-  }
-
   get isValid() { return this.formGroup.controls[this.parameter.id].valid; }
 
   selectData(event: Event) {
@@ -31,6 +28,7 @@ export class ParameterComponent {
   }
 
   unset(event: Event) {
+    // Mark as pristine, set value to null (or false for flags), and uncheck
     let activeControl = this.formGroup.get(this.parameter.id) as FormControl;
     activeControl.markAsPristine();
     activeControl.setValue(this.parameter.type != 'Flag' ? null : false);
@@ -43,6 +41,7 @@ export class ParameterComponent {
     if(this.parameter.type != 'Flag') {
       return;
     }
+    // If parameter is a flag: set form control value
     let activeControl = this.formGroup.get(this.parameter.id) as FormControl
     activeControl.setValue(eventTarget.checked);
   }

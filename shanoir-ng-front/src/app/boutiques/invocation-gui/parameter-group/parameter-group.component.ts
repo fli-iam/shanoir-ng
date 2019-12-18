@@ -37,7 +37,7 @@ export class ParameterGroupComponent implements OnInit {
       activeControl.updateValueAndValidity();
     })
 
-    //  - after once cycle: the newly selected parameterComponent: make it true (or its previous value if not a flag), mark it dirty and propagate changes
+    //  - after one cycle: the newly selected parameterComponent: make it true (or its previous value if not a flag), mark it dirty and propagate changes
     setTimeout(()=> {
       this.parameterComponents.forEach((parameterComponent, parameterIndex)=> {
         let activeControl = this.formGroup.get(parameterComponent.parameter.id) as FormControl;

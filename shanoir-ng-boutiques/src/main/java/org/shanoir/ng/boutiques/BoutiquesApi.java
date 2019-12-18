@@ -70,7 +70,7 @@ public interface BoutiquesApi {
 							@ApiResponse(code = 404, message = "no tool descriptor found", response = Void.class) })
 	@PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @GetMapping("/tool/{id}/descriptor/")
-    public ObjectNode getDescriptorById(@ApiParam(value = "id of the tool", required = true) @PathVariable("id") String id) throws ResponseStatusException;
+    public ObjectNode getDescriptor(@ApiParam(value = "id of the tool", required = true) @PathVariable("id") String id) throws ResponseStatusException;
 
 
 	@ApiOperation(value = "", notes = "Get a tool invocation example", response = Void.class, tags = {})
@@ -78,7 +78,7 @@ public interface BoutiquesApi {
 							@ApiResponse(code = 500, message = "error while generating example invocation", response = Void.class) })
     @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @GetMapping("/tool/{id}/invocation")
-    public String getInvocationById(@ApiParam(value = "id of the tool", required = true) @PathVariable("id") String id, 
+    public String getInvocation(@ApiParam(value = "id of the tool", required = true) @PathVariable("id") String id, 
     								@RequestParam(value="complete", defaultValue="false") String completeString) throws ResponseStatusException;
 
 	@ApiOperation(value = "", notes = "Generate the tool command", response = Void.class, tags = {})
@@ -86,7 +86,7 @@ public interface BoutiquesApi {
 							@ApiResponse(code = 500, message = "error while generating tool command", response = Void.class) })
     @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @PostMapping("/tool/{id}/generate-command/")
-    public String generateCommandById(	@ApiParam(value = "invocation", required = true) @RequestBody ObjectNode invocation, 
+    public String generateCommand(	@ApiParam(value = "invocation", required = true) @RequestBody ObjectNode invocation, 
     									@ApiParam(value = "id of the tool", required = true) @PathVariable("id") String id) throws ResponseStatusException;
 
 	@ApiOperation(value = "", notes = "execute a tool", response = Void.class, tags = {})
@@ -95,15 +95,22 @@ public interface BoutiquesApi {
 							@ApiResponse(code = 500, message = "error while executing tool", response = Void.class) })
     @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @PostMapping("/tool/{toolId}/execute/{sessionId}")
-    public String executeById(	@ApiParam(value = "invocation", required = true) @RequestBody ObjectNode invocation, 
+    public String execute(	@ApiParam(value = "invocation", required = true) @RequestBody ObjectNode invocation, 
     							@ApiParam(value = "id of the tool", required = true) @PathVariable("toolId") String toolId, 
     							@ApiParam(value = "id of the session", required = true) @PathVariable("sessionId") String sessionId) throws ResponseStatusException;
+
+	@ApiOperation(value = "", notes = "stop tool execution", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "tool execution stopped", response = Void.class) })
+    @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
+	@GetMapping("/tool/{toolId}/cancel-execution/{sessionId}")
+    public String cancelExecution(@ApiParam(value = "id of the tool", required = true) @PathVariable("toolId") String toolId, 
+    								@ApiParam(value = "id of the session", required = true) @PathVariable("sessionId") String sessionId) throws ResponseStatusException;
 
 	@ApiOperation(value = "", notes = "get execution output", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "output returned", response = Void.class) })
     @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @GetMapping("/tool/{toolId}/output/{sessionId}")
-    public ObjectNode getExecutionOutputById(	@ApiParam(value = "id of the tool", required = true) @PathVariable("toolId") String toolId, 
+    public ObjectNode getExecutionOutput(	@ApiParam(value = "id of the tool", required = true) @PathVariable("toolId") String toolId, 
 												@ApiParam(value = "id of the session", required = true) @PathVariable("sessionId") String sessionId) throws ResponseStatusException;
 
 	@ApiOperation(value = "", notes = "download output", response = Void.class, tags = {})
@@ -111,7 +118,7 @@ public interface BoutiquesApi {
 							@ApiResponse(code = 500, message = "error while creating zip file", response = Void.class) })
     @PreAuthorize("hasRole('EXPERT') or hasRole('ADMIN')")
     @GetMapping("/tool/{toolId}/download-output/{sessionId}")
-    public ResponseEntity<ByteArrayResource> downloadOutputById(	
+    public ResponseEntity<ByteArrayResource> downloadOutput(	
     		@ApiParam(value = "id of the tool", required = true) @PathVariable("toolId") String toolId, 
 			@ApiParam(value = "id of the session", required = true) @PathVariable("sessionId") String sessionId) throws ResponseStatusException;
 

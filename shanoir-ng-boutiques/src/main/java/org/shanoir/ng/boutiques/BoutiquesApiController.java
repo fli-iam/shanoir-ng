@@ -121,7 +121,7 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public ObjectNode getDescriptorById(@PathVariable String id) {
+    public ObjectNode getDescriptor(@PathVariable String id) {
 
         String descriptorFileName = id.replace('.', '-') + ".json";
         ObjectMapper objectMapper = new ObjectMapper();
@@ -139,7 +139,7 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public String getInvocationById(@PathVariable String id, @RequestParam(value="complete", defaultValue="false") String completeString) {
+    public String getInvocation(@PathVariable String id, @RequestParam(value="complete", defaultValue="false") String completeString) {
 
         Boolean complete = Boolean.parseBoolean(completeString);
 
@@ -155,7 +155,7 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public String generateCommandById(@RequestBody ObjectNode invocation, @PathVariable String id) {
+    public String generateCommand(@RequestBody ObjectNode invocation, @PathVariable String id) {
 
         try {
         	String invocationFilePath = BoutiquesUtils.writeTemporaryFile("invocation.json", invocation.toString());
@@ -170,7 +170,7 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public String executeById(@RequestBody ObjectNode invocation, @PathVariable String toolId, @PathVariable String sessionId) {
+    public String execute(@RequestBody ObjectNode invocation, @PathVariable String toolId, @PathVariable String sessionId) {
 
         try {
         	// Get data from data path, use -v to mount the data path to docker container
@@ -189,7 +189,7 @@ public class BoutiquesApiController implements BoutiquesApi {
 
         	BoutiquesUtils.createDirectory(outputPath);
 			
-			ObjectNode descriptor = getDescriptorById(toolId);
+			ObjectNode descriptor = getDescriptor(toolId);
 
 			BoutiquesUtils.setInputPaths(descriptor, invocation, inputPath);
 			BoutiquesUtils.checkOutputPaths(descriptor, invocation);
@@ -226,7 +226,18 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public ObjectNode getExecutionOutputById(@PathVariable String toolId, @PathVariable String sessionId) {
+    public String cancelExecution(@PathVariable String toolId, @PathVariable String sessionId) {
+    	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
+    	BoutiquesProcess boutiquesProcess = processes.get(processId); 
+    	if(boutiquesProcess != null) {
+    		boutiquesProcess.process.destroy();
+    		return "Execution stopped";
+    	}
+		return "Process not found";
+	}
+	
+	@Override
+    public ObjectNode getExecutionOutput(@PathVariable String toolId, @PathVariable String sessionId) {
 
     	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);
     	
@@ -242,10 +253,13 @@ public class BoutiquesApiController implements BoutiquesApi {
     			
     			String inputLine = null;
     			String errorLine = null;
-    			while((isAlive && inputLines.size() == 0 || !isAlive && inputLines.size() < MAX_OUTPUT_LINES) && (inputLine = boutiquesProcess.inputBufferedReader.readLine()) != null) {
+    			
+    			while((isAlive && inputLines.size() == 0 || !isAlive && inputLines.size() < MAX_OUTPUT_LINES) && 
+    					boutiquesProcess.inputBufferedReader.ready() && (inputLine = boutiquesProcess.inputBufferedReader.readLine()) != null) {
     				inputLines.add(inputLine);
     			}
-    			while((isAlive && errorLines.size() == 0 || !isAlive && errorLines.size() < MAX_OUTPUT_LINES) && (errorLine = boutiquesProcess.errorBufferedReader.readLine()) != null) {
+    			while((isAlive && errorLines.size() == 0 || !isAlive && errorLines.size() < MAX_OUTPUT_LINES) && 
+    					boutiquesProcess.errorBufferedReader.ready() && (errorLine = boutiquesProcess.errorBufferedReader.readLine()) != null) {
     				errorLines.add(errorLine);
     			}
     			
@@ -267,7 +281,7 @@ public class BoutiquesApiController implements BoutiquesApi {
     }
 
 	@Override
-    public ResponseEntity<ByteArrayResource> downloadOutputById(@PathVariable String toolId, @PathVariable String sessionId) throws ResponseStatusException {
+    public ResponseEntity<ByteArrayResource> downloadOutput(@PathVariable String toolId, @PathVariable String sessionId) throws ResponseStatusException {
 
 		try {
 	    	final String processId = BoutiquesUtils.getProcessId(toolId, sessionId);

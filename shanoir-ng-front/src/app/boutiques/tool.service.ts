@@ -5,7 +5,7 @@ import { EntityService } from '../shared/components/entity/entity.abstract.servi
 import { ServiceLocator } from '../utils/locator.service';
 import * as AppUtils from '../utils/app.utils';
 
-type BoutiquesData = {
+export type BoutiquesData = {
   invocation?: any,
   currentParameterId?: string,
   currentParameterIsList?: boolean,
@@ -29,7 +29,8 @@ export class ToolService extends EntityService<ToolInfo> {
   };
 
   constructor(private httpClient: HttpClient) {
-    super(httpClient)
+    super(httpClient);
+    // Load user data (previous invocation) stored in sessionStorage
     this.loadSession();
   }
 
@@ -41,15 +42,12 @@ export class ToolService extends EntityService<ToolInfo> {
   search(query: string): Promise<ToolInfo[]> {
 
     let queryParameters = new HttpParams({encoder: new HttpUrlEncodingCodec()});
+
     if (query) {
       queryParameters = queryParameters.append('query', <any>query);
     }
 
-    return this.httpClient.get<ToolInfo[]>(`${this.API_URL}/search`,
-      {
-        params: queryParameters,
-      }
-    ).toPromise();
+    return this.httpClient.get<ToolInfo[]>(`${this.API_URL}/search`, { params: queryParameters }).toPromise();
   }
 
   getAll(): Promise<ToolInfo[]> {
@@ -73,6 +71,11 @@ export class ToolService extends EntityService<ToolInfo> {
     this.saveSession({ isProcessing: true });
     let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
     return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/${encodeURIComponent(this.data.sessionId)}`, invocation, httpOptions).toPromise();
+  }
+
+  cancelExecution(toolId: string): Promise<string> {
+    let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
+    return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/cancel-execution/${encodeURIComponent(this.data.sessionId)}`, httpOptions).toPromise();
   }
 
   getExecutionOutput(toolId: string): Promise<any> {

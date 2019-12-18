@@ -28,7 +28,7 @@ export class ExecutionComponent implements OnInit {
   private invocationSubject = new Subject<string>();
 
   static readonly ansi_up = new AnsiUp();
-  // private topicSubscription: Subscription;
+  private invocationSubscription: Subscription;
 
   constructor(private toolService: ToolService, 
               private breadcrumbsService: BreadcrumbsService, 
@@ -47,13 +47,14 @@ export class ExecutionComponent implements OnInit {
       this.setGetOutputInterval();
     }
 
-    this.invocationSubject.pipe(
+    // Ask the server to generate the tool command when the invocation changes
+    this.invocationSubscription = this.invocationSubject.pipe(
       // wait 0.5 second after each keystroke before considering the term
       debounceTime(500),
 
       // ignore new term if same as previous term
       distinctUntilChanged()
-    ).subscribe((invocation: any)=> { 
+    ).subscribe((invocation: any)=> {
       this.invocation = invocation;
       this.toolService.generateCommand(this.toolId, this.invocation).then((generatedCommand)=> { 
         this.generatedCommand = generatedCommand;
@@ -64,7 +65,7 @@ export class ExecutionComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    // this.topicSubscription.unsubscribe();
+    this.invocationSubscription.unsubscribe();
   }
 
   onInvocationChanged(invocation: any) {
@@ -76,12 +77,17 @@ export class ExecutionComponent implements OnInit {
   }
 
   executeToolButton() {
-    return this.processFinished == null || this.processFinished ? "Execute tool" : "Processing...";
+    return this.processFinished == null || this.processFinished ? "Execute tool" : "Cancel execution";
   }
 
   onExecuteTool() {
     if(this.processFinished != null && !this.processFinished) {
-      this.msgBoxService.log('warn', 'Process is not finished yet.');
+      // this.msgBoxService.log('warn', 'Process is not finished yet.');
+      this.toolService.cancelExecution(this.toolId).then((output)=> {
+        this.setProcessFinished();
+      }).catch((error)=> { 
+        console.error(error)
+      })
       return;
     }
     if(this.toolId == null) {
@@ -95,6 +101,7 @@ export class ExecutionComponent implements OnInit {
     this.outputLines = [];
     this.processFinished = false;
 
+    // Ask the server to execute the given tool with the given invocation
     this.toolService.execute(this.toolId, this.invocation).then((output)=> {
       // this.output = output;
       if(output.startsWith('Error')) {
@@ -102,6 +109,8 @@ export class ExecutionComponent implements OnInit {
         return;
       }
       this.setGetOutputInterval();
+    }).catch((output)=> {
+      this.msgBoxService.log('warn', output);
     });
   }
 
@@ -111,22 +120,37 @@ export class ExecutionComponent implements OnInit {
 
   getOutput() {
     this.toolService.getExecutionOutput(this.toolId).then((output:any)=> {
+      // Display output: each line is converted from ansi to html (bosh returns ansi formatted text)
+      // The execution component then displays the outputLines array
       if(output != null && output.input != null) {
+        if( !(output.input instanceof Array) ) {
+          output.input = [output.input]
+        }
         for(let input of output.input) {
           this.outputLines.push(this.sanitizer.bypassSecurityTrustHtml(ExecutionComponent.ansi_up.ansi_to_html(input)));
         }
       }
       if(output != null && output.error != null) {
+        if( !(output.error instanceof Array) ) {
+          output.error = [output.error]
+        }
         for(let error of output.error) {
           this.outputLines.push(this.sanitizer.bypassSecurityTrustHtml(ExecutionComponent.ansi_up.ansi_to_html(error)));
         }
       }
+      // If execusion is finished: stop polling and save session
       if(output == null || output.finished) {
-        clearInterval(this.executionIntervalId);
-        this.processFinished = true;
-        this.toolService.saveSession({ isProcessing: false });
+        this.setProcessFinished();
       }
+    }).catch((output)=> {
+      this.msgBoxService.log('warn', output);
     });
+  }
+
+  setProcessFinished() {
+    clearInterval(this.executionIntervalId);
+    this.processFinished = true;
+    this.toolService.saveSession({ isProcessing: false });
   }
 
   onDownloadResults(link: string) {

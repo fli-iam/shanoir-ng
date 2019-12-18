@@ -76,7 +76,7 @@ export class Parameter<T> extends ParameterDescription<T> {
   }
 
   getValue(value: any) {
-    return this.list ? '"' + value.join('", "') + '"' : value;
+    return this.list ? (this.type == 'Number' ? value.join(', ') : '"' + value.join('", "') + '"') : value;
   }
 }
 

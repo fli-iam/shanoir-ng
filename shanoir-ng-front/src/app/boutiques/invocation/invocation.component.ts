@@ -34,6 +34,7 @@ export class InvocationComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Invocation subject provides new values when invocationValue changes, i.e. when user types in the invocation textarea
     this.invocationSubject.pipe(
       // wait 1 second after each keystroke before considering the term
       debounceTime(1000),
@@ -44,11 +45,14 @@ export class InvocationComponent implements OnInit {
       this.updateInvocationFromString(invocationValue);
     });
 
-    this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor);
+    // Get the tool descriptor from the server
+    this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor; );
 
+    // Get the invocation which was stored in session storage
     this.invocation = this.toolService.data.invocation;
 
     if(this.invocation == null) {
+      // If there was no invocation: generate a default one
       this.toolService.getDefaultInvocation(this.toolId).then((invocation)=> { 
         // If invocation has changed before the default one was retrieved from server: ignore default one
         if(this.toolService.data.invocation) {
@@ -58,11 +62,13 @@ export class InvocationComponent implements OnInit {
         this.invocationGUI.setInvocation(invocation);
       });
     } else {
+      // If there was an invocation stored: set invocation value (update textarea)
       this.invocationValue = this.getInvocationValue();
     }
   }
 
   openInvocation(event: any) {
+    // On open invocation: read given file and update invocation
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.updateInvocationFromString(e.target.result);
@@ -73,6 +79,7 @@ export class InvocationComponent implements OnInit {
   }
 
   saveInvocation(event: any) {
+    // On save invocation: create invocation blob & save file
     let blob = new Blob([this.getInvocationValue()], {type: "text/plain;charset=utf-8"});
     saveAs(blob, "invocation.json");
   }
@@ -87,6 +94,7 @@ export class InvocationComponent implements OnInit {
   }
 
   updateInvocation(invocation: string) {
+    // Update and store invocation, emit invocationChanged
     this.invocation = invocation;
     this.storeInvocation();
     this.invocationChanged.emit(this.invocation);

@@ -34,11 +34,8 @@ describe('ParameterControlService', () => {
   });
 
   it('should create form groups from descriptors', ()=> {
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
+    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor);
+    let parameterGroups = service.parameterGroups;
     expect(formGroup.controls['required']).toBeDefined();
     
     // group 0:
@@ -83,21 +80,14 @@ describe('ParameterControlService', () => {
   });
   
   it('should generate an empty invocation from form groups if form is pristine', ()=> {
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
+    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor);
     let invocation = service.generateInvocation(formGroup);
     expect(invocation).toEqual({});
   });
   
   it('should generate the proper invocation from form groups when form is changed', ()=> {
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
+    let formGroup = service.createFormGroupFromDescriptor(fakeDescriptor);
+
     let requiredFormGroups = formGroup.controls['required'] as FormGroup;
     let requiredFormGroup0 = requiredFormGroups.controls['0' + idPrefix + 0] as FormGroup;
     requiredFormGroup0.controls[idPrefix + 0].markAsDirty();

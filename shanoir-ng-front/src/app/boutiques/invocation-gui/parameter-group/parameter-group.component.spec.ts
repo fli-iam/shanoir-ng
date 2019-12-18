@@ -45,12 +45,10 @@ describe('ParameterGroupComponent', () => {
   it('should create all parameters when given a non exclusive formGroup and parameterGroup', () => {
 
     let service = new ParameterControlService();
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
     
+    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor);
+    let parameterGroups = service.parameterGroups;
+
     let group0Id = '0'+idPrefix+'0';
     component.formGroup = (formGroups.controls['required'] as FormGroup).controls[group0Id] as FormGroup;
     component.parameterGroup = parameterGroups.required.get(group0Id);
@@ -75,11 +73,9 @@ describe('ParameterGroupComponent', () => {
   it('should create one parameter when given an exclusive formGroup and parameterGroup', () => {
 
     let service = new ParameterControlService();
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
+
+    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor);
+    let parameterGroups = service.parameterGroups;
     
     let group1Id = '1'+idPrefix+'1';
     component.formGroup = (formGroups.controls['optional'] as FormGroup).controls[group1Id] as FormGroup;

@@ -47,7 +47,7 @@ describe('ToolDescriptorInfoComponent', () => {
     const toolDescriptionSpan: HTMLSpanElement = fixture.nativeElement.querySelector('#tool-description');
     expect(toolDescriptionSpan.textContent).toBe(component.descriptor.description);
     const toolTagsSpan: HTMLSpanElement = fixture.nativeElement.querySelector('#tool-tags');
-    expect(toolTagsSpan.textContent).toBe(component.descriptor.tags);
+    expect(toolTagsSpan.textContent).toBe(JSON.stringify(component.descriptor.tags));
   });
 
 

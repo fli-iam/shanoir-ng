@@ -21,7 +21,8 @@ export class BoutiquesComponent {
   }
 
   onToolSelected(toolInfo: ToolInfo) {
+    // Create a breacrumbd step and go to tool url when a tool is selected
     this.breadcrumbService.nameStep(toolInfo.name);
-    this.router.navigate(['boutiques/' + toolInfo.id], {replaceUrl: false });
+    this.router.navigate(['boutiques/' + toolInfo.id]);
   }
 }

@@ -97,7 +97,7 @@ describe('ToolService', () => {
 
   describe('#getDescriptor', () => {
     let expectedDescriptor = { name: 'fake descriptor'};
-    let toolId = Math.random();
+    let toolId = '' + Math.random();
 
     beforeEach(() => {
       service = TestBed.get(ToolService);
@@ -139,7 +139,7 @@ describe('ToolService', () => {
 
   describe('#getInvocation', () => {
     let expectedInvocation = 'fake invocation';
-    let toolId = Math.random();
+    let toolId = '' + Math.random();
 
     beforeEach(() => {
       service = TestBed.get(ToolService);
@@ -147,7 +147,7 @@ describe('ToolService', () => {
 
     it('should return expected tool invocation', fakeAsync(() => {
       let invocation = null;
-      service.getInvocation(toolId).then( i => invocation = i, fail );
+      service.getDefaultInvocation(toolId).then( i => invocation = i, fail );
 
       // HeroService should have made one request to GET heroes from expected URL
       const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/invocation/`);
@@ -165,7 +165,7 @@ describe('ToolService', () => {
       const message = 'Deliberate 404';
       let errorMessage: string = null;
 
-      service.getInvocation(toolId).then( invocation => errorMessage = null, error => errorMessage = error.error );
+      service.getDefaultInvocation(toolId).then( invocation => errorMessage = null, error => errorMessage = error.error );
 
       const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/invocation/`);
 
@@ -182,7 +182,7 @@ describe('ToolService', () => {
   describe('#generateCommand', () => {
     let fakeInvocation = 'fake invocation';
     let expectedCommand = 'fake command';
-    let toolId = Math.random();
+    let toolId = '' + Math.random();
 
     beforeEach(() => {
       service = TestBed.get(ToolService);
@@ -225,7 +225,7 @@ describe('ToolService', () => {
   describe('#execute', () => {
     let fakeInvocation = 'fake invocation';
     let expectedOutput = 'fake output';
-    let toolId = Math.random();
+    let toolId = '' + Math.random();
 
     beforeEach(() => {
       service = TestBed.get(ToolService);
@@ -237,13 +237,11 @@ describe('ToolService', () => {
 
       service.execute(toolId, fakeInvocation).then( o => output = o, fail );
 
-      // HeroService should have made one request to GET heroes from expected URL
-      const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/execute/`);
+      const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/execute/${service.data.sessionId}`);
       expect(req.request.method).toEqual('POST');
       expect(req.request.body).toEqual(fakeInvocation);
       expect(req.request.responseType).toEqual('text');
 
-      // Respond with the mock heroes
       req.flush(expectedOutput);
 
       flushMicrotasks();
@@ -256,7 +254,7 @@ describe('ToolService', () => {
       let errorMessage = null;
       service.execute(toolId, fakeInvocation).then( c => errorMessage = null, error => errorMessage = error.error );
 
-      const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/execute/`);
+      const req = httpTestingController.expectOne(`${service.API_URL}/${encodeURIComponent(toolId)}/execute/${service.data.sessionId}`);
 
       // respond with a 404 and the error message in the body
       req.flush(message, {status: 404, statusText: 'Not Found'});

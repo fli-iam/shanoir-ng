@@ -11,10 +11,14 @@ import { By } from '@angular/platform-browser';
 import { InvocationComponent } from './invocation.component';
 import { InvocationGuiComponent } from '../invocation-gui/invocation-gui.component';
 import { ToolDescriptorInfoComponent } from '../tool-descriptor-info/tool-descriptor-info.component';
+import { BreadcrumbsService as FakeBreadcrumbsService } from '../testing/breadcrumbs.service';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
 @Component({ selector: 'invocation-gui', template: '', providers: [{ provide: InvocationGuiComponent, useClass: InvocationGuiStubComponent }] })
 class InvocationGuiStubComponent {
   @Input() descriptor: any = null
+
+  setInvocation(invocation: any) { }
 }
 
 @Component({ selector: 'tool-descriptor-info', template: '', providers: [{ provide: ToolDescriptorInfoComponent, useClass: ToolDescriptorInfoStubComponent }] })
@@ -36,7 +40,7 @@ describe('InvocationComponent', () => {
     TestBed.configureTestingModule({
       imports: [ FormsModule ],
       declarations: [ InvocationComponent, ToolDescriptorInfoStubComponent, InvocationGuiStubComponent ],
-      providers: [ { provide: ToolService, useClass: FakeToolService } ]
+      providers: [ { provide: ToolService, useClass: FakeToolService }, { provide: BreadcrumbsService, useClass: FakeBreadcrumbsService } ]
     })
     .compileComponents();
   }));
@@ -51,16 +55,13 @@ describe('InvocationComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set invocation.descriptor, invocation.invocation when select tool', fakeAsync(() => {
-    expect(component.invocation).toBe(null, 'should be null');
-    expect(component.descriptor).toBe(null, 'should be null');
-    
+  it('should set invocation.descriptor, invocation.invocation when select tool', fakeAsync(() => {    
     const tool = new FakeToolInfo() as ToolInfo;
-    component.onToolSelected(tool);
 
+    component.ngOnInit();
     tick();
     fixture.detectChanges();
-
+    
     const expectedDescriptor = getToolService().getFakeDescriptor();
     const expectedInvocation  = getToolService().getFakeInvocation();
 
