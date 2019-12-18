@@ -60,7 +60,7 @@ input { border: none !important; }
 
 .list-drag-extend { background-color: transparent; position: fixed; top: 0; bottom: 0; z-index: -1; left: 0; right: 0; }
 
-.top-scroll-button, .bottom-scroll-button { background-color: var(--color-c); color: transparent; height: 10px; width: 2px; position: absolute; right: 0; overflow: hidden; font-size: 8px; cursor: pointer; }
+.top-scroll-button, .bottom-scroll-button { background-color: var(--color-c); color: transparent; height: 10px; width: 2px; position: absolute; right: 0; overflow: hidden; font-size: 11px; cursor: pointer; }
 .top-scroll-button { top: 0; }
 .bottom-scroll-button { bottom: 0; }
 

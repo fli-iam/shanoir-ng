@@ -25,6 +25,8 @@ import {
     SimpleChanges,
     ViewChild,
     PipeTransform,
+    NgZone,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -36,6 +38,7 @@ import { GlobalService } from '../services/global.service';
     selector: 'select-box',
     templateUrl: 'select.component.html',
     styleUrls: ['select.component.css'],
+    //changeDetection: ChangeDetectionStrategy.,
     providers: [
         {
           provide: NG_VALUE_ACCESSOR,
@@ -84,7 +87,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     constructor(
             private element: ElementRef, 
-            private globalService: GlobalService) {}
+            private globalService: GlobalService,
+            private ngZone: NgZone) {}
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
@@ -233,9 +237,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private close () {
-        // this.unsubscribeToGlobalClick();
-        // this.firstScrollOptionIndex = null;
-        // this.focusedOptionIndex = null;
+        this.unsubscribeToGlobalClick();
+        this.firstScrollOptionIndex = null;
+        this.focusedOptionIndex = null;
     }
     
     private isOpen(): boolean {
@@ -318,6 +322,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 }
             }
             event.preventDefault();
+        } else if ('PageUp' == event.key) {
+            if (this.isOpen()) this.pageUp();
+        } else if ('PageDown' == event.key) {
+            if (this.isOpen()) this.pageDown();     
         } else if ('Enter' == event.key) {
             if (!this.isOpen() && !this.disabled) {
                 this.open();
@@ -417,7 +425,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private lastScroll: number = 0;
     allowDrop(event) {
         let dropY: number = event.clientY;
-        if (dropY == this.lastDropY || (Date.now() - this.lastScroll) < 35) return;
+        if (dropY == this.lastDropY || (Date.now() - this.lastScroll) < 30) return;
         this.lastDropY = dropY;
         this.lastScroll = Date.now();
         let listElt = this.element.nativeElement.querySelector('.list');
@@ -432,6 +440,34 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             );
             
         //console.log(listHeight, relativeDropY, this.firstScrollOptionIndex)
+    }
+
+    onScrollZoneClick(event) {
+        if (event.srcElement.classList.contains('scrollzone')) {
+            if (event.clientY < this.liftHeight + event.srcElement.getBoundingClientRect().top) {
+                this.pageUp();
+            } else {
+                this.pageDown();
+            }
+        }
+    }
+
+    private pageUp() {
+        this.focusedOptionIndex = null;
+        if (this.firstScrollOptionIndex - this.LIST_LENGTH >= 0) {
+            this.firstScrollOptionIndex -= this.LIST_LENGTH;
+        } else {
+            this.firstScrollOptionIndex = 0;
+        }
+    }
+
+    private pageDown() {
+        this.focusedOptionIndex = null;
+        if (this.firstScrollOptionIndex + 2 * this.LIST_LENGTH <= this.displayableOptions.length) {
+            this.firstScrollOptionIndex += this.LIST_LENGTH;
+        } else {
+            this.firstScrollOptionIndex = this.displayableOptions.length - this.LIST_LENGTH;
+        }
     }
 
     private onTypeText(text: string) {
@@ -491,7 +527,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public get liftHeight(): number {
-        return this.length > 0 ? this.firstScrollOptionIndex / (this.length - this.LIST_LENGTH) : 0;
+        return this.length > 0 ? 250 * this.firstScrollOptionIndex / (this.length - this.LIST_LENGTH) : 0;
     }
 
     private get displayableOptions(): Option<any>[] {
