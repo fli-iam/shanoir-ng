@@ -45,12 +45,25 @@ import org.springframework.web.client.RestTemplate;
 /**
  * This class is used to download files on using WADO URLs:
  * 
- * First version: WADO RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
- * Next version: WADO URI URLs will be supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
+ * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
+ * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
  * 
- * WADO-RS: as the responses are encoded as multipart/related messages,
+ * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
+ * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
+ * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
+ * 
+ * As the responses are encoded as multipart/related messages,
  * this class extracts as well the files contained in the response to
  * the file system.
+ * 
+ * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/wado?requestType=WADO
+ * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
+ * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
+ * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
+ * &contentType=application/dicom
+ * 
+ * WADO-URI Web Service Endpoint URL in dcm4chee arc light 5:
+ * http[s]://<host>:<port>/dcm4chee-arc/aets/{AETitle}/wado
  *
  * This Spring service component uses the scope singleton, that is there by default,
  * as one instance should be reused for all other instances, that require usage.
