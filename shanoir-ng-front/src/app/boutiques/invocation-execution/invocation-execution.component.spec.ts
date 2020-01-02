@@ -1,3 +1,4 @@
+import { Component, OnInit, Input } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { BreadcrumbsService as FakeBreadcrumbsService } from '../testing/breadcrumbs.service';
@@ -19,6 +20,7 @@ class ExecutionStubComponent {
 }
 
 describe('InvocationExecutionComponent', () => {
+
   let component: InvocationExecutionComponent;
   let fixture: ComponentFixture<InvocationExecutionComponent>;
 
@@ -26,7 +28,7 @@ describe('InvocationExecutionComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ InvocationExecutionComponent, InvocationStubComponent, ExecutionStubComponent ],
       providers: [
-        { provide: ActivatedRoute, useValue: { params: of({id: 123}) } }, 
+        { provide: ActivatedRoute, useValue: { snapshot: { params: { toolId: 123 } } } }, 
         { provide: BreadcrumbsService, useClass: FakeBreadcrumbsService }
       ]
     })

@@ -76,7 +76,7 @@ describe('ExecutionComponent', () => {
     component.toolId = 'fake tool id';
     component.onInvocationChanged(invocation);
 
-    tick();
+    tick(1000);
     fixture.detectChanges();
 
     const expectedCommand = getToolService().getFakeCommand(invocation);
@@ -85,7 +85,7 @@ describe('ExecutionComponent', () => {
   }));
 
   it('should execute and display the command output when clicking the execute button', fakeAsync(() => {
-    expect(component.outputLines).toBe([], 'should be empty');
+    expect(component.outputLines).toEqual([], 'should be empty');
 
     const invocation = 'fake invocation';
     component.toolId = 'fake tool id';

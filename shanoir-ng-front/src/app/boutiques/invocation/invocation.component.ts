@@ -46,7 +46,7 @@ export class InvocationComponent implements OnInit {
     });
 
     // Get the tool descriptor from the server
-    this.toolService.getDescriptor(this.toolId).then((descriptor)=> this.descriptor = descriptor; );
+    this.toolService.getDescriptor(this.toolId).then( (descriptor)=> this.descriptor = descriptor );
 
     // Get the invocation which was stored in session storage
     this.invocation = this.toolService.data.invocation;
