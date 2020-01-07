@@ -59,74 +59,74 @@ public class ImportJobConstructorService {
 		for (Study study : patient.getStudies()) {
 			for (Serie serie : study.getSeries()) {
 				serie.setNonImages(new ArrayList<Object>());
-				boolean firstImageOfSerie = true; 
+				boolean firstImageOfSerie = true;
 				for (Iterator<Image> iterator = serie.getImages().iterator(); iterator.hasNext();) {
 					Image image=iterator.next();
 					File imageFile = new File(
 							folder.getAbsolutePath() + File.separator + image.getPath());
-					DicomInputStream dIS = new DicomInputStream(imageFile);
-					Attributes datasetAttributes = dIS.readDataset(-1, -1);
-					String seriesDescription = null;
-					if (firstImageOfSerie) {
-						if (serie.getSopClassUID() == null) {
-							String sopClassUID = datasetAttributes.getString(Tag.SOPClassUID);
-							serie.setSopClassUID(sopClassUID);
+					try (DicomInputStream dIS = new DicomInputStream(imageFile)) {
+						Attributes datasetAttributes = dIS.readDataset(-1, -1);
+						String seriesDescription = null;
+						if (firstImageOfSerie) {
+							if (serie.getSopClassUID() == null) {
+								String sopClassUID = datasetAttributes.getString(Tag.SOPClassUID);
+								serie.setSopClassUID(sopClassUID);
+							}
+							seriesDescription = datasetAttributes.getString(Tag.SeriesDescription);
+							if (serie.getSeriesDescription() == null) {
+								serie.setSeriesDescription(seriesDescription);
+							}
+							serie.setSeriesInstanceUID(datasetAttributes.getString(Tag.SeriesInstanceUID));
+							String protocolNameDicomFile = datasetAttributes.getString(Tag.ProtocolName);
+							if (protocolNameDicomFile != null && !protocolNameDicomFile.isEmpty()) {
+								serie.setProtocolName(protocolNameDicomFile);
+							}
+							serie.setSeriesDescription(datasetAttributes.getString(Tag.SeriesDescription));
+							serie.setSeriesDate(DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate)));
+							serie.setNumberOfSeriesRelatedInstances(datasetAttributes.getInt(Tag.NumberOfSeriesRelatedInstances,0));
+							EquipmentDicom equipment = new EquipmentDicom(
+								datasetAttributes.getString(Tag.Manufacturer),
+								datasetAttributes.getString(Tag.ManufacturerModelName),
+								datasetAttributes.getString(Tag.DeviceSerialNumber));
+							serie.setEquipment(equipment);
+							serie.setIsCompressed(checkSeriesIsCompressed(datasetAttributes));
+							if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())) {
+								serie.setSequenceName(datasetAttributes.getString(Tag.PulseSequenceName));
+								serie.setIsEnhancedMR(true);
+								serie.setIsMultiFrame(true);
+								Integer frameCount = new Integer(getFrameCount(datasetAttributes));
+								serie.setMultiFrameCount(frameCount);
+							} else {
+								serie.setSequenceName(datasetAttributes.getString(Tag.SequenceName));
+								serie.setIsEnhancedMR(false);
+								serie.setIsMultiFrame(false);
+								serie.setMultiFrameCount(0);
+							}
+							firstImageOfSerie = false;
 						}
-						seriesDescription = datasetAttributes.getString(Tag.SeriesDescription);
-						if (serie.getSeriesDescription() == null) {
-							serie.setSeriesDescription(seriesDescription);
-						}
-						serie.setSeriesInstanceUID(datasetAttributes.getString(Tag.SeriesInstanceUID));
-						String protocolNameDicomFile = datasetAttributes.getString(Tag.ProtocolName);
-						if (protocolNameDicomFile != null && !protocolNameDicomFile.isEmpty()) {
-							serie.setProtocolName(protocolNameDicomFile);
-						}
-						serie.setSeriesDescription(datasetAttributes.getString(Tag.SeriesDescription));
-						serie.setSeriesDate(DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate)));
-						serie.setNumberOfSeriesRelatedInstances(datasetAttributes.getInt(Tag.NumberOfSeriesRelatedInstances,0));
-						EquipmentDicom equipment = new EquipmentDicom(
-							datasetAttributes.getString(Tag.Manufacturer),
-							datasetAttributes.getString(Tag.ManufacturerModelName),
-							datasetAttributes.getString(Tag.DeviceSerialNumber));
-						serie.setEquipment(equipment);
-						serie.setIsCompressed(checkSeriesIsCompressed(datasetAttributes));
-						if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())) {
-							serie.setSequenceName(datasetAttributes.getString(Tag.PulseSequenceName));
-							serie.setIsEnhancedMR(true);
-							serie.setIsMultiFrame(true);
-							Integer frameCount = new Integer(getFrameCount(datasetAttributes));
-							serie.setMultiFrameCount(frameCount);
-						} else {
-							serie.setSequenceName(datasetAttributes.getString(Tag.SequenceName));
-							serie.setIsEnhancedMR(false);
-							serie.setIsMultiFrame(false);
-							serie.setMultiFrameCount(0);
-						}
-						firstImageOfSerie = false;
-					}
-
-					if (serie.getSopClassUID().startsWith("1.2.840.10008.5.1.4.1.1.66")) {
-						// ((ArrayNode) instances).remove(index);
-						// do nothing here as instances array will be deleted after split
-						iterator.remove();
-					} else {
-						// divide here between non-images and images, non-images at first
-						if (UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
-								|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
-								|| checkSerieIsSpectroscopy(seriesDescription)) {
+	
+						if (serie.getSopClassUID().startsWith("1.2.840.10008.5.1.4.1.1.66")) {
+							// ((ArrayNode) instances).remove(index);
+							// do nothing here as instances array will be deleted after split
 							iterator.remove();
-							serie.getNonImages().add(image);
-							serie.setIsSpectroscopy(true);
-							LOG.warn("Attention: spectroscopy serie is included in this import!");
-							// images at the second
 						} else {
-							// do not change here: use absolute path all time and find other solution for
-							// image preview
-							addImageSeparateDatasetsInfo(image, datasetAttributes, serie.getSopClassUID());
-							serie.setIsSpectroscopy(false);
+							// divide here between non-images and images, non-images at first
+							if (UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
+									|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
+									|| checkSerieIsSpectroscopy(seriesDescription)) {
+								iterator.remove();
+								serie.getNonImages().add(image);
+								serie.setIsSpectroscopy(true);
+								LOG.warn("Attention: spectroscopy serie is included in this import!");
+								// images at the second
+							} else {
+								// do not change here: use absolute path all time and find other solution for
+								// image preview
+								addImageSeparateDatasetsInfo(image, datasetAttributes, serie.getSopClassUID());
+								serie.setIsSpectroscopy(false);
+							}
 						}
 					}
-					dIS.close();
 				}
 			}
 		}
