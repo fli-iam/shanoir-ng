@@ -20,12 +20,13 @@ import java.util.UUID;
 
 public class UIDGeneration {
 
-	private final String root = "1.4.9.12.34.1.8527";
+	private static final String ROOT = "1.4.9.12.34.1.8527";
 
-	public String getNewUID() throws UIDException {
+	private Random rand = new Random();
+
+	public String getNewUID() {
 		String suffix = newSuffix();
-		String newUID = root + "." + suffix;
-		return newUID;
+		return ROOT + "." + suffix;
 	}
 
 	private String newSuffix() {
@@ -38,8 +39,7 @@ public class UIDGeneration {
 		// Each component of a UID is a number and shall consist of one or more digits.
 		// The first digit of each component shall not be zero unless the component is a single digit.
 		if (lUUID.startsWith("0")) {
-			Random random = new Random();
-			int randomBetweenOneAndNine = random.nextInt(9) + 1;
+			int randomBetweenOneAndNine = rand.nextInt(9) + 1;
 			lUUID = lUUID.replaceFirst("0", Integer.toString(randomBetweenOneAndNine));
 		}
 		return lUUID;
