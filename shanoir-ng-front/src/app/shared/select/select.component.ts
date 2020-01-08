@@ -19,14 +19,13 @@ import {
     HostBinding,
     HostListener,
     Input,
+    NgZone,
     OnChanges,
     OnDestroy,
     Output,
+    PipeTransform,
     SimpleChanges,
     ViewChild,
-    PipeTransform,
-    NgZone,
-    ChangeDetectionStrategy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -57,6 +56,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private displayedOptions: Option<any>[] = [];
     @ViewChild('input') textInput: ElementRef;
     @ViewChild('hiddenOption') hiddenOption: ElementRef;
+    private inputValue: any;
     private _selectedOptionIndex: number;
     private focusedOptionIndex: number;
     private _firstScrollOptionIndex: number;
@@ -97,10 +97,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        this.searchText = null;
-        if (changes.options && this.options && this.selectedOption) {
-            this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+        if (changes.options && this.options) {
+            this.searchText = null;
+            this.initSelectedOption();
+            this.computeMinWidth();
         } else if (changes.optionArr && this.optionArr) {
+            this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
                 let label: string = '';
@@ -110,9 +112,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 else if (item.name) label = item.name;
                 this.options.push(new Option<any>(item, label));
             });
-            if (this.selectedOption)
-                    this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+            this.initSelectedOption();
+            this.computeMinWidth();
         } else if (changes.optionBuilder && this.optionBuilder) {
+            this.searchText = null;
             if (this.optionBuilder.list) {
                 this.options = [];
                 this.optionBuilder.list.forEach(item => {
@@ -125,21 +128,45 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                     } 
                     this.options.push(new Option<any>(item, label));
                 });
-                if (this.selectedOption)
-                    this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+                this.initSelectedOption();
+                this.computeMinWidth();
             }
         }
     }
 
-    writeValue(obj: any): void {
-        this.searchText = null;
-        if (this.options && this.selectedOption) {
-            this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+    private initSelectedOption() {
+        if (this.inputValue) {
+            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+            if (index == -1) {
+                this.inputValue = null;
+                this.selectedOptionIndex == null;
+            } else {
+                this.selectedOptionIndex == index;
+            }
+        } else {
+            this.selectedOptionIndex = null;
         }
     }
 
+    writeValue(value: any): void {
+        this.searchText = null;
+        if (this.options && value) {
+            let index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
+            if (index > -1) {
+                this.inputValue = value;
+                this.selectedOptionIndex = index;
+                return;
+            }
+        }
+        this.inputValue = null;
+        this.selectedOptionIndex = null;
+    }
+
     private get selectedOption(): Option<any> {
-        return this.options ? this.options[this.selectedOptionIndex] : undefined;
+        return this.options 
+            && this.selectedOptionIndex != null 
+            && this.selectedOptionIndex != undefined
+            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : null;
     }
 
     private get selectedOptionIndex(): number {
@@ -147,12 +174,17 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private set selectedOptionIndex(index: number) {
+        if (index == -1) index = null;
         if (index != this._selectedOptionIndex) {
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
                 this.onChangeCallback(this.selectedOption.value);
                 this.change.emit(this.selectedOption.value);
+            } else {
+                this.inputText = null;
+                this.onChangeCallback(null);
+                this.change.emit(null);
             }
         }
     }
@@ -186,10 +218,13 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private set searchText(text: string) {
         this.focusedOptionIndex = null;
         if (!text) {
+            if (this._searchText == null) return;
             this._searchText = null;
             this.filteredOptions = null;
         } else {
-            this._searchText = text.trim().toLowerCase();
+            let trimmed = text.trim().toLowerCase();
+            if (trimmed == this._searchText) return;
+            this._searchText = trimmed;
             if (this.searchText.length <= 0) {
                 this.filteredOptions = null;
             } else if (!this.filteredOptions || this.filteredOptions.searchText != this.searchText) {
@@ -197,6 +232,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             }
         }
         this.computeMinWidth();
+        this.computeDisplayedOptions();
     }
 
     private get searchText(): string {
@@ -212,8 +248,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private onUserSelectedOption(option: Option<any>) {
+        let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
+        this.onUserSelectedOptionIndex(index);
+    }
+
+    private onUserSelectedOptionIndex(index: number) {
         this.searchText = null;
-        this.selectedOptionIndex = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
+        this.element.nativeElement.focus();
+        this.selectedOptionIndex = index;
         this.close();
     }
 
@@ -222,9 +264,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private valuesEqual(value1, value2) {
-        return value1 == value2 || (
-            value1 && value2 && value1.id && value2.id && value1.id == value2.id
-        );
+        if (value1 == value2) return true;
+        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+        else return JSON.stringify(value1) === JSON.stringify(value2);
     }
 
     private open() {
@@ -236,7 +278,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }  
     }
 
-    private close () {
+    private close() {
         this.unsubscribeToGlobalClick();
         this.firstScrollOptionIndex = null;
         this.focusedOptionIndex = null;
@@ -256,8 +298,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private scrollToSelected() {
-        if (this.scrollable) {
-            this.firstScrollOptionIndex = this.selectedOptionIndex ? this.selectedOptionIndex : 0;
+        if (this.scrollable && this.selectedOptionIndex) {
+            if (this.selectedOptionIndex < this.displayableOptions.length - this.LIST_LENGTH) {
+                this.firstScrollOptionIndex = this.selectedOptionIndex;
+            } else  {
+                this.firstScrollOptionIndex = this.displayableOptions.length - this.LIST_LENGTH;
+            }
         } else {
             this.firstScrollOptionIndex = 0;
         }
@@ -305,9 +351,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.scrollDownByOne();
             } else {
                 if (this.hasSelectedOption && this.selectedOptionIndex < this.options.length) {
-                    this.onUserSelectedOption(this.options[this.selectedOptionIndex + 1]);
+                    this.onUserSelectedOptionIndex(this.selectedOptionIndex + 1);
                 } else {
-                    this.onUserSelectedOption(this.options[0]);
+                    this.onUserSelectedOptionIndex(0);
                 }
             }
             event.preventDefault();
@@ -316,9 +362,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.scrollUpByOne();
             } else {
                 if (this.hasSelectedOption && this.selectedOptionIndex > 0) {
-                    this.onUserSelectedOption(this.options[this.selectedOptionIndex - 1]);
+                    this.onUserSelectedOptionIndex(this.selectedOptionIndex - 1);
                 } else {
-                    this.onUserSelectedOption(this.options[0]);
+                    this.onUserSelectedOptionIndex(0);
                 }
             }
             event.preventDefault();
@@ -339,7 +385,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             if (!this.isOpen()) this.open();
         }  else if (event.keyCode >= 65 && event.keyCode <= 90) {
             if (this.textInput.nativeElement != document.activeElement) {
-                this.inputText = '';
+                this.inputText = null;
                 this.textInput.nativeElement.focus();
             }
         }       
@@ -413,7 +459,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private dragStartOffsetY: number;
     private dragging: boolean = false;
-    onDragStart(event, data) {
+    onDragStart(event) {
         this.dragging = true;
         let img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
@@ -438,8 +484,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             Math.round((this.displayableOptions.length - this.LIST_LENGTH) * (relativeDropY / (listHeight - 50))), 
             this.displayableOptions.length - this.LIST_LENGTH
             );
-            
-        //console.log(listHeight, relativeDropY, this.firstScrollOptionIndex)
     }
 
     onScrollZoneClick(event) {
@@ -471,8 +515,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private onTypeText(text: string) {
-        this.searchText = text;
         this.unSelectOption();
+        this.inputText = text;
+        this.searchText = text;
         this.open();
     }
 
@@ -543,6 +588,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 export class Option<T> {
 
     disabled: boolean = false;
+    compatible: boolean = undefined;
       
     constructor(
         public value: T,

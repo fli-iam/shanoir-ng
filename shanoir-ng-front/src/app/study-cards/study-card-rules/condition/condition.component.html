@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="value">"{{condition.dicomValue}}"</span>
 </ng-container>
 <ng-container *ngIf="mode != 'view'">
-        <select-box [(ngModel)]="condition.dicomTag" [options]="tagOptions"></select-box>
-    <span class="method">{{condition.operation}}</span>
-    <span class="value">"{{condition.dicomValue}}"</span>
+    <select-box [(ngModel)]="condition.dicomTag" [options]="tagOptions"></select-box>
+    <select-box [(ngModel)]="condition.operation" [optionArr]="operations"></select-box>
+    <input type="text" class="value" [(ngModel)]="condition.dicomValue" />
 </ng-container>

@@ -300,7 +300,9 @@ import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag
         ExaminationDTOService,
         StudyCardDTOService,
         WindowService,
-        DicomService
+        DicomService,
+        ManufacturerModelPipe,
+        SubjectExaminationPipe
     ],
     bootstrap: [AppComponent],
 })

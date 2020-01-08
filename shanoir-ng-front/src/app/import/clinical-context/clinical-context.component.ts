@@ -35,6 +35,9 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { Subscription } from 'rxjs';
+import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
+import { Option } from '../../shared/select/select.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 
 @Component({
@@ -46,9 +49,10 @@ import { Subscription } from 'rxjs';
 export class ClinicalContextComponent implements OnDestroy {
     
     patient: PatientDicom;
-    private studies: Study[] = [];
-    private centers: Center[] = [];
-    private acquisitionEquipments: AcquisitionEquipment[] = [];
+    private studyOptions: Option<Study>[] = [];
+    private centerOptions: Option<Center>[] = [];
+    private allCenters: Center[];
+    private acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
     private subjects: SubjectWithSubjectStudy[] = [];
     private examinations: SubjectExamination[] = [];
     private niftiConverters: NiftiConverter[] = [];
@@ -60,6 +64,11 @@ export class ClinicalContextComponent implements OnDestroy {
     private niftiConverter: NiftiConverter;
     private importMode: "DICOM" | "PACS";
     private subscribtions: Subscription[] = [];
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
+    ];
     
     constructor(
             private studyService: StudyService,
@@ -68,7 +77,9 @@ export class ClinicalContextComponent implements OnDestroy {
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            public subjectExaminationLabelPipe: SubjectExaminationPipe,
+            private acqEqPipe: AcquisitionEquipmentPipe) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -124,84 +135,96 @@ export class ClinicalContextComponent implements OnDestroy {
 
     setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
-        return this.completeStudiesAndCompatibilities(this.patient.studies[0].series[0].equipment)
+        return this.completeStudiesCompatibilities(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
-                let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
-                if (hasOneCompatible) {
-                    this.study = this.studies.filter(study => study.compatible)[0];
+                let compatibleFounded = this.studyOptions.find(study => study.compatible);
+                if (compatibleFounded) {
+                    this.study = compatibleFounded.value;
                     this.onSelectStudy();
                 }
             })
     }
 
-    private completeStudiesAndCompatibilities(equipment: EquipmentDicom): Promise<void> {
-        let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
+    private completeStudiesCompatibilities(equipment: EquipmentDicom): Promise<void> {
+        return Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
+                this.studyOptions = [];
+                this.allCenters = allCenters;
                 for (let study of allStudies) {
+                    let studyOption: Option<Study> = new Option(study, study.name);
+                    studyOption.compatible = false;
                     if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
-                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id)
                             if (center) {
-                                if (this.importMode == 'DICOM') {
-                                    /* calculate compatibilites only if import from dicom zip */
-                                    let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
-                                        && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
-                                        && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
-                                    for (let compatibleAcqEqt of compatibleAcqEqts) {
-                                        compatibleAcqEqt.compatible = true;
-                                        center.compatible = true;
-                                        study.compatible = true;
-                                    }
-                                } else if (this.importMode == 'PACS') {
-                                    center.acquisitionEquipments.forEach(acqEqt => acqEqt.compatible = true);
-                                    center.compatible = true;
-                                    study.compatible = true;
+                                if (this.importMode == 'DICOM' && this.centerCompatible(center)) {
+                                    console.log(study.name, center.name, study)
+                                    studyOption.compatible = true;
                                 }
                                 studyCenter.center = center;
                             } 
                         }
-                        this.studies.push(study);
+                        this.studyOptions.push(studyOption);
                     }
                 }
-            })
-        );
-        return Promise.all(completeStudyPromises).then(() => {});
+            });
+    }
+
+    private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
+        return eq1.serialNumber === eq2.deviceSerialNumber
+        && eq1.manufacturerModel.name === eq2.manufacturerModelName
+        && eq1.manufacturerModel.manufacturer.name === eq2.manufacturer;
+    }
+
+    public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
+        return this.equipmentsEquals(acquisitionEquipment, this.patient.studies[0].series[0].equipment);
+    }
+    
+    public centerCompatible(center: Center): boolean {
+        return center.acquisitionEquipments && center.acquisitionEquipments.find(this.acqEqCompatible.bind(this)) != undefined;
     }
 
     private onSelectStudy(): void {
-        this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+        this.centerOptions = this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
-            let hasOneCompatible: boolean = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible).length == 1;
-            if (hasOneCompatible) {
-                this.center = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible)[0].center;
-                this.onSelectCenter();
-            }
             for (let studyCenter of this.study.studyCenterList) {
-                this.centers.push(studyCenter.center);
+                let option = new Option<Center>(studyCenter.center, studyCenter.center.name);
+                if (this.importMode == 'DICOM') {
+                    option.compatible = studyCenter.center && this.centerCompatible(studyCenter.center);
+                    if (option.compatible) {
+                        this.center = option.value;
+                        this.onSelectCenter();
+                    }
+                }
+                this.centerOptions.push(option);
             }
         }
     }
 
     private onSelectCenter(): void {
-        this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.acquisitionEquipment = this.subject = this.examination = null;
+        this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
         if (this.center && this.center.acquisitionEquipments) {
-            let hasOneCompatible: boolean = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible).length == 1;
-            if (hasOneCompatible) {
-                this.acquisitionEquipment = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible)[0];
-                this.onSelectAcquisitonEquipment();
+            for (let acqEq of this.center.acquisitionEquipments) {
+                let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+                if (this.importMode == 'DICOM') {
+                    option.compatible = this.acqEqCompatible(acqEq);
+                    if (option.compatible) {
+                        this.acquisitionEquipment = option.value;
+                        this.onSelectAcquisitonEquipment();
+                    }
+                }
+                this.acquisitionEquipmentOptions.push(option);
             }
-            this.acquisitionEquipments = this.center.acquisitionEquipments;
         }
     }
 
     private onSelectAcquisitonEquipment(): void {
-        this.subjects = this.examinations = [];
         this.subject = this.examination = null;
+        this.subjects = this.examinations = [];
         if (this.acquisitionEquipment) {
             this.studyService
                 .findSubjectsByStudyId(this.study.id)
@@ -210,8 +233,8 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private onSelectSubject(): void {
-        this.examinations = [];
         this.examination = null;
+        this.examinations = [];
         if (this.subject) {
             this.examinationService
             .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
@@ -372,12 +395,12 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private get hasCompatibleCenters(): boolean {
-        return this.centers.find(center => center.compatible) != undefined;
+        return this.centerOptions.find(center => center.compatible) != undefined;
     }
 
     
     private get hasCompatibleEquipments(): boolean {
-        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+        return this.acquisitionEquipmentOptions.find(ae => ae.compatible) != undefined;
     }
 
     private showStudyDetails() {

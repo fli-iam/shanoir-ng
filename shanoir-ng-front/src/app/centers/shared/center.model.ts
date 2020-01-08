@@ -28,7 +28,6 @@ export class Center extends Entity {
     postalCode: string;
     street: string;
     website: string;
-    compatible: boolean = false;
     studyCenterList: StudyCenter[] = [];
 
     service: CenterService = ServiceLocator.injector.get(CenterService);

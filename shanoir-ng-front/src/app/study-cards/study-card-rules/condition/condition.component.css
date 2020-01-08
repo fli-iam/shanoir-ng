@@ -3,3 +3,5 @@
 .var { color: blue; }
 .method { color: darkgreen; }
 .value { color: chocolate; }
+
+select-box { width: 150px; }

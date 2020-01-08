@@ -13,7 +13,7 @@
  */
 import { Component, Input, OnInit } from '@angular/core';
 
-import { StudyCardCondition, DicomTag } from '../../shared/study-card.model';
+import { StudyCardCondition, DicomTag, Operation } from '../../shared/study-card.model';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { DicomService } from '../../shared/dicom.service';
 import { Option } from '../../../shared/select/select.component';
@@ -30,6 +30,7 @@ export class StudyCardConditionComponent implements OnInit {
     @Input() condition: StudyCardCondition;
     @Input() mode: Mode = 'view';
     private tagOptions: Option<DicomTag>[];
+    operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'SMALLER_THAN', 'BIGGER_THAN'];
 
     constructor(
             private dicomService: DicomService) {}
