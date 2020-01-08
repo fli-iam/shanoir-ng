@@ -46,23 +46,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class MrProtocolStrategy implements ProtocolStrategy {
 	
+	private static final String RECTILINEAR = "RECTILINEAR";
+
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 	
-	// MultiFrameExtractor is only used in case of EnhancedMR MRI.	
-	private MultiframeExtractor emf;
-	
 	/** Returned Default Value when Dicom Tag is not found */
-	private static final int valueNotFoundValue = -999999;
+	private static final int VALUE_NOT_FOUND_VALUE = -999999;
 	
 	@Override
 	public MrProtocol generateMrProtocolForSerie(Attributes dicomAttribute, Serie serie) {
-		
+		// MultiFrameExtractor is only used in case of EnhancedMR MRI.
+		MultiframeExtractor emf;
 
 		Attributes dicomAttributes;
 		
-		//	MultiframeExtractor emf = new MultiframeExtractor();
-		if (serie.getIsEnhancedMR()) {
+		if (Boolean.TRUE.equals(serie.getIsEnhancedMR())) {
 			emf = new MultiframeExtractor();
 			dicomAttributes = emf.extract(dicomAttribute, 0);
 		} else {
@@ -75,37 +74,37 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         
         // Imaged nucleus
         final ImagedNucleus imagedNucleus = getImagedNucleus(dicomAttributes, serie.getIsEnhancedMR());
-        LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
+        LOG.debug("extractMetadata : imagedNucleus={}", imagedNucleus);
         mrProtocol.setImagedNucleus(imagedNucleus);
         
         // filters : private Siemens tag : (0051,1016)
         final String filters = dicomAttributes.getString(0x00511016);
-        LOG.debug("extractMetadata : filters=" + filters);
+        LOG.debug("extractMetadata : filters={}", filters);
         mrProtocol.setFilters(filters);
 
         // Imaging Frequency
         final Double imagingFrequency = dicomAttributes.getDouble(Tag.ImagingFrequency,0);
-        LOG.debug("extractMetadata : imagingFrequency=" + imagingFrequency);
+        LOG.debug("extractMetadata : imagingFrequency={}", imagingFrequency);
         mrProtocol.setImagingFrequency(imagingFrequency);
 
         // Acquisition duration
         final Double acquisitionDuration = dicomAttributes.getDouble(Tag.AcquisitionDuration,0);
-        LOG.debug("extractMetadata : acquisitionDuration=" + acquisitionDuration);
+        LOG.debug("extractMetadata : acquisitionDuration={}", acquisitionDuration);
         mrProtocol.setAcquisitionDuration(acquisitionDuration);
 
         // Echo Train Length
         final Integer echoTrainLength = dicomAttributes.getInt(Tag.EchoTrainLength,0);
-        LOG.debug("extractMetadata : echoTrainLength=" + echoTrainLength);
+        LOG.debug("extractMetadata : echoTrainLength={}", echoTrainLength);
         mrProtocol.setEchoTrainLength(echoTrainLength);
 
         // Number of averages
         final Integer numberOfAverages = dicomAttributes.getInt(Tag.NumberOfAverages,0);
-        LOG.debug("extractMetadata : numberOfAverages=" + numberOfAverages);
+        LOG.debug("extractMetadata : numberOfAverages={}", numberOfAverages);
         mrProtocol.setNumberOfAverages(numberOfAverages);
 
         // Number of Phase Encoding Steps
         final Integer numberOfPhaseEncodingSteps = dicomAttributes.getInt(Tag.NumberOfPhaseEncodingSteps,0);
-        LOG.debug("extractMetadata : numberOfPhaseEncodingSteps=" + numberOfPhaseEncodingSteps);
+        LOG.debug("extractMetadata : numberOfPhaseEncodingSteps={}", numberOfPhaseEncodingSteps);
         mrProtocol.setNumberOfPhaseEncodingSteps(numberOfPhaseEncodingSteps);
 
         // Pixel Spacing Spatial resolution X & Y
@@ -113,25 +112,25 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         if (pixelspacing != null && pixelspacing.length == 2) {
             final Double pixelSpacingX = pixelspacing[0];
             final Double pixelSpacingY = pixelspacing[1];
-            LOG.debug("extractMetadata : pixelSpacingX=" + pixelSpacingX);
-            LOG.debug("extractMetadata : pixelSpacingY=" + pixelSpacingY);
+            LOG.debug("extractMetadata : pixelSpacingX={}", pixelSpacingX);
+            LOG.debug("extractMetadata : pixelSpacingY={}", pixelSpacingY);
             mrProtocol.setPixelSpacingX(pixelSpacingX);
             mrProtocol.setPixelSpacingY(pixelSpacingY);
         }
 
         // Slice thickness
         final Double sliceThickness = dicomAttributes.getDouble(Tag.SliceThickness,0);
-        LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
+        LOG.debug("extractMetadata : sliceThickness={}", sliceThickness);
         mrProtocol.setSliceThickness(sliceThickness);
 
         // Spacing between slices
         final Double sliceSpacing = dicomAttributes.getDouble(Tag.SpacingBetweenSlices,0);
-        LOG.debug("extractMetadata : sliceSpacing=" + sliceSpacing);
+        LOG.debug("extractMetadata : sliceSpacing={}", sliceSpacing);
         mrProtocol.setSliceSpacing(sliceSpacing);
         
         // Acquisition Resolution X & Y
         final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(dicomAttributes, serie.getIsEnhancedMR());
-        if (acquisitionMatrixDimension != null && acquisitionMatrixDimension.length == 2) {
+        if (acquisitionMatrixDimension.length == 2) {
             final Integer acquisitionResolutionX = acquisitionMatrixDimension[0];
             final Integer acquisitionResolutionY = acquisitionMatrixDimension[1];
             mrProtocol.setAcquisitionResolutionX(acquisitionResolutionX);
@@ -143,7 +142,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final Integer rows = dicomAttributes.getInt(Tag.Rows,0);
         if (rows != null && mrProtocol.getPixelSpacingX() != null) {
             final Double fovX = rows * mrProtocol.getPixelSpacingX();
-            LOG.debug("extractMetadata : fovX=" + fovX);
+            LOG.debug("extractMetadata : fovX={}", fovX);
             mrProtocol.setFovX(fovX);
         }
 
@@ -155,11 +154,11 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final Integer columns = dicomAttributes.getInt(Tag.Columns,0);
         if (columns != null && mrProtocol.getPixelSpacingY() != null) {
             final Double fovY = columns * mrProtocol.getPixelSpacingY();
-            LOG.debug("extractMetadata : fovY=" + fovY);
+            LOG.debug("extractMetadata : fovY={}", fovY);
             mrProtocol.setFovY(fovY);
         }
         
-        if (serie.getIsEnhancedMR()) {
+        if (Boolean.TRUE.equals(serie.getIsEnhancedMR())) {
             Integer acquisitionResolutionX = null;
             Integer acquisitionResolutionY = null;
             final String inPlanePhaseEncodingDirection = getInPlanePhaseEncodingDirection(dicomAttributes, serie.getIsEnhancedMR());
@@ -195,27 +194,27 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 
         // Number of Temporal Positions
         final Integer numberOfTemporalPositions = dicomAttributes.getInt(Tag.NumberOfTemporalPositions,0);
-        LOG.debug("extractMetadata : numberOfTemporalPositions=" + numberOfTemporalPositions);
+        LOG.debug("extractMetadata : numberOfTemporalPositions={}", numberOfTemporalPositions);
         mrProtocol.setNumberOfTemporalPositions(numberOfTemporalPositions);
 
         // Temporal resolution
         final Double temporalResolution = dicomAttributes.getDouble(Tag.TemporalResolution,0);
-        LOG.debug("extractMetadata : temporalResolution=" + temporalResolution);
+        LOG.debug("extractMetadata : temporalResolution={}", temporalResolution);
         mrProtocol.setTemporalResolution(temporalResolution);
 
         // Percent sampling
         final Double percentSampling = dicomAttributes.getDouble(Tag.PercentSampling,0);
-        LOG.debug("extractMetadata : percentSampling=" + percentSampling);
+        LOG.debug("extractMetadata : percentSampling={}", percentSampling);
         mrProtocol.setPercentSampling(percentSampling);
 
         // Percent phase field of view
         final Double percentPhaseFieldOfView = dicomAttributes.getDouble(Tag.PercentPhaseFieldOfView,0);
-        LOG.debug("extractMetadata : percentPhaseFieldOfView=" + percentPhaseFieldOfView);
+        LOG.debug("extractMetadata : percentPhaseFieldOfView={}", percentPhaseFieldOfView);
         mrProtocol.setPercentPhaseFov(percentPhaseFieldOfView);
 
         // Pixel bandwidth
         final Double pixelBandwidth = dicomAttributes.getDouble(Tag.PixelBandwidth,0);
-        LOG.debug("extractMetadata : pixelBandwidth=" + pixelBandwidth);
+        LOG.debug("extractMetadata : pixelBandwidth={}", pixelBandwidth);
         mrProtocol.setPixelBandwidth(pixelBandwidth);
         
         // Patient position
@@ -228,10 +227,10 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		Field[] fieldArrayMrProtocol = mrProtocol.getClass().getDeclaredFields();
 		Field[] fieldArrayMrProtocolMetadata = mrProtocol.getOriginMetadata().getClass().getDeclaredFields();
 		
-	    SortedSet<Field> fields = new TreeSet<Field>(new FieldComparator());
+	    SortedSet<Field> fields = new TreeSet<>(new FieldComparator());
 	    fields.addAll(Arrays.asList(concat(fieldArrayMrProtocol, fieldArrayMrProtocolMetadata)));
 
-	    StringBuffer b = new StringBuffer("All About ");
+	    StringBuilder b = new StringBuilder("All About ");
 	    b.append(mrProtocol.getClass().getName());
 	    b.append("\nFields:\n");
 	    for(Field field : fields) {
@@ -245,8 +244,10 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 				try {
 					value = field.get(mrProtocol.getOriginMetadata());
 				} catch (IllegalArgumentException | IllegalAccessException e1) {
+					LOG.error(e1.getMessage());
 				}
 			} catch (IllegalAccessException e) {
+				LOG.error(e.getMessage());
 			}
 			if (value != null && !field.getName().contains("Coil")) {
 				b.append(value.toString());
@@ -262,16 +263,17 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	}
 
 	private static Field[] concat(Field[] first, Field[] second) {
-	    List<Field> both = new ArrayList<Field>(first.length + second.length);
+	    List<Field> both = new ArrayList<>(first.length + second.length);
 	    Collections.addAll(both, first);
 	    Collections.addAll(both, second);
 	    return both.toArray(new Field[both.size()]);
 	}
 	
 	private static class FieldComparator implements Comparator<Field> {
-	    public int compare(Field f1, Field f2) {
-	        return (f1.getName().compareTo(f2.getName()));
-	    }   
+	    @Override
+		public int compare(Field f1, Field f2) {
+	        return f1.getName().compareTo(f2.getName());
+	    }
 	}
 
 	/**
@@ -294,7 +296,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		
         // Acquisition contrast
         String acquisitionContrast = dicomAttributes.getString(Tag.AcquisitionContrast);
-        LOG.debug("extractMetadata : Acquisition Contrast=" + acquisitionContrast);
+        LOG.debug("extractMetadata : Acquisition Contrast={}", acquisitionContrast);
         mrProtocolMetadata.setAcquisitionContrast(AcquisitionContrast.getIdByType(acquisitionContrast));
 		
 
@@ -303,8 +305,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final String receivingCoilName = getReceiveCoilName(dicomAttributes, serie.getIsEnhancedMR());
         // Receiving coil type - tag (0018,9051)
         final String receivingCoilType = getReceiveCoilType(dicomAttributes, serie.getIsEnhancedMR());
-        if ((receivingCoilName != null && !receivingCoilName.equals(""))
-                || (receivingCoilType != null && !receivingCoilType.equals(""))) {
+        if (receivingCoilName != null && !receivingCoilName.equals("")
+                || receivingCoilType != null && !receivingCoilType.equals("")) {
             receivingCoil = new CoilDTO();
             receivingCoil.setName(receivingCoilName);
             receivingCoil.setCoilType(CoilType.valueOf(receivingCoilType));
@@ -317,8 +319,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         CoilDTO transmittingCoil = null;
         final String transmittingCoilName = getTransmitCoilName(dicomAttributes, serie.getIsEnhancedMR());
         final String transmittingCoilType = getTransmitCoilType(dicomAttributes, serie.getIsEnhancedMR());
-        if ((transmittingCoilName != null && !transmittingCoilName.equals(""))
-                || (transmittingCoilType != null && !transmittingCoilType.equals(""))) {
+        if (transmittingCoilName != null && !transmittingCoilName.equals("")
+                || transmittingCoilType != null && !transmittingCoilType.equals("")) {
             transmittingCoil = new CoilDTO();
             transmittingCoil.setName(transmittingCoilName);
             if (transmittingCoilType != null) {
@@ -331,71 +333,63 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         		
         // Volume injected of diluted contrast agent
         final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,0);
-        LOG.debug("extractMetadata : injectedVolume=" + injectedVolume);
+        LOG.debug("extractMetadata : injectedVolume={}", injectedVolume);
         mrProtocolMetadata.setInjectedVolume(injectedVolume);
 
         // Contrast agent concentration
         final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration, 0);
-        LOG.debug("extractMetadata : contrastAgentConcentration=" + contrastAgentConcentration);
+        LOG.debug("extractMetadata : contrastAgentConcentration={}", contrastAgentConcentration);
         mrProtocolMetadata.setContrastAgentConcentration(contrastAgentConcentration);
 
         // Parallel acquisition. Authorized values : YES, NO
         final String parallelAcquisitionExtracted = dicomAttributes.getString(Tag.ParallelAcquisition);
-        LOG.debug("extractMetadata : parallelAcquisitionExtracted=" + parallelAcquisitionExtracted);
+        LOG.debug("extractMetadata : parallelAcquisitionExtracted={}", parallelAcquisitionExtracted);
         if (parallelAcquisitionExtracted != null) {
-	        	if (!parallelAcquisitionExtracted.equals("NO")) {
-	        		mrProtocolMetadata.setParallelAcquisition(true);
-	        	} else {
-	        		mrProtocolMetadata.setParallelAcquisition(false);
-	        	}
+        	mrProtocolMetadata.setParallelAcquisition(!parallelAcquisitionExtracted.equals("NO"));
 		}
 
         // parallel acquisition technique.
         final String parallelAcquisitionTechniqueExtracted = dicomAttributes.getString(Tag.ParallelAcquisitionTechnique);
-        LOG.debug("extractMetadata : parallelAcquisitionTechniqueExtracted=" + parallelAcquisitionTechniqueExtracted);
+        LOG.debug("extractMetadata : parallelAcquisitionTechniqueExtracted={}", parallelAcquisitionTechniqueExtracted);
         if (parallelAcquisitionTechniqueExtracted != null) {
         		mrProtocolMetadata.setParallelAcquisitionTechnique(ParallelAcquisitionTechnique.getIdByTechnique(parallelAcquisitionTechniqueExtracted));
         }
 
         // Time reduction factor for the in-plane direction
         final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,0);
-        LOG.debug("extractMetadata : timeReductionFactorForTheInPlaneDirection=" + timeReductionFactorForTheInPlaneDirection);
+        LOG.debug("extractMetadata : timeReductionFactorForTheInPlaneDirection={}", timeReductionFactorForTheInPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheInPlaneDirection(timeReductionFactorForTheInPlaneDirection);
         
         // Time reduction factor for the out-of-plane direction
         final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,0);
-        LOG.debug("extractMetadata : timeReductionFactorForTheOutOfPlaneDirection=" + timeReductionFactorForTheOutOfPlaneDirection);
+        LOG.debug("extractMetadata : timeReductionFactorForTheOutOfPlaneDirection={}", timeReductionFactorForTheOutOfPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
 
         // Magnetization transfer. Authorized values : YES, NO
         
         // TODO Fix this using either field : (0018,0021) check if MT value in sequence (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,0021) )
-        // OR use Tag.MagnetizationTransfer (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9020) )  possible values: ON_RESONANCE OFF_RESONANCE NONE 
-        // 
+        // OR use Tag.MagnetizationTransfer (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9020) )  possible values: ON_RESONANCE OFF_RESONANCE NONE
+        //
         final String magnetizationTransferExtracted = dicomAttributes.getString(Tag.MagnetizationTransfer);
-        LOG.debug("extractMetadata : magnetizationTransferExtracted=" + magnetizationTransferExtracted);
+        LOG.debug("extractMetadata : magnetizationTransferExtracted={}", magnetizationTransferExtracted);
         if (magnetizationTransferExtracted != null) {
-	        	if (magnetizationTransferExtracted.equals("NONE")) {
-	        		mrProtocolMetadata.setMagnetizationTransfer(false);
-	        	} else {
-	        		mrProtocolMetadata.setMagnetizationTransfer(true);
-	        	}
+        	mrProtocolMetadata.setMagnetizationTransfer(!magnetizationTransferExtracted.equals("NONE"));
 		}
         
         final String contractAgentUsed = dicomAttributes.getString(Tag.ContrastBolusIngredient);
-        LOG.debug("extractMetadata : contractAgentUsed=" + contractAgentUsed);
+        LOG.debug("extractMetadata : contractAgentUsed={}", contractAgentUsed);
         if (contractAgentUsed != null) {
         	mrProtocolMetadata.setContrastAgentUsed(ContrastAgentUsed.getIdByType(contractAgentUsed));
         }
         
         final String[] sequenceVariant = dicomAttributes.getStrings(Tag.SequenceVariant);
-        LOG.debug("extractMetadata : sequenceVariant=" + Arrays.toString(sequenceVariant));
+        LOG.debug("extractMetadata : sequenceVariant={}", Arrays.toString(sequenceVariant));
         if (sequenceVariant != null) {
         	mrProtocolMetadata.setMrSequenceVariant(Arrays.asList(sequenceVariant));
         }
 
         final String[] scanningSequence = dicomAttributes.getStrings(Tag.ScanningSequence);
-        LOG.debug("extractMetadata : scanningSequence=" + Arrays.toString(scanningSequence));
+        LOG.debug("extractMetadata : scanningSequence={}", Arrays.toString(scanningSequence));
         if (scanningSequence != null) {
         	mrProtocolMetadata.setMrScanningSequence(Arrays.asList(scanningSequence));
         }
@@ -404,7 +398,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(dicomAttributes, serie.getIsEnhancedMR()));
         
         return mrProtocolMetadata;
-	}	
+	}
 	
     public String getReceiveCoilName(final Attributes dicomAttributes, final boolean isEnhancedMR) {
         final String result = dicomAttributes.getString(Tag.ReceiveCoilName);
@@ -498,8 +492,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	 */
 	public static Object getValue(final ShanoirConstants.DICOM_RETURNED_TYPES type, final int dicomTag,	final Attributes attributes) {
 		if (ShanoirConstants.DICOM_RETURNED_TYPES.INT == type) {
-			int result = attributes.getInt(dicomTag, valueNotFoundValue);
-			if (result != valueNotFoundValue) {
+			int result = attributes.getInt(dicomTag, VALUE_NOT_FOUND_VALUE);
+			if (result != VALUE_NOT_FOUND_VALUE) {
 				return result;
 			} else {
 				return null;
@@ -507,8 +501,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DATE == type) {
 			return attributes.getDate(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.FLOAT == type) {
-			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
-			if (((int) result) != valueNotFoundValue) {
+			float result = attributes.getFloat(dicomTag, VALUE_NOT_FOUND_VALUE);
+			if ((int) result != VALUE_NOT_FOUND_VALUE) {
 				return result;
 			} else {
 				return null;
@@ -523,13 +517,11 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 			return attributes.getStrings(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.STRING == type) {
 			return attributes.getString(dicomTag);
-		//} else if (ShanoirConstants.DICOM_RETURNED_TYPES.SHORT_ARRAY == type) {
-			//return attributes.getShorts(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DOUBLE_ARRAY == type) {
 			return attributes.getDoubles(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DOUBLE == type) {
-			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
-			if (((int) result) != valueNotFoundValue) {
+			double result = attributes.getDouble(dicomTag, VALUE_NOT_FOUND_VALUE);
+			if ((int) result != VALUE_NOT_FOUND_VALUE) {
 				return result;
 			} else {
 				return null;
@@ -540,8 +532,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 			try {
 				return attributes.getBytes(dicomTag);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				LOG.error("Error during import, fail to convert attribute to byte array",e);
+				LOG.error("Error during import, fail to convert attribute to byte array", e);
 			}
 		}
 		return null;
@@ -599,11 +590,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
     private Integer[] getAcquisitionResolution(final Attributes dicomAttributes, final boolean isEnhancedMR) {
         Integer[] acquisitionResolution = null;
         if (!isEnhancedMR) {
-            // final Integer[] acquisitionMatrixDimension = getInts(serieNumber,
-            // Tag.AcquisitionMatrix);
+
             final int[] acquisitionMatrixDimension = dicomAttributes.getInts(Tag.AcquisitionMatrix);
-            // final String manufacturer = getString(serieNumber,
-            // Tag.Manufacturer);
             final String manufacturer = dicomAttributes.getString(Tag.Manufacturer);
 
             if (acquisitionMatrixDimension != null && acquisitionMatrixDimension.length == 4 && manufacturer != null) {
@@ -622,7 +610,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 
             return acquisitionResolution;
         } else {
-            return null;
+            return new Integer[0];
         }
     }
     
@@ -701,11 +689,11 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final Integer echoTrainLength = getEchoTrainLength(dicomAttributes, isEnhancedMR);
         if (geometryOfKSpaceTraversal != null && !"".equals(geometryOfKSpaceTraversal) && echoTrainLength != null) {
             /* The defined terms are RECTILINEAR, RADIAL, SPIRAL */
-            if (echoTrainLength == 1 && "RECTILINEAR".equalsIgnoreCase(geometryOfKSpaceTraversal)) {
+            if (echoTrainLength == 1 && RECTILINEAR.equalsIgnoreCase(geometryOfKSpaceTraversal)) {
                 return MrSequenceKSpaceFill.CONVENTIONAL_CARTESIAN_SEQUENCE;
-            } else if (echoTrainLength > 1 && "RECTILINEAR".equalsIgnoreCase(geometryOfKSpaceTraversal)) {
+            } else if (echoTrainLength > 1 && RECTILINEAR.equalsIgnoreCase(geometryOfKSpaceTraversal)) {
                 return MrSequenceKSpaceFill.NON_CONVENTIONAL_CARTESIAN_SEQUENCE;
-            } else if (echoTrainLength > 1 && !"RECTILINEAR".equalsIgnoreCase(geometryOfKSpaceTraversal)) {
+            } else if (echoTrainLength > 1 && !RECTILINEAR.equalsIgnoreCase(geometryOfKSpaceTraversal)) {
                 return MrSequenceKSpaceFill.NON_CONVENTIONAL_NON_CARTESIAN_SEQUENCE;
             }
         }
@@ -752,77 +740,6 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             return dicomAttributes.getString(Tag.ResonantNucleus);
         }
     }
-//	
-//    
-//    public String getString(int[] tagPath) {
-//        return toString(get(tagPath), null);
-//    }
-//
-//    public DicomElement get(int[] tagPath) {
-//        checkTagPathLength(tagPath);
-//        final int last = tagPath.length - 1;
-//        final DicomObject item = getItem(tagPath, last, true);
-//        return item != null ? item.get(tagPath[last]) : null;
-//    }
-//
-//
-//    private DicomObject getItem(int[] itemPath, int pathLen, boolean readonly) {
-//        DicomObject item = this;
-//        for (int i = 0; i < pathLen; ++i, ++i) {
-//            DicomElement sq = item.get(itemPath[i]);
-//            if (sq == null || !sq.hasItems()) {
-//                if (readonly) {
-//                    return null;
-//                }
-//                sq = item.putSequence(itemPath[i]);
-//            }
-//            while (sq.countItems() <= itemPath[i + 1]) {
-//                if (readonly) {
-//                    return null;
-//                }
-//                sq.addDicomObject(new BasicDicomObject());
-//            }
-//            item = sq.getDicomObject(itemPath[i + 1]);
-//        }
-//        return item;
-//    }
-//
-//
-//    public String toString() {
-//        return toStringBuffer(null, TO_STRING_MAX_VAL_LEN).toString();
-//    }
-//
-//    private String toString(DicomElement a, String defVal) {
-//        return a == null || a.isEmpty() ? defVal : a.getString(
-//                getSpecificCharacterSet(), cacheGet());
-//    }
-//
-//    public String getString(SpecificCharacterSet cs, boolean cache) {
-//        if (cache) {
-//            Object tmp = cachedValue;
-//            if (tmp instanceof String)
-//                return (String) tmp;
-//        }
-//        String val = vr.toString(value, bigEndian, cs);
-//        if (cache)
-//            cachedValue = val;
-//        return val;
-//    }
-//
-//    
-//    public StringBuffer toStringBuffer(StringBuffer sb, int maxValLen) {
-//        if (sb == null)
-//            sb = new StringBuffer();
-//        TagUtils.toStringBuffer(tag, sb);
-//        sb.append(' ');
-//        sb.append(vr);
-//        sb.append(" #");
-//        sb.append(length());
-//        sb.append(" [");
-//        appendValue(sb, maxValLen);
-//        sb.append("]");
-//        return sb;
-//    }
     
 	public Long getCoil() {
 		return 1L;

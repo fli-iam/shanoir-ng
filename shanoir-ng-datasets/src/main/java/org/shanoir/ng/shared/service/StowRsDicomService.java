@@ -52,24 +52,19 @@ public class StowRsDicomService implements DicomServiceApi {
 	@Override
 	public void storeDcmFiles(List<String> dcmFilePathlist) {
 
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-
-		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
-		for (String filepath : dcmFilePathlist) {
-			multipartEntityBuilder.addBinaryBody("dcm_upload", new File(filepath), ContentType.create(CONTENT_TYPE), "filename");
-		}
-		HttpEntity entity = multipartEntityBuilder.build();
-
-		HttpPost httpPost = new HttpPost(dcm4cheeAddress + dcm4cheeWADORS);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE+";boundary="+BOUNDARY);
-		httpPost.setEntity(entity);
-
-		CloseableHttpResponse response;
-		try {
-			response = httpClient.execute(httpPost);
+		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
+			for (String filepath : dcmFilePathlist) {
+				multipartEntityBuilder.addBinaryBody("dcm_upload", new File(filepath), ContentType.create(CONTENT_TYPE), "filename");
+			}
+			HttpEntity entity = multipartEntityBuilder.build();
+	
+			HttpPost httpPost = new HttpPost(dcm4cheeAddress + dcm4cheeWADORS);
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE+";boundary="+BOUNDARY);
+			httpPost.setEntity(entity);
+	
+			CloseableHttpResponse response = httpClient.execute(httpPost);
 			response.getEntity();
-			response.close();
-			httpClient.close();
 		} catch (ClientProtocolException e) {
 			LOG.error("ClientProtocolException during upload into pacs",e);
 		} catch (IOException e) {

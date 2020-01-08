@@ -62,7 +62,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
 				return delegate.datasetToDatasetDTO(entity);
 			}
 		});
-		return new PageImpl<EegDatasetDTO>(mappedPage.getContent());
+		return new PageImpl<>(mappedPage.getContent());
 	}
 
 }

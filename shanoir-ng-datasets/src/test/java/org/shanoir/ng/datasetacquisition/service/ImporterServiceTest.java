@@ -113,11 +113,11 @@ public class ImporterServiceTest {
 		
 		assertEquals(1, ds.getChannelCount());
 		assertEquals(ds.getName(), dataset.getName());
-		assertEquals(ds.getDatasetExpressions().get(0).getDatasetExpressionFormat(), DatasetExpressionFormat.EEG);
+		assertEquals(DatasetExpressionFormat.EEG, ds.getDatasetExpressions().get(0).getDatasetExpressionFormat());
 
 		DatasetMetadata metadata = ds.getOriginMetadata();
 		assertNotNull(metadata);
-		assertEquals(metadata.getDatasetModalityType(), DatasetModalityType.EEG_DATASET);
+		assertEquals(DatasetModalityType.EEG_DATASET, metadata.getDatasetModalityType());
 	}
 
 	@Test

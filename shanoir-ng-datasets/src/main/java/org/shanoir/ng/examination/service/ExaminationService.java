@@ -49,7 +49,7 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPage(Pageable pageable);;
+	Page<Examination> findPage(Pageable pageable);
 
 	/**
 	 * Find examination by its id.

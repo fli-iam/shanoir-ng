@@ -28,8 +28,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -60,9 +58,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class WADODownloaderService {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
-
 	private static final String INSTANCES = "/instances/";
 
 	private static final String DCM = ".dcm";
@@ -86,10 +81,12 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder) throws IOException, MessagingException {
-		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
-			String url = ((URL) iterator.next()).toString();
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			String url = iterator.next().toString();
 			int indexInstanceUID = url.lastIndexOf(INSTANCES);
-			if (indexInstanceUID < 0) throw new IOException("URL is not in WADO-RS instance URL format. WADO-URI is not yet implemented.");
+			if (indexInstanceUID < 0) {
+				throw new IOException("URL is not in WADO-RS instance URL format. WADO-URI is not yet implemented.");
+			}
 			String instanceUID = url.substring(indexInstanceUID + INSTANCES.length());
 			byte[] responseBody = downloadFileFromPACS(url);
 			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
@@ -101,14 +98,14 @@ public class WADODownloaderService {
 	 * 
 	 * @param url
 	 * @param targetFile
-	 * @return 
+	 * @return
 	 * @throws IOException
 	 */
 	private byte[] downloadFileFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE + ";");
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
@@ -134,10 +131,8 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
-			throws FileNotFoundException, IOException, MessagingException {
-		ByteArrayInputStream bIS = null;
-		try {
-			bIS = new ByteArrayInputStream(responseBody);
+			throws IOException, MessagingException {
+		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
@@ -154,10 +149,6 @@ public class WADODownloaderService {
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
-			}
-		} finally {
-			if (bIS != null) {
-				bIS.close();
 			}
 		}
 	}

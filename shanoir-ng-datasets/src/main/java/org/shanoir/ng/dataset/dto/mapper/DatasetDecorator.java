@@ -25,8 +25,6 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
@@ -39,8 +37,6 @@ import org.springframework.data.domain.Page;
  *
  */
 public abstract class DatasetDecorator implements DatasetMapper {
-
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetDecorator.class);
 
 	@Autowired
 	private DatasetMapper defaultMapper;
@@ -77,7 +73,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
 				}
 			}
 		});
-		return new PageImpl<DatasetDTO>(mappedPage);
+		return new PageImpl<>(mappedPage);
 	}
 
 	@Override

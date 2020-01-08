@@ -19,8 +19,6 @@
 package org.shanoir.ng.dataset.controler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
@@ -35,10 +33,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
@@ -47,7 +47,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "dataset", description = "the dataset API")
+@Api(value = "dataset")
 @RequestMapping("/datasets")
 public interface DatasetApi {
 
@@ -57,7 +57,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
@@ -69,7 +69,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
 	ResponseEntity<DatasetDTO> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
@@ -80,8 +80,8 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@PutMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
+			"application/json" })
 	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
@@ -94,7 +94,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
 			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
@@ -106,13 +106,13 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/download/{datasetId}", produces = { "application/zip" }, method = RequestMethod.GET)
+    @GetMapping(value = "/download/{datasetId}", produces = { "application/zip" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) or eeg(eeg) files.",
     			allowableValues = "dcm, nii, egg", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, IOException;
     
     @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
     @ApiResponses(value = {
@@ -121,13 +121,12 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" },
-        method = RequestMethod.GET)
+    @GetMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
+        produces = { "application/zip" })
     ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(
     		@ApiParam(value = "id of the subject", required=true) @PathVariable("subjectId") Long subjectId,
     		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
     @ApiOperation(value = "", nickname = "exportBIDSByExaminationId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given Examination id", response = Resource.class, tags={})
     @ApiResponses(value = {
@@ -136,13 +135,12 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/exportBIDS/examinationId/{examinationId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" },
-        method = RequestMethod.GET)
+    @GetMapping(value = "/exportBIDS/examinationId/{examinationId}/subjectName/{subjectName}/studyName/{studyName}",
+        produces = { "application/zip" })
     ResponseEntity<ByteArrayResource> exportBIDSByExaminationId(
     		@ApiParam(value = "id of the examination", required=true) @PathVariable("examinationId") Long examinationId,
     		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
     @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
     @ApiResponses(value = {
@@ -151,11 +149,10 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/exportBIDS/studyId/{studyId}/studyName/{studyName}",
-        produces = { "application/zip" },
-        method = RequestMethod.GET)
+    @GetMapping(value = "/exportBIDS/studyId/{studyId}/studyName/{studyName}",
+        produces = { "application/zip" })
     ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
     		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 	
 }

@@ -101,7 +101,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
-		if (examinationDb == null) throw new EntityNotFoundException(Examination.class, examination.getId());
+		if (examinationDb == null) {
+			throw new EntityNotFoundException(Examination.class, examination.getId());
+		}
 		updateExaminationValues(examinationDb, examination);
 		examinationRepository.save(examinationDb);
 		return examinationDb;
@@ -123,7 +125,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
 					entity, IdName[].class);
 		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - " + e.getMessage());
+			LOG.error("Error on study microservice request - {}", e.getMessage());
 		}
 
 		final List<Long> studyIds = new ArrayList<>();
@@ -133,7 +135,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
 				studies = response.getBody();
 			} else {
-				LOG.error("Error on study microservice response - status code: " + response.getStatusCode());
+				LOG.error("Error on study microservice response - status code: {}",response.getStatusCode());
 			}
 
 			if (studies != null) {
@@ -157,20 +159,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
-		// examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
-		// examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
-		// examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
-		// examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-		// examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
-		// examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
-		// examinationDb.setInvestigatorId(examination.getInvestigatorId());
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudyId(examination.getStudyId());
-		// examinationDb.setSubjectId(examination.getSubjectId());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
-		// examinationDb.setTimepoint(examination.getTimepoint());
-		// examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 		return examinationDb;
 	}
 

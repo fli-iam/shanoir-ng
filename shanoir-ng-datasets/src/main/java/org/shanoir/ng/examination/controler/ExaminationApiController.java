@@ -81,7 +81,7 @@ public class ExaminationApiController implements ExaminationApi {
 			examinationService.deleteById(examinationId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -100,10 +100,10 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
 		Page<Examination> examinations = examinationService.findPage(pageable);
-		if (examinations.getContent().size() == 0) {
+		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 	
 	@Override
@@ -113,10 +113,10 @@ public class ExaminationApiController implements ExaminationApi {
 
 		// Get examinations reachable by connected user
 		examinations = examinationService.findPreclinicalPage(isPreclinical, pageable);
-		if (examinations.getContent().size() == 0) {
+		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class ExaminationApiController implements ExaminationApi {
 		validate(result);
 
 		final Examination createdExamination = examinationService.save(examinationDTO);
-		return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 
 	}
 
@@ -154,9 +154,9 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -185,7 +185,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 		final Examination createdExamination = examinationService.save(examinationDTO);
 		LOG.warn("Subject service completed");
-		return new ResponseEntity<Long>(createdExamination.getId(), HttpStatus.OK);
+		return new ResponseEntity<>(createdExamination.getId(), HttpStatus.OK);
 
 	}
 
@@ -214,7 +214,7 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			data = Files.readAllBytes(archiveFile.toPath());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		ByteArrayResource resource = new ByteArrayResource(data);
