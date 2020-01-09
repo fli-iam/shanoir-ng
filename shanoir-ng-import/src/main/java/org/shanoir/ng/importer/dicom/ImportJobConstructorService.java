@@ -94,7 +94,7 @@ public class ImportJobConstructorService {
 								serie.setSequenceName(datasetAttributes.getString(Tag.PulseSequenceName));
 								serie.setIsEnhancedMR(true);
 								serie.setIsMultiFrame(true);
-								Integer frameCount = new Integer(getFrameCount(datasetAttributes));
+								Integer frameCount = Integer.valueOf(getFrameCount(datasetAttributes));
 								serie.setMultiFrameCount(frameCount);
 							} else {
 								serie.setSequenceName(datasetAttributes.getString(Tag.SequenceName));
@@ -106,7 +106,6 @@ public class ImportJobConstructorService {
 						}
 	
 						if (serie.getSopClassUID().startsWith("1.2.840.10008.5.1.4.1.1.66")) {
-							// ((ArrayNode) instances).remove(index);
 							// do nothing here as instances array will be deleted after split
 							iterator.remove();
 						} else {
@@ -142,7 +141,7 @@ public class ImportJobConstructorService {
 		for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
 			final String tag = item.split(DOUBLE_EQUAL)[0];
 			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkIsSpectroscopy : tag=" + tag + ", value=" + value);
+			LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
 			String wildcard = ImportUtils.wildcardToRegex(value);
 			if (seriesDescription != null && seriesDescription.matches(wildcard)) {
 				return true;
@@ -162,7 +161,6 @@ public class ImportJobConstructorService {
 		Attributes attributes = null;
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
-			// Attributes sequenceAttributes = null;
 			// sequenceAttributes =
 			attributes = emf.extract(datasetAttributes, 0);
 		} else {
@@ -174,7 +172,7 @@ public class ImportJobConstructorService {
 		}
 
 		if (image.getImageOrientationPatient() == null) {
-			List<Double> imageOrientationPatient = new ArrayList<Double>();
+			List<Double> imageOrientationPatient = new ArrayList<>();
 			double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
 			if (imageOrientationPatientArray != null) {
 				for (int i = 0; i < imageOrientationPatientArray.length; i++) {
@@ -182,7 +180,7 @@ public class ImportJobConstructorService {
 				}
 				image.setImageOrientationPatient(imageOrientationPatient);
 			} else {
-				LOG.info("imageOrientationPatientArray in dcm file null: " + image.getPath());
+				LOG.info("imageOrientationPatientArray in dcm file null: {}", image.getPath());
 			}
 		}
 		
@@ -210,7 +208,7 @@ public class ImportJobConstructorService {
 			Double anEchoTime = attributes.getDouble(Tag.EchoTime, 0.0);
 			echoTime.setEchoNumber(anEchoNumber);
 			echoTime.setEchoTime(anEchoTime);
-			Set<EchoTime> echoTimes = new HashSet<EchoTime>();
+			Set<EchoTime> echoTimes = new HashSet<>();
 			echoTimes.add(echoTime);
 			image.setEchoTimes(echoTimes);
 		}
@@ -224,11 +222,7 @@ public class ImportJobConstructorService {
 	 */
 	private boolean checkSeriesIsCompressed(Attributes datasetAttributes) {
 		String transferSyntaxUID = datasetAttributes.getString(Tag.TransferSyntaxUID);
-		if (transferSyntaxUID != null && transferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
-			return true;
-		} else {
-			return false;
-		}
+		return transferSyntaxUID != null && transferSyntaxUID.startsWith("1.2.840.10008.1.2.4");
 	}
 	
 	/**

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -44,6 +45,7 @@ import com.google.common.io.Files;
  */
 public class ImportUtils {
 
+	private static final String INTO = " into ";
 	private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 	/**
 	 * @todo: read from application.yml -> Yao
@@ -70,7 +72,7 @@ public class ImportUtils {
 		if (iterable instanceof List) {
 			return (List<E>) iterable;
 		}
-		ArrayList<E> list = new ArrayList<E>();
+		ArrayList<E> list = new ArrayList<>();
 		if (iterable != null) {
 			for (E e : iterable) {
 				list.add(e);
@@ -80,10 +82,12 @@ public class ImportUtils {
 	}
 
 	public static boolean equalsIgnoreNull(Object o1, Object o2) {
-		if (o1 == null)
+		if (o1 == null) {
 			return o2 == null;
-		if (o2 == null)
+		}
+		if (o2 == null) {
 			return o1 == null;
+		}
 		if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
 			return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
 		}
@@ -127,7 +131,7 @@ public class ImportUtils {
 		final Enumeration<? extends ZipEntry> e = zipfile.entries();
 		boolean found = false;
 		while (e.hasMoreElements() && !found) {
-			entry = (ZipEntry) e.nextElement();
+			entry = e.nextElement();
 			if (entry.getName().toUpperCase().endsWith(fileName.toUpperCase())) {
 				found = true;
 				result = true;
@@ -150,9 +154,8 @@ public class ImportUtils {
 		if (!destDir.exists()) {
 			destDir.mkdir();
 		}
-		ZipInputStream zipIn = null;
-		try {
-			zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+		
+		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
 			ZipEntry entry = zipIn.getNextEntry();
 			String directoryFile;
 			String name;
@@ -177,12 +180,6 @@ public class ImportUtils {
 				zipIn.closeEntry();
 				entry = zipIn.getNextEntry();
 			}
-		} catch (IOException e) {
-			throw e;
-		} finally {
-			if (zipIn != null) {
-				zipIn.close();
-			}
 		}
 	}
 
@@ -206,19 +203,11 @@ public class ImportUtils {
 	 * @throws IOException
 	 */
 	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		BufferedOutputStream bos = null;
-		try {
-			bos = new BufferedOutputStream(new FileOutputStream(filePath));
+		try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
 			byte[] bytesIn = new byte[BUFFER_SIZE];
 			int read = 0;
 			while ((read = zipIn.read(bytesIn)) != -1) {
 				bos.write(bytesIn, 0, read);
-			}
-		} catch (IOException e) {
-			throw e;
-		} finally {
-			if (bos != null) {
-				bos.close();
 			}
 		}
 	}
@@ -246,7 +235,7 @@ public class ImportUtils {
 	public static List<File> listFolders(File serieFolder) {
 		List<File> result = null;
 		if (serieFolder != null) {
-			result = new ArrayList<File>();
+			result = new ArrayList<>();
 			final File[] listFiles = serieFolder.listFiles();
 			for (final File file : listFiles) {
 				if (file.isDirectory()) {
@@ -265,7 +254,7 @@ public class ImportUtils {
 	 * @return the string
 	 */
 	public static String wildcardToRegex(String wildcard) {
-		StringBuffer s = new StringBuffer(wildcard.length());
+		StringBuilder s = new StringBuilder(wildcard.length());
 		s.append('^');
 		for (int i = 0, is = wildcard.length(); i < is; i++) {
 			char c = wildcard.charAt(i);
@@ -297,7 +286,7 @@ public class ImportUtils {
 			}
 		}
 		s.append('$');
-		return (s.toString());
+		return s.toString();
 	}
 	
 	/**
@@ -307,20 +296,20 @@ public class ImportUtils {
 	 * @param destination
 	 */
 	public static void copyAllFiles(File folder, File destination) {
-		LOG.debug(" copyAllFiles from " + folder.getName() + " is directory " + folder.isDirectory() + " into "
+		LOG.debug(" copyAllFiles from " + folder.getName() + " is directory " + folder.isDirectory() + INTO
 				+ destination.getName());
 		if (folder.isDirectory()) {
 			for (File inner : Arrays.asList(folder.listFiles())) {
 				if (inner.isDirectory()) {
 					copyAllFiles(inner, destination);
 				} else {
-					LOG.debug("copyAllFiles copying file " + inner.getName());
-					copyFile(inner, new File(destination + "/" + inner.getName()), false);
+					LOG.debug("copyAllFiles copying file {}", inner.getName());
+					copyFile(inner, new File(destination + File.pathSeparator + inner.getName()), false);
 				}
 			}
 		} else {
-			LOG.debug("copyAllFiles directly copying file " + folder.getName());
-			copyFile(folder, new File(destination + "/" + folder.getName()), false);
+			LOG.debug("copyAllFiles directly copying file {}", folder.getName());
+			copyFile(folder, new File(destination + File.pathSeparator + folder.getName()), false);
 		}
 	}
 
@@ -338,7 +327,7 @@ public class ImportUtils {
 	 *         real output file.
 	 */
 
-	public static HashMap<Boolean, File> copyFile(final File in, final File out, final boolean overwrite) {
+	public static Map<Boolean, File> copyFile(final File in, final File out, final boolean overwrite) {
 		return moveOrCopyFile(in, out, overwrite, false);
 	}
 
@@ -359,16 +348,15 @@ public class ImportUtils {
 	 */
 	private static HashMap<Boolean, File> moveOrCopyFile(final File in, final File out, final boolean overwrite,
 			final boolean move) {
-		final HashMap<Boolean, File> result = new HashMap<Boolean, File>();
+		final HashMap<Boolean, File> result = new HashMap<>();
 
-		LOG.debug("moveOrCopyFile : (File in " + in + ", File out " + out + ", overwrite " + overwrite + ", move "
-				+ move + ")");
+		LOG.debug("moveOrCopyFile : (File in {}, File out {}, overwrite {}, move {})", in, out, overwrite, move);
 
 		// rename the file if needed
 		if (out.exists() && !overwrite) {
 			final String folder = out.getParent();
 			String newName = getRenamedFile(out.getName());
-			File realOut = new File(folder + "/" + newName);
+			File realOut = new File(folder + '/' + newName);
 			return moveOrCopyFile(in, realOut, overwrite, move);
 		} else {
 			result.clear();
@@ -378,10 +366,10 @@ public class ImportUtils {
 					result.put(Boolean.TRUE, out);
 				} catch (IOException e) {
 					result.put(Boolean.FALSE, out);
-					LOG.error("Error while moving file " + in + " into " + out, e);
+					LOG.error("Error while moving file " + in + INTO + out, e);
 				} catch (IllegalArgumentException e2) {
 					result.put(Boolean.FALSE, out);
-					LOG.error("Error while moving same file " + in + " into " + out, e2);
+					LOG.error("Error while moving same file " + in + INTO + out, e2);
 				}
 			} else { // copy file
 				try {
@@ -410,9 +398,9 @@ public class ImportUtils {
 		String newName = null;
 		String nameNoExtension = name;
 		String extension = "";
-		if (name.lastIndexOf(".") != -1) {
-			nameNoExtension = name.substring(0, name.lastIndexOf("."));
-			extension = name.substring(name.lastIndexOf("."), name.length());
+		if (name.lastIndexOf('.') != -1) {
+			nameNoExtension = name.substring(0, name.lastIndexOf('.'));
+			extension = name.substring(name.lastIndexOf('.'), name.length());
 		}
 
 		final String lastCharacter = Character.toString(nameNoExtension.charAt(nameNoExtension.length() - 1));

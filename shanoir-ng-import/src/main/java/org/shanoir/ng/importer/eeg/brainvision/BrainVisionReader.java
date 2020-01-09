@@ -36,12 +36,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.model.Channel;
 import org.shanoir.ng.importer.model.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class parses and reads brainvision files.
@@ -54,7 +53,12 @@ import org.shanoir.ng.importer.model.Event;
  */
 public class BrainVisionReader {
 
-    private String dataFileLocation;
+	private static final String ERROR_TEMPLATE_MSG = "Error: {}: {}";
+
+	private static final Logger LOG = LoggerFactory.getLogger(BrainVisionReader.class);
+
+    private static final String NO_FILE_FOUND_ON_CURRENT_LOCATION = "No file found on current location.";
+	private String dataFileLocation;
     private RandomAccessFile dataFile;
     private DataFormat dataFormat;
     private DataOrientation dataOrientation;
@@ -93,15 +97,15 @@ public class BrainVisionReader {
         if (file != null && file.exists() && file.getName().toLowerCase().endsWith(".vhdr")) {
             readHeaderFromVHDR();
         } else {
-        	System.out.println("No .vhdr file");
+        	LOG.info("No .vhdr file");
         	return;
         }
-        
+
         if (markerFile != null && markerFile.exists()) {
         	// Create events
         	readEventsFile();
         }
-        
+
         // Read .pos file if existing
 		// Get .pos file
         File parentDir = new File(file.getParent());
@@ -112,14 +116,14 @@ public class BrainVisionReader {
 		        return name.equals(fileNameWithOutExt + ".pos");
 		    }
 		});
-		
+
 		if (matchingFiles != null && matchingFiles.length == 1) {
 			positionFile = matchingFiles[0];
 		}
         if (positionFile != null && positionFile.exists()) {
         	readPositionFile();
         }
-        
+
         /**
          * Has to be set to 0 initially, reflects changes in buffer size
          */
@@ -128,18 +132,17 @@ public class BrainVisionReader {
             	eegFile = new File(dataFileLocation);
                 dataFile = new RandomAccessFile(dataFileLocation, "r");
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(BrainVisionReader.class.getName()).log(Level.ALL, null, ex);
+            	LOG.error(ex.getMessage());
             }
 
             if (pnts == 0 && dataFile != null) {
                 try {
                     pnts = (int) (dataFile.length() / bytes / nbchan);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                	LOG.error(ex.getMessage());
                 }
             }
         }
-        printPropertiesVHDR();
 
         nSamples = 1;
         isAsciiRead = false;
@@ -176,9 +179,9 @@ public class BrainVisionReader {
             }
             hasPosition = true;
         } catch (FileNotFoundException e) {
-        	System.err.println("No file found on current location.");
+        	LOG.error(ERROR_TEMPLATE_MSG, NO_FILE_FOUND_ON_CURRENT_LOCATION, e.getMessage());
         } catch (IOException e) {
-        	e.printStackTrace();
+        	LOG.error(e.getMessage());
         }
     }
 
@@ -211,7 +214,7 @@ public class BrainVisionReader {
                     // <points>,
                     // <channel number>,
                     // [<date>]
-                    int stringIndex = tmp[0].indexOf("=");
+                    int stringIndex = tmp[0].indexOf('=');
                     String eventType =  tmp[0].substring(stringIndex + 1);
                     String descriptionValue = description? tmp[1] : null;
                     String position = description? tmp[2] : tmp[1];
@@ -228,13 +231,10 @@ public class BrainVisionReader {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.err.println("No file found on current location.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            System.err.println("Problem with parsing, you can panic now.");
-			e.printStackTrace();
-		}
+        	LOG.error(ERROR_TEMPLATE_MSG, NO_FILE_FOUND_ON_CURRENT_LOCATION, e.getMessage());
+        } catch (IOException | ParseException e) {
+        	LOG.error(e.getMessage());
+        }
 	}
 
 	private void readHeaderFromVHDR() {
@@ -290,14 +290,11 @@ public class BrainVisionReader {
 
                 // Read DataType
                 else if (zeile.startsWith("DataType=")) {
-                    switch (zeile.substring(9)) {
-                        case "TIMEDOMAIN":
-                            dataType = DataType.TIMEDOMAIN;
-                            break;
-                        default:
-                            dataType = DataType.UNKNOWN;
-                            break;
-                    }
+                	if ("TIMEDOMAIN".equals(zeile.substring(9))) {
+                        dataType = DataType.TIMEDOMAIN;
+                	} else {
+                        dataType = DataType.UNKNOWN;
+                	}
                 }
 
                 // Read number of channels
@@ -377,7 +374,7 @@ public class BrainVisionReader {
                     String[] tmp = zeile.split(",");
 
                     if (tmp.length == 4) {
-                        int stringIndex = tmp[0].indexOf("=");
+                        int stringIndex = tmp[0].indexOf('=');
                         channelNames[countChannels] = tmp[0].substring(stringIndex + 1);
                         if (tmp[2].isEmpty()) {
                             channelResolution = 1;
@@ -389,7 +386,7 @@ public class BrainVisionReader {
                     	channels.add(chan);
                         countChannels++;
                     } else if (hasPosition && tmp.length == 3) {
-                        int stringIndex = tmp[0].indexOf("=");
+                        int stringIndex = tmp[0].indexOf('=');
                         Channel chan = channels.get(Integer.parseInt(tmp[0].substring(2, stringIndex)) - 1);
                         chan.setX(Integer.valueOf(tmp[0].substring(stringIndex + 1)));
                         chan.setY(Integer.valueOf(tmp[1]));
@@ -420,9 +417,9 @@ public class BrainVisionReader {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.err.println("No file found on current location.");
+        	LOG.error(ERROR_TEMPLATE_MSG, NO_FILE_FOUND_ON_CURRENT_LOCATION, e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+          	LOG.error(e.getMessage());
         }
 
         //set some standard values, if header is not complete
@@ -434,48 +431,19 @@ public class BrainVisionReader {
 
     }
 
-    /**
-     * Testfunction: Proof manually, if properties are correct.
-     */
-    private void printPropertiesVHDR() {
-
-        System.out.println("DataFormat: " + dataFormat);
-        System.out.println("DataOrientation: " + dataOrientation);
-        System.out.println("DataType: " + dataType);
-        System.out.println("NumberOfChannels: " + nbchan);
-        System.out.println("DataPoints: " + pnts);
-        System.out.println("SamplingIntervall: " + samplingIntervall);
-        System.out.println("BinaryFormat: " + binaryFormat);
-        System.out.println("SkipLines: " + skipLines);
-        System.out.println("SkipColumns: " + skipColumns);
-        System.out.println("UseBigEndianOrdner: " + useBigEndianOrder);
-        System.out.println("ChannelResolution: " + channelResolution);
-        String[] tmp = channelNames;
-        System.out.print("ChannelNames:");
-        for (int i = 0; i < tmp.length; i++) {
-            System.out.print(" " + tmp[i]);
-        }
-        System.out.println("SamplingRate in Hertz: " + srate);
-        
-        System.out.println("Found " + channels == null ? 0 : channels.size() + " channels");
-        System.out.println("Found " + events == null ? 0 : events.size() + " events");
-    }
-
     public void read(final int channel, final long from, final long to) {
-        //TODO: check bounds!
-        int nSamples = (int) (to - from);
-        if (this.nSamples != nSamples) {
-            prepareBuffers(nSamples);
+        int nbSamples = (int) (to - from);
+        if (this.nSamples != nbSamples) {
+            prepareBuffers(nbSamples);
         }
 
         if (dataFormat.equals(DataFormat.BINARY)) {
-            readBinary(channel, from, to);
+            readBinary(channel, from);
         } else if (dataFormat.equals(DataFormat.ASCII)) {
             if (!isAsciiRead) {
                 asciiData = readAscii(new File(dataFileLocation));
                 isAsciiRead = true;
             }
-            int j = 0;
             System.arraycopy(asciiData[channel], (int) from, data, 0, data.length);
         }
     }
@@ -488,7 +456,7 @@ public class BrainVisionReader {
      * @param epochToRead the epoch which have to be read.
      * @return
      */
-    private float[] readBinary(final int channel, final long from, final long to) {
+    private float[] readBinary(final int channel, final long from) {
         try {
             FileChannel inChannel = dataFile.getChannel();
             // Set the start position in the file
@@ -502,18 +470,18 @@ public class BrainVisionReader {
 
             final int increment = nbchan * bytes - bytes;
             final boolean flag = dataOrientation.equals(DataOrientation.MULTIPLEXED);
-            final int bytes = this.bytes;
+            final int localBytes = this.bytes;
 
-            int nRead = 0;
-            if ((nRead = inChannel.read(buf)) != -1) {
+            int nRead = inChannel.read(buf);
+            if (nRead != -1) {
                 // Make buffer ready for read
                 buf.rewind();
                 for (int i = 0; i < data.length; i++) {
-                    if (bytes == 2) {
+                    if (localBytes == 2) {
                         data[i] = buf.getShort() * channelResolution;
-                    } else if (bytes == 4) {
+                    } else if (localBytes == 4) {
                         data[i] = buf.getFloat();
-                    } else if (bytes == 8) {
+                    } else if (localBytes == 8) {
                         data[i] = (float) buf.getDouble();
                     }
 
@@ -524,7 +492,7 @@ public class BrainVisionReader {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+           	LOG.error(e.getMessage());
         }
         return data;
     }
@@ -540,9 +508,9 @@ public class BrainVisionReader {
                     .toArray(float[][]::new);
 
         } catch (FileNotFoundException e) {
-            System.err.println("No file found on current location.");
+        	LOG.error(ERROR_TEMPLATE_MSG, NO_FILE_FOUND_ON_CURRENT_LOCATION, e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+        	LOG.error(e.getMessage());
         }
         return out;
     }
@@ -565,15 +533,15 @@ public class BrainVisionReader {
             }
 
         } else if (dataFormat.equals(DataFormat.ASCII) && dataType.equals(DataType.TIMEDOMAIN)) {
-
+        	// Nothing to be done here
         } else {
-            System.out.println("Cannot recognize specific BrainVision format");
+        	LOG.error("Cannot recognize specific BrainVision format");
         }
 
     }
 
     public void close() throws IOException {
-        if (dataFormat.equals(DataFormat.BINARY)) {
+        if (dataFormat.equals(DataFormat.BINARY) && dataFile != null) {
             dataFile.close();
         }
     }

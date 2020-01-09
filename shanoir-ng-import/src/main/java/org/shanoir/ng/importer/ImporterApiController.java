@@ -79,6 +79,10 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class ImporterApiController implements ImporterApi {
 
+	private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
+
+	private static final String NO_FILE_UPLOADED = "No file uploaded.";
+
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterApiController.class);
 
 	private static final SecureRandom RANDOM = new SecureRandom();
@@ -125,17 +129,17 @@ public class ImporterApiController implements ImporterApi {
 			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files) throws RestServiceException {
 		if (files.length == 0) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		try {
 			// not used currently
 			for (int i = 0; i < files.length; i++) {
 				saveTempFile(new File(importDir), files[i]);
 			}
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (IOException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		}
 	}
 
@@ -145,7 +149,7 @@ public class ImporterApiController implements ImporterApi {
 			throws RestServiceException {
 		if (dicomZipFile == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		if (!isZipFile(dicomZipFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -188,11 +192,11 @@ public class ImporterApiController implements ImporterApi {
 			// Work folder is always relative to general import directory and userId (not shown to outside world)
 			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
 			importJob.setPatients(patients);
-			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		}
 	}
 
@@ -201,7 +205,7 @@ public class ImporterApiController implements ImporterApi {
 			throws RestServiceException, ShanoirException {
 		if (dicomZipFile == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		try {
 			final Long userId = KeycloakUtil.getTokenUserId();
@@ -234,12 +238,12 @@ public class ImporterApiController implements ImporterApi {
 		} catch (IOException e) {
 			LOG.error(e.getMessage());
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
 			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
@@ -248,9 +252,8 @@ public class ImporterApiController implements ImporterApi {
 		try {
 			final Long userId = KeycloakUtil.getTokenUserId();
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					e.getMessage(), null));
 		}
@@ -266,7 +269,6 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setWorkFolder("");
 			importJob.setFromPacs(true);
 		} catch (ShanoirException e) {
-			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							e.getMessage(), null));
@@ -274,7 +276,7 @@ public class ImporterApiController implements ImporterApi {
 		if (importJob.getPatients() == null || importJob.getPatients().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+		return new ResponseEntity<>(importJob, HttpStatus.OK);
 	}
 
 	/**
@@ -345,11 +347,8 @@ public class ImporterApiController implements ImporterApi {
 	 * @param file
 	 */
 	private boolean isZipFile(final MultipartFile file) {
-		if (file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
-				|| file.getOriginalFilename().endsWith(ZIP_FILE_SUFFIX)) {
-			return true;
-		}
-		return false;
+		return file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
+				|| file.getOriginalFilename().endsWith(ZIP_FILE_SUFFIX);
 	}
 	
 	
@@ -358,7 +357,7 @@ public class ImporterApiController implements ImporterApi {
 			@ApiParam(value = "file detail") @RequestBody final String dicomZipFilename) throws RestServiceException {
 		if (dicomZipFilename == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		File tempFile = new File(dicomZipFilename);
 
@@ -390,7 +389,7 @@ public class ImporterApiController implements ImporterApi {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
 			File importJobDir = saveTempFileCreateFolderAndUnzipFromFile(userImportDir, dicomZipFile);
-			LOG.info("...unzipped into  "+userImportDir);
+			LOG.info("...unzipped into  {}", userImportDir);
 
 			/**
 			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
@@ -413,26 +412,23 @@ public class ImporterApiController implements ImporterApi {
 			/**
 			 * 4. STEP: create ImportJob
 			 */
-			LOG.info("importDicomZipFile step3 importJob "+importJobDir.getAbsolutePath());
+			LOG.info("importDicomZipFile step3 importJob {}", importJobDir.getAbsolutePath());
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
 			// Work folder is always relative to general import directory and userId (not
 			// shown to outside world)
 			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
 			importJob.setPatients(patients);
-			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		}
 	}
 	
 	private boolean isZipFileFromFile(final File file) {
-		if (file != null && file.getName().endsWith(ZIP_FILE_SUFFIX)) {
-			return true;
-		}
-		return false;
+		return file != null && file.getName().endsWith(ZIP_FILE_SUFFIX);
 	}
 	
 	/**
@@ -490,7 +486,7 @@ public class ImporterApiController implements ImporterApi {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
 			if (eegFile == null) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 			}
 			if (!isZipFile(eegFile)) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip or .edf required.", null));
@@ -533,7 +529,6 @@ public class ImporterApiController implements ImporterApi {
 			    }
 			});
 
-			// TODO: Manage .edf AND .vhdr files ?
 			if (bvMatchingFiles != null && bvMatchingFiles.length > 0) {
 				// Manage multiple vhdr files
 				// read .vhdr files
@@ -547,7 +542,7 @@ public class ImporterApiController implements ImporterApi {
 
 			importJob.setDatasets(datasets);
 			
-			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
+			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
 		}
@@ -610,7 +605,6 @@ public class ImporterApiController implements ImporterApi {
 				dataset.setName(fileNameWithOutExt);
 				
 				dataset.setSamplingFrequency((int)samplingfrequency);
-				//dataset.setCoordinatesSystem(??);
 				
 				// Get the list of file to save from reader
 				List<String> files = new ArrayList<>();
@@ -660,7 +654,7 @@ public class ImporterApiController implements ImporterApi {
 
 			dataset.setSamplingFrequency(samplingFrequency);
 			dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
-			
+
 			bvr.close();
 			
 			// Get the list of file to save from reader
