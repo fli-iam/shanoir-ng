@@ -51,7 +51,7 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 
 		try {
 			subjectStudyService.update(subjectStudy);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

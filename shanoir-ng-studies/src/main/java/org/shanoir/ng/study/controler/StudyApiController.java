@@ -61,44 +61,58 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			studyService.deleteById(studyId);		
+			studyService.deleteById(studyId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 	
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
 		List<Study> studies = studyService.findAll();
-		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		else return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+		}
 	}
 
 	@Override
 	public ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException {
-		List<IdName> studiesDTO = new ArrayList<>(); 
+		List<IdName> studiesDTO = new ArrayList<>();
 		final List<Study> studies = studyService.findAll();
-		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		for (Study study : studies) studiesDTO.add(studyMapper.studyToIdNameDTO(study));			
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
-		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>(); 
+		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>();
 		final List<Study> studies = studyService.findAll();
-		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		for (Study study : studies) studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));			
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));
+		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
-		Study study = studyService.findById(studyId);			
-		if (study == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		else return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
+		Study study = studyService.findById(studyId);
+		if (study == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} else {
+			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
+		}
 	}
 
 	@Override
@@ -120,7 +134,7 @@ public class StudyApiController implements StudyApi {
 		try {
 			studyService.update(study);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
@@ -130,7 +144,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<List<StudyUserRight>> rights(@PathVariable("studyId") final Long studyId) throws RestServiceException {
 		List<StudyUserRight> rights = this.studyUserService.getRightsForStudy(studyId);
 		if (!rights.isEmpty()) {
-			return new ResponseEntity<>(rights, HttpStatus.OK);			
+			return new ResponseEntity<>(rights, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -152,7 +166,7 @@ public class StudyApiController implements StudyApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
 	
 }
