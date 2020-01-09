@@ -153,7 +153,7 @@ export class ExecutionComponent implements OnInit {
     this.toolService.saveSession({ isProcessing: false });
   }
 
-  onDownloadResults(link: string) {
+  onDownloadResults() {
     this.toolService.downloadOutput(this.toolId);
   }
 }

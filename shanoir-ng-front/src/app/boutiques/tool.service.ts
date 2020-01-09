@@ -18,9 +18,9 @@ export type BoutiquesData = {
 })
 export class ToolService extends EntityService<ToolInfo> {
 
-  API_URL = 'http://localhost:9906/tool';
-  // API_URL = 'https://shanoir-ng/boutiques/tool';
-  // API_URL = AppUtils.BACKEND_API_BOUTIQUES_TOOL_URL;
+  // API_URL = 'http://localhost:9906/tool';
+  // API_URL = 'https://shanoir-ng-nginx/shanoir-ng/boutiques/tool';
+  API_URL = AppUtils.BACKEND_API_BOUTIQUES_TOOL_URL;
 
   data: BoutiquesData = { sessionId: Date.now(), isProcessing: false };
 
