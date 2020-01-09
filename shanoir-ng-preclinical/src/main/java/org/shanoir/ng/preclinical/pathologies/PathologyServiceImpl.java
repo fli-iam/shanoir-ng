@@ -17,7 +17,6 @@ package org.shanoir.ng.preclinical.pathologies;
 import java.util.List;
 import java.util.Optional;
 
-//import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;

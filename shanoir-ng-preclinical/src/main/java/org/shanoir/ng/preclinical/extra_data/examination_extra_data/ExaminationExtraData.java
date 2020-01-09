@@ -124,37 +124,48 @@ public class ExaminationExtraData extends HalEntity   {
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj)
+	if (this == obj) {
 		return true;
-	if (obj == null)
+	}
+	if (obj == null) {
 		return false;
-	if (getClass() != obj.getClass())
+	}
+	if (getClass() != obj.getClass()) {
 		return false;
+	}
 	ExaminationExtraData other = (ExaminationExtraData) obj;
 	if (examinationId == null) {
-		if (other.examinationId != null)
+		if (other.examinationId != null) {
 			return false;
-	} else if (!examinationId.equals(other.examinationId))
+		}
+	} else if (!examinationId.equals(other.examinationId)) {
 		return false;
+	}
 	if (filename == null) {
-		if (other.filename != null)
+		if (other.filename != null) {
 			return false;
-	} else if (!filename.equals(other.filename))
+		}
+	} else if (!filename.equals(other.filename)) {
 		return false;
+	}
 	if (filepath == null) {
-		if (other.filepath != null)
+		if (other.filepath != null) {
 			return false;
-	} else if (!filepath.equals(other.filepath))
+		}
+	} else if (!filepath.equals(other.filepath)) {
 		return false;
+	}
 	if (extradatatype == null) {
-		if (other.extradatatype != null)
+		if (other.extradatatype != null) {
 			return false;
-	} else if (!extradatatype.equals(other.extradatatype))
+		}
+	} else if (!extradatatype.equals(other.extradatatype)) {
 		return false;
+	}
 	return true;
   }
 
-@Override	
+@Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExaminationExtraData {\n");

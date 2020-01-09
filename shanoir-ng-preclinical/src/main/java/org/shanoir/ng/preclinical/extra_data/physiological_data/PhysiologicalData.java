@@ -34,76 +34,76 @@ public class PhysiologicalData extends ExaminationExtraData   {
 	
   @JsonProperty("has_heart_rate")
   @NotNull
-  private boolean has_heart_rate = false;
+  private boolean hasHeartRate = false;
   
   @JsonProperty("has_respiratory_rate")
   @NotNull
-  private boolean has_respiratory_rate = false;
+  private boolean hasRespiratoryRate = false;
   
   @JsonProperty("has_sao2")
   @NotNull
-  private boolean has_sao2 = false;
+  private boolean hasSao2 = false;
   
   @JsonProperty("has_temperature")
   @NotNull
-  private boolean has_temperature = false;
+  private boolean hasTemperature = false;
 	
  
   
-  public PhysiologicalData has_heart_rate(boolean has_heart_rate) {
-    this.has_heart_rate = has_heart_rate;
+  public PhysiologicalData hasHeartRate(boolean hasHeartRate) {
+    this.hasHeartRate = hasHeartRate;
     return this;
   }
 
   @ApiModelProperty(value = "none")
-  public boolean getHas_heart_rate() {
-    return has_heart_rate;
+  public boolean getHasHeartRate() {
+    return hasHeartRate;
   }
 
-  public void setHas_heart_rate(boolean has_heart_rate) {
-    this.has_heart_rate = has_heart_rate;
+  public void setHasHeartRate(boolean hasHeartRate) {
+    this.hasHeartRate = hasHeartRate;
   }
   
-  public PhysiologicalData has_respiratory_rate(boolean has_respiratory_rate) {
-    this.has_respiratory_rate = has_respiratory_rate;
+  public PhysiologicalData hasRespiratoryRate(boolean hasRespiratoryRate) {
+    this.hasRespiratoryRate = hasRespiratoryRate;
     return this;
   }
 
   @ApiModelProperty(value = "none")
-  public boolean getHas_respiratory_rate() {
-    return has_respiratory_rate;
+  public boolean getHasRespiratoryRate() {
+    return hasRespiratoryRate;
   }
 
-  public void setHas_respiratory_rate(boolean has_respiratory_rate) {
-    this.has_respiratory_rate = has_respiratory_rate;
+  public void setHasRespiratoryRate(boolean hasRespiratoryRate) {
+    this.hasRespiratoryRate = hasRespiratoryRate;
   }
   
-  public PhysiologicalData has_sao2(boolean has_sao2) {
-    this.has_sao2 = has_sao2;
+  public PhysiologicalData hasSao2(boolean hasSao2) {
+    this.hasSao2 = hasSao2;
     return this;
   }
 
   @ApiModelProperty(value = "none")
-  public boolean getHas_sao2() {
-    return has_sao2;
+  public boolean getHasSao2() {
+    return hasSao2;
   }
 
-  public void setHas_sao2(boolean has_sao2) {
-    this.has_sao2 = has_sao2;
+  public void setHasSao2(boolean hasSao2) {
+    this.hasSao2 = hasSao2;
   }
   
-  public PhysiologicalData has_temperature(boolean has_temperature) {
-    this.has_temperature = has_temperature;
+  public PhysiologicalData hasTemperature(boolean hasTemperature) {
+    this.hasTemperature = hasTemperature;
     return this;
   }
 
   @ApiModelProperty(value = "none")
-  public boolean getHas_temperature() {
-    return has_temperature;
+  public boolean getHasTemperature() {
+    return hasTemperature;
   }
 
-  public void setHas_temperature(boolean has_temperature) {
-    this.has_temperature = has_temperature;
+  public void setHasTemperature(boolean hasTemperature) {
+    this.hasTemperature = hasTemperature;
   }
   
 
@@ -111,30 +111,34 @@ public class PhysiologicalData extends ExaminationExtraData   {
 
   @Override
   public int hashCode() {
-	return Objects.hash(getExaminationId(), getFilename(),getFilepath(),has_heart_rate, has_respiratory_rate, has_sao2, has_temperature);
+	return Objects.hash(getExaminationId(), getFilename(),getFilepath(),hasHeartRate, hasRespiratoryRate, hasSao2, hasTemperature);
   }
 
 @Override
 public boolean equals(Object obj) {
-	if (this == obj)
+	if (this == obj) {
 		return true;
-	if (!super.equals(obj))
+	}
+	if (!super.equals(obj)) {
 		return false;
-	if (getClass() != obj.getClass())
+	}
+	if (getClass() != obj.getClass()) {
 		return false;
+	}
 	PhysiologicalData other = (PhysiologicalData) obj;
-	if (has_heart_rate != other.has_heart_rate)
+	if (hasHeartRate != other.hasHeartRate) {
 		return false;
-	if (has_respiratory_rate != other.has_respiratory_rate)
+	}
+	if (hasRespiratoryRate != other.hasRespiratoryRate) {
 		return false;
-	if (has_sao2 != other.has_sao2)
+	}
+	if (hasSao2 != other.hasSao2) {
 		return false;
-	if (has_temperature != other.has_temperature)
-		return false;
-	return true;
+	}
+	return hasTemperature != other.hasTemperature;
 }
 
-@Override	
+@Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class PhysiologicalData {\n");
@@ -142,10 +146,10 @@ public boolean equals(Object obj) {
     sb.append("    examinationId: ").append(toIndentedString(getExaminationId())).append("\n");
     sb.append("    filename: ").append(toIndentedString(getFilename())).append("\n");
     sb.append("    filepath: ").append(toIndentedString(getFilepath())).append("\n");
-    sb.append("    has_heart_rate: ").append(toIndentedString(has_heart_rate)).append("\n");
-    sb.append("    has_respiratory_rate: ").append(toIndentedString(has_respiratory_rate)).append("\n");
-    sb.append("    has_sao2: ").append(toIndentedString(has_sao2)).append("\n");
-    sb.append("    has_temperature: ").append(toIndentedString(has_temperature)).append("\n");
+    sb.append("    has_heart_rate: ").append(toIndentedString(hasHeartRate)).append("\n");
+    sb.append("    has_respiratory_rate: ").append(toIndentedString(hasRespiratoryRate)).append("\n");
+    sb.append("    has_sao2: ").append(toIndentedString(hasSao2)).append("\n");
+    sb.append("    has_temperature: ").append(toIndentedString(hasTemperature)).append("\n");
     return sb.toString();
   }
 

@@ -69,8 +69,7 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 
 	@Override
 	public List<SubjectPathology> findByAnimalSubject(AnimalSubject animalSubject) {
-		List<SubjectPathology> subjectPathologies = Utils.toList(pathosRepository.findByAnimalSubject(animalSubject));
-		return subjectPathologies;
+		return Utils.toList(pathosRepository.findByAnimalSubject(animalSubject));
 	}
 
 	@Override

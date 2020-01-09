@@ -20,8 +20,6 @@ import java.util.Optional;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
-import org.shanoir.ng.preclinical.references.Reference;
-
 /**
  * Refs service.
  *

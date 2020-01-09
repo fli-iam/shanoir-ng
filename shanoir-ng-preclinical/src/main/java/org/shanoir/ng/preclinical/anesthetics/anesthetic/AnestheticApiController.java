@@ -38,11 +38,14 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class AnestheticApiController implements AnestheticApi {
 
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(AnestheticApiController.class);
 
 	@Autowired
 	private AnestheticService anestheticsService;
 
+	@Override
 	public ResponseEntity<Anesthetic> createAnesthetic(
 			@ApiParam(value = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
 			BindingResult result) throws RestServiceException {
@@ -54,7 +57,7 @@ public class AnestheticApiController implements AnestheticApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		// Guarantees it is a creation, not an update
@@ -63,44 +66,48 @@ public class AnestheticApiController implements AnestheticApi {
 		/* Save anesthetic in db. */
 		try {
 			final Anesthetic createdAnesthetic = anestheticsService.save(anesthetic);
-			return new ResponseEntity<Anesthetic>(createdAnesthetic, HttpStatus.OK);
+			return new ResponseEntity<>(createdAnesthetic, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteAnesthetic(
 			@ApiParam(value = "Anesthetic id to delete", required = true) @PathVariable("id") Long id) {
 		if (anestheticsService.findById(id) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			anestheticsService.deleteById(id);
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Anesthetic> getAnestheticById(
 			@ApiParam(value = "ID of anesthetic that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final Anesthetic anesthetic = anestheticsService.findById(id);
 		if (anesthetic == null) {
-			return new ResponseEntity<Anesthetic>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Anesthetic>(anesthetic, HttpStatus.OK);
+		return new ResponseEntity<>(anesthetic, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Anesthetic>> getAnesthetics() {
 		final List<Anesthetic> anesthetics = anestheticsService.findAll();
 		if (anesthetics.isEmpty()) {
-			return new ResponseEntity<List<Anesthetic>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<Anesthetic>>(anesthetics, HttpStatus.OK);
+		return new ResponseEntity<>(anesthetics, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Anesthetic>> getAnestheticsByType(
 			@ApiParam(value = "Anesthetic type ", required = true) @PathVariable("type") String type) {
 		try {
@@ -108,14 +115,15 @@ public class AnestheticApiController implements AnestheticApi {
 					.findAllByAnestheticType(AnestheticType.valueOf(type.toUpperCase()));
 
 			if (anesthetics.isEmpty()) {
-				return new ResponseEntity<List<Anesthetic>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<List<Anesthetic>>(anesthetics, HttpStatus.OK);
+			return new ResponseEntity<>(anesthetics, HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
-			return new ResponseEntity<List<Anesthetic>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> updateAnesthetic(
 			@ApiParam(value = "ID of anesthetic that needs to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Anesthetic object that needs to be updated", required = true) @RequestBody Anesthetic anesthetic,
@@ -129,7 +137,7 @@ public class AnestheticApiController implements AnestheticApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -137,16 +145,15 @@ public class AnestheticApiController implements AnestheticApi {
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update anesthetic " + id + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Anesthetic anesthetic) {
 		final Anesthetic previousStateAnesthetic = anestheticsService.findById(anesthetic.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Anesthetic>().validate(previousStateAnesthetic,
+		return new EditableOnlyByValidator<Anesthetic>().validate(previousStateAnesthetic,
 				anesthetic);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final Anesthetic anesthetic) {
@@ -154,9 +161,8 @@ public class AnestheticApiController implements AnestheticApi {
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Anesthetic anesthetic) {
-		final UniqueValidator<Anesthetic> uniqueValidator = new UniqueValidator<Anesthetic>(anestheticsService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(anesthetic);
-		return uniqueErrors;
+		final UniqueValidator<Anesthetic> uniqueValidator = new UniqueValidator<>(anestheticsService);
+		return uniqueValidator.validate(anesthetic);
 	}
 
 }

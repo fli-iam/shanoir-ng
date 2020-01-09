@@ -248,42 +248,55 @@ public class ContrastAgent extends HalEntity   {
   
   @Override
   public boolean equals(Object obj) {
-	if (this == obj)
+	if (this == obj) {
 		return true;
-	if (obj == null)
+	}
+	if (obj == null) {
 		return false;
-	if (getClass() != obj.getClass())
+	}
+	if (getClass() != obj.getClass()) {
 		return false;
+	}
 	ContrastAgent other = (ContrastAgent) obj;
 	if (injectionInterval == null) {
-		if (other.injectionInterval != null)
+		if (other.injectionInterval != null) {
 			return false;
-	} else if (!injectionInterval.equals(other.injectionInterval))
+		}
+	} else if (!injectionInterval.equals(other.injectionInterval)) {
 		return false;
+	}
 	if (injectionSite == null) {
-		if (other.injectionSite != null)
+		if (other.injectionSite != null) {
 			return false;
-	} else if (!injectionSite.equals(other.injectionSite))
+		}
+	} else if (!injectionSite.equals(other.injectionSite)) {
 		return false;
+	}
 	if (injectionType == null) {
-		if (other.injectionType != null)
+		if (other.injectionType != null) {
 			return false;
-	} else if (!injectionType.equals(other.injectionType))
+		}
+	} else if (!injectionType.equals(other.injectionType)) {
 		return false;
+	}
 	if (manufacturedName == null) {
-		if (other.manufacturedName != null)
+		if (other.manufacturedName != null) {
 			return false;
-	} else if (!manufacturedName.equals(other.manufacturedName))
+		}
+	} else if (!manufacturedName.equals(other.manufacturedName)) {
 		return false;
+	}
 	if (name == null) {
-		if (other.name != null)
+		if (other.name != null) {
 			return false;
-	} else if (!name.equals(other.name))
+		}
+	} else if (!name.equals(other.name)) {
 		return false;
+	}
 	return true;
   }
 
-  @Override	
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ContrastAgent {\n");

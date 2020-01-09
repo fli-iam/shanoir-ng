@@ -72,12 +72,12 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 	 */
 	public void merge(FieldErrorMap... maps) {
 		for (FieldErrorMap map : maps) {
-			for (String fieldName : map.keySet()) {
-				List<FieldError> error = map.get(fieldName);
-				if (!this.containsKey(fieldName)) {
-					this.put(fieldName, error);
+			for (Entry<String, List<FieldError>> entry : map.entrySet()) {
+				List<FieldError> error = entry.getValue();
+				if (!this.containsKey(entry.getKey())) {
+					this.put(entry.getKey(), error);
 				} else {
-					this.get(fieldName).addAll(error);
+					this.get(entry.getKey()).addAll(error);
 				}
 			}
 		}

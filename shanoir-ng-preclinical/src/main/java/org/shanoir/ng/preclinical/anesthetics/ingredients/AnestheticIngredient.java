@@ -144,37 +144,48 @@ public class AnestheticIngredient extends HalEntity   {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		AnestheticIngredient other = (AnestheticIngredient) obj;
 		if (concentration == null) {
-			if (other.concentration != null)
+			if (other.concentration != null) {
 				return false;
-		} else if (!concentration.equals(other.concentration))
+			}
+		} else if (!concentration.equals(other.concentration)) {
 			return false;
+		}
 		if (concentrationUnit == null) {
-			if (other.concentrationUnit != null)
+			if (other.concentrationUnit != null) {
 				return false;
-		} else if (!concentrationUnit.equals(other.concentrationUnit))
+			}
+		} else if (!concentrationUnit.equals(other.concentrationUnit)) {
 			return false;
+		}
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		if (anesthetic == null) {
-			if (other.anesthetic != null)
+			if (other.anesthetic != null) {
 				return false;
-		} else if (!anesthetic.equals(other.anesthetic))
+			}
+		} else if (!anesthetic.equals(other.anesthetic)) {
 			return false;
+		}
 		return true;
 	}
 
-  @Override	
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class AnestheticIngredient {\n");

@@ -36,7 +36,7 @@ public class Utils {
 		if (iterable instanceof List) {
 			return (List<E>) iterable;
 		}
-		ArrayList<E> list = new ArrayList<E>();
+		ArrayList<E> list = new ArrayList<>();
 		if (iterable != null) {
 			for (E e : iterable) {
 				list.add(e);
@@ -46,10 +46,12 @@ public class Utils {
 	}
 
 	public static boolean equalsIgnoreNull(Object o1, Object o2) {
-		if (o1 == null)
+		if (o1 == null) {
 			return o2 == null;
-		if (o2 == null)
+		}
+		if (o2 == null) {
 			return o1 == null;
+		}
 		if (o1 instanceof AbstractGenericItem && o2 instanceof AbstractGenericItem) {
 			return ((AbstractGenericItem) o1).getId().equals(((AbstractGenericItem) o2).getId());
 		}

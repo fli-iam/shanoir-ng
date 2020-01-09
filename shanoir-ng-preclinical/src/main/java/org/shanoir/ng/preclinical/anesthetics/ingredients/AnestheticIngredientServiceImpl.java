@@ -98,7 +98,6 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 
 	private AnestheticIngredient updateModelValues(final AnestheticIngredient ingredientDb,
 			final AnestheticIngredient ingredient) {
-		// ingredientDb.setAnesthetic(ingredient.getAnesthetic());
 		ingredientDb.setName(ingredient.getName());
 		ingredientDb.setConcentration(ingredient.getConcentration());
 		ingredientDb.setConcentrationUnit(ingredient.getConcentrationUnit());

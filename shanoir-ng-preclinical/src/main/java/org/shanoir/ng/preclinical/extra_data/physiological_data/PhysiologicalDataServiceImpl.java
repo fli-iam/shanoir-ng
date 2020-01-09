@@ -99,10 +99,10 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 		physioDataDb.setExtradatatype(physioData.getExtradatatype());
 		physioDataDb.setFilename(physioData.getFilename());
 		physioDataDb.setFilepath(physioData.getFilepath());
-		physioDataDb.setHas_heart_rate(physioData.getHas_heart_rate());
-		physioDataDb.setHas_respiratory_rate(physioData.getHas_respiratory_rate());
-		physioDataDb.setHas_sao2(physioData.getHas_sao2());
-		physioDataDb.setHas_temperature(physioData.getHas_temperature());
+		physioDataDb.setHasHeartRate(physioData.getHasHeartRate());
+		physioDataDb.setHasRespiratoryRate(physioData.getHasRespiratoryRate());
+		physioDataDb.setHasSao2(physioData.getHasSao2());
+		physioDataDb.setHasTemperature(physioData.getHasTemperature());
 		return physioDataDb;
 	}
 

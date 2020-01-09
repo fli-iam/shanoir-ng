@@ -223,7 +223,6 @@ public class SubjectPathology extends HalEntity {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class SubjectPathologies {\n");
 
-		// sb.append(" subject: ").append(toIndentedString(subject)).append("\n");
 		sb.append("    pathology: ").append(toIndentedString(pathology)).append("\n");
 		sb.append("    pathologyModel: ").append(toIndentedString(pathologyModel)).append("\n");
 		sb.append("    location: ").append(toIndentedString(location)).append("\n");

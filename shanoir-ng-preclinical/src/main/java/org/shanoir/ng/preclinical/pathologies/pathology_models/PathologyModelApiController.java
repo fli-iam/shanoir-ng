@@ -52,6 +52,8 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class PathologyModelApiController implements PathologyModelApi {
 
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(PathologyModelApiController.class);
 
 	@Autowired
@@ -61,6 +63,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
+	@Override
 	public ResponseEntity<PathologyModel> createPathologyModel(
 			@ApiParam(value = "pathology model to create", required = true) @RequestBody PathologyModel model,
 			BindingResult result) throws RestServiceException {
@@ -72,7 +75,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		// Guarantees it is a creation, not an update
@@ -81,24 +84,26 @@ public class PathologyModelApiController implements PathologyModelApi {
 		/* Save model in db. */
 		try {
 			final PathologyModel createdModel = modelsService.save(model);
-			return new ResponseEntity<PathologyModel>(createdModel, HttpStatus.OK);
+			return new ResponseEntity<>(createdModel, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deletePathologyModel(
 			@ApiParam(value = "Pathology model id to delete", required = true) @PathVariable("id") Long id) {
 		PathologyModel toDelete = modelsService.findById(id);
 		if (toDelete == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			// Find and delete corresponding file
-			if (Files.exists(Paths.get(toDelete.getFilepath())))
+			if (Paths.get(toDelete.getFilepath()).toFile().exists()) {
 				Files.delete(Paths.get(toDelete.getFilepath()));
+			}
 		} catch (Exception e) {
 			LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
 					+ toDelete.getFilename() + " " + e.getMessage(), e);
@@ -106,42 +111,46 @@ public class PathologyModelApiController implements PathologyModelApi {
 		try {
 			modelsService.deleteById(id);
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<PathologyModel> getPathologyModelById(
 			@ApiParam(value = "ID of pathology model that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final PathologyModel model = modelsService.findById(id);
 		if (model == null) {
-			return new ResponseEntity<PathologyModel>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<PathologyModel>(model, HttpStatus.OK);
+		return new ResponseEntity<>(model, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<PathologyModel>> getPathologyModels() {
 		final List<PathologyModel> models = modelsService.findAll();
 		if (models.isEmpty()) {
-			return new ResponseEntity<List<PathologyModel>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<PathologyModel>>(models, HttpStatus.OK);
+		return new ResponseEntity<>(models, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(
 			@ApiParam(value = "ID of pathology", required = true) @PathVariable("id") Long id) {
 		Pathology pathology = pathologiesService.findById(id);
 		if (pathology == null) {
-			return new ResponseEntity<List<PathologyModel>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} else {
 			final List<PathologyModel> models = modelsService.findByPathology(pathology);
 			if (models.isEmpty()) {
-				return new ResponseEntity<List<PathologyModel>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<List<PathologyModel>>(models, HttpStatus.OK);
+			return new ResponseEntity<>(models, HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> updatePathologyModel(
 			@ApiParam(value = "ID of pathology model that needs to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Pathology model object that needs to be updated", required = true) @RequestBody PathologyModel model,
@@ -156,7 +165,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -164,18 +173,19 @@ public class PathologyModelApiController implements PathologyModelApi {
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update pathology model" + id + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
 
+	@Override
 	public ResponseEntity<PathologyModel> uploadModelSpecifications(
 			@ApiParam(value = "ID of pathology model upload data to", required = true) @PathVariable("id") Long id,
 			@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException {
 
 		if (uploadfiles == null || uploadfiles.length == 0) {
-			LOG.error("uploadFiles is null or empty " + (uploadfiles == null ? "null" : "empty"));
+			LOG.error("uploadFiles is null or empty ");
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded", null));
 
@@ -190,18 +200,19 @@ public class PathologyModelApiController implements PathologyModelApi {
 		try {
 			model = saveUploadedFile(model, uploadfiles[0]);
 			modelsService.save(model);
-			return new ResponseEntity<PathologyModel>(model, HttpStatus.OK);
+			return new ResponseEntity<>(model, HttpStatus.OK);
 		} catch (IOException e) {
-			LOG.error("Error while uploadModelSpecifications: issue with file " + (e == null ? "" : e.getMessage()), e);
+			LOG.error("Error while uploadModelSpecifications: issue with file {}", e.getMessage(), e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
 		} catch (ShanoirException e) {
-			LOG.error("Error while uploadModelSpecifications: saving in db " + (e == null ? "" : e.getMessage()), e);
+			LOG.error("Error while uploadModelSpecifications: saving in db {}", e.getMessage(), e);
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Error while saving updated model specifications", null));
 		}
 	}
 
+	@Override
 	public ResponseEntity<Resource> downloadModelSpecifications(
 			@ApiParam(value = "ID of model specifications file to download", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
@@ -222,17 +233,16 @@ public class PathologyModelApiController implements PathologyModelApi {
 						.contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
 			} catch (IOException ioe) {
 				LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
-				return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		}
-		return new ResponseEntity<Resource>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final PathologyModel model) {
 		final PathologyModel previousStateModel = modelsService.findById(model.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<PathologyModel>().validate(previousStateModel,
+		return new EditableOnlyByValidator<PathologyModel>().validate(previousStateModel,
 				model);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final PathologyModel model) {
@@ -240,9 +250,8 @@ public class PathologyModelApiController implements PathologyModelApi {
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final PathologyModel model) {
-		final UniqueValidator<PathologyModel> uniqueValidator = new UniqueValidator<PathologyModel>(modelsService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(model);
-		return uniqueErrors;
+		final UniqueValidator<PathologyModel> uniqueValidator = new UniqueValidator<>(modelsService);
+		return uniqueValidator.validate(model);
 	}
 
 	private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
@@ -250,9 +259,8 @@ public class PathologyModelApiController implements PathologyModelApi {
 		Path path = Paths.get(preclinicalConfig.getUploadExtradataFolder() + "models/" + model.getId());
 		Files.createDirectories(path);
 		// Path to file
-		Path pathToFile = Paths.get(path.toString() + "/" + file.getOriginalFilename());
+		Path pathToFile = Paths.get(path.toString() + File.separatorChar + file.getOriginalFilename());
 		byte[] bytes = file.getBytes();
-		// Path path = Paths.get(UPLOADED_EXAM_FOLDER + file.getOriginalFilename());
 		Files.write(pathToFile, bytes);
 		model.setFilename(file.getOriginalFilename());
 		model.setFilepath(pathToFile.toString());

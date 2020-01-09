@@ -50,15 +50,17 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class BrukerApiController implements BrukerApi {
 
+	private static final String ERROR_BRUKER2DICOM_REQUEST = "Error on bruker2dicom microservice request";
+
 	private static final Logger LOG = LoggerFactory.getLogger(BrukerApiController.class);
 
-	public final static String BRUKER_FOLDER = "bruker";
-	public final static String CONVERT_FOLDER = "convert";
-	public final static String FOLDER_SEP = "/";
-	public final static String TEMP_FOLDER = "/tmp";
-	public final static String RECONSTRUCTED_DATA_FILES = "2dseq";
-	public final static String ZIP_EXTENSION = ".zip";
-	public final static String RESULT_FOLDER = "result";
+	public static final String BRUKER_FOLDER = "bruker";
+	public static final String CONVERT_FOLDER = "convert";
+	public static final String FOLDER_SEP = "/";
+	public static final String TEMP_FOLDER = "/tmp";
+	public static final String RECONSTRUCTED_DATA_FILES = "2dseq";
+	public static final String ZIP_EXTENSION = ".zip";
+	public static final String RESULT_FOLDER = "result";
 
 	public static final int KB = 1024;
 	public static final int BUFFER_SIZE = 2 * KB;
@@ -76,10 +78,9 @@ public class BrukerApiController implements BrukerApi {
 	public ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
 			throws RestServiceException {
 		if (uploadfiles == null || uploadfiles.length == 0) {
-			LOG.error("uploadFiles is null or empty " + (uploadfiles == null ? "null" : "empty"));
+			LOG.error("uploadFiles is null or empty");
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded", null));
-
 		}
 		try {
 			MultipartFile brukerFile = uploadfiles[0];
@@ -88,19 +89,19 @@ public class BrukerApiController implements BrukerApi {
 			if (id != -1) {
 				fileName = fileName.substring(0, id);
 			}
-			LOG.info("upload bruker file [" + fileName + "]");
+			LOG.info("upload bruker file [{}]", fileName);
 			Path brukerDirFile = createBrukerTempFile(fileName);
 			String brukerDirString = brukerDirFile.getFileName().toString();
 
-			LOG.info("bruker temp file has been created " + brukerDirFile.toFile().getAbsolutePath());
+			LOG.info("bruker temp file has been created {}", brukerDirFile.toFile().getAbsolutePath());
 			Path uploadedFile = saveUploadedFileTmp(brukerFile, brukerDirFile);
 			LOG.info("bruker zip archive has been uploaded ");
 			unzipBrukerArchive(uploadedFile.toFile().getAbsolutePath(), brukerDirFile.toFile().getAbsolutePath());
-			LOG.info("bruker file has been unzipped into " + brukerDirFile);
+			LOG.info("bruker file has been unzipped into {}", brukerDirFile);
 			boolean isValidBruker = checkBrukerCrawlFor2dseq(
 					Arrays.asList(new File(brukerDirFile.toAbsolutePath().toString()).listFiles()),
 					RECONSTRUCTED_DATA_FILES);
-			LOG.info("isValidBruker for {" + fileName + "}? " + isValidBruker);
+			LOG.info("isValidBruker for {{}}? {}", fileName, isValidBruker);
 
 			String destinationFilePath = brukerDirFile.toAbsolutePath().toString() + File.separator + RESULT_FOLDER;
 			if (isValidBruker) {
@@ -108,20 +109,19 @@ public class BrukerApiController implements BrukerApi {
 				startBruker2Dicom(brukerDirFile);
 				LOG.info("ZIP DICOM FILES");
 				File destinationZip = File.createTempFile(destinationFilePath, "." + brukerDirString + ".converted.zip");
-				LOG.info("zip destinationFilePath = " + destinationFilePath + ", destinationZip = "
-						+ destinationZip.getAbsolutePath().toString() + ", rootFolderToRemove = " + RESULT_FOLDER);
+				LOG.info("zip destinationFilePath = {}, destinationZip = {}, rootFolderToRemove = {}", destinationFilePath, destinationZip.getAbsolutePath(), RESULT_FOLDER);
 				zipFolder(destinationFilePath, destinationZip, RESULT_FOLDER);
-				return new ResponseEntity<String>(destinationZip.getAbsolutePath(), HttpStatus.OK);
+				return new ResponseEntity<>(destinationZip.getAbsolutePath(), HttpStatus.OK);
 			} else {
-				return new ResponseEntity<String>(destinationFilePath, HttpStatus.NOT_ACCEPTABLE);
+				return new ResponseEntity<>(destinationFilePath, HttpStatus.NOT_ACCEPTABLE);
 			}
 		} catch (IOException e) {
-			LOG.error("Error while uploadBrukerFile: issue with file " + (e == null ? "" : e.getMessage()), e);
+			LOG.error("Error while uploadBrukerFile: issue with file {}", e.getMessage(), e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
-		} catch (Exception e2) {
-			LOG.error("Error while zipping dicom files:  " + (e2 == null ? "" : e2.getMessage()), e2);
-			throw new RestServiceException(e2,
+		} catch (Exception e) {
+			LOG.error("Error while zipping dicom files: {}", e.getMessage(), e);
+			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
 		}
 	}
@@ -143,25 +143,24 @@ public class BrukerApiController implements BrukerApi {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		// HttpEntity represents the request
-		HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+		HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
 		// Post to Bruker2Dicom to start conversion
 		ResponseEntity<String> response = null;
 		try {
 			response = restTemplate.exchange(bruker2DicomMsUrl, HttpMethod.POST, entity, String.class);
 		} catch (RestClientException e) {
-			LOG.error("Error on bruker2dicom microservice request", e);
+			LOG.error(ERROR_BRUKER2DICOM_REQUEST, e);
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Error while converting bruker2dicom.", null));
 		} catch (Exception e2) {
-			LOG.error("Error on bruker2dicom microservice request", e2);
+			LOG.error(ERROR_BRUKER2DICOM_REQUEST, e2);
 			throw new RestServiceException(e2, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Error while converting bruker2dicom.", null));
 		}
 
-		if (HttpStatus.OK.equals(response.getStatusCode()) || HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-		} else {
-			LOG.error("Error on bruker2dicom microservice request");
+		if (!HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+			LOG.error(ERROR_BRUKER2DICOM_REQUEST);
 		}
 	}
 
@@ -176,11 +175,10 @@ public class BrukerApiController implements BrukerApi {
 		int index = 0;
 		String pathFile = preclinicalConfig.getUploadBrukerFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
 				+ FOLDER_SEP + fileName;
-		Path path = Paths.get(pathFile);
 		// if the folder exists, create a new folder by adding a figure at the end of
 		// the folder name
-		path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
-		while (Files.exists(path)) {
+		Path path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
+		while (path.toFile().exists()) {
 			path = Paths.get(pathFile + FOLDER_SEP + String.valueOf(index));
 			index++;
 		}
@@ -199,8 +197,6 @@ public class BrukerApiController implements BrukerApi {
 	private Path saveUploadedFileTmp(MultipartFile brukerFile, Path brukerDirPath) throws IOException {
 		// Path to file
 		Path pathToFile = Paths.get(brukerDirPath.toString() + FOLDER_SEP + brukerFile.getOriginalFilename());
-		/*byte[] bytes = brukerFile.getBytes();
-		return Files.write(pathToFile, bytes);*/
 		File destFile = pathToFile.toFile();
 		brukerFile.transferTo(destFile);
 		return pathToFile;
@@ -214,23 +210,23 @@ public class BrukerApiController implements BrukerApi {
 	 * @throws IOException
 	 */
 	private void unzipBrukerArchive(String brukerPath, String brukerDirPath) throws IOException {
-		ZipInputStream zipIn = new ZipInputStream(new FileInputStream(brukerPath));
-		ZipEntry entry = zipIn.getNextEntry();
-		// iterates over entries in the zip file
-		while (entry != null) {
-			String filePath = brukerDirPath + FOLDER_SEP + entry.getName();
-			if (!entry.isDirectory()) {
-				// if the entry is a file, extracts it
-				extractFile(zipIn, filePath);
-			} else {
-				// if the entry is a directory, make the directory
-				File dir = new File(filePath);
-				dir.mkdir();
+		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(brukerPath))) {
+			ZipEntry entry = zipIn.getNextEntry();
+			// iterates over entries in the zip file
+			while (entry != null) {
+				String filePath = brukerDirPath + FOLDER_SEP + entry.getName();
+				if (!entry.isDirectory()) {
+					// if the entry is a file, extracts it
+					extractFile(zipIn, filePath);
+				} else {
+					// if the entry is a directory, make the directory
+					File dir = new File(filePath);
+					dir.mkdir();
+				}
+				zipIn.closeEntry();
+				entry = zipIn.getNextEntry();
 			}
-			zipIn.closeEntry();
-			entry = zipIn.getNextEntry();
 		}
-		zipIn.close();
 	}
 
 	/**
@@ -241,13 +237,13 @@ public class BrukerApiController implements BrukerApi {
 	 * @throws IOException
 	 */
 	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-		byte[] bytesIn = new byte[BUFFER_SIZE];
-		int read = 0;
-		while ((read = zipIn.read(bytesIn)) != -1) {
-			bos.write(bytesIn, 0, read);
+		try(BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = zipIn.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
 		}
-		bos.close();
 	}
 
 	/**
@@ -305,14 +301,14 @@ public class BrukerApiController implements BrukerApi {
 		} else {
 			byte[] buf = new byte[1024];
 			int len;
-			FileInputStream in = new FileInputStream(srcFile);
-			String pathAfterOmittingtheRootFolder = path.replaceFirst(rootFolderToRemove, "");
-			zip.putNextEntry(new ZipEntry(pathAfterOmittingtheRootFolder + "/" + folder.getName()));
-
-			while ((len = in.read(buf)) > 0) {
-				zip.write(buf, 0, len);
+			try (FileInputStream in = new FileInputStream(srcFile)) {
+				String pathAfterOmittingtheRootFolder = path.replaceFirst(rootFolderToRemove, "");
+				zip.putNextEntry(new ZipEntry(pathAfterOmittingtheRootFolder + "/" + folder.getName()));
+	
+				while ((len = in.read(buf)) > 0) {
+					zip.write(buf, 0, len);
+				}
 			}
-			in.close();
 		}
 	}
 

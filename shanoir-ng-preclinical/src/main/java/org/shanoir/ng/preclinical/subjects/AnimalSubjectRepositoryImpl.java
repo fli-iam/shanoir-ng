@@ -20,14 +20,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AnimalSubjectRepositoryImpl implements AnimalSubjectRepositoryCustom {
-
-	private static final Logger LOG = LoggerFactory.getLogger(AnimalSubjectRepositoryImpl.class);
 
 	@PersistenceContext
 	private EntityManager em;

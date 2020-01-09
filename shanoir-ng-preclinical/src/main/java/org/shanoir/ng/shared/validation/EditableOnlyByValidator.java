@@ -42,6 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public class EditableOnlyByValidator<T> {
 
+	private static final String ERROR_CHECKING_EDITABLE_ANNOTATION = "Error while checking @EditableOnlyBy custom annotation";
 	private static final Logger LOG = LoggerFactory.getLogger(EditableOnlyByValidator.class);
 
 	/**
@@ -65,13 +66,13 @@ public class EditableOnlyByValidator<T> {
 						final Object givenValue = editedGetter.invoke(editedEntity);
 						final boolean fieldHasBeenModified = !Utils.equalsIgnoreNull(originalValue, givenValue);
 						if (fieldHasBeenModified && !haveOneRoleInCommon(annotation.roles(), connectedUserRoles)) {
-							final List<FieldError> errors = new ArrayList<FieldError>();
+							final List<FieldError> errors = new ArrayList<>();
 							errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
 									givenValue));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-						LOG.error("Error while checking @EditableOnlyBy custom annotation", e);
+						LOG.error(ERROR_CHECKING_EDITABLE_ANNOTATION, e);
 					} catch (NoSuchMethodException e) {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
@@ -82,7 +83,7 @@ public class EditableOnlyByValidator<T> {
 				}
 			}
 		} catch (SecurityException e) {
-			LOG.error("Error while checking @EditableOnlyBy custom annotation", e);
+			LOG.error(ERROR_CHECKING_EDITABLE_ANNOTATION, e);
 		}
 		return errorMap;
 	}
@@ -105,13 +106,13 @@ public class EditableOnlyByValidator<T> {
 						final Method editedGetter = editedEntity.getClass().getMethod(getterName);
 						final Object givenValue = editedGetter.invoke(editedEntity);
 						if (givenValue != null && !haveOneRoleInCommon(annotation.roles(), connectedUserRoles)) {
-							final List<FieldError> errors = new ArrayList<FieldError>();
+							final List<FieldError> errors = new ArrayList<>();
 							errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
 									givenValue));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-						LOG.error("Error while checking @EditableOnlyBy custom annotation", e);
+						LOG.error(ERROR_CHECKING_EDITABLE_ANNOTATION, e);
 					} catch (NoSuchMethodException e) {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
@@ -122,7 +123,7 @@ public class EditableOnlyByValidator<T> {
 				}
 			}
 		} catch (SecurityException e) {
-			LOG.error("Error while checking @EditableOnlyBy custom annotation", e);
+			LOG.error(ERROR_CHECKING_EDITABLE_ANNOTATION, e);
 		}
 		return errorMap;
 	}
@@ -146,14 +147,14 @@ public class EditableOnlyByValidator<T> {
 	@SuppressWarnings("rawtypes")
 	private Collection<String> getConnectedUserRoles() {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		} else {
 			final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (principal == null) {
 				throw new IllegalArgumentException("connectedUser cannot be null");
 			}
 			if (principal instanceof User) {
-				final List<String> userRoles = new ArrayList<String>();
+				final List<String> userRoles = new ArrayList<>();
 				for (GrantedAuthority authority : ((User) principal).getAuthorities()) {
 					userRoles.add(authority.getAuthority());
 				}

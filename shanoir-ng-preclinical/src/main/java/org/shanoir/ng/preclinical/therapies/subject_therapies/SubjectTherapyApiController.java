@@ -42,6 +42,10 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class SubjectTherapyApiController implements SubjectTherapyApi {
 
+	private static final String ANIMAL_SUBJECT_NOT_FOUND = "AnimalSubject not found";
+
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectTherapyApiController.class);
 
 	@Autowired
@@ -51,6 +55,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 	@Autowired
 	private TherapyService therapyService;
 
+	@Override
 	public ResponseEntity<SubjectTherapy> addSubjectTherapy(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "therapy to add to subject", required = true) @RequestBody SubjectTherapy subtherapy,
@@ -60,7 +65,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		AnimalSubject animalSubject = subjectService.findById(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "AnimalSubject not found", new ErrorDetails()));
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
 		} else {
 			final FieldErrorMap accessErrors = this.getCreationRightsErrors(subtherapy);
 			final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
@@ -68,7 +73,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			/* Merge errors. */
 			final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 			if (!errors.isEmpty()) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments",
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS,
 						new ErrorDetails(errors)));
 			}
 
@@ -84,15 +89,16 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			/* Save subject therapy in db. */
 			try {
 				final SubjectTherapy createdSubTherapy = subtherapiesService.save(subtherapy);
-				return new ResponseEntity<SubjectTherapy>(createdSubTherapy, HttpStatus.OK);
+				return new ResponseEntity<>(createdSubTherapy, HttpStatus.OK);
 			} catch (ShanoirException e) {
 				throw new RestServiceException(e,
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 			}
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteSubjectTherapy(
 			@ApiParam(value = "Subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "subject therapy id to delete", required = true) @PathVariable("tid") Long tid)
@@ -102,39 +108,41 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		AnimalSubject animalSubject = subjectService.findById(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "AnimalSubject not found", new ErrorDetails()));
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
 		} else {
 			SubjectTherapy toDelete = subtherapiesService.findById(tid);
 			if (toDelete == null) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			try {
 				subtherapiesService.deleteById(toDelete.getId());
 			} catch (ShanoirException e) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteSubjectTherapies(
 			@ApiParam(value = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.findById(id);
 		if (animalSubject == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} else {
 			try {
 				subtherapiesService.deleteByAnimalSubject(animalSubject);
 			} catch (ShanoirException e) {
 				LOG.error("ERROR while deleting therapies for subject " + animalSubject.getId(), e);
-				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<SubjectTherapy> getSubjectTherapyById(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of subject therapy that needs to be fetched", required = true) @PathVariable("tid") Long tid)
@@ -142,16 +150,17 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		AnimalSubject animalSubject = subjectService.findById(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "AnimalSubject not found", new ErrorDetails()));
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
 		} else {
 			final SubjectTherapy subtherapy = subtherapiesService.findById(tid);
 			if (subtherapy == null) {
-				return new ResponseEntity<SubjectTherapy>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<SubjectTherapy>(subtherapy, HttpStatus.OK);
+			return new ResponseEntity<>(subtherapy, HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.findById(id);
@@ -160,25 +169,27 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
 		} else {
 			final List<SubjectTherapy> subtherapies = subtherapiesService.findAllByAnimalSubject(animalSubject);
-			return new ResponseEntity<List<SubjectTherapy>>(subtherapies, HttpStatus.OK);
+			return new ResponseEntity<>(subtherapies, HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapiesByTherapy(
 			@ApiParam(value = "therapy id", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException {
 		Therapy therapy = therapyService.findById(tid);
 		if (therapy == null) {
-			return new ResponseEntity<List<SubjectTherapy>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} else {
 			final List<SubjectTherapy> subtherapies = subtherapiesService.findAllByTherapy(therapy);
 			if (subtherapies.isEmpty()) {
-				return new ResponseEntity<List<SubjectTherapy>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<List<SubjectTherapy>>(subtherapies, HttpStatus.OK);
+			return new ResponseEntity<>(subtherapies, HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> updateSubjectTherapy(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of subject therapy that needs to be updated", required = true) @PathVariable("tid") Long tid,
@@ -193,7 +204,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -201,16 +212,15 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update subject therapy " + tid + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final SubjectTherapy subtherapy) {
 		final SubjectTherapy previousStateTherapy = subtherapiesService.findById(subtherapy.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<SubjectTherapy>().validate(previousStateTherapy,
+		return new EditableOnlyByValidator<SubjectTherapy>().validate(previousStateTherapy,
 				subtherapy);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final SubjectTherapy therapies) {
@@ -218,10 +228,9 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final SubjectTherapy therapies) {
-		final UniqueValidator<SubjectTherapy> uniqueValidator = new UniqueValidator<SubjectTherapy>(
+		final UniqueValidator<SubjectTherapy> uniqueValidator = new UniqueValidator<>(
 				subtherapiesService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(therapies);
-		return uniqueErrors;
+		return uniqueValidator.validate(therapies);
 	}
 
 }

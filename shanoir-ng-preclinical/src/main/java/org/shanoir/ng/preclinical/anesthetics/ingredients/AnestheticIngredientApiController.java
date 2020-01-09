@@ -40,6 +40,8 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class AnestheticIngredientApiController implements AnestheticIngredientApi {
 
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(AnestheticIngredientApiController.class);
 
 	@Autowired
@@ -47,6 +49,7 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 	@Autowired
 	private AnestheticService anestheticsService;
 
+	@Override
 	public ResponseEntity<AnestheticIngredient> createAnestheticIngredient(
 			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Anesthetic Ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
@@ -64,7 +67,7 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 			/* Merge errors. */
 			final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 			if (!errors.isEmpty()) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments",
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS,
 						new ErrorDetails(errors)));
 			}
 
@@ -78,39 +81,42 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 			/* Save ingredient in db. */
 			try {
 				final AnestheticIngredient createdIngredient = ingredientsService.save(ingredient);
-				return new ResponseEntity<AnestheticIngredient>(createdIngredient, HttpStatus.OK);
+				return new ResponseEntity<>(createdIngredient, HttpStatus.OK);
 			} catch (ShanoirException e) {
 				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 			}
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteAnestheticIngredient(
 			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Anesthetic Ingredient id to delete", required = true) @PathVariable("aiid") Long aiid) {
 		AnestheticIngredient toDelete = ingredientsService.findById(aiid);
 		if (toDelete == null) {
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		try {
 			ingredientsService.deleteById(toDelete.getId());
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<AnestheticIngredient> getAnestheticIngredientById(
 			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of ingredient that needs to be fetched", required = true) @PathVariable("aiid") Long aiid) {
 		final AnestheticIngredient ingredient = ingredientsService.findById(aiid);
 		if (ingredient == null) {
-			return new ResponseEntity<AnestheticIngredient>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<AnestheticIngredient>(ingredient, HttpStatus.OK);
+		return new ResponseEntity<>(ingredient, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<AnestheticIngredient>> getAnestheticIngredients(
 			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
@@ -121,13 +127,11 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 					new ErrorModel(HttpStatus.NO_CONTENT.value(), "Anesthetic not found", new ErrorDetails()));
 		} else {
 			final List<AnestheticIngredient> ingredients = ingredientsService.findByAnesthetic(anesthetic);
-			/*if (ingredients.isEmpty()) {
-				return new ResponseEntity<List<AnestheticIngredient>>(HttpStatus.NO_CONTENT);
-			}*/
-			return new ResponseEntity<List<AnestheticIngredient>>(ingredients, HttpStatus.OK);
+			return new ResponseEntity<>(ingredients, HttpStatus.OK);
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> updateAnestheticIngredient(
 			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of anesthetic ingredient that needs to be updated", required = true) @PathVariable("aiid") Long aiid,
@@ -142,7 +146,7 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -150,16 +154,15 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update ingredient " + aiid + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final AnestheticIngredient ingredient) {
 		final AnestheticIngredient previousStateIngredient = ingredientsService.findById(ingredient.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<AnestheticIngredient>()
+		return new EditableOnlyByValidator<AnestheticIngredient>()
 				.validate(previousStateIngredient, ingredient);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final AnestheticIngredient ingredient) {
@@ -167,10 +170,9 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final AnestheticIngredient ingredient) {
-		final UniqueValidator<AnestheticIngredient> uniqueValidator = new UniqueValidator<AnestheticIngredient>(
+		final UniqueValidator<AnestheticIngredient> uniqueValidator = new UniqueValidator<>(
 				ingredientsService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(ingredient);
-		return uniqueErrors;
+		return uniqueValidator.validate(ingredient);
 	}
 
 }

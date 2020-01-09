@@ -22,11 +22,11 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Component;
 
-import org.shanoir.ng.preclinical.references.Reference;
-
 @Component
 public class RefsRepositoryImpl implements RefsRepositoryCustom{
 
+	private static final String CATEGORY2 = "category";
+	private static final String REFTYPE2 = "reftype";
 	@PersistenceContext
     private EntityManager em;
 	
@@ -35,7 +35,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	public List<Reference> findByCategory(String category) {
 		return em.createQuery(
 				"SELECT r FROM Reference r WHERE r.category LIKE :category")
-				.setParameter("category", category)
+				.setParameter(CATEGORY2, category)
 				.getResultList();
 	}
 	
@@ -44,8 +44,8 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	public List<Reference> findByCategoryAndType(String category,String reftype) {
 		return em.createQuery(
 				"SELECT r FROM Reference r WHERE r.category LIKE :category AND r.reftype LIKE :reftype")
-				.setParameter("category", category)
-				.setParameter("reftype", reftype)
+				.setParameter(CATEGORY2, category)
+				.setParameter(REFTYPE2, reftype)
 				.getResultList();
 	}
 	
@@ -54,8 +54,8 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	public Optional<Reference> findByCategoryTypeAndValue(String category, String reftype, String value) {
 		List<Reference> resultList = em.createQuery(
 				"SELECT r FROM Reference r WHERE r.category LIKE :category AND r.reftype LIKE :reftype AND r.value LIKE :value")
-				.setParameter("category", category)
-				.setParameter("reftype", reftype)
+				.setParameter(CATEGORY2, category)
+				.setParameter(REFTYPE2, reftype)
 				.setParameter("value", value)
 				.setMaxResults(1)
 				.getResultList();
@@ -71,7 +71,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	public Optional<Reference> findByTypeAndValue(String reftype, String value) {
 		List<Reference> resultList = em.createQuery(
 				"SELECT r FROM Reference r WHERE r.reftype LIKE :reftype AND r.value LIKE :value")
-				.setParameter("reftype", reftype)
+				.setParameter(REFTYPE2, reftype)
 				.setParameter("value", value)
 				.setMaxResults(1)
 				.getResultList();
@@ -95,7 +95,7 @@ public class RefsRepositoryImpl implements RefsRepositoryCustom{
 	public List<String> findTypesByCategory(String category) {
 		return em.createQuery(
 				"SELECT DISTINCT(r.reftype) FROM Reference r WHERE r.category LIKE :category")
-				.setParameter("category", category)
+				.setParameter(CATEGORY2, category)
 				.getResultList();
 	}
 	

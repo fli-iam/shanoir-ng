@@ -36,6 +36,8 @@ import org.springframework.util.StringUtils;
  */
 public class UniqueValidator<T extends AbstractGenericItem> {
 
+	private static final String ERROR_CHECKING_UNIQUE_ANNOTATION = "Error while checking @Unique custom annotation";
+
 	private static final Logger LOG = LoggerFactory.getLogger(UniqueValidator.class);
 
 	private UniqueCheckableService<T> service;
@@ -70,13 +72,13 @@ public class UniqueValidator<T extends AbstractGenericItem> {
 						// If found entities and it is not the same current entity
 						if (foundedList != null && !foundedList.isEmpty()
 								&& !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {
-							List<FieldError> errors = new ArrayList<FieldError>();
+							List<FieldError> errors = new ArrayList<>();
 							errors.add(new FieldError("unique",
 									"The given value is already taken for this field, choose another", value));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-						LOG.error("Error while checking @Unique custom annotation", e);
+						LOG.error(ERROR_CHECKING_UNIQUE_ANNOTATION, e);
 					} catch (NoSuchMethodException e) {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
@@ -87,7 +89,7 @@ public class UniqueValidator<T extends AbstractGenericItem> {
 				}
 			}
 		} catch (SecurityException e) {
-			LOG.error("Error while checking @Unique custom annotation", e);
+			LOG.error(ERROR_CHECKING_UNIQUE_ANNOTATION, e);
 		}
 		return errorMap;
 	}
@@ -111,13 +113,13 @@ public class UniqueValidator<T extends AbstractGenericItem> {
 						List<T> foundedList = service.findBy(field.getName(), value);
 						// If found entities and it is not the same current entity
 						if (foundedList != null && !foundedList.isEmpty()) {
-							List<FieldError> errors = new ArrayList<FieldError>();
+							List<FieldError> errors = new ArrayList<>();
 							errors.add(new FieldError("unique",
 									"The given value is already taken for this field, choose another", value));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-						LOG.error("Error while checking @Unique custom annotation", e);
+						LOG.error(ERROR_CHECKING_UNIQUE_ANNOTATION, e);
 					} catch (NoSuchMethodException e) {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
@@ -128,7 +130,7 @@ public class UniqueValidator<T extends AbstractGenericItem> {
 				}
 			}
 		} catch (SecurityException e) {
-			LOG.error("Error while checking @Unique custom annotation", e);
+			LOG.error(ERROR_CHECKING_UNIQUE_ANNOTATION, e);
 		}
 		return errorMap;
 	}

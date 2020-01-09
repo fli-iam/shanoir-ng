@@ -99,7 +99,6 @@ public class AnestheticServiceImpl implements AnestheticService {
 		anestheticDb.setName(anesthetic.getName());
 		anestheticDb.setComment(anesthetic.getComment());
 		anestheticDb.setAnestheticType(anesthetic.getAnestheticType());
-		// anestheticDb.setIngredients(anesthetic.getIngredients());
 		return anestheticDb;
 	}
 
