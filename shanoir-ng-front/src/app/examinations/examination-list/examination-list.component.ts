@@ -59,19 +59,25 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         let colDef: any[] = [
             { headerName: "Examination id", field: "id" },
             {
-                headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
-                    return (params.data.subject) ? params.data.subject.name : "";
-                }
-            },{
-                headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
+                headerName: "Subject", field: "subjectId", 
+                cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""
+            },
+            {
+                headerName: "Examination date", field: "examinationDate", type: "date",
+                cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
-                }, width: "100px"
-            },{
-                headerName: "Research study", field: "study.name", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
-            },{
-                headerName: "Center", field: "centerName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
+                },
+                width: "100px"
+            },
+            {
+                headerName: "Research study", field: "studyId", type: "link",
+                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id]),
+                cellRenderer: (params: any) => (params.data.study) ? params.data.study.name : ""
+            },
+            {
+                headerName: "Center", field: "centerId", type: "link",
+                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id]),
+                cellRenderer: (params: any) => (params.data.center) ? params.data.center.name : ""
             }
         ];
         return colDef;       
