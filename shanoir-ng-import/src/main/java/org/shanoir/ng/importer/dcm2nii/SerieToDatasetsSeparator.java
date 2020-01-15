@@ -97,7 +97,8 @@ public class SerieToDatasetsSeparator {
 		if (echoTime.hashCode() != other.echoTime.hashCode()) {
 			return false;
 		}
-		return !imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
+		return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
+
 	}
 
 	/**
