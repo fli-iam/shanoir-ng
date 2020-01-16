@@ -15,9 +15,6 @@
 package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.study.rights.ampq.StudyUserListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -33,8 +30,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMQConfiguration {
-
-private static final Logger LOG = LoggerFactory.getLogger(RabbitMQConfiguration.class);
 	
 	@Autowired
 	private StudyUserListener listener;
@@ -47,14 +42,14 @@ private static final Logger LOG = LoggerFactory.getLogger(RabbitMQConfiguration.
 	@Bean
 	public FanoutExchange fanout() {
 	    return new FanoutExchange("study-user-exchange", true, false);
-	}	
+	}
 	
 	@RabbitListener(bindings = @QueueBinding(
 	        value = @Queue(value = "study-user-queue-import", durable = "true"),
-	        exchange = @Exchange(value = "study-user-exchange", ignoreDeclarationExceptions = "true", 
+	        exchange = @Exchange(value = "study-user-exchange", ignoreDeclarationExceptions = "true",
 	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
 	)
-	public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException  {
+	public void receiveMessage(String commandArrStr) {
 		listener.receiveMessageImport(commandArrStr);
 	}
 

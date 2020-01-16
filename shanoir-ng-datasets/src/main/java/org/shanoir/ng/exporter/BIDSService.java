@@ -31,6 +31,8 @@ import org.shanoir.ng.importer.dto.Subject;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -54,6 +56,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 @Scope("prototype")
 public class BIDSService {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(BIDSService.class);
+
+	private static final String TASK = "_task_";
 
 	private static final String ZIP = ".zip";
 
@@ -110,7 +116,7 @@ public class BIDSService {
 					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.SUBJECT + "/" + studyId +"/allSubjects?preclinical=null", HttpMethod.GET,
 					entity, Subject[].class);
 		} catch (RestClientException e) {
-			System.err.println("Error on study microservice request - " + e.getMessage());
+			LOG.error("Error on study microservice request - {}", e.getMessage());
 		}
 
 		List<Subject> subjects = new ArrayList<>();
@@ -118,7 +124,7 @@ public class BIDSService {
 			if (HttpStatus.OK.equals(response.getStatusCode()) || HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
 				subjects = Arrays.asList(response.getBody());
 			} else {
-				System.err.println("Error on study microservice response - status code: " + response.getStatusCode());
+				LOG.error("Error on study microservice response - status code: {}", response.getStatusCode());
 			}
 		}
 		return subjects;
@@ -145,7 +151,7 @@ public class BIDSService {
 		try {
 			zipFile.createNewFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}
 
 		// 2. Create dataset_description.json and README
@@ -156,7 +162,7 @@ public class BIDSService {
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}
 		
 		return workFolder;
@@ -273,7 +279,7 @@ public class BIDSService {
 		try {
 			createDatasetBidsFiles(dataset, examDir, studyName, subjectName);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
 		}
 
 		return workDir == null ? baseDir : examDir;
@@ -290,7 +296,7 @@ public class BIDSService {
 	 */
 	public void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		// Copy dataset files in the directory
-		List<URL> pathURLs = new ArrayList<URL>();
+		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, null);
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
@@ -302,19 +308,15 @@ public class BIDSService {
 			try {
 			Files.copy(srcFile.toPath(), pathToGo);
 			} catch (IOException exception) {
-				System.out.println("File could not be treated (PACS): " + srcFile.getAbsolutePath());
+				LOG.error("File could not be treated (PACS): {}", srcFile.getAbsolutePath(), exception);
 			}
 		}
 
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
-			try {
-				exportSpecificEegFiles((EegDataset) dataset, workDir, pathURLs, subjectName == null ? dataset.getSubjectId().toString() : subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
-			} catch (RestServiceException e) {
-				e.printStackTrace();
-			}
+			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName == null ? dataset.getSubjectId().toString() : subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
 		} else if (dataset instanceof MrDataset) {
-			// XXX:  Do something specific about it
+			// Do something specific about MR dataset
 		}
 	}
 
@@ -358,7 +360,7 @@ public class BIDSService {
 	 * @throws RestServiceException
 	 * @throws IOException
 	 */
-	private void exportSpecificEegFiles(final EegDataset dataset, final File workFolder, final List<URL> pathURLs, final String subjectName, final String sessionId, final String studyName, final String runId) throws RestServiceException, IOException {
+	private void exportSpecificEegFiles(final EegDataset dataset, final File workFolder, final String subjectName, final String sessionId, final String studyName, final String runId) throws IOException {
 		// Create _eeg.json
 		String fileName = "task_" + studyName + "_eeg.json";
 		File baseDirectory = workFolder.getParentFile().getParentFile();
@@ -379,10 +381,10 @@ public class BIDSService {
 			destWorkFolderFile.mkdirs();
 		}
 
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_channel.tsv";
+		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_channel.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
 
 		for (Channel chan: dataset.getChannels()) {
@@ -397,14 +399,14 @@ public class BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// Create events.tsv file
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
+		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append("onset \t duration \t sample \n");
 
 		for (Event event: dataset.getEvents()) {
-			float sample = Float.valueOf(event.getPosition());
+			float sample = Float.parseFloat(event.getPosition());
 			float samplingFrequency = dataset.getSamplingFrequency();
 			float onset = sample / samplingFrequency;
 			int duration = event.getPoints();
@@ -420,10 +422,10 @@ public class BIDSService {
 		}
 
 		// Create electrode.csv file
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_electrodes.tsv";
+		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_electrodes.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append("name \t x \t y \t z \n");
 
 		for (Channel chan: dataset.getChannels()) {
@@ -435,10 +437,10 @@ public class BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// Create _coordsystem.json file
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_coordsystem.json";
+		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append("{\n")
 		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
 		.append("\"EEGCoordinateUnits\": ").append("\"" +CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")

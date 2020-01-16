@@ -15,7 +15,6 @@
 package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.study.rights.ampq.StudyUserListener;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -43,14 +42,14 @@ public class RabbitMQConfiguration {
 	@Bean
     public FanoutExchange fanout() {
         return new FanoutExchange("study-user-exchange", true, false);
-    }	
+    }
 
 	@RabbitListener(bindings = @QueueBinding(
 	        value = @Queue(value = "study-user-queue-dataset", durable = "true"),
-	        exchange = @Exchange(value = "study-user-exchange", ignoreDeclarationExceptions = "true", 
+	        exchange = @Exchange(value = "study-user-exchange", ignoreDeclarationExceptions = "true",
 	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
 	)
-    public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException  {
+    public void receiveMessage(String commandArrStr) {
 		listener.receiveMessageImport(commandArrStr);
     }
 

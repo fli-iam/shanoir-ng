@@ -29,6 +29,7 @@ public class ExtensionWithMotivationValidator implements ConstraintValidator<Ext
 
 	@Override
 	public void initialize(final ExtensionWithMotivation constraintAnnotation) {
+		// empty initializer
 	}
 
 	@Override

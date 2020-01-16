@@ -32,8 +32,6 @@ public interface SubjectPathologyRepositoryCustom {
 	
 	List<SubjectPathology> findBy(String fieldName, Object value);
 	
-	//List<SubjectPathology> findBySubject(Subject subject);
-	
 	List<SubjectPathology> findAllByPathology(Pathology pathology);
 	
 	List<SubjectPathology> findAllByPathologyModel(PathologyModel model);

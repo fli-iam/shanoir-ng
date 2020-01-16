@@ -229,7 +229,6 @@ public class SubjectTherapy extends HalEntity {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class SubjectTherapies {\n");
 
-		// sb.append(" subject: ").append(toIndentedString(subject)).append("\n");
 		sb.append("    therapy: ").append(toIndentedString(therapy)).append("\n");
 		sb.append("    dose: ").append(toIndentedString(dose)).append("\n");
 		sb.append("    unit: ").append(toIndentedString(doseUnit)).append("\n");

@@ -20,19 +20,23 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "subject", description = "the subjects API")
+@Api(value = "subject")
 @RequestMapping("/subject")
 public interface AnimalSubjectApi {
 
@@ -43,8 +47,8 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = AnimalSubject.class),
 			@ApiResponse(code = 409, message = "Already exists - conflict", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
+	@PostMapping(value = "", produces = { "application/json" }, consumes = {
+			"application/json" })
 	ResponseEntity<AnimalSubject> createAnimalSubject(
 			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubject animalSubject,
 			final BindingResult result) throws RestServiceException;
@@ -53,7 +57,7 @@ public interface AnimalSubjectApi {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
 			@ApiResponse(code = 400, message = "Invalid subject value", response = Void.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
-	@RequestMapping(value = "/{id}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<Void> deleteAnimalSubject(
 			@ApiParam(value = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
 
@@ -63,7 +67,7 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 400, message = "Invalid ID supplied", response = AnimalSubject.class),
 			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
-	@RequestMapping(value = "/{id}", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<AnimalSubject> getAnimalSubjectById(
 			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
@@ -73,7 +77,7 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 400, message = "Invalid ID supplied", response = AnimalSubject.class),
 			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
-	@RequestMapping(value = "/find/{id}", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/find/{id}", produces = { "application/json" })
 	ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
 			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
@@ -81,8 +85,12 @@ public interface AnimalSubjectApi {
 			"AnimalSubject", })
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject", response = AnimalSubject.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = AnimalSubject.class),
+			@ApiResponse(code = 403, message = "forbidden", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubject.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/all", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
 
 	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
@@ -91,8 +99,8 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
 			@ApiResponse(code = 404, message = "Subject not found", response = Void.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
-	@RequestMapping(value = "/{id}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
+			"application/json" })
 	ResponseEntity<Void> updateAnimalSubject(
 			@ApiParam(value = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,

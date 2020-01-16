@@ -84,15 +84,15 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			throws FileNotFoundException {
 		// patient level
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-			Patient patient = (Patient) patientsIt.next();
+			Patient patient = patientsIt.next();
 			// study level
 			List<Study> studies = patient.getStudies();
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-				Study study = (Study) studiesIt.next();
+				Study study = studiesIt.next();
 				// serie level
 				List<Serie> series = study.getSeries();
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-					Serie serie = (Serie) seriesIt.next();
+					Serie serie = seriesIt.next();
 					filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
 					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
 				}
@@ -126,13 +126,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
 		// instance level
-		List<Object> nonImages = new ArrayList<Object>();
-		List<Image> images = new ArrayList<Image>();
+		List<Object> nonImages = new ArrayList<>();
+		List<Image> images = new ArrayList<>();
 		List<Instance> instances = serie.getInstances();
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
-			Instance instance = (Instance) instancesIt.next();
+			Instance instance = instancesIt.next();
 			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processDicomFileForAllInstances(instanceFile, nonImages, images, folderFileAbsolutePath);
+			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
 		}
 		serie.setNonImages(nonImages);
 		serie.setNonImagesNumber(nonImages.size());
@@ -151,27 +151,30 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
-		String instanceFilePath;
+		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {
-			instanceFilePath = folderFileAbsolutePath
-					+ File.separator + serie.getSeriesInstanceUID()
-					+ File.separator + instance.getSopInstanceUID() + SUFFIX_DCM;
+			instanceFilePath.append(folderFileAbsolutePath)
+				.append(File.separator)
+				.append(serie.getSeriesInstanceUID())
+				.append(File.separator)
+				.append(instance.getSopInstanceUID())
+				.append(SUFFIX_DCM);
 		} else {
 			String[] instancePathArray = instance.getReferencedFileID();
 			if (instancePathArray != null) {
-				instanceFilePath = folderFileAbsolutePath + File.separator;
+				instanceFilePath.append(folderFileAbsolutePath).append(File.separator);
 				for (int count = 0; count < instancePathArray.length; count++) {
-					instanceFilePath += instancePathArray[count];
-					if (count != (instancePathArray.length - 1)) {
-						instanceFilePath += File.separator;
+					instanceFilePath.append(instancePathArray[count]);
+					if (count != instancePathArray.length - 1) {
+						instanceFilePath.append(File.separator);
 					}
 				}
 			} else {
 				throw new FileNotFoundException(
-						"instancePathArray in DicomDir: missing file: " + instancePathArray);							
-			}			
+						"instancePathArray in DicomDir: missing file: " + instancePathArray);
+			}
 		}
-		File instanceFile = new File(instanceFilePath);
+		File instanceFile = new File(instanceFilePath.toString());
 		if (instanceFile.exists()) {
 			return instanceFile;
 		} else {
@@ -192,10 +195,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFileForAllInstances(File dicomFile, List<Object> nonImages, List<Image> images, String folderFileAbsolutePath) {
-		DicomInputStream dIS = null;
-		try {
-			dIS = new DicomInputStream(dicomFile);
+	private void processDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) {
+		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes attributes = dIS.readDataset(-1, -1);
 			final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
@@ -224,14 +225,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			}
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
-		} finally {
-			if (dIS != null) {
-				try {
-					dIS.close();
-				} catch (IOException e) {
-					LOG.error("Error while closing DICOM input stream", e);
-				}
-			}
 		}
 	}
 	
@@ -243,9 +236,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param patient
 	 */
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
-		DicomInputStream dIS = null;
-		try {
-			dIS = new DicomInputStream(dicomFile);
+		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
+			
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
@@ -254,14 +246,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
-		} finally {
-			if (dIS != null) {
-				try {
-					dIS.close();
-				} catch (IOException e) {
-					LOG.error("Error while closing DICOM input stream", e);
-				}
-			}
 		}
 	}
 
@@ -274,7 +258,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
 			final String tag = item.split(DOUBLE_EQUAL)[0];
 			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkIsSpectroscopy : tag=" + tag + ", value=" + value);
+			LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
 			String wildcard = ImportUtils.wildcardToRegex(value);
 			if (seriesDescription != null && seriesDescription.matches(wildcard)) {
 				return true;
@@ -298,7 +282,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		// acquisition number
 		image.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
 		// image orientation patient
-		List<Double> imageOrientationPatient = new ArrayList<Double>();
+		List<Double> imageOrientationPatient = new ArrayList<>();
 		double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
 		if (imageOrientationPatientArray != null) {
 			for (int i = 0; i < imageOrientationPatientArray.length; i++) {
@@ -306,7 +290,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			}
 			image.setImageOrientationPatient(imageOrientationPatient);
 		} else {
-			LOG.error("imageOrientationPatientArray in dcm file null: " + image.getPath());
+			LOG.error("imageOrientationPatientArray in dcm file null: {}", image.getPath());
 		}
 		// repetition time
 		image.setRepetitionTime(attributes.getDouble(Tag.RepetitionTime, 0));
@@ -319,7 +303,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		image.setFlipAngle(flipAngle);
 		// echo times
-		Set<EchoTime> echoTimes = new HashSet<EchoTime>();
+		Set<EchoTime> echoTimes = new HashSet<>();
 		EchoTime echoTime = new EchoTime();
 		echoTime.setEchoNumber(attributes.getInt(Tag.EchoNumbers, 0));
 		echoTime.setEchoTime(attributes.getDouble(Tag.EchoTime, 0.0));
@@ -383,23 +367,15 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		if (UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
-			|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
-			|| checkSerieIsSpectroscopy(serie.getSeriesDescription())) {
-			serie.setIsSpectroscopy(true);
-		} else {
-			serie.setIsSpectroscopy(false);
-		}
+		serie.setIsSpectroscopy(UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
+				|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
+				|| checkSerieIsSpectroscopy(serie.getSeriesDescription()));
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
 		if (serie.getIsCompressed() == null) {
 			String transferSyntaxUID = attributes.getString(Tag.TransferSyntaxUID);
-			if (transferSyntaxUID != null && transferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
-				serie.setIsCompressed(true);
-			} else {
-				serie.setIsCompressed(false);
-			}
+			serie.setIsCompressed(transferSyntaxUID != null && transferSyntaxUID.startsWith("1.2.840.10008.1.2.4"));
 		}
 		if (StringUtils.isEmpty(serie.getProtocolName())) {
 			serie.setProtocolName(attributes.getString(Tag.ProtocolName));

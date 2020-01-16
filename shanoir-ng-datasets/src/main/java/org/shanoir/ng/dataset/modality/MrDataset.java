@@ -82,7 +82,7 @@ public class MrDataset extends Dataset {
 	private LocalDateTime  firstImageAcquisitionTime;
 
 	/** Store temporarily the last image acquisition time until all images are processed */
-	@Transient	
+	@Transient
 	private LocalDateTime lastImageAcquisitionTime;
 	
 	/**
@@ -105,7 +105,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<EchoTime> getEchoTime() {
 		if (echoTime == null) {
-			this.echoTime =  new ArrayList<EchoTime>();
+			this.echoTime =  new ArrayList<>();
 		}
 		return echoTime;
 	}
@@ -123,7 +123,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<FlipAngle> getFlipAngle() {
 		if (flipAngle == null) {
-			this.flipAngle = new ArrayList<FlipAngle>();
+			this.flipAngle = new ArrayList<>();
 		}
 		return flipAngle;
 	}
@@ -141,7 +141,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<InversionTime> getInversionTime() {
 		if (inversionTime == null) {
-			this.inversionTime =  new ArrayList<InversionTime>();
+			this.inversionTime =  new ArrayList<>();
 		}
 		return inversionTime;
 	}
@@ -195,7 +195,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<RepetitionTime> getRepetitionTime() {
 		if (repetitionTime == null) {
-			this.repetitionTime = new ArrayList<RepetitionTime>();
+			this.repetitionTime = new ArrayList<>();
 		}
 		return repetitionTime;
 	}

@@ -65,26 +65,25 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : " +serie.getSequenceName() + " - " + serie.getProtocolName() + " - Rank:" + rank);
+		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
 		Attributes dicomAttributes = null;
 		try {
 			// TODO ATO : should always be a dicom: add check
 			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhancedMR());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e); 
+			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
 		}
 		mrDatasetAcquisition.setRank(rank);
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));		
+		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
 		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
 		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level. 
+		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
 		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		List<Dataset> genericizedList = new ArrayList<Dataset>();
+		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(mrDatasetAcquisition);
 			genericizedList.add(dataset);
@@ -96,7 +95,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			Double totalAcquisitionTime = null;
 			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
 				Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
-				totalAcquisitionTime = new Double(duration.toMillis());
+				totalAcquisitionTime = Double.valueOf(duration.toMillis());
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
 			} else {
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);

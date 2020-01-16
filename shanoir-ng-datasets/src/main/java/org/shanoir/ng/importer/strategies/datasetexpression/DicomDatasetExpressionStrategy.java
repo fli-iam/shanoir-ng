@@ -51,76 +51,74 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	private String dcm4cheeWADORS;
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) {
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) {
 
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
-		if (serie.getIsMultiFrame()) {
+		if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {
 			pacsDatasetExpression.setMultiFrame(true);
-			pacsDatasetExpression.setFrameCount(new Integer(serie.getMultiFrameCount()));
+			pacsDatasetExpression.setFrameCount(serie.getMultiFrameCount());
 		}
 
-		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
+		if (expressionFormat == null || !expressionFormat.getType().equals("dcm")) {
+			return pacsDatasetExpression;
+		}
 
-			//List<String> dcmFilesToSendToPacs = new ArrayList<String>();
-			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-				//dcmFilesToSendToPacs.add(datasetFile.getPath());
-				LocalDateTime contentTime = null;
-				LocalDateTime acquisitionTime = null;
-				Attributes dicomAttributes = null;
-				try {
-					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile,serie.getIsEnhancedMR());
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
+		for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+			LocalDateTime contentTime = null;
+			LocalDateTime acquisitionTime = null;
+			Attributes dicomAttributes = null;
+			try {
+				dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile,serie.getIsEnhancedMR());
+			} catch (IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+			DatasetFile pacsDatasetFile = new DatasetFile();
+			pacsDatasetFile.setPacs(true);
+			final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
+			final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
+			final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
+			String wadoRsRequest = dcm4cheeAddress + dcm4cheeWADORS + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
+
+			try {
+				URL wadoURL = new URL(wadoRsRequest);
+				pacsDatasetFile.setPath(wadoURL.toString());
+			} catch (MalformedURLException e) {
+				LOG.error(e.getMessage(), e);
+			}
+
+			pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
+			pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
+
+			// calculate the acquisition duration for this acquisition
+			acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
+			contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
+			if (acquisitionTime != null) {
+				if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
+					pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
 				}
-				DatasetFile pacsDatasetFile = new DatasetFile();
-				pacsDatasetFile.setPacs(true);
-				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
-				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
-				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				String wadoRsRequest = dcm4cheeAddress + dcm4cheeWADORS + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
-
-				try {
-					URL wadoURL = new URL(wadoRsRequest);
-					pacsDatasetFile.setPath(wadoURL.toString());
-				} catch (MalformedURLException e) {
-					LOG.error(e.getMessage(), e);
+				if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
+					pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
 				}
-
-				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
-				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
-
-				// calculate the acquisition duration for this acquisition
-				acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
-				contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
-				if (acquisitionTime != null) {
-					if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
-					}
-					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
-					}
-					if (acquisitionTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
-					} else if (acquisitionTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
-					}
+				if (acquisitionTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+					pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
+				} else if (acquisitionTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+					pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
 				}
-				if (contentTime != null) {
-					if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
-					}
-					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
-					}
-					if (contentTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
-					} else if (contentTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
-					}
+			}
+			if (contentTime != null) {
+				if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
+					pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
+				}
+				if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
+					pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
+				}
+				if (contentTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+					pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
+				} else if (contentTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+					pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
 				}
 			}
 		}

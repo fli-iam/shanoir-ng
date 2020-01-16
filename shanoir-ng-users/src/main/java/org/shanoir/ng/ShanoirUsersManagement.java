@@ -77,6 +77,8 @@ import groovyjarjarcommonscli.MissingArgumentException;
 //@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
+	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
+
 	/**
 	 * Logger
 	 */
@@ -125,9 +127,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				/**
 				 * @ToDo: implement initial admin Shanoir creation here, in database users and in keycloak, check if dbs are really empty.
 				 */
-			} else if (args.containsOption("syncAllUsersToKeycloak")
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0) != null
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0).equals("true")) {
+			} else if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0) != null
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0).equals("true")) {
 				
 				int tries = 0;
 				boolean success = false;
@@ -161,7 +163,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
-		LOG.info("syncAllUsersToKeycloak");
+		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
 		final Iterable<User> users = userRepository.findAll();
 		for (final User user : users) {
 			final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
@@ -190,7 +192,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	}
 
 	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+		final Map<String, List<String>> attributes = new HashMap<>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {

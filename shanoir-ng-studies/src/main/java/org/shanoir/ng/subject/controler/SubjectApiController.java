@@ -21,13 +21,10 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
-import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
@@ -49,9 +46,6 @@ public class SubjectApiController implements SubjectApi {
 	private SubjectMapper subjectMapper;
 
 	@Autowired
-	private SubjectMappingUtilsService mappingUtils;
-
-	@Autowired
 	private SubjectService subjectService;
 
 	@Autowired
@@ -62,9 +56,9 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
 			subjectService.deleteById(subjectId);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -73,7 +67,7 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
-			return new ResponseEntity<SubjectDTO>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 	}
@@ -102,7 +96,7 @@ public class SubjectApiController implements SubjectApi {
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
 		final Subject createdSubject = subjectService.create(subject);
-		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
+		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
 	}
 
 	@Override
@@ -113,9 +107,9 @@ public class SubjectApiController implements SubjectApi {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -124,15 +118,15 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
-		if (preclinical == "null") {
+		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
 		} else {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}
 		if (simpleSubjectDTOList.isEmpty()) {
-			return new ResponseEntity<List<SimpleSubjectDTO>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<SimpleSubjectDTO>>(simpleSubjectDTOList, HttpStatus.OK);
+		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 
 	}
 
@@ -141,9 +135,9 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
-			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 
 	}
 

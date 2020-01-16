@@ -25,6 +25,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -75,21 +76,17 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class DatasetApiController implements DatasetApi {
 
+	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
+
 	private static final String ZIP = ".zip";
 
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-	private static final String T1w = "T1w";
-
 	private static final String SUB_PREFIX = "sub-";
 
 	private static final String SES_PREFIX = "ses-";
-
-	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
-
-	private static final String README_FILE = "README";
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
@@ -135,7 +132,7 @@ public class DatasetApiController implements DatasetApi {
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -163,14 +160,14 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody final Dataset dataset,
 			final BindingResult result) throws RestServiceException {
 
-		validate(dataset, result);
+		validate(result);
 
 		try {
 			datasetService.update(dataset);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -180,7 +177,7 @@ public class DatasetApiController implements DatasetApi {
 		if (datasets.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
 
 	@Override
@@ -211,7 +208,7 @@ public class DatasetApiController implements DatasetApi {
 		zipFile.createNewFile();
 
 		try {
-			List<URL> pathURLs = new ArrayList<URL>();
+			List<URL> pathURLs = new ArrayList<>();
 			if ("dcm".equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
@@ -238,7 +235,7 @@ public class DatasetApiController implements DatasetApi {
 		ByteArrayResource resource = new ByteArrayResource(data);
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
 				.contentType(MediaType.parseMediaType(contentType))
 				.contentLength(data.length)
 				.body(resource);
@@ -292,20 +289,20 @@ public class DatasetApiController implements DatasetApi {
 		Path p = Paths.get(zipFilePath);
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
 			Path pp = Paths.get(sourceDirPath);
-			Files.walk(pp)
-			.filter(path -> !Files.isDirectory(path))
-			.forEach(path -> {
-				ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-				try {
-					zos.putNextEntry(zipEntry);
-					Files.copy(path, zos);
-					zos.closeEntry();
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			});
+			try(Stream<Path> walker = Files.walk(pp)) {
+				walker.filter(path -> !path.toFile().isDirectory())
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+					try {
+						zos.putNextEntry(zipEntry);
+						Files.copy(path, zos);
+						zos.closeEntry();
+					} catch (IOException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				});
+			}
 			zos.finish();
-			zos.close();
 		}
 	}
 
@@ -313,7 +310,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") final Long subjectId,
 			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") final String subjectName,
 			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, MalformedURLException, IOException {
+					throws RestServiceException, IOException {
 		final List<Examination> examinationList = examinationService.findBySubjectId(subjectId);
 		if (examinationList.isEmpty()) {
 			throw new RestServiceException(
@@ -339,7 +336,7 @@ public class DatasetApiController implements DatasetApi {
 
 			return ResponseEntity.ok()
 					// Content-Disposition
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+					.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
 					// Content-Type
 					.contentType(MediaType.parseMediaType(contentType)) //
 					// Content-Length
@@ -352,7 +349,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> exportBIDSByExaminationId(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
 			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") final String subjectName,
 			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, MalformedURLException, IOException {
+					throws RestServiceException, IOException {
 		// Get examination from ID
 		Examination exam = examinationService.findById(examinationId);
 
@@ -371,7 +368,7 @@ public class DatasetApiController implements DatasetApi {
 
 		return ResponseEntity.ok()
 				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
 				// Content-Type
 				.contentType(MediaType.parseMediaType(contentType)) //
 				// Content-Length
@@ -383,7 +380,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") final Long studyId,
 			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, MalformedURLException, IOException {
+					throws RestServiceException, IOException {
 		// Export Study files as BIDS
 		File workFolder = bidsService.exportAsBids(studyId, studyName);
 
@@ -399,7 +396,7 @@ public class DatasetApiController implements DatasetApi {
 
 		return ResponseEntity.ok()
 				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
 				// Content-Type
 				.contentType(MediaType.parseMediaType(contentType)) //
 				// Content-Length
@@ -422,7 +419,7 @@ public class DatasetApiController implements DatasetApi {
 			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
 			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
 			destFolder.mkdirs();
-			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
+			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf('.') + 1);
 			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
 			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
 			Files.copy(srcFile.toPath(), destFile.toPath());
@@ -432,11 +429,10 @@ public class DatasetApiController implements DatasetApi {
 	/**
 	 * Validate a dataset
 	 * 
-	 * @param dataset
 	 * @param result
 	 * @throws RestServiceException
 	 */
-	private void validate(final Dataset dataset, final BindingResult result) throws RestServiceException {
+	private void validate(final BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));

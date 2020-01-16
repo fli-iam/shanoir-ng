@@ -17,8 +17,6 @@ package org.shanoir.ng.preclinical.references;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.preclinical.references.Reference;
-
 /**
  * Custom repository for refs.
  * 

@@ -145,32 +145,41 @@ public class Anesthetic extends HalEntity   {
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj)
+	if (this == obj) {
 		return true;
-	if (obj == null)
+	}
+	if (obj == null) {
 		return false;
-	if (getClass() != obj.getClass())
+	}
+	if (getClass() != obj.getClass()) {
 		return false;
+	}
 	Anesthetic other = (Anesthetic) obj;
 	if (anestheticType == null) {
-		if (other.anestheticType != null)
+		if (other.anestheticType != null) {
 			return false;
-	} else if (!anestheticType.equals(other.anestheticType))
+		}
+	} else if (!anestheticType.equals(other.anestheticType)) {
 		return false;
+	}
 	if (ingredients == null) {
-		if (other.ingredients != null)
+		if (other.ingredients != null) {
 			return false;
-	} else if (!ingredients.equals(other.ingredients))
+		}
+	} else if (!ingredients.equals(other.ingredients)) {
 		return false;
+	}
 	if (name == null) {
-		if (other.name != null)
+		if (other.name != null) {
 			return false;
-	} else if (!name.equals(other.name))
+		}
+	} else if (!name.equals(other.name)) {
 		return false;
+	}
 	return true;
   }
 
-  @Override	
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Anesthetic {\n");

@@ -49,16 +49,18 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Autowired
 	private BasicEntityService<AcquisitionEquipment> acquisitionEquipmentService;
 
+	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
+	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId);
@@ -68,6 +70,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(equipment), HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
 		if (equipments.isEmpty()) {
@@ -77,28 +80,30 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
-		validate(acquisitionEquipment, result);
+		validate(result);
 		
 		/* Save acquisition equipment in db. */
 		try {
 			return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
-					acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);			
+					acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);
 		} catch (DataIntegrityViolationException e) {
 			checkDataIntegrityException(e, acquisitionEquipment);
 			throw e;
 		}
 	}
 
+	@Override
 	public ResponseEntity<Void> updateAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
 			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
-		validate(acquisitionEquipment, result);
+		validate(result);
 
 		/* Update user in db. */
 		try {
@@ -112,12 +117,12 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		}
 	}
 	
-	private void validate(AcquisitionEquipment acquisitionEquipment, BindingResult result) throws RestServiceException {
+	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}	
+		}
 	}
 	
 	private void checkDataIntegrityException(DataIntegrityViolationException e, AcquisitionEquipment acquisitionEquipment) throws RestServiceException {
@@ -125,12 +130,12 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			MySQLIntegrityConstraintViolationException rootEx = (MySQLIntegrityConstraintViolationException) e.getRootCause();
 			if (rootEx.getMessage().contains("model_number_idx")) {
 				FieldErrorMap errorMap = new FieldErrorMap();
-				List<FieldError> errors = new ArrayList<FieldError>();
-				errors.add(new FieldError("unique", "The given manufModel/serial value couple is already taken, choose another ", 
+				List<FieldError> errors = new ArrayList<>();
+				errors.add(new FieldError("unique", "The given manufModel/serial value couple is already taken, choose another ",
 						acquisitionEquipment.getManufacturerModel().getId() + " / " + acquisitionEquipment.getSerialNumber()));
 				errorMap.put("manufacturerModel - serialNumber", errors);
 				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errorMap));
-				throw new RestServiceException(error);					
+				throw new RestServiceException(error);
 			}
 		}
 	}

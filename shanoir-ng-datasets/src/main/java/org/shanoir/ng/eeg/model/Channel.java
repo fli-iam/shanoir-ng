@@ -4,8 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
@@ -45,6 +43,7 @@ public class Channel extends HalEntity {
 			this.name = name;
 		}
 
+		@Override
 		public String toString(){
 			return name;
 		}

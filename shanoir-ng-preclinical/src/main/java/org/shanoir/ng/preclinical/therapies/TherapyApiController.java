@@ -16,7 +16,6 @@ package org.shanoir.ng.preclinical.therapies;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -39,13 +38,14 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class TherapyApiController implements TherapyApi {
 
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(TherapyApiController.class);
 
 	@Autowired
 	private TherapyService therapiesService;
-	@Autowired
-	private RefsService referencesService;
 
+	@Override
 	public ResponseEntity<Therapy> createTherapy(
 			@ApiParam(value = "therapy to create", required = true) @RequestBody Therapy therapy, BindingResult result)
 			throws RestServiceException {
@@ -57,7 +57,7 @@ public class TherapyApiController implements TherapyApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		// Guarantees it is a creation, not an update
@@ -66,58 +66,63 @@ public class TherapyApiController implements TherapyApi {
 		/* Save therapy in db. */
 		try {
 			final Therapy createdTherapy = therapiesService.save(therapy);
-			return new ResponseEntity<Therapy>(createdTherapy, HttpStatus.OK);
+			return new ResponseEntity<>(createdTherapy, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteTherapy(
 			@ApiParam(value = "Therapy id to delete", required = true) @PathVariable("id") Long id) {
 		if (therapiesService.findById(id) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			therapiesService.deleteById(id);
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Therapy> getTherapyById(
 			@ApiParam(value = "ID of therapy that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final Therapy therapy = therapiesService.findById(id);
 		if (therapy == null) {
-			return new ResponseEntity<Therapy>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Therapy>(therapy, HttpStatus.OK);
+		return new ResponseEntity<>(therapy, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Therapy>> getTherapyByType(
 			@ApiParam(value = "Type of therapies that needs to be fetched", required = true) @PathVariable("type") String type)
 			throws RestServiceException {
 		try {
 			final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.valueOf(type.toUpperCase()));
 			if (therapies.isEmpty()) {
-				return new ResponseEntity<List<Therapy>>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<List<Therapy>>(therapies, HttpStatus.OK);
+			return new ResponseEntity<>(therapies, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<List<Therapy>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 
+	@Override
 	public ResponseEntity<List<Therapy>> getTherapies() {
 		final List<Therapy> therapies = therapiesService.findAll();
 		if (therapies.isEmpty()) {
-			return new ResponseEntity<List<Therapy>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<Therapy>>(therapies, HttpStatus.OK);
+		return new ResponseEntity<>(therapies, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Void> updateTherapy(
 			@ApiParam(value = "ID of therapy that needs to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Therapy object that needs to be updated", required = true) @RequestBody Therapy therapy,
@@ -132,7 +137,7 @@ public class TherapyApiController implements TherapyApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -140,16 +145,15 @@ public class TherapyApiController implements TherapyApi {
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update therapy " + id + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Therapy therapy) {
 		final Therapy previousStateTherapy = therapiesService.findById(therapy.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Therapy>().validate(previousStateTherapy,
+		return new EditableOnlyByValidator<Therapy>().validate(previousStateTherapy,
 				therapy);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final Therapy therapy) {
@@ -157,9 +161,8 @@ public class TherapyApiController implements TherapyApi {
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Therapy therapy) {
-		final UniqueValidator<Therapy> uniqueValidator = new UniqueValidator<Therapy>(therapiesService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(therapy);
-		return uniqueErrors;
+		final UniqueValidator<Therapy> uniqueValidator = new UniqueValidator<>(therapiesService);
+		return uniqueValidator.validate(therapy);
 	}
 
 }

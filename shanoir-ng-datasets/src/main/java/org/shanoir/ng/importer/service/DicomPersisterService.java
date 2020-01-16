@@ -39,13 +39,13 @@ public class DicomPersisterService {
 	public void persistAllForSerie(Serie serie) {
 		
 		if (serie != null) {
-			List<String> dcmFilesToSendToPacs = new ArrayList<String>();
+			List<String> dcmFilesToSendToPacs = new ArrayList<>();
 			for (Dataset dataset : serie.getDatasets()) {
 				for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 					if (expressionFormat.getType().equals("dcm")) {
 						for (DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 							if (datasetFile.getPath() != null && !datasetFile.getPath().isEmpty()) {
-								dcmFilesToSendToPacs.add(datasetFile.getPath());								
+								dcmFilesToSendToPacs.add(datasetFile.getPath());
 							}
 						}
 					}

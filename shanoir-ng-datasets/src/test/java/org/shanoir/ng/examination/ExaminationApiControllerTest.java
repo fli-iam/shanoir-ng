@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -115,6 +116,24 @@ public class ExaminationApiControllerTest {
 	public void updateExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockUser
+	public void exportExaminationTestFileNotExisting() throws Exception {
+		Examination exam = new Examination();
+		exam.setExtraDataFilePathList(Collections.singletonList("/var/datasets-data/preclinical/BusyFile"));
+		given(examinationServiceMock.findById(1L)).willReturn(exam);
+
+		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isInternalServerError());
+	}
+	
+	@Test
+	@WithMockUser
+	public void exportExaminationNoContentTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
 

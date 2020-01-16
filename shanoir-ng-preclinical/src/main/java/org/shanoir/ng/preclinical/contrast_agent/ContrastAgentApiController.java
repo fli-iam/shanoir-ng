@@ -41,6 +41,8 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class ContrastAgentApiController implements ContrastAgentApi {
 
+	private static final String BAD_ARGUMENTS = "Bad arguments";
+
 	private static final Logger LOG = LoggerFactory.getLogger(ContrastAgentApiController.class);
 
 	@Autowired
@@ -48,6 +50,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 	@Autowired
 	private RefsService referencesService;
 
+	@Override
 	public ResponseEntity<ContrastAgent> createContrastAgent(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
 			@ApiParam(value = "Contrast Agent to create", required = true) @RequestBody ContrastAgent contrastagent,
@@ -60,7 +63,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		// Guarantees it is a creation, not an update
@@ -71,71 +74,78 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		/* Save contrastagent in db. */
 		try {
 			final ContrastAgent createdAgent = contrastAgentService.save(contrastagent);
-			return new ResponseEntity<ContrastAgent>(createdAgent, HttpStatus.OK);
+			return new ResponseEntity<>(createdAgent, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteContrastAgent(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
 			@ApiParam(value = "Contrast Agent id to delete", required = true) @PathVariable("cid") Long cid) {
 		if (contrastAgentService.findById(cid) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		try {
 			contrastAgentService.deleteById(cid);
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid) {
 		final ContrastAgent agent = contrastAgentService.findByProtocolId(pid);
 		if (agent == null) {
-			return new ResponseEntity<ContrastAgent>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<ContrastAgent>(agent, HttpStatus.OK);
+		return new ResponseEntity<>(agent, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentById(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
 			@ApiParam(value = "ID of contrast agent that needs to be fetched", required = true) @PathVariable("cid") Long cid) {
 		final ContrastAgent agent = contrastAgentService.findById(cid);
 		if (agent == null) {
-			return new ResponseEntity<ContrastAgent>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<ContrastAgent>(agent, HttpStatus.OK);
+		return new ResponseEntity<>(agent, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentByName(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
 			@ApiParam(value = "Name of contrast agent that needs to be fetched", required = true) @PathVariable("name") String name) {
 		// Does name exists as reference
-		Reference agent_name = referencesService.findByCategoryTypeAndValue(ReferenceEnum.REF_CATEGORY_CONTRASTAGENT,
+		Reference agentName = referencesService.findByCategoryTypeAndValue(ReferenceEnum.REF_CATEGORY_CONTRASTAGENT,
 				ReferenceEnum.REF_TYPE_CONTRASTAGENT_NAME, name);
-		if (agent_name == null)
-			return new ResponseEntity<ContrastAgent>(HttpStatus.NOT_FOUND);
-		final ContrastAgent agent = contrastAgentService.findByName(agent_name);
-		if (agent == null) {
-			return new ResponseEntity<ContrastAgent>(HttpStatus.NO_CONTENT);
+		if (agentName == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<ContrastAgent>(agent, HttpStatus.OK);
+		final ContrastAgent agent = contrastAgentService.findByName(agentName);
+		if (agent == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(agent, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<ContrastAgent>> getContrastAgents(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid) {
 		final List<ContrastAgent> agents = contrastAgentService.findAll();
 		if (agents.isEmpty()) {
-			return new ResponseEntity<List<ContrastAgent>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<ContrastAgent>>(agents, HttpStatus.OK);
+		return new ResponseEntity<>(agents, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Void> updateContrastAgent(
 			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
 			@ApiParam(value = "ID of contrast agent that needs to be updated", required = true) @PathVariable("cid") Long cid,
@@ -150,7 +160,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 
 		try {
@@ -158,17 +168,16 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update contrast agent " + cid + " : ", e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
 
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ContrastAgent agent) {
 		final ContrastAgent previousStateContrastAgent = contrastAgentService.findById(agent.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<ContrastAgent>()
+		return new EditableOnlyByValidator<ContrastAgent>()
 				.validate(previousStateContrastAgent, agent);
-		return accessErrors;
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final ContrastAgent agent) {
@@ -176,9 +185,8 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final ContrastAgent agent) {
-		final UniqueValidator<ContrastAgent> uniqueValidator = new UniqueValidator<ContrastAgent>(contrastAgentService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(agent);
-		return uniqueErrors;
+		final UniqueValidator<ContrastAgent> uniqueValidator = new UniqueValidator<>(contrastAgentService);
+		return uniqueValidator.validate(agent);
 	}
 
 }

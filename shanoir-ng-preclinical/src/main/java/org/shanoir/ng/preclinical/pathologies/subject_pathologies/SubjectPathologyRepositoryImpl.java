@@ -40,15 +40,6 @@ public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositor
 				.getResultList();
 	}
 	
-	/*@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectPathology> findAllBySubject(Subject subject) {
-		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p.subject LIKE :subject")
-				.setParameter("subject", subject)
-				.getResultList();
-	}*/
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<SubjectPathology> findAllByPathology(Pathology pathology) {

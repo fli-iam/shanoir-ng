@@ -71,7 +71,7 @@ public class RefValueExistsValidator<T extends AbstractGenericItem> {
 									value.getValue());
 							// If found entities and it is not the same current entity
 							if (!foundValue.isPresent()) {
-								List<FieldError> errors = new ArrayList<FieldError>();
+								List<FieldError> errors = new ArrayList<>();
 								errors.add(new FieldError("invalid value",
 										"The given value do not exists for this field", value.getValue()));
 								errorMap.put(field.getName(), errors);

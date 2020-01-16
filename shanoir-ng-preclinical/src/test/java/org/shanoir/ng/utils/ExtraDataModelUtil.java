@@ -59,10 +59,10 @@ public final class ExtraDataModelUtil {
 		extradata.setExtradatatype(PHYSIOLOGICALDATA_TYPE);
 		extradata.setFilename(EXTRADATA_FILENAME);
 		extradata.setFilepath(EXTRADATA_FILEPATH);
-		extradata.setHas_heart_rate(true);
-		extradata.setHas_respiratory_rate(true);
-		extradata.setHas_sao2(false);
-		extradata.setHas_temperature(false);
+		extradata.setHasHeartRate(true);
+		extradata.setHasRespiratoryRate(true);
+		extradata.setHasSao2(false);
+		extradata.setHasTemperature(false);
 		return extradata;
 	}
 	public static BloodGasData createExaminationBloodGasData() {

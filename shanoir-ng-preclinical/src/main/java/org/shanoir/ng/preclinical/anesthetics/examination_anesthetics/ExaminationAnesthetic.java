@@ -223,45 +223,58 @@ public class ExaminationAnesthetic extends HalEntity  {
 
   @Override
   public boolean equals(Object obj) {
-	if (this == obj)
+	if (this == obj) {
 		return true;
-	if (obj == null)
+	}
+	if (obj == null) {
 		return false;
-	if (getClass() != obj.getClass())
+	}
+	if (getClass() != obj.getClass()) {
 		return false;
+	}
 	ExaminationAnesthetic other = (ExaminationAnesthetic) obj;
 	if (anesthetic == null) {
-		if (other.anesthetic != null)
+		if (other.anesthetic != null) {
 			return false;
-	} else if (!anesthetic.equals(other.anesthetic))
+		}
+	} else if (!anesthetic.equals(other.anesthetic)) {
 		return false;
+	}
 	if (examinationId == null) {
-		if (other.examinationId != null)
+		if (other.examinationId != null) {
 			return false;
-	} else if (!examinationId.equals(other.examinationId))
+		}
+	} else if (!examinationId.equals(other.examinationId)) {
 		return false;
+	}
 	if (injectionInterval == null) {
-		if (other.injectionInterval != null)
+		if (other.injectionInterval != null) {
 			return false;
-	} else if (!injectionInterval.equals(other.injectionInterval))
+		}
+	} else if (!injectionInterval.equals(other.injectionInterval)) {
 		return false;
+	}
 	if (injectionSite == null) {
-		if (other.injectionSite != null)
+		if (other.injectionSite != null) {
 			return false;
-	} else if (!injectionSite.equals(other.injectionSite))
+		}
+	} else if (!injectionSite.equals(other.injectionSite)) {
 		return false;
+	}
 	if (injectionType == null) {
-		if (other.injectionType != null)
+		if (other.injectionType != null) {
 			return false;
-	} else if (!injectionType.equals(other.injectionType))
+		}
+	} else if (!injectionType.equals(other.injectionType)) {
 		return false;
+	}
 	return true;
   }
 
 @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ExaminationAnesthetic {\n");    
+    sb.append("class ExaminationAnesthetic {\n");
     sb.append("    examinationId: ").append(toIndentedString(examinationId)).append("\n");
     sb.append("    anesthetic: ").append(toIndentedString(anesthetic)).append("\n");
     sb.append("    dose: ").append(toIndentedString(dose)).append("\n");

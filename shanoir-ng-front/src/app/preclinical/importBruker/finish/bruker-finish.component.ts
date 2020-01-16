@@ -105,6 +105,7 @@ export class BrukerFinishImportComponent {
             importJob.frontStudyId = this.context.study.id;
             importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
             importJob.frontConverterId = this.context.niftiConverter.id;
+            importJob.archive = this.importJob.archive;
             return this.importService.startImportJob(importJob);
         }
     }

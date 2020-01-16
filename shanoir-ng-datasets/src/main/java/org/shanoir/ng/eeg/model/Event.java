@@ -8,7 +8,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -39,20 +39,20 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = RestServiceException.class)
 	public ResponseEntity<ErrorModel> handleRestServiceException(final RestServiceException e) {
 		LOG.warn("Error in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
+		return new ResponseEntity<>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
 	}
 
 	@ExceptionHandler(value = AccessDeniedException.class)
 	public ResponseEntity<ErrorModel> handleAccessDeniedException(final AccessDeniedException e) {
 		final ErrorModel error = new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage());
-		return new ResponseEntity<ErrorModel>(error, HttpStatus.FORBIDDEN);
+		return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
 	}
 
 	@ExceptionHandler(value = Exception.class)
 	public ResponseEntity<ErrorModel> handleException(final Exception e) {
 		final ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 		LOG.error("Unexpected error in the rest service. ", e);
-		return new ResponseEntity<ErrorModel>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }
