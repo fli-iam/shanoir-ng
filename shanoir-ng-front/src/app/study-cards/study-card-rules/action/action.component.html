@@ -16,3 +16,14 @@ set
 <span class="var">{{assignment?.field}}</span>
 =
 <span class="value">"{{assignment?.value}}"</span>
+
+set
+<ng-container *ngIf="mode == 'view'">
+    <span class="var">{{assignment?.field}}</span>
+    =
+    <span class="value">"{{assignment?.value}}"</span>
+</ng-container>
+<ng-container *ngIf="mode != 'view'">
+    <select-box class="var auto-width" [(ngModel)]="assignment.field" [options]="assigments"></select-box>
+    <auto-ajust-input class="value" [(ngModel)]="assignment.value" placeholder="enter value"></auto-ajust-input>
+</ng-container>

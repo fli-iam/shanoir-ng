@@ -12,12 +12,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #conditions class="conditions">
-	<ng-content select="condition"></ng-content>
-</div>
-
-<div #separator class="separator"><i class="fas fa-angle-double-right"></i></div>
-
-<div class="actions">
-	<ng-content select="action"></ng-content>
-</div>
+<input 
+        type="text" 
+        [ngModel]="model" 
+        (ngModelChange)="onChange($event)"
+        [placeholder]="placeholder"
+        [disabled]="disabled"/>
+<span class="spacer">{{model && model.length > 0 ? model : placeholder}}</span>

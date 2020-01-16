@@ -96,18 +96,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.studyService.getStudiesNames()
             .then(studies => this.studies = studies);
     }
-    
-    private fetchCenters(studyId: number): Promise<IdName[]> {
-        return this.centerService.getCentersNamesByStudyId(studyId)
-            .then(centers => this.centers = centers);
-    }
 
     private fetchAcqEq(studyId: number): Promise<void> {
         return this.acqEqService.getAllByStudy(studyId)
             .then(acqEqs => {
                 this.acquisitionEquipments = [];
                 for (let acqEq of acqEqs) {
-                    let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq), acqEq.center.name);
+                    let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
                     this.acquisitionEquipments.push(option);
                 }
             });

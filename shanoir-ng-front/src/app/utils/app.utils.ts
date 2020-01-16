@@ -172,8 +172,8 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
 }
 
-export function getEntityInstance(entity: Dataset) { 
-    if (entity.type == 'Mr') return new MrDataset();
+export function getDatasetInstance(type: string) { 
+    if (type == 'Mr') return new MrDataset();
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

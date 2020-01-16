@@ -14,6 +14,7 @@
 import { Component, Input } from '@angular/core';
 import { StudyCardAssignment } from '../../shared/study-card.model';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Option } from '../../../shared/select/select.component';
 
 
 
@@ -26,5 +27,22 @@ export class StudyCardActionComponent {
     
     @Input() assignment: StudyCardAssignment;
     @Input() mode: Mode = 'view';
+    assigmentOptions: Option<AssignmentField>[];
+
+    constructor() {
+        this.assigmentOptions = [
+            new Option(new AssignmentField('datasetMetadata.modalityType', ['Mr', 'Pet']), 'Dataset modality type'),
+            new Option(new AssignmentField('datasetMetadata.modalityType'), 'Protocol name'),
+        ];
+    }
     
+}
+
+export class AssignmentField {
+
+    constructor(
+            public field: string,
+            public possibleValues?: any[]
+        ) {}
+
 }

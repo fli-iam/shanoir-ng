@@ -1,7 +1,8 @@
 :host() { display: block; white-space: nowrap; color: purple; }
 
+select-box, input { border: none !important; }
+input { box-sizing: border-box; width: auto; padding: 0 1px; }
+
 .var { color: blue; }
 .method { color: darkgreen; }
-.value { color: chocolate; }
-
-select-box { width: 150px; }
+.value { color: chocolate; text-overflow: ellipsis; }

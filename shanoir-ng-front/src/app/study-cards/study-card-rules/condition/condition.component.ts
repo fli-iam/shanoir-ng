@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 
 import { StudyCardCondition, DicomTag, Operation } from '../../shared/study-card.model';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
@@ -28,8 +28,9 @@ import { Option } from '../../../shared/select/select.component';
 export class StudyCardConditionComponent implements OnInit {
     
     @Input() condition: StudyCardCondition;
+    @Output() conditionChange: EventEmitter<StudyCardCondition> = new EventEmitter();
     @Input() mode: Mode = 'view';
-    private tagOptions: Option<DicomTag>[];
+    public tagOptions: Option<DicomTag>[];
     operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'SMALLER_THAN', 'BIGGER_THAN'];
 
     constructor(

@@ -11,17 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { Dataset } from '../../shared/dataset.model';
-import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
+
 
 
 @Component({
@@ -44,8 +44,8 @@ export class CommonDatasetComponent implements OnChanges {
             private formBuilder: FormBuilder) {}
 
     completeForm() {
-        this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subjectId, [Validators.required]));
-        this.parentFormGroup.addControl('study', new FormControl(this.dataset.studyId, [Validators.required]));
+        this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subject, [Validators.required]));
+        this.parentFormGroup.addControl('study', new FormControl(this.dataset.study, [Validators.required]));
         this.parentFormGroup.addControl('creationDate', new FormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
         
     }
@@ -75,17 +75,11 @@ export class CommonDatasetComponent implements OnChanges {
     }
 
     private fetchOneSubject() {
-        if (!this.dataset.subjectId) return;
-        this.subjectService.get(this.dataset.subjectId).then(subject => {
-            this.subjects = [subject];
-        });
+        this.subjects = this.dataset.subject ? [this.dataset.subject] : [];
     }
 
     private fetchOneStudy() {
-        if (!this.dataset.studyId) return;
-        this.studyService.get(this.dataset.studyId).then(study => {
-            this.studies = [study];
-        });
+        this.studies = this.dataset.study ? [this.dataset.study] : [];
     }
 
     private fetchAllSubjects() {
@@ -98,22 +92,6 @@ export class CommonDatasetComponent implements OnChanges {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
-    }
-
-    private getSubjectName(id: number): string {
-        if (!this.subjects || this.subjects.length == 0 || !id) return null;
-        for (let subject of this.subjects) {
-            if (subject.id == id) return subject.name;
-        }
-        throw new Error('Cannot find subject for id = ' + id);
-    }
-
-    private getStudyName(id: number): string {
-        if (!this.studies || this.studies.length == 0 || !id) return null;
-        for (let study of this.studies) {
-            if (study.id == id) return study.name;
-        }
-        throw new Error('Cannot find study for id = ' + id);
     }
 
 }

@@ -17,6 +17,11 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { DatasetService } from './dataset.service';
+import { Study } from '../../studies/shared/study.model';
+import { Subject } from '../../subjects/shared/subject.model';
+import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { getDatasetInstance } from '../../utils/app.utils'
+import { DatasetDTO } from './dataset.dto';
 
 declare type ExploredEntity = 'ANATOMICAL_DATASET' | 'FUNCTIONAL_DATASET' | 'HEMODYNAMIC_DATASET' | 'METABOLIC_DATASET' | 'CALIBRATION';
 declare type ProcessedDatasetType = 'RECONSTRUCTEDDATASET' | 'NONRECONSTRUCTEDDATASET';
@@ -30,16 +35,29 @@ export abstract class Dataset extends Entity {
     type: DatasetType;
     //datasetAcquisition: DatasetAcquisition
     //datasetExpressions: List<DatasetExpression>
-    datasetProcessing: DatasetProcessing
-    groupOfSubjectsId: number;
+    //datasetProcessing: DatasetProcessing
+    //groupOfSubjectsId: number;
     //inputOfDatasetProcessings: Array<InputOfDatasetProcessing>
-    referencedDatasetForSuperimposition: Dataset;
-    studyId : number;
-    subjectId : number;
+    //referencedDatasetForSuperimposition: Dataset;
+    study : Study;
+    subject : Subject;
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
 
     service: DatasetService = ServiceLocator.injector.get(DatasetService);
+
+    public stringify() {
+        return JSON.stringify(new DatasetDTO(this), this.replacer);
+    }
+
+    static getDatasetInstance(type: DatasetType): Dataset {
+        // switch(type) {
+        //     case 'Mr': return new MrDataset();
+        //     //case 'Pet': return new PetDataset();
+        //     default: throw new Error(type + ' is not an implemented dataset type');
+        // }
+        return getDatasetInstance(type); // temporary
+    }
 }
 
 export class DatasetMetadata {

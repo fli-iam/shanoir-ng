@@ -150,6 +150,8 @@ import { PetProtocolComponent } from './dataset-acquisitions/modality/pet/pet-pr
 import { WindowService } from './shared/services/window.service';
 import { DicomService } from './study-cards/shared/dicom.service';
 import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag.pipe';
+import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
+import { DatasetDTOService } from './datasets/shared/dataset.dto';
 
 @NgModule({
     imports: [
@@ -249,7 +251,8 @@ import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag
         DatasetAcquisitionComponent,
         MrProtocolComponent,
         PetProtocolComponent,
-        DicomTagPipe
+        DicomTagPipe,
+        AutoAdjustInputComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -302,7 +305,8 @@ import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag
         WindowService,
         DicomService,
         ManufacturerModelPipe,
-        SubjectExaminationPipe
+        SubjectExaminationPipe,
+        DatasetDTOService
     ],
     bootstrap: [AppComponent],
 })

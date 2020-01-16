@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <span [ngSwitch]="mode">
     <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
     <ng-template ngSwitchDefault>
-        <select-box [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled" [options]="options">
+        <select-box [(ngModel)]="model" (change)="propagateChange(model)" [ngModelOptions]="{standalone: true}" [disabled]="disabled" [options]="options">
         </select-box>
     </ng-template>
 </span>

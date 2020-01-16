@@ -72,6 +72,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() disabled: boolean = false;
     @Input() placeholder: string;
     private maxWidth: number;
+    private noResult: boolean;
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -138,10 +139,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (this.inputValue) {
             let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
             if (index == -1) {
-                this.inputValue = null;
-                this.selectedOptionIndex == null;
+                this.selectedOptionIndex = null;
             } else {
-                this.selectedOptionIndex == index;
+                this.selectedOptionIndex = index;
             }
         } else {
             this.selectedOptionIndex = null;
@@ -150,15 +150,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     writeValue(value: any): void {
         this.searchText = null;
+        this.inputValue = value;
         if (this.options && value) {
             let index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
             if (index > -1) {
-                this.inputValue = value;
                 this.selectedOptionIndex = index;
                 return;
             }
         }
-        this.inputValue = null;
         this.selectedOptionIndex = null;
     }
 
@@ -179,11 +178,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                this.onChangeCallback(this.selectedOption.value);
                 this.change.emit(this.selectedOption.value);
             } else {
                 this.inputText = null;
-                this.onChangeCallback(null);
                 this.change.emit(null);
             }
         }
@@ -199,14 +196,21 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
         this.firstScrollOptionIndex = 0;
         this.focusedOptionIndex = null;
+        this.onChangeCallback(null);
     }
 
     private computeMinWidth() {
         let maxOption: Option<any>;
+        let maxWidth: number = 0;
         if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
             this.displayableOptions.forEach(opt => {
-                if (!maxOption || opt.label.length > maxOption.label.length) {
-                    maxOption = opt;
+                if (!maxOption || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
+                    this.hiddenOption.nativeElement.innerText = opt.label;
+                    let width: number = this.hiddenOption.nativeElement.offsetWidth;
+                    if (width > maxWidth) {
+                        maxWidth = width;
+                        maxOption = opt;
+                    }
                 }
             })
             this.hiddenOption.nativeElement.innerText = maxOption.label;
@@ -242,9 +246,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private computeDisplayedOptions() {
         if (this.firstScrollOptionIndex == undefined || this.firstScrollOptionIndex == null || !this.options) {
             this.displayedOptions = [];
+            this.noResult = false;
             return;
         }
         this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
+        this.noResult = this.displayedOptions.length == 0;
     }
     
     private onUserSelectedOption(option: Option<any>) {
@@ -256,6 +262,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;
+        this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null)
         this.close();
     }
 

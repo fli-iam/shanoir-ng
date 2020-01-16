@@ -40,7 +40,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[state]="footerState"
 					(edit)="goToEdit()"
 					(cancel)="goToView()"
-					(back)="goBack()">
+					(back)="goBack()"
+					(save)="save()">
 				<button *ngIf="mode=='view' && hasDownloadRight" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
 				<button *ngIf="mode=='view' && hasDownloadRight" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
 			</form-footer>

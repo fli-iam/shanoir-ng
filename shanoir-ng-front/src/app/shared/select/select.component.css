@@ -1,9 +1,15 @@
-:host() { display: inline-block; position: relative; box-sizing: border-box; }
+:host() { display: inline-block; position: relative; box-sizing: border-box; text-align: left; }
+:host().auto-width { width: auto; }
 .root.disabled { opacity: 0.3; }
 .root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 100%; }
-.label { display: inline-block; cursor: default; width: 100%; height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; }
-.label.empty { font-style: italic; color: var(--greyer); }
+.input-container { position: relative; width: 100%; }
+.fake-input { color: transparent; }
+.auto-width label { width: auto; }
+.label { display: inline-block; cursor: default; min-width: 50px; width: 100%; height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; position: absolute; left: 0; right: 0; top: 0; }
+.empty { font-style: italic; color: var(--greyer); }
+.empty-list { padding: 0 5px; }
+.reset { color: var(--color-a); cursor: pointer; font-style: normal; }
 .label.placeholder { color: var(--greyer); }
 .commands { display: inline-flex; vertical-align: middle; }
     .commands > .button {
