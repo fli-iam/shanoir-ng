@@ -130,7 +130,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         
         // Acquisition Resolution X & Y
         final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(dicomAttributes, serie.getIsEnhancedMR());
-        if (acquisitionMatrixDimension.length == 2) {
+        if (acquisitionMatrixDimension != null && acquisitionMatrixDimension.length == 2) {
             final Integer acquisitionResolutionX = acquisitionMatrixDimension[0];
             final Integer acquisitionResolutionY = acquisitionMatrixDimension[1];
             mrProtocol.setAcquisitionResolutionX(acquisitionResolutionX);
