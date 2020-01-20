@@ -154,7 +154,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
 			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
 			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
-		try (DicomInputStream din = new DicomInputStream(dicomFile); DicomOutputStream dos = new DicomOutputStream(dicomFile)) {
+		DicomInputStream din = null;
+		DicomOutputStream dos = null;
+		try {
+			din = new DicomInputStream(dicomFile);
+			
 			/**
 			 * DICOM "header"/meta-information fields: read tags
 			 */
@@ -231,10 +235,22 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr);
 			}
 			LOG.debug("finish anonymization: begin storage");
+			dos = new DicomOutputStream(dicomFile);
 			dos.writeDataset(metaInformationAttributes, datasetAttributes);
 			LOG.debug("finish anonymization: end storage");
 		} catch (final IOException exc) {
 			LOG.error("performAnonymization : error while anonimizing file " + dicomFile.toString() + " : ", exc);
+		} finally {
+			try {
+				if (din != null) {
+					din.close();
+				}
+				if (dos != null) {
+					dos.close();
+				}
+			} catch (IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -320,61 +336,57 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	}
 
 	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
-		String value = null;
-		if (seriesInstanceUIDs != null) {
-			if (!seriesInstanceUIDs.isEmpty() && seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-				value = seriesInstanceUIDs.get(attributes.getString(tagInt));
-			} else {
-				UIDGeneration generator = new UIDGeneration();
-				String newUID = null;
-				try {
-					newUID = generator.getNewUID();
-				} catch (Exception e) {
-					LOG.error(e.getMessage());
-				}
-				value = newUID;
-				seriesInstanceUIDs.put(attributes.getString(tagInt), value);
+		String value;
+		if (seriesInstanceUIDs != null && seriesInstanceUIDs.size() != 0
+				&& seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
+			value = seriesInstanceUIDs.get(attributes.getString(tagInt));
+		} else {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = null;
+			try {
+				newUID = generator.getNewUID();
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
 			}
+			value = newUID;
+			seriesInstanceUIDs.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 	private void anonymizeStudyInstanceUID(int tagInt, Attributes attributes, Map<String, String> studyInstanceUIDs) {
-		String value = null;
-		if (studyInstanceUIDs != null) {
-			if (!studyInstanceUIDs.isEmpty() && studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
-				value = studyInstanceUIDs.get(attributes.getString(tagInt));
-			} else {
-				UIDGeneration generator = new UIDGeneration();
-				String newUID = null;
-				try {
-					newUID = generator.getNewUID();
-				} catch (Exception e) {
-					LOG.error(e.getMessage());
-				}
-				value = newUID;
-				studyInstanceUIDs.put(attributes.getString(tagInt), value);
+		String value;
+		if (studyInstanceUIDs != null && studyInstanceUIDs.size() != 0
+				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
+			value = studyInstanceUIDs.get(attributes.getString(tagInt));
+		} else {
+			UIDGeneration generator = new UIDGeneration();
+			String newUID = null;
+			try {
+				newUID = generator.getNewUID();
+			} catch (Exception e) {
+				LOG.error(e.getMessage());
 			}
+			value = newUID;
+			studyInstanceUIDs.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 	private void anonymizeStudyId(int tagInt, Attributes attributes, Map<String, String> studyIds) {
-		String value = null;
-		if (studyIds != null) {
-			if (!studyIds.isEmpty() && studyIds.get(attributes.getString(tagInt)) != null) {
-				value = studyIds.get(attributes.getString(tagInt));
-			} else {
-				char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < 10; i++) {
-					char c = chars[rand.nextInt(chars.length)];
-					sb.append(c);
-				}
-				String output = sb.toString();
-				value = output;
-				studyIds.put(attributes.getString(tagInt), value);
+		String value;
+		if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
+			value = studyIds.get(attributes.getString(tagInt));
+		} else {
+			char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < 10; i++) {
+				char c = chars[rand.nextInt(chars.length)];
+				sb.append(c);
 			}
+			String output = sb.toString();
+			value = output.toString();
+			studyIds.put(attributes.getString(tagInt), value);
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
