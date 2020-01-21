@@ -25,7 +25,7 @@ def test_shanoir_ng_users(driverToUse,  shanoir_util_to_use, selenium_util_to_us
 
     # Request 2 accounts
     acc1 = request_account()
-    time.sleep(1)   
+    time.sleep(1)
     acc2 = request_account()
 
     shanoir_util.login(user, password)
@@ -35,7 +35,7 @@ def test_shanoir_ng_users(driverToUse,  shanoir_util_to_use, selenium_util_to_us
     shanoir_util.search(search_string=acc1, select_option='Email')
     accept_deny_account_request(user=acc1, accept=True)
     time.sleep(1)
-    
+
     shanoir_util.search(search_string=acc1, select_option='Email')
     edit_user(name=acc1)
     shanoir_util.clean_search()
@@ -130,7 +130,9 @@ def request_account():
     # Submit
     submit_xpath = "//button[@type='submit']"
     selenium_util.wait_to_be_clickable_and_click(submit_xpath)
-
+    # Cancel
+    cancel_xpath = "//button[contains(.,'Cancel')]"
+    selenium_util.wait_to_be_clickable_and_click(cancel_xpath)
     return email
 
 

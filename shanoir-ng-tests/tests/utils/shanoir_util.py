@@ -98,7 +98,10 @@ class Shanoir_util:
     def edit_entity(self, fields):
         selenium_utility.wait_to_be_present_and_click("//tbody//span[contains(.,'" + fields[0]['value'] + "')]")
         selenium_utility.wait_to_be_clickable_and_click("//button[contains(.,'Edit')]")
+
         for field in fields:
+            time.sleep(1)
+
             if (field['type'] == 'select'):
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']/div[@class='root']")
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']//select-option//div[contains(.,'"+field['valueEdited']+"')]")
