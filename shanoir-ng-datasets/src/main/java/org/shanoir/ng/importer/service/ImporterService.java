@@ -43,6 +43,7 @@ import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
@@ -80,11 +81,14 @@ public class ImporterService {
 	@Autowired
 	private DicomPersisterService dicomPersisterService;
 
+	@Autowired
+	private BIDSService bidsService;
+
 	private ImportJob importJob;
 
-	private static final String SUB_PREFIX = "sub-";
+	private static final String SESSION_PREFIX = "ses-";
 
-	private static final String SES_PREFIX = "ses-";
+	private static final String SUBJECT_PREFIX = "sub-";
 
 	private static final String EEG_PREFIX = "eeg";
 
@@ -107,6 +111,13 @@ public class ImporterService {
 				}
 			}
 		}
+		// Create BIDS folder
+		try {
+			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
+		} catch (IOException e2) {
+			LOG.error("ERROR: Could not create BIDS folder", e2);
+		}
+		// Manage archive
 		if (importJob.getArchive() == null) {
 			return;
 		}
@@ -227,8 +238,8 @@ public class ImporterService {
 			if (datasetDto.getFiles() != null) {
 
 				// Copy the data somewhere else
-				final String subLabel = SUB_PREFIX + importJob.getSubjectId();
-				final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+				final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+				final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
 				final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
 				outDir.mkdirs();
@@ -283,8 +294,16 @@ public class ImporterService {
 			
 			datasets.add(datasetToCreate);
 		}
+
 		datasetAcquisition.setDatasets(datasets);
 		datasetAcquisitionRepository.save(datasetAcquisition);
+		
+		// Complete BIDS with data
+		try {
+			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
+		} catch (IOException e) {
+			LOG.error("SOMETHING WENT WRONG CREATIN BIDS DATA: ", e);
+		}
 	}
 
 }

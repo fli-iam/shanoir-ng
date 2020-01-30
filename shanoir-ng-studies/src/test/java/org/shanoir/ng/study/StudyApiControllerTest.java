@@ -32,6 +32,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
+import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -86,6 +87,9 @@ public class StudyApiControllerTest {
 	@MockBean
 	private StudyUniqueConstraintManager uniqueConstraintManager;
 
+	@MockBean
+	private StudyBIDSService bidsService;
+	
 	@Before
 	public void setup() throws AccessDeniedException, EntityNotFoundException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();

@@ -1,18 +1,19 @@
-package org.shanoir.ng.exporter;
+package org.shanoir.ng.exporter.service;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
@@ -34,6 +35,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -55,24 +57,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Service
 @Scope("prototype")
-public class BIDSService {
+public class BIDSServiceImpl implements BIDSService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(BIDSService.class);
+	private static final String SESSION_PREFIX = "ses-";
+
+	private static final String SUBJECT_PREFIX = "sub-";
+
+	private static final String STUDY_PREFIX = "stud-";
+
+	private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
 
 	private static final String TASK = "_task_";
-
-	private static final String ZIP = ".zip";
-
-	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
 	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
 
 	private static final String README_FILE = "README";
 
-	private static final SecureRandom RANDOM = new SecureRandom();
-
-	@Autowired
-	private ExaminationService examinationService;
+	@Value("${bids-data-folder}")
+	private String bidsStorageDir;
 
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
@@ -80,23 +82,110 @@ public class BIDSService {
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private ExaminationService examService;
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
 	 * @param study the study we want to export as BIDS
 	 * @return data from the study formatted as BIDS in a .zip file.
 	 */
+	@Override
 	public File exportAsBids(final Long studyId, final String studyName) {
 		// Create source folder
-		File baseDir = createBaseBidsFolder(studyName);
+		File baseDir = createBaseBidsFolder(studyName, studyId);
 		
 		// Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
-
 		List<Subject> subjs = getSubjectsForStudy(studyId);
 		for (Subject subj : subjs) {
 			exportAsBids(subj, studyName, baseDir);
 		}
 
 		return baseDir;
+	}
+
+	@Override
+	public File addDataset(Examination exam, String subjectName, String studyName) throws IOException {
+		// 0. If base file does not exist, create it from scratch
+		File baseDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + exam.getStudyId() + "_" + studyName);
+		if (!baseDir.exists()) {
+			return exportAsBids(exam.getStudyId(), studyName);
+		}
+
+		// 1. Create Subject File if not existing
+		File subjDir = createSubjectFolder(subjectName, exam.getSubjectId().toString(), baseDir);
+
+		// 2. Create dataset files
+		exportAsBids(exam, subjDir, studyName, subjectName);
+		return baseDir;
+	}
+
+	@Override
+	public void deleteDataset(Dataset dataset) {
+		Long examId = dataset.getDatasetAcquisition().getExamination().getId();
+		Long subjectId = dataset.getSubjectId();
+		Long studyId = dataset.getStudyId();
+
+		File fileToDelete = null;
+		try {
+			// Get study folder
+			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
+			// Get subject folder
+			fileToDelete = getFileFromId(subjectId.toString(), fileToDelete);
+			// Get exam folder
+			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+			// Get anat, eeg, [...] folder
+			if (dataset instanceof EegDataset) {
+				fileToDelete = getFileFromId("eeg", fileToDelete);
+			} else if (dataset instanceof MrDataset) {
+				fileToDelete = getFileFromId("anat", fileToDelete);
+			}
+
+			// Now delete only the data files we are interested in
+			for (DatasetExpression expr : dataset.getDatasetExpressions()) {
+				for (DatasetFile dataFile : expr.getDatasetFiles()) {
+					if (!dataFile.isPacs()) {
+						// Get FileName path object
+				        Path path = Paths.get(dataFile.getPath());
+				        Path fileName = path.getFileName();
+						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
+					}
+				}
+			}
+
+			// And delete metadata files created for bids
+			for (File metaDataFile : fileToDelete.listFiles()) {
+				if (metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
+					metaDataFile.delete();
+				}
+			}
+			
+		} catch (IOException e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
+		}
+	}
+
+	@Override
+	public void deleteExam(Long examId) {
+		Examination exam = examService.findById(examId);
+		if (exam == null) {
+			// Not found, just get back
+			return;
+		}
+
+		File fileToDelete = null;
+		try {
+			// Get study folder
+			fileToDelete = getFileFromId(exam.getStudyId().toString(), new File(bidsStorageDir));
+			// Get subject folder
+			fileToDelete = getFileFromId(exam.getSubjectId().toString(), fileToDelete);
+			// Get exam folder
+			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+
+			// Delete all the folder
+			FileUtils.deleteDirectory(fileToDelete);
+		} catch (IOException e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
+		}
 	}
 
 	/**
@@ -133,26 +222,18 @@ public class BIDSService {
 	/**
 	 * Create the study/BASE BIDS folder.
 	 * @param studyName the study name
+	 * @param studyId the study id
 	 * @return the base folder newly created
 	 */
-	private File createBaseBidsFolder(final String studyName) {
+	private File createBaseBidsFolder(final String studyName, Long studyId) {
 		// 1. Create folder
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		long n = RANDOM.nextLong();
-		if (n == Long.MIN_VALUE) {
-			n = 0; // corner case
-		} else {
-			n = Math.abs(n);
-		}
-		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
 		File workFolder = new File(tmpFilePath);
-		workFolder.mkdirs();
-		File zipFile = new File(tmpFilePath + ZIP);
-		try {
-			zipFile.createNewFile();
-		} catch (IOException e) {
-			LOG.error(e.getMessage());
+		if (workFolder.exists()) {
+			// If the file already exists, just return it
+			return workFolder;
 		}
+		workFolder.mkdirs();
 
 		// 2. Create dataset_description.json and README
 		DatasetDescription datasetDescription = new DatasetDescription();
@@ -169,40 +250,34 @@ public class BIDSService {
 	}
 
 	/**
-	 * Returns data from the subject formatted as BIDS in a .zip file.
+	 * Create all the data in a BIDS folder for a given subject
 	 * @param subject the subject we want to export as BIDS
 	 * @param studyName the study name
 	 * @param workDir Subject BIDS directory where we are working. Will be created if null.
 	 * @return data from the subject formatted as BIDS in a .zip file.
 	 */
-	public File exportAsBids(final Subject subject, final String studyName, final File workDir) {
-		// When workDir is not defined, we create the full BIDS export
-		File baseDir;
-		if (workDir == null) {
-			baseDir = createBaseBidsFolder(studyName);
-		} else {
-			baseDir = workDir;
-		}
-		File subjDir = createSubjectFolder(subject.getName(), baseDir);
+	private void exportAsBids(final Subject subject, final String studyName, final File workDir) {
+		File subjDir = createSubjectFolder(subject.getName(), String.valueOf(subject.getId()), workDir);
 
 		// Get subject examinations and filter on the one with adapted study only
-		final List<Examination> examinationList = examinationService.findBySubjectId(subject.getId());
+		final List<Examination> examinationList = examService.findBySubjectId(subject.getId());
 
 		// Iterate over examinations to export them as BIDS
 		for (Examination exam : examinationList) {
+			// OTHER: can we imagine a subject in multiple studies ? Do the filter here
 			exportAsBids(exam, subjDir, studyName, subject.getName());
 		}
-		return workDir == null ? baseDir : subjDir;
 	}
 
 	/**
 	 * Create the subject/patient BIDS folder
 	 * @param subjectName the subject name for which we want to create the folder
 	 * @param baseDir the parent folder
+	 * @param subjectId the subject id
 	 * @return the newly created folder
 	 */
-	private File createSubjectFolder(final String subjectName, final File baseDir) {
-		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + "sub-" + subjectName);
+	private File createSubjectFolder(final String subjectName, final String subjectId, final File baseDir) {
+		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + subjectId + "_" + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
@@ -212,33 +287,25 @@ public class BIDSService {
 	/**
 	 * Returns data from the examination formatted as BIDS in a .zip file.
 	 * @param examination the examination we want to export as BIDS
-	 * @param workDir examination BIDS directory where we are working. Will be created if null.
+	 * @param subjDir examination BIDS directory where we are working.
 	 * @param studyName the study name
 	 * @param subjectName the subject name
 	 * @return data from the examination formatted as BIDS in a .zip file.
 	 */
-	public File exportAsBids(final Examination examination, final File workDir, final String studyName, final String subjectName) {
-		// When workDir is not defined, we create the full BIDS export
-		File baseDir;
-		File subjectDir;
-		if (workDir == null) {
-			baseDir = createBaseBidsFolder(studyName);
-			subjectDir = createSubjectFolder(subjectName == null ? examination.getSubjectId().toString() : subjectName, baseDir);
-		} else {
-			baseDir = workDir.getParentFile();
-			subjectDir = workDir;
-		}
-		File examDir = createExaminationFolder(examination, subjectDir);
+	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) {
+		File examDir = createExaminationFolder(examination, subjDir);
 
 		// Iterate over acquisitions/datasets
 		for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {
 			List<Dataset> datasets = acq.getDatasets();
 			for (Dataset ds : datasets) {
-				exportAsBids(ds, examDir, studyName, subjectName);
+				try {
+					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
+				} catch (IOException e) {
+					LOG.error(e.getMessage());
+				}
 			}
 		}
-
-		return workDir == null ? baseDir : examDir;
 	}
 
 	/**
@@ -248,41 +315,11 @@ public class BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + "ses-" +  examination.getId());
+		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  examination.getId());
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
 		}
 		return examFolder;
-	}
-
-	/**
-	 * Returns data from the dataset formatted as BIDS in a .zip file.
-	 * @param dataset the dataset we want to export as BIDS
-	 * @param workDir Examination (session) bids directory where we are working. Will be created if null;
-	 * @param studyName the study name
-	 * @param subjectName the subject name
-	 * @return data from the dataset formatted as BIDS in a .zip file.
-	 */
-	public File exportAsBids(final Dataset dataset, final File workDir, final String studyName, final String subjectName) {
-		// When workDir is not defined, we create the full BIDS export
-		File examDir;
-		File baseDir;
-		if (workDir == null) {
-			baseDir = createBaseBidsFolder(studyName);
-			File subjectDir = createSubjectFolder(subjectName == null ? dataset.getSubjectId().toString() : subjectName, baseDir);
-			examDir = createExaminationFolder(dataset.getDatasetAcquisition().getExamination(), subjectDir);
-		} else {
-			baseDir = null;
-			examDir = workDir;
-		}
-		// Create BIDS files for the dataset in the examination directory
-		try {
-			createDatasetBidsFiles(dataset, examDir, studyName, subjectName);
-		} catch (IOException e) {
-			LOG.error(e.getMessage());
-		}
-
-		return workDir == null ? baseDir : examDir;
 	}
 
 	/**
@@ -294,30 +331,47 @@ public class BIDSService {
 	 * @return A list of newly created specific BIDS files associated to the dataset in entry
 	 * @throws IOException when we fail to create a file
 	 */
-	public void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
-		// Copy dataset files in the directory
+	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
+		File dataFolder;
+
+		// Create specific files (EEG, MS, MEG, etc..)
+		if (dataset instanceof EegDataset) {
+			dataFolder = createDataFolder("eeg", workDir);
+			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
+		} else if (dataset instanceof MrDataset) {
+			// Do something specific about MR dataset
+			dataFolder = createDataFolder("anat", workDir);
+		} else {
+			dataFolder = workDir;
+		}
+		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, null);
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
 			File srcFile = new File(url.getPath());
-			File destFolder = new File(workDir.getAbsolutePath());
 
-			Path pathToGo = Paths.get(destFolder.getAbsolutePath() + File.separator + srcFile.getName());
+			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			try {
-			Files.copy(srcFile.toPath(), pathToGo);
+				// Use link to avoid file duplication
+				Files.createLink(pathToGo, srcFile.toPath());
 			} catch (IOException exception) {
-				LOG.error("File could not be treated (PACS): {}", srcFile.getAbsolutePath(), exception);
+				LOG.error("File could not be treated: {}", srcFile.getAbsolutePath(), exception);
 			}
 		}
+	}
 
-		// Create specific files (EEG, MS, MEG, etc..)
-		if (dataset instanceof EegDataset) {
-			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName == null ? dataset.getSubjectId().toString() : subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
-		} else if (dataset instanceof MrDataset) {
-			// Do something specific about MR dataset
+	/**
+	 * Create /eeg, /func ,[...] folder in BIDS file if not existing.
+	 * @return the folder newly created.
+	 */
+	private File createDataFolder(final String folderName, final File workDir) {
+		File dataFolder = new File(workDir.getAbsolutePath() + File.separator + folderName);
+		if (!dataFolder.exists()) {
+			dataFolder.mkdirs();
 		}
+		return dataFolder;
 	}
 
 	/**
@@ -334,8 +388,10 @@ public class BIDSService {
 				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
 				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
 					DatasetFile datasetFile = itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-					pathURLs.add(url);
+					if (!datasetFile.isPacs()) {
+						URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+						pathURLs.add(url);
+					}
 				}
 			}
 		}
@@ -373,8 +429,8 @@ public class BIDSService {
 		objectMapper.writeValue(new File(destFile), datasetDescription);
 
 		// Create channels.tsv file
-		String destWorkFolderPath = baseDirectory.getAbsolutePath() + File.separator + "sub-" + subjectName + File.separator + "ses-" + sessionId + File.separator;
-		
+		String destWorkFolderPath = baseDirectory.getAbsolutePath() + File.separator + SUBJECT_PREFIX + dataset.getSubjectId() + "_" + subjectName + File.separator + SESSION_PREFIX + sessionId + File.separator + "eeg" + File.separator;
+
 		// Create the folder where we are currently working if necessary.
 		File destWorkFolderFile = new File(destWorkFolderPath);
 		if (!destWorkFolderFile.exists()) {
@@ -383,7 +439,7 @@ public class BIDSService {
 
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_channel.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
-
+		
 		StringBuilder buffer = new StringBuilder();
 		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
 
@@ -449,4 +505,34 @@ public class BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 	}
 
+	/**
+	 * This method allows to find a specific object ( Study or subject ) from its ID in the given folder
+	 * @param id the ID to find, or the modality
+	 * @param folder the folder where we are looking for.s
+	 * @return The File we found, null otherwise
+	 * @throws IOException when there is a duplicated folder
+	 */
+	protected File getFileFromId(String id, File folder) throws IOException {
+		if (!folder.exists()) {
+			throw new IOException("ERROR: parent folder does not exist:" + folder.getAbsolutePath());
+		}
+		File[] files = folder.listFiles(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.startsWith(SUBJECT_PREFIX + id + "_") && !name.endsWith(".zip")
+						|| name.startsWith(STUDY_PREFIX + id + "_")
+						|| name.equals(SESSION_PREFIX + id)
+						|| name.equals(id);
+			}
+		});
+		if (files.length == 1) {
+			return files[0];
+		} else if (files.length > 1) {
+			LOG.error("ERROR: duplicate folder containing ID: {} in bids folder", id);
+			throw new IOException("ERROR: duplicate folder containing ID:" + id + "{} in bids folder");
+		}
+		LOG.info("ERROR: no folder containing ID: {} in bids folder. It will probably be created by the BIDS manager. Should not happen", id);
+		return null;
+	}
 }

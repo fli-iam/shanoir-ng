@@ -108,6 +108,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "datasets-data:/var/datasets-data"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
@@ -296,6 +298,7 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "/home/fli/JCome/ShanoirNG/shanoir-ng/shanoir-ng-front/dist:/etc/nginx/html:ro"
     networks:
       - shanoir_ng_network    
     ports:

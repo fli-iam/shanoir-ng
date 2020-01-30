@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.subject.controler.SubjectApi;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -85,6 +86,9 @@ public class SubjectApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
+	@MockBean
+	private StudyBIDSService bidsService;
+
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createSubject();
@@ -253,7 +257,7 @@ public class SubjectApiSecurityTest {
 		Subject newSubjectMock = buildSubjectMock(null);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
 		
-		// Create subject 
+		// Create subject
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(9L));
 		given(studyRepository.findAll(Arrays.asList(9L))).willReturn(studiesMock);
@@ -303,10 +307,10 @@ public class SubjectApiSecurityTest {
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);			
+			studyUserList.add(studyUser);
 		}
 		study.setStudyUserList(studyUserList);
-		return study;		
+		return study;
 	}
 	
 	private Subject buildSubjectMock(Long id) {
@@ -322,8 +326,12 @@ public class SubjectApiSecurityTest {
 		subjectStudy.setSubject(mock);
 		subjectStudy.setStudy(study);
 		
-		if (study.getSubjectStudyList() == null) study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		if (mock.getSubjectStudyList() == null) mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		if (study.getSubjectStudyList() == null) {
+			study.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
+		if (mock.getSubjectStudyList() == null) {
+			mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
 		study.getSubjectStudyList().add(subjectStudy);
 		mock.getSubjectStudyList().add(subjectStudy);
 	}
