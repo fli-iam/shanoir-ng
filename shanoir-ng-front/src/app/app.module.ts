@@ -50,10 +50,7 @@ import { DatasetListComponent } from './datasets/dataset-list/dataset-list.compo
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
-import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { DatasetService } from './datasets/shared/dataset.service';
-import { ExploredEntityComponent } from './datasets/shared/explored-entity/explored-entity.component';
-import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-dataset-type/processed-dataset-type.component';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
@@ -152,6 +149,7 @@ import { DicomService } from './study-cards/shared/dicom.service';
 import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag.pipe';
 import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
+import { StudyCardRulesComponent } from './study-cards/study-card-rules/study-card-rules.component';
 
 @NgModule({
     imports: [
@@ -218,9 +216,6 @@ import { DatasetDTOService } from './datasets/shared/dataset.dto';
         CommonDatasetComponent,
         MsgBoxComponent,
         PapayaComponent,
-        DatasetTypeComponent,
-        ExploredEntityComponent,
-        ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
         DicomUploadComponent,
         QueryPacsComponent,
@@ -244,6 +239,7 @@ import { DatasetDTOService } from './datasets/shared/dataset.dto';
         StudyCardComponent,
         StudyCardListComponent,
         StudyCardRuleComponent,
+        StudyCardRulesComponent,
         StudyCardConditionComponent,
         StudyCardActionComponent,
         GetValuesPipe,

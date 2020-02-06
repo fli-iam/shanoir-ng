@@ -19,7 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';

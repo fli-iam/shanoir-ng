@@ -12,18 +12,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-set
-<span class="var">{{assignment?.field}}</span>
-=
-<span class="value">"{{assignment?.value}}"</span>
-
-set
 <ng-container *ngIf="mode == 'view'">
+    set
     <span class="var">{{assignment?.field}}</span>
     =
     <span class="value">"{{assignment?.value}}"</span>
 </ng-container>
 <ng-container *ngIf="mode != 'view'">
-    <select-box class="var auto-width" [(ngModel)]="assignment.field" [options]="assigments"></select-box>
-    <auto-ajust-input class="value" [(ngModel)]="assignment.value" placeholder="enter value"></auto-ajust-input>
+    set
+    <select-box class="var auto-width" [(ngModel)]="assignment.field" (change)="onChangeField($event)" (selectOption)="onSelectFieldOption($event)" (deSelectOption)="onDeSelectFieldOption($event)" [options]="fieldOptions"></select-box>
+    =
+    <auto-ajust-input *ngIf="!assigmentOptions" class="value" [(ngModel)]="assignment.value" placeholder="enter value" (change)="onChangeValue()"></auto-ajust-input>
+    <select-box *ngIf="assigmentOptions" class="var auto-width" [(ngModel)]="assignment.value" [options]="assigmentOptions" (change)="onChangeValue()"></select-box>
 </ng-container>
+<ng-content></ng-content>

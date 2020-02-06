@@ -19,7 +19,7 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
-import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 @Component({
     selector: 'dataset-acquisition-list',

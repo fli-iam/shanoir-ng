@@ -21,6 +21,11 @@ import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { Dataset } from '../../shared/dataset.model';
+import { ExploredEntity } from '../../../enum/explored-entity.enum';
+import { Option } from '../../../shared/select/select.component';
+import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
+import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
+import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
 
 
 
@@ -36,12 +41,19 @@ export class CommonDatasetComponent implements OnChanges {
     @Input() private parentFormGroup: FormGroup;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    
+    exploredEntityOptions: Option<ExploredEntity>[];
+    datasetModalityTypes: Option<DatasetModalityType>[];
+    processedDatasetTypeOptions: Option<ProcessedDatasetType>[];
 
     constructor(
             private studyService: StudyService,
             private subjectService: SubjectService,
-            private formBuilder: FormBuilder) {}
+            private formBuilder: FormBuilder) {
+
+        this.exploredEntityOptions = ExploredEntity.toOptions();
+        this.datasetModalityTypes = DatasetModalityType.toOptions();
+        this.processedDatasetTypeOptions = ProcessedDatasetType.toOptions();
+    }
 
     completeForm() {
         this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subject, [Validators.required]));

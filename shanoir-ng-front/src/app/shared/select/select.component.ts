@@ -31,6 +31,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 import { GlobalService } from '../services/global.service';
+import { findLastIndex } from '../../utils/app.utils';
 
 
 @Component({
@@ -49,6 +50,8 @@ import { GlobalService } from '../services/global.service';
 export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges {
 
     @Output() change = new EventEmitter();
+    @Output() selectOption = new EventEmitter();
+    @Output() deSelectOption = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -173,15 +176,21 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private set selectedOptionIndex(index: number) {
+        let previousOption: Option<any> = this.selectedOption;
         if (index == -1) index = null;
         if (index != this._selectedOptionIndex) {
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
                 this.change.emit(this.selectedOption.value);
+                this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
                 this.change.emit(null);
+                this.selectOption.emit(null);
+            }
+            if (previousOption) {
+                this.deSelectOption.emit(previousOption);
             }
         }
     }
@@ -254,6 +263,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private onUserSelectedOption(option: Option<any>) {
+        if (option.disabled) return;
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
     }
@@ -354,26 +364,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
         if ('ArrowDown' == event.key) {
-            if (this.isOpen()) {
-                this.scrollDownByOne();
-            } else {
-                if (this.hasSelectedOption && this.selectedOptionIndex < this.options.length) {
-                    this.onUserSelectedOptionIndex(this.selectedOptionIndex + 1);
-                } else {
-                    this.onUserSelectedOptionIndex(0);
-                }
-            }
+            this.scrollDownByOne();
             event.preventDefault();
         } else if ('ArrowUp' == event.key) {
-            if (this.isOpen()) {
-                this.scrollUpByOne();
-            } else {
-                if (this.hasSelectedOption && this.selectedOptionIndex > 0) {
-                    this.onUserSelectedOptionIndex(this.selectedOptionIndex - 1);
-                } else {
-                    this.onUserSelectedOptionIndex(0);
-                }
-            }
+            this.scrollUpByOne();
             event.preventDefault();
         } else if ('PageUp' == event.key) {
             if (this.isOpen()) this.pageUp();
@@ -399,30 +393,70 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private scrollDownByOne() {
-        if (this.focusedOptionIndex == null) {
-            this.focusedOptionIndex = 0;
-            return;
-        }
-        //let nextIndex: number = this.displayableOptions.slice(this.focusedOptionIndex).findIndex()
-        if (this.focusedOptionIndex + this.firstScrollOptionIndex + 1 < this.displayableOptions.length) {
-            if (this.scrollable && this.focusedOptionIndex + 1 == this.LIST_LENGTH) {
-                this.firstScrollOptionIndex ++;
+        let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex + 1) : 0;
+        let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
+        if (nextIndex == -1) return;
+        else {
+            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? nextIndex + 1 : 0;
+            if (this.isOpen()) {
+                if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.LIST_LENGTH) {
+                    this.firstScrollOptionIndex += nbSteps;
+                    this.focusedOptionIndex = this.LIST_LENGTH - 1;
+                } else {
+                    this.focusedOptionIndex += nbSteps;
+                }
             } else {
-                this.focusedOptionIndex ++;
+                if (this.hasSelectedOption && this.selectedOptionIndex + nbSteps <= this.options.length) {
+                    this.onUserSelectedOptionIndex(this.selectedOptionIndex + nbSteps);
+                } else {
+                    this.onUserSelectedOptionIndex(0);
+                }
             }
         }
     }
 
     private scrollUpByOne() {
-        if (this.focusedOptionIndex == null) {
-            this.focusedOptionIndex = 0;
-            return;
-        }
-        if (this.focusedOptionIndex + this.firstScrollOptionIndex > 0) {
-            if (this.scrollable && this.focusedOptionIndex == 0) {
-                this.firstScrollOptionIndex --;
+        let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex - 1) : 0;
+        let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
+        if (nextIndex == -1) return;
+        else {
+            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? this.focusedOptionIndex + this.firstScrollOptionIndex - nextIndex - 1 : 0;
+            if (this.isOpen()) {
+                if (this.scrollable && this.focusedOptionIndex - nbSteps < 0) {
+                    this.firstScrollOptionIndex -= nbSteps;
+                    this.focusedOptionIndex = 0;
+                } else {
+                    this.focusedOptionIndex -= nbSteps;
+                }
             } else {
-                this.focusedOptionIndex --;
+                if (this.hasSelectedOption && this.selectedOptionIndex - nbSteps > 0) {
+                    this.onUserSelectedOptionIndex(this.selectedOptionIndex - nbSteps);
+                } else {
+                    this.onUserSelectedOptionIndex(0);
+                }
+            }
+        }
+
+
+
+
+        if (this.isOpen()) {
+            if (this.focusedOptionIndex == null) {
+                this.focusedOptionIndex = 0;
+                return;
+            }
+            if (this.focusedOptionIndex + this.firstScrollOptionIndex > 0) {
+                if (this.scrollable && this.focusedOptionIndex == 0) {
+                    this.firstScrollOptionIndex --;
+                } else {
+                    this.focusedOptionIndex --;
+                }
+            }
+        } else {
+            if (this.hasSelectedOption && this.selectedOptionIndex > 0) {
+                this.onUserSelectedOptionIndex(this.selectedOptionIndex - 1);
+            } else {
+                this.onUserSelectedOptionIndex(0);
             }
         }
     }

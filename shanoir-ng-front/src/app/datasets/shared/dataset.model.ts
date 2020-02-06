@@ -11,21 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
+import { CardinalityOfRelatedSubjects } from '../../enum/cardinality-of-related-subjects.enum';
+import { ExploredEntity } from '../../enum/explored-entity.enum';
+import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetProcessing } from './dataset-processing.model';
-import { DatasetType } from './dataset-type.model';
-import { DatasetService } from './dataset.service';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { MrDataset } from '../dataset/mr/dataset.mr.model';
-import { getDatasetInstance } from '../../utils/app.utils'
+import { getDatasetInstance } from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetType } from './dataset-type.model';
 import { DatasetDTO } from './dataset.dto';
+import { DatasetService } from './dataset.service';
 
-declare type ExploredEntity = 'ANATOMICAL_DATASET' | 'FUNCTIONAL_DATASET' | 'HEMODYNAMIC_DATASET' | 'METABOLIC_DATASET' | 'CALIBRATION';
-declare type ProcessedDatasetType = 'RECONSTRUCTEDDATASET' | 'NONRECONSTRUCTEDDATASET';
-declare type CardinalityOfRelatedSubjects = 'SINGLE_SUBJECT_DATASET' | 'MULTIPLE_SUBJECTS_DATASET';
 
 export abstract class Dataset extends Entity {
     
@@ -66,5 +63,5 @@ export class DatasetMetadata {
     exploredEntity: ExploredEntity;
     name: string;
     processedDatasetType: ProcessedDatasetType;
-    cardinalityOfRelatedSubjects: CardinalityOfRelatedSubjects = 'SINGLE_SUBJECT_DATASET';
+    cardinalityOfRelatedSubjects: CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
 }

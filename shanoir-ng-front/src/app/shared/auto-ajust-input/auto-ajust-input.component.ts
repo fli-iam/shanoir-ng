@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, HostListener } from '@angular/core';
+import { Component, forwardRef, Input, HostListener, Output, EventEmitter } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -32,6 +32,7 @@ export class AutoAdjustInputComponent implements ControlValueAccessor {
     model: any;
     disabled: boolean;
     @Input() placeholder: string;
+    @Output() change: EventEmitter<string> = new EventEmitter();
     onTouch = () => {};
     onChange = (_: any) => {};
 

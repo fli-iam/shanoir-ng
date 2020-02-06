@@ -31,7 +31,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ol>
                     <li>
 						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">Modality type</label> 
-						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" (change)="onModalityChange($event)" formControlName="datasetModalityType"></select-dataset-type>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.datasetModalityType}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
+									(change)="onModalityChange($event)" formControlName="datasetModalityType">
+								</select-box>
+							</ng-template>
+						</span>
                     </li>
 					<li>
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">Manufacturer</label> 

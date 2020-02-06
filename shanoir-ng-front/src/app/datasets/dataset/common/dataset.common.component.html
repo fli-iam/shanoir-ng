@@ -56,8 +56,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
-			{{dataset.type}}
-			<!-- <select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type" [ngModelOptions]="{standalone: true}" ></select-dataset-type> -->
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'"> 
+					{{dataset.type}}
+				</ng-template>
+				<ng-template ngSwitchDefault> 
+					<select-box [ngModelOptions]="{standalone: true}" [(ngModel)]="dataset.type" [options]="datasetModalityTypes">
+					</select-box>
+				</ng-template>
+			</span>
 		</li>
 		<!-- <li>
 			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition">Acquisition</label>
@@ -126,12 +133,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
-			<select-explored-entity class="right-col" 
-				[mode]="mode" 
-				[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity" 
-				(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
-				[ngModelOptions]="{standalone: true}" >
-			</select-explored-entity>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.exploredEntity? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<select-box 
+							[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity" 
+							(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event" 
+							[ngModelOptions]="{standalone: true}" 
+							[options]="exploredEntityOptions">
+					</select-box>
+				</ng-template>
+			</span>
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset cardinality of releted subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of releted subjects</label>
@@ -153,12 +165,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
-			<select-processed-dataset-type class="right-col" 
-				[mode]="mode" 
-				[ngModel]="dataset.updatedMetadata.datasetProcessedType ? dataset.updatedMetadata.datasetProcessedType : dataset.originMetadata.datasetProcessedType" 
-				(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event"
-				[ngModelOptions]="{standalone: true}" >
-			</select-processed-dataset-type>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.exploredEntity? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<select-box 
+							[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType"
+							(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event" 
+							[ngModelOptions]="{standalone: true}" 
+							[options]="processedDatasetTypeOptions">
+					</select-box>
+				</ng-template>
+			</span>
 		</li>
 	</ol>
 </fieldset>

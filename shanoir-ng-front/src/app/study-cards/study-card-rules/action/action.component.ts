@@ -11,10 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input } from '@angular/core';
-import { StudyCardAssignment } from '../../shared/study-card.model';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
+import { StudyCardAssignment } from '../../shared/study-card.model';
 
 
 
@@ -26,23 +27,40 @@ import { Option } from '../../../shared/select/select.component';
 export class StudyCardActionComponent {
     
     @Input() assignment: StudyCardAssignment;
+    @Output() assignmentChange: EventEmitter<StudyCardAssignment> = new EventEmitter();
     @Input() mode: Mode = 'view';
-    assigmentOptions: Option<AssignmentField>[];
+    @Input() fieldOptions: Option<string>[];
+    @Input() fields: AssignmentField[];
+    assigmentOptions: Option<any>[];
 
-    constructor() {
-        this.assigmentOptions = [
-            new Option(new AssignmentField('datasetMetadata.modalityType', ['Mr', 'Pet']), 'Dataset modality type'),
-            new Option(new AssignmentField('datasetMetadata.modalityType'), 'Protocol name'),
-        ];
+    onChangeField(field: string) {
+        let assignmentField: AssignmentField = this.fields.find(assF => assF.field == field);
+        if (assignmentField && assignmentField.options) {
+            this.assigmentOptions = assignmentField.options;
+        } else {
+            this.assigmentOptions = null;
+        }    
+        this.assignmentChange.emit(this.assignment);
     }
-    
+
+    onSelectFieldOption(option: Option<any>) {
+        option.disabled = true;
+    }
+
+    onDeSelectFieldOption(option: Option<any>) {
+        option.disabled = false;
+    }
+
+    onChangeValue() {
+        this.assignmentChange.emit(this.assignment);
+    }
 }
 
 export class AssignmentField {
-
     constructor(
-            public field: string,
-            public possibleValues?: any[]
-        ) {}
-
+        public label: string, 
+        public field: string,
+        public options?: any[]) {}
 }
+
+

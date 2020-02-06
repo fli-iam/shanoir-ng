@@ -1,4 +1,7 @@
-:host() { display: block; white-space: nowrap; color: purple; }
+:host() { white-space: nowrap; color: purple; }
+
+select-box, input { border: none !important; }
+input { box-sizing: border-box; width: auto; padding: 0 1px; }
 
 .var { color: blue; }
 .value { color: chocolate; }

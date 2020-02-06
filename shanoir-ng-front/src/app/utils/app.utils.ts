@@ -125,6 +125,24 @@ export function pad(n, width, z?): string {
 }
 
 
+/**
+* Returns the index of the last element in the array where predicate is true, and -1
+* otherwise.
+* @param array The source array to search in
+* @param predicate find calls predicate once for each element of the array, in descending
+* order, until it finds one where predicate returns true. If such an element is found,
+* findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+*/
+export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    let l = array.length;
+    while (l--) {
+        if (predicate(array[l], l, array))
+            return l;
+    }
+    return -1;
+}
+
+
 @Pipe({name: 'times'})
 export class TimesPipe implements PipeTransform {
   transform(value: number): any {
@@ -156,8 +174,7 @@ export class GetValuesPipe implements PipeTransform {
 export function allOfEnum<T>(enumClass): Array<T> {
     let list: Array<T> = [];
     for (let key in enumClass) {
-        if (key != 'all' && isNaN(Number(key)))
-        list.push(enumClass[key]);
+        if (!(enumClass[key] instanceof Function)) list.push(enumClass[key]);
     }
     return list;
 }
@@ -171,6 +188,11 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     if (!str) return;
     return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
 }
+
+export function isFunction(obj) {
+    return !!(obj && obj.constructor && obj.call && obj.apply);
+}
+
 
 export function getDatasetInstance(type: string) { 
     if (type == 'Mr') return new MrDataset();

@@ -3,7 +3,7 @@
 .root.disabled { opacity: 0.3; }
 .root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 100%; }
-.input-container { position: relative; width: 100%; }
+.input-container { position: relative; width: 100%; cursor: pointer; }
 .fake-input { color: transparent; }
 .auto-width label { width: auto; }
 .label { display: inline-block; cursor: default; min-width: 50px; width: 100%; height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; position: absolute; left: 0; right: 0; top: 0; }
@@ -22,7 +22,8 @@
         height: 20px;
         min-width: 23px;
     }
-        .button svg { margin: 2px 0; }
+    :host().auto-width .commands > .button { min-width: 0; font-size: 6px; height: 22px; }
+        .button svg { margin: 0px 2px; height: 100%;}
     .commands > .button.disabled { opacity: 0.7; }
     .commands > .button:hover:not(.disabled),
     .commands > .button:focus:not(.disabled) { cursor: pointer; color: var(--color-a); outline: none; }
@@ -49,13 +50,15 @@
 .list.up { bottom: 18px; } 
 .hidden-list { opacity: 0; }
 input { border: none !important; }
+input:hover { cursor: pointer; }
+input:focus:hover { cursor: initial; }
 :host()::ng-deep caption { display: block; text-align: center; color: var(--color-a); padding: 0 5px; font-style: italic; }
 :host()::ng-deep .option-section.hidden { display: none; }
 
 .option { height: 20px; display:block; border: none; white-space: nowrap; color: var(--dark-grey); cursor: pointer; padding: 0 5px; }
-.option.focused { background-color: var(--grey); }
 .option.selected { background-color: var(--color-b-light); }
-.option.disabled { opacity: 0.5; }
+.option.focused { background-color: var(--grey); }
+.option.disabled { opacity: 0.5; cursor: default !important; }
 
 .list.scrollable { padding-right: 0px; }
 .scrollbar { position: absolute; top: 0; bottom: 0; right: 0; width: 10px; background-color: transparent; }

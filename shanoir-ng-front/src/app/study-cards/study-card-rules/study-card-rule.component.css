@@ -1,6 +1,26 @@
-:host() { display: flex; align-self: center; position: relative; }
-.conditions { align-self: center; text-align: right; position: relative;}
-.separator { width: 100px; align-self: center; color: purple; text-align: center; position: relative; }
-.actions { align-self: center; text-align: left; position: relative; }
+:host() { display: block; position: relative; white-space: nowrap; }
+.conditions { text-align: right; }
+.separator { width: 100px; color: purple; text-align: center; }
+.actions { text-align: left; }
 
-.conditions::ng-deep condition:not(:first-child)::before { display: inline; content: "and" }
+.conditions, .separator, .actions { vertical-align: middle; display: inline-block; position: relative; }
+
+.conditions::ng-deep .condition:not(:first-child) condition::before { display: inline; content: "and" }
+
+condition, action, .add {
+    border: 1px solid var(--grey);
+    border-radius: 10px;
+    margin: 3px 0;
+    padding: 0px 7px; }
+
+condition, action { position: relative; display: inline-block; }
+
+condition.edit:hover, action.edit:hover { border-color: var(--color-b); }
+
+.add { text-align: left; color: var(--color-b); border-style: dashed; cursor: pointer; display: inline-block; padding: 1px 8px; }
+.add svg { margin-right: 7px; vertical-align: -1px; color: var(--grey); }
+.add:hover { background-color: var(--color-b); color: white; }
+
+.delete { color: var(--grey); position: absolute; right: -17px; top: 4px; bottom: 4px; z-index: 1; }
+.delete svg { vertical-align: -2px; }
+.delete:hover { color: var(--color-error); cursor: pointer; }

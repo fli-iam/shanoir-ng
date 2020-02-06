@@ -23,3 +23,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <select-box class="method auto-width" [ngModel]="condition.operation" (ngModelChange)="conditionChange.emit(condition)" [optionArr]="operations"></select-box>
     <auto-ajust-input class="value" [ngModel]="condition.dicomValue" (ngModelChange)="conditionChange.emit(condition)" placeholder="enter value"></auto-ajust-input>
 </ng-container>
+<ng-content></ng-content>

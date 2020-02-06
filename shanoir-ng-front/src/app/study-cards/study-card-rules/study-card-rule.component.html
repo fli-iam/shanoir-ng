@@ -12,12 +12,26 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #conditions class="conditions">
-	<ng-content select="condition"></ng-content>
+<div class="conditions">
+	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
+		<condition [condition]="condition" [mode]="mode" [class.edit]="mode == 'edit'">
+			<span *ngIf="mode == 'edit'" class="delete" (click)="deleteCondition(i)"><i class="far fa-times-circle"></i></span>
+		</condition>
+	</div>
+	<div>
+		<span *ngIf="mode == 'edit'" class="add" (click)="addNewCondition()"><i class="fas fa-plus"></i>Add a condition</span>
+	</div>
 </div>
 
 <div #separator class="separator"><i class="fas fa-angle-double-right"></i></div>
 
 <div class="actions">
-	<ng-content select="action"></ng-content>
+	<div *ngFor="let action of rule.assignments; let i = index" class="action">
+		<action [assignment]="action" [mode]="mode" [fieldOptions]="fieldOptions" [fields]="fields" [class.edit]="mode == 'edit'">
+			<span *ngIf="mode == 'edit'" class="delete" (click)="deleteAction(i)"><i class="far fa-times-circle"></i></span>	
+		</action>
+	</div>
+	<div>
+		<span *ngIf="mode == 'edit'" class="add" (click)="addNewAction()"><i class="fas fa-plus"></i>Add an action</span>
+	</div>
 </div>

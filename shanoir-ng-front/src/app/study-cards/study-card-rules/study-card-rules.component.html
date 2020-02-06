@@ -12,10 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span [ngSwitch]="mode">
-    <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
-    <ng-template ngSwitchDefault>
-        <select-box [(ngModel)]="model" (change)="propagateChange(model)" [ngModelOptions]="{standalone: true}" [disabled]="disabled" [options]="options">
-        </select-box>
-    </ng-template>
-</span>
+<ng-container *ngFor="let rule of rules">
+	<study-card-rule *ngIf="rule.assignments && rule.assignments.length > 0" [rule]="rule" [fields]="fields" [mode]="mode" >
+	</study-card-rule>
+</ng-container>
