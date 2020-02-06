@@ -12,29 +12,64 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<form class="row">
+<form class="row" [formGroup]="form">
     <div class="left">
         <h2>Solr Search</h2>
         <input type="text" id="searchBar" placeholder="Search..">
         <ol id="facet">
             <li>
+                <span class="button" (click)="removeAllFacets(); table.refresh()">
+                    <i class="fas fa-ban"></i> Remove all criteria
+                </span>
+            </li>
+            <!-- <li>
                 <label>Study Name</label> 
                 <span class="right-col">
-                    <select-box [(ngModel)]="study" [ngModelOptions]="{standalone: true}" (change)="onSelectStudy()">
-                        <select-option *ngFor="let study of studies" [value]="study">{{study?.name}}</select-option>
+                    <select-box [(ngModel)]="solrRequest.study" formControlName="study" (change)="onStudyChange($event)" (onAddClick)="onStudyAdd()" [addDisabled]="!selectedStudies.length < maxSelectedStudies">
+                        <select-option *ngFor="let study of studies" [value]="study" [disabled]="isStudyAlreadySelected(study.id)">{{study?.name}}</select-option>
                     </select-box>
+                    <label *ngIf="hasError('study', ['required'])" [@slideDown]="hasError('study', ['required'])" class="form-validation-alert">Study is required!</label>
+                </span>
+            </li> -->
+            <!-- <li>
+                <label>Subject Name</label>
+                <span class="right-col">
+                    <mat-form-field>
+                        <input type="text" matInput [(ngModel)]="solrRequest.subject" formControlName="subject" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let option of filteredSubjectNames | async" [value]="option">
+                                {{option}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    <label *ngIf="hasError('subject', ['required'])" [@slideDown]="hasError('subject', ['required'])" class="form-validation-alert">Subject is required!</label>
+                </span>
+            </li> -->
+            <li>
+                <label>Study Name</label>
+                <span class="right-col">
+                        <span class="button" (click)="showAllStudies(); table.refresh()">
+                            &#9664; Show all studies
+                        </span>
+                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [items]="facets[0]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
-                <label>Subject Name</label> 
+                <label>Subject Name</label>
                 <span class="right-col">
-                    <input class="search-txt" [(ngModel)]="subject" [ngModelOptions]="{standalone: true}" (change)="onSelectSubject()" type="text"/> 
+                    <checkbox-list [(ngModel)]="solrRequest.subjectName" formControlName="subjectName" [items]="facets[1]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Examination Comment</label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.examinationComment" formControlName="examinationComment" [items]="facets[2]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Dataset Name</label> 
                 <span class="right-col">
-                    <input class="search-txt" [(ngModel)]="datasetName" [ngModelOptions]="{standalone: true}" (change)="onSelectDatasetName()" type="text"/> 
+                    <checkbox-list [(ngModel)]="solrRequest.datasetName" formControlName="datasetName" [items]="facets[3]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
@@ -42,34 +77,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <br/>
                 <label>bewteen </label>
                 <span class="right-col">
-                    <datepicker [(ngModel)]="startDate" [ngModelOptions]="{standalone: true}"></datepicker>
+                    <datepicker [(ngModel)]="solrRequest.datasetStartDate" formControlName="startDate"></datepicker>
+                    <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
                 </span>
                 <br/>
                 <label>and </label>
                 <span class="right-col">
-                    <datepicker [(ngModel)]="endDate" [ngModelOptions]="{standalone: true}"></datepicker>
-                </span>
-            </li>
-            <li>
-                <label>Examination Comment</label> 
-                <span class="right-col">
-                    <input class="search-txt" [(ngModel)]="examinationComment" [ngModelOptions]="{standalone: true}" (change)="onSelectExam()" type="text"/> 
+                    <datepicker [(ngModel)]="solrRequest.datasetEndDate" formControlName="endDate"></datepicker>
+                    <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+                    <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
                 </span>
             </li>
             <li>
                 <label>Dateset ModalityType</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="datasetModalityTypes" [items]="allDatasetModalityTypes" [ngModelOptions]="{standalone: true}"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.datasetTypes" formControlName="datasetTypes" [items]="allDatasetModalityTypes"></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Mr Dateset Nature</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="mrDatasetNatures" [items]="allMrDatasetNatures" [ngModelOptions]="{standalone: true}"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.datasetNatures" formControlName="datasetNatures" [items]="allMrDatasetNatures"></checkbox-list>
                 </span>
             </li>
             <!-- criteres choisis -->
-            <button class="Button" (click)="search()">Search</button>
+            <button class="Button" (click)="table.refresh()" [disabled]="!form.valid">Search</button>
         </ol>
     </div>
     <div class="right">

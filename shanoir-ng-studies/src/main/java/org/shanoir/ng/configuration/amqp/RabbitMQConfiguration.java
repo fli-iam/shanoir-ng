@@ -30,7 +30,7 @@ public class RabbitMQConfiguration {
 	
 	private static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 	private static final String STUDY_NAME_UPDATE = "study_name_update";
-	private static final String SUBJECT_NAME_UPDATE = "subject_name_change";
+	private static final String SUBJECT_NAME_UPDATE = "subject_name_update";
 
     
 //	@Bean

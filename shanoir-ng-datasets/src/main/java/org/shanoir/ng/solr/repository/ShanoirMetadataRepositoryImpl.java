@@ -43,23 +43,21 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 	@Override
 	public List<ShanoirMetadata> findAllAsSolrDoc() {
 		List<ShanoirMetadata> result = new ArrayList<>();
-		Query mrQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, "
-				+ "mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, "
-				+ "e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, d.study_id as studyId "
-				+ "from dataset d, dataset_metadata dm, dataset_acquisition da, examination e, study st, subject su, "
-				+ "mr_dataset md left join mr_dataset_metadata mdm "
-				+ "on md.updated_mr_metadata_id = mdm.id where d.updated_metadata_id = dm.id and da.id = d.dataset_acquisition_id "
-				+ "and da.examination_id = e.id and md.id = d.id and st.id = d.study_id and su.id = d.subject_id;", "SolrResult");
-		Query petQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, "
-				+ "null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, "
-				+ "su.name as subjectName, st.name as studyName, d.study_id as studyId from dataset d, dataset_metadata dm, "
-				+ "dataset_acquisition da, examination e, study st, subject su, pet_dataset pd where d.updated_metadata_id = dm.id "
-				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and pd.id = d.id and st.id = d.study_id and su.id = d.subject_id;", "SolrResult");
-		Query ctQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, "
-				+ "null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, "
-				+ "su.name as subjectName, st.name as studyName, d.study_id as studyId from dataset d, dataset_metadata dm, "
-				+ "dataset_acquisition da, examination e, study st, subject su, ct_dataset cd where d.updated_metadata_id = dm.id "
-				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and cd.id = d.id and st.id = d.study_id and su.id = d.subject_id;", "SolrResult");
+		Query mrQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, "
+				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
+				+ "d.study_id as studyId from dataset d LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, "
+				+ "dataset_acquisition da, examination e, mr_dataset md LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id "
+				+ "where d.updated_metadata_id = dm.id and da.id = d.dataset_acquisition_id and da.examination_id = e.id and md.id = d.id;", "SolrResult");
+		Query petQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, "
+				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
+				+ "d.study_id as studyId from dataset d LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, "
+				+ "dataset_metadata dm, dataset_acquisition da, examination e, pet_dataset pd where d.updated_metadata_id = dm.id "
+				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and pd.id = d.id;", "SolrResult");
+		Query ctQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, "
+				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
+				+ "d.study_id as studyId from dataset d  LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, "
+				+ "dataset_acquisition da, examination e, ct_dataset cd where d.updated_metadata_id = dm.id "
+				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and cd.id = d.id;", "SolrResult");
 				
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());

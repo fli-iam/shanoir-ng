@@ -22,11 +22,18 @@ package org.shanoir.ng.solr.service;
 import java.util.Iterator;
 import java.util.List;
 
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +51,9 @@ public class SolrServiceImpl implements SolrService {
 	
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
+	
+	@Autowired
+	private StudyUserRightsRepository rightsRepository;
 	
 	@Transactional
 	@Override
@@ -72,19 +82,38 @@ public class SolrServiceImpl implements SolrService {
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
 			ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-					shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), shanoirMetadata.getDatasetCreationDate(),
-					shanoirMetadata.getExaminationComment(), shanoirMetadata.getExaminationDate(),
+					shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+					shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
 					shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
 			addToIndex(doc);
 		}
 	}
 	
-//	public Iterable<ShanoirSolrDocument> getDocuments() {
-//		return repository.findAll();
-//	}
-//	
-//	public List<ShanoirSolrDocument> findDocumentByDatasetName(String datasetName) {
-//		return repository.findByDatasetName(datasetName);
-//	}
+	@Transactional
+	@Override
+	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
+		SolrResultPage<ShanoirSolrDocument> result = null; 
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findAllDocsAndFacets(pageable);		
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			result = solrRepository.findByStudyIdIn(studyIds, pageable);
+		}
+		return result;
+	}
+	
+	@Transactional
+	@Override
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet,Pageable pageable) {
+		SolrResultPage<ShanoirSolrDocument> result = null; 
+		
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findByFacetCriteria(facet, pageable);
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
+		}
+		return result;
+	}
 
 }

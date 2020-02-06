@@ -20,6 +20,7 @@ package org.shanoir.ng.shared.dateTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -32,6 +33,11 @@ public class DateTimeUtils {
 	public static LocalDate dateToLocalDate(Date date) {
 		if (date == null) return null;
 		else return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+	
+	public static Date localDateToDate(LocalDate localDate) {
+		if (localDate == null) return null;
+		else return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 	}
 	
 	public static LocalDateTime dateToLocalDateTime(Date date) {
@@ -47,6 +53,17 @@ public class DateTimeUtils {
 		} else {
 			return null;
 		}	
+	}
+	
+	public static String localDateToSolrString(LocalDate localDate) {
+		if (localDate == null) return null;
+		else {
+			LocalDateTime ldt = localDate.atTime(0, 0, 0);
+			ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+			final DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
+			return zdt.format(dtf);
+//			return localDate.toString().concat("T00:00:00Z");
+		}
 	}
 
 }

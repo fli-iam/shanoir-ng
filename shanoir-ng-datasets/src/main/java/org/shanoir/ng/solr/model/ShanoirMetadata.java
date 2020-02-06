@@ -27,6 +27,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.SqlResultSetMapping;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
 /**
  * @author yyao
  *
@@ -53,10 +55,12 @@ public class ShanoirMetadata {
 	// T1, T2, Diff, etc..
 	private String datasetNature;
 	
+	@LocalDateAnnotations
 	private LocalDate datasetCreationDate;
 	
 	private String examinationComment;
 	
+	@LocalDateAnnotations
 	private LocalDate examinationDate;
 	
 	private String subjectName;

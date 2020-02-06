@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef, Input, OnInit } from "@angular/core";
+import { Component, forwardRef, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 @Component({
@@ -27,15 +27,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
         }]   
 })
 
-export class CheckboxListComponent implements ControlValueAccessor, OnInit{
+export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     onChange = (_: any) => {};
     onTouched = () => {};
     @Input() items: any[];
     selectedItems: any[] = [];
     selectAll: boolean = true;
-
-    ngOnInit() {
-        this.selectUnselectAll(true); // checked all by default
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.items && this.items !== undefined) {
+            // this.selectUnselectAll(false); // checked all by default
+        }
     }
 
     selectUnselectAll (isChecked: boolean) {
@@ -58,7 +60,7 @@ export class CheckboxListComponent implements ControlValueAccessor, OnInit{
     onToggle() {
         this.selectedItems = this.items.filter(item => item.checked).map(item => item.value);
         this.onChange(this.selectedItems);
-        console.log("this.selectedItems: ", this.selectedItems);
+        console.log('change selected items' , this.selectedItems)
     }
 
 }

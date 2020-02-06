@@ -55,6 +55,7 @@ export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/da
 
 // Solr http api
 export const BACKEND_API_SOLR_URL: string = BACKEND_API_DATASET_MS_URL + '/solr';
+export const BACKEND_API_SOLR_INDEX_URL: string = BACKEND_API_SOLR_URL + '/index';
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';

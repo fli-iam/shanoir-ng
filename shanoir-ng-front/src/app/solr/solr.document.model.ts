@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Page } from "../shared/components/table/pageable.model";
+
 export class SolrDocument {
     datasetId: string;
     datasetName: string;
@@ -23,4 +25,36 @@ export class SolrDocument {
     subjectName: string;
     studyName: string;
     studyId: string;
+}
+
+export class ShanoirSolrFacet {
+    studyName: string[];
+    subjectName: string[];
+    examinationComment: string[];
+    datasetName: string[];
+    datasetStartDate: Date;
+    datasetEndDate: Date;
+    datasetTypes: string[];
+    datasetNatures: string[];
+}
+
+export class FacetField {
+    field: string;
+    value: string;
+    valueCount: number;
+    checked: boolean;
+
+    constructor (facetField: FacetField) {
+        this.field = facetField.field;
+        this.value = facetField.value;
+        this.valueCount = facetField.valueCount;
+    }
+}
+
+export class FacetResultPage {
+    public content: FacetField[];
+}
+
+export class SolrResultPage extends Page<SolrDocument>{
+    public facetResultPages: FacetResultPage[];
 }

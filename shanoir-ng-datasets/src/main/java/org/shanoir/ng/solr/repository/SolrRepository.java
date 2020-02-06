@@ -19,27 +19,26 @@
  */
 package org.shanoir.ng.solr.repository;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.data.solr.repository.Facet;
+import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 
 /**
  * @author yyao
  *
  */
-public interface SolrRepository extends SolrCrudRepository<ShanoirSolrDocument, Long> {
+public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository<ShanoirSolrDocument, Long> {
 	
-	/**
-	 * @param datasetName
-	 * @return
-	 */
-	List<ShanoirSolrDocument> findByDatasetName(String datasetName);
-		
-//	@Query("id:*?0* OR name:*?0*")
-//  public Page<ShanoirDocument> findByCustomQuery(String searchTerm, Pageable pageable);
-//
-//  @Query(name = "Product.findByNamedQuery")
-//  public Page<ShanoirDocument> findByNamedQuery(String searchTerm, Pageable pageable);
+	@Query(value = "*:*")
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str"})
+	SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
+	
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str"})
+	SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 
 }

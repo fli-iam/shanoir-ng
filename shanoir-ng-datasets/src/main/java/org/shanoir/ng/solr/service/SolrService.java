@@ -20,6 +20,9 @@
 package org.shanoir.ng.solr.service;
 
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -36,5 +39,9 @@ public interface SolrService {
 	void indexAll();
 	
 	void deleteAll();
+	
+	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
+
+	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable);
 
 }

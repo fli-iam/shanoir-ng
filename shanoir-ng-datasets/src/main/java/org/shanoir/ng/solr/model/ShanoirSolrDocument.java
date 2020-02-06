@@ -19,7 +19,9 @@
  */
 package org.shanoir.ng.solr.model;
 
-import java.time.LocalDate;
+import java.util.Date;
+
+import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
@@ -32,35 +34,45 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
 public class ShanoirSolrDocument {
 	
 	@Id
+	@Field
 	@Indexed(name="datasetId", type="Long")
 	private	Long datasetId;
 	
+	@Field
 	@Indexed(name="datasetName", type="string")
 	private	String datasetName;
 	
 	// DatasetModalityType: MR, CT, PET etc..
+	@Field
 	@Indexed(name="datasetType", type="string")
 	private	String datasetType;
 	
 	// T1, T2, Diff, etc..
+	@Field
 	@Indexed(name="datasetNature", type="string")
 	private String datasetNature;
 	
+	@Field
 	@Indexed(name="datasetCreationDate", type="Date")
-	private LocalDate datasetCreationDate;
+	private Date datasetCreationDate;
 	
+	@Field
 	@Indexed(name="examinationComment", type="string")
 	private String examinationComment;
 	
+	@Field
 	@Indexed(name="examinationDate", type="Date") 
-	private LocalDate examinationDate;
+	private Date examinationDate;
 	
+	@Field
 	@Indexed(name="subjectName", type="string")
 	private String subjectName;
 	
+	@Field
 	@Indexed(name="studyName", type="string")
 	private String studyName;
 	
+	@Field
 	@Indexed(name="studyId", type="Long")
 	private Long studyId;
 	
@@ -69,7 +81,7 @@ public class ShanoirSolrDocument {
 	}
 	
 	public ShanoirSolrDocument (Long datasetId, String datasetName, String datasetType, String datasetNature,
-			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
+			Date datasetCreationDate, String examinationComment, Date examinationDate,
 			String subjectName, String studyName, Long studyId) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
@@ -142,14 +154,14 @@ public class ShanoirSolrDocument {
 	/**
 	 * @return the datasetCreationDate
 	 */
-	public LocalDate getDatasetCreationDate() {
+	public Date getDatasetCreationDate() {
 		return datasetCreationDate;
 	}
 
 	/**
 	 * @param datasetCreationDate the datasetCreationDate to set
 	 */
-	public void setDatasetCreationDate(LocalDate datasetCreationDate) {
+	public void setDatasetCreationDate(Date datasetCreationDate) {
 		this.datasetCreationDate = datasetCreationDate;
 	}
 
@@ -170,14 +182,14 @@ public class ShanoirSolrDocument {
 	/**
 	 * @return the examinationDate
 	 */
-	public LocalDate getExaminationDate() {
+	public Date getExaminationDate() {
 		return examinationDate;
 	}
 
 	/**
 	 * @param examinationDate the examinationDate to set
 	 */
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
