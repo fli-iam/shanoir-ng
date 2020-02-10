@@ -23,8 +23,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
     
-    <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
-        A Brainvision zip archive is required!
+    <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
+        {{errorMessage}}
     </label>
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

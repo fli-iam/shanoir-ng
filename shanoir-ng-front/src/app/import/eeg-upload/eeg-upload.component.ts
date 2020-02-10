@@ -33,8 +33,9 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 export class EegUploadComponent {
     
     private archiveStatus: Status = 'none';
-    private extensionError: boolean;
+    protected extensionError: boolean;
     private modality: string;
+    protected errorMessage: string;
 
 
     constructor(
@@ -77,6 +78,9 @@ export class EegUploadComponent {
                 this.setArchiveStatus('uploaded');
             }).catch(error => {
                 this.setArchiveStatus('error');
+                if (error && error.error && error.error.message) {
+                        this.errorMessage = error.error.message;
+                    }
             });
     }
 
