@@ -34,6 +34,12 @@ public class EegImportJob {
 	@JsonProperty("datasets")
 	List<EegDataset> datasets;
 
+	@JsonProperty("subjectName")
+	private String subjectName;
+
+	@JsonProperty("studyName")
+	private String studyName;
+
 	public List<EegDataset> getDatasets() {
 		return datasets;
 	}
@@ -80,5 +86,21 @@ public class EegImportJob {
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 }

@@ -96,6 +96,8 @@ export class FinishEegImportComponent {
             importJob.datasets.push(datasetToSet);
         }
         importJob.subjectId = this.context.subject.id;
+        importJob.subjectName = this.context.subject.name;
+        importJob.studyName = this.context.study.name;
         importJob.workFolder = this.importJob.workFolder;
         importJob.examinationId = this.context.examination.id;
         importJob.frontStudyId = this.context.study.id;

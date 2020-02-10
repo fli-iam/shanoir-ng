@@ -1,18 +1,24 @@
 import time
 import os
 import argparse
+
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException        
-import preclinical
-import users
-import core_entities
-import import_dicom
-import shanoir_util
-import selenium_util
-import users
+from selenium.common.exceptions import NoSuchElementException
+
+from core.users.users import test_shanoir_ng_users
+from preclinical.entities.therapy import test_preclinical_therapy
+from preclinical.entities.anesthetic import test_preclinical_anesthetic
+from preclinical.entities.pathology import test_preclinical_pathology
+from core.entities.coil import test_core_coil
+from core.entities.center import test_core_center
+from core.entities.acquisition_equipement import test_core_acquisition_equipement
+from core.entities.study import test_core_study
+from preclinical.imports.import_bruker import test_shanoir_import_dicom
+from utils.shanoir_util import *
+from utils.selenium_util import *
 import random
 import traceback
 
@@ -62,30 +68,35 @@ def start_selenium():
 if __name__ == "__main__":
     try:
         start_selenium()
-        selenium_utility = selenium_util.Selenium_util(driver)
-        shanoir_utility = shanoir_util.Shanoir_util(driver, selenium_utility)
+        selenium_utility = Selenium_util(driver)
+        shanoir_utility = Shanoir_util(driver, selenium_utility)
         if args.shanoir in ["users", "all"]:
-            users.test_shanoir_ng_users(driver, shanoir_utility, selenium_utility, args.user, args.password)
+            test_shanoir_ng_users(driver, shanoir_utility, selenium_utility, args.user, args.password)
             shanoir_utility.logout()
-            print('Success!')
+            print('Users: Success!')
         
         if args.shanoir in ["preclinical", "all"]:
             shanoir_utility.login(args.user, args.password)
-            preclinical.test_shanoir_preclinical(driver, shanoir_utility)
+            test_preclinical_anesthetic(driver, shanoir_utility)
+            test_preclinical_therapy(driver, shanoir_utility)
+            test_preclinical_pathology(driver, shanoir_utility)
             shanoir_utility.logout()
-            print('Success!')
+            print('Preclinical entities: Success!')
         
         if args.shanoir in ["entities", "all"]:
             shanoir_utility.login(args.user, args.password)
-            core_entities.test_shanoir_core_entities(driver, shanoir_utility)
+#             test_core_acquisition_equipement(driver, shanoir_utility)
+#             test_core_center(driver, shanoir_utility)
+#             test_core_coil(driver, shanoir_utility)
+            test_core_study(driver, shanoir_utility)
             shanoir_utility.logout()
-            print('Success!')
+            print('Core entities: Success!')
         
         if args.shanoir in ["import", "all"]:
             shanoir_utility.login(args.user, args.password)
-            import_dicom.test_shanoir_import_dicom(driver, shanoir_utility, selenium_utility)
+            test_shanoir_import_dicom(driver, shanoir_utility, selenium_utility)
             shanoir_utility.logout()
-            print('Success!')
+            print('Preclinical import: Success!')
             
     except Exception as e:
         print(traceback.format_exc(e))

@@ -126,12 +126,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
-    private exportBIDS(exam: Examination) {
-        let studyName: string;
-        this.bidsLoading = true;
-        this.datasetService.exportBIDSByExaminationId(exam.id, exam.subject.name, exam.study.name).then(() => this.bidsLoading = false);
-    }
-
     private onStudyChange() {
         this.getSubjects();
     }

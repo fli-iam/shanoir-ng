@@ -59,31 +59,6 @@ export class DatasetService extends EntityService<Dataset> {
         ).map(response => response);
     }
 
-    exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
-        if (!subjectId) throw Error('subject id is required');
-        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId 
-            + '/subjectName/' + subjectName + '/studyName/' + studyName, 
-            { observe: 'response', responseType: 'blob' }
-        ).subscribe(response => {this.downloadIntoBrowser(response);});
-    }
-
-    exportBIDSByStudyId(studyId: number, studyName: string): Promise<void> {
-        if (!studyId) throw Error('study id is required');
-        return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/studyId/' + studyId 
-            + '/studyName/' + studyName,
-            { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
-    }
-
-    exportBIDSByExaminationId(examinationId: number, subjectName: string, studyName: string): Promise<void> {
-        if (!examinationId) throw Error('examination id is required');
-        return this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/examinationId/' + examinationId
-            + '/subjectName/' + subjectName
-            + '/studyName/' + studyName,
-            { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
-    }
-
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');

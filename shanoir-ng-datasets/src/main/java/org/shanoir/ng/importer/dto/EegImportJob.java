@@ -29,6 +29,14 @@ public class EegImportJob {
 	@JsonProperty("subjectId")
 	private Long subjectId;
 
+	/** Corresponding subject name. */
+	@JsonProperty("subjectName")
+	private String subjectName;
+
+	/** Corresponding study name. */
+	@JsonProperty("studyName")
+	private String studyName;
+
 	/** Not mandatyory, acquisition equipement. */
 	@JsonProperty("frontAcquisitionEquipmentId")
 	private Long frontAcquisitionEquipmentId;
@@ -84,4 +92,21 @@ public class EegImportJob {
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
 	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+	
 }

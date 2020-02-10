@@ -127,6 +127,15 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         );
     }
     
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: false, 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+    
     deleteExamination(examinationId: number) {
         // Delete examination and refresh page
         this.examAnestheticsService.getExaminationAnesthetics(examinationId)

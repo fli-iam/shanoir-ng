@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -27,6 +29,7 @@ import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
@@ -64,8 +67,11 @@ public class ImporterServiceTest {
 	@MockBean
 	private DicomPersisterService dicomPersisterService;
 
+	@MockBean
+	private BIDSService bidsService;
+
 	@Test
-	public void testCreateEegDataset() {
+	public void testCreateEegDataset() throws IOException {
 		// Create a complete import job with some files and channels and events...
 		EegImportJob importJob = new EegImportJob();
 		EegDatasetDTO dataset = new EegDatasetDTO();
@@ -94,8 +100,11 @@ public class ImporterServiceTest {
 		importJob.setFrontStudyId(Long.valueOf(1));
 		importJob.setExaminationId(Long.valueOf(1));
 		importJob.setFrontAcquisitionEquipmentId(Long.valueOf(1));
+		importJob.setSubjectName("What about us");
 		dataset.setName("Charles Trenet");
 		importJob.setWorkFolder("Julien Clerc");
+		importJob.setSubjectName("subjName");
+		importJob.setStudyName("studname");
 		
 		service.createEegDataset(importJob);
 		ArgumentCaptor<DatasetAcquisition> datasetAcquisitionCapturer = ArgumentCaptor.forClass(DatasetAcquisition.class);
@@ -114,6 +123,9 @@ public class ImporterServiceTest {
 		assertEquals(1, ds.getChannelCount());
 		assertEquals(ds.getName(), dataset.getName());
 		assertEquals(DatasetExpressionFormat.EEG, ds.getDatasetExpressions().get(0).getDatasetExpressionFormat());
+		
+		// Check that we save bids folder too
+		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 
 		DatasetMetadata metadata = ds.getOriginMetadata();
 		assertNotNull(metadata);
@@ -121,7 +133,7 @@ public class ImporterServiceTest {
 	}
 
 	@Test
-	public void createAllDatasetAcquisition() {
+	public void createAllDatasetAcquisition() throws IOException {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();
 		Patient patient = new Patient();
@@ -164,6 +176,7 @@ public class ImporterServiceTest {
 		// Check what we save at the end
 		verify(datasetAcquisitionRepository).save(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
+		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 
 		assertNotNull(datasetAcq);
 		

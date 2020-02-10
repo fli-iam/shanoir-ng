@@ -29,6 +29,7 @@ import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -72,6 +73,9 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
+
+	@MockBean
+	private BIDSService bidsService;
 
 	@Before
 	public void setup() throws ShanoirException {

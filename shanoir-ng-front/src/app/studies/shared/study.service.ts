@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
@@ -62,4 +63,23 @@ export class StudyService extends EntityService<Study> {
             }).map(study => study.id);
         });
     }
+
+    exportBIDSByStudyId(studyId: number, studyName: string): Promise<void> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId 
+            + '/studyName/' + studyName,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+   
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
 }

@@ -24,6 +24,8 @@ export class EegImportJob {
     frontAcquisitionEquipmentId: number;
     datasets: EegDataset[];
     coordinatesSystem: String;
+    subjectName: String;
+    studyName: String;
 }
 
 export class EquipmentEeg {

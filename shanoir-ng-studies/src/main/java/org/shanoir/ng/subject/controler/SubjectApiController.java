@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -51,10 +52,15 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 
+	@Autowired
+	private StudyBIDSService bidsService;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
+			bidsService.deleteSubjectBids(subjectId);
+			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -106,6 +112,8 @@ public class SubjectApiController implements SubjectApi {
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
 		try {
+			// Update subject BIDS
+			bidsService.updateSubjectBids(subjectId, subject);
 			subjectService.update(subject);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {

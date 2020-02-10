@@ -50,6 +50,12 @@ public class ImportJob {
     
     @JsonProperty("archive")
     private String archive;
+
+	@JsonProperty("subjectName")
+	private String subjectName;
+
+	@JsonProperty("studyName")
+	private String studyName;
     
 	public String getArchive() {
 		return archive;
@@ -121,5 +127,21 @@ public class ImportJob {
 
 	public void setWorkFolder(final String workFolder) {
 		this.workFolder = workFolder;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 }

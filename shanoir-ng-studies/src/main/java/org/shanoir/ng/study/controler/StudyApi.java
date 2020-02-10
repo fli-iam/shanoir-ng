@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
@@ -23,10 +24,13 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -151,4 +155,17 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
+    @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/exportBIDS/studyId/{studyId}/studyName/{studyName}",
+        produces = { "application/zip" })
+    ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+	
 }

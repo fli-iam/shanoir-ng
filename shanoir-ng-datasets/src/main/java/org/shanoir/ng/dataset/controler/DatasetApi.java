@@ -114,45 +114,10 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii, egg", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, IOException;
     
-    @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(
-    		@ApiParam(value = "id of the subject", required=true) @PathVariable("subjectId") Long subjectId,
-    		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
-
-    @ApiOperation(value = "", nickname = "exportBIDSByExaminationId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given Examination id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/examinationId/{examinationId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSByExaminationId(
-    		@ApiParam(value = "id of the examination", required=true) @PathVariable("examinationId") Long examinationId,
-    		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
-
-    @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/studyId/{studyId}/studyName/{studyName}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
-	
+    /**
+     * @ApiOperation(value="Telecharger un set de données spécifiques")
+     * 
+     * @ApiOperation(value="Requêter des datasets à partir de critères spécifiques")
+     */
+    
 }

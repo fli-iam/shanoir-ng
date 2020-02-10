@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
 import org.shanoir.ng.subject.dto.SubjectDTO;
@@ -82,6 +83,9 @@ public class SubjectApiControllerTest {
 	
 	@MockBean
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
+	
+	@MockBean
+	StudyBIDSService bidsService;
 
 	@Before
 	public void setup() throws EntityNotFoundException {

@@ -27,6 +27,7 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -66,6 +67,9 @@ public class ExaminationApiController implements ExaminationApi {
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
 
+	@Autowired
+	BIDSService bidsService;
+
 	@org.springframework.beans.factory.annotation.Autowired
 	public ExaminationApiController(final HttpServletRequest request) {
 		this.request = request;
@@ -77,6 +81,8 @@ public class ExaminationApiController implements ExaminationApi {
 			throws RestServiceException {
 		
 		try {
+			// delete bids folder
+			bidsService.deleteExam(examinationId);
 			// Check if user rights needed
 			examinationService.deleteById(examinationId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -150,7 +156,7 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
-		
+		// QUESTION: is it authorized ?
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));

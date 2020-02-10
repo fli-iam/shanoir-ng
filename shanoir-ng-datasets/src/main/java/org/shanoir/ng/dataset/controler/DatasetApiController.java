@@ -45,10 +45,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.BIDSService;
-import org.shanoir.ng.importer.dto.Subject;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -84,10 +81,6 @@ public class DatasetApiController implements DatasetApi {
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-	private static final String SUB_PREFIX = "sub-";
-
-	private static final String SES_PREFIX = "ses-";
-
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
 	@Value("${datasets-data}")
@@ -104,9 +97,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private DatasetService datasetService;
-
-	@Autowired
-	private ExaminationService examinationService;
 
 	private final HttpServletRequest request;
 
@@ -129,6 +119,8 @@ public class DatasetApiController implements DatasetApi {
 					throws RestServiceException {
 
 		try {
+			Dataset dataset = datasetService.findById(datasetId);
+			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -303,126 +295,6 @@ public class DatasetApiController implements DatasetApi {
 				});
 			}
 			zos.finish();
-		}
-	}
-
-	@Override
-	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") final Long subjectId,
-			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") final String subjectName,
-			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, IOException {
-		final List<Examination> examinationList = examinationService.findBySubjectId(subjectId);
-		if (examinationList.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Examination found of subject Id.", null));
-		} else {
-			// Create an adapted subject
-			Subject subject = new Subject();
-			subject.setId(subjectId);
-			subject.setName(subjectName);
-			
-			// Export files as bids
-			File workFolder = bidsService.exportAsBids(subject, studyName, null);
-
-			// Create zip file
-			File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
-			zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
-
-			// Try to determine file's content type
-			String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-
-			byte[] data = Files.readAllBytes(zipFile.toPath());
-			ByteArrayResource resource = new ByteArrayResource(data);
-
-			return ResponseEntity.ok()
-					// Content-Disposition
-					.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
-					// Content-Type
-					.contentType(MediaType.parseMediaType(contentType)) //
-					// Content-Length
-					.contentLength(data.length) //
-					.body(resource);
-		}
-	}
-
-	@Override
-	public ResponseEntity<ByteArrayResource> exportBIDSByExaminationId(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
-			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") final String subjectName,
-			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, IOException {
-		// Get examination from ID
-		Examination exam = examinationService.findById(examinationId);
-
-		// Export files as bids
-		File workFolder = bidsService.exportAsBids(exam, null, studyName, subjectName);
-
-		// Create zip file
-		File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
-		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
-
-		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-
-		byte[] data = Files.readAllBytes(zipFile.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		return ResponseEntity.ok()
-				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
-				// Content-Type
-				.contentType(MediaType.parseMediaType(contentType)) //
-				// Content-Length
-				.contentLength(data.length) //
-				.body(resource);
-	}
-
-	@Override
-	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") final Long studyId,
-			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") final String studyName)
-					throws RestServiceException, IOException {
-		// Export Study files as BIDS
-		File workFolder = bidsService.exportAsBids(studyId, studyName);
-
-		// Create zip file
-		File zipFile = new File(workFolder.getAbsolutePath() + ZIP);
-		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
-
-		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-
-		byte[] data = Files.readAllBytes(zipFile.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		return ResponseEntity.ok()
-				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
-				// Content-Type
-				.contentType(MediaType.parseMediaType(contentType)) //
-				// Content-Length
-				.contentLength(data.length) //
-				.body(resource);
-	}
-
-	/**
-	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-	 * @param urls
-	 * @param workFolder
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-			final String sesId, final String modalityLabel) throws IOException {
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
-			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-			destFolder.mkdirs();
-			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf('.') + 1);
-			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-			Files.copy(srcFile.toPath(), destFile.toPath());
 		}
 	}
 

@@ -101,6 +101,8 @@ export class BrukerFinishImportComponent {
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
+            importJob.subjectName = this.context.subject.name;
+            importJob.studyName = this.context.study.name;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
             importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;

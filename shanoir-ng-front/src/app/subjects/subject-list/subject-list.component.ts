@@ -67,22 +67,12 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
             { headerName: "Manual HD", field: "manualHemisphericDominance"},
             { headerName: "Language HD", field: "languageHemisphericDominance"},
             { headerName: "Imaged object category", field: "imagedObjectCategory"},
-            { headerName: "Personal Comments", field: ""},
-            { headerName: "BIDS", width: "63px", type: "button", awesome: "fa-download", action: item => this.exportBIDS(item) }
+            { headerName: "Personal Comments", field: ""}
         ];
     }
 
     getCustomActionsDefs(): any[] {
         return [];
-    }
-
-    private exportBIDS(subject: Subject) {
-        let studyName: string;
-        if (subject.subjectStudyList[0]) {
-            // TODO: for export BIDS of one subject, the name of his first study is used for the moment..
-            studyName = subject.subjectStudyList[0].study.name;
-        }
-        this.datasetService.exportBIDSBySubjectId(subject.id, subject.name, studyName);
     }
 
     getOptions() {
