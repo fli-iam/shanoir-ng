@@ -406,10 +406,11 @@ public class BrainVisionReader {
                 	 */
                 	Channel channelToGet = channels.get(channelIndex - 1);
                 	// Split by spaces
-                	String[] tmp = zeile.split("\\s+");
-                	channelToGet.setLowCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
-                	channelToGet.setHighCutoff("DC".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
-                	channelToGet.setNotch("Off".equals(tmp[7]) ? 0 : Integer.parseInt(tmp[7]));
+                	// Consider that a channel name can contain a space, split with 2+ spaces (and hope that the separator will always be 2+ spaces..
+                	String[] tmp = zeile.split("\\s\\s+");
+                	channelToGet.setLowCutoff("DC".equals(tmp[4]) ? 0 : Integer.parseInt(tmp[4]));
+                	channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
+                	channelToGet.setNotch("Off".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
                 	channelIndex ++;
                 }
                 else if (zeile.startsWith("[Coordinates]")) {

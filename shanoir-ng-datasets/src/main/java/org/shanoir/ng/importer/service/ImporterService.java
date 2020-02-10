@@ -275,6 +275,12 @@ public class ImporterService {
 			for (Channel chan : datasetDto.getChannels()) {
 				chan.setDataset(datasetToCreate);
 				chan.setReferenceType(ChannelType.EEG);
+				// Parse channel name to get its type
+				for (ChannelType type : ChannelType.values()) {
+					if (chan.getName().contains(type.name())) {
+						chan.setReferenceType(type);
+					}
+				}
 			}
 			for (Event event : datasetDto.getEvents()) {
 				event.setDataset(datasetToCreate);
