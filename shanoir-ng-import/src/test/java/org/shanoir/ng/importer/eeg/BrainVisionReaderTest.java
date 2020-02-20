@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
 import org.shanoir.ng.importer.model.Channel;
 import org.shanoir.ng.importer.model.Event;
+import org.shanoir.ng.shared.exception.ShanoirImportException;
 
 /**
  * Test class for Brainvision reader.
@@ -21,17 +22,17 @@ import org.shanoir.ng.importer.model.Event;
 public class BrainVisionReaderTest {
 
 	BrainVisionReader reader;
-	File vhdrFile = new File("./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.vhdr");;
+	File vhdrFile = new File("./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.vhdr");
 
 	@Test
-	public void testNoFile() {
+	public void testNoFile() throws ShanoirImportException {
 		reader = new BrainVisionReader(null);
 		assertNull(reader.getEegFile());
 		assertNull(reader.getChannels());
 	}
 
 	@Test
-	public void testReadChannels() {
+	public void testReadChannels() throws ShanoirImportException {
 		assertNotNull(vhdrFile);
 		assertTrue(vhdrFile.exists());
 		

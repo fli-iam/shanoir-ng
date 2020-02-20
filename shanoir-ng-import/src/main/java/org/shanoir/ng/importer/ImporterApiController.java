@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -78,6 +79,8 @@ import io.swagger.annotations.ApiParam;
  */
 @Controller
 public class ImporterApiController implements ImporterApi {
+
+	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
 	private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
 
@@ -153,7 +156,7 @@ public class ImporterApiController implements ImporterApi {
 		}
 		if (!isZipFile(dicomZipFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Wrong content type of file upload, .zip required.", null));
+					WRONG_CONTENT_FILE_UPLOAD, null));
 		}
 		try {
 			/**
@@ -373,7 +376,7 @@ public class ImporterApiController implements ImporterApi {
 	private ResponseEntity<ImportJob> importDicomZipFile(final File dicomZipFile) throws RestServiceException {
 		if (!isZipFileFromFile(dicomZipFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Wrong content type of file upload, .zip required.", null));
+					WRONG_CONTENT_FILE_UPLOAD, null));
 		}
 		try {
 			LOG.info("importDicomZipFile step1 unzip file ");
@@ -489,7 +492,7 @@ public class ImporterApiController implements ImporterApi {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 			}
 			if (!isZipFile(eegFile)) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip or .edf required.", null));
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),WRONG_CONTENT_FILE_UPLOAD, null));
 			}
 			/**
 			 * 1. STEP: Handle file management.
@@ -537,7 +540,7 @@ public class ImporterApiController implements ImporterApi {
 				// read .edf files
 				readEdfFiles(edfMatchingFiles, dataFileDir, datasets);
 			} else {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr or .edf file.", null));
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr or .edf file."));
 			}
 
 			importJob.setDatasets(datasets);
@@ -545,6 +548,8 @@ public class ImporterApiController implements ImporterApi {
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
+		} catch (ShanoirImportException e) {
+			throw new RestServiceException(e, new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
 		}
 	}
 
@@ -553,9 +558,9 @@ public class ImporterApiController implements ImporterApi {
 	 * @param datasets the list of datasets to import
 	 * @param dataFileDir the file directory where we are working
 	 * @param edfMatchingFiles the list of .edf files
-	 * @throws IOException when parsing fails
+	 * @throws ShanoirImportException when parsing fails
 	 */
-	private void readEdfFiles(final File[] edfMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws IOException {
+	private void readEdfFiles(final File[] edfMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws ShanoirImportException {
 		for (File edfFile : edfMatchingFiles) {
 			
 			// Parse the file
@@ -620,6 +625,8 @@ public class ImporterApiController implements ImporterApi {
 				}
 				dataset.setFiles(files);
 				datasets.add(dataset);
+			} catch (IOException e) {
+				throw new ShanoirImportException("Error while parsing file. Please contact an amdinistrator", e);
 			}
 		}
 	}
@@ -630,9 +637,9 @@ public class ImporterApiController implements ImporterApi {
 	 * @param bvMatchingFiles  the list of vhdr files
 	 * @param datasets the list of datasets to import
 	 * @return a list of datasets generated from the informations of the .vhdr files
-	 * @throws IOException when parsing fails
+	 * @throws ShanoirImportException when parsing fails
 	 */
-	private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws IOException {
+	private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir, final List<EegDataset> datasets) throws ShanoirImportException {
 		for (File vhdrFile : bvMatchingFiles) {
 			
 			// Parse the file
@@ -655,7 +662,11 @@ public class ImporterApiController implements ImporterApi {
 			dataset.setSamplingFrequency(samplingFrequency);
 			dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
 
-			bvr.close();
+			try {
+				bvr.close();
+			} catch (IOException e) {
+				throw new ShanoirImportException("Error while parsing file. Please contact an administrator.", e);
+			}
 			
 			// Get the list of file to save from reader
 			List<String> files = new ArrayList<>();
@@ -666,8 +677,13 @@ public class ImporterApiController implements ImporterApi {
 			        return name.startsWith(fileNameWithOutExt);
 			    }
 			});
-			for (File fi : filesToSave) {
-				files.add(fi.getCanonicalPath());
+			try {
+				for (File fi : filesToSave) {
+					files.add(fi.getCanonicalPath());
+
+				}
+			} catch (IOException e) {
+			throw new ShanoirImportException("Error while parsing file. Please contact an administrator.", e);
 			}
 			dataset.setFiles(files);
 			datasets.add(dataset);
