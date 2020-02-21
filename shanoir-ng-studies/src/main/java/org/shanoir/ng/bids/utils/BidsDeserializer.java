@@ -46,7 +46,7 @@ public class BidsDeserializer {
 	 * Deserialize recusrsively a BidsElement to create sub folders and files
 	 * @param studyElement
 	 */
-	private BidsElement deserializeElement(BidsFolder folderElement) {
+	public BidsElement deserializeElement(BidsFolder folderElement) {
 		File f = new File(folderElement.getPath());
 
 		if (f.listFiles() == null) {
