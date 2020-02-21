@@ -21,6 +21,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from './study-user-right.enum';
+import { BidsElement } from '../../bids/model/bidsElement.model';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
@@ -64,12 +65,17 @@ export class StudyService extends EntityService<Study> {
         });
     }
 
-    exportBIDSByStudyId(studyId: number, studyName: string): Promise<void> {
+    exportBIDSByStudyId(studyId: number): Promise<void> {
         if (!studyId) throw Error('study id is required');
-        return this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId 
-            + '/studyName/' + studyName,
+        return this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId,
             { observe: 'response', responseType: 'blob' }
         ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+    }
+
+    getBidsStructure(studyId: number): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_STUDY_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){

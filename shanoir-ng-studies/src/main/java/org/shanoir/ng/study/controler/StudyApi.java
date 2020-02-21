@@ -17,6 +17,7 @@ package org.shanoir.ng.study.controler;
 import java.io.IOException;
 import java.util.List;
 
+import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -162,10 +163,21 @@ public interface StudyApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/studyId/{studyId}/studyName/{studyName}",
+    @GetMapping(value = "/exportBIDS/studyId/{studyId}",
         produces = { "application/zip" })
     ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
-	
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+
+
+    @ApiOperation(value = "", nickname = "getBids", notes = "If exists, returns a BIDSElement structure corresponding to the given study id", response = BidsElement.class, tags={})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "BidsElement", response = BidsElement.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/bidsStructure/studyId/{studyId}",
+        produces = { "application/json" })
+    ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 }

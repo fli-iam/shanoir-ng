@@ -27,6 +27,10 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.shanoir.ng.bids.model.BidsElement;
+import org.shanoir.ng.bids.model.BidsFolder;
+import org.shanoir.ng.bids.service.StudyBIDSService;
+import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -39,7 +43,6 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
-import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -84,6 +87,9 @@ public class StudyApiController implements StudyApi {
 	
 	@Autowired
 	private StudyBIDSService bidsService;
+
+	@Autowired
+	private BidsDeserializer bidsDeserializer;
 
 	private final HttpServletRequest request;
 	
@@ -211,8 +217,7 @@ public class StudyApiController implements StudyApi {
 
     @Override
 	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException {
 		Study study = studyService.findById(studyId);
 		File workFolder = bidsService.exportAsBids(study);
 
@@ -236,6 +241,19 @@ public class StudyApiController implements StudyApi {
 				.contentLength(data.length) //
 				.body(resource);
 	}
+
+    @Override
+	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException {
+
+    	BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please contact an administrator.");
+    	Study study = studyService.findById(studyId);
+		if (study != null) {
+			studyBidsElement =  bidsDeserializer.deserialize(study);
+		}
+
+		return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+    }
 
 	/**
 	 * Zip

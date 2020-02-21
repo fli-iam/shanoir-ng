@@ -39,6 +39,7 @@ export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_S
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_BIDS_EXPORT_URL: string = BACKEND_API_STUDY_URL + '/exportBIDS';
+export const BACKEND_API_STUDY_BIDS_STRUCTURE_URL: string = BACKEND_API_STUDY_URL + '/bidsStructure';
 
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';

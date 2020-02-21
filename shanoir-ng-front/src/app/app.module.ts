@@ -99,6 +99,7 @@ import { TableSearchComponent } from './shared/components/table/search/search.co
 import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
+import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
@@ -242,6 +243,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         TableComponent,
         PagerComponent,
         TreeNodeComponent,
+        BidsTreeComponent,
         TooltipComponent,
         UserListComponent,
         InstrumentAssessmentComponent,

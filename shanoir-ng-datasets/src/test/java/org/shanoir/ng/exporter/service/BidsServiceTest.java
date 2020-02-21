@@ -109,7 +109,7 @@ public class BidsServiceTest {
 	}
 
 	@Test
-	public void testExportAsBids() {
+	public void testExportAsBids() throws IOException {
 		//GIVEN a study full of data
 
 		// Mock on rest template to get the list of subjects

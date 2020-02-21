@@ -36,6 +36,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { BidsElement } from '../../bids/model/bidsElement.model'
 
 
 @Component({
@@ -63,6 +64,8 @@ export class StudyComponent extends EntityComponent<Study> {
     
     protected readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
+    
+    protected bidsStructure: BidsElement[];
 
     constructor(
             private route: ActivatedRoute, 
@@ -78,6 +81,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
+        this.getBidsStructure(this.id);
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -352,7 +356,11 @@ export class StudyComponent extends EntityComponent<Study> {
     private exportBIDS(study: Study) {
         let studyName: string;
         this.bidsLoading = true;
-        this.studyService.exportBIDSByStudyId(study.id, study.name).then(() => this.bidsLoading = false);
+        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
+    }
+
+    getBidsStructure(id: number) {
+       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
     }
 
     // removeTimepoint(timepoint: Timepoint): void {

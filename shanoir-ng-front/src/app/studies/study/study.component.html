@@ -215,6 +215,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset *ngIf="mode == 'view'">
 				<study-tree [study]="study"></study-tree>
 			</fieldset>
+            <fieldset *ngIf="mode == 'view'">
+                <bids-tree [(list)]="bidsStructure"></bids-tree>
+            </fieldset>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"

@@ -1,7 +1,6 @@
-package org.shanoir.ng.study.service;
+package org.shanoir.ng.bids.service;
 
 import java.io.File;
-
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.stereotype.Service;
@@ -22,4 +21,6 @@ public interface StudyBIDSService {
 	void updateSubjectBids(Long subjectId, Subject subject);
 
 	File getStudyFolder(Study studyToCreate);
+
+	File createBidsFolderFromScratch(Study study);
 }

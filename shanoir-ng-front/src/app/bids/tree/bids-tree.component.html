@@ -1,0 +1,33 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+
+<h1>Bids</h1>
+
+<ng-template #recursiveList let-datas>
+    <node *ngFor="let item of datas" 
+    [label]="getFileName(item.path)" 
+    [dataRequest]="(item.elements && item.elements.length > 0) ? true : false" 
+    [nodeParams]="item" 
+    [deploy]="false"
+    [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
+    (openClick)="getDetail($event)">
+      <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements }"></ng-container>
+    </node>
+</ng-template>
+
+<node label="Bids" awesome="far fa-folder" [deploy]="true" >
+  <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
+</node>

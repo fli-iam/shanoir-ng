@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.bids.service.StudyBIDSService;
+import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -32,7 +34,6 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
-import org.shanoir.ng.study.service.StudyBIDSService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -89,6 +90,9 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private StudyBIDSService bidsService;
+	
+	@MockBean
+	private BidsDeserializer bidsDeserializer;
 	
 	@Before
 	public void setup() throws AccessDeniedException, EntityNotFoundException {

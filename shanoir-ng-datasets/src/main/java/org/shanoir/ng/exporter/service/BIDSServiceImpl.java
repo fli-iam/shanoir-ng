@@ -1,6 +1,10 @@
 package org.shanoir.ng.exporter.service;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -8,10 +12,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
@@ -59,6 +66,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Scope("prototype")
 public class BIDSServiceImpl implements BIDSService {
 	
+	private static final String TABULATION = "\t";
+
+	private static final String NEW_LINE = "\n";
+
+	private static final String SCANS_FILE_EXTENSION = "_scans.tsv";
+
 	private static final String SESSION_PREFIX = "ses-";
 
 	private static final String SUBJECT_PREFIX = "sub-";
@@ -88,9 +101,10 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Returns data from the study formatted as BIDS in a .zip file.
 	 * @param study the study we want to export as BIDS
 	 * @return data from the study formatted as BIDS in a .zip file.
+	 * @throws IOException
 	 */
 	@Override
-	public File exportAsBids(final Long studyId, final String studyName) {
+	public File exportAsBids(final Long studyId, final String studyName) throws IOException {
 		// Create source folder
 		File baseDir = createBaseBidsFolder(studyName, studyId);
 		
@@ -130,9 +144,9 @@ public class BIDSServiceImpl implements BIDSService {
 			// Get study folder
 			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
 			// Get subject folder
-			fileToDelete = getFileFromId(subjectId.toString(), fileToDelete);
+			File subjectFolder = getFileFromId(subjectId.toString(), fileToDelete);
 			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+			fileToDelete = getFileFromId(examId.toString(), subjectFolder);
 			// Get anat, eeg, [...] folder
 			if (dataset instanceof EegDataset) {
 				fileToDelete = getFileFromId("eeg", fileToDelete);
@@ -148,6 +162,9 @@ public class BIDSServiceImpl implements BIDSService {
 				        Path path = Paths.get(dataFile.getPath());
 				        Path fileName = path.getFileName();
 						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
+
+						// Delete from  scans.tsv searching by examination id / file name
+						deleteLineFromFile(getScansFile(subjectFolder), dataset.getDatasetAcquisition().getExamination().getId(), fileName.toString());
 					}
 				}
 			}
@@ -178,14 +195,53 @@ public class BIDSServiceImpl implements BIDSService {
 			fileToDelete = getFileFromId(exam.getStudyId().toString(), new File(bidsStorageDir));
 			// Get subject folder
 			fileToDelete = getFileFromId(exam.getSubjectId().toString(), fileToDelete);
+		
+			// delete from scans.tsv searching by examination ID
+			File scans = getScansFile(fileToDelete);
+			deleteLineFromFile(scans, examId, ".*");
+
 			// Get exam folder
 			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+
 
 			// Delete all the folder
 			FileUtils.deleteDirectory(fileToDelete);
 		} catch (IOException e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
 		}
+	}
+
+	/**
+	 * Deletes a line with given regex in the given file
+	 * @param fileNameRegex the regex to find the filename to delete
+	 * @param examId the examination ID
+	 * @throws IOException
+	 */
+	private void deleteLineFromFile(File scansFile, Long examId, String fileNameRegex) throws IOException {
+		File tempFile = new File(scansFile.getAbsolutePath() + "_tmp.tsv");
+
+		BufferedReader reader = new BufferedReader(new FileReader(scansFile));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+		String currentLine;
+
+		while((currentLine = reader.readLine()) != null) {
+		    // trim newline when comparing with lineToRemove
+		    String trimmedLine = currentLine.trim();
+		    String[] columns = trimmedLine.split(TABULATION);
+		    if(columns[2].equals(examId.toString())) {
+		    	// Check filename regex
+		        Pattern pattern = Pattern.compile(fileNameRegex);
+		        Matcher matcher = pattern.matcher(columns[0]);
+		    	if (matcher.find()) {
+					continue;
+				}
+			}
+		    writer.write(currentLine + System.getProperty("line.separator"));
+		}
+		writer.close();
+		reader.close();
+		tempFile.renameTo(scansFile);
 	}
 
 	/**
@@ -209,7 +265,7 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 
 		List<Subject> subjects = new ArrayList<>();
-		if (response != null) {
+		if (response != null && response.getBody() != null) {
 			if (HttpStatus.OK.equals(response.getStatusCode()) || HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
 				subjects = Arrays.asList(response.getBody());
 			} else {
@@ -255,8 +311,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param studyName the study name
 	 * @param workDir Subject BIDS directory where we are working. Will be created if null.
 	 * @return data from the subject formatted as BIDS in a .zip file.
+	 * @throws IOException
 	 */
-	private void exportAsBids(final Subject subject, final String studyName, final File workDir) {
+	private void exportAsBids(final Subject subject, final String studyName, final File workDir) throws IOException {
 		File subjDir = createSubjectFolder(subject.getName(), String.valueOf(subject.getId()), workDir);
 
 		// Get subject examinations and filter on the one with adapted study only
@@ -275,12 +332,14 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param baseDir the parent folder
 	 * @param subjectId the subject id
 	 * @return the newly created folder
+	 * @throws IOException
 	 */
-	private File createSubjectFolder(final String subjectName, final String subjectId, final File baseDir) {
+	private File createSubjectFolder(final String subjectName, final String subjectId, final File baseDir) throws IOException {
 		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + subjectId + "_" + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
+		getScansFile(subjectFolder);
 		return subjectFolder;
 	}
 
@@ -291,8 +350,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param studyName the study name
 	 * @param subjectName the subject name
 	 * @return data from the examination formatted as BIDS in a .zip file.
+	 * @throws IOException
 	 */
-	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) {
+	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) throws IOException {
 		File examDir = createExaminationFolder(examination, subjDir);
 
 		// Iterate over acquisitions/datasets
@@ -356,10 +416,37 @@ public class BIDSServiceImpl implements BIDSService {
 			try {
 				// Use link to avoid file duplication
 				Files.createLink(pathToGo, srcFile.toPath());
+				
+				// Add the file to the scans.tsv reference
+				File scansTsvFile = getScansFile(workDir.getParentFile());
+				StringBuilder buffer = new StringBuilder();
+				buffer.append(pathToGo.getFileName()).append(TABULATION)
+					.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
+					.append(dataset.getDatasetAcquisition().getExamination().getId())
+					.append(NEW_LINE);
+
+				// TODO: center_id / comment / weigth / other examination things ?
+				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
+
 			} catch (IOException exception) {
 				LOG.error("File could not be treated: {}", srcFile.getAbsolutePath(), exception);
 			}
 		}
+	}
+
+	private File getScansFile(File parentFile) throws IOException {
+		// What if we don't have subject name ?
+		File scansFile = new File(parentFile.getAbsolutePath() + File.separator + parentFile.getName() + SCANS_FILE_EXTENSION);
+		if (!scansFile.exists()) {
+			StringBuilder buffer = new StringBuilder();
+			buffer.append("filename").append(TABULATION)
+				.append("acq_time").append(TABULATION)
+				.append("session_id")
+				.append(NEW_LINE);
+			// TODO: center_id / comment / weigth / other examination things ?
+			Files.write(Paths.get(scansFile.getAbsolutePath()), buffer.toString().getBytes());
+		}
+		return scansFile;
 	}
 
 	/**
@@ -444,13 +531,13 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
 
 		for (Channel chan: dataset.getChannels()) {
-			buffer.append(chan.getName()).append("\t")
-			.append(chan.getReferenceType().name()).append("\t")
-			.append(chan.getReferenceUnits()).append("\t")
-			.append(dataset.getSamplingFrequency()).append("\t")
-			.append(chan.getLowCutoff() == 0 ? "n/a" : chan.getLowCutoff()).append("\t")
-			.append(chan.getHighCutoff() == 0 ? "n/a" : chan.getHighCutoff()).append("\t")
-			.append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append("\n");
+			buffer.append(chan.getName()).append(TABULATION)
+			.append(chan.getReferenceType().name()).append(TABULATION)
+			.append(chan.getReferenceUnits()).append(TABULATION)
+			.append(dataset.getSamplingFrequency()).append(TABULATION)
+			.append(chan.getLowCutoff() == 0 ? "n/a" : chan.getLowCutoff()).append(TABULATION)
+			.append(chan.getHighCutoff() == 0 ? "n/a" : chan.getHighCutoff()).append(TABULATION)
+			.append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
@@ -466,9 +553,9 @@ public class BIDSServiceImpl implements BIDSService {
 			float samplingFrequency = dataset.getSamplingFrequency();
 			float onset = sample / samplingFrequency;
 			int duration = event.getPoints();
-			buffer.append(onset).append("\t")
-			.append(duration == 0 ? "n/a" : String.valueOf(duration)).append("\t")
-			.append(sample).append("\n");
+			buffer.append(onset).append(TABULATION)
+			.append(duration == 0 ? "n/a" : String.valueOf(duration)).append(TABULATION)
+			.append(sample).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
@@ -485,10 +572,10 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer.append("name \t x \t y \t z \n");
 
 		for (Channel chan: dataset.getChannels()) {
-			buffer.append(chan.getName()).append("\t")
-			.append(chan.getX()).append("\t")
-			.append(chan.getY()).append("\t")
-			.append(chan.getZ()).append("\n");
+			buffer.append(chan.getName()).append(TABULATION)
+			.append(chan.getX()).append(TABULATION)
+			.append(chan.getY()).append(TABULATION)
+			.append(chan.getZ()).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		

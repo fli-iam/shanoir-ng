@@ -1,7 +1,13 @@
-package org.shanoir.ng.study.service;
+package org.shanoir.ng.bids.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -9,6 +15,10 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.subject.model.HemisphericDominance;
+import org.shanoir.ng.subject.model.ImagedObjectCategory;
+import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
@@ -23,7 +33,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
 @Service
 public class StudyBIDSServiceImpl implements StudyBIDSService {
@@ -32,6 +45,20 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 
 	private static final String SUBJECT_PREFIX = "sub-";
 
+	private static final String CSV_SEPARATOR = ",";
+	
+	private static final String CSV_SPLITTER = "\n";
+
+	private static final String[] CSV_PARTICIPANTS_HEADER = {
+			"participant_id",
+			"common_name",
+			"sex",
+			"birth_date",
+			"manualHemisphericDominance",
+			"languageHemisphericDominance",
+			"imagedObjectCategory"
+		};
+	
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(StudyBIDSService.class);
 
@@ -117,6 +144,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 			// Create it from scratch
 			bidsDir = createBidsFolderFromScratch(studyToExport);
 		}
+		createParticipantsFiles(bidsDir, studyToExport);
 		return bidsDir;
 	}
 
@@ -144,7 +172,8 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 		return new File(bidsStorageDir + File.separator + STUDY_PREFIX + study.getId() + '_' + study.getName());
 	}
 
-	protected File createBidsFolderFromScratch(Study studyToGenerate) {
+	@Override
+	public File createBidsFolderFromScratch(Study studyToGenerate) {
 		// Call datasets MS to create data
 		HttpEntity<Object> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
 		try {
@@ -165,7 +194,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 	public void deleteSubjectBids(Long subjectId) {
 		Subject oldsub = subjectService.findById(subjectId);
 
-		// Do nothing if we can't find the subject or if the name didn't change
+		// Do nothing if we can't find the subject
 		if (oldsub == null) {
 			return;
 		}
@@ -176,7 +205,11 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 					+ File.separator
 					+ SUBJECT_PREFIX + oldsub.getId() + "_" + oldsub.getName());
 			//Delete file
-			subjectFile.delete();
+			try {
+				FileUtils.deleteDirectory(subjectFile);
+			} catch (IOException e) {
+				LOG.error("Failed to delete file:{} : {}", subjectFile, e);
+			}
 		}
 	}
 
@@ -198,4 +231,72 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 		}
 	}
 
+	/**
+	 * Creates the participants.tsv and participants.json file from the study
+	 */
+	public void createParticipantsFiles(File parentFolder, Study study) {
+		File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
+		if (csvFile.exists()) {
+			// Recreate it everytime
+			FileUtils.deleteQuietly(csvFile);
+		}
+        StringBuilder buffer =  new StringBuilder();
+        
+        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
+        	buffer.append(columnHeader).append(CSV_SEPARATOR);
+        }
+        buffer.append(CSV_SPLITTER);
+        
+		for (SubjectStudy stubject : study.getSubjectStudyList()) {
+			Subject u = stubject.getSubject();
+			
+			// Write in the file
+			buffer.append(u.getIdentifier()).append(CSV_SEPARATOR)
+			 	  .append(u.getName()).append(CSV_SEPARATOR)
+			 	  .append(u.getSex()).append(CSV_SEPARATOR)
+			 	  .append(u.getBirthDate()).append(CSV_SEPARATOR)
+			 	  .append(u.getManualHemisphericDominance()).append(CSV_SEPARATOR)
+			 	  .append(u.getLanguageHemisphericDominance()).append(CSV_SEPARATOR)
+			 	  .append(u.getImagedObjectCategory()).append(CSV_SEPARATOR)
+			 	  .append(CSV_SPLITTER);
+		}
+
+		try {
+			Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
+		} catch (IOException e) {
+			LOG.error("Error while creating particpants.tsv file: {}", e);
+		}
+	}
+
+	public List<Subject> participantsDeserializer(File participantsTsv) throws IOException {
+		if (participantsTsv == null || !participantsTsv.exists()) {
+			return Collections.emptyList();
+		}
+		
+		// Get the CSV as String[] lines
+		CsvMapper mapper = new CsvMapper();
+		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(participantsTsv);
+		List<Subject> subjects = new ArrayList<>();
+
+		// Ignore header
+		it.next();
+		// Iterate over the lines to create new subjects
+		// TODO: add technical checks on mandatory fields (following ImagedObjectCategory value)
+		// Is there default values ?
+		while (it.hasNext()) {
+			Subject su = new Subject();
+			String[] row = it.next();
+			su.setIdentifier(row[0]);
+			su.setName(row[1]);
+			su.setSex("null".equals(row[2])? null : Sex.valueOf(row[2]));
+			su.setBirthDate("null".equals(row[3])? null : LocalDate.parse(row[3]));
+			su.setManualHemisphericDominance("null".equals(row[4])? null : HemisphericDominance.valueOf(row[4]));
+			su.setLanguageHemisphericDominance("null".equals(row[5])? null : HemisphericDominance.valueOf(row[5]));
+			su.setImagedObjectCategory("null".equals(row[6])? null : ImagedObjectCategory.valueOf(row[6]));
+			subjects.add(su);
+		}
+
+		return subjects;
+	}
 }
