@@ -200,6 +200,8 @@ public class BidsServiceTest {
 		assertTrue(examFile.exists());
 		File bidsDataFile = new File(examFile.getAbsolutePath() + "/eeg/test.test");
 		assertTrue(bidsDataFile.exists());
+		File scansFile = new File(subjectFile.getAbsolutePath() + File.separator + subjectFile.getName() + "_scans.tsv");
+		assertTrue(scansFile.exists());
 
 		// WHEN we delete a dataset
 		service.deleteDataset(ds2);
