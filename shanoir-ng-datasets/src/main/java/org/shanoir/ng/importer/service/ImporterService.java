@@ -50,6 +50,9 @@ import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.tasks.AsyncTask;
+import org.shanoir.ng.tasks.AsyncTaskService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +87,9 @@ public class ImporterService {
 	@Autowired
 	private BIDSService bidsService;
 
+	@Autowired
+	private AsyncTaskService taskService;
+
 	private ImportJob importJob;
 
 	private static final String SESSION_PREFIX = "ses-";
@@ -97,20 +103,30 @@ public class ImporterService {
 	}
 
 	public void createAllDatasetAcquisition() {
+		AsyncTask task = new AsyncTask("Dataset import for subject " + importJob.getSubjectName(), KeycloakUtil.getTokenUserId());
+		taskService.addTask(task);
+		float progress = 0;
+		
 		Examination examination = examinationService.findById(importJob.getExaminationId());
 		if (examination != null) {
 			int rank = 0;
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
+						progress += 1f / study.getSeries().size();
 						if (serie.getSelected() != null && serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination);
 							rank++;
 						}
+						task.updateTask(progress, "Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
+						taskService.addTask(task);
 					}
 				}
 			}
 		}
+		task.endTask();
+		taskService.addTask(task);
+
 		// Create BIDS folder
 		try {
 			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
@@ -200,7 +216,13 @@ public class ImporterService {
 	 */
 	public void createEegDataset(final EegImportJob importJob) {
 
+		AsyncTask task = new AsyncTask("Dataset import for subject " + importJob.getSubjectName(), KeycloakUtil.getTokenUserId());
+		taskService.addTask(task);
+		float progress = 0;
+
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
+			task.failTask("No dataset to create");
+			taskService.addTask(task);
 			return;
 		}
 
@@ -215,6 +237,9 @@ public class ImporterService {
 		List<Dataset> datasets = new ArrayList<>();
 
 		for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
+			progress += 1f / importJob.getDatasets().size();
+			task.updateTask(progress, "Treating dataset: " + datasetDto.getName());
+			taskService.addTask(task);
 
 			// Metadata
 			DatasetMetadata originMetadata = new DatasetMetadata();
@@ -304,6 +329,9 @@ public class ImporterService {
 		datasetAcquisition.setDatasets(datasets);
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		
+		task.endTask();
+		taskService.addTask(task);
+
 		// Complete BIDS with data
 		try {
 			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());

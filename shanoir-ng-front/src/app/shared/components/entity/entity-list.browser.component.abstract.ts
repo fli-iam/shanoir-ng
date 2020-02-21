@@ -44,6 +44,12 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
 
     abstract getEntities(): Promise<T[]>;
 
+    protected reloadData() {
+        this.getEntities().then((entities) => {
+            this.entities = entities;
+        });
+    }
+
     private manageAfterDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {

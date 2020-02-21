@@ -3,6 +3,8 @@ package org.shanoir.ng.datasetacquisition.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,10 +14,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -40,35 +49,46 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
 import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.shanoir.ng.tasks.AsyncTask;
+import org.shanoir.ng.tasks.AsyncTaskService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@RunWith(PowerMockRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@PrepareForTest(KeycloakUtil.class)
 public class ImporterServiceTest {
 
-	@Autowired
-	ImporterService service;
+	@InjectMocks
+	@Spy
+	ImporterService service = new ImporterService();
 	
-	@MockBean
+	@Mock
 	private ExaminationService examinationService;
 
-	@MockBean
+	@Mock
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 	
-	@MockBean
+	@Mock
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	
-	@MockBean
+	@Mock
 	private DicomPersisterService dicomPersisterService;
 
-	@MockBean
+	@Mock
 	private BIDSService bidsService;
+
+	@Mock
+	private AsyncTaskService taskService;
+
+	@Before
+	public void setUp() throws IOException {
+        PowerMockito.mockStatic(KeycloakUtil.class);
+        given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
+	}
 
 	@Test
 	public void testCreateEegDataset() throws IOException {
@@ -109,6 +129,13 @@ public class ImporterServiceTest {
 		service.createEegDataset(importJob);
 		ArgumentCaptor<DatasetAcquisition> datasetAcquisitionCapturer = ArgumentCaptor.forClass(DatasetAcquisition.class);
 		
+		ArgumentCaptor<AsyncTask> argument = ArgumentCaptor.forClass(AsyncTask.class);
+		Mockito.verify(taskService, Mockito.times(3)).addTask(argument.capture());
+		
+		List<AsyncTask> values = argument.getAllValues();
+		AsyncTask task = values.get(0);
+		assertTrue(task.taskFinished());
+
 		// Check what we save at the end
 		verify(datasetAcquisitionRepository).save(datasetAcquisitionCapturer.capture());
 		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
@@ -171,6 +198,13 @@ public class ImporterServiceTest {
 		
 		// WHEN we treat this importjob
 		service.createAllDatasetAcquisition();
+		
+		ArgumentCaptor<AsyncTask> argument = ArgumentCaptor.forClass(AsyncTask.class);
+		Mockito.verify(taskService, Mockito.times(3)).addTask(argument.capture());
+		
+		List<AsyncTask> values = argument.getAllValues();
+		AsyncTask task = values.get(0);
+		assertTrue(task.taskFinished());
 		
 		// THEN datasets are created
 		// Check what we save at the end

@@ -59,6 +59,7 @@ export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/da
 
 // BIDS http api
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
+export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
@@ -86,7 +87,6 @@ export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/impo
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
 export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_eeg/';
 
-export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';
