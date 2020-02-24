@@ -40,6 +40,7 @@
     "@angular/upgrade": "5.1.1",
     "@types/node": "8.5.1",
     "angular-in-memory-web-api": "0.5.2",
+    "ngx-json-viewer": "2.4.0",
     "angular-sha": "^0.3.3",
     "core-js": "2.5.3",
     "js-sha1": "^0.6.0",

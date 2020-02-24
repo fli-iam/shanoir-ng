@@ -31,6 +31,9 @@ import { BidsElement } from '../model/bidsElement.model'
 export class BidsTreeComponent  {
 
     @Input() list: BidsElement[];
+    protected json: JSON;
+    protected tsv: string;
+    protected title: string;
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
@@ -38,9 +41,26 @@ export class BidsTreeComponent  {
 
     getDetail(component: TreeNodeComponent) {
         component.dataLoading = true;
-        let bidsElem: BidsElement = component.nodeParams;
         component.hasChildren = true;
         component.open();
+    }
+
+    getContent(bidsElem: BidsElement) {
+        this.removeContent();
+        if (bidsElem.content) {
+            this.title = this.getFileName(bidsElem.path);
+            if (bidsElem.path.indexOf('.json') != -1) {
+                this.json = JSON.parse(bidsElem.content);
+            } else if (bidsElem.path.indexOf('.tsv') != -1) {
+                this.tsv = bidsElem.content;
+            }
+        }
+    }
+
+    removeContent() {
+        this.title = null;
+        this.tsv = null;
+        this.json = null;
     }
 
 }

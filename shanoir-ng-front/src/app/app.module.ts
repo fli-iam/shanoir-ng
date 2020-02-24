@@ -22,6 +22,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import {
     AcquisitionEquipmentListComponent,
@@ -202,6 +203,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         MyDatePickerModule,
         ReactiveFormsModule,
         routing,
+        NgxJsonViewerModule,
     	preclinicalRouting
     ],
     declarations: [

@@ -23,6 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [nodeParams]="item" 
     [deploy]="false"
     [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
+    (labelClick)="getContent(item)"
     (openClick)="getDetail($event)">
       <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements }"></ng-container>
     </node>
@@ -31,3 +32,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node label="Bids" awesome="far fa-folder" [deploy]="true" >
   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
 </node>
+
+<p *ngIf="json">
+    <b> {{title}} </b> <br/>
+    <ngx-json-viewer  [json]="json"></ngx-json-viewer>
+</p>
+<p *ngIf="tsv">
+    <b> {{title}} </b> <br/>
+    {{tsv}}
+</p>

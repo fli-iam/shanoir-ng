@@ -1,6 +1,9 @@
 package org.shanoir.ng.bids.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.shanoir.ng.bids.model.BidsElement;
@@ -29,7 +32,7 @@ public class BidsDeserializer {
 	@Autowired
 	private StudyBIDSService bidsService;
 
-	public BidsElement deserialize(Study study) {
+	public BidsElement deserialize(Study study) throws IOException {
 		// Get the parent folder
 		File studyFile = new File(bidsStorageDir + File.separator + STUDY_PREFIX + study.getId() + '_' + study.getName());
 
@@ -45,8 +48,9 @@ public class BidsDeserializer {
 	/**
 	 * Deserialize recusrsively a BidsElement to create sub folders and files
 	 * @param studyElement
+	 * @throws IOException
 	 */
-	public BidsElement deserializeElement(BidsFolder folderElement) {
+	public BidsElement deserializeElement(BidsFolder folderElement) throws IOException {
 		File f = new File(folderElement.getPath());
 
 		if (f.listFiles() == null) {
@@ -62,7 +66,10 @@ public class BidsDeserializer {
 				deserializeElement((BidsFolder) fileElement);
 			} else {
 				fileElement = new BidsFile(file.getAbsolutePath());
-				// LATER: Manage file content here
+				if (fileElement.getPath().endsWith(".tsv") || fileElement.getPath().endsWith(".json")) {
+					String content = String.join("\n", Files.readAllLines(Paths.get(file.getAbsolutePath())));
+					((BidsFile)fileElement).setContent(content);
+				}
 			}
 			if (folderElement.getElements() == null) {
 				folderElement.setElements(new ArrayList<>());
