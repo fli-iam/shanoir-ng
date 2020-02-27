@@ -25,12 +25,16 @@ import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +67,9 @@ public class PathologyModelApiController implements PathologyModelApi {
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<PathologyModel> createPathologyModel(
 			@ApiParam(value = "pathology model to create", required = true) @RequestBody PathologyModel model,
@@ -84,6 +91,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		/* Save model in db. */
 		try {
 			final PathologyModel createdModel = modelsService.save(model);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PATHOLOGY_EVENT, createdModel.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(createdModel, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
@@ -110,6 +118,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		}
 		try {
 			modelsService.deleteById(id);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PATHOLOGY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
@@ -170,6 +179,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 		try {
 			modelsService.update(model);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_PATHOLOGY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update pathology model" + id + " : ", e);
 			throw new RestServiceException(e,

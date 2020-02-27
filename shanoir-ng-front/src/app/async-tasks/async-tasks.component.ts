@@ -57,20 +57,27 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
             return null;
         };
         return [
-            { headerName: 'Label', field: 'label', defaultSortCol: true, defaultAsc: true },
-            { headerName: 'Message', field: 'message' },
-            { headerName: 'Progress', field: 'progress', type: 'progress', cellRenderer: function (params: any) {
-                    return params.data.progress * 100 + '%';
+            { headerName: 'Message', field: 'message', defaultSortCol: true, defaultAsc: true },
+            { headerName: 'Status', field: 'status', type: 'Status', cellRenderer: function (params: any) {
+                    if (params.data.status == 0) {
+                        return "In progress"
+                    }
+                    if (params.data.status == 1) {
+                        return "Success"
+                    }
+                    if (params.data.status == -1) {
+                        return "Error"
+                    }
                 } 
             },
             {
-                headerName: "Start", field: "startDate", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.startDate);
+                headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
+                    return dateRenderer(params.data.creationDate);
                 }
             },
             {
-                headerName: "End", field: "endDate", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.endDate);
+                headerName: "Last update", field: "lastUpdate", cellRenderer: function (params: any) {
+                    return dateRenderer(params.data.lastUpdate);
                 }
             },
         ];
@@ -82,15 +89,6 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
             this.table.refresh();
             }
         }];
-    }
-
-    private static buildTask(label: string, startDate: Date, endDate: Date, progress: number): Task {
-        let task = new Task(); 
-        task.label = label;
-        task.startDate = startDate;
-        task.endDate = endDate;
-        task.progress = progress;
-        return task;
     }
 
 }

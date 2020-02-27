@@ -28,8 +28,10 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -76,6 +78,8 @@ public class PathologyModelApiControllerTest {
 	private PathologyService pathologyServiceMock;
 	@MockBean
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	@MockBean
+	private ShanoirEventService eventService;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -86,11 +90,13 @@ public class PathologyModelApiControllerTest {
 		given(modelServiceMock.findByPathology(new Pathology())).willReturn(Arrays.asList(new PathologyModel()));
 		given(modelServiceMock.findById(1L)).willReturn(new PathologyModel());
 		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
-		given(modelServiceMock.save(Mockito.mock(PathologyModel.class))).willReturn(new PathologyModel());
+		PathologyModel patho = new PathologyModel();
+		patho.setId(Long.valueOf(123));
+		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho );
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deletePathologyModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -115,7 +121,7 @@ public class PathologyModelApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewPathologyModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -123,7 +129,7 @@ public class PathologyModelApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updatePathologyModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)

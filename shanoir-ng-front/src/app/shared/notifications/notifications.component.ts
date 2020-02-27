@@ -65,7 +65,7 @@ export class NotificationsComponent implements OnInit {
             this.tasksDone = [];
             this.tasksInProgress = []
             for (let task of this.tasks) {
-                if (task.progress == 1) {
+                if (task.status == 1) {
                     this.tasksDone.push(task);
                     this.nbDone +=1;
                 } else {

@@ -29,10 +29,14 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +74,9 @@ public class ExaminationApiController implements ExaminationApi {
 	@Autowired
 	BIDSService bidsService;
 
+	@Autowired
+	ShanoirEventService eventService;
+
 	@org.springframework.beans.factory.annotation.Autowired
 	public ExaminationApiController(final HttpServletRequest request) {
 		this.request = request;
@@ -85,6 +92,7 @@ public class ExaminationApiController implements ExaminationApi {
 			bidsService.deleteExam(examinationId);
 			// Check if user rights needed
 			examinationService.deleteById(examinationId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -145,6 +153,7 @@ public class ExaminationApiController implements ExaminationApi {
 		validate(result);
 
 		final Examination createdExamination = examinationService.save(examinationDTO);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 
 	}
@@ -160,6 +169,7 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

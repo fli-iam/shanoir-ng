@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.study.controler.StudyApiController;
@@ -38,6 +39,7 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -93,6 +95,9 @@ public class StudyApiControllerTest {
 	
 	@MockBean
 	private BidsDeserializer bidsDeserializer;
+
+	@MockBean
+	private ShanoirEventService eventService;
 	
 	@Before
 	public void setup() throws AccessDeniedException, EntityNotFoundException {
@@ -120,7 +125,7 @@ public class StudyApiControllerTest {
 
 	// TODO: manage keycloak token
 	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());

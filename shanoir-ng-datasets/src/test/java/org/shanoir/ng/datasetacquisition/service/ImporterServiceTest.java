@@ -49,8 +49,8 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
 import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.tasks.AsyncTask;
-import org.shanoir.ng.tasks.AsyncTaskService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -82,7 +82,7 @@ public class ImporterServiceTest {
 	private BIDSService bidsService;
 
 	@Mock
-	private AsyncTaskService taskService;
+	private ShanoirEventService taskService;
 
 	@Before
 	public void setUp() throws IOException {
@@ -129,12 +129,12 @@ public class ImporterServiceTest {
 		service.createEegDataset(importJob);
 		ArgumentCaptor<DatasetAcquisition> datasetAcquisitionCapturer = ArgumentCaptor.forClass(DatasetAcquisition.class);
 		
-		ArgumentCaptor<AsyncTask> argument = ArgumentCaptor.forClass(AsyncTask.class);
-		Mockito.verify(taskService, Mockito.times(3)).addTask(argument.capture());
+		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());
 		
-		List<AsyncTask> values = argument.getAllValues();
-		AsyncTask task = values.get(0);
-		assertTrue(task.taskFinished());
+		List<ShanoirEvent> values = argument.getAllValues();
+		ShanoirEvent task = values.get(0);
+		assertTrue(task.getStatus() == 1);
 
 		// Check what we save at the end
 		verify(datasetAcquisitionRepository).save(datasetAcquisitionCapturer.capture());
@@ -199,12 +199,12 @@ public class ImporterServiceTest {
 		// WHEN we treat this importjob
 		service.createAllDatasetAcquisition();
 		
-		ArgumentCaptor<AsyncTask> argument = ArgumentCaptor.forClass(AsyncTask.class);
-		Mockito.verify(taskService, Mockito.times(3)).addTask(argument.capture());
+		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());
 		
-		List<AsyncTask> values = argument.getAllValues();
-		AsyncTask task = values.get(0);
-		assertTrue(task.taskFinished());
+		List<ShanoirEvent> values = argument.getAllValues();
+		ShanoirEvent task = values.get(0);
+		assertTrue(task.getStatus() == 1);
 		
 		// THEN datasets are created
 		// Check what we save at the end

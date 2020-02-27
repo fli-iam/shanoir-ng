@@ -19,6 +19,9 @@ import java.util.List;
 import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -29,6 +32,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +59,9 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private StudyBIDSService bidsService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
@@ -62,6 +69,7 @@ public class SubjectApiController implements SubjectApi {
 			bidsService.deleteSubjectBids(subjectId);
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -102,6 +110,7 @@ public class SubjectApiController implements SubjectApi {
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
 		final Subject createdSubject = subjectService.create(subject);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
 	}
 
@@ -115,6 +124,7 @@ public class SubjectApiController implements SubjectApi {
 			// Update subject BIDS
 			bidsService.updateSubjectBids(subjectId, subject);
 			subjectService.update(subject);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -23,10 +23,14 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -49,11 +53,15 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Autowired
 	private BasicEntityService<AcquisitionEquipment> acquisitionEquipmentService;
 
+	@Autowired
+	ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EQUIPEMENT_EVENT, acquisitionEquipmentId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -89,8 +97,11 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		
 		/* Save acquisition equipment in db. */
 		try {
-			return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
-					acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);
+			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
+					acquisitionEquipmentService.create(acquisitionEquipment));
+			
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipementCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			return new ResponseEntity<>(equipementCreated, HttpStatus.OK);
 		} catch (DataIntegrityViolationException e) {
 			checkDataIntegrityException(e, acquisitionEquipment);
 			throw e;
@@ -108,6 +119,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		/* Update user in db. */
 		try {
 			acquisitionEquipmentService.update(acquisitionEquipment);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EQUIPEMENT_EVENT, acquisitionEquipmentId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

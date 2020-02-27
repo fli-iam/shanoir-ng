@@ -26,13 +26,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
+import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -77,6 +80,9 @@ public class ExaminationApiControllerTest {
 	@MockBean
 	private BIDSService bidsService;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -84,11 +90,13 @@ public class ExaminationApiControllerTest {
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-		given(examinationServiceMock.save(Mockito.mock(Examination.class))).willReturn(new Examination());
+		Examination exam = new Examination();
+		exam.setId(Long.valueOf(123));
+		given(examinationServiceMock.save(Mockito.any(ExaminationDTO.class))).willReturn(exam);
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
@@ -108,7 +116,7 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
@@ -116,7 +124,7 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))

@@ -17,12 +17,16 @@ package org.shanoir.ng.preclinical.references;
 import java.util.List;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,10 @@ public class RefsApiController implements RefsApi {
 	@Autowired
 	private RefsService referenceService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
+	@Override
 	public ResponseEntity<Reference> createReferenceValue(
 			@ApiParam(value = "Ref value to add", required = true) @RequestBody Reference reference)
 			throws RestServiceException {
@@ -60,6 +68,7 @@ public class RefsApiController implements RefsApi {
 				newRef.setValue(reference.getValue());
 
 				final Reference createdRef = referenceService.save(newRef);
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_REFERENCE_EVENT, createdRef.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 				return new ResponseEntity<Reference>(createdRef, HttpStatus.OK);
 			}
 		} catch (ShanoirException e) {
@@ -69,6 +78,7 @@ public class RefsApiController implements RefsApi {
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteReferenceValue(
 			@ApiParam(value = "id of reference", required = true) @PathVariable("id") Long id) {
 
@@ -78,12 +88,14 @@ public class RefsApiController implements RefsApi {
 		}
 		try {
 			referenceService.deleteById(toDelete.getId());
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PRECLINICAL_REFERENCE_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Reference>> getReferencesByCategory(
 			@ApiParam(value = "type of reference", required = true) @PathVariable("category") String category) {
 		final List<Reference> refs = referenceService.findByCategory(category);
@@ -93,6 +105,7 @@ public class RefsApiController implements RefsApi {
 		return new ResponseEntity<List<Reference>>(refs, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Reference>> getReferencesByCategoryAndType(
 			@ApiParam(value = "Category of the reference", required = true) @PathVariable("category") String category,
 			@ApiParam(value = "Type of the reference", required = true) @PathVariable("type") String type) {
@@ -103,6 +116,7 @@ public class RefsApiController implements RefsApi {
 		return new ResponseEntity<List<Reference>>(refs, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<String>> getReferenceCategories() {
 		final List<String> categories = referenceService.findCategories();
 		if (categories.isEmpty()) {
@@ -111,6 +125,7 @@ public class RefsApiController implements RefsApi {
 		return new ResponseEntity<List<String>>(categories, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<String>> getReferenceTypesByCategory(
 			@ApiParam(value = "category of reference", required = true) @PathVariable("category") String category) {
 		final List<String> types = referenceService.findTypesByCategory(category);
@@ -120,6 +135,7 @@ public class RefsApiController implements RefsApi {
 		return new ResponseEntity<List<String>>(types, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<Reference>> getReferences() {
 		final List<Reference> refs = referenceService.findAll();
 		if (refs.isEmpty()) {
@@ -150,6 +166,7 @@ public class RefsApiController implements RefsApi {
 		return new ResponseEntity<Reference>(ref, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Void> updateReferenceValue(
 			@ApiParam(value = "id of ref to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "New value for the ref given as name", required = true) @RequestBody Reference reference,
@@ -173,6 +190,7 @@ public class RefsApiController implements RefsApi {
 			}
 			try {
 				referenceService.update(reference);
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_PRECLINICAL_REFERENCE_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			} catch (ShanoirException e) {
 				LOG.error("Error while trying to update reference " + toUpdate.getId() + " : ", e);
 				throw new RestServiceException(e,

@@ -49,9 +49,10 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.tasks.AsyncTask;
-import org.shanoir.ng.tasks.AsyncTaskService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -88,7 +89,7 @@ public class ImporterService {
 	private BIDSService bidsService;
 
 	@Autowired
-	private AsyncTaskService taskService;
+	private ShanoirEventService eventService;
 
 	private ImportJob importJob;
 
@@ -103,9 +104,8 @@ public class ImporterService {
 	}
 
 	public void createAllDatasetAcquisition() {
-		AsyncTask task = new AsyncTask("Dataset import for subject " + importJob.getSubjectName(), KeycloakUtil.getTokenUserId());
-		taskService.addTask(task);
-		float progress = 0;
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS);
+		eventService.publishEvent(event);
 		
 		Examination examination = examinationService.findById(importJob.getExaminationId());
 		if (examination != null) {
@@ -113,19 +113,19 @@ public class ImporterService {
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-						progress += 1f / study.getSeries().size();
 						if (serie.getSelected() != null && serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination);
 							rank++;
 						}
-						task.updateTask(progress, "Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
-						taskService.addTask(task);
+						event.setMessage("Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
+						eventService.publishEvent(event);
 					}
 				}
 			}
 		}
-		task.endTask();
-		taskService.addTask(task);
+		event.setStatus(ShanoirEvent.SUCCESS);
+		event.setMessage("Successfully created datasets for examination " + examination.getId());
+		eventService.publishEvent(event);
 
 		// Create BIDS folder
 		try {
@@ -216,13 +216,12 @@ public class ImporterService {
 	 */
 	public void createEegDataset(final EegImportJob importJob) {
 
-		AsyncTask task = new AsyncTask("Dataset import for subject " + importJob.getSubjectName(), KeycloakUtil.getTokenUserId());
-		taskService.addTask(task);
-		float progress = 0;
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS);
+		eventService.publishEvent(event);
 
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
-			task.failTask("No dataset to create");
-			taskService.addTask(task);
+			event.setStatus(ShanoirEvent.ERROR);
+			eventService.publishEvent(event);
 			return;
 		}
 
@@ -237,10 +236,8 @@ public class ImporterService {
 		List<Dataset> datasets = new ArrayList<>();
 
 		for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
-			progress += 1f / importJob.getDatasets().size();
-			task.updateTask(progress, "Treating dataset: " + datasetDto.getName());
-			taskService.addTask(task);
-
+			event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
+			eventService.publishEvent(event);
 			// Metadata
 			DatasetMetadata originMetadata = new DatasetMetadata();
 			originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
@@ -307,8 +304,8 @@ public class ImporterService {
 					}
 				}
 			}
-			for (Event event : datasetDto.getEvents()) {
-				event.setDataset(datasetToCreate);
+			for (Event eventToImport : datasetDto.getEvents()) {
+				eventToImport.setDataset(datasetToCreate);
 			}
 
 			// Fill dataset with informations
@@ -329,14 +326,15 @@ public class ImporterService {
 		datasetAcquisition.setDatasets(datasets);
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		
-		task.endTask();
-		taskService.addTask(task);
+		event.setStatus(ShanoirEvent.SUCCESS);
+		event.setMessage("Success");
+		eventService.publishEvent(event);
 
 		// Complete BIDS with data
 		try {
 			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
 		} catch (IOException e) {
-			LOG.error("SOMETHING WENT WRONG CREATIN BIDS DATA: ", e);
+			LOG.error("Something went wrong creating the bids data: ", e);
 		}
 	}
 

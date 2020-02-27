@@ -17,12 +17,16 @@ package org.shanoir.ng.preclinical.therapies;
 import java.util.List;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,9 @@ public class TherapyApiController implements TherapyApi {
 	@Autowired
 	private TherapyService therapiesService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+	
 	@Override
 	public ResponseEntity<Therapy> createTherapy(
 			@ApiParam(value = "therapy to create", required = true) @RequestBody Therapy therapy, BindingResult result)
@@ -66,6 +73,7 @@ public class TherapyApiController implements TherapyApi {
 		/* Save therapy in db. */
 		try {
 			final Therapy createdTherapy = therapiesService.save(therapy);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_THERAPY_EVENT, createdTherapy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(createdTherapy, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
@@ -82,6 +90,7 @@ public class TherapyApiController implements TherapyApi {
 		}
 		try {
 			therapiesService.deleteById(id);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_THERAPY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
@@ -142,6 +151,7 @@ public class TherapyApiController implements TherapyApi {
 
 		try {
 			therapiesService.update(therapy);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_THERAPY_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update therapy " + id + " : ", e);
 			throw new RestServiceException(e,

@@ -22,6 +22,9 @@ import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPatholo
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -29,6 +32,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.RefValueExistsValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +63,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	private SubjectPathologyService subjectPathologyService;
 	@Autowired
 	private SubjectTherapyService subjectTherapyService;
+	@Autowired
+	private ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<AnimalSubject> createAnimalSubject(
@@ -88,6 +94,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 		try {
 			final AnimalSubject createdSubject = subjectService.save(animalSubject);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(createdSubject, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
@@ -112,6 +119,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 				subjectTherapyService.deleteByAnimalSubject(animalSubject);
 			}
 			subjectService.deleteById(id);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("ERROR while deleting animal subject " + id, e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
@@ -164,6 +172,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		/* Update template in db. */
 		try {
 			subjectService.update(animalSubject);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update subject " + id + " : ", e);
 			throw new RestServiceException(e,

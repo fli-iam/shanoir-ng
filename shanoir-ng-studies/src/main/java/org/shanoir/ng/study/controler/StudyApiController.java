@@ -33,6 +33,9 @@ import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -46,6 +49,7 @@ import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +95,9 @@ public class StudyApiController implements StudyApi {
 	@Autowired
 	private BidsDeserializer bidsDeserializer;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	private final HttpServletRequest request;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
@@ -105,6 +112,7 @@ public class StudyApiController implements StudyApi {
 		try {
 			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
@@ -166,7 +174,7 @@ public class StudyApiController implements StudyApi {
 
 		final Study createdStudy = studyService.create(study);
 		bidsService.createBidsFolder(createdStudy);
-
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT, createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 	}
 
@@ -179,6 +187,7 @@ public class StudyApiController implements StudyApi {
 		try {
 			bidsService.updateBidsFolder(study);
 			studyService.update(study);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}

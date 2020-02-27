@@ -29,14 +29,15 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticApiController;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -74,6 +75,9 @@ public class AnestheticApiControllerTest {
 	@MockBean
 	private AnestheticService anestheticsServiceMock;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -83,11 +87,13 @@ public class AnestheticApiControllerTest {
 		given(anestheticsServiceMock.findAllByAnestheticType(AnestheticType.GAS))
 				.willReturn(Arrays.asList(new Anesthetic()));
 		given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
-		given(anestheticsServiceMock.save(Mockito.mock(Anesthetic.class))).willReturn(new Anesthetic());
+		Anesthetic anes = new Anesthetic();
+		anes.setId(Long.valueOf(123));
+		given(anestheticsServiceMock.save(Mockito.any(Anesthetic.class))).willReturn(anes );
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteAnestheticTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -118,7 +124,7 @@ public class AnestheticApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewAnestheticTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -126,7 +132,7 @@ public class AnestheticApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateAnestheticTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)

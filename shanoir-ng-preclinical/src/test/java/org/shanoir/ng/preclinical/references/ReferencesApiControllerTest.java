@@ -25,14 +25,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -72,6 +73,9 @@ public class ReferencesApiControllerTest {
 	@MockBean
 	private RefsService refsServiceMock;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -80,11 +84,13 @@ public class ReferencesApiControllerTest {
 		given(refsServiceMock.findAll()).willReturn(Arrays.asList(new Reference()));
 		given(refsServiceMock.findById(1L)).willReturn(new Reference());
 		given(refsServiceMock.findByCategoryTypeAndValue("subject", "specie", "rat")).willReturn(new Reference());
-		given(refsServiceMock.save(Mockito.mock(Reference.class))).willReturn(new Reference());
+		Reference ref = new Reference();
+		ref.setId(Long.valueOf(123));
+		given(refsServiceMock.save(Mockito.any(Reference.class))).willReturn(ref );
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteReferenceTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -127,7 +133,7 @@ public class ReferencesApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewReferenceTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +141,7 @@ public class ReferencesApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateReferenceTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)

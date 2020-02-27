@@ -30,14 +30,15 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -82,6 +83,9 @@ public class AnimalSubjectApiControllerTest {
 	@MockBean
 	private SubjectTherapyService subjectTherapiesServiceMock;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -92,11 +96,13 @@ public class AnimalSubjectApiControllerTest {
 		List<AnimalSubject> subjects = new ArrayList<AnimalSubject>();
 		subjects.add(new AnimalSubject());
 		given(subjectsServiceMock.findBy("subjectId", 1L)).willReturn(subjects);
-		given(subjectsServiceMock.save(Mockito.mock(AnimalSubject.class))).willReturn(new AnimalSubject());
+		AnimalSubject anSubj = new AnimalSubject();
+		anSubj.setId(Long.valueOf(123));
+		given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -115,7 +121,7 @@ public class AnimalSubjectApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -123,7 +129,7 @@ public class AnimalSubjectApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)

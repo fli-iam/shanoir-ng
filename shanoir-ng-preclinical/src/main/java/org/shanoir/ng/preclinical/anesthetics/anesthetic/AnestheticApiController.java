@@ -17,12 +17,16 @@ package org.shanoir.ng.preclinical.anesthetics.anesthetic;
 import java.util.List;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,9 @@ public class AnestheticApiController implements AnestheticApi {
 	@Autowired
 	private AnestheticService anestheticsService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Anesthetic> createAnesthetic(
 			@ApiParam(value = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
@@ -66,6 +73,7 @@ public class AnestheticApiController implements AnestheticApi {
 		/* Save anesthetic in db. */
 		try {
 			final Anesthetic createdAnesthetic = anestheticsService.save(anesthetic);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_ANESTHETIC_EVENT, createdAnesthetic.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(createdAnesthetic, HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
@@ -82,6 +90,7 @@ public class AnestheticApiController implements AnestheticApi {
 		}
 		try {
 			anestheticsService.deleteById(id);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
@@ -142,6 +151,7 @@ public class AnestheticApiController implements AnestheticApi {
 
 		try {
 			anestheticsService.update(anesthetic);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_ANESTHETIC_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update anesthetic " + id + " : ", e);
 			throw new RestServiceException(e,
