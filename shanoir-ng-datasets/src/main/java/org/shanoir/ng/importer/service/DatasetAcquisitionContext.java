@@ -52,7 +52,7 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	}
 
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
 		if (datasetAcquisitionStrategy != null) {
 			return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 		}
