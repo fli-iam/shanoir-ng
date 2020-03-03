@@ -102,3 +102,36 @@ export const preventInitialChildAnimations = trigger('preventInitialChildAnimati
         ]
     )
 ]);
+
+
+const moveDur = 1000;
+export const moveDown = trigger('moveDown', [
+    transition(
+        ':enter', [
+            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);
+
+
+export const moveUp = trigger('moveUp', [
+    transition(
+        ':enter', [
+            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);

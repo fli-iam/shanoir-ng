@@ -18,6 +18,7 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyCardDTO } from './study-card.dto'
 import { ServiceLocator } from '../../utils/locator.service';
 import { StudyCardService } from './study-card.service';
+import { Coil } from '../../coils/shared/coil.model';
 
 
 export class StudyCard extends Entity {
@@ -27,7 +28,7 @@ export class StudyCard extends Entity {
     study: Study;
     acquisitionEquipment: AcquisitionEquipment;
     niftiConverter: NiftiConverter;
-    rules: StudyCardRule[];
+    rules: StudyCardRule[] = [];
 
     service: StudyCardService = ServiceLocator.injector.get(StudyCardService);
 
@@ -47,7 +48,23 @@ export class StudyCardRule {
 export class StudyCardAssignment {
     
     field: string;
-	value: string;
+    value: string | Coil;
+    
+    get label(): string {
+        if (this.value instanceof Coil) {
+            return (this.value as Coil).name;
+        } else {
+            return this.value;
+        }
+    }
+
+    get type(): 'string' | 'Coil' {
+        if (this.value instanceof Coil) {
+            return 'Coil';
+        } else {
+            return 'string';
+        }
+    }
 }
 
 export class StudyCardCondition {
@@ -62,6 +79,10 @@ export class DicomTag {
     constructor(
         public code: number,
         public label: string) {};
+
+    equals(other: DicomTag): boolean {
+        return this.code == other.code;
+    }
 }
 
 export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'SMALLER_THAN' | 'BIGGER_THAN';

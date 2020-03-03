@@ -1,1 +1,12 @@
-study-card-rule + study-card-rule { margin-top: 20px; }
+study-card-rule { text-align: center; padding: 10px 0; }
+
+.add-container { width: 100%; text-align: center; }
+.add { color: var(--color-b); cursor: pointer; display: inline-block; padding: 1px 8px; margin-top: 10px; border: 1px dashed var(--color-c); border-radius: 10px; width: 200px; text-align: center; }
+.add svg { margin-right: 7px; vertical-align: -1px; color: var(--grey); color: var(--color-c); }
+.add:hover { background-color: var(--color-b); color: white; }
+
+.add-container { color: var(--grey); margin-top: 20px; }
+.add-container span { display: inline-block; }
+.add-container span:hover { cursor: pointer; color: var(--color-b); } 
+
+.add-container svg { font-size: 35px; }

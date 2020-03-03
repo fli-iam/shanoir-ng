@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="root" [class.disabled]="disabled">
     <span class="frame"> 
         <span class="input-container">
-            <span class="fake-input">{{inputText ? inputText : 'Select an option...'}}</span>
+            <span class="fake-input">{{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}</span>
             <input #input
                 *ngIf="options?.length > 0"
                 type="text" 

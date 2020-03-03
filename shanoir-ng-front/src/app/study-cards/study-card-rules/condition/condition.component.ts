@@ -32,6 +32,12 @@ export class StudyCardConditionComponent implements OnInit {
     @Input() mode: Mode = 'view';
     public tagOptions: Option<DicomTag>[];
     operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'SMALLER_THAN', 'BIGGER_THAN'];
+    @Output() delete: EventEmitter<void> = new EventEmitter();
+
+    @Input() showErrors: boolean;
+    tagTouched: boolean = false;
+    operationTouched: boolean = false;
+    valueTouched: boolean = false;
 
     constructor(
             private dicomService: DicomService) {}
@@ -47,5 +53,21 @@ export class StudyCardConditionComponent implements OnInit {
                 }
             });
         }
+    }
+
+    onConditionChange() {
+        this.conditionChange.emit(this.condition);
+    }
+
+    get tagError(): boolean {
+        return !this.condition.dicomTag && (this.tagTouched || this.showErrors)
+    }
+
+    get operationError(): boolean {
+        return !this.condition.operation && (this.operationTouched || this.showErrors)
+    }
+
+    get valueError(): boolean {
+        return !this.condition.dicomValue && (this.valueTouched || this.showErrors)
     }
 }

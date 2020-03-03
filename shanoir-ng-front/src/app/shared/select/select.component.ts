@@ -182,11 +182,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                this.change.emit(this.selectedOption.value);
+                this.onChangeCallback(this.selectedOption.value)
                 this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                this.change.emit(null);
+                this.onChangeCallback(null);
                 this.selectOption.emit(null);
             }
             if (previousOption) {
@@ -205,7 +205,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
         this.firstScrollOptionIndex = 0;
         this.focusedOptionIndex = null;
-        this.onChangeCallback(null);
     }
 
     private computeMinWidth() {
@@ -272,8 +271,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;
-        this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null)
         this.close();
+        this.change.emit(this.selectedOption.value);
     }
 
     private isOptionSelected(option: Option<any>) {
@@ -283,6 +282,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private valuesEqual(value1, value2) {
         if (value1 == value2) return true;
         else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
         else return JSON.stringify(value1) === JSON.stringify(value2);
     }
 
@@ -557,6 +557,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private onTypeText(text: string) {
         this.unSelectOption();
+        this.change.emit(null);
         this.inputText = text;
         this.searchText = text;
         this.open();

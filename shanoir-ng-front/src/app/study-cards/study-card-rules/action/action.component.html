@@ -14,15 +14,45 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ng-container *ngIf="mode == 'view'">
     set
-    <span class="var">{{assignment?.field}}</span>
+    <span class="var">{{fieldLabel ? fieldLabel : assignment?.field}}</span>
     =
-    <span class="value">"{{assignment?.value}}"</span>
+    <span class="value">
+        <span *ngIf="assignment?.type == 'string' && valueIsString == true">"</span>{{valueLabel ? valueLabel : assignment?.label}}<span *ngIf="assignment?.type == 'string' && valueIsString == true">"</span>
+    </span>
 </ng-container>
 <ng-container *ngIf="mode != 'view'">
     set
-    <select-box class="var auto-width" [(ngModel)]="assignment.field" (change)="onChangeField($event)" (selectOption)="onSelectFieldOption($event)" (deSelectOption)="onDeSelectFieldOption($event)" [options]="fieldOptions"></select-box>
+    <select-box 
+            class="var auto-width" 
+            [class.error]="fieldError"
+            [(ngModel)]="assignment.field" 
+            (change)="onChangeField($event)" 
+            (selectOption)="onSelectFieldOption($event)" 
+            (deSelectOption)="onDeSelectFieldOption($event)" 
+            [options]="fieldOptions" 
+            placeholder="select field"
+            (focusout)="fieldTouched = true">
+    </select-box>
     =
-    <auto-ajust-input *ngIf="!assigmentOptions" class="value" [(ngModel)]="assignment.value" placeholder="enter value" (change)="onChangeValue()"></auto-ajust-input>
-    <select-box *ngIf="assigmentOptions" class="var auto-width" [(ngModel)]="assignment.value" [options]="assigmentOptions" (change)="onChangeValue()"></select-box>
+    <auto-ajust-input 
+            *ngIf="!assigmentOptions" 
+            class="value"
+            [class.error]="valueError"
+            [(ngModel)]="assignment.value" 
+            placeholder="enter value" 
+            (change)="onChangeValue()"
+            (focusout)="valueTouched = true"
+            [disabled]="!assignment.field">
+    </auto-ajust-input>
+    <select-box 
+            *ngIf="assigmentOptions" 
+            class="value auto-width"
+            [class.error]="valueError"
+            [(ngModel)]="assignment.value" 
+            [options]="assigmentOptions" 
+            (change)="onChangeValue()" 
+            placeholder="select value"
+            (focusout)="valueTouched = true">
+    </select-box>
 </ng-container>
-<ng-content></ng-content>
+<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>	

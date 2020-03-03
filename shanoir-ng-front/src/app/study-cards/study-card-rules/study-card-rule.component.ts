@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ElementRef, HostListener } from '@angular/core';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
@@ -29,9 +29,18 @@ export class StudyCardRuleComponent implements OnChanges {
     @Input() mode: Mode;
     @Input() rule: StudyCardRule;
     @Input() fields: AssignmentField[];
+    @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
+    @Output() moveUp: EventEmitter<void> = new EventEmitter();
+    @Output() moveDown: EventEmitter<void> = new EventEmitter();
+    @Output() copy: EventEmitter<void> = new EventEmitter();
+    @Output() delete: EventEmitter<void> = new EventEmitter();
+    @Input() showErrors: boolean = false;
+    touched: boolean = false;
 
     fieldOptions: Option<string>[];
     assigmentOptions: Option<any>[];
+
+    constructor(public elementRef: ElementRef) { }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.fields) {
@@ -45,21 +54,32 @@ export class StudyCardRuleComponent implements OnChanges {
 
     addNewCondition() {
         this.rule.conditions.push(new StudyCardCondition());
+        this.change.emit(this.rule);
     }
 
     addNewAction() {
         this.rule.assignments.push(new StudyCardAssignment());
+        this.change.emit(this.rule);
     }
 
     deleteCondition(index: number) {
         this.rule.conditions.splice(index, 1);
+        this.change.emit(this.rule);
     }
     
     deleteAction(index: number) {
         let fieldOption: Option<string> = this.fieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
-        console.log(fieldOption)
-        console.log(index, this.fieldOptions, this.rule.assignments[index])
         if (fieldOption) fieldOption.disabled = false;
         this.rule.assignments.splice(index, 1);
+        this.change.emit(this.rule);
     }
+
+    @HostListener('document:click', ['$event.target'])
+    public onClick(targetElement) {
+        const clickedInside = this.elementRef.nativeElement.contains(targetElement);
+        if (!clickedInside) {
+            this.touched = true;
+        }
+    }
+
 }

@@ -19,8 +19,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="value">"{{condition.dicomValue}}"</span>
 </ng-container>
 <ng-container *ngIf="mode != 'view'">
-    <select-box class="var auto-width" [ngModel]="condition.dicomTag" (ngModelChange)="conditionChange.emit(condition)" [options]="tagOptions"></select-box>
-    <select-box class="method auto-width" [ngModel]="condition.operation" (ngModelChange)="conditionChange.emit(condition)" [optionArr]="operations"></select-box>
-    <auto-ajust-input class="value" [ngModel]="condition.dicomValue" (ngModelChange)="conditionChange.emit(condition)" placeholder="enter value"></auto-ajust-input>
+    <select-box 
+            class="var auto-width" 
+            [class.error]="tagError"
+            [(ngModel)]="condition.dicomTag" 
+            (ngModelChange)="onConditionChange()" 
+            [options]="tagOptions" 
+            placeholder="select dicom tag" 
+            (focusout)="tagTouched = true">
+    </select-box>
+    <select-box 
+            class="method auto-width"
+            [class.error]="operationError"
+            [(ngModel)]="condition.operation" 
+            (ngModelChange)="onConditionChange()" 
+            [optionArr]="operations" 
+            placeholder="select operation" 
+            (focusout)="operationTouched = true">
+    </select-box>
+    <auto-ajust-input 
+            class="value"
+            [class.error]="valueError"
+            [(ngModel)]="condition.dicomValue" 
+            (ngModelChange)="onConditionChange()" 
+            placeholder="enter value" 
+            (focusout)="valueTouched = true">
+</auto-ajust-input>
 </ng-container>
-<ng-content></ng-content>
+<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>

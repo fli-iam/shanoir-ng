@@ -21,6 +21,8 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { DicomService } from './dicom.service';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
+import { Coil } from '../../coils/shared/coil.model';
+import { CoilService } from '../../coils/shared/coil.service';
 
 @Injectable()
 export class StudyCardDTOService {
@@ -30,6 +32,7 @@ export class StudyCardDTOService {
         private studyService: StudyService,
         private niftiService: NiftiConverterService,
         private dicomService: DicomService,
+        private coilService: CoilService
     ) {}
 
     /**
@@ -44,7 +47,8 @@ export class StudyCardDTOService {
             this.studyService.get(dto.studyId).then(study => result.study = study),
             this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq),
             this.niftiService.get(dto.niftiConverterId).then(nifti => result.niftiConverter = nifti),
-            this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags))
+            this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
+            this.coilService.getAll().then(coils => this.completeCoils(result, coils))
         ]).then(([]) => {
             return result;
         });
@@ -55,11 +59,29 @@ export class StudyCardDTOService {
             for (let rule of result.rules) {
                 if (rule.conditions) {
                     for (let condition of rule.conditions) {
-                        condition.dicomTag.label = tags.find(tag => tag.code == condition.dicomTag.code).label;
+                        condition.dicomTag = tags.find(tag => tag.code == condition.dicomTag.code);
                     }
                 }
             }
         }
+    }
+
+    private completeCoils(result: StudyCard, coils: Coil[]) {
+        if (result.rules) {
+            for (let rule of result.rules) {
+                if (rule.assignments) {
+                    for (let assigment of rule.assignments) {
+                        if (StudyCardDTOService.isCoil(assigment.field)) {
+                            assigment.value = coils.find(coil => coil.id == (assigment.value as Coil).id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static isCoil(assigmentField: string): boolean {
+        return assigmentField.toLowerCase().includes('coil');
     }
 
     /**
@@ -91,7 +113,12 @@ export class StudyCardDTOService {
                     if (entity.niftiConverter) 
                         entity.niftiConverter = niftis.find(nifti => nifti.id == entity.niftiConverter.id);
                 }
-            })
+            }),
+            // this.dicomService.getDicomTags().then(tags => {
+            //     for (let entity of result) {
+            //         this.completeDicomTagNames(entity, tags);
+            //     }
+            // })
         ]).then(() => {
             return result;
         })
@@ -121,7 +148,12 @@ export class StudyCardDTOService {
                     for (let assigmentDTO of ruleDTO.assignments) {
                         let assigment: StudyCardAssignment = new StudyCardAssignment();
                         assigment.field = assigmentDTO.field;
-                        assigment.value = assigmentDTO.value;
+                        if (this.isCoil(assigment.field)) {
+                            assigment.value = new Coil();
+                            assigment.value.id = +assigmentDTO.value;
+                        } else {
+                            assigment.value = assigmentDTO.value;
+                        }
                         rule.assignments.push(assigment);
                     }
                 }
@@ -129,7 +161,7 @@ export class StudyCardDTOService {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition();
-                        condition.dicomTag = new DicomTag(parseInt(conditionDTO.dicomTag), null);
+                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
                         condition.dicomValue = conditionDTO.dicomValue;
                         condition.operation = conditionDTO.operation as Operation;
                         rule.conditions.push(condition);
@@ -150,7 +182,7 @@ export class StudyCardDTO {
     studyId: number;
     acquisitionEquipmentId: number;
     niftiConverterId: number;
-    rules: any[];
+    rules: StudyCardRuleDTO[];
 
     constructor(studyCard?: StudyCard) {
         if (studyCard) {
@@ -159,7 +191,47 @@ export class StudyCardDTO {
             this.studyId = studyCard.study.id;
             this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
             this.niftiConverterId = studyCard.niftiConverter.id;
-            this.rules = studyCard.rules;
+            this.rules = studyCard.rules.map(rule => {
+                let ruleDTO: StudyCardRuleDTO = new StudyCardRuleDTO();
+                ruleDTO.conditions = rule.conditions.map(cond => {
+                    let condDTO: StudyCardConditionDTO = new StudyCardConditionDTO();
+                    condDTO.dicomTag = cond.dicomTag ? cond.dicomTag.code : null;
+                    condDTO.dicomValue = cond.dicomValue;
+                    condDTO.operation = cond.operation;
+                    return condDTO;
+                });
+                ruleDTO.assignments = rule.assignments.map(ass => {
+                    let assDTO: StudyCardAssignmentDTO = new StudyCardAssignmentDTO();
+                    assDTO.field = ass.field;
+                    if (ass.value instanceof Coil) {
+                        assDTO.value = (ass.value as Coil).id.toString();
+                    } else {
+                        assDTO.value = ass.value as string;
+                    }
+                    return assDTO;
+                });
+                return ruleDTO;
+            });
         }
     }
+}
+
+export class StudyCardRuleDTO {
+
+    assignments: StudyCardAssignmentDTO[];
+    conditions: StudyCardConditionDTO[];
+
+}
+
+export class StudyCardConditionDTO {
+
+    dicomTag: number;
+	dicomValue: string;
+	operation: Operation;
+}
+
+export class StudyCardAssignmentDTO {
+    
+    field: string;
+	value: string;
 }

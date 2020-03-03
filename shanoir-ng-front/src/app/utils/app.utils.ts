@@ -186,7 +186,7 @@ export function capitalizeFirstLetter(str: string) {
 
 export function capitalsAndUnderscoresToDisplayable(str: string) {
     if (!str) return;
-    return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
+    return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
 export function isFunction(obj) {

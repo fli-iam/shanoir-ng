@@ -32,10 +32,12 @@ public class StudyCardRule extends AbstractEntity {
 
 	private static final long serialVersionUID = 6708188853533591193L;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "rule")
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name="rule_id")
 	private List<StudyCardAssignment> assignments;
 	
-@	OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "rule")
+@	OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
 	
 

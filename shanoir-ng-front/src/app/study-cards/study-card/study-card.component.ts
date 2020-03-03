@@ -26,6 +26,7 @@ import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 
 @Component({
     selector: 'study-card',
@@ -38,6 +39,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     private studies: IdName[] = [];
     private acquisitionEquipments: Option<AcquisitionEquipment>[];
     private niftiConverters: IdName[] = [];
+    showRulesErrors: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -80,6 +82,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
+            'rules': [this.studyCard.rules, [Validators.required, StudyCardRulesComponent.validator]]
         });
         this.subscribtions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
@@ -127,6 +130,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             this.studyCard.acquisitionEquipment = null;
             this.acquisitionEquipments = [];
         }
+    }
+
+    onShowErrors() {
+        this.form.markAsDirty();
+        this.showRulesErrors = !this.showRulesErrors;
     }
 
 }

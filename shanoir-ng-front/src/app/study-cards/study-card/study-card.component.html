@@ -79,10 +79,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset class="rules">
 				<legend>Rules</legend>
-				<study-card-rules class="rules" 
-					[(rules)]="studyCard.rules" 
+				<study-card-rules class="rules" [formGroup]="form"
+					formControlName="rules"
+					[(ngModel)]="studyCard.rules" 
 					[mode]="mode" 
-					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id">
+					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
+					[showErrors]="showRulesErrors">
 				</study-card-rules>
 			</fieldset>
 			<form-footer
@@ -90,8 +92,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
+				(back)="goBack()">
+				<button *ngIf="mode != 'view'"
+						type="button" 
+						class="Button right-icon show-errors" 
+						(click)="onShowErrors()"
+						[disabled]="footerState.valid || showRulesErrors">
+					Show all errors<i class="fas fa-bug"></i>
+				</button>
+			</form-footer>
 		</div>
 	</form>
 </div>
