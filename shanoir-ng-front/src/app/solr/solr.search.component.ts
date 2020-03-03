@@ -14,16 +14,14 @@
 
 import { Component, ViewChild } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from "@angular/forms";
+import { Router } from "@angular/router";
 import { BreadcrumbsService } from "../breadcrumbs/breadcrumbs.service";
-import { MrDatasetNature } from "../datasets/dataset/mr/dataset.mr.model";
 import { slideDown } from "../shared/animations/animations";
 import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { DatasetModalityType } from "../shared/enums/dataset-modality-type";
 import { IdName } from "../shared/models/id-name.model";
-import { Subject } from "../subjects/shared/subject.model";
-import { FacetField, ShanoirSolrFacet, SolrResultPage } from "./solr.document.model";
+import { FacetField, ShanoirSolrFacet, SolrResultPage, FacetResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
 
 @Component({
@@ -36,7 +34,7 @@ import { SolrService } from "./solr.service";
 export class SolrSearchComponent{
     studies: IdName[] = [];
     selectedStudies: IdName[] = [];
-    facets: any[] = [];
+    facetResultPage: FacetResultPage[] = [];
     // filteredSubjectNames: Observable<string[]>;
     allMrDatasetNatures: any[];
     allDatasetModalityTypes: any[];
@@ -47,14 +45,14 @@ export class SolrSearchComponent{
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
-            private solrService: SolrService) {
+            private solrService: SolrService, private router: Router) {
         
         this.form = this.buildForm();
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
-        this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();
-        this.allDatasetModalityTypes = DatasetModalityType.getValueLabelJsonArray(); 
+        // this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();
+        // this.allDatasetModalityTypes = DatasetModalityType.getValueLabelJsonArray(); 
     }
     
     // ngOnInit() {
@@ -73,8 +71,8 @@ export class SolrSearchComponent{
             'datasetName': [{value: this.solrRequest.datasetName, disabled: !this.solrRequest.subjectName || this.selectedStudies.length < 1}],
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
-            'datasetTypes': [this.solrRequest.datasetTypes],
-            'datasetNatures': [this.solrRequest.datasetNatures]
+            'datasetTypes': [this.solrRequest.datasetType],
+            'datasetNatures': [this.solrRequest.datasetNature]
         });
         return formGroup;
     }
@@ -110,15 +108,17 @@ export class SolrSearchComponent{
         if (this.solrRequest.subjectName) saveStates[1] = this.solrRequest.subjectName.slice();
         if (this.solrRequest.examinationComment) saveStates[2] = this.solrRequest.examinationComment.slice();
         if (this.solrRequest.datasetName) saveStates[3] = this.solrRequest.datasetName.slice();
+        if (this.solrRequest.datasetType) saveStates[4] = this.solrRequest.datasetType.slice();
+        if (this.solrRequest.datasetNature) saveStates[5] = this.solrRequest.datasetNature.slice();
         return this.solrService.facetSearch(this.solrRequest, pageable).then(solrResultPage => {
             for (let j = 0; j < solrResultPage['facetResultPages'].length; j++) {
-                let facet: any[] = [];
                 for (let i = 0; i < solrResultPage['facetResultPages'][j].content.length; i++) {
                     let facetField: FacetField = new FacetField(solrResultPage['facetResultPages'][j].content[i]);
-                    if (saveStates[j] && facetField.value == saveStates[j]) {facetField.checked = true;}
-                    facet.push(facetField);
+                    if (saveStates[j] && saveStates[j].includes(facetField.value))
+                       {facetField.checked = true;}
+                    solrResultPage['facetResultPages'][j].content[i] = facetField;
+                    this.facetResultPage[j] = solrResultPage['facetResultPages'][j];
                 }
-                this.facets[j] = facet;
             }
             return solrResultPage;
         });
@@ -161,9 +161,8 @@ export class SolrSearchComponent{
         this.selectedStudies = this.selectedStudies.filter(study => study.id !== studyId);
     }
 
-
-    private removeSelectedSubject(subject: Subject) {
-        console.log(subject)
+    private onRowClick(solrRequest: any) {
+        this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
     }
 
     // private filterSubjectName(value: string): string[] {

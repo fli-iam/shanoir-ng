@@ -35,10 +35,12 @@ import org.springframework.data.solr.repository.SolrCrudRepository;
 public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository<ShanoirSolrDocument, Long> {
 	
 	@Query(value = "*:*")
-	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str"})
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
+			"datasetType", "datasetNature"}, limit = 100)
 	SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
 	
-	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str"})
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
+			"datasetType", "datasetNature"}, limit = 100)
 	SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 
 }

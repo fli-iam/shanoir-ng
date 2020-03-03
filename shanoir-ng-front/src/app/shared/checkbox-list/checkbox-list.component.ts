@@ -14,6 +14,7 @@
 
 import { Component, forwardRef, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { FacetResultPage } from "../../solr/solr.document.model";
 
 @Component({
     selector: 'checkbox-list',
@@ -30,18 +31,22 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     onChange = (_: any) => {};
     onTouched = () => {};
-    @Input() items: any[];
+    @Input() items: FacetResultPage;
     selectedItems: any[] = [];
     selectAll: boolean = true;
+    currentPage: number = 0;
+    itemsPersPage: number = 5;
+    totalPages: number =  0;
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.items && this.items !== undefined) {
+            this.totalPages = Math.ceil(this.items.totalElements / this.itemsPersPage);console.log('totalPages: ', this.totalPages)
             // this.selectUnselectAll(false); // checked all by default
         }
     }
 
     selectUnselectAll (isChecked: boolean) {
-        this.items.map(item => { item.checked = isChecked; return item; })
+        this.items.content.map(item => { item.checked = isChecked; return item; })
         this.onToggle();
     }
     
@@ -58,9 +63,12 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     }
 
     onToggle() {
-        this.selectedItems = this.items.filter(item => item.checked).map(item => item.value);
+        this.selectedItems = this.items.content.filter(item => item.checked).map(item => item.value);
         this.onChange(this.selectedItems);
-        console.log('change selected items' , this.selectedItems)
     }
 
+    setPage(page: number) {
+        if (page < 0) return;
+        this.currentPage = page;console.log('currentPage: ', this.currentPage)
+    }
 }

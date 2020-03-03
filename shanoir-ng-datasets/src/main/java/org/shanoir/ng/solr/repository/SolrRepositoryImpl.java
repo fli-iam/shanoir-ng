@@ -62,14 +62,22 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 		if (facet.getDatasetEndDate() != null) {
 			criteria.and(Criteria.where("datasetCreationDate").lessThanEqual(DateTimeUtils.localDateToSolrString(facet.getDatasetEndDate())));
 		}
+		if (facet.getDatasetType() != null && facet.getDatasetType().size() > 0) {
+			criteria.and(Criteria.where("datasetType").in(facet.getDatasetType()));
+		}
+		if (facet.getDatasetNature() != null && facet.getDatasetNature().size() > 0) {
+			criteria.and(Criteria.where("datasetNature").in(facet.getDatasetNature()));
+		}
 		
 		criteria = combineCriteria(criteria);
 		
 		FacetQuery query = new SimpleFacetQuery(criteria)
-		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str").setFacetLimit(10)
-		  .addFacetOnField("subjectName_str").setFacetLimit(10)
-		  .addFacetOnField("examinationComment_str").setFacetLimit(10)
-		  .addFacetOnField("datasetName_str").setFacetLimit(10));
+		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str").setFacetLimit(100)
+		  .addFacetOnField("subjectName_str").setFacetLimit(100)
+		  .addFacetOnField("examinationComment_str").setFacetLimit(100)
+		  .addFacetOnField("datasetName_str").setFacetLimit(100)
+		  .addFacetOnField("datasetType").setFacetLimit(100)
+		  .addFacetOnField("datasetNature").setFacetLimit(100));
 		FacetPage<ShanoirSolrDocument> facetPage = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
 		
 		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) facetPage;

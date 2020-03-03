@@ -37,6 +37,10 @@ public class ShanoirSolrFacet {
 	
 	private LocalDate datasetEndDate;
 	
+	private	Collection<String> datasetType;
+	
+	private Collection<String> datasetNature;
+	
 	/**
 	 * @return the studyName
 	 */
@@ -133,6 +137,34 @@ public class ShanoirSolrFacet {
 	 */
 	public void setDatasetEndDate(LocalDate datasetEndDate) {
 		this.datasetEndDate = datasetEndDate;
+	}
+
+	/**
+	 * @return the datasetType
+	 */
+	public Collection<String> getDatasetType() {
+		return datasetType;
+	}
+
+	/**
+	 * @param datasetType the datasetType to set
+	 */
+	public void setDatasetType(Collection<String> datasetType) {
+		this.datasetType = datasetType;
+	}
+
+	/**
+	 * @return the datasetNature
+	 */
+	public Collection<String> getDatasetNature() {
+		return datasetNature;
+	}
+
+	/**
+	 * @param datasetNature the datasetNature to set
+	 */
+	public void setDatasetNature(Collection<String> datasetNature) {
+		this.datasetNature = datasetNature;
 	}
 
 //	private	Long datasetId;

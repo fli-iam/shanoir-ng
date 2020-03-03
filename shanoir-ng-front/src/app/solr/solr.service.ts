@@ -35,7 +35,7 @@ export class SolrService {
 
     public facetSearch(facetSearch: ShanoirSolrFacet, pageable: Pageable): Promise<SolrResultPage> {
         if (!facetSearch.studyName && !facetSearch.subjectName && !facetSearch.examinationComment && !facetSearch.datasetName
-            && !facetSearch.datasetStartDate && !facetSearch.datasetEndDate) {
+            && !facetSearch.datasetStartDate && !facetSearch.datasetEndDate && !facetSearch.datasetType && !facetSearch.datasetNature) {
                 return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
                 .map((solrResultPage: SolrResultPage) => {
                     return solrResultPage;

@@ -51,25 +51,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="button" (click)="showAllStudies(); table.refresh()">
                             &#9664; Show all studies
                         </span>
-                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [items]="facets[0]" (change)="table.refresh()"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [items]="facetResultPage[0]" ></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Subject Name</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="solrRequest.subjectName" formControlName="subjectName" [items]="facets[1]" (change)="table.refresh()"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.subjectName" formControlName="subjectName" [items]="facetResultPage[1]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Examination Comment</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="solrRequest.examinationComment" formControlName="examinationComment" [items]="facets[2]" (change)="table.refresh()"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.examinationComment" formControlName="examinationComment" [items]="facetResultPage[2]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Dataset Name</label> 
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="solrRequest.datasetName" formControlName="datasetName" [items]="facets[3]" (change)="table.refresh()"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.datasetName" formControlName="datasetName" [items]="facetResultPage[3]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
@@ -91,13 +91,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label>Dateset ModalityType</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="solrRequest.datasetTypes" formControlName="datasetTypes" [items]="allDatasetModalityTypes"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.datasetType" formControlName="datasetTypes" [items]="facetResultPage[4]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
                 <label>Mr Dateset Nature</label>
                 <span class="right-col">
-                    <checkbox-list [(ngModel)]="solrRequest.datasetNatures" formControlName="datasetNatures" [items]="allMrDatasetNatures"></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.datasetNature" formControlName="datasetNatures" [items]="facetResultPage[5]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <!-- criteres choisis -->
@@ -109,9 +109,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <shanoir-table #table
             [getPage]="getPage.bind(this)" 
             [columnDefs]="columnDefs" 
-            [customActionDefs]="customActionDefs" 
             (rowClick)="onRowClick($event)"
-            [browserSearch]="false">
+            [browserSearch]="false"
+            [selectionAllowed]="true">
         </shanoir-table>
     </div>
 </form>

@@ -62,7 +62,6 @@ public class DateTimeUtils {
 			ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
 			final DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
 			return zdt.format(dtf);
-//			return localDate.toString().concat("T00:00:00Z");
 		}
 	}
 

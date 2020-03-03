@@ -17,12 +17,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Select / Unselect All -->
 <!-- <input type="checkbox" [(ngModel)]="selectAll" (change)="selectUnselectAll($event.target.checked)" /> Select / Unselect All -->
 <!-- List of checkboxes -->
-<div class="items">
-    <label *ngFor="let item of items">
+<div class="items" *ngIf="items && items.content">
+    <label *ngFor="let item of items.content | slice: itemsPersPage*currentPage : itemsPersPage*(currentPage+1)">
         <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" />
             {{item.value}}
         <ng-container *ngIf="item.valueCount"> - {{item.valueCount}}</ng-container>
     </label>
+    <button [disabled]="currentPage == 0" (click)="setPage(currentPage - 1)">-</button>
+    <button [disabled]="currentPage + 1 == totalPages" (click)="setPage(currentPage + 1)">+</button>
 </div>
-
-<!-- TODO: item order by item.count -->

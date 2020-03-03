@@ -34,8 +34,8 @@ export class ShanoirSolrFacet {
     datasetName: string[];
     datasetStartDate: Date;
     datasetEndDate: Date;
-    datasetTypes: string[];
-    datasetNatures: string[];
+    datasetType: string[];
+    datasetNature: string[];
 }
 
 export class FacetField {
@@ -51,10 +51,6 @@ export class FacetField {
     }
 }
 
-export class FacetResultPage {
-    public content: FacetField[];
-}
+export class FacetResultPage extends Page<FacetField>{}
 
-export class SolrResultPage extends Page<SolrDocument>{
-    public facetResultPages: FacetResultPage[];
-}
+export class SolrResultPage extends Page<SolrDocument>{}
