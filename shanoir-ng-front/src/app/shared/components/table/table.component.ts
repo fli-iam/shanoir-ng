@@ -27,7 +27,10 @@ export class TableComponent implements OnInit {
     @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
-    @Input() selectionAllowed: boolean = false; // TODO : selectable
+    selection: Map<number, any> = new Map();
+    @Input() selectionAllowed: boolean = false;
+    @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
+    selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
@@ -272,26 +275,46 @@ export class TableComponent implements OnInit {
     }
 
     private getNbSelected(): number {
-        if (!this.items) return 0;
-        let nb: number = 0;
-        for (let item of this.items) {
-            if (item["isSelectedInTable"]) nb++;
-        }
-        return nb;
+        return this.selection ? this.selection.size : 0;
     }
 
-    private selectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = true;
+    onSelectAllChange() {
+        if (this.selectAll == true) {
+            this.getPage(new Pageable(1, this.page.totalElements)).then(page => {
+                this.selection = new Map();
+                page.content.forEach(elt => this.selection.set(elt.id, elt));
+            });
+        } else if (this.selectAll == false) {
+            this.selection = new Map();
         }
     }
 
-    private unSelectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = false;
+    onSelectChange(item: Object, selected: boolean) {
+        if (selected) {
+            if (item['id']) this.selection.set(item['id'], item);
+        } else {
+            this.selection.delete(item['id']);
         }
+        
+        if (this.selection.size == this.page.totalElements) {
+            this.selectAll = true;
+        } else if (this.selection.size == 0) {
+            this.selectAll = false;
+        } else {
+            this.selectAll = 'indeterminate';
+        }
+
+        let arr = [];
+        this.selection.forEach(sel => arr.push(sel));
+        this.selectionChange.emit(arr);
+    }
+
+    isSelected(item: Object): boolean {
+        if (!item['id']) {
+            this.selectionAllowed = false;
+            throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
+        }
+        return this.selection.get(item['id']) != undefined;
     }
 
     private getDefaultSorting() {
