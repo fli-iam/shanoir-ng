@@ -193,9 +193,20 @@ public class BIDSServiceImpl implements BIDSService {
 		try {
 			// Get study folder
 			fileToDelete = getFileFromId(exam.getStudyId().toString(), new File(bidsStorageDir));
+
+			if (fileToDelete == null || !fileToDelete.exists()) {
+				LOG.info("Trying to delete a non existing examination folder, file not deleted");
+				return;
+			}
+
 			// Get subject folder
 			fileToDelete = getFileFromId(exam.getSubjectId().toString(), fileToDelete);
-		
+			
+			if (fileToDelete == null || !fileToDelete.exists()) {
+				LOG.info("Trying to delete a non existing exmaination folder, file not deleted");
+				return;
+			}
+
 			// delete from scans.tsv searching by examination ID
 			File scans = getScansFile(fileToDelete);
 			deleteLineFromFile(scans, examId, ".*");
@@ -206,7 +217,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 			// Delete all the folder
 			FileUtils.deleteDirectory(fileToDelete);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
 		}
 	}
@@ -607,7 +618,7 @@ public class BIDSServiceImpl implements BIDSService {
 			
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.startsWith(SUBJECT_PREFIX + id + "_") && !name.endsWith(".zip")
+				return name.startsWith(SUBJECT_PREFIX + id + "_") && !name.endsWith(".zip")  && !name.endsWith(".tsv")
 						|| name.startsWith(STUDY_PREFIX + id + "_")
 						|| name.equals(SESSION_PREFIX + id)
 						|| name.equals(id);
