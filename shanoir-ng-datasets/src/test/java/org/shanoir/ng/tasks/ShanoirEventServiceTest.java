@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -44,9 +45,9 @@ public class ShanoirEventServiceTest {
 		// WHEN we add the task
 		service.publishEvent(t);
 
-		// THEN the task is sent using RabbitMQ
+		// THEN the task is sent using RabbitMQ and sent to the front
 		ArgumentCaptor<String> argumentCatcher = new ArgumentCaptor();
-		Mockito.verify(template).convertAndSend(Mockito.eq("shanoir-events-exchange"), Mockito.eq(""), argumentCatcher.capture());
+		Mockito.verify(template).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
 		String message = argumentCatcher.getValue();
 		assertNotNull(message);
 		assertTrue(message.contains(t.getId().toString()));
