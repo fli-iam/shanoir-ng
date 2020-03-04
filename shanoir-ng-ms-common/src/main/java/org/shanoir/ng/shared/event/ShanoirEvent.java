@@ -20,6 +20,8 @@ public class ShanoirEvent {
 
 	protected int status;
 
+	protected Float progress;
+
 	public ShanoirEvent() {
 	}
 
@@ -31,6 +33,11 @@ public class ShanoirEvent {
 		this.status = status;
 		// Generate an ID
 		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+	}
+
+	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress) {
+		this(eventType, objectId, userId, message, status);
+		this.progress = Float.valueOf(progress);
 	}
 
 	/**
@@ -115,6 +122,20 @@ public class ShanoirEvent {
 	 */
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	/**
+	 * @return the progress
+	 */
+	public Float getProgress() {
+		return progress;
+	}
+
+	/**
+	 * @param progress the progress to set
+	 */
+	public void setProgress(Float progress) {
+		this.progress = progress;
 	}
 
 }

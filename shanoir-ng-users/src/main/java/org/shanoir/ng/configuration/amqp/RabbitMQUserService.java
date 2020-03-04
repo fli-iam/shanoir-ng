@@ -14,71 +14,51 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.io.IOException;
-
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-@Configuration
-@Profile("!test")
-public class RabbitMQConfiguration {
+@Component
+public class RabbitMQUserService {
 
-	private static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
-
-	private static final String SHANOIR_EVENTS_QUEUE = "shanoir_events_queue";
-
-	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQConfiguration.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
 
 	@Autowired
 	ShanoirEventsService eventsService;
-	
-    @Bean
-    public static org.springframework.amqp.core.Queue getMSUsersToMSStudiesUserDelete() {
-    		return new org.springframework.amqp.core.Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
-    }
-
-    @Bean
-    public static org.springframework.amqp.core.Queue getShanoirEventsQueue() {
-    		return new org.springframework.amqp.core.Queue(SHANOIR_EVENTS_QUEUE, true);
-    }
-
-	@Bean
-	public FanoutExchange fanoutEvents() {
-	    return new FanoutExchange("shanoir-events-exchange");
-	}
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-	        value = @Queue(value = SHANOIR_EVENTS_QUEUE, durable = "true"),
-	        exchange = @Exchange(value = "shanoir-events-exchange", ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
+			key = "*.event",
+			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 	)
-	public void receiveEvent(String eventAsString) {
+	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
+		LOG.error("receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			eventsService.addEvent(event);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
 		}
 	}
 }

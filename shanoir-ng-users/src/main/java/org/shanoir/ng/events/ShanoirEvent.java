@@ -47,6 +47,9 @@ public class ShanoirEvent {
 	/** Status, can be either 0 (created), 1 (success) or -1 (in error) **/
 	protected int status;
 
+	/** The progress of the event. */
+	protected Float progress;
+
 	public ShanoirEvent() {
 		// Default empty constructor for json deserializer.
 	}
@@ -163,5 +166,18 @@ public class ShanoirEvent {
 		this.status = status;
 	}
 
-	
+	/**
+	 * @return the progress
+	 */
+	public Float getProgress() {
+		return progress;
+	}
+
+	/**
+	 * @param progress the progress to set
+	 */
+	public void setProgress(Float progress) {
+		this.progress = progress;
+	}
+
 }

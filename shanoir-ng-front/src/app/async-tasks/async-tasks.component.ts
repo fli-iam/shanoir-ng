@@ -70,6 +70,10 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
                     }
                 } 
             },
+            { headerName: 'Progress', field: 'progress', type: 'progress', cellRenderer: function (params: any) {
+                    return params.data.progress * 100 + '%';
+                } 
+            },
             {
                 headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.creationDate);

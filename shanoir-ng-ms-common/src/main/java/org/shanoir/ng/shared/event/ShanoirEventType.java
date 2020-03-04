@@ -3,60 +3,60 @@ package org.shanoir.ng.shared.event;
 public class ShanoirEventType {
 
 	/** Study **/
-	public static final String CREATE_STUDY_EVENT = "createStudyEvent";
-	public static final String UPDATE_STUDY_EVENT = "updateStudyEvent";
-	public static final String DELETE_STUDY_EVENT = "deleteStudyEvent";
+	public static final String CREATE_STUDY_EVENT = "createStudy.event";
+	public static final String UPDATE_STUDY_EVENT = "updateStudy.event";
+	public static final String DELETE_STUDY_EVENT = "deleteStudy.event";
 
 	/** Center **/
-	public static final String CREATE_CENTER_EVENT = "createCenterEvent";
-	public static final String UPDATE_CENTER_EVENT = "updateCenterEvent";
-	public static final String DELETE_CENTER_EVENT = "deleteCenterEvent";
+	public static final String CREATE_CENTER_EVENT = "createCenter.event";
+	public static final String UPDATE_CENTER_EVENT = "updateCenter.event";
+	public static final String DELETE_CENTER_EVENT = "deleteCenter.event";
 
 	/** Subject**/
-	public static final String CREATE_SUBJECT_EVENT = "createSubjectEvent";
-	public static final String UPDATE_SUBJECT_EVENT = "updateSubjectEvent";
-	public static final String DELETE_SUBJECT_EVENT = "deleteSubjectEvent";
+	public static final String CREATE_SUBJECT_EVENT = "createSubject.event";
+	public static final String UPDATE_SUBJECT_EVENT = "updateSubject.event";
+	public static final String DELETE_SUBJECT_EVENT = "deleteSubject.event";
 
 	/** Examination **/
-	public static final String CREATE_EXAMINATION_EVENT = "createExaminationEvent";
-	public static final String UPDATE_EXAMINATION_EVENT = "updateExaminationEvent";
-	public static final String DELETE_EXAMINATION_EVENT = "deleteExaminationEvent";
+	public static final String CREATE_EXAMINATION_EVENT = "createExamination.event";
+	public static final String UPDATE_EXAMINATION_EVENT = "updateExamination.event";
+	public static final String DELETE_EXAMINATION_EVENT = "deleteExamination.event";
 
 	/** Equipement **/
-	public static final String CREATE_EQUIPEMENT_EVENT = "createEquipementEvent";
-	public static final String UPDATE_EQUIPEMENT_EVENT = "updateEquipementEvent";
-	public static final String DELETE_EQUIPEMENT_EVENT = "deleteEquipementEvent";
+	public static final String CREATE_EQUIPEMENT_EVENT = "createEquipement.event";
+	public static final String UPDATE_EQUIPEMENT_EVENT = "updateEquipement.event";
+	public static final String DELETE_EQUIPEMENT_EVENT = "deleteEquipement.event";
 
 	/** Coil **/
-	public static final String CREATE_COIL_EVENT = "createCoilEvent";
-	public static final String UPDATE_COIL_EVENT = "updateCoilEvent";
-	public static final String DELETE_COIL_EVENT = "deleteCoilEvent";
+	public static final String CREATE_COIL_EVENT = "createCoil.event";
+	public static final String UPDATE_COIL_EVENT = "updateCoil.event";
+	public static final String DELETE_COIL_EVENT = "deleteCoil.event";
 
 	/** Pathology **/
-	public static final String CREATE_PATHOLOGY_EVENT = "createPathologyEvent";
-	public static final String UPDATE_PATHOLOGY_EVENT = "updatePathologyEvent";
-	public static final String DELETE_PATHOLOGY_EVENT = "deletePathologyEvent";
+	public static final String CREATE_PATHOLOGY_EVENT = "createPathology.event";
+	public static final String UPDATE_PATHOLOGY_EVENT = "updatePathology.event";
+	public static final String DELETE_PATHOLOGY_EVENT = "deletePathology.event";
 
 	/** Therapy **/
-	public static final String CREATE_THERAPY_EVENT = "createTherapyEvent";
-	public static final String UPDATE_THERAPY_EVENT = "updateTherapyEvent";
-	public static final String DELETE_THERAPY_EVENT = "deleteTherapyEvent";
+	public static final String CREATE_THERAPY_EVENT = "createTherapy.event";
+	public static final String UPDATE_THERAPY_EVENT = "updateTherapy.event";
+	public static final String DELETE_THERAPY_EVENT = "deleteTherapy.event";
 
 	/** Anesthetic **/
-	public static final String CREATE_ANESTHETIC_EVENT = "createAnestheticEvent";
-	public static final String UPDATE_ANESTHETIC_EVENT = "updateAnestheticEvent";
-	public static final String DELETE_ANESTHETIC_EVENT = "deleteAnestheticEvent";
+	public static final String CREATE_ANESTHETIC_EVENT = "createAnesthetic.event";
+	public static final String UPDATE_ANESTHETIC_EVENT = "updateAnesthetic.event";
+	public static final String DELETE_ANESTHETIC_EVENT = "deleteAnesthetic.event";
 
 	/** Preclinical Subject**/
-	public static final String CREATE_PRECLINICAL_SUBJECT_EVENT = "createPreclinicalSubjectEvent";
-	public static final String UPDATE_PRECLINICAL_SUBJECT_EVENT = "updatePreclinicalSubjectEvent";
-	public static final String DELETE_PRECLINICAL_SUBJECT_EVENT = "deletePreclinicalSubjectEvent";
+	public static final String CREATE_PRECLINICAL_SUBJECT_EVENT = "createPreclinicalSubject.event";
+	public static final String UPDATE_PRECLINICAL_SUBJECT_EVENT = "updatePreclinicalSubject.event";
+	public static final String DELETE_PRECLINICAL_SUBJECT_EVENT = "deletePreclinicalSubject.event";
 
 	/** preclinical Reference **/
-	public static final String CREATE_PRECLINICAL_REFERENCE_EVENT = "createPreclinicalReferenceEvent";
-	public static final String UPDATE_PRECLINICAL_REFERENCE_EVENT = "updatePreclinicalReferenceEvent";
-	public static final String DELETE_PRECLINICAL_REFERENCE_EVENT = "deletePreclinicalReferenceEvent";
+	public static final String CREATE_PRECLINICAL_REFERENCE_EVENT = "createPreclinicalReference.event";
+	public static final String UPDATE_PRECLINICAL_REFERENCE_EVENT = "updatePreclinicalReference.event";
+	public static final String DELETE_PRECLINICAL_REFERENCE_EVENT = "deletePreclinicalReference.event";
 	
 	/** Import Dataset **/
-	public static final String IMPORT_DATASET_EVENT = "importDatasetEvent";
+	public static final String IMPORT_DATASET_EVENT = "importDataset.event";
 }

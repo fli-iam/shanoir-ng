@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     
     <div class="subtitle"><i class="fas fa-hourglass-half"></i> {{nbProcess}} works in progress</div>
     <ul>
-        <li *ngFor="let item of tasksInProgress"> {{item.message}} <progress-bar progress="{{item.status}}"></progress-bar></li>
+        <li *ngFor="let item of tasksInProgress"> {{item.message}} <progress-bar progress="{{item.progress}}"></progress-bar></li>
     </ul>
     <li class="horizontal-bar"><hr/></li>
     <div class="subtitle"><i class="fas fa-flag-checkered"></i>{{nbDone}} works done</div>

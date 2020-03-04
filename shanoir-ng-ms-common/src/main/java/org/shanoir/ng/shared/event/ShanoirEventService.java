@@ -1,5 +1,6 @@
 package org.shanoir.ng.shared.event;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -32,7 +33,7 @@ public class ShanoirEventService {
 		mapper.registerModule(new JavaTimeModule());
 		try {
 			String str = mapper.writeValueAsString(event);
-			rabbitTemplate.convertAndSend("shanoir-events-exchange", "", str);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
 		} catch (JsonProcessingException e) {
 			LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
 			LOG.error("Thrown exception: {}", e);

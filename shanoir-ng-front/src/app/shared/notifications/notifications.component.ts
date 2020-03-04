@@ -18,6 +18,10 @@ import { menuSlideDown } from '../animations/animations';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { Task } from '../../async-tasks/task.model'
 import { TaskService } from '../../async-tasks/task.service'
+import * as AppUtils from '../../utils/app.utils'
+import { KeycloakService } from '../../shared/keycloak/keycloak.service'
+
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 @Component({
     selector: 'notifications',
@@ -39,8 +43,9 @@ export class NotificationsComponent implements OnInit {
     protected tasksDone: Task[] = [];
     protected tasksInProgress: Task[] = [];
     protected isLoading = false;
+    protected source;
 
-    constructor(public elementRef: ElementRef, private taskService: TaskService) {
+    constructor(public elementRef: ElementRef, private taskService: TaskService, private keycloakService: KeycloakService) {
         document.addEventListener('click', () => {
             if (!elementRef.nativeElement.contains(event.target)) {
                 if (this.isOpen) this.close();
@@ -50,30 +55,52 @@ export class NotificationsComponent implements OnInit {
 
     ngOnInit(): void {
         this.refresh();
+        this.connect();
     }
 
     getEntities(): Promise<Task[]> {
         return this.taskService.getTasks();
     }
 
-    private refresh() {
+    private refresh(items = []) {
         this.isLoading = true;
-        this.getEntities().then(items => {
-            this.tasks = items;
-            this.nbProcess = 0;
-            this.nbDone = 0;
-            this.tasksDone = [];
-            this.tasksInProgress = []
-            for (let task of this.tasks) {
-                if (task.status == 1) {
-                    this.tasksDone.push(task);
-                    this.nbDone +=1;
-                } else {
-                    this.tasksInProgress.push(task);
-                     this.nbProcess +=1;
-                }
+        if (items.length == 0) {
+           this.getEntities().then(items => this.refresh(items));
+            return;
+        }
+
+        this.tasks = items;
+        this.nbProcess = 0;
+        this.nbDone = 0;
+        this.tasksDone = [];
+        this.tasksInProgress = []
+        for (let task of this.tasks) {
+            if (task.status == 1) {
+                this.tasksDone.push(task);
+                this.nbDone +=1;
+            } else {
+                this.tasksInProgress.push(task);
+                 this.nbProcess +=1;
             }
-            this.isLoading = false;
+        }
+        this.isLoading = false;
+    }
+
+    connect(): void {
+        this.keycloakService.getToken().then(token => {
+            this.source = new EventSourcePolyfill(AppUtils.BACKEND_API_UPDATE_TASKS_URL, {
+                  headers: {
+                    'Authorization': "Bearer " + token
+                  }
+                });
+            this.source.addEventListener('message', message => {
+                if (message.data !== "{}") {
+                    this.refresh();
+                }
+            });
+            this.source.onmessage = (message)=>{
+                let n:Notification = JSON.parse(message.data);
+            }     
         })
     }
 
