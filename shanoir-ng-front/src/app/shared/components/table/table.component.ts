@@ -280,7 +280,21 @@ export class TableComponent implements OnInit {
 
     onSelectAllChange() {
         if (this.selectAll == true) {
-            this.getPage(new Pageable(1, this.page.totalElements)).then(page => {
+            let pageableAll: Pageable;
+            if (this.filter) {
+                pageableAll = new FilterablePageable(
+                    1, 
+                    this.page.totalElements,
+                    null,
+                    this.filter
+                );
+            } else {
+                pageableAll = new Pageable(
+                    1, 
+                    this.page.totalElements
+                );
+            }
+            this.getPage(pageableAll).then(page => {
                 this.selection = new Map();
                 page.content.forEach(elt => this.selection.set(elt.id, elt));
             });
