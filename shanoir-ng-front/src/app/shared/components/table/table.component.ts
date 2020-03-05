@@ -87,6 +87,7 @@ export class TableComponent implements OnInit {
 
     private onSearchChange(filter: Filter) {
         this.filter = filter;
+        this.clearSelection();
         this.goToPage(1);
     }
 
@@ -224,6 +225,7 @@ export class TableComponent implements OnInit {
         this.isLoading = true;
         this.getPage(this.getPageable()).then(page => {
             this.page = page;
+            this.computeSelectAll();
             setTimeout(() => this.isLoading = false, 200);
         });
     }
@@ -280,27 +282,56 @@ export class TableComponent implements OnInit {
 
     onSelectAllChange() {
         if (this.selectAll == true) {
-            let pageableAll: Pageable;
-            if (this.filter) {
-                pageableAll = new FilterablePageable(
-                    1, 
-                    this.page.totalElements,
-                    null,
-                    this.filter
-                );
-            } else {
-                pageableAll = new Pageable(
-                    1, 
-                    this.page.totalElements
-                );
-            }
-            this.getPage(pageableAll).then(page => {
-                this.selection = new Map();
-                page.content.forEach(elt => this.selection.set(elt.id, elt));
-            });
+
+            // let pageableAll: Pageable;
+            // if (this.filter) {
+            //     pageableAll = new FilterablePageable(
+            //         1, 
+            //         this.page.totalElements,
+            //         null,
+            //         this.filter
+            //     );
+            // } else {
+            //     pageableAll = new Pageable(
+            //         1, 
+            //         this.page.totalElements
+            //     );
+            // }
+            // this.getPage(pageableAll).then(page => {
+            //     this.selection = new Map();
+            //     page.content.forEach(elt => this.selection.set(elt.id, elt));
+            // });
+            this.page.content.forEach(elt => this.selection.set(elt['id'], elt));
+            this.emitSelectionChange();
         } else if (this.selectAll == false) {
-            this.selection = new Map();
+            this.page.content.forEach(elt => {
+                this.selection.delete(elt['id']);
+            });
+            this.emitSelectionChange();
         }
+    }
+
+    clearSelection() {
+        this.selection = new Map();
+        this.emitSelectionChange();
+        this.selectAll = false;
+    }
+
+    computeSelectAll() {
+        let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+        if (selectedOnCurrentPage.length == this.page.content.length) {
+            this.selectAll = true;
+        } else if (selectedOnCurrentPage.length == 0) {
+            this.selectAll = false;
+        } else {
+            this.selectAll = 'indeterminate';
+        }
+    }
+
+    emitSelectionChange() {
+        let arr = [];
+        this.selection.forEach(sel => arr.push(sel));
+        this.selectionChange.emit(arr);
     }
 
     onSelectChange(item: Object, selected: boolean) {
@@ -309,18 +340,8 @@ export class TableComponent implements OnInit {
         } else {
             this.selection.delete(item['id']);
         }
-        
-        if (this.selection.size == this.page.totalElements) {
-            this.selectAll = true;
-        } else if (this.selection.size == 0) {
-            this.selectAll = false;
-        } else {
-            this.selectAll = 'indeterminate';
-        }
-
-        let arr = [];
-        this.selection.forEach(sel => arr.push(sel));
-        this.selectionChange.emit(arr);
+        this.computeSelectAll();
+        this.emitSelectionChange();
     }
 
     isSelected(item: Object): boolean {
