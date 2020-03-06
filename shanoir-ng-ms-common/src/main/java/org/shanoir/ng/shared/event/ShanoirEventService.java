@@ -31,14 +31,14 @@ public class ShanoirEventService {
 	public void publishEvent(ShanoirEvent event) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
-		StringBuilder builder = new StringBuilder("Event:\n")
-			.append("Id: ").append(event.getId()).append("\n")
-			.append("User ID: ").append(event.getUserId()).append("\n")
-			.append("EventType: ").append(event.getEventType()).append("\n")
-			.append("Object ID: ").append(event.getObjectId()).append("\n")
-			.append("Message: ").append(event.getMessage()).append("\n")
-			.append("Status: ").append(event.getStatus()).append("\n")
-			.append("Progress: ").append(event.getProgress()).append("\n");
+		StringBuilder builder = new StringBuilder("Event:[")
+			.append("id=").append(event.getId()).append(";")
+			.append("user_id=").append(event.getUserId()).append(";")
+			.append("event_type=").append(event.getEventType()).append(";")
+			.append("object_id=").append(event.getObjectId()).append(";")
+			.append("message=").append(event.getMessage()).append(";")
+			.append("status=").append(event.getStatus()).append(";")
+			.append("progress=").append(event.getProgress()).append("]");
 		LOG.info(builder.toString());
 		try {
 			String str = mapper.writeValueAsString(event);
