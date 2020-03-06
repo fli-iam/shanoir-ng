@@ -2,8 +2,10 @@ package org.shanoir.ng.events;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.utils.Utils;
@@ -41,6 +43,16 @@ public class ShanoirEventsService {
 
 	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
 		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	}
+
+	/**
+	 * Deletes everyday events older than 1 year.
+	 */
+	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
+	private void deletePeriodically( ) {
+		Date now = new Date();
+		Long nowMinusSevenDays = now.getTime() - DateUtils.MILLIS_PER_DAY * 180;
+		repository.deleteByLastUpdateBefore(new Date(nowMinusSevenDays));
 	}
 
 	/**

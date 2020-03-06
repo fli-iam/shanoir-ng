@@ -1,22 +1,28 @@
 package org.shanoir.ng.events;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
- * A shanoir event is an event allowing to keep some history during CRUD events of shanoir elements
+ * A shanoir event is an event allowing to keep some history during CRUD events of shanoir elementcs
  * @author JComeD
  *
  */
 @Entity
-@Table(name = "events")
+@Table(name = "events",
+		indexes = {
+			@Index(name = "i_user_type", columnList = "userId,eventType"),
+		}
+	)
 public class ShanoirEvent {
 
 	/** ID of the event, normally generated BEFORE arriving here **/

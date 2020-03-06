@@ -231,125 +231,135 @@ public class ImporterService {
 
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
 			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("No datasets to create. Please check your EEG files");
 			eventService.publishEvent(event);
 			return;
 		}
 
-		DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
-		
-		// Get examination
-		Examination examination = examinationService.findById(importJob.getExaminationId());
-		
-		datasetAcquisition.setExamination(examination);
-		datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-
-		List<Dataset> datasets = new ArrayList<>();
-		float progress = 0f;
-
-		for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
-			progress += 1f / importJob.getDatasets().size();
-			event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
-			event.setProgress(progress);
-			eventService.publishEvent(event);
-			// Metadata
-			DatasetMetadata originMetadata = new DatasetMetadata();
-			originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
-			originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-			originMetadata.setName(datasetDto.getName());
-			originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-
-			// Create the dataset with informations from job
-			EegDataset datasetToCreate = new EegDataset();
-
-			// DatasetExpression with list of files
-			DatasetExpression expression = new DatasetExpression();
-			expression.setCreationDate(LocalDateTime.now());
-			expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
-			expression.setDataset(datasetToCreate);
-
-			List<DatasetFile> files = new ArrayList<>();
-
-			// Set files
-			if (datasetDto.getFiles() != null) {
-
-				// Copy the data somewhere else
-				final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-				final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-
-				final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
-				outDir.mkdirs();
-
-				// Move file one by one to the new directory
-				for (String filePath : datasetDto.getFiles()) {
-
-					File srcFile = new File(filePath);
-					String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
-					File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
-					Path finalLocation = null;
-					try {
-						finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						LOG.error("IOException generating EEG Dataset Expression", e);
-					}
-
-					// Create datasetExpression => Files
-					if (finalLocation != null) {
-						DatasetFile file = new DatasetFile();
-						file.setDatasetExpression(expression);
-						file.setPath(finalLocation.toUri().toString());
-						file.setPacs(false);
-						files.add(file);
-					}
-				}
-			}
-
-			expression.setDatasetFiles(files);
-			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-
-			// set the dataset_id where needed
-			for (Channel chan : datasetDto.getChannels()) {
-				chan.setDataset(datasetToCreate);
-				chan.setReferenceType(ChannelType.EEG);
-				// Parse channel name to get its type
-				for (ChannelType type : ChannelType.values()) {
-					if (chan.getName().contains(type.name())) {
-						chan.setReferenceType(type);
-					}
-				}
-			}
-			for (Event eventToImport : datasetDto.getEvents()) {
-				eventToImport.setDataset(datasetToCreate);
-			}
-
-			// Fill dataset with informations
-			datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
-			datasetToCreate.setChannels(datasetDto.getChannels());
-			datasetToCreate.setEvents(datasetDto.getEvents());
-			datasetToCreate.setCreationDate(LocalDate.now());
-			datasetToCreate.setDatasetAcquisition(datasetAcquisition);
-			datasetToCreate.setOriginMetadata(originMetadata);
-			datasetToCreate.setStudyId(importJob.getFrontStudyId());
-			datasetToCreate.setSubjectId(importJob.getSubjectId());
-			datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
-			datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
-			
-			datasets.add(datasetToCreate);
-		}
-
-		datasetAcquisition.setDatasets(datasets);
-		datasetAcquisitionRepository.save(datasetAcquisition);
-		
-		event.setStatus(ShanoirEvent.SUCCESS);
-		event.setMessage("Success");
-		event.setProgress(1f);
-		eventService.publishEvent(event);
-
-		// Complete BIDS with data
 		try {
-			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-		} catch (IOException e) {
-			LOG.error("Something went wrong creating the bids data: ", e);
+			DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
+			
+			// Get examination
+			Examination examination = examinationService.findById(importJob.getExaminationId());
+			
+			datasetAcquisition.setExamination(examination);
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+	
+			List<Dataset> datasets = new ArrayList<>();
+			float progress = 0f;
+	
+			for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
+				progress += 1f / importJob.getDatasets().size();
+				event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
+				event.setProgress(progress);
+				eventService.publishEvent(event);
+				// Metadata
+				DatasetMetadata originMetadata = new DatasetMetadata();
+				originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
+				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
+				originMetadata.setName(datasetDto.getName());
+				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+	
+				// Create the dataset with informations from job
+				EegDataset datasetToCreate = new EegDataset();
+	
+				// DatasetExpression with list of files
+				DatasetExpression expression = new DatasetExpression();
+				expression.setCreationDate(LocalDateTime.now());
+				expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
+				expression.setDataset(datasetToCreate);
+	
+				List<DatasetFile> files = new ArrayList<>();
+	
+				// Set files
+				if (datasetDto.getFiles() != null) {
+	
+					// Copy the data somewhere else
+					final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+					final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
+	
+					final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
+					outDir.mkdirs();
+	
+					// Move file one by one to the new directory
+					for (String filePath : datasetDto.getFiles()) {
+	
+						File srcFile = new File(filePath);
+						String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
+						File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+						Path finalLocation = null;
+						try {
+							finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							LOG.error("IOException generating EEG Dataset Expression", e);
+						}
+	
+						// Create datasetExpression => Files
+						if (finalLocation != null) {
+							DatasetFile file = new DatasetFile();
+							file.setDatasetExpression(expression);
+							file.setPath(finalLocation.toUri().toString());
+							file.setPacs(false);
+							files.add(file);
+						}
+					}
+				}
+	
+				expression.setDatasetFiles(files);
+				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+	
+				// set the dataset_id where needed
+				for (Channel chan : datasetDto.getChannels()) {
+					chan.setDataset(datasetToCreate);
+					chan.setReferenceType(ChannelType.EEG);
+					// Parse channel name to get its type
+					for (ChannelType type : ChannelType.values()) {
+						if (chan.getName().contains(type.name())) {
+							chan.setReferenceType(type);
+						}
+					}
+				}
+				for (Event eventToImport : datasetDto.getEvents()) {
+					eventToImport.setDataset(datasetToCreate);
+				}
+	
+				// Fill dataset with informations
+				datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+				datasetToCreate.setChannels(datasetDto.getChannels());
+				datasetToCreate.setEvents(datasetDto.getEvents());
+				datasetToCreate.setCreationDate(LocalDate.now());
+				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
+				datasetToCreate.setOriginMetadata(originMetadata);
+				datasetToCreate.setStudyId(importJob.getFrontStudyId());
+				datasetToCreate.setSubjectId(importJob.getSubjectId());
+				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
+				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
+				
+				datasets.add(datasetToCreate);
+			}
+	
+			datasetAcquisition.setDatasets(datasets);
+			datasetAcquisitionRepository.save(datasetAcquisition);
+			
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Success");
+			event.setProgress(1f);
+			eventService.publishEvent(event);
+			// Complete BIDS with data
+			try {
+				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
+			} catch (IOException e) {
+				LOG.error("Something went wrong creating the bids data: ", e);
+			}
+
+		//} catch (ShanoirException exc) {
+		//  Do something specific about ShanoirException when trhown
+		} catch (Exception e) {
+			LOG.error("Error while importing EEG: ", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("An unexpected error occured, please contact an administrator.");
+			eventService.publishEvent(event);
+			throw e;
 		}
 	}
-
 }

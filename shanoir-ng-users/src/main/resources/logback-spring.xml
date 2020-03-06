@@ -15,9 +15,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <configuration>
-	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
-	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
-	<root level="INFO">
-		<appender-ref ref="FILE" />
-	</root>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
+    <appender name="EVENT_FILE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>shanoir-events-log.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
+        <appender-ref ref="EVENT_FILE_LOG" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+    </root>
 </configuration>

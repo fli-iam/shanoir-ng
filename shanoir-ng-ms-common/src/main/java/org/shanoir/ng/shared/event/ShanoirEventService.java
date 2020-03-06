@@ -31,6 +31,15 @@ public class ShanoirEventService {
 	public void publishEvent(ShanoirEvent event) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
+		StringBuilder builder = new StringBuilder("Event:\n")
+			.append("Id: ").append(event.getId()).append("\n")
+			.append("User ID: ").append(event.getUserId()).append("\n")
+			.append("EventType: ").append(event.getEventType()).append("\n")
+			.append("Object ID: ").append(event.getObjectId()).append("\n")
+			.append("Message: ").append(event.getMessage()).append("\n")
+			.append("Status: ").append(event.getStatus()).append("\n")
+			.append("Progress: ").append(event.getProgress()).append("\n");
+		LOG.info(builder.toString());
 		try {
 			String str = mapper.writeValueAsString(event);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);

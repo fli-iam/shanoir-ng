@@ -57,7 +57,7 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
             return null;
         };
         return [
-            { headerName: 'Message', field: 'message', defaultSortCol: true, defaultAsc: true },
+            { headerName: 'Message', field: 'message'},
             { headerName: 'Status', field: 'status', type: 'Status', cellRenderer: function (params: any) {
                     if (params.data.status == 0) {
                         return "In progress"
@@ -80,7 +80,7 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
                 }
             },
             {
-                headerName: "Last update", field: "lastUpdate", cellRenderer: function (params: any) {
+                headerName: "Last update", field: "lastUpdate", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                     return dateRenderer(params.data.lastUpdate);
                 }
             },
