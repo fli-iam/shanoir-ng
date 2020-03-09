@@ -17,8 +17,6 @@ package org.shanoir.uploader.model.rest;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.uploader.model.PseudonymusHashValues;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 

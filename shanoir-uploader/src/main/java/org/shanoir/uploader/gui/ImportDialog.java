@@ -31,6 +31,7 @@ import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
+import org.shanoir.uploader.model.dto.SubjectStudyDTO;
 
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination
@@ -116,6 +117,7 @@ public class ImportDialog extends JDialog {
 	public JSeparator separatorMrExamination;
 	
 	public MainWindow mainWindow;
+	public SubjectStudyDTO subjectStudyDTO;
 	
 	/**
 	 * On injecting both listeners the ImportDialog becomes invisible of

@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
@@ -9,17 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.swing.JFormattedTextField;
-
 import org.apache.log4j.Logger;
-import org.jdatepicker.impl.JDatePickerImpl;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
@@ -277,6 +272,7 @@ public class ImportDialogOpenerNG {
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
 			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
 			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+			importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[2]);
 		}
 	}
 
@@ -292,33 +288,26 @@ public class ImportDialogOpenerNG {
 	private void updateImportDialogForExaminations(List<Examination> examinationDTOs, UploadJob uploadJob)
 			throws ParseException {
 		importDialog.mrExaminationExistingExamCB.removeAllItems();
+		/**
+		 * Existing examinations found
+		 */
 		if (examinationDTOs != null && !examinationDTOs.isEmpty()) {
 			for (Iterator iterator = examinationDTOs.iterator(); iterator.hasNext();) {
-				Examination examinationDTO = (Examination) iterator.next();
-				importDialog.mrExaminationExistingExamCB.addItem(examinationDTO);
+				Examination examination = (Examination) iterator.next();
+				importDialog.mrExaminationExistingExamCB.addItem(examination);
 			}
 			importDialog.mrExaminationExistingExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(false);
-			disableExaminationNew();
+		/**
+		 * New examination to create and no existing examinations found
+		 */
 		} else {
 			importDialog.mrExaminationExistingExamCB.setEnabled(false);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(true);
 		}
+		importDialog.mrExaminationNewExamCB.setEnabled(true);
+		importDialog.mrExaminationNewExamCB.setSelected(true);
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);
 		importDialog.mrExaminationCommentTF.setText(uploadJob.getStudyDescription());
-	}
-
-	private void disableExaminationNew() {
-		importDialog.mrExaminationExamExecutiveCB.setEnabled(false);
-		importDialog.mrExaminationCenterCB.setEnabled(false);
-		((Container) importDialog.mrExaminationDateDP).getComponent(1).setEnabled(false);
-		JFormattedTextField mrExaminationDateDPTF = ((JDatePickerImpl) importDialog.mrExaminationDateDP)
-				.getJFormattedTextField();
-		mrExaminationDateDPTF.setBackground(Color.LIGHT_GRAY);
-		importDialog.mrExaminationCommentTF.setEnabled(false);
 	}
 
 }
