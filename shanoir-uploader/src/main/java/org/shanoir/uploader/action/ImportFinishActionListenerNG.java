@@ -17,16 +17,16 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.model.Center;
-import org.shanoir.uploader.model.Investigator;
-import org.shanoir.uploader.model.PseudonymusHashValues;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.StudyCard;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Investigator;
+import org.shanoir.uploader.model.rest.PseudonymusHashValues;
 import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
@@ -65,21 +65,19 @@ public class ImportFinishActionListenerNG implements ActionListener {
 	 */
 	public void actionPerformed(final ActionEvent event) {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-//		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
-//		if (study == null || study.getId() == null || studyCard == null || studyCard.getId() == null) {
-//			return;
-//		}
+		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
+		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
+			return;
+		}
 		
 		// block further action
 		((JButton) event.getSource()).setEnabled(false);
 		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		// TODO the next lines are totally strange as GUI and two different DTOs are used: totally strange,
-		// but I did not refactor here as too time demanding at the moment and bad legacy of developer before
-		Long subjectId = null;
-		String subjectName = null;
+		/**
+		 * Handle subject here: creation or use existing
+		 */
 		if (subjectDTO == null) {
-			Subject subjectDTO = null;
 			try {
 				 subjectDTO = fillSubjectDTO(mainWindow.importDialog, uploadJob);
 			} catch (ParseException e) {
@@ -91,7 +89,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
-			subjectDTO = shanoirUploaderServiceClientNG.createSubject(study.getId(), new Long(1), ShUpConfig.isModeSubjectCommonNameManual(), subjectDTO);
+			subjectDTO = shanoirUploaderServiceClientNG.createSubject(subjectDTO, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
 			if (subjectDTO == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -100,15 +98,12 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
-				subjectId = new Long(subjectDTO.getId());
-				subjectName = subjectDTO.getName();
-				logger.info("Auto-Import: subject created on server with ID: " + subjectId);
+				logger.info("Auto-Import: subject created on server with ID: " + subjectDTO.getId());
 			}
 		} else {
-			subjectId = subjectDTO.getId();
-			subjectName = subjectDTO.getName();
-			logger.info("Auto-Import: subject used on server with ID: " + subjectId);
+			logger.info("Auto-Import: subject used on server with ID: " + subjectDTO.getId());
 		}
+		
 		Long examinationId = null;
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 			Examination examinationDTO = new Examination();
@@ -116,15 +111,15 @@ public class ImportFinishActionListenerNG implements ActionListener {
 			examinationDTO.setStudy(studyIdName);
 			IdName subjectIdName = new IdName(subjectDTO.getId(), subjectDTO.getName());
 			examinationDTO.setSubject(subjectIdName);
-			Center center = (Center) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
-			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
+			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
+//			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-//			IdName centerIdName = new IdName(center.getId(), center.getName());
-			IdName centerIdName = new IdName(new Long(1), "CHU Rennes");
+			IdName centerIdName = new IdName(center.getId(), center.getName());
 			examinationDTO.setCenter(centerIdName);
 			examinationDTO.setExaminationDate(examinationDate);
 			examinationDTO.setComment(examinationComment);
+
 			/**
 			 * TODO handle investigators here or decide finally to delete them in sh-ng
 			 */
@@ -149,8 +144,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		/**
 		 * 3. Fill PreImportData, later added to upload-job.xml
 		 */
-		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subjectId, examinationId);
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subjectName);
+		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subjectDTO.getId(), examinationId);
+		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subjectDTO.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
@@ -206,6 +201,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 			subjectDTO.setManualHemisphericDominance(HemisphericDominance.Right);
 		}
 //		final SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
+// 		subjectStudyDTO.setStudyId(studyId);
 //		subjectStudyDTO.setSubjectType((SubjectType) importDialog.subjectTypeCB.getSelectedItem());
 //		subjectStudyDTO.setPhysicallyInvolved(importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
 //		List<SubjectStudyDTO> subjectStudyList = new ArrayList<SubjectStudyDTO>();
@@ -245,7 +241,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		
 		org.shanoir.dicom.importer.StudyCard exportStudyCard = new org.shanoir.dicom.importer.StudyCard();
 		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
-		exportStudyCard.setId(studyCard.getId().intValue());
+//		exportStudyCard.setId(studyCard.getId().intValue());
 		exportStudyCard.setName(studyCard.getName());
 		preImportData.setStudycard(exportStudyCard);
 		

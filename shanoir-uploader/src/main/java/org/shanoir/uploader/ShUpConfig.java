@@ -25,7 +25,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v6.0.1";
+	public static final String SHANOIR_UPLOADER_VERSION = "v6.0.2";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	

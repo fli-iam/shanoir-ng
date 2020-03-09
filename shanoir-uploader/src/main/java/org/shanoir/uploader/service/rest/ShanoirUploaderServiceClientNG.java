@@ -178,10 +178,9 @@ public class ShanoirUploaderServiceClientNG {
 	 * @return boolean true, if success
 	 */
 	public Subject createSubject(
-			final Long studyId,
-			final Long studyCardId,
+			final Subject subjectDTO,
 			final boolean modeSubjectCommonNameManual,
-			final Subject subjectDTO) {
+			final Long centerId) {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subjectDTO);
@@ -189,7 +188,7 @@ public class ShanoirUploaderServiceClientNG {
 			if (modeSubjectCommonNameManual) {
 				response = httpService.post(this.serviceURLSubjectsCreate, json);
 			} else {
-				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId="+ studyCardId, json);
+				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json);
 			}
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {

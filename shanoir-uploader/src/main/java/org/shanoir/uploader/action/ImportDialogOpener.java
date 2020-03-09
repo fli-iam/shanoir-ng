@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -10,10 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.swing.JFormattedTextField;
-
 import org.apache.log4j.Logger;
-import org.jdatepicker.impl.JDatePickerImpl;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
@@ -29,7 +25,6 @@ import org.shanoir.uploader.model.dto.InvestigatorDTO;
 import org.shanoir.uploader.model.dto.StudyCardDTO;
 import org.shanoir.uploader.model.dto.StudyDTO;
 import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.model.dto.SubjectStudyDTO;
 import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
@@ -56,7 +51,7 @@ public class ImportDialogOpener {
 	
 	private String[] leftOrRightManual = { "", "Left", "Right" };
 	
-	private String[] subjectTypeValues = { "Healthy volunteer", "Patient", "Phantom" };
+	public static String[] subjectTypeValues = { "Healthy volunteer", "Patient", "Phantom" };
 
 	public ImportDialogOpener(final MainWindow mainWindow,
 			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
@@ -69,8 +64,9 @@ public class ImportDialogOpener {
 		// login again, in case session has been expired
 		if (shanoirUploaderServiceClient.login()) {
 			try {
+				// first, search subject in shanoir server and then init the both listeners
 				SubjectDTO subjectDTO = getSubject(uploadJob);
-				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow);
+				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subjectDTO);
 				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
 				importDialog = new ImportDialog(this.mainWindow,
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
@@ -267,29 +263,6 @@ public class ImportDialogOpener {
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
-			// Manage subject_study values here:
-			List<SubjectStudyDTO> subjectStudyList = subjectDTO.getSubjectStudyList();
-			for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-				SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
-				importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
-				importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-				importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
-				importDialog.subjectTypeCB.setEnabled(false);
-				break; // use the first relation here to display some info
-				/**
-				 * At this time we have found a subject on using the identifier.
-				 * This subject could be in multiple studies, or not, even in a
-				 * study not available to the importing user.
-				 * The subject could be in the future study, the user chooses to
-				 * import into, but could also be in another study. So we display
-				 * the first info we have here, as in the current implementation
-				 * the user can not change and modify anything on using ShUp.
-				 * When we import for the subject and the subject is not yet in
-				 * the selected study, we add it automatically to this study on
-				 * using the same values as in the other study. This could be
-				 * extended later.
-				 */
-			}
 		// No existing subject found with identifier:
 		} else {
 			// Common name
@@ -315,8 +288,6 @@ public class ImportDialogOpener {
 			importDialog.subjectPersonalCommentTextArea.setText("");
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
-			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		}
 	}
 
@@ -332,33 +303,26 @@ public class ImportDialogOpener {
 	private void updateImportDialogForExaminations(List<ExaminationDTO> examinationDTOs, UploadJob uploadJob)
 			throws ParseException {
 		importDialog.mrExaminationExistingExamCB.removeAllItems();
+		/**
+		 * Existing examinations found
+		 */
 		if (examinationDTOs != null && !examinationDTOs.isEmpty()) {
 			for (Iterator iterator = examinationDTOs.iterator(); iterator.hasNext();) {
 				ExaminationDTO examinationDTO = (ExaminationDTO) iterator.next();
 				importDialog.mrExaminationExistingExamCB.addItem(examinationDTO);
 			}
 			importDialog.mrExaminationExistingExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(false);
-			disableExaminationNew();
+		/**
+		 * New examination to create and no existing examinations found
+		 */
 		} else {
 			importDialog.mrExaminationExistingExamCB.setEnabled(false);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(true);
 		}
+		importDialog.mrExaminationNewExamCB.setEnabled(true);
+		importDialog.mrExaminationNewExamCB.setSelected(true);
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);
 		importDialog.mrExaminationCommentTF.setText(uploadJob.getStudyDescription());
-	}
-
-	private void disableExaminationNew() {
-		importDialog.mrExaminationExamExecutiveCB.setEnabled(false);
-		importDialog.mrExaminationCenterCB.setEnabled(false);
-		((Container) importDialog.mrExaminationDateDP).getComponent(1).setEnabled(false);
-		JFormattedTextField mrExaminationDateDPTF = ((JDatePickerImpl) importDialog.mrExaminationDateDP)
-				.getJFormattedTextField();
-		mrExaminationDateDPTF.setBackground(Color.LIGHT_GRAY);
-		importDialog.mrExaminationCommentTF.setEnabled(false);
 	}
 
 }
