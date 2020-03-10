@@ -292,8 +292,7 @@ public class ImporterApiController implements ImporterApi {
 	private File saveTempFile(final File userImportDir, final MultipartFile file) throws IOException {
 		long n = createRandomLong();
 		File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
-		byte[] bytes = file.getBytes();
-		Files.write(uploadFile.toPath(), bytes);
+		file.transferTo(uploadFile);
 		return uploadFile;
 	}
 	
@@ -341,6 +340,7 @@ public class ImporterApiController implements ImporterApi {
 					"Error while unzipping file: folder already exists.", null));
 		}
 		ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+		tempFile.delete();
 		return unzipFolderFile;
 	}
 
