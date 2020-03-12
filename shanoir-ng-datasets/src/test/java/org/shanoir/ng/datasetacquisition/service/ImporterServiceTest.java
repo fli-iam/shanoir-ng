@@ -51,6 +51,7 @@ import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -160,7 +161,7 @@ public class ImporterServiceTest {
 	}
 
 	@Test
-	public void createAllDatasetAcquisition() throws IOException {
+	public void createAllDatasetAcquisition() throws IOException, ShanoirException {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();
 		Patient patient = new Patient();
