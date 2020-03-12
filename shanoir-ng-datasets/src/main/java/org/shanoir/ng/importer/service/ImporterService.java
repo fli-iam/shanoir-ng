@@ -53,6 +53,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -103,7 +104,7 @@ public class ImporterService {
 		this.importJob = importJob;
 	}
 
-	public void createAllDatasetAcquisition() {
+	public void createAllDatasetAcquisition() throws ShanoirException {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		try {
@@ -125,6 +126,8 @@ public class ImporterService {
 					}
 				}
 			}
+		} else {
+			throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 		}
 		event.setProgress(1f);
 		event.setStatus(ShanoirEvent.SUCCESS);
@@ -178,6 +181,7 @@ public class ImporterService {
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
 			throw e;
 		}
