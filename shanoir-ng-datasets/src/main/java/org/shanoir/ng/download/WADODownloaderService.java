@@ -22,12 +22,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,16 +41,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 /**
  * This class is used to download files on using WADO URLs:
  * 
- * First version: WADO RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
- * Next version: WADO URI URLs will be supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
+ * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
+ * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
  * 
- * WADO-RS: as the responses are encoded as multipart/related messages,
+ * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
+ * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
+ * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
+ * 
+ * As the responses are encoded as multipart/related messages,
  * this class extracts as well the files contained in the response to
  * the file system.
+ * 
+ * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/wado?requestType=WADO
+ * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
+ * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
+ * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
+ * &contentType=application/dicom
+ * 
+ * WADO-URI Web Service Endpoint URL in dcm4chee arc light 5:
+ * http[s]://<host>:<port>/dcm4chee-arc/aets/{AETitle}/wado
  *
  * This Spring service component uses the scope singleton, that is there by default,
  * as one instance should be reused for all other instances, that require usage.
@@ -58,7 +74,12 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class WADODownloaderService {
 
-	private static final String INSTANCES = "/instances/";
+	/** Logger. */
+	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
+
+	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
+
+	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
 
 	private static final String DCM = ".dcm";
 
@@ -67,30 +88,76 @@ public class WADODownloaderService {
 	/** Mime type */
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	
-	private static final String CONTENT_TYPE = "application/dicom";
+	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+
+	private static final String CONTENT_TYPE = "&contentType";
 	
 	@Autowired
 	private RestTemplate restTemplate;
 	
 	/**
-	 * This method receives a list of URLs containing WADO-RS urls and downloads
+	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
+	 * 
 	 * @param urls
 	 * @param workFolder
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder) throws IOException, MessagingException {
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-			String url = iterator.next().toString();
-			int indexInstanceUID = url.lastIndexOf(INSTANCES);
-			if (indexInstanceUID < 0) {
-				throw new IOException("URL is not in WADO-RS instance URL format. WADO-URI is not yet implemented.");
+		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
+			String url = ((URL) iterator.next()).toString();
+			String instanceUID = null;
+			// handle and check at first for WADO-RS URLs by "/instances/"
+			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+			if (indexInstanceUID > 0) {
+				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+				byte[] responseBody = downloadFileFromPACS(url);
+				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
+			} else {
+				// handle and check secondly for WADO-URI URLs by "objectUID="
+				// instanceUID == objectUID
+				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+				if (indexInstanceUID > 0) {
+					instanceUID = extractInstanceUID(url, instanceUID);
+					byte[] responseBody = downloadFileFromPACS(url);
+					File extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+					ByteArrayInputStream bIS = null;
+					try {
+						bIS = new ByteArrayInputStream(responseBody);
+						Files.copy(bIS, extractedDicomFile.toPath());
+					} finally {
+						if (bIS != null) {
+							bIS.close();
+						}
+					}
+				} else {
+					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+				}
 			}
-			String instanceUID = url.substring(indexInstanceUID + INSTANCES.length());
-			byte[] responseBody = downloadFileFromPACS(url);
-			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
 		}
+	}
+
+	/**
+	 * The instanceUID (== objectUID) is inside the URL string
+	 * and has to be extracted to be used.
+	 * 
+	 * @param url
+	 * @param instanceUID
+	 * @return
+	 */
+	private String extractInstanceUID(String url, String instanceUID) {
+		Pattern p = null;
+		if (url.indexOf(CONTENT_TYPE) != -1) {
+			p = Pattern.compile("objectUID=(\\S+)&contentType");
+		} else {
+			p = Pattern.compile("objectUID=(\\S+)");
+		}
+		Matcher m = p.matcher(url);
+		if (m.find()) {
+			instanceUID = m.group(1);
+		}
+		return instanceUID;
 	}
 
 	/**
@@ -104,7 +171,7 @@ public class WADODownloaderService {
 	private byte[] downloadFileFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE + ";");
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
@@ -138,7 +205,7 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE)) {
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
 					File extractedDicomFile = null;
 					if (count == 1) {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);

@@ -152,7 +152,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     };
 
     setBox(value: boolean | 'indeterminate') {
-        if (this.boxElt) this.boxElt.ngModel = value;
+        if (this.boxElt) this.boxElt.model = value;
         this.writeValue(value != null && value);
     }
 

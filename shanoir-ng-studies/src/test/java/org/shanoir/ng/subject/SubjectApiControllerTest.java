@@ -33,7 +33,6 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
-import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
@@ -61,7 +60,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectApiController.class)
-@ContextConfiguration(classes = {SubjectApiController.class, SubjectMappingUtilsService.class, RestTemplate.class, MicroserviceRequestsService.class})
+@ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
 @AutoConfigureMockMvc(secure = false)
 public class SubjectApiControllerTest {
 

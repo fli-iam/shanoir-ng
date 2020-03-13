@@ -2,25 +2,30 @@ package org.shanoir.uploader.action;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
-import org.shanoir.uploader.model.Center;
-import org.shanoir.uploader.model.Investigator;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.StudyCard;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectStudy;
+import org.shanoir.uploader.model.rest.SubjectType;
 
 public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 
-	private static Logger logger = Logger.getLogger(ImportStudyAndStudyCardCBItemListenerNG.class);
-
 	private MainWindow mainWindow;
+	
+	private Subject subject;
+	
+	private SubjectStudy subjectStudy;
 
-	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow) {
+	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject) {
 		this.mainWindow = mainWindow;
+		this.subject = subject;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -28,36 +33,68 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 		if (state == ItemEvent.SELECTED) {
 			if (e.getSource().equals(mainWindow.importDialog.studyCB)) {
 				Study study = (Study) e.getItem();
-				mainWindow.importDialog.studyCardCB.removeAllItems();
-				if (study.getStudyCards() != null) {
-					for (StudyCard studyCard : study.getStudyCards()) {
-						mainWindow.importDialog.studyCardCB.addItem(studyCard);
-					}
-				}
+				updateStudyCards(study);
+				updateSubjectStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
 			// the center for new created examinations
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// add center
-				Center centerOfStudyCard = studyCard.getCenter();
+				// put center into exam using study card and acq equipment
+				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+				IdName center = acqEquipment.getCenter();
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				mainWindow.importDialog.mrExaminationCenterCB.addItem(centerOfStudyCard);
+				mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				// add investigators
-				mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
-				Study selectedStudy = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-				List<Center> centersOfSelectedStudy = selectedStudy.getCenters();
-				for (Center center : centersOfSelectedStudy) {
-					if (center.equals(centerOfStudyCard)) {
-						List<Investigator> investigators = center.getInvestigatorList();
-						for (Investigator investigator : investigators) {
-							mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);
-						}
-					}
-				}
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
 			}			
 		} // ignore otherwise
 	}
 
+	private void updateStudyCards(Study study) {
+		mainWindow.importDialog.studyCardCB.removeAllItems();
+		if (study.getStudyCards() != null) {
+			for (StudyCard studyCard : study.getStudyCards()) {
+				mainWindow.importDialog.studyCardCB.addItem(studyCard);
+			}
+		}
+	}
+
+	private void updateSubjectStudy(Study study) {
+		if (this.subject != null) {
+			// Check if RelSubjectStudy exists for selected study
+			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+			if (subjectStudyList != null) {
+				for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
+					SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
+					// subject is already in study: display values in GUI and stop editing
+					if (subjectStudy.getStudy().getId() == study.getId()) {
+						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
+						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
+						mainWindow.importDialog.subjectTypeCB.setEnabled(false);
+						this.subjectStudy = subjectStudy;
+						return;
+					}
+				}
+			}
+		}
+		// subject is not in study, enable editing and display defaults
+		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
+		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
+		mainWindow.importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
+		this.subjectStudy = null;
+	}
+
+	public SubjectStudy getSubjectStudy() {
+		return subjectStudy;
+	}
+
+	public void setSubjectStudy(SubjectStudy subjectStudy) {
+		this.subjectStudy = subjectStudy;
+	}
+	
 }

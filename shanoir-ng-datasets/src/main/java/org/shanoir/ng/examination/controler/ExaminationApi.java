@@ -122,21 +122,7 @@ public interface ExaminationApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
-	
-	@ApiOperation(value = "", notes = "Saves a new examination", response = Long.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
-			@ApiResponse(code = 302, message = "found already existing examination", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/SHUP", produces = { "application/json" }, consumes = {
-			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudy().getId(), 'CAN_IMPORT'))")
-	ResponseEntity<Long> saveNewExaminationFromShup(
-			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
-			final BindingResult result);
-	
+
 	@ApiOperation(value = "", notes = "Saves a new examination", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

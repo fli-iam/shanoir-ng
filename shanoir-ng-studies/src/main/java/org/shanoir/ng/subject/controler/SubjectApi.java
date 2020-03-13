@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
@@ -102,6 +103,7 @@ public interface SubjectApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
+			@ApiParam(value = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException;
 	
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})

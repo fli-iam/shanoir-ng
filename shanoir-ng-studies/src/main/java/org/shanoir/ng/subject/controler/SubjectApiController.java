@@ -106,12 +106,18 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> saveNewSubject(
-			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
+			@RequestBody Subject subject,
+			@RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
-		final Subject createdSubject = subjectService.create(subject);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
+		Subject createdSubject;
+		if (centerId == null) {
+			createdSubject = subjectService.create(subject);
+		} else {
+			createdSubject = subjectService.createAutoIncrement(subject, centerId);
+		}
+		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
+		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
 
 	@Override
@@ -145,7 +151,6 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
-
 	}
 
 	@Override
@@ -156,7 +161,6 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
-
 	}
 
 	private void validate(Subject subject, BindingResult result) throws RestServiceException {

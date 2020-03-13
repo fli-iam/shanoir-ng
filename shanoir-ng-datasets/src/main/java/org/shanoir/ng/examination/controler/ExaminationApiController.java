@@ -149,13 +149,10 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<ExaminationDTO> saveNewExamination(
 			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
-
 		validate(result);
-
 		final Examination createdExamination = examinationService.save(examinationDTO);
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
-
 	}
 
 	@Override
@@ -184,25 +181,6 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations),
 				HttpStatus.OK);
-	}
-
-	@Override
-	public ResponseEntity<Long> saveNewExaminationFromShup(@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
-			final BindingResult result) {
-		
-		
-		// TODO : need to add a check on examination in order to see if it exists already in Shanoig Ng
-		//		Examination examination = examinationService.findByIdentifier(subjectFromShupDTO.getIdentifier());
-		//		if (subject != null) {
-		//			return new ResponseEntity<Long>(HttpStatus.FOUND);
-		//		}
-		
-		// TODO : need to add a data Validation STEP
-
-		final Examination createdExamination = examinationService.save(examinationDTO);
-		LOG.warn("Subject service completed");
-		return new ResponseEntity<>(createdExamination.getId(), HttpStatus.OK);
-
 	}
 
 	@Override
@@ -237,7 +215,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(archiveFile.getAbsolutePath());
-
+		<<<<<<< HEAD
 		return ResponseEntity.ok()
 				// Content-Disposition
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveFile.getName())
