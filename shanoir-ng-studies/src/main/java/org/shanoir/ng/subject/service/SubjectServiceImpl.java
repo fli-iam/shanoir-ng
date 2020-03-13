@@ -30,6 +30,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,6 +41,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SubjectServiceImpl implements SubjectService {
+
+	private static final String FORMAT_CENTER_CODE = "000";
+
+	private static final String FORMAT_SUBJECT_CODE = "0000";
 
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -108,7 +113,8 @@ public class SubjectServiceImpl implements SubjectService {
 				subjectStudy.setSubject(subject);
 			}			
 		}
-		DecimalFormat formatterCenter = new DecimalFormat("000");
+		// the first 3 numbers are the center code, search for highest existing subject with center code
+		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
 		String commonNameCenter = formatterCenter.format(centerId);
 		int maxCommonNameNumber = 0;
 		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
@@ -117,7 +123,7 @@ public class SubjectServiceImpl implements SubjectService {
 			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
 		}
 		maxCommonNameNumber += 1;
-		DecimalFormat formatterSubject = new DecimalFormat("0000");
+		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
 		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
 		subject.setName(subjectName);
 		return subjectRepository.save(subject);
@@ -193,6 +199,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (centerCode == null || "".equals(centerCode)) {
 			return null;
 		}
-		return subjectRepository.findFromCenterCode(centerCode);
+		return subjectRepository.findSubjectFromCenterCode(centerCode + "%");
 	}
+
 }

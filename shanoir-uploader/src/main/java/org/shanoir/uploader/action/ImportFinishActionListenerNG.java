@@ -17,17 +17,17 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.Investigator;
 import org.shanoir.uploader.model.rest.PseudonymusHashValues;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectStudy;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
 
@@ -47,15 +47,19 @@ public class ImportFinishActionListenerNG implements ActionListener {
 	
 	private File uploadFolder;
 	
-	private Subject subjectDTO;
+	private Subject subject;
 	
 	private ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	
+	private ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG;
 
-	public ImportFinishActionListenerNG(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subjectDTO) {
+	public ImportFinishActionListenerNG(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subject,
+			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
-		this.subjectDTO = subjectDTO;
+		this.subject = subject;
+		this.importStudyAndStudyCardCBILNG = importStudyAndStudyCardCBILNG;
 		this.shanoirUploaderServiceClientNG = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
 	}
 
@@ -77,9 +81,9 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		/**
 		 * Handle subject here: creation or use existing
 		 */
-		if (subjectDTO == null) {
+		if (subject == null) {
 			try {
-				 subjectDTO = fillSubjectDTO(mainWindow.importDialog, uploadJob);
+				 subject = fillSubject(mainWindow.importDialog, uploadJob);
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -89,8 +93,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
-			subjectDTO = shanoirUploaderServiceClientNG.createSubject(subjectDTO, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
-			if (subjectDTO == null) {
+			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
+			if (subject == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
 						"Error", JOptionPane.ERROR_MESSAGE);
@@ -98,10 +102,12 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
-				logger.info("Auto-Import: subject created on server with ID: " + subjectDTO.getId());
+				handleSubjectStudy(study, subject);
+				logger.info("Auto-Import: subject created on server with ID: " + subject.getId());
 			}
 		} else {
-			logger.info("Auto-Import: subject used on server with ID: " + subjectDTO.getId());
+			handleSubjectStudy(study, subject);
+			logger.info("Auto-Import: subject used on server with ID: " + subject.getId());
 		}
 		
 		Long examinationId = null;
@@ -109,7 +115,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 			Examination examinationDTO = new Examination();
 			IdName studyIdName = new IdName(study.getId(), study.getName());
 			examinationDTO.setStudy(studyIdName);
-			IdName subjectIdName = new IdName(subjectDTO.getId(), subjectDTO.getName());
+			IdName subjectIdName = new IdName(subject.getId(), subject.getName());
 			examinationDTO.setSubject(subjectIdName);
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 //			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
@@ -144,8 +150,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		/**
 		 * 3. Fill PreImportData, later added to upload-job.xml
 		 */
-		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subjectDTO.getId(), examinationId);
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subjectDTO.getName());
+		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subject.getId(), examinationId);
+		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
@@ -158,6 +164,19 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				"Import", JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	private void handleSubjectStudy(final Study study, final Subject subject) {
+		if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
+			SubjectStudy subjectStudy = new SubjectStudy();
+			subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
+			subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
+			subjectStudy.setSubjectType((SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
+			subjectStudy.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
+			subject.getSubjectStudyList().add(subjectStudy);
+			shanoirUploaderServiceClientNG.createSubjectStudy(subject);
+			logger.info("Auto-import: RelSubjectStudy created with id: " + subjectStudy.getId() + " for subject: " + subject.getName() + " in study: " + study.getName());
+		}
+	}
+
 	/**
 	 * 
 	 * @param importDialog
@@ -165,7 +184,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 	 * @return
 	 * @throws ParseException 
 	 */
-	private Subject fillSubjectDTO(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
+	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
 		final Subject subjectDTO = new Subject();
 		/**
 		 * Values coming from UploadJob
@@ -200,13 +219,6 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
 			subjectDTO.setManualHemisphericDominance(HemisphericDominance.Right);
 		}
-//		final SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
-// 		subjectStudyDTO.setStudyId(studyId);
-//		subjectStudyDTO.setSubjectType((SubjectType) importDialog.subjectTypeCB.getSelectedItem());
-//		subjectStudyDTO.setPhysicallyInvolved(importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
-//		List<SubjectStudyDTO> subjectStudyList = new ArrayList<SubjectStudyDTO>();
-//		subjectDTO.setSubjectStudyList(subjectStudyList);
-//		subjectDTO.getSubjectStudyList().add(subjectStudyDTO);
 		return subjectDTO;
 	}
 

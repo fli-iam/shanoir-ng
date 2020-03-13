@@ -67,7 +67,7 @@ public class ImportDialogOpener {
 				// first, search subject in shanoir server and then init the both listeners
 				SubjectDTO subjectDTO = getSubject(uploadJob);
 				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subjectDTO);
-				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
+				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subjectDTO, importStudyAndStudyCardCBIL);
 				importDialog = new ImportDialog(this.mainWindow,
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 						importStudyAndStudyCardCBIL, importFinishAL);

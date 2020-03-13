@@ -45,6 +45,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -176,7 +177,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockNoRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockNoRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockNoRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
 		
@@ -200,7 +201,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockWrongRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
@@ -225,7 +226,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockRightRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockRightRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
 		

@@ -174,16 +174,16 @@ public class ShanoirUploaderServiceClientNG {
 	 * @param studyId
 	 * @param studyCardId
 	 * @param modeSubjectCommonName
-	 * @param subjectDTO
+	 * @param subject
 	 * @return boolean true, if success
 	 */
 	public Subject createSubject(
-			final Subject subjectDTO,
+			final Subject subject,
 			final boolean modeSubjectCommonNameManual,
 			final Long centerId) {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(subjectDTO);
+			String json = ow.writeValueAsString(subject);
 			HttpResponse response;
 			if (modeSubjectCommonNameManual) {
 				response = httpService.post(this.serviceURLSubjectsCreate, json);
@@ -194,6 +194,30 @@ public class ShanoirUploaderServiceClientNG {
 			if (code == 200) {
 				Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
 				return subjectDTOCreated;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	/**
+	 * This method updates a subject on the server and therefore updates
+	 * the rel_subject_study list too.
+	 * 
+	 * @param subject
+	 * @return
+	 */
+	public Subject createSubjectStudy(
+			final Subject subject) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(subject);
+			HttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				Subject subjectCreated = Util.getMappedObject(response, Subject.class);
+				return subjectCreated;
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
