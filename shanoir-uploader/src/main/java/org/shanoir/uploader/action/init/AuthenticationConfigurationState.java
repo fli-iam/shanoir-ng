@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.keycloak.adapters.installed.KeycloakInstalled;
@@ -41,6 +44,25 @@ public class AuthenticationConfigurationState implements State {
 				keycloakInstalled.setLocale(Locale.ENGLISH);
 				keycloakInstalled.loginDesktop();
 				ShUpOnloadConfig.setKeycloakInstalled(keycloakInstalled);
+				/**
+				 * Start job, that refreshes token every 20 seconds
+				 */
+				ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+				Runnable task = () -> {
+					try {
+						keycloakInstalled.refreshToken();
+						logger.info("KeycloakInstalled: token has been refreshed.");
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+						context.getShUpStartupDialog().updateStartupText(
+								"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+						context.setState(new ServerUnreachableState());
+						context.nextState();	
+						return;						
+					}
+				};
+				executor.scheduleAtFixedRate(task, 0, 20, TimeUnit.SECONDS);
+				
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(

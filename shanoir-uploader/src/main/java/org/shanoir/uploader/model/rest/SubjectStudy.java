@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 /**
  * DTO for subject of a study.
@@ -20,7 +20,7 @@ package org.shanoir.uploader.service.rest.dto;
  * @author msimon
  *
  */
-public class SubjectStudyDTO {
+public class SubjectStudy {
 
 	private Long id;
 

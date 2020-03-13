@@ -27,7 +27,10 @@ export class TableComponent implements OnInit {
     @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
-    @Input() selectionAllowed: boolean = false; // TODO : selectable
+    selection: Map<number, any> = new Map();
+    @Input() selectionAllowed: boolean = false;
+    @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
+    selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
@@ -84,6 +87,7 @@ export class TableComponent implements OnInit {
 
     private onSearchChange(filter: Filter) {
         this.filter = filter;
+        this.clearSelection();
         this.goToPage(1);
     }
 
@@ -221,6 +225,7 @@ export class TableComponent implements OnInit {
         this.isLoading = true;
         this.getPage(this.getPageable()).then(page => {
             this.page = page;
+            this.computeSelectAll();
             setTimeout(() => this.isLoading = false, 200);
         });
     }
@@ -272,26 +277,79 @@ export class TableComponent implements OnInit {
     }
 
     private getNbSelected(): number {
-        if (!this.items) return 0;
-        let nb: number = 0;
-        for (let item of this.items) {
-            if (item["isSelectedInTable"]) nb++;
-        }
-        return nb;
+        return this.selection ? this.selection.size : 0;
     }
 
-    private selectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = true;
+    onSelectAllChange() {
+        if (this.selectAll == true) {
+
+            // let pageableAll: Pageable;
+            // if (this.filter) {
+            //     pageableAll = new FilterablePageable(
+            //         1, 
+            //         this.page.totalElements,
+            //         null,
+            //         this.filter
+            //     );
+            // } else {
+            //     pageableAll = new Pageable(
+            //         1, 
+            //         this.page.totalElements
+            //     );
+            // }
+            // this.getPage(pageableAll).then(page => {
+            //     this.selection = new Map();
+            //     page.content.forEach(elt => this.selection.set(elt.id, elt));
+            // });
+            this.page.content.forEach(elt => this.selection.set(elt['id'], elt));
+            this.emitSelectionChange();
+        } else if (this.selectAll == false) {
+            this.page.content.forEach(elt => {
+                this.selection.delete(elt['id']);
+            });
+            this.emitSelectionChange();
         }
     }
 
-    private unSelectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = false;
+    clearSelection() {
+        this.selection = new Map();
+        this.emitSelectionChange();
+        this.selectAll = false;
+    }
+
+    computeSelectAll() {
+        let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+        if (selectedOnCurrentPage.length == this.page.content.length) {
+            this.selectAll = true;
+        } else if (selectedOnCurrentPage.length == 0) {
+            this.selectAll = false;
+        } else {
+            this.selectAll = 'indeterminate';
         }
+    }
+
+    emitSelectionChange() {
+        let arr = [];
+        this.selection.forEach(sel => arr.push(sel));
+        this.selectionChange.emit(arr);
+    }
+
+    onSelectChange(item: Object, selected: boolean) {
+        if (selected) {
+            if (item['id']) this.selection.set(item['id'], item);
+        } else {
+            this.selection.delete(item['id']);
+        }
+        this.computeSelectAll();
+        this.emitSelectionChange();
+    }
+
+    isSelected(item: Object): boolean {
+        if (!item['id']) {
+            this.selectionAllowed = false;
+            throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
+        }
+        return this.selection.get(item['id']) != undefined;
     }
 
     private getDefaultSorting() {

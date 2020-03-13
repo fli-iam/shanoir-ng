@@ -44,6 +44,7 @@ public class InitialStartupState implements State {
 	private static final String LOG4J_PROPERTIES = "/log4j.properties";
 	
 	public void load(StartupStateContext context) throws Exception {
+		initShanoirUploaderFolder();
 		initLogging();
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);	
@@ -53,7 +54,6 @@ public class InitialStartupState implements State {
 		 // Disable http request to check for quartz upload
 		System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 		System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
-		initShanoirUploaderFolder();
 		initPropertiesFiles();
 		initLanguage();
 		initStartupDialog(context);
@@ -78,6 +78,8 @@ public class InitialStartupState implements State {
 			Properties log4jProperties = new Properties();
 			InputStream propsFile = InitialStartupState.class.getResourceAsStream(LOG4J_PROPERTIES);
 			log4jProperties.load(propsFile);
+			log4jProperties.put("log4j.appender.file.File",
+					ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + "su.log");
 			PropertyConfigurator.configure(log4jProperties);
 			logger.info("Logging successfully initialized.");
 		} catch (IOException e) {
@@ -124,27 +126,18 @@ public class InitialStartupState implements State {
 		logger.info("language.properties successfully initialized.");
 		
 		// check if pseudonymus has been copied in case of true
-		if (Boolean.parseBoolean(ShUpConfig.generalProperties.getProperty("mode.pseudonymus"))) {
+		if (Boolean.parseBoolean(ShUpConfig.generalProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS))) {
 			// check at first for the executables
 			File pseudonymusFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 			if (!pseudonymusFolder.exists()) {
-				throw new FileNotFoundException("/.su/pseudonymus folder missing for mode pseudonymus! Please copy manually.");
+				throw new FileNotFoundException(pseudonymusFolder.getAbsolutePath() + " folder missing for mode pseudonymus! Please copy manually.");
 			}
-			// than check for key
-			String pseudonymusKeyPath = ShUpConfig.generalProperties.getProperty("mode.pseudonymus.path");
-			if (pseudonymusKeyPath != null && !pseudonymusKeyPath.isEmpty()) {
-				File pseudonymusKeyPropertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + pseudonymusKeyPath);
-				if (!pseudonymusKeyPropertiesFile.exists()) {
-					throw new FileNotFoundException("/.su/" + pseudonymusKeyPath + " file missing for mode pseudonymus! Please copy manually.");
-				} else {
-					Properties keyProperties = new Properties();
-					loadPropertiesFromFile(keyProperties, pseudonymusKeyPropertiesFile);
-					// copy into generalProperties in the memory, to avoid using another props file
-					ShUpConfig.generalProperties.put("key", keyProperties.get("key"));
-				}
-			} else {
-				throw new FileNotFoundException("/.su/" + pseudonymusKeyPath + " file missing. Please configure your path accordingly.");
-			}
+			// than check for the key in the .jar file
+			Properties keyProperties = new Properties();
+			InputStream in = getClass().getResourceAsStream(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE);
+			keyProperties.load(in);
+			in.close();
+			ShUpConfig.generalProperties.put("key", keyProperties.get("key"));
 		}
 		
 		// put settings into ShUpOnloadConfig
@@ -179,7 +172,7 @@ public class InitialStartupState implements State {
 	private void initShanoirUploaderFolder() {
 		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
 		final String shanoirUploaderFolderPath = userHomeFolderPath
-				+ File.separator + ShUpConfig.SU;
+				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;
 		final File shanoirUploaderFolder = new File(shanoirUploaderFolderPath);
 		boolean shanoirUploaderFolderExists = shanoirUploaderFolder.exists();
 		if (shanoirUploaderFolderExists) {

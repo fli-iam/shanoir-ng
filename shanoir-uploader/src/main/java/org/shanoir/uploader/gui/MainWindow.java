@@ -51,8 +51,6 @@ import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.FindDicomActionListener;
 import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.ImportDialogOpenerNG;
-import org.shanoir.uploader.action.ImportFinishActionListener;
-import org.shanoir.uploader.action.ImportStudyAndStudyCardCBItemListener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;

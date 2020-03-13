@@ -111,7 +111,6 @@ public interface SubjectService {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findSubjectFromCenterCode(String centerCode);
 	
-	
 	/**
 	 * Save a subject.
 	 *
@@ -121,7 +120,14 @@ public interface SubjectService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	Subject create(Subject subject);
 	
-	
+	/**
+	 * Save a subject and auto-increment the common name on using the centerId.
+	 *
+	 * @param subject subject to create.
+	 * @return created subject.
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	Subject createAutoIncrement(Subject subject, Long centerId);
 	
 	/**
 	 * Update a subject.
