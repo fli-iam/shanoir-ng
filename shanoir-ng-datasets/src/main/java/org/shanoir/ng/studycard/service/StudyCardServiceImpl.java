@@ -14,14 +14,11 @@
 
 package org.shanoir.ng.studycard.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.studycard.dto.StudyStudyCardDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +43,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 			throw new EntityNotFoundException(StudyCard.class, id);
 		}
 		studyCardRepository.delete(id);
-
-		// Delete study card on MS studies
-		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), null, studyCard.getStudyId());
-		updateMsStudies(studyCardDTO);
 	}
 
 	@Override
@@ -65,8 +58,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 	@Override
 	public StudyCard save(final StudyCard studyCard) throws MicroServiceCommunicationException {
 		StudyCard savedStudyCard = studyCardRepository.save(studyCard);
-		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), null);
-		updateMsStudies(studyCardDTO);
 		return savedStudyCard;
 	}
 
@@ -79,31 +70,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 	public StudyCard update(final StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
 		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, studyCard.getId());
-		final Long oldStudyId = studyCardDb.getStudyId();
 		updateStudyCardValues(studyCardDb, studyCard);
 		studyCardRepository.save(studyCardDb);
-		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), oldStudyId);
-		updateMsStudies(studyCardDTO);
 		return studyCardDb;
 	}
 
-	/**
-	 * Update MS studies to link study to current study card.
-	 *
-	 * @param StudyStudyCardDTO DTO with link between study card and study.
-	 * @return false if it fails, true if it succeed.
-	 * @throws MicroServiceCommunicationException 
-	 */
-	private boolean updateMsStudies(final StudyStudyCardDTO StudyStudyCardDTO) throws MicroServiceCommunicationException {
-//		try {
-//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueToStudy().getName(),
-//					new ObjectMapper().writeValueAsString(StudyStudyCardDTO));
-//			return true;
-//		} catch (AmqpException | JsonProcessingException e) {
-//			throw new MicroServiceCommunicationException("Error while communicating with Study MS.");
-//		} 
-		return true;
-	}
 
 	/**
 	 * Update some values of template to save them in database.
@@ -119,7 +90,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 		studyCardDb.setId(studyCard.getId());
 		studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
 		studyCardDb.setStudyId(studyCard.getStudyId());
-		studyCardDb.setRules(studyCard.getRules());
+		studyCardDb.getRules().clear();
+		studyCardDb.getRules().addAll(studyCard.getRules());
 		return studyCardDb;
 	}
 

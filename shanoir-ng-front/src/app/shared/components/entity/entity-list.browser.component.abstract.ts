@@ -22,7 +22,7 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
 
     private entitiesPromise: Promise<void>;
     private browserPaging: BrowserPaging<T>;
-    private entities: T[];
+    protected entities: T[];
 
     ngOnInit() {
         this.loadEntities();

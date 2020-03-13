@@ -69,7 +69,7 @@ public class StudyCard extends HalEntity {
 	/** The study for which is defined the study card. */
 	private Long studyId;
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="study_card_id")
 	private List<StudyCardRule> rules;
 

@@ -34,7 +34,8 @@ th { width: 100%; white-space: normal; }
 tr { height: 20px; }
 	/* tr.even { background-color: var(--light-grey); }
 	tr.odd { background-color: var(--lighter-grey); } */
-	tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
+	tr:not(.disabled):not(.edit):hover td:not(.loading):not(.empty) { background-color: var(--color-b-light); cursor: pointer; }
+tr.disabled { opacity: 0.7; }
 td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool { text-align: center; }

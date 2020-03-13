@@ -11,21 +11,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../../breadcrumbs/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { ShanoirError } from '../../models/error.model';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
-import { ShanoirError } from '../../models/error.model';
-import { Router } from '../../../breadcrumbs/router';
+
 
 export type Mode =  "view" | "edit" | "create";
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
@@ -58,7 +69,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     abstract buildForm(): FormGroup;
 
     constructor(
-            private activatedRoute: ActivatedRoute,
+            protected activatedRoute: ActivatedRoute,
             private readonly ROUTING_NAME: string) {
         
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);

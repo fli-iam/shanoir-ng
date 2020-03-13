@@ -13,21 +13,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ng-container *ngFor="let rule of rules; let i = index;">
-	<study-card-rule 
+	<study-card-rule
+		[class.appear]="canAnimateEnter(i)"
+		[class.select-mode]="mode == 'select'"
+		[class.selected]="selectedRules.get(i) != undefined"
 		[rule]="rule" 
 		[fields]="fields" 
-		[mode]="mode" 
+		[mode]="mode == 'select' ? 'view' : mode" 
 		(change)="onChangeCallback(rules)" 
 		(moveUp)="moveUp(i)"
 		(moveDown)="moveDown(i)"
 		(copy)="copy(i)"
 		(delete)="delete(i)"
-		[showErrors]="showErrors">
+		[showErrors]="showErrors"
+		(click)="clickRule(i)">
 	</study-card-rule>
 </ng-container>
-<div *ngIf="mode != 'view'" class="add-container">
+<div *ngIf="mode == 'edit' || mode == 'create'" class="add-container">
 	<span (click)="addNewRule()">
 		<i class="fas fa-plus"></i>
 		<div>Add a rule</div>
+	</span>
+	<span (click)="importRules.emit()">
+		<i class="fas fa-file-import"></i>
+		<div>Import a rule</div>
 	</span>
 </div>

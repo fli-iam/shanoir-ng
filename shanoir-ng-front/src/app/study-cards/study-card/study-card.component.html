@@ -82,9 +82,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-card-rules class="rules" [formGroup]="form"
 					formControlName="rules"
 					[(ngModel)]="studyCard.rules" 
-					[mode]="mode" 
+					[mode]="selectMode ? 'select' : mode" 
 					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
-					[showErrors]="showRulesErrors">
+					[showErrors]="showRulesErrors"
+					(selectedRulesChange)="selectedRules = $event"
+					(importRules)="importRules()">
 				</study-card-rules>
 			</fieldset>
 			<form-footer
@@ -99,6 +101,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						(click)="onShowErrors()"
 						[disabled]="footerState.valid || showRulesErrors">
 					Show all errors<i class="fas fa-bug"></i>
+				</button>
+				<button *ngIf="selectMode" 
+						class="Button right-icon" 
+						(click)="clickImportRules()" 
+						[disabled]="selectedRules.length <= 0">
+					Import selected rules<i class="fas fa-file-import"></i>
 				</button>
 			</form-footer>
 		</div>

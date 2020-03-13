@@ -50,7 +50,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private new: boolean = false;
 
     constructor(
-            private readonly ROUTING_NAME: string) {
+            protected readonly ROUTING_NAME: string) {
         
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
@@ -104,7 +104,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    private onRowClick(entity: T) {
+    onRowClick(entity: T) {
         // if (this.windowService.isWide()) this.selectedId = entity.id;
         // else 
             this.goToView(entity.id);

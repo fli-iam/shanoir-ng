@@ -91,7 +91,7 @@ export class TableComponent implements OnInit {
 
 
     private onRowClick(item: Object) {
-        this.rowClick.emit(item);
+        if (!this.rowDisabled(item)) this.rowClick.emit(item);
     }
 
 

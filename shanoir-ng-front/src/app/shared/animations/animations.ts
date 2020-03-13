@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { animate, query, style, transition, trigger } from '@angular/animations';
+import { animate, query, style, transition, trigger, state } from '@angular/animations';
 
 export const parent = trigger('parent', [
     transition(':enter', [])

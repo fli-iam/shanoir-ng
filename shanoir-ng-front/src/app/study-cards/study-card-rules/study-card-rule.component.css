@@ -27,6 +27,7 @@ condition.edit:hover, action.edit:hover { border-color: var(--color-b); }
 .rule-controls svg { margin: 0 5px; color: var(--grey); width: 12px; vertical-align: -2px; }
 .rule-controls svg:hover { cursor: pointer; }
 .rule-controls svg:hover { color: var(--color-a); }
+.rule-delete svg:hover { color: var(--color-error); } 
 
 .rule-controls { opacity: 0; position: absolute; left: 0; right: 0; transition: opacity 0.3s; }
 .rule-controls.top { bottom: 14px; padding: 10px 10px 0; }

@@ -11,21 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { IdName } from '../../shared/models/id-name.model';
 
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { StudyService } from '../../studies/shared/study.service';
-import { StudyCard } from '../shared/study-card.model';
-import { StudyCardService } from '../shared/study-card.service';
+import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { StudyService } from '../../studies/shared/study.service';
+import { StudyCard, StudyCardRule } from '../shared/study-card.model';
+import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 
 @Component({
@@ -40,6 +41,9 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     private acquisitionEquipments: Option<AcquisitionEquipment>[];
     private niftiConverters: IdName[] = [];
     showRulesErrors: boolean = false;
+    selectMode: boolean;
+    selectedRules: StudyCardRule[] = [];
+    @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
 
     constructor(
             private route: ActivatedRoute,
@@ -50,6 +54,9 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private niftiConverterService: NiftiConverterService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
         super(route, 'study-card');
+
+        this.mode = this.activatedRoute.snapshot.data['mode'];
+        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
     }
 
     get studyCard(): StudyCard { return this.entity; }
@@ -60,7 +67,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             this.studyCard = sc;
         });
     }
-
+    
     initEdit(): Promise<void> {
         this.fetchStudies();
         this.fetchNiftiConverters();
@@ -87,12 +94,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.subscribtions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
         );
-
         return form;
     }
 
     public hasEditRight(): boolean {
-        return this.keycloakService.isUserAdminOrExpert();
+        return !this.selectMode && this.keycloakService.isUserAdminOrExpert();
     }
     
     private fetchStudies() {
@@ -135,6 +141,27 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     onShowErrors() {
         this.form.markAsDirty();
         this.showRulesErrors = !this.showRulesErrors;
+    }
+
+    importRules() {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
+            this.breadcrumbsService.currentStep.label = 'Select study-card';
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
+                    rules.forEach(rule => {
+                        this.studyCard.rules.push(rule);
+                        let lastIndex: number = this.studyCard.rules.length - 1;
+                        currentStep.data.rulesToAnimate.add(lastIndex);
+                    });
+                })
+            );
+        });
+    }
+
+    clickImportRules() {
+        this.breadcrumbsService.currentStep.notifySave(this.selectedRules);
+        this.breadcrumbsService.goBack(2);
     }
 
 }

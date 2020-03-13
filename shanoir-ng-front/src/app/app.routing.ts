@@ -50,6 +50,7 @@ import { AccountRequestComponent } from './users/account-request/account-request
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
+import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 
 
 let appRoutes: Routes = [
@@ -100,6 +101,18 @@ let appRoutes: Routes = [
     }, {
         path: 'task',
         component: AsyncTasksComponent
+    }, {
+        path: 'study-card/select-rule',
+        children: [
+            {
+                path: 'list/:id',
+                component: StudyCardForRulesListComponent,
+            }, {
+                path: 'select/:id',
+                component: StudyCardComponent,
+                data: { mode: 'view', select: true }
+            }
+        ]
     }
 ];
 

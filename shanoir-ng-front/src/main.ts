@@ -20,7 +20,7 @@ import { KeycloakService } from './app/shared/keycloak/keycloak.service';
 
 // Enable production mode unless running locally
 if (process.env.ENV === 'production') {
-  enableProdMode();
+  //enableProdMode();
 }
 
 if (window.location.href.endsWith('/account-request')) {

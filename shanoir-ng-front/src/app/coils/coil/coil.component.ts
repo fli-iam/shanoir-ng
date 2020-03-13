@@ -95,7 +95,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     buildForm(): FormGroup {
-        return this.formBuilder.group({
+        let form: FormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
@@ -103,6 +103,11 @@ export class CoilComponent extends EntityComponent<Coil> {
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
+        form.valueChanges.subscribe(() => {
+            if (this.coil.center && !this.prefilledManuf) this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
+            else this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+        })
+        return form;
     }
 
     private updateManufList(center: Center): void {

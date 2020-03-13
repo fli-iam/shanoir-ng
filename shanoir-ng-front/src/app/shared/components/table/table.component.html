@@ -64,7 +64,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <tr
     *ngFor="let item of items; let i = index" 
     [class.odd]="i%2!=0" 
-    [class.even]="i%2==0">
+    [class.even]="i%2==0"
+    [class.disabled]="rowDisabled(item)"
+    [class.edit]="editMode">
     <td *ngIf="selectionAllowed" class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <td 

@@ -13,18 +13,21 @@
  */
 import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
-import { slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -34,17 +37,12 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { Subscription } from 'rxjs';
-import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
-import { Option } from '../../shared/select/select.component';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    styleUrls: ['clinical-context.component.css', '../shared/import.step.css']
 })
 export class ClinicalContextComponent implements OnDestroy {
     

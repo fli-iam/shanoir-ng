@@ -87,7 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										[newDisabled]="form.get('center').disabled"
 										formControlName="center" 
 										[ngModel]="coil.center"  
-										(change)="updateManufList($event)"
+										(ngModelChange)="updateManufList($event)"
 										[optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>

@@ -11,8 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, forwardRef, HostListener, Input, OnChanges, SimpleChanges, QueryList, ViewChildren } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    forwardRef,
+    HostListener,
+    Input,
+    IterableDiffer,
+    OnChanges,
+    Output,
+    QueryList,
+    SimpleChanges,
+    ViewChildren,
+} from '@angular/core';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
@@ -21,13 +35,13 @@ import { ContrastAgent } from '../../enum/contrast-agent.enum';
 import { ExploredEntity } from '../../enum/explored-entity.enum';
 import { MrSequenceApplication } from '../../enum/mr-sequence-application.enum';
 import { MrSequencePhysics } from '../../enum/mr-sequence-physics.enum';
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { StudyCardRule } from '../shared/study-card.model';
 import { AssignmentField } from './action/action.component';
 import { StudyCardRuleComponent } from './study-card-rule.component';
-import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
-import { Observable, Subscriber, Subject, BehaviorSubject } from 'rxjs';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
 
 @Component({
@@ -44,24 +58,29 @@ import { Observable, Subscriber, Subject, BehaviorSubject } from 'rxjs';
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     
-    @Input() mode: Mode;
+    @Input() mode: Mode | 'select';
     rules: StudyCardRule[];
     @ViewChildren(StudyCardRuleComponent) ruleElements: QueryList<StudyCardRuleComponent>;
     private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
     fields: AssignmentField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
     private coilOptions: Observable<Option<Coil>[]> = this.coilOptionsSubject.asObservable();
     private allCoilsPromise: Promise<Coil[]>;
     @Input() showErrors: boolean = false;
-    
+    @Output() importRules: EventEmitter<void> = new EventEmitter();
+    @Output() selectedRulesChange: EventEmitter<StudyCardRule[]> = new EventEmitter();
+    selectedRules: Map<number, StudyCardRule> = new Map();
+    rulesToAnimate: Set<number> = new Set();
+
     
     constructor(
             private coilService: CoilService, 
             private element: ElementRef,
-            private confirmDialogService: ConfirmDialogService) {
-        
+            private confirmDialogService: ConfirmDialogService,
+            private breadcrumbService: BreadcrumbsService) {
+     
         this.allCoilsPromise = this.coilService.getAll();
         
         this.fields = [
@@ -82,6 +101,11 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             new AssignmentField('MR sequence name', 'mrProtocolMetadata.mrSequenceName'),
             new AssignmentField('Contrast agent used', 'mrProtocolMetadata.contrastAgentUsed', ContrastAgent.toOptions())
         ];
+
+        if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
+            this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;
+        else
+            this.breadcrumbService.currentStep.data.rulesToAnimate = this.rulesToAnimate;
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -108,12 +132,15 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         rule.conditions = [];
         rule.assignments = []; 
         this.rules.push(rule);
+        this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);
     }
 
     writeValue(obj: any): void {
         this.rules = obj;
     }
+
+    public animate
 
     registerOnChange(fn: any): void {
         this.onChangeCallback = fn;
@@ -145,6 +172,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     switchWithFollowing(index: number) {
+        this.rulesToAnimate.delete(index);
+        this.rulesToAnimate.delete(index + 1);
         const delay: number = 0.2;
         let a = this.ruleElements.toArray()[index].elementRef.nativeElement;
         let b = this.ruleElements.toArray()[index + 1].elementRef.nativeElement;
@@ -178,6 +207,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     copy(index: number) {
         let copy = this.rules.slice(index, index + 1)[0];
         this.rules.push(copy);
+        this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);
     }
 
@@ -203,5 +233,23 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             });
         }
         return errors;
+    }
+
+    clickRule(i: number) {
+        if (this.mode == 'select') {
+            if (this.selectedRules.has(i)) this.selectedRules.delete(i);
+            else (this.selectedRules.set(i, this.rules[i]));
+            let rulesArr: StudyCardRule[] = [];
+            this.selectedRules.forEach(rule => rulesArr.push(rule));
+            this.selectedRulesChange.emit(rulesArr);
+        }
+    }
+
+    animateRule(index: number) {
+        this.rulesToAnimate.add(index);
+    }
+
+    canAnimateEnter(i: number): boolean {
+        return this.rulesToAnimate.has(i);
     }
 }
