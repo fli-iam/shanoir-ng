@@ -215,7 +215,6 @@ public class ExaminationApiController implements ExaminationApi {
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(archiveFile.getAbsolutePath());
-		<<<<<<< HEAD
 		return ResponseEntity.ok()
 				// Content-Disposition
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveFile.getName())
