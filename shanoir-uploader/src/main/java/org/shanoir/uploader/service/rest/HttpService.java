@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -40,6 +41,20 @@ public class HttpService {
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
 			HttpResponse	 response = httpClient.execute(httpPost);
+			return response;
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public HttpResponse put(String url, String json) {
+		try {
+			HttpPut httpPut = new HttpPut(url);
+			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
+			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+			httpPut.setEntity(requestEntity);
+			HttpResponse	 response = httpClient.execute(httpPut);
 			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

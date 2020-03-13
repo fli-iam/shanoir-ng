@@ -29,6 +29,8 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private MainWindow mainWindow;
 	
 	private SubjectDTO subjectDTO;
+	
+	private SubjectStudyDTO subjectStudyDTO;
 
 	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, SubjectDTO subjectDTO) {
 		this.mainWindow = mainWindow;
@@ -90,7 +92,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
 						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
 						mainWindow.importDialog.subjectTypeCB.setEnabled(false);
-						mainWindow.importDialog.subjectStudyDTO = subjectStudyDTO;
+						this.subjectStudyDTO = subjectStudyDTO;
 						return;
 					}
 				}
@@ -101,7 +103,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
 		mainWindow.importDialog.subjectTypeCB.setSelectedItem(ImportDialogOpener.subjectTypeValues[1]);
-		mainWindow.importDialog.subjectStudyDTO = null;
+		this.subjectStudyDTO = null;
+	}
+
+	public SubjectStudyDTO getSubjectStudyDTO() {
+		return subjectStudyDTO;
+	}
+
+	public void setSubjectStudyDTO(SubjectStudyDTO subjectStudyDTO) {
+		this.subjectStudyDTO = subjectStudyDTO;
 	}
 	
 }

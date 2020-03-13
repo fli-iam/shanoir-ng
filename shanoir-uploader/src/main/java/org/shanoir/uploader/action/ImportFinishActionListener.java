@@ -48,12 +48,16 @@ public class ImportFinishActionListener implements ActionListener {
 	private org.shanoir.uploader.model.dto.SubjectDTO subjectDTO;
 	
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+	
+	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL;
 
-	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, org.shanoir.uploader.model.dto.SubjectDTO subjectDTO) {
+	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, org.shanoir.uploader.model.dto.SubjectDTO subjectDTO,
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL) {
 		this.mainWindow = mainWindow;
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
 		this.subjectDTO = subjectDTO;
+		this.importStudyAndStudyCardCBIL = importStudyAndStudyCardCBIL;
 		this.shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 	}
 
@@ -154,7 +158,7 @@ public class ImportFinishActionListener implements ActionListener {
 	}
 
 	private void handleSubjectStudy(final Study study, final Long subjectId) {
-		if (mainWindow.importDialog.subjectStudyDTO == null) {
+		if (importStudyAndStudyCardCBIL.getSubjectStudyDTO() == null) {
 			SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
 			subjectStudyDTO.setStudyId(study.getId());
 			subjectStudyDTO.setSubjectId(subjectId);
