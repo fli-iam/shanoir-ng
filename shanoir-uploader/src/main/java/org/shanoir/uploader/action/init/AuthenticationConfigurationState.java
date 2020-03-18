@@ -4,13 +4,16 @@ import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.keycloak.adapters.installed.KeycloakInstalled;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests
@@ -35,13 +38,31 @@ public class AuthenticationConfigurationState implements State {
 		if (ShUpOnloadConfig.isShanoirNg()) {
 			ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
 			ShUpOnloadConfig.setShanoirUploaderServiceClientNG(shanoirUploaderServiceClientNG);
-
 			try {
 				FileInputStream fIS = new FileInputStream(ShUpConfig.keycloakJson);
 				KeycloakInstalled keycloakInstalled = new KeycloakInstalled(fIS);
 				keycloakInstalled.setLocale(Locale.ENGLISH);
 				keycloakInstalled.loginDesktop();
 				ShUpOnloadConfig.setKeycloakInstalled(keycloakInstalled);
+				/**
+				 * Start job, that refreshes token every 20 seconds
+				 */
+				ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+				Runnable task = () -> {
+					try {
+						keycloakInstalled.refreshToken();
+						logger.info("KeycloakInstalled: token has been refreshed.");
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+						context.getShUpStartupDialog().updateStartupText(
+								"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+						context.setState(new ServerUnreachableState());
+						context.nextState();	
+						return;						
+					}
+				};
+				executor.scheduleAtFixedRate(task, 0, 20, TimeUnit.SECONDS);
+				
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(

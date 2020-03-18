@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.subjectstudy.dto;
 
-import java.util.List;
-
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.subject.model.SubjectType;
 
@@ -26,22 +24,18 @@ import org.shanoir.ng.subject.model.SubjectType;
  *
  */
 public class SubjectStudyDTO {
-	
+
 	private Long id;
 
 	private IdName subject;
-	
+
 	private IdName study;
 
 	private String subjectStudyIdentifier;
 
 	private SubjectType subjectType;
-	
+
 	private boolean physicallyInvolved;
-	
-	private List<ExaminationDTO> examinationDTO;
-	
-	
 
 	public Long getId() {
 		return id;
@@ -75,7 +69,8 @@ public class SubjectStudyDTO {
 	}
 
 	/**
-	 * @param subjectStudyIdentifier the subjectStudyIdentifier to set
+	 * @param subjectStudyIdentifier
+	 *            the subjectStudyIdentifier to set
 	 */
 	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
 		this.subjectStudyIdentifier = subjectStudyIdentifier;
@@ -89,7 +84,8 @@ public class SubjectStudyDTO {
 	}
 
 	/**
-	 * @param subjectType the subjectType to set
+	 * @param subjectType
+	 *            the subjectType to set
 	 */
 	public void setSubjectType(SubjectType subjectType) {
 		this.subjectType = subjectType;
@@ -103,23 +99,11 @@ public class SubjectStudyDTO {
 	}
 
 	/**
-	 * @param physicallyInvolved the physicallyInvolved to set
+	 * @param physicallyInvolved
+	 *            the physicallyInvolved to set
 	 */
 	public void setPhysicallyInvolved(boolean physicallyInvolved) {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
-	/**
-	 * @return the examinationDTO
-	 */
-	public List<ExaminationDTO> getExaminationDTO() {
-		return examinationDTO;
-	}
-
-	/**
-	 * @param examinationDTO the examinationDTO to set
-	 */
-	public void setExaminationDTO(List<ExaminationDTO> examinationDTO) {
-		this.examinationDTO = examinationDTO;
-	}
 }

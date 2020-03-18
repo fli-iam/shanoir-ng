@@ -40,8 +40,13 @@ public enum ImagedObjectCategory {
 	/**
 	 * Anatomical piece
 	 */
-	ANATOMICAL_PIECE(4);
-
+	ANATOMICAL_PIECE(4),
+	
+	/**
+	 * Animal
+	 */
+	ANIMAL(5);
+	
 	private int id;
 
 	/**

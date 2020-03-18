@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.wsdl;
+package org.shanoir.uploader.service.soap;
 
 import java.io.File;
 import java.net.URL;
@@ -109,6 +109,7 @@ public class ShanoirUploaderServiceClient {
 			SubjectDTO subjectDTO = new SubjectDTO(subject.getId(), subject.getBirthDate(), subject.getName(),
 					subject.getSex(), subject.getImagedObjectCategory(), subject.getLanguageHemisphericDominance(),
 					subject.getManualHemisphericDominance(), subjectStudyListDTO, subject.getIdentifier());
+			subjectDTO.setSubjectStudyList(subjectStudyListDTO);
 			return subjectDTO;
 		} else {
 			return null;
@@ -150,11 +151,21 @@ public class ShanoirUploaderServiceClient {
 	 * @return boolean true, if success
 	 */
 	public org.shanoir.ws.generated.uploader.SubjectDTO createSubject(
-			final Long studyId,
 			final Long studyCardId,
 			final boolean modeSubjectCommonName,
 			final org.shanoir.ws.generated.uploader.SubjectDTO subjectDTO) {
-		return shanoirUploaderService.createSubject(studyId, studyCardId, modeSubjectCommonName, subjectDTO);
+		return shanoirUploaderService.createSubject(studyCardId, modeSubjectCommonName, subjectDTO);
+	}
+	
+	/**
+	 * This method puts subjects into studies.
+	 * 
+	 * @param subjectStudyDTO
+	 * @return
+	 */
+	public org.shanoir.ws.generated.uploader.SubjectStudyDTO createSubjectStudy(
+			final org.shanoir.ws.generated.uploader.SubjectStudyDTO subjectStudyDTO) {
+		return shanoirUploaderService.createSubjectStudy(subjectStudyDTO);
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.wsdl;
+package org.shanoir.uploader.service.soap;
 
 import org.shanoir.uploader.ShUpConfig;
 

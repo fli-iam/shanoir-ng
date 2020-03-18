@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,6 +48,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Service
 public class SubjectServiceImpl implements SubjectService {
+
+	private static final String FORMAT_CENTER_CODE = "000";
+
+	private static final String FORMAT_SUBJECT_CODE = "0000";
 
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -111,6 +117,29 @@ public class SubjectServiceImpl implements SubjectService {
 		updateSubjectName(new IdName(subject.getId(), subject.getName()));
 		return subjectDb;
 	}
+	
+	@Override
+	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
+		if (subject.getSubjectStudyList() != null) {
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				subjectStudy.setSubject(subject);
+			}			
+		}
+		// the first 3 numbers are the center code, search for highest existing subject with center code
+		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
+		String commonNameCenter = formatterCenter.format(centerId);
+		int maxCommonNameNumber = 0;
+		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
+		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
+			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
+			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		}
+		maxCommonNameNumber += 1;
+		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
+		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+		subject.setName(subjectName);
+		return subjectRepository.save(subject);
+	}
 
 	@Override
 	public Subject update(final Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException {
@@ -120,8 +149,6 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectRepository.save(subjectDb);
 		return subjectDb;
 	}
-	
-	
 
 	/*
 	 * Update some values of template to save them in database.
@@ -183,16 +210,6 @@ public class SubjectServiceImpl implements SubjectService {
 		if (centerCode == null || "".equals(centerCode)) {
 			return null;
 		}
-		return subjectRepository.findFromCenterCode(centerCode);
-	}
-	
-	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
-		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
-					new ObjectMapper().writeValueAsString(subject));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
-		} 
+		return subjectRepository.findSubjectFromCenterCode(centerCode + "%");
 	}
 }

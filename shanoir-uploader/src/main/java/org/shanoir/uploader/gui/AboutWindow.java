@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.shanoir.uploader.ShUpConfig;
 
 public class AboutWindow extends JFrame {
 
@@ -63,7 +64,7 @@ public class AboutWindow extends JFrame {
 				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		JLabel versionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.version"));
+		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION);
 		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
 		JLabel copyrightLabel = new JLabel(

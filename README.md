@@ -12,6 +12,12 @@ GitHub is a tool for developers if you are seeking information at a user level v
 
 # :warning: Disclaimers :warning:
 
+* The latest version of Shanoir-NG is currently on the branch "develop", or on the branch "appning" for the preclinical solution,
+that will soon be merged into the "develop" branch. The "develop" branch is operational, we wait until our go-live in April/May
+2020 is finished before merging "develop" into the "master", to have a real stable production version 1.0 "master" afterwards.
+
+* You can find the installation instruction for "develop" branch below
+
 * Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
 
 * A few .env files in the docker-compose layer contain clear Keycloak password. Please choose your own password (check Keycloak password format policy first).

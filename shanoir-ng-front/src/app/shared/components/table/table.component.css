@@ -16,12 +16,11 @@ th { width: 100%; white-space: normal; }
 		.controls select { width: 150px; margin-right: 5px; }
 		.controls .text-search,
 		.controls .options,
-		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; }
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 5px;vertical-align: bottom; }
 			.controls .options .max-results { width: 40px; text-align: right; }
-	.select-ctrl button { padding: 0 5px; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
-	th.checkbox-col { width: 21px; }
+	th.checkbox-col { width: 17px; }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -47,7 +46,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-o
 		td span.button .awesome { color: var(--color-b); }
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
-		
+
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
 
@@ -57,7 +56,7 @@ a.link { text-decoration: none; color: inherit; }
 
 .cell-button svg:hover { color: var(--color-a); }
 
-checkbox { height: 15px; width: 15px; }
+checkbox { height: 13px; width: 13px; margin: 1px 0; }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
 .triangle.up { bottom: 100%; }

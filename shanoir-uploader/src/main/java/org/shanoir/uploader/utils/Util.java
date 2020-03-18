@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -257,6 +259,12 @@ public final class Util {
 			return null;
 		}
 		return calendar.toGregorianCalendar().getTime();
+	}
+	
+	public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+	    return dateToConvert.toInstant()
+	      .atZone(ZoneId.systemDefault())
+	      .toLocalDate();
 	}
 
 	public static String generateErrorMessage(ResourceBundle resourceBundle, String message, boolean contactAdmin) {
