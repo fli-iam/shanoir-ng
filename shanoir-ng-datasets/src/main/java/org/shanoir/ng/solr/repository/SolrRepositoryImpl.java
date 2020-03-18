@@ -17,7 +17,6 @@ import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
-import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
 /**
@@ -71,16 +70,17 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 		
 		criteria = combineCriteria(criteria);
 		
-		FacetQuery query = new SimpleFacetQuery(criteria)
-		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str").setFacetLimit(100)
+		SimpleFacetQuery query = ((FacetQuery) new SimpleFacetQuery(criteria)
+		  .setPageRequest(pageable))
+		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str").setFacetLimit(200)
 		  .addFacetOnField("subjectName_str").setFacetLimit(100)
 		  .addFacetOnField("examinationComment_str").setFacetLimit(100)
 		  .addFacetOnField("datasetName_str").setFacetLimit(100)
-		  .addFacetOnField("datasetType").setFacetLimit(100)
-		  .addFacetOnField("datasetNature").setFacetLimit(100));
-		FacetPage<ShanoirSolrDocument> facetPage = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
+		  .addFacetOnField("datasetType").setFacetLimit(10)
+		  .addFacetOnField("datasetNature").setFacetLimit(20));
 		
-		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) facetPage;
+		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) solrTemplate.queryForPage(query, ShanoirSolrDocument.class);
+
 		return result;
 	}
 	

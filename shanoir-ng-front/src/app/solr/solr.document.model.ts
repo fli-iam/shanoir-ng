@@ -27,7 +27,8 @@ export class SolrDocument {
     studyId: string;
 }
 
-export class ShanoirSolrFacet {
+export class SolrRequest {
+    keyword: string;
     studyName: string[];
     subjectName: string[];
     examinationComment: string[];

@@ -17,7 +17,7 @@ import { Injectable } from '@angular/core';
 import { Pageable } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
-import { SolrResultPage, ShanoirSolrFacet } from './solr.document.model';
+import { SolrRequest, SolrResultPage } from './solr.document.model';
 
 
 @Injectable()
@@ -33,16 +33,22 @@ export class SolrService {
         }
     }
 
-    public facetSearch(facetSearch: ShanoirSolrFacet, pageable: Pageable): Promise<SolrResultPage> {
-        if (!facetSearch.studyName && !facetSearch.subjectName && !facetSearch.examinationComment && !facetSearch.datasetName
-            && !facetSearch.datasetStartDate && !facetSearch.datasetEndDate && !facetSearch.datasetType && !facetSearch.datasetNature) {
+    public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
+        if (!solrReq.studyName && !solrReq.subjectName && !solrReq.examinationComment && !solrReq.datasetName
+            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature && !solrReq.keyword) {
                 return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
                 .map((solrResultPage: SolrResultPage) => {
                     return solrResultPage;
                 })
             .toPromise();
-        } else {
-            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(facetSearch), { 'params': pageable.toParams() })    
+        } else if (!solrReq.keyword) {
+            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(solrReq), { 'params': pageable.toParams() })    
+                .map((solrResultPage: SolrResultPage) => {
+                    return solrResultPage;
+                })
+            .toPromise();
+        } else if (solrReq.keyword != null && solrReq.keyword != undefined){
+            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_FULLTEXT_SEARCH_URL, JSON.stringify(solrReq.keyword), { 'params': pageable.toParams() })    
                 .map((solrResultPage: SolrResultPage) => {
                     return solrResultPage;
                 })
@@ -50,16 +56,12 @@ export class SolrService {
         }   
     }
 
-    // private toRealObject(entity: T) {
-    //     let trueObject = Object.assign(this.getEntityInstance(entity), entity);
-    //     Object.keys(entity).forEach(key => {
-    //         let value = entity[key];
-    //         // For Date Object, put the json object to a real Date object
-    //         if (String(key).indexOf("Date") > -1 && value) {
-    //             trueObject[key] = new Date(value);
-    //         } 
-    //     });
-    //     return trueObject;
-    // }
+   public fulltextSearch(keyword: String, pageable: Pageable): Promise<SolrResultPage> {
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(keyword), { 'params': pageable.toParams() })
+            .map((solrResultPage: SolrResultPage) => {
+                return solrResultPage;
+            })
+        .toPromise();    
+   }
 
 }

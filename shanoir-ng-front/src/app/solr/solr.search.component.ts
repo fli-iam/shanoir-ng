@@ -21,7 +21,7 @@ import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { IdName } from "../shared/models/id-name.model";
-import { FacetField, ShanoirSolrFacet, SolrResultPage, FacetResultPage } from "./solr.document.model";
+import { FacetField, SolrRequest, SolrResultPage, FacetResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
 
 @Component({
@@ -38,7 +38,8 @@ export class SolrSearchComponent{
     // filteredSubjectNames: Observable<string[]>;
     allMrDatasetNatures: any[];
     allDatasetModalityTypes: any[];
-    solrRequest: ShanoirSolrFacet = new ShanoirSolrFacet();
+    solrRequest: SolrRequest = new SolrRequest();
+    savedSolrRequestState: SolrRequest;
     columnDefs: any[];
     form: FormGroup;
     @ViewChild('table') table: TableComponent;
@@ -65,6 +66,7 @@ export class SolrSearchComponent{
 
     buildForm(): FormGroup {
         let formGroup = this.formBuilder.group({
+            'keyword': [this.solrRequest.keyword],
             'studyName': [this.solrRequest.studyName],
             'subjectName': [this.solrRequest.subjectName],
             'examinationComment': [{value: this.solrRequest.examinationComment, disabled: !this.solrRequest.subjectName || this.selectedStudies.length < 1}],
@@ -103,6 +105,9 @@ export class SolrSearchComponent{
     }
     
     getPage(pageable: Pageable): Promise<SolrResultPage> {
+        // this.savedSolrRequestState = this.solrRequest;
+        // console.log('solrR: ', this.solrRequest, 'saved: ', this.savedSolrRequestState);
+
         let saveStates = [];
         if (this.solrRequest.studyName) saveStates[0] = this.solrRequest.studyName.slice();
         if (this.solrRequest.subjectName) saveStates[1] = this.solrRequest.subjectName.slice();
@@ -110,7 +115,7 @@ export class SolrSearchComponent{
         if (this.solrRequest.datasetName) saveStates[3] = this.solrRequest.datasetName.slice();
         if (this.solrRequest.datasetType) saveStates[4] = this.solrRequest.datasetType.slice();
         if (this.solrRequest.datasetNature) saveStates[5] = this.solrRequest.datasetNature.slice();
-        return this.solrService.facetSearch(this.solrRequest, pageable).then(solrResultPage => {
+        return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
             for (let j = 0; j < solrResultPage['facetResultPages'].length; j++) {
                 for (let i = 0; i < solrResultPage['facetResultPages'][j].content.length; i++) {
                     let facetField: FacetField = new FacetField(solrResultPage['facetResultPages'][j].content[i]);
@@ -146,7 +151,9 @@ export class SolrSearchComponent{
     }
 
     private removeAllFacets() {
-        this.solrRequest.studyName = this.solrRequest.subjectName = this.solrRequest.examinationComment = this.solrRequest.datasetName = null;
+        this.solrRequest.studyName = this.solrRequest.subjectName = this.solrRequest.examinationComment = this.solrRequest.datasetName 
+            = this.solrRequest.datasetStartDate = this.solrRequest.datasetEndDate = this.solrRequest.datasetType = this.solrRequest.datasetNature 
+            = this.solrRequest.keyword = null;
     }
 
     private showAllStudies() {
@@ -163,6 +170,10 @@ export class SolrSearchComponent{
 
     private onRowClick(solrRequest: any) {
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
+    }
+
+    private fulltextSearch(keyword: string, pageable: Pageable) {
+        this.solrService.fulltextSearch(keyword, pageable);
     }
 
     // private filterSubjectName(value: string): string[] {

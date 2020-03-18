@@ -43,5 +43,7 @@ public interface SolrService {
 	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable);
+	
+	SolrResultPage<ShanoirSolrDocument> findByKeyword(String keyword, Pageable pageable);
 
 }

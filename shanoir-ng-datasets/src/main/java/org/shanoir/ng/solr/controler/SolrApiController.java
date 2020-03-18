@@ -74,4 +74,14 @@ public class SolrApiController implements SolrApi {
 		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
 	}
 	
+	@Override
+	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> findByKeyword(
+			@ApiParam(value = "keyword", required = true) @Valid @RequestBody String keyword, Pageable pageable) {
+		SolrResultPage<ShanoirSolrDocument> documents = solrService.findByKeyword(keyword, pageable);
+		if (documents == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
+	}
+	
 }

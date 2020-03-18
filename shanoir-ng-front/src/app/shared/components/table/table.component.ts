@@ -33,11 +33,11 @@ export class TableComponent implements OnInit {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() maxResults: number = 20;
 
     private page: Page<Object>;
     private isLoading: boolean = false;
     private maxResultsField: number;
-    private maxResults: number = 20;
     private lastSortedCol: Object = null;
     private lastSortedAsc: boolean = true;
     private currentPage: number = 1;
@@ -221,6 +221,7 @@ export class TableComponent implements OnInit {
         this.isLoading = true;
         this.getPage(this.getPageable()).then(page => {
             this.page = page;
+            this.maxResultsField = page.size;
             setTimeout(() => this.isLoading = false, 200);
         });
     }
@@ -280,17 +281,10 @@ export class TableComponent implements OnInit {
         return nb;
     }
 
-    private selectAll() {
+    private selectUnselectAll() {
         if (!this.items) return;
         for (let item of this.items) {
-            item["isSelectedInTable"] = true;
-        }
-    }
-
-    private unSelectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = false;
+            item["isSelectedInTable"] = !item["isSelectedInTable"];
         }
     }
 

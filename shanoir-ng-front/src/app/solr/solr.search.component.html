@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <form class="row" [formGroup]="form">
     <div class="left">
         <h2>Solr Search</h2>
-        <input type="text" id="searchBar" placeholder="Search..">
+        <input type="text" [(ngModel)]="solrRequest.keyword" formControlName="keyword" id="searchBar" placeholder="Search.." (change)="table.refresh()">
         <ol id="facet">
             <li>
                 <span class="button" (click)="removeAllFacets(); table.refresh()">
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="button" (click)="showAllStudies(); table.refresh()">
                             &#9664; Show all studies
                         </span>
-                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [items]="facetResultPage[0]" ></checkbox-list>
+                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [items]="facetResultPage[0]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
@@ -108,6 +108,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <h2>Results</h2>
         <shanoir-table #table
             [getPage]="getPage.bind(this)" 
+            [maxResults]="50"
             [columnDefs]="columnDefs" 
             (rowClick)="onRowClick($event)"
             [browserSearch]="false"

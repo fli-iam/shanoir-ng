@@ -81,11 +81,14 @@ public class SolrServiceImpl implements SolrService {
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-					shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-					shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-					shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
-			addToIndex(doc);
+			//TODO to be removed: massive test data
+			for (int i = 0; i < 1000; i++) {
+				ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName() + i,
+						shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+						shanoirMetadata.getExaminationComment() + i, DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+						shanoirMetadata.getSubjectName() + i, shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
+				addToIndex(doc);
+			}
 		}
 	}
 	
@@ -104,7 +107,7 @@ public class SolrServiceImpl implements SolrService {
 	
 	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet,Pageable pageable) {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null; 
 		
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -112,6 +115,20 @@ public class SolrServiceImpl implements SolrService {
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
 			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
+		}
+		return result;
+	}
+	
+	@Transactional
+	@Override
+	public SolrResultPage<ShanoirSolrDocument> findByKeyword(String keyword, Pageable pageable) {
+		SolrResultPage<ShanoirSolrDocument> result = null; 
+		
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findByKeyword(keyword, pageable);
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			result = solrRepository.findByStudyIdInAndKeyword(studyIds, keyword, pageable);
 		}
 		return result;
 	}

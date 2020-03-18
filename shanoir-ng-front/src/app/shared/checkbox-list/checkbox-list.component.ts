@@ -35,12 +35,12 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     selectedItems: any[] = [];
     selectAll: boolean = true;
     currentPage: number = 0;
-    itemsPersPage: number = 5;
+    itemsPersPage: number = 10;
     totalPages: number =  0;
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.items && this.items !== undefined) {
-            this.totalPages = Math.ceil(this.items.totalElements / this.itemsPersPage);console.log('totalPages: ', this.totalPages)
+            this.totalPages = Math.ceil(this.items.totalElements / this.itemsPersPage);
             // this.selectUnselectAll(false); // checked all by default
         }
     }
@@ -69,6 +69,6 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
 
     setPage(page: number) {
         if (page < 0) return;
-        this.currentPage = page;console.log('currentPage: ', this.currentPage)
+        this.currentPage = page;
     }
 }

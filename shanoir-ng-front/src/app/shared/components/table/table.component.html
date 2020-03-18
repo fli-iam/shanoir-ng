@@ -15,8 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
-        <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
-        <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
+        <button><checkbox (onChange)="selectUnselectAll()" title="select/unselect all"></checkbox></button>
     </span>
     <!-- Text search -->
     <span *ngIf="browserSearch" class="text-search">

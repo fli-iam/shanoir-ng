@@ -37,10 +37,20 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 	@Query(value = "*:*")
 	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
 			"datasetType", "datasetNature"}, limit = 100)
-	SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
+	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
 	
 	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
 			"datasetType", "datasetNature"}, limit = 100)
-	SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
+	
+	@Query("datasetName:?0 OR examinationComment:?0 OR subjectName:?0 OR studyName:?0")
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
+			"datasetType", "datasetNature"}, limit = 100)
+	public SolrResultPage<ShanoirSolrDocument> findByKeyword(String keyword, Pageable pageable);
+	
+	@Query("studyId:(?0... ) AND (datasetName:?0 OR examinationComment:?0 OR subjectName:?0 OR studyName:?0)")
+	@Facet(fields = {"studyName_str", "subjectName_str", "examinationComment_str", "datasetName_str",
+			"datasetType", "datasetNature"}, limit = 100)
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndKeyword(Collection<Long> studyIds,String keyword, Pageable pageable);
 
 }
