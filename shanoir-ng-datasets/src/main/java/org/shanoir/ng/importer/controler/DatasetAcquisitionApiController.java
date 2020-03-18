@@ -18,6 +18,8 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,14 +33,24 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
+	
 	@Autowired
 	private ImporterService importerService;
 
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) {
-		importerService.setImportJob(importJob);
-		importerService.createAllDatasetAcquisition();
-		importerService.cleanTempFiles(importJob.getWorkFolder());
+		try {
+			long startTime = System.currentTimeMillis();
+			importerService.createAllDatasetAcquisition(importJob);
+		    long endTime = System.currentTimeMillis();
+		    long duration = (endTime - startTime);
+		    LOG.info("Creation of dataset acquisition required " + duration + " millis.");
+		} catch (Exception e) {
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			importerService.cleanTempFiles(importJob.getWorkFolder());			
+		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 

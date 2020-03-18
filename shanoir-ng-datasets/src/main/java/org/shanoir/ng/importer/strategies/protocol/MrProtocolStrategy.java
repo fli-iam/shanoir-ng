@@ -256,7 +256,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	        b.append("\n");
 	    }
 
-	    LOG.info(b.toString());
+	    LOG.debug(b.toString());
         
 		return mrProtocol;
 	}

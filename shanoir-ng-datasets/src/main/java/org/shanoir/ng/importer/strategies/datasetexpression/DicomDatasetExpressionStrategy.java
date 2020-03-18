@@ -44,15 +44,27 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	@Autowired
 	DicomProcessing dicomProcessing;
 
-	@Value("${dcm4chee-arc.address}")
-	private String dcm4cheeAddress;
+	@Value("${dcm4chee-arc.protocol}")
+	private String dcm4cheeProtocol;
 	
-	@Value("${dcm4chee-arc.wado-rs}")
-	private String dcm4cheeWADORS;
+	@Value("${dcm4chee-arc.host}")
+	private String dcm4cheeHost;
+
+	@Value("${dcm4chee-arc.port.web}")
+	private String dcm4cheePortWeb;
+	
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
+	
+	@Value("${dcm4chee-arc.dicom.wado.uri}")
+	private String dicomWADOURI;
+	
+	@Value("${dcm4chee-arc.dicom.web.rs}")
+	private String dicomWebRS;
 
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) {
+			ExpressionFormat expressionFormat) throws MalformedURLException {
 
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
@@ -64,31 +76,34 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 		}
 
 		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
-
-			//List<String> dcmFilesToSendToPacs = new ArrayList<String>();
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-				//dcmFilesToSendToPacs.add(datasetFile.getPath());
 				LocalDateTime contentTime = null;
 				LocalDateTime acquisitionTime = null;
 				Attributes dicomAttributes = null;
 				try {
-					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile,serie.getIsEnhancedMR());
+					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhancedMR());
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
 				DatasetFile pacsDatasetFile = new DatasetFile();
 				pacsDatasetFile.setPacs(true);
-				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
+
 				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
 				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				String wadoRsRequest = dcm4cheeAddress + dcm4cheeWADORS + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
-
-				try {
-					URL wadoURL = new URL(wadoRsRequest);
-					pacsDatasetFile.setPath(wadoURL.toString());
-				} catch (MalformedURLException e) {
-					LOG.error(e.getMessage(), e);
+				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);				
+				final StringBuffer wadoStrBuf = new StringBuffer();
+				wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+				// Use WADO-RS if true, WADO-URI if otherwise
+				if (dicomWeb) {
+					wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
+							+ "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
+				} else {
+					wadoStrBuf.append(dicomWADOURI + "?requestType=WADO&studyUID="
+							+ studyInstanceUID + "&seriesUID=" + seriesInstanceUID + "&objectUID=" + sOPInstanceUID
+							+ "&contentType=application/dicom");
 				}
+				URL wadoURL = new URL(wadoStrBuf.toString());
+				pacsDatasetFile.setPath(wadoURL.toString());
 
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);

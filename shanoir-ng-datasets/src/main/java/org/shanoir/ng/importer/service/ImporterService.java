@@ -51,20 +51,7 @@ public class ImporterService {
 	@Autowired 
 	private DicomPersisterService dicomPersisterService;
 	
-	private ImportJob importJob;
-	
-	public void setImportJob(ImportJob importJob) {
-		this.importJob = importJob;
-	}
-	
-	// TODO 
-	public void retrieveMetadataInDicom() {
-	}
-	
-	public void buildDatasets() {
-	}
-	
-	public void createAllDatasetAcquisition() {
+	public void createAllDatasetAcquisition(ImportJob importJob) throws Exception {
 		Examination examination = examinationService.findById(importJob.getExaminationId());
 		if (examination != null) {
 			int rank = 0;
@@ -72,7 +59,7 @@ public class ImporterService {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
 						if (serie.getSelected() != null && serie.getSelected()) {
-							createDatasetAcquisitionForSerie(serie, rank, examination);
+							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
 						}
 					}
@@ -81,7 +68,7 @@ public class ImporterService {
 		}
 	}
 	
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
@@ -92,9 +79,14 @@ public class ImporterService {
 						datasetAcquisition.setExamination(examination);
 						// Persist Serie in Shanoir DB
 						DatasetAcquisition persistedDatasetAcquisition = datasetAcquisitionRepository.save(datasetAcquisition);
+						long startTime = System.currentTimeMillis();
 						// Persist Dicom images in Shanoir Pacs
-			//			if (persistedDatasetAcquisition != null) {
-							dicomPersisterService.persistAllForSerie(serie);
+						dicomPersisterService.persistAllForSerie(serie);					 
+					    long endTime = System.currentTimeMillis();
+					    long duration = (endTime - startTime);
+					    LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
+					    		+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
+					    		+ "(" + serie.getSeriesDescription() + ")");
 					}
 				}
 			}
@@ -102,7 +94,6 @@ public class ImporterService {
 	}
 	
 	public void cleanTempFiles(String workFolder) {
-		
 		if (workFolder != null) {
 			// delete workFolder.upload file
 			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
