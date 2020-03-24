@@ -54,9 +54,7 @@ import org.shanoir.uploader.action.ImportDialogOpenerNG;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.anonymize.ISubjectIdentifierGenerator;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.dicom.anonymize.SubjectIdentifierGenerator;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.shanoir.uploader.service.soap.ServiceConfiguration;
@@ -728,8 +726,7 @@ public class MainWindow extends JFrame {
 		} catch (PseudonymusException e) {
 			logger.error(e.getMessage(), e);
 		}
-		ISubjectIdentifierGenerator generator = new SubjectIdentifierGenerator();
-		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, generator, dicomServerClient);
+		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient);
 		downloadOrCopyButton.addActionListener(dOCAL);		
 		downloadOrCopyButton.setEnabled(false);	
 		
