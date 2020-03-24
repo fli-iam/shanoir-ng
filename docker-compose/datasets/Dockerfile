@@ -12,6 +12,15 @@
 
 FROM openjdk:8-jdk-alpine
 
+# Installation of dcm4che to manage the store-scu into the PACS
+# dcm4che3, used last version 5.21.0 as available on the 2020-02-14
+# https://sourceforge.net/projects/dcm4che/files/dcm4che3/
+RUN wget -O dcm4che-5.21.0-bin.zip http://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.21.0/dcm4che-5.21.0-bin.zip
+RUN unzip dcm4che-5.21.0-bin.zip
+
+# take care of path
+ENV PATH /dcm4che-5.21.0/bin:$PATH
+
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-datasets.jar shanoir-ng-datasets.jar
 
