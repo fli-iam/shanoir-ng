@@ -58,9 +58,7 @@ public class StreamGobbler extends Thread {
 	 */
 	@Override
 	public void run() {
-		try {
-			final InputStreamReader isr = new InputStreamReader(is);
-			final BufferedReader br = new BufferedReader(isr);
+		try (InputStreamReader isr = new InputStreamReader(is); BufferedReader br = new BufferedReader(isr)) {
 			String line = null;
 
 			while ((line = br.readLine()) != null) {
@@ -75,7 +73,6 @@ public class StreamGobbler extends Thread {
 					stringDisplay += "INFO : " + line + "\n";
 				}
 			}
-			isr.close();
 		} catch (final IOException ioe) {
 			LOG.error(ioe.getMessage());
 		}
