@@ -181,6 +181,7 @@ public class ImporterService {
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+			event.setProgress(1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
 			throw e;
@@ -236,6 +237,7 @@ public class ImporterService {
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("No datasets to create. Please check your EEG files");
+			event.setProgress(1f);
 			eventService.publishEvent(event);
 			return;
 		}
@@ -362,6 +364,7 @@ public class ImporterService {
 			LOG.error("Error while importing EEG: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("An unexpected error occured, please contact an administrator.");
+			event.setProgress(1f);
 			eventService.publishEvent(event);
 			throw e;
 		}
