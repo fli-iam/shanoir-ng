@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,10 +23,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.bids.service.StudyBIDSServiceImpl;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.subject.model.HemisphericDominance;
+import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
@@ -41,9 +44,7 @@ import org.springframework.web.client.RestTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class StudyBIDSServiceImplTest {
 	
-	private static final String CSV_SEPARATOR = ",";
-	
-	private static final String CSV_SPLITTER = "\n";
+	private static final String CSV_SEPARATOR = "\t";
 	
 	@Mock
 	private MicroserviceRequestsService microservicesRequestsService;
@@ -79,8 +80,10 @@ public class StudyBIDSServiceImplTest {
 		subject.setId(Long.valueOf("1231"));
 		subject.setName("subjectName");
 		subject.setIdentifier("iudentifier");
+		subject.setBirthDate(LocalDate.now());
 		subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
 		subject.setManualHemisphericDominance(HemisphericDominance.Right);
+		subject.setImagedObjectCategory(ImagedObjectCategory.ANIMAL_CADAVER);
 		subject.setSex(Sex.F);
 		
 		SubjectStudy subjstud = new SubjectStudy();
@@ -227,7 +230,7 @@ public class StudyBIDSServiceImplTest {
 		}
 
 		// WHEN we create the subject participants.tsv file
-		service.createParticipantsFiles(studyFolder, studyToCreate);
+		service.participantsSerializer(studyFolder, studyToCreate);
 		
 		// THEN the file is created with some content
 		File subjectFile = new File(studyFolder + File.separator + "participants.tsv");
@@ -236,16 +239,16 @@ public class StudyBIDSServiceImplTest {
 		List<String> lines = Files.readAllLines(Paths.get(subjectFile.getPath()));
 		StringBuilder columnLine = new StringBuilder();
 		columnLine.append("participant_id").append(CSV_SEPARATOR)
-		  	  .append("common_name").append(CSV_SEPARATOR)
+		  	  .append("subject_identifier").append(CSV_SEPARATOR)
 		  	  .append("sex").append(CSV_SEPARATOR)
 		  	  .append("birth_date").append(CSV_SEPARATOR)
-		  	  .append("manualHemisphericDominance").append(CSV_SEPARATOR)
-		  	  .append("languageHemisphericDominance").append(CSV_SEPARATOR)
-		  	  .append("imagedObjectCategory").append(CSV_SEPARATOR);
+		  	  .append("manual_hemispheric_dominance").append(CSV_SEPARATOR)
+		  	  .append("language_hemispheric_dominance").append(CSV_SEPARATOR)
+		  	  .append("imaged_object_category").append(CSV_SEPARATOR);
 		assertEquals(lines.get(0), columnLine.toString());
 		StringBuilder dataLine = new StringBuilder();
-		dataLine.append(subject.getIdentifier()).append(CSV_SEPARATOR)
-		 	  .append(subject.getName()).append(CSV_SEPARATOR)
+		dataLine.append(subject.getName()).append(CSV_SEPARATOR)
+			  .append(subject.getIdentifier()).append(CSV_SEPARATOR)
 		 	  .append(subject.getSex()).append(CSV_SEPARATOR)
 		 	  .append(subject.getBirthDate()).append(CSV_SEPARATOR)
 		 	  .append(subject.getManualHemisphericDominance()).append(CSV_SEPARATOR)
@@ -255,14 +258,14 @@ public class StudyBIDSServiceImplTest {
 	}
 
 	@Test
-	public void testDeserializeParticipantTsv() throws IOException {
+	public void testDeserializeParticipantTsv() throws IOException, ShanoirException {
 		// GIVEN a participants.tsv file
 		File studyFolder = service.getStudyFolder(studyToCreate);
 		if (!studyFolder.exists()) {
 			studyFolder.mkdirs();
 		}
 		// Create the file
-		service.createParticipantsFiles(studyFolder, studyToCreate);
+		service.participantsSerializer(studyFolder, studyToCreate);
 	
 		File subjectFile = new File(studyFolder + File.separator + "participants.tsv");
 		assertTrue(subjectFile.exists());

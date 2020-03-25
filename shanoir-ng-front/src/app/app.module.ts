@@ -73,6 +73,7 @@ import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-c
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
@@ -270,6 +271,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         EegSelectSeriesComponent,
         DicomUploadComponent,
         EegUploadComponent,
+        BidsUploadComponent,
         QueryPacsComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,

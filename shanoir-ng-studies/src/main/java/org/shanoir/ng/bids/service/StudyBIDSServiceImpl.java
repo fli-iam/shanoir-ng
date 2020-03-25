@@ -6,11 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
@@ -41,29 +43,64 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 @Service
 public class StudyBIDSServiceImpl implements StudyBIDSService {
 
+	private static final String NULL = "null";
+
+	private static final String BIRTH_NAME_HASH = "birth_name_hash1";
+
+	private static final String LAST_NAME_HASH = "last_name_hash1";
+
+	private static final String FIRST_NAME_HASH = "first_name_hash1";
+
+	private static final String IMAGED_OBJECT_CATEGORY = "imaged_object_category";
+
+	private static final String LANGUAGE_HEMISPHERIC_DOMINANCE = "language_hemispheric_dominance";
+
+	private static final String MANUAL_HEMISPHERIC_DOMINANCE = "manual_hemispheric_dominance";
+
+	private static final String BIRTH_DATE = "birth_date";
+
+	private static final String SEX = "sex";
+
+	private static final String SUBJECT_IDENTIFIER = "subject_identifier";
+
+	private static final String PARTICIPANT_ID = "participant_id";
+
 	private static final String STUDY_PREFIX = "stud-";
 
 	private static final String SUBJECT_PREFIX = "sub-";
 
-	private static final String CSV_SEPARATOR = ",";
-	
+	private static final String CSV_SEPARATOR = "\t";
+
 	private static final String CSV_SPLITTER = "\n";
 
 	private static final String[] CSV_PARTICIPANTS_HEADER = {
-			"participant_id",
-			"common_name",
-			"sex",
-			"birth_date",
-			"manualHemisphericDominance",
-			"languageHemisphericDominance",
-			"imagedObjectCategory"
-		};
-	
+			PARTICIPANT_ID,
+			SUBJECT_IDENTIFIER,
+			SEX,
+			BIRTH_DATE,
+			MANUAL_HEMISPHERIC_DOMINANCE,
+			LANGUAGE_HEMISPHERIC_DOMINANCE,
+			IMAGED_OBJECT_CATEGORY
+	};
+
+	private static final String[] CSV_PARTICIPANTS_HEADER_IMPORT = {
+			PARTICIPANT_ID,
+			SUBJECT_IDENTIFIER,
+			SEX,
+			BIRTH_DATE,
+			MANUAL_HEMISPHERIC_DOMINANCE,
+			LANGUAGE_HEMISPHERIC_DOMINANCE,
+			IMAGED_OBJECT_CATEGORY,
+			FIRST_NAME_HASH,
+			LAST_NAME_HASH,
+			BIRTH_NAME_HASH
+	};
+
 	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(StudyBIDSService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StudyBIDSServiceImpl.class);
 
 	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
-	
+
 	private static final String README_FILE = "README";
 
 	private static final String DEFAULT_README = "This BIDS dataset was automatically created by Shanoir-NG.";
@@ -76,13 +113,13 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Autowired
 	StudyService studyService;
-	
+
 	@Autowired
 	SubjectService subjectService;
-	
+
 	@Override
 	/**
 	 * This method creates the BIDS folder for the study.
@@ -122,7 +159,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 	public void updateBidsFolder(Study studyToChange) {
 		// Get the study to update
 		Study baseStudy = studyService.findById(studyToChange.getId());
-		
+
 		// If the name didn't change, don't change anything.
 		if (baseStudy == null || studyToChange.getName().equals(baseStudy.getName())) {
 			return;
@@ -144,7 +181,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 			// Create it from scratch
 			bidsDir = createBidsFolderFromScratch(studyToExport);
 		}
-		createParticipantsFiles(bidsDir, studyToExport);
+		participantsSerializer(bidsDir, studyToExport);
 		return bidsDir;
 	}
 
@@ -182,7 +219,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 					+ studyToGenerate.getId()
 					+ MicroserviceRequestsService.STUDY_NAME
 					+ studyToGenerate.getName()
-				, HttpMethod.GET, entity, Void.class);
+					, HttpMethod.GET, entity, Void.class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study microservice request - {}", e.getMessage());
 		}
@@ -234,31 +271,32 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 	/**
 	 * Creates the participants.tsv and participants.json file from the study
 	 */
-	public void createParticipantsFiles(File parentFolder, Study study) {
+	public void participantsSerializer(File parentFolder, Study study) {
 		File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
 		if (csvFile.exists()) {
 			// Recreate it everytime
 			FileUtils.deleteQuietly(csvFile);
 		}
-        StringBuilder buffer =  new StringBuilder();
-        
-        for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
-        	buffer.append(columnHeader).append(CSV_SEPARATOR);
-        }
-        buffer.append(CSV_SPLITTER);
-        
+		StringBuilder buffer =  new StringBuilder();
+
+		// Headers
+		for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
+			buffer.append(columnHeader).append(CSV_SEPARATOR);
+		}
+		buffer.append(CSV_SPLITTER);
+
 		for (SubjectStudy stubject : study.getSubjectStudyList()) {
 			Subject u = stubject.getSubject();
-			
-			// Write in the file
-			buffer.append(u.getIdentifier()).append(CSV_SEPARATOR)
-			 	  .append(u.getName()).append(CSV_SEPARATOR)
-			 	  .append(u.getSex()).append(CSV_SEPARATOR)
-			 	  .append(u.getBirthDate()).append(CSV_SEPARATOR)
-			 	  .append(u.getManualHemisphericDominance()).append(CSV_SEPARATOR)
-			 	  .append(u.getLanguageHemisphericDominance()).append(CSV_SEPARATOR)
-			 	  .append(u.getImagedObjectCategory()).append(CSV_SEPARATOR)
-			 	  .append(CSV_SPLITTER);
+
+			// Write in the file the values
+			buffer.append(u.getName()).append(CSV_SEPARATOR)
+			.append(u.getIdentifier() == null ? NULL : u.getIdentifier()).append(CSV_SEPARATOR)
+			.append(u.getSex() == null ? NULL : u.getSex()).append(CSV_SEPARATOR)
+			.append(u.getBirthDate()).append(CSV_SEPARATOR)
+			.append(u.getManualHemisphericDominance() == null ? NULL : u.getManualHemisphericDominance()).append(CSV_SEPARATOR)
+			.append(u.getLanguageHemisphericDominance() == null ? NULL : u.getLanguageHemisphericDominance()).append(CSV_SEPARATOR)
+			.append(u.getImagedObjectCategory()).append(CSV_SEPARATOR)
+			.append(CSV_SPLITTER);
 		}
 
 		try {
@@ -268,32 +306,65 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 		}
 	}
 
-	public List<Subject> participantsDeserializer(File participantsTsv) throws IOException {
+	@Override
+	public List<Subject> participantsDeserializer(File participantsTsv) throws IOException, ShanoirException {
 		if (participantsTsv == null || !participantsTsv.exists()) {
 			return Collections.emptyList();
 		}
-		
+
 		// Get the CSV as String[] lines
 		CsvMapper mapper = new CsvMapper();
 		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
 		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(participantsTsv);
 		List<Subject> subjects = new ArrayList<>();
 
-		// Ignore header
-		it.next();
-		// Iterate over the lines to create new subjects
-		// TODO: add technical checks on mandatory fields (following ImagedObjectCategory value)
-		// Is there default values ?
+		// Check that the list of column is known
+		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+		for (String columnFound : columns) {
+			if (Arrays.asList(CSV_PARTICIPANTS_HEADER_IMPORT).indexOf(columnFound) == -1) {
+				throw new ShanoirException("Non existing column in participants.tsv file. Please refer to the .sef documentation: " + columnFound);
+			}
+		}
+
+		// Iterate over the lines to create new subjects and store them
 		while (it.hasNext()) {
 			Subject su = new Subject();
-			String[] row = it.next();
-			su.setIdentifier(row[0]);
-			su.setName(row[1]);
-			su.setSex("null".equals(row[2])? null : Sex.valueOf(row[2]));
-			su.setBirthDate("null".equals(row[3])? null : LocalDate.parse(row[3]));
-			su.setManualHemisphericDominance("null".equals(row[4])? null : HemisphericDominance.valueOf(row[4]));
-			su.setLanguageHemisphericDominance("null".equals(row[5])? null : HemisphericDominance.valueOf(row[5]));
-			su.setImagedObjectCategory("null".equals(row[6])? null : ImagedObjectCategory.valueOf(row[6]));
+			String[] row = it.next()[0].split(CSV_SEPARATOR);
+
+			if (columns.contains(PARTICIPANT_ID)) {
+				su.setName(row[columns.indexOf(PARTICIPANT_ID)]);
+			} else {
+				throw new ShanoirException("Error in participants.tsv: column participant_id is mandatory.");
+			}
+			if (columns.contains(SUBJECT_IDENTIFIER)) {
+				su.setIdentifier(NULL.equals(row[columns.indexOf(SUBJECT_IDENTIFIER)]) ? NULL : row[columns.indexOf(SUBJECT_IDENTIFIER)]);
+			}
+			if (columns.contains(SEX)) {
+				su.setSex(NULL.equals(row[columns.indexOf(SEX)])? null: Sex.valueOf(row[columns.indexOf(SEX)]));
+			}
+			if (columns.contains(BIRTH_DATE)) {
+				su.setBirthDate(NULL.equals(row[columns.indexOf(BIRTH_DATE)])? null : LocalDate.parse(row[columns.indexOf(BIRTH_DATE)]));
+			}
+			if (columns.contains(MANUAL_HEMISPHERIC_DOMINANCE)) {
+				su.setManualHemisphericDominance(NULL.equals(row[columns.indexOf(MANUAL_HEMISPHERIC_DOMINANCE)])? null : HemisphericDominance.valueOf(row[columns.indexOf(MANUAL_HEMISPHERIC_DOMINANCE)]));
+			}
+			if (columns.contains(LANGUAGE_HEMISPHERIC_DOMINANCE)) {
+				su.setLanguageHemisphericDominance(NULL.equals(row[columns.indexOf(LANGUAGE_HEMISPHERIC_DOMINANCE)])? null : HemisphericDominance.valueOf(row[columns.indexOf(LANGUAGE_HEMISPHERIC_DOMINANCE)]));
+			}
+			if (columns.contains(IMAGED_OBJECT_CATEGORY)) {
+				su.setImagedObjectCategory(ImagedObjectCategory.valueOf(row[columns.indexOf(IMAGED_OBJECT_CATEGORY)]));
+			} else {
+				throw new ShanoirException("Error in participants.tsv: column imaged_object_category is mandatory.");
+			}
+			if (columns.contains(FIRST_NAME_HASH)) {
+				su.setName(NULL.equals(row[columns.indexOf(FIRST_NAME_HASH)])? null : row[columns.indexOf(FIRST_NAME_HASH)]);
+			}
+			if (columns.contains(LAST_NAME_HASH)) {
+				su.setName(NULL.equals(row[columns.indexOf(LAST_NAME_HASH)])? null : row[columns.indexOf(LAST_NAME_HASH)]);
+			}
+			if (columns.contains(BIRTH_NAME_HASH)) {
+				su.setName(NULL.equals(row[columns.indexOf(BIRTH_NAME_HASH)])? null : row[columns.indexOf(BIRTH_NAME_HASH)]);
+			}
 			subjects.add(su);
 		}
 

@@ -86,6 +86,10 @@ ms.url:
   shanoir-ng-datasets: http://datasets:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://datasets:9904/datasetacquisition_eeg
   dicom2nifti: http://preclinical-bruker2dicom:5000/dicom2nifti
+  shanoir-ng-studies-name: http://studies:9902/studies/names
+  shanoir-ng-studies-subjects-names: http://studies:9902/subjects/names
+  shanoir-ng-create-examination: http://datasets:9904/examinations
+  shanoir-ng-studies-commons: http://studies:9902/common
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-import.log

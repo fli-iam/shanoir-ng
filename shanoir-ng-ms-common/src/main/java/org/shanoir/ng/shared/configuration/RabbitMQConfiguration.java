@@ -63,11 +63,16 @@ public class RabbitMQConfiguration {
 
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
+	public static final String SUBJECTS_QUEUE = "subjects-queue";
+
 	////////////////// EXCHANGES //////////////////
 
 	public static final String EVENTS_EXCHANGE = "events-exchange";
 
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
+	public static final String SUBJECTS_EXCHANGE = "subjects-exchange";
+
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -174,6 +179,10 @@ public class RabbitMQConfiguration {
 		return new Queue(STUDY_USER_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue subjectsQueue() {
+		return new Queue(SUBJECTS_QUEUE, true);
+	}
 
 	@Bean
 	public FanoutExchange fanout() {
@@ -183,5 +192,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public TopicExchange topicExchange() {
 	    return new TopicExchange(EVENTS_EXCHANGE);
+	}
+
+	@Bean
+	public FanoutExchange fanoutSubjectExchange() {
+	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
 }

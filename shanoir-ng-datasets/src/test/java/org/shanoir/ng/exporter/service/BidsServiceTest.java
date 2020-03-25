@@ -240,7 +240,6 @@ public class BidsServiceTest {
 		// See testAddDataset
 	}
 
-	@Test
 	@After
 	public void tearDown() throws IOException {
 	    File studyFile = new File("/tmp/stud-" + exam.getStudyId() + "_" + studyName);

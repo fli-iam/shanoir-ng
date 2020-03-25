@@ -33,6 +33,7 @@ import { ClinicalContextComponent } from './import/clinical-context/clinical-con
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { ImportComponent } from './import/import.component';
@@ -82,6 +83,10 @@ let appRoutes: Routes = [
                 path: 'eeg',
                 component: EegUploadComponent,
                 data: {importMode: 'EEG'}
+            }, {   
+                path: 'bids',
+                component: BidsUploadComponent,
+                data: {importMode: 'BIDS'}
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,

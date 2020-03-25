@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.common;
+package org.shanoir.ng.importer.dto;
 
 /**
  * DTO with center id, study id and subject id.
@@ -29,6 +29,14 @@ public class CommonIdsDTO {
 	private Long subjectId;
 
 	private Long equipementId;
+
+	public CommonIdsDTO(Long centerId, Long studyId, Long subjectId, Long equipementId) {
+		super();
+		this.centerId = centerId;
+		this.studyId = studyId;
+		this.subjectId = subjectId;
+		this.equipementId = equipementId;
+	}
 
 	/**
 	 * @return the centerId

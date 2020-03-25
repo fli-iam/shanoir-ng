@@ -32,6 +32,10 @@ export class ImportService {
         return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
     }
 
+    uploadBidsFile(formData: FormData): Promise<Object> {
+        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
+    }
+
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))

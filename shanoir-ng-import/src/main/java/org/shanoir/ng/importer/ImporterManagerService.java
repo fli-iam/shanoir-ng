@@ -106,19 +106,20 @@ public class ImporterManagerService {
 			}
 			List<Patient> patients = importJob.getPatients();
 			// In PACS import the dicom files are still in the PACS, we have to download them first
-			// and then analyze them: what gives us a list of images for each serie.
 			final File importJobDir;
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
 			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
+			// Analyze DICOM: what gives us a list of images for each serie.
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), importJob.isFromPacs());
+			
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
