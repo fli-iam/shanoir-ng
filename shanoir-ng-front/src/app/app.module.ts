@@ -68,6 +68,7 @@ import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
@@ -208,6 +209,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
         DicomUploadComponent,
+        BidsUploadComponent,
         QueryPacsComponent,
         ClinicalContextComponent,
         SubjectStudyListComponent,
