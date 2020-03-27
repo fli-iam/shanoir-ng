@@ -26,6 +26,7 @@ import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -79,6 +80,9 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private WADODownloaderService downloader;
+	
+	@MockBean
+	private DatasetSecurityService datasetSecurityService;
 
 
 	@Before

@@ -41,6 +41,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
@@ -108,12 +109,15 @@ public class DatasetApiController implements DatasetApi {
 	
 	@Autowired 
 	private ExaminationService examinationService;
-
+	
     private final HttpServletRequest request;
     
 	@Autowired
 	private WADODownloaderService downloader;
-
+	
+	@Autowired
+	private DatasetSecurityService datasetSecurityService;
+	
 	private static final SecureRandom RANDOM = new SecureRandom();
 	
     @org.springframework.beans.factory.annotation.Autowired
@@ -226,6 +230,34 @@ public class DatasetApiController implements DatasetApi {
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
 
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.contentType(MediaType.parseMediaType(contentType))
+				.contentLength(data.length)
+				.body(resource);
+	}
+	
+	@Override
+	public ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+				@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format,
+			@ApiParam(value = "ids of the datasets", required = true) @Valid @RequestBody final List<Long> datasetIds)
+			throws RestServiceException, EntityNotFoundException, IOException {
+		
+		// Check rights on at least one of the datasets and filter the datasetIds list
+		datasetSecurityService.hasRightOnAtLeastOneDataset(datasetIds, "CAN_DOWNLOAD");
+    	if (datasetIds.isEmpty()) throw new RestServiceException(
+    			new ErrorModel(HttpStatus.FORBIDDEN.value(), "Not allowed to download asked datasets"));
+    	
+		//TODO now datasetIds are all valid, do massive download with these datasetIds
+    	
+    	String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+    	String tmpFilePath = tmpDir + File.separator + "TODO";
+		File zipFile = new File(tmpFilePath + ZIP);
+		zipFile.createNewFile();
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+    	byte[] data = Files.readAllBytes(zipFile.toPath());
+    	ByteArrayResource resource = new ByteArrayResource(data);
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
 				.contentType(MediaType.parseMediaType(contentType))
