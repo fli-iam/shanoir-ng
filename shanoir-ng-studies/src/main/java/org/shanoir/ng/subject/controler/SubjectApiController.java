@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
@@ -110,16 +111,13 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException {
+			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
 		try {
 			subjectService.update(subject);
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-		} catch (MicroServiceCommunicationException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 	}
 

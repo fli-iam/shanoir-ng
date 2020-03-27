@@ -110,9 +110,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [getPage]="getPage.bind(this)" 
             [maxResults]="50"
             [columnDefs]="columnDefs" 
+            [customActionDefs]="customActionDefs"
             (rowClick)="onRowClick($event)"
             [browserSearch]="false"
-            [selectionAllowed]="true">
+            [selectionAllowed]="true"
+            (selectionChange)="onSelectionChange($event)">
         </shanoir-table>
     </div>
 </form>

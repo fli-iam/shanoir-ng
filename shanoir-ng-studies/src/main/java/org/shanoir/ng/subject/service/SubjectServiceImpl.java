@@ -34,7 +34,6 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -107,14 +106,13 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
-	public Subject create(final Subject subject) throws MicroServiceCommunicationException {
+	public Subject create(final Subject subject) {
 		if (subject.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}			
 		}
 		Subject subjectDb = subjectRepository.save(subject);
-		updateSubjectName(new IdName(subject.getId(), subject.getName()));
 		return subjectDb;
 	}
 	
@@ -180,6 +178,16 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
+	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+					new ObjectMapper().writeValueAsString(subject));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
+		} 
+	}
+
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<SimpleSubjectDTO>();

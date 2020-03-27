@@ -117,10 +117,9 @@ public interface SubjectService {
 	 *
 	 * @param subject subject to create.
 	 * @return created subject.
-	 * @throws MicroServiceCommunicationException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject create(Subject subject) throws MicroServiceCommunicationException;
+	Subject create(Subject subject);
 	
 	/**
 	 * Save a subject and auto-increment the common name on using the centerId.

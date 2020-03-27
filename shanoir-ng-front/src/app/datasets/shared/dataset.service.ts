@@ -67,6 +67,13 @@ export class DatasetService extends EntityService<Dataset> {
         ).subscribe(response => {this.downloadIntoBrowser(response);});
     }
 
+    massiveDownload(datasetIds: number[], format: string):void {
+        if (!datasetIds) throw Error('Cannot download without at least one id');
+        this.http.post(AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload/' + format, JSON.stringify(datasetIds),
+            { observe: 'response', responseType: 'blob' }
+        ).subscribe(response => {this.downloadIntoBrowser(response);});
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');

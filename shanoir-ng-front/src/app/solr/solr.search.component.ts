@@ -21,8 +21,9 @@ import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { IdName } from "../shared/models/id-name.model";
-import { FacetField, SolrRequest, SolrResultPage, FacetResultPage } from "./solr.document.model";
+import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
+import { DatasetService } from "../datasets/shared/dataset.service";
 
 @Component({
     selector: 'solr-search',
@@ -41,17 +42,21 @@ export class SolrSearchComponent{
     solrRequest: SolrRequest = new SolrRequest();
     savedSolrRequestState: SolrRequest;
     columnDefs: any[];
+    customActionDefs: any[];
     form: FormGroup;
     @ViewChild('table') table: TableComponent;
+    hasDownloadRight: boolean = true;
+    selectedDatasetIds: number[];
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
-            private solrService: SolrService, private router: Router) {
+            private solrService: SolrService, private router: Router, private datasetService:DatasetService) {
         
         this.form = this.buildForm();
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
+        this.customActionDefs = this.getCustomActionsDefs();
         // this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();
         // this.allDatasetModalityTypes = DatasetModalityType.getValueLabelJsonArray(); 
     }
@@ -125,6 +130,7 @@ export class SolrSearchComponent{
                     this.facetResultPage[j] = solrResultPage['facetResultPages'][j];
                 }
             }
+            solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
             return solrResultPage;
         });
     }
@@ -137,8 +143,9 @@ export class SolrSearchComponent{
             }
             return null;
         };
-        return [
-            {headerName: "Id", field: "datasetId", type: "number", width: "30px", defaultSortCol: true, defaultAsc: false},
+
+        let columnDefs: any = [
+            {headerName: "Id", field: "id", type: "number", width: "30px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Type", field: "datasetType", width: "30px"},
             {headerName: "Nature", field: "datasetNature", width: "30px"},
@@ -148,6 +155,26 @@ export class SolrSearchComponent{
             {headerName: "Exam", field: "examinationComment"},
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)}
         ];
+        return columnDefs;
+    }
+
+    getCustomActionsDefs(): any[] {
+        let customActionDefs:any = [];
+        if (this.hasDownloadRight) {
+            customActionDefs.push({
+                title: "",awesome: "fa-download", action: () => this.massiveDownload()
+            });
+        }
+        return customActionDefs;
+    }
+
+    massiveDownload() {
+        this.datasetService.massiveDownload(this.selectedDatasetIds, 'dcm');
+    }
+
+    onSelectionChange (selection) {
+        this.selectedDatasetIds = [];
+        selection.forEach(sel => this.selectedDatasetIds.push(sel.datasetId));
     }
 
     private removeAllFacets() {
