@@ -43,7 +43,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <p> Non existing subjects will be created based on their name </p>
 
-    <p> shanoir-import.json see further example:</p>
+    <p> shanoir-import.json is a json constructed following the further example:</p>
+    <p>
+    {{'{'}} <br/>
+    &nbsp;&nbsp;&nbsp;"frontStudyId" : 10,  <i> => Study ID</i><br/>
+    &nbsp;&nbsp;&nbsp;"examinationId": 0, <i>=> Examination ID (can be null or set to 0 to be created)</i><br/>
+    &nbsp;&nbsp;&nbsp;"frontAcquisitionEquipmentId": 1 <i>=> ID of the equipement</i><br/>
+    {{'}'}}
+    </p>
+    <p>
+    If examinationId is set, it must be already existing in Shanoir<br/>
+    If not, it will be created dynamically
+    </p>
 </fieldset>
 
 <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>

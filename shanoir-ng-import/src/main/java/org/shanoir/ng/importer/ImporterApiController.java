@@ -26,6 +26,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.importer.dicom.DicomDirCreator;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
@@ -83,8 +84,6 @@ public class ImporterApiController implements ImporterApi {
 
 	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
-	private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
-
 	private static final String NO_FILE_UPLOADED = "No file uploaded.";
 
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterApiController.class);
@@ -104,9 +103,6 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
-
-	@Value("${ms.url.shanoir-ng-datasets-eeg}")
-	private String datasetsMsUrl;
 
 	@Value("${ms.url.shanoir-ng-studies-commons}")
 	private String studiesCommonMsUrl;
@@ -451,6 +447,7 @@ public class ImporterApiController implements ImporterApi {
 			// Check that equipement exists
 			// Check that study exists
 			// All in one with studies MS CommonsApi
+			// This is not necessary if we further use the studyCard
 			if (response.getBody().getEquipement() == null) {
 				throw new ShanoirException("Equipement with ID " + sid.getFrontAcquisitionEquipmentId() + " does not exists.");
 			}
@@ -458,10 +455,17 @@ public class ImporterApiController implements ImporterApi {
 				throw new ShanoirException("Study with ID " + sid.getFrontStudyId() + " does not exists.");
 			}
 
-			// If no subject was specified in the import.json, we base ourselves on the name
+			// Subject based on folder name
 			Long subjectId = getSubjectIdByName(subjectName, participants);
 			if (subjectId == null) {
 				throw new ShanoirException("Subject " + subjectName + " could not be created. Please check participants.tsv file. ");
+			}
+
+			// If there is no DICOMDIR: create it
+			File dicomDir = new File(subjFile.getAbsolutePath() + "/DICOM/DICOMDIR");
+			if (!dicomDir.exists()) {
+				DicomDirCreator creator = new DicomDirCreator(subjFile.getAbsolutePath() + "/DICOMDIR", subjFile.getAbsolutePath()+ "/DICOM");
+				creator.start();
 			}
 
 			// Zip data folders to be able to call ImporterAPIController.uploadDicomZipFile
@@ -480,7 +484,8 @@ public class ImporterApiController implements ImporterApi {
 			 ResponseEntity<ImportJob> entity = this.uploadDicomZipFile(multiPartFile);
 
 			// Complete ImportJob to use startImportJob
-			job = new ImportJob();
+			job = entity.getBody();
+
 			// Construire l'arborescence
 			job.setFrontAcquisitionEquipmentId(sid.getFrontAcquisitionEquipmentId());
 			job.setFrontStudyId(sid.getFrontStudyId());
@@ -488,7 +493,7 @@ public class ImporterApiController implements ImporterApi {
 			job.setFromPacs(false);
 			job.setFromShanoirUploader(false);
 			job.setFromDicomZip(true);
-			for (Patient pat : job.z()) {
+			for (Patient pat : job.getPatients()) {
 				pat.setPatientName(subjectName);
 				Subject subject = new Subject();
 				subject.setId(subjectId);
@@ -508,7 +513,7 @@ public class ImporterApiController implements ImporterApi {
 				// Create examination => We actually need its ID so do a direct API call
 				ExaminationDTO examDTO = new ExaminationDTO();
 				// Construct DTO
-				// examDTO.setCenter(new IdName(sid.getCenterId(), null));
+				examDTO.setCenter(new IdName(Long.valueOf(1), null));
 				examDTO.setPreclinical(false); // Pour le moment on fait que du DICOM
 				examDTO.setStudy(new IdName(sid.getFrontStudyId(), response.getBody().getStudy().getName()));
 				examDTO.setSubject(new IdName(subjectId, subjectName));
