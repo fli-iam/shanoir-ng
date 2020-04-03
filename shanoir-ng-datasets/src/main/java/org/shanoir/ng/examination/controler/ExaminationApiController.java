@@ -17,9 +17,9 @@ package org.shanoir.ng.examination.controler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -65,13 +65,6 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Value("${datasets-data}")
 	private String dataDir;
-
-    private final HttpServletRequest request;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    public ExaminationApiController(HttpServletRequest request) {
-        this.request = request;
-    }
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
@@ -195,7 +188,7 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 
 		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
+		String contentType = Files.probeContentType(Paths.get(fileToDownLoad.getAbsolutePath()));
 
 		byte[] data = Files.readAllBytes(fileToDownLoad.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);

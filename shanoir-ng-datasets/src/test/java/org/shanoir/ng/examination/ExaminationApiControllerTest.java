@@ -14,12 +14,20 @@
 
 package org.shanoir.ng.examination;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +46,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.google.gson.Gson;
@@ -86,20 +96,44 @@ public class ExaminationApiControllerTest {
 	@WithMockUser(authorities = { "adminRole" })
 	public void deleteExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
+		.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "adminRole" })
+	public void testDeleteExaminationWithExtraData() throws IOException {
+		// GIVEN an examination to delete with extra data files
+		File extraData = new File("/var/datasets-data/examination-1");
+		extraData.mkdirs();
+
+		// WHEN we delete the examination
+		try {
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNoContent());
+
+			// THEN both examination and files are deleted
+			assertFalse(extraData.exists());
+		} catch (Exception e) {
+			fail();
+		} finally {
+			// Always delete file
+			extraData.delete();
+			File todel = new File("/var/datasets-data/");
+			FileUtils.deleteDirectory(todel);
+		}
 	}
 
 	@Test
 	public void findExaminationByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+		.andExpect(status().isOk());
 	}
 
 	@Test
 	public void findExaminationsTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(new PageRequest(0, 10))))
-				.andExpect(status().isOk());
+		.andExpect(status().isOk());
 	}
 
 	@Test
@@ -107,7 +141,7 @@ public class ExaminationApiControllerTest {
 	public void saveNewExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
-				.andExpect(status().isOk());
+		.andExpect(status().isOk());
 	}
 
 	@Test
@@ -115,7 +149,85 @@ public class ExaminationApiControllerTest {
 	public void updateExaminationTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+		.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockUser
+	public void testAddExtraData() throws IOException {
+		// GIVEN a file to add to an examination
+
+		File importZip = new File("/tmp/test-import-extra-data.zip");
+		File saved = new File("/var/datasets-data/examination-1/test-import-extra-data.txt");
+		if (saved.exists()) {
+			saved.delete();
+		}
+
+		try {
+			importZip.createNewFile();
+			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
+
+			// WHEN The file is added to the examination
+
+			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
+			.andExpect(status().isOk());
+
+			// THEN the file is saved
+			assertTrue(saved.exists());
+			saved.delete();
+		} catch (Exception e) {
+			fail();
+		} finally {
+			importZip.delete();
+			saved.delete();
+			File todel = new File("/var/datasets-data/");
+			FileUtils.deleteDirectory(todel);
+		}
+	}
+
+	@Test
+	@WithMockUser
+	public void testDownloadExtraDataNotExisting() throws IOException {
+		// GIVEN an examination with no extra-data
+
+		// WHEN we download extra-data
+		try {
+			// THEN we have a "no content" answer.
+			mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
 				.andExpect(status().isNoContent());
+		} catch (Exception e) {
+			fail();
+		} finally {
+			File todel = new File("/var/datasets-data/");
+			FileUtils.deleteDirectory(todel);
+		}
+	}
+
+	@Test
+	@WithMockUser
+	public void testDownloadExtraData() throws IOException {
+		// GIVEN an examination with extra-data files
+		File todow = new File("/var/datasets-data/examination-1/file.pdf");
+		todow.getParentFile().mkdirs();
+
+		// WHEN we download extra-data
+		try {
+			todow.createNewFile();
+			FileUtils.write(todow, "test");
+			MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
+				.andExpect(status().isOk())
+				.andReturn();
+
+			// THEN the file is downloaded
+			assertNotNull(result.getResponse().getContentAsString());
+			System.out.println(result.getResponse().getContentAsString());
+		} catch (Exception e) {
+			System.out.println(e);
+			fail();
+		} finally {
+			File todel = new File("/var/datasets-data/");
+			FileUtils.deleteDirectory(todel);
+		}
 	}
 
 }
