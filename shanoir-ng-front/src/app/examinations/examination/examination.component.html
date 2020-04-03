@@ -169,19 +169,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="!inImport">
+					<li *ngIf="mode == 'create'">
 						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								
-								<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
-								disabled (click)="attachNewFiles()">
-									<i class="fas fa-plus-square"></i>
-									Attach extra data to existing examinations									
-								</button>
-							</ng-template>
+                                                    <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                                                    <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+                                                    <ul>
+                                                        <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                                        </li>
+                                                    </ul>
 						</span>
 					</li>
 				</ol>

@@ -28,6 +28,7 @@ export class Examination extends Entity {
     comment: string;
     note: string;
     subjectWeight: number;
+    extraDataFilePathList: string[] = [];
 
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 }

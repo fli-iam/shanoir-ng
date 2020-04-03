@@ -48,7 +48,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     protected keycloakService: KeycloakService;
-    private msgBoxService: MsgBoxService; 
+    protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -201,6 +201,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             return this.entity.create().then((entity) => {
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
+                this._entity.id = entity.id;
             });
         }
         else if (this.mode == 'edit') {
