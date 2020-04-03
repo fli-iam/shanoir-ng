@@ -62,7 +62,6 @@ public class AuthenticationConfigurationState implements State {
 					}
 				};
 				executor.scheduleAtFixedRate(task, 0, 20, TimeUnit.SECONDS);
-				
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(
@@ -76,11 +75,11 @@ public class AuthenticationConfigurationState implements State {
 			context.setState(new PacsConfigurationState());
 			context.nextState();
 		} else {
-			String serviceURI = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.namespace.uri");
-			String serviceLocalPart = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.local.part");
+			String serviceURI = ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.qname.namespace.uri");
+			String serviceLocalPart = ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.qname.local.part");
 			URL serviceURL = null;
 			try {
-				serviceURL = new URL(ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.url"));
+				serviceURL = new URL(ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.url"));
 			} catch (MalformedURLException e) {
 				logger.error("Property defined in shanoir.server.uploader.service.url (File shanoir_server.properties in .su folder) is not properly configured", e);
 				context.getShUpStartupDialog().updateStartupText(

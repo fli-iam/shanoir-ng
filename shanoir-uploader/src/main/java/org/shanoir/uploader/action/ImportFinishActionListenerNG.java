@@ -169,6 +169,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 			SubjectStudy subjectStudy = new SubjectStudy();
 			subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
 			subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
+			subjectStudy.setSubjectStudyIdentifier(mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 			subjectStudy.setSubjectType((SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
 			subjectStudy.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
 			subject.getSubjectStudyList().add(subjectStudy);
