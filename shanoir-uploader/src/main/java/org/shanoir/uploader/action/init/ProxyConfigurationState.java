@@ -29,7 +29,7 @@ public class ProxyConfigurationState implements State {
 		switch (httpResponseCode){
 			case 200 :
 				context.getShUpStartupDialog().updateStartupText("\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.proxy.success"));
-				context.setState(new AuthenticationConfigurationState());
+				context.setState(new SelectProfileManualConfigurationState());
 				context.nextState();
 				break;
 			default:

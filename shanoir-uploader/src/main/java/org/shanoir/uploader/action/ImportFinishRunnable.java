@@ -31,6 +31,8 @@ public class ImportFinishRunnable implements Runnable {
 
 	private static Logger logger = Logger.getLogger(ImportFinishRunnable.class);
 
+	private static final String ANONYMIZATION_PROFILE = "anonymization.profile";
+
 	private UploadJob uploadJob;
 	
 	private File uploadFolder;
@@ -40,10 +42,6 @@ public class ImportFinishRunnable implements Runnable {
 	private String subjectName;
 
 	private Anonymizer anonymizer = new Anonymizer();
-	
-	private static final String PROFILE_OFSEP = "Profile OFSEP";
-	
-	private static final String PROFILE_NEURINFO = "Profile Neurinfo";
 	
 	public ImportFinishRunnable(final UploadJob uploadJob, final File uploadFolder, final PreImportData preImportData, final String subjectName) {
 		this.uploadJob = uploadJob;
@@ -58,11 +56,8 @@ public class ImportFinishRunnable implements Runnable {
 		 */
 		boolean anonymizationSuccess = false;
 		try {
-			if (ShUpConfig.isModePseudonymus()) {
-				anonymizationSuccess = anonymizer.anonymize(uploadFolder, PROFILE_OFSEP, uploadJob, subjectName);
-			} else {
-				anonymizationSuccess = anonymizer.anonymize(uploadFolder, PROFILE_NEURINFO, uploadJob, subjectName);
-			}
+			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ANONYMIZATION_PROFILE);
+			anonymizationSuccess = anonymizer.anonymize(uploadFolder, anonymizationProfile, uploadJob, subjectName);
 		} catch (IOException e) {
 			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 		}

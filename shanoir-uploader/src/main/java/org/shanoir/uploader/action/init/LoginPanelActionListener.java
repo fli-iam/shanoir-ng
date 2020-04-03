@@ -2,6 +2,7 @@ package org.shanoir.uploader.action.init;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.LoginConfigurationPanel;
@@ -22,15 +23,13 @@ public class LoginPanelActionListener implements ActionListener {
 		ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 		serviceConfiguration.setUsername(this.loginPanel.loginText.getText());
 		serviceConfiguration.setPassword(String.valueOf(this.loginPanel.passwordText.getPassword()));
-		
-		ShUpConfig.shanoirServerProperties.setProperty("shanoir.server.user.name",
+		ShUpConfig.profileProperties.setProperty("shanoir.server.user.name",
 				serviceConfiguration.getUsername());
-		ShUpConfig.shanoirServerProperties.setProperty("shanoir.server.user.password",
+		ShUpConfig.profileProperties.setProperty("shanoir.server.user.password",
 				serviceConfiguration.getPassword());
-		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
-				ShUpConfig.shanoirServerProperties, "shanoir.server.user.password",
-				ShUpConfig.SHANOIR_SERVER_PROPERTIES);
-		// attention: values are never stored in config files (bug introduced by AT, GitHub issue #188)
+		final File propertiesFile = new File(ShUpConfig.profileDirectory, ShUpConfig.PROFILE_PROPERTIES);
+		ShUpConfig.encryption.decryptIfEncryptedString(propertiesFile,
+				ShUpConfig.profileProperties, "shanoir.server.user.password");
 		sSC.nextState();
 	}
 

@@ -123,9 +123,7 @@ public class MainWindow extends JFrame {
 	
 	public IDicomServerClient dicomServerClient;
 	public File shanoirUploaderFolder;
-	public String DICOM_SERVER_PROPERTIES;
-	public String SHANOIR_SERVER_PROPERTIES;
-	public String LANGUAGE_PROPERTIES;
+
 	public ResourceBundle resourceBundle;
 	public ShUpConfig shanoirUploaderConfiguration;
 	
@@ -137,17 +135,11 @@ public class MainWindow extends JFrame {
 	 */
 	public MainWindow(final IDicomServerClient dicomServerClient,
 			final File shanoirUploaderFolder,
-			final String DICOM_SERVER_PROPERTIES,
-			final String SHANOIR_SERVER_PROPERTIES,
-			final String LANGUAGE_PROPERTIES,
 			final UrlConfig urlConfig,
 			final ResourceBundle resourceBundle) {		
 		this.dicomServerClient=dicomServerClient;
 		this.shanoirUploaderFolder=shanoirUploaderFolder;
-		this.DICOM_SERVER_PROPERTIES=DICOM_SERVER_PROPERTIES;
-		this.SHANOIR_SERVER_PROPERTIES=SHANOIR_SERVER_PROPERTIES;
 		this.resourceBundle=resourceBundle;
-		this.LANGUAGE_PROPERTIES=LANGUAGE_PROPERTIES;
 		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION;
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -197,7 +189,13 @@ public class MainWindow extends JFrame {
 		mntmDicomServerConfiguration.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(
-						shanoirUploaderFolder, DICOM_SERVER_PROPERTIES,resourceBundle );
+						shanoirUploaderFolder, resourceBundle );
+				dscw.hostNameTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.host"));
+				dscw.portTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.port"));
+				dscw.aetTF.setText(ShUpConfig.dicomServerProperties.getProperty("dicom.server.aet.called"));
+				dscw.hostNameLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.host"));
+				dscw.portLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.port"));
+				dscw.aetLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.aet.calling"));
 			}
 		});
 
@@ -208,8 +206,7 @@ public class MainWindow extends JFrame {
 		mntmShanoirServerConfiguration.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				ShanoirServerConfigurationWindow sscw = new ShanoirServerConfigurationWindow(
-						shanoirUploaderFolder, SHANOIR_SERVER_PROPERTIES,
-						ServiceConfiguration.getInstance(),resourceBundle);
+						shanoirUploaderFolder, ServiceConfiguration.getInstance(),resourceBundle);
 			}
 		});
 		
@@ -219,13 +216,13 @@ public class MainWindow extends JFrame {
 		mnConfiguration.add(mntmLanguage);
 		mntmLanguage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			LanguageConfigurationWindow sscw = new LanguageConfigurationWindow(shanoirUploaderFolder, LANGUAGE_PROPERTIES, resourceBundle);
+			LanguageConfigurationWindow sscw = new LanguageConfigurationWindow(shanoirUploaderFolder, resourceBundle);
 			}
 		});
 
 		JMenu mnHelp = new JMenu(resourceBundle.getString("shanoir.uploader.helpMenu"));
 		menuBar.add(mnHelp);
-
+		
 		JMenuItem mntmAboutShUp = new JMenuItem(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp"));
 		mnHelp.add(mntmAboutShUp);
 		mntmAboutShUp.addActionListener(new ActionListener() {
@@ -233,6 +230,10 @@ public class MainWindow extends JFrame {
 				AboutWindow aboutW = new AboutWindow(resourceBundle);
 			}
 		});
+
+		JMenu profileSelected = new JMenu(resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected);
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(profileSelected);
 
 		/*** add TabbedPane to display the upload jobs in progress ***/
 		JTabbedPane tabbedPane;
@@ -722,7 +723,7 @@ public class MainWindow extends JFrame {
 		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 		Pseudonymizer pseudonymizer = null;
 		try {
-			pseudonymizer = new Pseudonymizer(ShUpConfig.generalProperties.getProperty("key"), pseudonymusFolder.getAbsolutePath());
+			pseudonymizer = new Pseudonymizer(ShUpConfig.basicProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE), pseudonymusFolder.getAbsolutePath());
 		} catch (PseudonymusException e) {
 			logger.error(e.getMessage(), e);
 		}

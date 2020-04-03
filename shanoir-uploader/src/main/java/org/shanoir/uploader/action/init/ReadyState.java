@@ -127,8 +127,7 @@ public class ReadyState implements State {
 	 */
 	private MainWindow initJFrame() {
 		MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
-				ShUpConfig.DICOM_SERVER_PROPERTIES, ShUpConfig.SHANOIR_SERVER_PROPERTIES,
-				ShUpConfig.LANGUAGE_PROPERTIES, ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
+				ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e) {

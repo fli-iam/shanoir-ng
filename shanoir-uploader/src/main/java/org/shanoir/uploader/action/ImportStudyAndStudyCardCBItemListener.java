@@ -1,10 +1,12 @@
 package org.shanoir.uploader.action;
 
+import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Iterator;
 import java.util.List;
 
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.Center;
@@ -88,6 +90,10 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 					SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
 					// subject is already in study: display values in GUI and stop editing
 					if (subjectStudyDTO.getStudyId() == study.getId()) {
+						mainWindow.importDialog.subjectStudyIdentifierTF.setText(subjectStudyDTO.getSubjectStudyIdentifier());
+						mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(false);
+						mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(false);
+						mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
 						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
 						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
 						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
@@ -99,6 +105,12 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 			}
 		}
 		// subject is not in study, enable editing and display defaults
+		if (ShUpConfig.isModeSubjectStudyIdentifier()) {
+			mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(true);
+			mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(true);
+			mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.WHITE);
+		}
+		mainWindow.importDialog.subjectStudyIdentifierTF.setText("");
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
