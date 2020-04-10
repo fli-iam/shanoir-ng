@@ -157,16 +157,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<!--{{examination.note}}-->
-							</ng-template>
+                            <ng-template ngFor let-instrumentBased [ngForOf]="examination.instrumentBasedAssessmentList">
+								<instrument-assessment-detail [instrument]="instrumentBased.instrument">
+                                </instrument-assessment-detail>
+                            </ng-template>
+                            <!--
 							<ng-template ngSwitchDefault>
 								<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-								disabled (click)="instAssessment()">
+								(click)="instAssessment()">
 									<i class="fas fa-plus-square"></i>
 									new Instrument Based Assessment										
 								</button>
 							</ng-template>
+                            -->
 						</span>
 					</li>
 					<li *ngIf="!inImport">

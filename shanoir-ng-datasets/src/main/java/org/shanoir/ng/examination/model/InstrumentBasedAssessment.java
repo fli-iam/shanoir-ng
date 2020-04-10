@@ -24,10 +24,12 @@ import javax.persistence.OneToMany;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Instrument based assessment.
  * 
- * @author ifakhfakh
+ * @author ifakhfakh, JCome
  *
  */
 @Entity
@@ -41,6 +43,7 @@ public class InstrumentBasedAssessment extends AbstractEntity {
 	/** Related Examination. */
 	@ManyToOne
 	@JoinColumn(name = "examination_id", updatable = true, nullable = false)
+	@JsonIgnore
 	private Examination examination;
 
 	/** Instrument. */
@@ -49,6 +52,7 @@ public class InstrumentBasedAssessment extends AbstractEntity {
 	private Instrument instrument;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrumentBasedAssessment")
+	@JsonIgnore
 	private List<VariableAssessment> variableAssessmentList;
 
 	/**
