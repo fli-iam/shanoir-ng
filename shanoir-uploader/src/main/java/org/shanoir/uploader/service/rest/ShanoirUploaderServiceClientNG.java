@@ -3,9 +3,6 @@ package org.shanoir.uploader.service.rest;
 import java.io.File;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
@@ -174,15 +171,13 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 	
-	public String uploadFile(final String folderName, final File file) throws Exception {
-		final FileDataSource fDS = new FileDataSource(file);
-		final DataHandler dataHandler = new DataHandler(fDS);
-		final String result = null;
-		if (!"200".equals(result)) {
-			logger.error(result);
-			throw new Exception("File upload error occured!");
+	public void uploadFile(String tempDirId, File file) throws Exception {
+		HttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId, file);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error during file upload.");
 		}
-		return result;
 	}
 	
 	/**

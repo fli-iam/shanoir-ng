@@ -14,11 +14,14 @@
 
 package org.shanoir.ng.importer;
 
+import java.io.IOException;
+
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,9 +37,9 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "importer", description = "Importer API")
 @RequestMapping("/importer")
 public interface ImporterApi {
-    
-    @ApiOperation(value = "Create a temp directory for one import and return id",
-    		notes = "Create a temp directory for one import and return id", response = String.class)
+
+    @ApiOperation(value = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId",
+    		notes = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId", response = String.class)
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "temp dir created", response = String.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = String.class),
@@ -45,6 +48,18 @@ public interface ImporterApi {
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
+    
+    @ApiOperation(value = "Upload a file into a specific temp dir", notes = "Upload a file into a specific temp dir", response = Void.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "file uploaded", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })    
+	@RequestMapping(value = "{tempDirId}", consumes = { "multipart/form-data" }, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<Void> uploadFile(
+    		@ApiParam(value = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
+    		@ApiParam(value = "file") @RequestPart("file") MultipartFile file) throws RestServiceException, IOException;
 	
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 

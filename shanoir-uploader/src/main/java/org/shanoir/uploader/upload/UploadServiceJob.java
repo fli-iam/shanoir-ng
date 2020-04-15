@@ -190,7 +190,7 @@ public class UploadServiceJob implements Job {
 				File file = (File) iterator.next();
 				i++;
 				logger.debug("UploadServiceJob started to upload file: " + file.getName());
-//				uploadServiceClient.uploadFile(folder.getName(), file);
+				uploadServiceClientNG.uploadFile(tempDirId, file);
 				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
 				uploadPercentage = i * 100 / allFiles.size() + " %";
 				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);

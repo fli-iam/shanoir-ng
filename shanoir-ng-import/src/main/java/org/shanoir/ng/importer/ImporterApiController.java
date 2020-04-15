@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestClientException;
@@ -114,12 +115,7 @@ public class ImporterApiController implements ImporterApi {
 			 * Always create a userId specific folder in the import work folder (the root of everything):
 			 * split imports to clearly separate them into separate folders for each user
 			 */
-			final Long userId = KeycloakUtil.getTokenUserId();
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
-			final File userImportDir = new File(userImportDirFilePath);
-			if (!userImportDir.exists()) {
-				userImportDir.mkdirs(); // create if not yet existing
-			}
+			File userImportDir = getUserImportDir();
 			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
 	
 			/**
@@ -309,12 +305,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<String> createTempDir() throws RestServiceException {
-		final Long userId = KeycloakUtil.getTokenUserId();
-		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
-		final File userImportDir = new File(userImportDirFilePath);
-		if (!userImportDir.exists()) {
-			userImportDir.mkdirs(); // create if not yet existing
-		} // else is wanted case, user has already its import directory
+		final File userImportDir = getUserImportDir();
 		long n = createRandomLong();
 		File tempDirForImport = new File(userImportDir, Long.toString(n));
 		if (!tempDirForImport.exists()) {
@@ -324,6 +315,37 @@ public class ImporterApiController implements ImporterApi {
 					"Error while creating temp dir: random number generated twice?", null));
 		}
 		return new ResponseEntity<String>(tempDirForImport.getName(), HttpStatus.OK);
+	}
+
+	private File getUserImportDir() {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		return userImportDir;
+	}
+
+	@Override
+	public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") final String tempDirId, @RequestPart("file") final MultipartFile file) throws RestServiceException, IOException {
+		final File userImportDir = getUserImportDir();
+		final File tempDir = new File(userImportDir, tempDirId);
+		// only continue in case of existing temp dir id
+		if (tempDir.exists()) {
+			File fileToWrite = new File(tempDir, file.getName());
+			if (fileToWrite.exists()) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"Duplicate file name in tempDir, could not create file as file exists already.", null));				
+			} else {
+				byte[] bytes = file.getBytes();
+				Files.write(fileToWrite.toPath(), bytes);
+			}
+		} else {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Upload file called with not existing tempDirId.", null));
+		}
+		return null;
 	}
 
 }

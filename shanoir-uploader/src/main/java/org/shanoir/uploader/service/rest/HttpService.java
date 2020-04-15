@@ -1,5 +1,8 @@
 package org.shanoir.uploader.service.rest;
 
+import java.io.File;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -7,6 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.slf4j.Logger;
@@ -40,6 +44,23 @@ public class HttpService {
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
+			HttpResponse	 response = httpClient.execute(httpPost);
+			return response;
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	public HttpResponse postFile(String url, String tempDirId, File file) {
+		try {
+			HttpPost httpPost = new HttpPost(url + tempDirId);
+			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
+			HttpEntity entity = MultipartEntityBuilder
+				    .create()
+				    .addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName())
+				    .build();
+			httpPost.setEntity(entity);
 			HttpResponse	 response = httpClient.execute(httpPost);
 			return response;
 		} catch (Exception e) {
