@@ -46,7 +46,9 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 	
-	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";	
+	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
+	
+	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
 
 	private HttpService httpService;
 	
@@ -65,6 +67,8 @@ public class ShanoirUploaderServiceClientNG {
 	private String serviceURLSubjectsCreate;
 	
 	private String serviceURLExaminationsCreate;
+	
+	private String serviceURLImporterCreateTempDir;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
@@ -83,6 +87,8 @@ public class ShanoirUploaderServiceClientNG {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_CREATE);
 		this.serviceURLExaminationsCreate = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+		this.serviceURLImporterCreateTempDir = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
@@ -122,6 +128,17 @@ public class ShanoirUploaderServiceClientNG {
 		if (code == 200) {
 			Subject subjectDTO = Util.getMappedObject(response, Subject.class);
 			return subjectDTO;
+		} else {
+			return null;
+		}
+	}
+	
+	public String createTempDir() throws Exception {
+		HttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+			String importTempDirId = Util.getMappedObject(response, String.class);
+			return importTempDirId;
 		} else {
 			return null;
 		}

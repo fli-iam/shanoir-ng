@@ -5,14 +5,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.PreImportData;
 import org.shanoir.dicom.importer.UploadJob;
+import org.shanoir.ng.exchange.model.ExExamination;
+import org.shanoir.ng.exchange.model.ExStudy;
+import org.shanoir.ng.exchange.model.ExStudyCard;
+import org.shanoir.ng.exchange.model.ExSubject;
+import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -146,12 +151,12 @@ public class ImportFinishActionListenerNG implements ActionListener {
 			examinationId = examinationDTO.getId();
 			logger.info("Auto-Import: examination used on server with ID: " + examinationId);
 		}
-		
+				
 		/**
-		 * 3. Fill PreImportData, later added to upload-job.xml
+		 * 3. Fill exchange.json
 		 */
-		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subject.getId(), examinationId);
-		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subject.getName());
+		Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), examinationId);
+		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, exchange, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
@@ -242,25 +247,33 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
 
-	private PreImportData fillPreImportData(ImportDialog importDialog, Long subjectId, Long examinationId) {
-		PreImportData preImportData = new PreImportData();
-		preImportData.setAutoImportEnable(true);
-		
-		org.shanoir.dicom.importer.Study exportStudy = new org.shanoir.dicom.importer.Study();
+	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long examinationId) {
+		Exchange exchange = new Exchange();
+		// Study
 		Study study = (Study) importDialog.studyCB.getSelectedItem();
-		exportStudy.setId(study.getId().intValue());
-		exportStudy.setName(study.getName());
-		preImportData.setStudy(exportStudy);
-		
-		org.shanoir.dicom.importer.StudyCard exportStudyCard = new org.shanoir.dicom.importer.StudyCard();
+		ExStudy exStudy = new ExStudy();
+		exStudy.setStudyName(study.getName());
+		exchange.setExStudy(exStudy);
+		// StudyCard
 		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
-//		exportStudyCard.setId(studyCard.getId().intValue());
-		exportStudyCard.setName(studyCard.getName());
-		preImportData.setStudycard(exportStudyCard);
-		
-		preImportData.setSubjectId(subjectId);
-		preImportData.setExaminationId(examinationId);
-		return preImportData;
+		ExStudyCard exStudyCard = new ExStudyCard();
+		exStudyCard.setName(studyCard.getName());
+		ArrayList<ExStudyCard> exStudyCards = new ArrayList<ExStudyCard>();
+		exStudyCards.add(exStudyCard);
+		exStudy.setExStudyCards(exStudyCards);
+		// Subject
+		ExSubject exSubject = new ExSubject();
+		exSubject.setSubjectName(subjectName);
+		ArrayList<ExSubject> exSubjects = new ArrayList<ExSubject>();
+		exSubjects.add(exSubject);
+		exStudy.setExSubjects(exSubjects);
+		// Examination
+		ExExamination exExamination = new ExExamination();
+		exExamination.setId(examinationId);
+		ArrayList<ExExamination> exExaminations = new ArrayList<ExExamination>();
+		exExaminations.add(exExamination);
+		exSubject.setExExaminations(exExaminations);
+		return exchange;
 	}
 
 }

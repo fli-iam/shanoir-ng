@@ -153,50 +153,50 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	@Override
-	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
-			throws RestServiceException, ShanoirException {
-		if (dicomZipFile == null)
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
-		try {
-			final Long userId = KeycloakUtil.getTokenUserId();
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
-			final File userImportDir = new File(userImportDirFilePath);
-			if (!userImportDir.exists()) {
-				userImportDir.mkdirs(); // create if not yet existing
-			}
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
-			File importJobFile = new File(importJobDir.getAbsolutePath() + File.separator + IMPORTJOB);
-			ImportJob importJob = null;
-			if (importJobFile.exists()) {
-				ObjectMapper objectMapper = new ObjectMapper();
-				try {
-					importJob = objectMapper.readValue(importJobFile, ImportJob.class);
-					importJob = importJobConstructorService.reconstructImportJob(importJob, importJobDir);
-					LOG.warn(objectMapper.writeValueAsString(importJob));
-				} catch (IOException ioe) {
-					LOG.error(ioe.getMessage(), ioe);
-					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"Error while mapping importJob.json file to object.", null));
-				}
-			} else {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-						"Error missing importJob.json in upload from ShUp.", null));				
-			}
-			importJob.setFromShanoirUploader(true);
-			importJob.setWorkFolder(File.separator + importJobDir.getName());
-			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
-		} catch (IOException e) {
-			LOG.error(e.getMessage());
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
-		} catch (RestClientException e) {
-			LOG.error("Error on dataset microservice request", e);
-			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
-		}
-		return new ResponseEntity<Void>(HttpStatus.OK);
-	}
+//	@Override
+//	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+//			throws RestServiceException, ShanoirException {
+//		if (dicomZipFile == null)
+//			throw new RestServiceException(
+//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+//		try {
+//			final Long userId = KeycloakUtil.getTokenUserId();
+//			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+//			final File userImportDir = new File(userImportDirFilePath);
+//			if (!userImportDir.exists()) {
+//				userImportDir.mkdirs(); // create if not yet existing
+//			}
+//			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
+//			File importJobFile = new File(importJobDir.getAbsolutePath() + File.separator + IMPORTJOB);
+//			ImportJob importJob = null;
+//			if (importJobFile.exists()) {
+//				ObjectMapper objectMapper = new ObjectMapper();
+//				try {
+//					importJob = objectMapper.readValue(importJobFile, ImportJob.class);
+//					importJob = importJobConstructorService.reconstructImportJob(importJob, importJobDir);
+//					LOG.warn(objectMapper.writeValueAsString(importJob));
+//				} catch (IOException ioe) {
+//					LOG.error(ioe.getMessage(), ioe);
+//					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+//							"Error while mapping importJob.json file to object.", null));
+//				}
+//			} else {
+//				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+//						"Error missing importJob.json in upload from ShUp.", null));				
+//			}
+//			importJob.setFromShanoirUploader(true);
+//			importJob.setWorkFolder(File.separator + importJobDir.getName());
+//			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+//		} catch (IOException e) {
+//			LOG.error(e.getMessage());
+//			throw new RestServiceException(
+//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+//		} catch (RestClientException e) {
+//			LOG.error("Error on dataset microservice request", e);
+//			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
+//		}
+//		return new ResponseEntity<Void>(HttpStatus.OK);
+//	}
 
 	@Override
 	public ResponseEntity<Void> startImportJob( @ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
@@ -305,6 +305,25 @@ public class ImporterApiController implements ImporterApi {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public ResponseEntity<String> createTempDir() throws RestServiceException {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		long n = createRandomLong();
+		File tempDirForImport = new File(userImportDir, Long.toString(n));
+		if (!tempDirForImport.exists()) {
+			tempDirForImport.mkdirs();
+		} else {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Error while creating temp dir: random number generated twice?", null));
+		}
+		return new ResponseEntity<String>(tempDirForImport.getName(), HttpStatus.OK);
 	}
 
 }

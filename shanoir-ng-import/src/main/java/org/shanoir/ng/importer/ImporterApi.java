@@ -17,7 +17,6 @@ package org.shanoir.ng.importer;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,25 +31,21 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-08-10T08:45:26.334Z")
-
-@Api(value = "importer", description = "the importer API")
+@Api(value = "importer", description = "Importer API")
 @RequestMapping("/importer")
 public interface ImporterApi {
-
-    @ApiOperation(value = "Upload one DICOM .zip file from Shanoir uploader with importJob json file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file from shup", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
-    @RequestMapping(value = "/upload_dicom_shup/",
-        produces = { "application/json" }, 
-        consumes = { "multipart/form-data" },
-        method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException, ShanoirException;
     
+    @ApiOperation(value = "Create a temp directory for one import and return id",
+    		notes = "Create a temp directory for one import and return id", response = String.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "temp dir created", response = String.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = String.class),
+			@ApiResponse(code = 403, message = "forbidden", response = String.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = String.class) })
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<String> createTempDir() throws RestServiceException;
+	
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
