@@ -20,14 +20,12 @@ public class HttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 	
-	private HttpClient httpClient;
-	
 	public HttpService() {
-		this.httpClient = HttpClientBuilder.create().build();
 	}
 
 	public HttpResponse get(String url) {
 		try {
+			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
 			HttpResponse response = httpClient.execute(httpGet);
@@ -40,6 +38,7 @@ public class HttpService {
 
 	public HttpResponse post(String url, String json) {
 		try {
+			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPost httpPost = new HttpPost(url);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
@@ -54,12 +53,15 @@ public class HttpService {
 	
 	public HttpResponse postFile(String url, String tempDirId, File file) {
 		try {
+			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPost httpPost = new HttpPost(url + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
-			HttpEntity entity = MultipartEntityBuilder
-				    .create()
-				    .addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName())
-				    .build();
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+//			for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+//				File file = (File) iterator.next();
+				builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());				
+//			}
+			HttpEntity entity = builder.build();
 			httpPost.setEntity(entity);
 			HttpResponse	 response = httpClient.execute(httpPost);
 			return response;
@@ -71,6 +73,7 @@ public class HttpService {
 
 	public HttpResponse put(String url, String json) {
 		try {
+			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPut httpPut = new HttpPut(url);
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getKeycloakInstalled().getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);

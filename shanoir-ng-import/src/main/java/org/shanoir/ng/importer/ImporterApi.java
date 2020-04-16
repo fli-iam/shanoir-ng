@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,7 +45,7 @@ public interface ImporterApi {
 			@ApiResponse(code = 200, message = "temp dir created", response = String.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = String.class),
 			@ApiResponse(code = 403, message = "forbidden", response = String.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = String.class) })
+			@ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
@@ -54,13 +55,26 @@ public interface ImporterApi {
 			@ApiResponse(code = 200, message = "file uploaded", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })    
+			@ApiResponse(code = 500, message = "unexpected error", response = Error.class) })    
 	@RequestMapping(value = "{tempDirId}", consumes = { "multipart/form-data" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
     		@ApiParam(value = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
-    		@ApiParam(value = "file") @RequestPart("file") MultipartFile file) throws RestServiceException, IOException;
-	
+    		@ApiParam(value = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
+    
+    @ApiOperation(value = "Start exchange", notes = "Start exchange", response = Void.class)
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "exchange started", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+    @RequestMapping(value = "/start_exchange/", consumes = { "application/json" }, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<Void> startExchange(@ApiParam(value = "Exchange", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
+    
+    
+    
+
+    
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "success returns file path", response = Void.class),

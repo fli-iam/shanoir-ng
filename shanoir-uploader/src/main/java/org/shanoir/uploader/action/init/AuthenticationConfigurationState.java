@@ -61,7 +61,7 @@ public class AuthenticationConfigurationState implements State {
 						return;						
 					}
 				};
-				executor.scheduleAtFixedRate(task, 0, 20, TimeUnit.SECONDS);
+				executor.scheduleAtFixedRate(task, 0, 60, TimeUnit.SECONDS);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(

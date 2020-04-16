@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.jboss.seam.security.Identity;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -113,6 +114,7 @@ public class UploadServiceJob implements Job {
 			final NominativeDataUploadJob nominativeDataUploadJob = nominativeDataUploadJobManager.readUploadDataJob();
 			nominativeDataUploadJob.setUploadState(uploadState);
 			if (uploadState.equals(UploadState.START) || uploadState.equals(UploadState.START_AUTOIMPORT)) {
+				long startTime = System.currentTimeMillis();
 				if (ShUpOnloadConfig.isShanoirNg()) {
 					processStartForServerNG(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
 						uploadJobManager, nominativeDataUploadJobManager, currentNominativeDataController);
@@ -120,6 +122,9 @@ public class UploadServiceJob implements Job {
 					processStartForServer(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
 							uploadJobManager, nominativeDataUploadJobManager, currentNominativeDataController);					
 				}
+				long stopTime = System.currentTimeMillis();
+			    long elapsedTime = stopTime - startTime;
+				logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
 			}
 		} else {
 			logger.error("Folder found in workFolder without upload-job.xml.");
@@ -204,9 +209,9 @@ public class UploadServiceJob implements Job {
 			 */
 			File uploadJobXML = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
 //			uploadServiceClient.uploadFile(folder.getName(), uploadJobXML);
-			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
+			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
 			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
 		} catch (Exception e) {

@@ -30,7 +30,6 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
@@ -44,11 +43,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiParam;
 
@@ -328,23 +325,31 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") final String tempDirId, @RequestPart("file") final MultipartFile file) throws RestServiceException, IOException {
+	public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") String tempDirId, @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
 		final File userImportDir = getUserImportDir();
 		final File tempDir = new File(userImportDir, tempDirId);
 		// only continue in case of existing temp dir id
 		if (tempDir.exists()) {
-			File fileToWrite = new File(tempDir, file.getName());
-			if (fileToWrite.exists()) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-						"Duplicate file name in tempDir, could not create file as file exists already.", null));				
-			} else {
-				byte[] bytes = file.getBytes();
-				Files.write(fileToWrite.toPath(), bytes);
-			}
+//			for (int i = 0; i < files.length; i++) {
+				File fileToWrite = new File(tempDir, file.getOriginalFilename());
+				if (fileToWrite.exists()) {
+					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"Duplicate file name in tempDir, could not create file as file exists already.", null));				
+				} else {
+					byte[] bytes = file.getBytes();
+					Files.write(fileToWrite.toPath(), bytes);
+				}
+//			}
 		} else {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Upload file called with not existing tempDirId.", null));
 		}
+		return null;
+	}
+
+	@Override
+	public ResponseEntity<Void> startExchange(ImportJob importJob) throws RestServiceException {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
