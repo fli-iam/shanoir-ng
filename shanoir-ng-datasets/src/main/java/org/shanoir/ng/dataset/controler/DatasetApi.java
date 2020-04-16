@@ -111,13 +111,8 @@ public interface DatasetApi {
     ResponseEntity<ByteArrayResource> downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) or eeg(eeg) files.",
-    			allowableValues = "dcm, nii, egg", defaultValue = "dcm") @Valid
+    			allowableValues = "dcm, nii, eeg", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, IOException;
     
-    /**
-     * @ApiOperation(value="Telecharger un set de données spécifiques")
-     * 
-     * @ApiOperation(value="Requêter des datasets à partir de critères spécifiques")
-     */
     
 }

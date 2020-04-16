@@ -97,6 +97,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Autowired
 	private ExaminationService examService;
+
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
 	 * @param study the study we want to export as BIDS
