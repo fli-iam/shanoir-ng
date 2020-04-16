@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.strategies.dataset;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	
 	@Override
 	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
-			ImportJob importJob) {
+			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
@@ -114,7 +115,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	 */
 	@Override
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-			ImportJob importJob) {
+			ImportJob importJob) throws Exception {
 		MrDataset mrDataset = new MrDataset();
 		mrDataset.setCreationDate(serie.getSeriesDate());
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());

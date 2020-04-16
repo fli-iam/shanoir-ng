@@ -7,7 +7,7 @@
 	<version>6.0.2</version>
 	<packaging>jar</packaging>
 
-	<name>shanoir-uploader</name>
+	<name>ShanoirUploader</name>
 	<url>http://shanoir.org</url>
 
 	<properties>
@@ -16,16 +16,6 @@
 	</properties>
 
 	<dependencies>
-		<!-- **********************************************************
-			 ** basic dependencies ************************************
-			 ********************************************************** -->
-		<!-- Spring Framework 4.3.3, stable release, same as used by Spring Boot 
-			1.4.1 in Shanoir-NG -->
-		<!-- Referenced here to use shared Spring beans between Shanoir-NG and 
-			ShanoirUploader: see shanoir-ng-import-shared <dependency> <groupId>org.springframework</groupId> 
-			<artifactId>spring-context</artifactId> <version>4.3.3.RELEASE</version> 
-			<scope>runtime</scope> </dependency> -->
-
 		<!-- dependency httpcomponents -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -37,6 +27,12 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.13</version>
+		</dependency>
+		<!-- dependency Shanoir-NG exchange -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-exchange</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<!-- dependency Shanoir -->
 		<dependency>
@@ -100,19 +96,17 @@
 			<artifactId>xmlbeans</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<!-- **********************************************************
-			 Dependency to KeycloakInstalled, to connect desktop apps
-			 (e.g. Swing or JavaFX) with Keycloak, see
-			 https://www.keycloak.org/docs/latest/securing_apps/index.html#_installed_adapter 
-		     ********************************************************** -->
+		<!-- ********************************************************** Dependency 
+			to KeycloakInstalled, to connect desktop apps (e.g. Swing or JavaFX) with 
+			Keycloak, see https://www.keycloak.org/docs/latest/securing_apps/index.html#_installed_adapter 
+			********************************************************** -->
 		<dependency>
-		        <groupId>org.keycloak</groupId>
-		        <artifactId>keycloak-installed-adapter</artifactId>
-		        <version>${keycloak.version}</version>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-installed-adapter</artifactId>
+			<version>${keycloak.version}</version>
 		</dependency>
-		<!-- **********************************************************
-			 ** DCM4CHE dependencies **********************************
-			 ********************************************************** -->
+		<!-- ********************************************************** ** DCM4CHE 
+			dependencies ********************************** ********************************************************** -->
 		<!-- dependency DCM4CHE core -->
 		<dependency>
 			<groupId>dcm4che</groupId>

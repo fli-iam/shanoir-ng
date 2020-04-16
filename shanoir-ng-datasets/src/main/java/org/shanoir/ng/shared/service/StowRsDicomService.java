@@ -16,7 +16,6 @@ package org.shanoir.ng.shared.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -27,50 +26,69 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class sends dicom files from a directory to a PACS on using stow-rs REST.
+ * 
+ * @author mkain
+ *
+ */
 @Component(value = "stowrs")
 public class StowRsDicomService implements DicomServiceApi {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(StowRsDicomService.class);
-	
+
 	/** Mime type */
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	private static final String CONTENT_TYPE = "application/dicom";
 	private static final String BOUNDARY = "--import_dicom_shanoir--";
-	
-	@Value("${dcm4chee-arc.address}")
-	private String dcm4cheeAddress;
-	
-	@Value("${dcm4chee-arc.wado-rs}")
-	private String dcm4cheeWADORS;
-	
+
+	@Value("${dcm4chee-arc.protocol}")
+	private String dcm4cheeProtocol;
+
+	@Value("${dcm4chee-arc.host}")
+	private String dcm4cheeHost;
+
+	@Value("${dcm4chee-arc.port.web}")
+	private String dcm4cheePortWeb;
+
+	@Value("${dcm4chee-arc.dicom.web.rs}")
+	private String dicomWebRS;
+
 	@Override
-	public void storeDcmFiles(List<String> dcmFilePathlist) {
+	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
+		if (directoryWithDicomFiles == null || directoryWithDicomFiles.exists() || directoryWithDicomFiles.isDirectory()) {
+			throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
+		}
+		File[] dicomFiles = directoryWithDicomFiles.listFiles();
+		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
 
 		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
-			for (String filepath : dcmFilePathlist) {
-				multipartEntityBuilder.addBinaryBody("dcm_upload", new File(filepath), ContentType.create(CONTENT_TYPE), "filename");
+			for (File dicomFile : dicomFiles) {
+				multipartEntityBuilder.addBinaryBody("dcm_upload", dicomFile, ContentType.create(CONTENT_TYPE), "filename");
 			}
 			HttpEntity entity = multipartEntityBuilder.build();
-	
-			HttpPost httpPost = new HttpPost(dcm4cheeAddress + dcm4cheeWADORS);
+			HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb + dicomWebRS);
 			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE+";boundary="+BOUNDARY);
 			httpPost.setEntity(entity);
-	
 			CloseableHttpResponse response = httpClient.execute(httpPost);
 			response.getEntity();
+			response.close();
 		} catch (ClientProtocolException e) {
 			LOG.error("ClientProtocolException during upload into pacs",e);
+			throw e;
 		} catch (IOException e) {
 			LOG.error("IOException during upload into pacs",e);
+			throw e;
 		}
-
+		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
 	}
 
 }

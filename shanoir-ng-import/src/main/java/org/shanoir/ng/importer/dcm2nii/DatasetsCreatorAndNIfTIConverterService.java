@@ -753,14 +753,14 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		} else {
 			Dataset dataset = new Dataset();
 			dataset.setName(serie.getSeriesDescription());
+			ExpressionFormat expressionFormat = new ExpressionFormat();
+			expressionFormat.setType("dcm");
+			dataset.getExpressionFormats().add(expressionFormat);
 			for (Image image : serie.getImages()) {
 				dataset.getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
 				dataset.getRepetitionTimes().add(image.getRepetitionTime());
 				dataset.getInversionTimes().add(image.getInversionTime());
 				dataset.setEchoTimes(image.getEchoTimes());
-				ExpressionFormat expressionFormat = new ExpressionFormat();
-				expressionFormat.setType("dcm");
-				dataset.getExpressionFormats().add(expressionFormat);
 				DatasetFile datasetFile = createDatasetFile(image);
 				expressionFormat.getDatasetFiles().add(datasetFile);
 			}

@@ -34,6 +34,6 @@ import org.shanoir.ng.importer.dto.Serie;
 public interface DatasetAcquisitionStrategy {
 	
 	// Create a new dataset acquisition 
-	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob);
+	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception;
 
 }

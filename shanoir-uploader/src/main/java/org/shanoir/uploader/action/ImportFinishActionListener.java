@@ -121,18 +121,27 @@ public class ImportFinishActionListener implements ActionListener {
 			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			long createExaminationId = shanoirUploaderServiceClient.createExamination(study.getId(), subjectId, new Long(center.getId()),
-					new Long(investigator.getId()), examinationDate, examinationComment);
-			if (createExaminationId == -1) {
+			if (investigator != null && center != null && examinationDate != null) {
+				long createExaminationId = shanoirUploaderServiceClient.createExamination(study.getId(), subjectId, new Long(center.getId()),
+						new Long(investigator.getId()), examinationDate, examinationComment);
+				if (createExaminationId == -1) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
+							"Error", JOptionPane.ERROR_MESSAGE);
+					mainWindow.setCursor(null); // turn off the wait cursor
+					((JButton) event.getSource()).setEnabled(true);
+					return;
+				} else {
+					examinationId = new Long(createExaminationId);
+					logger.info("Auto-Import: examination created on server with ID: " + examinationId);
+				}
+			} else {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
 						"Error", JOptionPane.ERROR_MESSAGE);
 				mainWindow.setCursor(null); // turn off the wait cursor
 				((JButton) event.getSource()).setEnabled(true);
 				return;
-			} else {
-				examinationId = new Long(createExaminationId);
-				logger.info("Auto-Import: examination created on server with ID: " + examinationId);
 			}
 		} else {
 			ExaminationDTO examinationDTO = (ExaminationDTO) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();

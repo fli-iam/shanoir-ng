@@ -2,6 +2,8 @@ package org.shanoir.uploader.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -10,9 +12,9 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.anonymize.ISubjectIdentifierGenerator;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.DicomTree;
@@ -31,16 +33,16 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	private MainWindow mainWindow;
 	private ResourceBundle resourceBundle;
 	private Pseudonymizer pseudonymizer;
-	private ISubjectIdentifierGenerator subjectIdentifierGenerator;
+	private IdentifierCalculator identifierCalculator;
+	
 	// Introduced here to inject into DownloadOrCopyRunnable
 	private IDicomServerClient dicomServerClient;
 
-	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer,
-			final ISubjectIdentifierGenerator subjectIdentifierGenerator, final IDicomServerClient dicomServerClient) {
+	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient) {
 		this.mainWindow = mainWindow;
 		this.resourceBundle = mainWindow.resourceBundle;
 		this.pseudonymizer = pseudonymizer;
-		this.subjectIdentifierGenerator = subjectIdentifierGenerator;
+		this.identifierCalculator = new IdentifierCalculator();
 		this.dicomServerClient = dicomServerClient;
 	}
 
@@ -72,7 +74,22 @@ public class DownloadOrCopyActionListener implements ActionListener {
 				    resourceBundle.getString("shanoir.uploader.select.error.title"),
 				    JOptionPane.ERROR_MESSAGE);
 			return;
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return;
+		} catch (NoSuchAlgorithmException e) {
+			logger.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+		
 		/**
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
@@ -150,13 +167,13 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		return dicomData;
 	}
 
-	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException {
+	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		String subjectIdentifier = null;
 		if (ShUpConfig.isModePseudonymus()) {
 			dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
-			subjectIdentifier = subjectIdentifierGenerator.generateSubjectIdentifierWithPseudonymus(dicomData);
+			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
 		} else {
-			subjectIdentifier = subjectIdentifierGenerator.generateSubjectIdentifier(dicomData);
+			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
 		}
 		dicomData.setSubjectIdentifier(subjectIdentifier);
 		return dicomData;

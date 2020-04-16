@@ -108,89 +108,87 @@ public class ImporterService {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		try {
-		Examination examination = examinationService.findById(importJob.getExaminationId());
-		if (examination != null) {
-			int rank = 0;
-			for (Patient patient : importJob.getPatients()) {
-				for (Study study : patient.getStudies()) {
-					float progress = 0f;
-					for (Serie serie : study.getSeries() ) {
-						if (serie.getSelected() != null && serie.getSelected()) {
-							createDatasetAcquisitionForSerie(serie, rank, examination);
-							rank++;
+			Examination examination = examinationService.findById(importJob.getExaminationId());
+			if (examination != null) {
+				int rank = 0;
+				for (Patient patient : importJob.getPatients()) {
+					for (Study study : patient.getStudies()) {
+						float progress = 0f;
+						for (Serie serie : study.getSeries() ) {
+							if (serie.getSelected() != null && serie.getSelected()) {
+								createDatasetAcquisitionForSerie(serie, rank, examination);
+								rank++;
+							}
+							progress += 1f / study.getSeries().size();
+							event.setMessage("Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
+							event.setProgress(progress);
+							eventService.publishEvent(event);
 						}
-						progress += 1f / study.getSeries().size();
-						event.setMessage("Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
-						event.setProgress(progress);
-						eventService.publishEvent(event);
 					}
 				}
+			} else {
+				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
-		} else {
-			throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
-		}
-		event.setProgress(1f);
-		event.setStatus(ShanoirEvent.SUCCESS);
-		event.setMessage("Successfully created datasets for examination " + examination.getId());
-		eventService.publishEvent(event);
+			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Successfully created datasets for examination " + examination.getId());
+			eventService.publishEvent(event);
 
-		// Create BIDS folder
-		try {
-			bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-		} catch (IOException e2) {
-			LOG.error("ERROR: Could not create BIDS folder", e2);
-		}
-		// Manage archive
-		if (importJob.getArchive() == null) {
-			return;
-		}
-		// Copy archive
-		File archiveFile = new File(importJob.getArchive());
-		if (!archiveFile.exists()) {
-			LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
-			return;
-		}
-		String fileName = niftiStorageDir + File.separator + "preclinical" + File.separator + examination.getStudyId() + File.separator + examination.getId() + File.separator;
+			// Create BIDS folder
+			try {
+				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
+			} catch (IOException e2) {
+				LOG.error("ERROR: Could not create BIDS folder", e2);
+			}
+			// Manage archive
+			if (importJob.getArchive() == null) {
+				return;
+			}
+			// Copy archive
+			File archiveFile = new File(importJob.getArchive());
+			if (!archiveFile.exists()) {
+				LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
+				return;
+			}
+			String fileName = niftiStorageDir + File.separator + "preclinical" + File.separator + examination.getStudyId() + File.separator + examination.getId() + File.separator;
 
-		File archive = new File(fileName);
-		
-		// Create archive directory
-		if (!archive.exists()) {
-			archive.mkdirs();
-		}
+			File archive = new File(fileName);
 
-		fileName += importJob.getArchive().substring(importJob.getArchive().lastIndexOf(File.separator));
-		Path destPath = new File(fileName).toPath();
+			// Create archive directory
+			if (!archive.exists()) {
+				archive.mkdirs();
+			}
 
-		try {
-			Files.copy(archiveFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e1) {
-			LOG.info("Could not copy archive to destination, not saved: {}", importJob.getArchive());
-			return;
-		}
+			fileName += importJob.getArchive().substring(importJob.getArchive().lastIndexOf(File.separator));
+			Path destPath = new File(fileName).toPath();
 
-		// Keep archive informations in examination
-		List<String> archives = new ArrayList<>();
-		archives.add(fileName);
-		examination.setExtraDataFilePathList(archives);
-		try {
-			examinationService.update(examination);
-		} catch (EntityNotFoundException e) {
-			LOG.error(e.getMessage());
-		}
+			try {
+				Files.copy(archiveFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e1) {
+				LOG.info("Could not copy archive to destination, not saved: {}", importJob.getArchive());
+				return;
+			}
+
+			// Keep archive informations in examination
+			List<String> archives = new ArrayList<>();
+			archives.add(fileName);
+			examination.setExtraDataFilePathList(archives);
+			try {
+				examinationService.update(examination);
+			} catch (EntityNotFoundException e) {
+				LOG.error(e.getMessage());
+			}
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
-			throw e;
+			throw new ShanoirException(event.getMessage(), e);
 		}
 	}
-
-	public void createDatasetAcquisitionForSerie(final Serie serie, final int rank, final Examination examination) {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) throws Exception {
 		// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-
 		if (serie.getModality() != null
 				&& serie.getDatasets() != null
 				&& !serie.getDatasets().isEmpty()
@@ -201,30 +199,36 @@ public class ImporterService {
 			datasetAcquisition.setExamination(examination);
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionRepository.save(datasetAcquisition);
+			long startTime = System.currentTimeMillis();
+			// Persist Dicom images in Shanoir Pacs
 			dicomPersisterService.persistAllForSerie(serie);
+			long endTime = System.currentTimeMillis();
+			long duration = endTime - startTime;
+			LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
+					+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
+					+ "(" + serie.getSeriesDescription() + ")");
 		}
 	}
 
-	public void cleanTempFiles(final String workFolder) {
 
+	public void cleanTempFiles(String workFolder) {
 		if (workFolder != null) {
 			// delete workFolder.upload file
 			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
-
+			uploadZipFile.delete();
 			// delete workFolder
-			final boolean success = uploadZipFile.delete() && Utils.deleteFolder(new File(workFolder));
+			final boolean success = Utils.deleteFolder(new File(workFolder));
 			if (!success) {
 				if (new File(workFolder).exists()) {
-					LOG.error("cleanTempFiles: {} could not be deleted", workFolder);
+					LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
 				} else {
-					LOG.error("cleanTempFiles: {} does not exist", workFolder);
+					LOG.error("cleanTempFiles: " + workFolder + " does not exist" );
 				}
 			}
 		} else {
 			LOG.error("cleanTempFiles: workFolder is null");
 		}
 	}
-
 	/**
 	 * Create a dataset acquisition, and associated dataset.
 	 * @param importJob the import job from importer MS.
@@ -244,16 +248,16 @@ public class ImporterService {
 
 		try {
 			DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
-			
+
 			// Get examination
 			Examination examination = examinationService.findById(importJob.getExaminationId());
-			
+
 			datasetAcquisition.setExamination(examination);
 			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-	
+
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
-	
+
 			for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
 				progress += 1f / importJob.getDatasets().size();
 				event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
@@ -265,31 +269,31 @@ public class ImporterService {
 				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 				originMetadata.setName(datasetDto.getName());
 				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-	
+
 				// Create the dataset with informations from job
 				EegDataset datasetToCreate = new EegDataset();
-	
+
 				// DatasetExpression with list of files
 				DatasetExpression expression = new DatasetExpression();
 				expression.setCreationDate(LocalDateTime.now());
 				expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
 				expression.setDataset(datasetToCreate);
-	
+
 				List<DatasetFile> files = new ArrayList<>();
-	
+
 				// Set files
 				if (datasetDto.getFiles() != null) {
-	
+
 					// Copy the data somewhere else
 					final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
 					final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-	
+
 					final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
 					outDir.mkdirs();
-	
+
 					// Move file one by one to the new directory
 					for (String filePath : datasetDto.getFiles()) {
-	
+
 						File srcFile = new File(filePath);
 						String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
 						File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
@@ -299,7 +303,7 @@ public class ImporterService {
 						} catch (IOException e) {
 							LOG.error("IOException generating EEG Dataset Expression", e);
 						}
-	
+
 						// Create datasetExpression => Files
 						if (finalLocation != null) {
 							DatasetFile file = new DatasetFile();
@@ -310,10 +314,10 @@ public class ImporterService {
 						}
 					}
 				}
-	
+
 				expression.setDatasetFiles(files);
 				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-	
+
 				// set the dataset_id where needed
 				for (Channel chan : datasetDto.getChannels()) {
 					chan.setDataset(datasetToCreate);
@@ -328,7 +332,7 @@ public class ImporterService {
 				for (Event eventToImport : datasetDto.getEvents()) {
 					eventToImport.setDataset(datasetToCreate);
 				}
-	
+
 				// Fill dataset with informations
 				datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
 				datasetToCreate.setChannels(datasetDto.getChannels());
@@ -340,13 +344,13 @@ public class ImporterService {
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
-				
+
 				datasets.add(datasetToCreate);
 			}
-	
+
 			datasetAcquisition.setDatasets(datasets);
 			datasetAcquisitionRepository.save(datasetAcquisition);
-			
+
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");
 			event.setProgress(1f);
@@ -358,8 +362,8 @@ public class ImporterService {
 				LOG.error("Something went wrong creating the bids data: ", e);
 			}
 
-		//} catch (ShanoirException exc) {
-		//  Do something specific about ShanoirException when trhown
+			//} catch (ShanoirException exc) {
+			//  Do something specific about ShanoirException when trhown
 		} catch (Exception e) {
 			LOG.error("Error while importing EEG: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
