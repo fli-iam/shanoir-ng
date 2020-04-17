@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
@@ -348,9 +349,10 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startExchange(ImportJob importJob) throws RestServiceException {
-		// TODO Auto-generated method stub
+	public ResponseEntity<Void> startImport(Exchange exchange) throws RestServiceException {
+		LOG.info(exchange.toString());
 		return null;
 	}
+
 
 }

@@ -60,6 +60,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>anonymization</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- dependency Shanoir-NG exchange -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-exchange</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 	
 		<!-- Database connector -->
 		<dependency>

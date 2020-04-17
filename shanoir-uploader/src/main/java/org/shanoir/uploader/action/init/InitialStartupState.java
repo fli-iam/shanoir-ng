@@ -138,6 +138,7 @@ public class InitialStartupState implements State {
 			log4jProperties.load(propsFile);
 			log4jProperties.put("log4j.appender.file.File",
 					ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + "su.log");
+			log4jProperties.put("log4j.logger.org.quartz", "OFF");
 			PropertyConfigurator.configure(log4jProperties);
 			logger.info("Logging successfully initialized.");
 		} catch (IOException e) {

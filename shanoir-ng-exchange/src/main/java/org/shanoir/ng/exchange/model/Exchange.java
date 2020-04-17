@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Exchange {
 	
+	public static final String SHANOIR_EXCHANGE_JSON = "shanoir-exchange.json";
+	
 	/**
 	 * Study, used for data exchange. Mandatory element.
 	 */
@@ -40,8 +42,8 @@ public class Exchange {
 	private String anonymisationProfileToUse;
 
 	// let's see if this is still necessary here
-	@JsonProperty("workFolder")
-	private String workFolder;
+	@JsonProperty("tempDirId")
+	private String tempDirId;
 
 	public ExStudy getExStudy() {
 		return exStudy;
@@ -51,8 +53,8 @@ public class Exchange {
 		return anonymisationProfileToUse;
 	}
 
-	public String getWorkFolder() {
-		return workFolder;
+	public String getTempDirId() {
+		return tempDirId;
 	}
 
 	public void setExStudy(ExStudy exStudy) {
@@ -63,8 +65,8 @@ public class Exchange {
 		this.anonymisationProfileToUse = anonymisationProfileToUse;
 	}
 
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
+	public void setTempDirId(String tempDirId) {
+		this.tempDirId = tempDirId;
 	}
 
 }

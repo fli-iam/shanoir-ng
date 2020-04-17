@@ -16,6 +16,7 @@ package org.shanoir.ng.importer;
 
 import java.io.IOException;
 
+import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -67,13 +68,9 @@ public interface ImporterApi {
         @ApiResponse(code = 200, message = "exchange started", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @RequestMapping(value = "/start_exchange/", consumes = { "application/json" }, method = RequestMethod.POST)
+    @RequestMapping(value = "/start_import/", consumes = { "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<Void> startExchange(@ApiParam(value = "Exchange", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
-    
-    
-    
-
+    ResponseEntity<Void> startImport(@ApiParam(value = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException;
     
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 

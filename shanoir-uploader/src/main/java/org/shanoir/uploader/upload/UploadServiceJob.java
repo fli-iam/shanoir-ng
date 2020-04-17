@@ -1,6 +1,9 @@
 package org.shanoir.uploader.upload;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,6 +20,7 @@ import org.quartz.JobExecutionException;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.dicom.importer.UploadJobManager;
 import org.shanoir.dicom.importer.UploadState;
+import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
@@ -25,6 +29,12 @@ import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 import org.shanoir.util.ShanoirUtil;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * The UploadServiceJob.
@@ -56,7 +66,7 @@ public class UploadServiceJob implements Job {
 		String workFolderFilePath = dataMap.getString(ShUpConfig.WORK_FOLDER);
 		File workFolder = new File(workFolderFilePath);
 		processWorkFolder(workFolder, currentNominativeDataController);
-		logger.info("UploadServiceJob ended...");
+		logger.debug("UploadServiceJob ended...");
 	}
 
 	/**
@@ -90,7 +100,6 @@ public class UploadServiceJob implements Job {
 	 */
 	private void processFolderForServer(final File folder, final UploadJobManager uploadJobManager,
 			final File uploadJobFile, CurrentNominativeDataController currentNominativeDataController) {
-		logger.info("Started processing folder " + folder.getName() + "...");
 		NominativeDataUploadJobManager nominativeDataUploadJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
 		final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
@@ -129,7 +138,6 @@ public class UploadServiceJob implements Job {
 		} else {
 			logger.error("Folder found in workFolder without upload-job.xml.");
 		}
-		logger.debug("Ended processing folder " + folder.getName() + ".");
 	}
 
 	/**
@@ -190,6 +198,7 @@ public class UploadServiceJob implements Job {
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
 			String tempDirId = uploadServiceClientNG.createTempDir();
+			logger.info("Upload: tempDirId for import: " + tempDirId);
 			int i = 0;
 			for (Iterator iterator = allFiles.iterator(); iterator.hasNext();) {
 				File file = (File) iterator.next();
@@ -203,12 +212,17 @@ public class UploadServiceJob implements Job {
 				nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
 				logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
 			}
+			logger.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
 			/**
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File uploadJobXML = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-//			uploadServiceClient.uploadFile(folder.getName(), uploadJobXML);
+			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + Exchange.SHANOIR_EXCHANGE_JSON);
+			if (exchangeJsonFile.exists()) {
+				setTempDirIdAndStartImport(tempDirId, exchangeJsonFile);	
+			} else {
+				throw new Exception(Exchange.SHANOIR_EXCHANGE_JSON + " missing in folder.");
+			}
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
@@ -221,6 +235,25 @@ public class UploadServiceJob implements Job {
 			uploadJobManager.writeUploadJob(uploadJob);
 			logger.error("An error occured during upload : " + e.getMessage());
 		}
+	}
+
+	/**
+	 * @param tempDirId
+	 * @param exchangeJsonFile
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JsonProcessingException
+	 * @throws Exception
+	 */
+	private void setTempDirIdAndStartImport(String tempDirId, File exchangeJsonFile)
+			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Exchange exchange = objectMapper.readValue(exchangeJsonFile, Exchange.class);
+		exchange.setTempDirId(tempDirId);
+		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+		String exchangeJson = ow.writeValueAsString(exchange);
+		uploadServiceClientNG.startImport(exchangeJson);
 	}
 	
 }
