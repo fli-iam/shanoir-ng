@@ -349,7 +349,7 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startImport(Exchange exchange) throws RestServiceException {
+	public ResponseEntity<Void> startImport(@RequestBody Exchange exchange) throws RestServiceException {
 		LOG.info(exchange.toString());
 		return null;
 	}
