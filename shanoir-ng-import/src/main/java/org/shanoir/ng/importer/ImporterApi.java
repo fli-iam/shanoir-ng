@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.shanoir.ng.exchange.model.Exchange;
@@ -70,7 +71,7 @@ public interface ImporterApi {
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
     @RequestMapping(value = "/start_import/", consumes = { "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<Void> startImport(@ApiParam(value = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException;
+    ResponseEntity<Void> startImport(@ApiParam(value = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException;
     
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 

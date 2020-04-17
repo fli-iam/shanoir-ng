@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
@@ -22,10 +23,10 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -68,8 +69,6 @@ public class ImporterApiController implements ImporterApi {
 	private static final String FILE_POINT = ".";
 
 	private static final String DICOMDIR = "DICOMDIR";
-	
-	private static final String IMPORTJOB = "importJob.json";
 
 	private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
@@ -84,9 +83,6 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Autowired
 	private DicomDirToModelService dicomDirToModel;
-	
-	@Autowired
-	private ImportJobConstructorService importJobConstructorService;
 	
 	@Autowired
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
@@ -117,22 +113,13 @@ public class ImporterApiController implements ImporterApi {
 			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
 	
 			/**
-			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
-			 * Patient - Study - Serie - Instance
+			 * 2. STEP: prepare patients list to be put into ImportJob:
+			 * read DICOMDIR and complete with meta-data from files
 			 */
-			List<Patient> patients = null;
-			File dicomDirFile = new File(importJobDir.getAbsolutePath() + File.separator + DICOMDIR);
-			if (dicomDirFile.exists()) {
-				patients = dicomDirToModel.readDicomDirToPatients(dicomDirFile);
-			}
-			/**
-			 * 3. STEP: split instances into non-images and images and get additional meta-data
-			 * from first dicom file of each serie, meta-data missing in dicomdir.
-			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			List<Patient> patients = preparePatientsForImportJob(importJobDir);
 	
 			/**
-			 * 4. STEP: create ImportJob
+			 * 3. STEP: create ImportJob
 			 */
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
@@ -147,50 +134,26 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-//	@Override
-//	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
-//			throws RestServiceException, ShanoirException {
-//		if (dicomZipFile == null)
-//			throw new RestServiceException(
-//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
-//		try {
-//			final Long userId = KeycloakUtil.getTokenUserId();
-//			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
-//			final File userImportDir = new File(userImportDirFilePath);
-//			if (!userImportDir.exists()) {
-//				userImportDir.mkdirs(); // create if not yet existing
-//			}
-//			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
-//			File importJobFile = new File(importJobDir.getAbsolutePath() + File.separator + IMPORTJOB);
-//			ImportJob importJob = null;
-//			if (importJobFile.exists()) {
-//				ObjectMapper objectMapper = new ObjectMapper();
-//				try {
-//					importJob = objectMapper.readValue(importJobFile, ImportJob.class);
-//					importJob = importJobConstructorService.reconstructImportJob(importJob, importJobDir);
-//					LOG.warn(objectMapper.writeValueAsString(importJob));
-//				} catch (IOException ioe) {
-//					LOG.error(ioe.getMessage(), ioe);
-//					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-//							"Error while mapping importJob.json file to object.", null));
-//				}
-//			} else {
-//				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-//						"Error missing importJob.json in upload from ShUp.", null));				
-//			}
-//			importJob.setFromShanoirUploader(true);
-//			importJob.setWorkFolder(File.separator + importJobDir.getName());
-//			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
-//		} catch (IOException e) {
-//			LOG.error(e.getMessage());
-//			throw new RestServiceException(
-//					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
-//		} catch (RestClientException e) {
-//			LOG.error("Error on dataset microservice request", e);
-//			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
-//		}
-//		return new ResponseEntity<Void>(HttpStatus.OK);
-//	}
+	/**
+	 * 1. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
+	 * Patient - Study - Serie - Instance
+	 * 2. STEP: split instances into non-images and images and get additional meta-data
+	 * from first dicom file of each serie, meta-data missing in dicomdir.
+	 * 
+	 * @param dirWithDicomDir
+	 * @return
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	private List<Patient> preparePatientsForImportJob(File dirWithDicomDir) throws IOException, FileNotFoundException {
+		List<Patient> patients = null;
+		File dicomDirFile = new File(dirWithDicomDir.getAbsolutePath() + File.separator + DICOMDIR);
+		if (dicomDirFile.exists()) {
+			patients = dicomDirToModel.readDicomDirToPatients(dicomDirFile);
+		}
+		//imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, dirWithDicomDir.getAbsolutePath(), false);
+		return patients;
+	}
 
 	@Override
 	public ResponseEntity<Void> startImportJob( @ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
@@ -331,16 +294,14 @@ public class ImporterApiController implements ImporterApi {
 		final File tempDir = new File(userImportDir, tempDirId);
 		// only continue in case of existing temp dir id
 		if (tempDir.exists()) {
-//			for (int i = 0; i < files.length; i++) {
-				File fileToWrite = new File(tempDir, file.getOriginalFilename());
-				if (fileToWrite.exists()) {
-					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"Duplicate file name in tempDir, could not create file as file exists already.", null));				
-				} else {
-					byte[] bytes = file.getBytes();
-					Files.write(fileToWrite.toPath(), bytes);
-				}
-//			}
+			File fileToWrite = new File(tempDir, file.getOriginalFilename());
+			if (fileToWrite.exists()) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"Duplicate file name in tempDir, could not create file as file exists already.", null));				
+			} else {
+				byte[] bytes = file.getBytes();
+				Files.write(fileToWrite.toPath(), bytes);
+			}
 		} else {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Upload file called with not existing tempDirId.", null));
@@ -349,8 +310,32 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startImport(@RequestBody Exchange exchange) throws RestServiceException {
-		LOG.info(exchange.toString());
+	public ResponseEntity<Void> startImport(@RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException {
+		// 1. Check if uploaded data are complete (to be done a little later)
+		final File userImportDir = getUserImportDir();
+		final File tempDir = new File(userImportDir, exchange.getTempDirId());
+		
+		final File dicomDir = new File(tempDir, DICOMDIR);
+		DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+		dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, tempDir);
+		
+		/**
+		 * 2. STEP: prepare patients list to be put into ImportJob:
+		 * read DICOMDIR and complete with meta-data from files
+		 */
+		List<Patient> patients = preparePatientsForImportJob(tempDir);
+		
+		ImportJob importJob = new ImportJob();
+		importJob.setFromDicomZip(true);
+		// Work folder is always relative to general import directory and userId (not shown to outside world)
+		importJob.setWorkFolder(File.separator + tempDir.getAbsolutePath());
+		//importJob.setFrontStudyId();
+		importJob.setExaminationId(exchange.getExStudy().getExSubjects().get(0).getExExaminations().get(0).getId());
+		importJob.setPatients(patients);
+		
+		final Long userId = KeycloakUtil.getTokenUserId();
+		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+
 		return null;
 	}
 
