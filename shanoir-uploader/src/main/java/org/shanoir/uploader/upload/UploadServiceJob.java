@@ -111,7 +111,8 @@ public class UploadServiceJob implements Job {
 		    // remove upload-job.xml from the list of files to transfer, to guarantee later
 			// that this file is for sure transferred as the last file to avoid sync problems
 			// on the server, when auto-import starts with still missing files
-			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)) {
+			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
+					|| file.getName().equals(Exchange.SHANOIR_EXCHANGE_JSON)) {
 				// do not add to list
 		    } else {
 				filesToTransfer.add(file);
