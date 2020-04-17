@@ -48,7 +48,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     protected keycloakService: KeycloakService;
-    private msgBoxService: MsgBoxService; 
+    protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */

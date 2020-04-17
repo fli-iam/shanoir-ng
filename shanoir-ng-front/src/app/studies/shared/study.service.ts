@@ -20,6 +20,8 @@ import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from './study-user-right.enum';
+import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
@@ -56,5 +58,36 @@ export class StudyService extends EntityService<Study> {
                 return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
             }).map(study => study.id);
         });
+    }
+
+    uploadFile(fileToUpload: File, studyId: number): Observable<any> {
+        const endpoint = this.API_URL + '/protocol-file-upload/' + studyId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return this.http.post<any>(endpoint, formData);
+    }
+
+    deleteFile(studyId: number): Observable<any> {
+        const endpoint = this.API_URL + '/protocol-file-delete/' + studyId;
+        return this.http.delete(endpoint);
+    }
+
+    downloadFile(fileName: string, studyId: number): void {
+        const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
+            if (response.status == 200) {
+                this.downloadIntoBrowser(response);
+            }
+        });;
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
     }
 }

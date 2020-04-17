@@ -184,10 +184,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ol>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
-						<span class="right-col">
-							TODO
+						<span  *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]" class="right-col">
+						    <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                            <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
 						</span>
+                        <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
+                            <p> {{study.protocolFilePaths[0]}}
+                            <button (click)="deleteFile()" class="left-icon"><i class="fas fa-trash"></i></button>
+                            <p>
+                        </span>
+                        
 					</li>
+                    <li *ngIf="mode == 'view'">
+                        <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
+                        <span class="right-col">
+                            <p *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
+                            <button (click)="downloadFile()"><i class="fas fa-save"></i></button>
+                            </p>
+                            <p *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-
+                            </p>
+                        </span>
+                    </li>
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode != 'view'">
