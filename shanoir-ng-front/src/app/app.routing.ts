@@ -30,6 +30,7 @@ import { NewInstrumentComponent } from './examinations/instrument-assessment/new
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
@@ -73,6 +74,10 @@ let appRoutes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
+            }, {   
+                path: 'bids',
+                component: BidsUploadComponent,
+                data: {importMode: 'BIDS'}
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,

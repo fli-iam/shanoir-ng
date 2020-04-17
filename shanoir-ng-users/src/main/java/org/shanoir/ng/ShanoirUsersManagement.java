@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import groovyjarjarcommonscli.MissingArgumentException;
@@ -78,6 +77,8 @@ import groovyjarjarcommonscli.MissingArgumentException;
 //@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
+	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
+
 	/**
 	 * Logger
 	 */
@@ -98,10 +99,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${kc.admin.client.username}")
+	@Value("${KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${kc.admin.client.password}")
+	@Value("${KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
 	@Value("${keycloak.realm}")
@@ -117,7 +118,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	
 	@Override
-	public void run(ApplicationArguments args) throws Exception { 
+	public void run(final ApplicationArguments args) throws Exception {
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
@@ -126,9 +127,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				/**
 				 * @ToDo: implement initial admin Shanoir creation here, in database users and in keycloak, check if dbs are really empty.
 				 */
-			} else if (args.containsOption("syncAllUsersToKeycloak")
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0) != null
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0).equals("true")) {
+			} else if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0) != null
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0).equals("true")) {
 				
 				int tries = 0;
 				boolean success = false;
@@ -142,10 +143,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 						LOG.error(msg); // users logs
 						System.out.println(msg); // docker compose console
 						TimeUnit.SECONDS.sleep(5);
-					} 
+					}
 				}
 				if (!success) {
-					throw new IllegalStateException("Could not export users to Keycloak.");		
+					throw new IllegalStateException("Could not export users to Keycloak.");
 				}
 			}
 		}
@@ -162,7 +163,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
-		LOG.info("syncAllUsersToKeycloak");
+		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
 		final Iterable<User> users = userRepository.findAll();
 		for (final User user : users) {
 			final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
@@ -191,7 +192,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	}
 
 	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+		final Map<String, List<String>> attributes = new HashMap<>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {

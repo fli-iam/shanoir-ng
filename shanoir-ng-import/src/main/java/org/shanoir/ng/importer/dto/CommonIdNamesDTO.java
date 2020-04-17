@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.common;
+package org.shanoir.ng.importer.dto;
 
 import org.shanoir.ng.shared.core.model.IdName;
 
