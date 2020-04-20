@@ -155,7 +155,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		/**
 		 * 3. Fill exchange.json
 		 */
-		Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), examinationId);
+		Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, exchange, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
@@ -247,12 +247,13 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
 
-	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long examinationId) {
+	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long subjectId, Long examinationId) {
 		Exchange exchange = new Exchange();
 		// Study
 		Study study = (Study) importDialog.studyCB.getSelectedItem();
 		ExStudy exStudy = new ExStudy();
 		exStudy.setStudyName(study.getName());
+		exStudy.setStudyId(study.getId());
 		exchange.setExStudy(exStudy);
 		// StudyCard
 		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();

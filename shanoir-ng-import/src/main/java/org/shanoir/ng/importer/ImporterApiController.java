@@ -24,6 +24,9 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.exchange.model.ExStudy;
+import org.shanoir.ng.exchange.model.ExStudyCard;
+import org.shanoir.ng.exchange.model.ExSubject;
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
@@ -323,19 +326,32 @@ public class ImporterApiController implements ImporterApi {
 		 * 2. STEP: prepare patients list to be put into ImportJob:
 		 * read DICOMDIR and complete with meta-data from files
 		 */
-		List<Patient> patients = preparePatientsForImportJob(tempDir);
-		
 		ImportJob importJob = new ImportJob();
+		List<Patient> patients = preparePatientsForImportJob(tempDir);		
+		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);
 		// Work folder is always relative to general import directory and userId (not shown to outside world)
 		importJob.setWorkFolder(File.separator + tempDir.getAbsolutePath());
-		//importJob.setFrontStudyId();
-		importJob.setExaminationId(exchange.getExStudy().getExSubjects().get(0).getExExaminations().get(0).getId());
-		importJob.setPatients(patients);
-		
+		/**
+		 * Handle Study and StudyCard settings:
+		 */
+		ExStudy exStudy = exchange.getExStudy();
+		if (exStudy != null && exStudy.getStudyId() != null) {
+			importJob.setFrontStudyId(exStudy.getStudyId());
+			ExStudyCard exStudyCard = exStudy.getExStudyCards().get(0);
+			importJob.setStudyCardName(exStudyCard.getName());
+			// todo: delete later here
+			ExSubject exSubject = exStudy.getExSubjects().get(0);
+			if (exSubject != null && exSubject.getSubjectName() != null) {
+				importJob.setExaminationId(exSubject.getExExaminations().get(0).getId());				
+			} else {
+				// handle creation of subject and exams later here
+			}
+		} else {
+			// handle creation of study and study cards later here
+		}
 		final Long userId = KeycloakUtil.getTokenUserId();
 		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
-
 		return null;
 	}
 

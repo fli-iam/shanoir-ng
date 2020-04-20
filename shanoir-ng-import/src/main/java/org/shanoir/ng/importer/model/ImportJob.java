@@ -45,8 +45,8 @@ public class ImportJob {
     @JsonProperty("frontStudyId")
     private Long frontStudyId;
     
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
+	@JsonProperty("studyCardName")
+	private String studyCardName;
     
     @JsonProperty("frontConverterId")
     private Long frontConverterId;
@@ -99,12 +99,12 @@ public class ImportJob {
 		this.frontStudyId = frontStudyId;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public String getStudyCardName() {
+		return studyCardName;
 	}
 
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
 	}
 
 	public Long getFrontConverterId() {
