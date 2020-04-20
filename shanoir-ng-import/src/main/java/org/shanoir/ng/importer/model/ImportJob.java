@@ -47,6 +47,9 @@ public class ImportJob {
     
 	@JsonProperty("studyCardName")
 	private String studyCardName;
+	
+	@JsonProperty("anonymisationProfileToUse")
+	private String anonymisationProfileToUse;
     
     @JsonProperty("frontConverterId")
     private Long frontConverterId;
@@ -115,7 +118,15 @@ public class ImportJob {
 		this.frontConverterId = frontConverterId;
 	}
 
-    public String getWorkFolder() {
+    public String getAnonymisationProfileToUse() {
+		return anonymisationProfileToUse;
+	}
+
+	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+		this.anonymisationProfileToUse = anonymisationProfileToUse;
+	}
+
+	public String getWorkFolder() {
 		return workFolder;
 	}
 

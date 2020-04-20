@@ -163,6 +163,7 @@ public class ImporterApiController implements ImporterApi {
 			throws RestServiceException {
 		try {
 			final Long userId = KeycloakUtil.getTokenUserId();
+			importJob.setAnonymisationProfileToUse("Profile Neurinfo");
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
@@ -330,6 +331,7 @@ public class ImporterApiController implements ImporterApi {
 		List<Patient> patients = preparePatientsForImportJob(tempDir);		
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);
+		importJob.setAnonymisationProfileToUse(exchange.getAnonymisationProfileToUse());
 		// Work folder is always relative to general import directory and userId (not shown to outside world)
 		importJob.setWorkFolder(File.separator + tempDir.getAbsolutePath());
 		/**
