@@ -27,6 +27,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.SqlResultSetMapping;
 
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
@@ -36,7 +38,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 @Entity
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
 	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class), 
-			@ColumnResult(name="datasetType", type = String.class), @ColumnResult(name="datasetNature", type = String.class),
+			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
 			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class), 
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class)
@@ -50,10 +52,10 @@ public class ShanoirMetadata {
 	private	String datasetName;
 	
 	// DatasetModalityType: MR, CT, PET etc..
-	private	String datasetType;
+	private	Integer datasetType;
 	
 	// T1, T2, Diff, etc..
-	private String datasetNature;
+	private Integer datasetNature;
 	
 	@LocalDateAnnotations
 	private LocalDate datasetCreationDate;
@@ -73,7 +75,7 @@ public class ShanoirMetadata {
 		
 	}
 	
-	public ShanoirMetadata (Long datasetId, String datasetName, String datasetType, String datasetNature, 
+	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature, 
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
 			String subjectName, String studyName, Long studyId) {
 		this.datasetId = datasetId;
@@ -120,28 +122,44 @@ public class ShanoirMetadata {
 	 * @return the datasetType
 	 */
 	public String getDatasetType() {
-		return datasetType;
+		if (DatasetModalityType.getType(datasetType) == null) {
+			return "unknown";
+		} else {
+			return DatasetModalityType.getType(datasetType).toString();
+		}
 	}
 
 	/**
 	 * @param datasetType the datasetType to set
 	 */
-	public void setDatasetType(String datasetType) {
-		this.datasetType = datasetType;
+	public void setDatasetType(DatasetModalityType datasetType) {
+		if (datasetType == null) {
+			this.datasetType = null;
+		} else {
+			this.datasetType = datasetType.getId();
+		}
 	}
 
 	/**
 	 * @return the datasetNature
 	 */
 	public String getDatasetNature() {
-		return datasetNature;
+		if (MrDatasetNature.getNature(datasetNature) == null) {
+			return "unknown";
+		} else {
+			return MrDatasetNature.getNature(datasetNature).toString();
+		}
 	}
 
 	/**
 	 * @param datasetNature the datasetNature to set
 	 */
-	public void setDatasetNature(String datasetNature) {
-		this.datasetNature = datasetNature;
+	public void setDatasetNature(MrDatasetNature datasetNature) {
+		if (datasetNature == null) {
+			this.datasetNature = null;
+		} else {
+			this.datasetNature = datasetNature.getId();
+		}
 	}
 
 	/**

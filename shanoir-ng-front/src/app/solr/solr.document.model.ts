@@ -42,6 +42,7 @@ export class SolrRequest {
 
 export class FacetField {
     field: string;
+    key: string;
     value: string;
     valueCount: number;
     checked: boolean;

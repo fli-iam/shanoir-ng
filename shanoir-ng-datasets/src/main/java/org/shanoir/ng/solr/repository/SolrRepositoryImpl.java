@@ -72,14 +72,17 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 		
 		SimpleFacetQuery query = ((FacetQuery) new SimpleFacetQuery(criteria)
 		  .setPageRequest(pageable))
-		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str").setFacetLimit(200)
-		  .addFacetOnField("subjectName_str").setFacetLimit(100)
-		  .addFacetOnField("examinationComment_str").setFacetLimit(100)
-		  .addFacetOnField("datasetName_str").setFacetLimit(100)
-		  .addFacetOnField("datasetType").setFacetLimit(10)
-		  .addFacetOnField("datasetNature").setFacetLimit(20));
+		  .setFacetOptions(new FacetOptions().addFacetOnField("studyName_str")
+		  .addFacetOnField("subjectName_str")
+		  .addFacetOnField("datasetName_str")
+		  .addFacetOnField("examinationComment_str")
+		  .addFacetOnField("datasetType")
+		  .addFacetOnField("datasetNature").setFacetLimit(200));
 		
-		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) solrTemplate.queryForPage(query, ShanoirSolrDocument.class);
+//		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) solrTemplate.queryForPage(query, ShanoirSolrDocument.class);
+		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
+		
+		
 
 		return result;
 	}

@@ -49,7 +49,7 @@ public class ShanoirSolrDocument {
 	
 	// T1, T2, Diff, etc..
 	@Field
-	@Indexed(name="datasetNature", type="string", defaultValue="unknown", required=true, searchable=true, stored=true)
+	@Indexed(name="datasetNature", type="string")
 	private String datasetNature;
 	
 	@Field
@@ -85,16 +85,8 @@ public class ShanoirSolrDocument {
 			String subjectName, String studyName, Long studyId) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
-		if (datasetType != null) {
-			this.datasetType = datasetType;
-		} else {
-			this.datasetType = "unknown";
-		}
-		if (datasetNature != null) {
-			this.datasetNature = datasetNature;
-		} else {
-			this.datasetNature = "unknown";
-		}
+		this.datasetType = datasetType;
+		this.datasetNature = datasetNature;
 		this.datasetCreationDate = datasetCreationDate;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
@@ -102,7 +94,7 @@ public class ShanoirSolrDocument {
 		this.studyName = studyName;
 		this.studyId = studyId;
 	}
-	
+
 	/**
 	 * @return the datasetId
 	 */

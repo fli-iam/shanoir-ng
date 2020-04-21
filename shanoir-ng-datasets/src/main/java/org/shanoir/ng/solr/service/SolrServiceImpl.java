@@ -34,6 +34,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +76,7 @@ public class SolrServiceImpl implements SolrService {
 	
 	@Transactional
 	@Override
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() {
 		// 1. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();

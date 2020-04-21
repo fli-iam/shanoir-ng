@@ -19,9 +19,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- List of checkboxes -->
 <div class="items" *ngIf="items && items.content">
     <label *ngFor="let item of items.content | slice: itemsPersPage*currentPage : itemsPersPage*(currentPage+1)">
-        <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" />
-            {{item.value}}
-        <ng-container *ngIf="item.valueCount"> - {{item.valueCount}}</ng-container>
+        <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" [disabled]="!item.valueCount"/>
+            {{item.value}} - {{item.valueCount}}
     </label>
     <button [disabled]="currentPage == 0" (click)="setPage(currentPage - 1)">-</button>
     <button [disabled]="currentPage + 1 == totalPages" (click)="setPage(currentPage + 1)">+</button>

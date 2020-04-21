@@ -13,17 +13,17 @@
  */
 
 import { Component, ViewChild } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, SelectControlValueAccessor } from "@angular/forms";
 import { Router } from "@angular/router";
 import { BreadcrumbsService } from "../breadcrumbs/breadcrumbs.service";
+import { DatasetService } from "../datasets/shared/dataset.service";
 import { slideDown } from "../shared/animations/animations";
 import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { IdName } from "../shared/models/id-name.model";
 import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
-import { DatasetService } from "../datasets/shared/dataset.service";
+import { Study } from "../studies/shared/study.model";
 
 @Component({
     selector: 'solr-search',
@@ -33,20 +33,15 @@ import { DatasetService } from "../datasets/shared/dataset.service";
 })
 
 export class SolrSearchComponent{
-    studies: IdName[] = [];
-    selectedStudies: IdName[] = [];
-    facetResultPage: FacetResultPage[] = [];
-    // filteredSubjectNames: Observable<string[]>;
-    allMrDatasetNatures: any[];
-    allDatasetModalityTypes: any[];
+    facetResultPages: FacetResultPage[] = [];
     solrRequest: SolrRequest = new SolrRequest();
-    savedSolrRequestState: SolrRequest;
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
     @ViewChild('table') table: TableComponent;
     hasDownloadRight: boolean = true;
     selectedDatasetIds: number[];
+    allStudies: FacetResultPage; 
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
@@ -57,25 +52,15 @@ export class SolrSearchComponent{
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
-        // this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();
-        // this.allDatasetModalityTypes = DatasetModalityType.getValueLabelJsonArray(); 
     }
     
-    // ngOnInit() {
-    //     this.filteredSubjectNames = this.form.get('subject').valueChanges
-    //     .pipe(
-    //       startWith(''),
-    //       map(value => this.filterSubjectName(value))
-    //     );
-    // }
-
     buildForm(): FormGroup {
         let formGroup = this.formBuilder.group({
             'keyword': [this.solrRequest.keyword],
             'studyName': [this.solrRequest.studyName],
             'subjectName': [this.solrRequest.subjectName],
-            'examinationComment': [{value: this.solrRequest.examinationComment, disabled: !this.solrRequest.subjectName || this.selectedStudies.length < 1}],
-            'datasetName': [{value: this.solrRequest.datasetName, disabled: !this.solrRequest.subjectName || this.selectedStudies.length < 1}],
+            'examinationComment': [this.solrRequest.examinationComment],
+            'datasetName': [this.solrRequest.datasetName],
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
             'datasetTypes': [this.solrRequest.datasetType],
@@ -103,34 +88,56 @@ export class SolrSearchComponent{
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
-            return { order: true }
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate 
+            && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
+                return { order: true }
         }
         return null;
     }
-    
-    getPage(pageable: Pageable): Promise<SolrResultPage> {
-        // this.savedSolrRequestState = this.solrRequest;
-        // console.log('solrR: ', this.solrRequest, 'saved: ', this.savedSolrRequestState);
 
-        let saveStates = [];
-        if (this.solrRequest.studyName) saveStates[0] = this.solrRequest.studyName.slice();
-        if (this.solrRequest.subjectName) saveStates[1] = this.solrRequest.subjectName.slice();
-        if (this.solrRequest.examinationComment) saveStates[2] = this.solrRequest.examinationComment.slice();
-        if (this.solrRequest.datasetName) saveStates[3] = this.solrRequest.datasetName.slice();
-        if (this.solrRequest.datasetType) saveStates[4] = this.solrRequest.datasetType.slice();
-        if (this.solrRequest.datasetNature) saveStates[5] = this.solrRequest.datasetNature.slice();
-        return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
-            for (let j = 0; j < solrResultPage['facetResultPages'].length; j++) {
-                for (let i = 0; i < solrResultPage['facetResultPages'][j].content.length; i++) {
-                    let facetField: FacetField = new FacetField(solrResultPage['facetResultPages'][j].content[i]);
-                    if (saveStates[j] && saveStates[j].includes(facetField.value))
-                       {facetField.checked = true;}
-                    solrResultPage['facetResultPages'][j].content[i] = facetField;
-                    this.facetResultPage[j] = solrResultPage['facetResultPages'][j];
-                }
+    removeAllFacets() {
+        for (let key of Object.keys(this.solrRequest)) {
+            this.solrRequest[key] = null;
+        }
+    }
+
+    showAllStudies() {
+        this.solrRequest.studyName = null;
+    }
+
+    getSelection() {
+        return Object.keys(this.solrRequest).map((key)=>{ return {key:key, value:this.solrRequest[key]} });
+    }
+
+    removeSelection(keyS:string, valueS: string) {
+        for (let key of Object.keys(this.solrRequest)) {
+            if (key && this.solrRequest[key] && key == keyS && this.solrRequest[key].includes(valueS)) {
+                this.solrRequest[key] = this.solrRequest[key].filter(item => item !== valueS);
+                if (this.solrRequest[key].length == 0) this.solrRequest[key] = null;
             }
+        }
+    }
+
+    getPage(pageable: Pageable): Promise<SolrResultPage> {
+        let savedStates = [];
+        for (let key of Object.keys(this.solrRequest)) {
+            if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
+        }
+        return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
             solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
+            
+            if (!savedStates[0]) this.allStudies = solrResultPage['facetResultPages'][0];
+            solrResultPage['facetResultPages'].forEach((facetResultPage, i) => {
+                facetResultPage.content.forEach((facetField, j) => {
+                    if (savedStates[i] && savedStates[i].includes(facetField.value)) facetField.checked = true;
+                    facetResultPage.content[j] = facetField;
+                    this.facetResultPages[i] = facetResultPage;
+                })
+            })
+
+            // this.allStudies.content.forEach((study) => this.facetResultPages[0].content.forEach((facet) =>
+            //     {if(study.value == facet.value) study = facet}))
+            
             return solrResultPage;
         });
     }
@@ -161,15 +168,16 @@ export class SolrSearchComponent{
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         if (this.hasDownloadRight) {
-            customActionDefs.push({
-                title: "",awesome: "fa-download", action: () => this.massiveDownload()
-            });
+            customActionDefs.push(
+                {title: "dcm",awesome: "fa-download", action: () => this.massiveDownload('dcm')},
+                {title: "nii",awesome: "fa-download", action: () => this.massiveDownload('nii')}
+            );
         }
         return customActionDefs;
     }
 
-    massiveDownload() {
-        this.datasetService.massiveDownload(this.selectedDatasetIds, 'dcm');
+    massiveDownload(type: string) {
+        this.datasetService.massiveDownload(this.selectedDatasetIds, 'type');
     }
 
     onSelectionChange (selection) {
@@ -177,23 +185,14 @@ export class SolrSearchComponent{
         selection.forEach(sel => this.selectedDatasetIds.push(sel.datasetId));
     }
 
-    private removeAllFacets() {
-        this.solrRequest.studyName = this.solrRequest.subjectName = this.solrRequest.examinationComment = this.solrRequest.datasetName 
-            = this.solrRequest.datasetStartDate = this.solrRequest.datasetEndDate = this.solrRequest.datasetType = this.solrRequest.datasetNature 
-            = this.solrRequest.keyword = null;
-    }
+    // private isStudyAlreadySelected (studyId: number) {
+    //     if (this.selectedStudies.filter(study => study.id == studyId).length > 0) return true;
+    //     else return false;
+    // }
 
-    private showAllStudies() {
-        this.solrRequest.studyName = null;
-    }
-    private isStudyAlreadySelected (studyId: number) {
-        if (this.selectedStudies.filter(study => study.id == studyId).length > 0) return true;
-        else return false;
-    }
-
-    private removeFromSelectedStudies(studyId: number) {
-        this.selectedStudies = this.selectedStudies.filter(study => study.id !== studyId);
-    }
+    // private removeFromSelectedStudies(studyId: number) {
+    //     this.selectedStudies = this.selectedStudies.filter(study => study.id !== studyId);
+    // }
 
     private onRowClick(solrRequest: any) {
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
@@ -202,9 +201,4 @@ export class SolrSearchComponent{
     private fulltextSearch(keyword: string, pageable: Pageable) {
         this.solrService.fulltextSearch(keyword, pageable);
     }
-
-    // private filterSubjectName(value: string): string[] {
-    //     const filterValue = value.toLowerCase();
-    //     return this.subjectNames.filter(option => option.toLowerCase().includes(filterValue));
-    // }
 }
