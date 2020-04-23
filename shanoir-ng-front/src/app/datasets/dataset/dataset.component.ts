@@ -111,7 +111,9 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private initPapaya(dataFiles: any): void {
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
-            buffs.push(dataFiles.files[key].async("arraybuffer"));
+            if(key.indexOf(".nii") != -1) {
+                buffs.push(dataFiles.files[key].async("arraybuffer"));
+            }
         });
         let promiseOfList = Promise.all(buffs);
         promiseOfList.then((values) => {
