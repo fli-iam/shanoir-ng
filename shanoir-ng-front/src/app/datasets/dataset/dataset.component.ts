@@ -96,7 +96,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     private loadDicomInMemory() {
-        this.datasetService.downloadToBlob(this.id, 'dcm').subscribe(blobReponse => {
+        this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             this.dicomArchiveService.importFromZip(blobReponse.body)
                 .subscribe(response => {
