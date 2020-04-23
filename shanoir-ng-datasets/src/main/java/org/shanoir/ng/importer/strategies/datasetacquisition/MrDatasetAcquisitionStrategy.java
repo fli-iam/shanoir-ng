@@ -86,7 +86,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		if (studyCard != null) {
 			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		} else {
-			throw new Exception("StudyCard referenced in importJob not found by name in database.");
+			if (importJob.getFrontAcquisitionEquipmentId() != null) {
+				// todo: remove this later, when studycards are in web GUI import integrated
+				mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+			} else {
+				throw new Exception("StudyCard/AcqEqu referenced in importJob not found by name in database.");				
+			}
 		}
 		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);

@@ -75,8 +75,10 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         
         // Imaged nucleus
         final ImagedNucleus imagedNucleus = getImagedNucleus(dicomAttributes, serie.getIsEnhancedMR());
-        LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
-        mrProtocol.setImagedNucleus(imagedNucleus);
+        if (imagedNucleus != null) {
+        		LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
+        		mrProtocol.setImagedNucleus(imagedNucleus);
+        }
         
         // filters : private Siemens tag : (0051,1016)
         final String filters = dicomAttributes.getString(0x00511016);

@@ -51,6 +51,10 @@ public class ImportJob implements Serializable {
 	@JsonProperty("studyCardName")
 	private String studyCardName;
 	
+	// todo: remove this later, when front end uses StudyCards
+    @JsonProperty("frontAcquisitionEquipmentId")
+    private Long frontAcquisitionEquipmentId;
+	
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
     
@@ -111,6 +115,14 @@ public class ImportJob implements Serializable {
 
 	public void setStudyCardName(String studyCardName) {
 		this.studyCardName = studyCardName;
+	}
+
+	public Long getFrontAcquisitionEquipmentId() {
+		return frontAcquisitionEquipmentId;
+	}
+
+	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
+		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
 	}
 
 	public Long getFrontConverterId() {
