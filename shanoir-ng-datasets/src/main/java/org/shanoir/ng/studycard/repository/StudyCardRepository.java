@@ -33,5 +33,7 @@ public interface StudyCardRepository extends CrudRepository<StudyCard, Long> {
 	 * @return list of study cards.
 	 */
 	List<StudyCard> findByStudyIdIn(List<Long> studyIdList);
+	
+	StudyCard findByName(String name);
 
 }

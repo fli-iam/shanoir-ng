@@ -265,6 +265,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		// Subject
 		ExSubject exSubject = new ExSubject();
 		exSubject.setSubjectName(subjectName);
+		exSubject.setSubjectId(subjectId);
 		ArrayList<ExSubject> exSubjects = new ArrayList<ExSubject>();
 		exSubjects.add(exSubject);
 		exStudy.setExSubjects(exSubjects);

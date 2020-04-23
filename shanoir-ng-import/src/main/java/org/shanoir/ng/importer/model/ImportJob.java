@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,9 +23,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  * @author mkain
  */
-public class ImportJob {
+public class ImportJob implements Serializable {
 
-    @JsonProperty("fromDicomZip")
+	private static final long serialVersionUID = 8804929608059674037L;
+
+	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
     @JsonProperty("fromShanoirUploader")

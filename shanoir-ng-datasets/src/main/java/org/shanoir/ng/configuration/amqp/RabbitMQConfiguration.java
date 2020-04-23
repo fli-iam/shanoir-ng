@@ -41,6 +41,11 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static org.springframework.amqp.core.Queue importerQueue() {
+		return new org.springframework.amqp.core.Queue("importer-queue-dataset", true);
+	}
+	
+	@Bean
     public FanoutExchange fanout() {
         return new FanoutExchange("study-user-exchange", true, false);
     }	

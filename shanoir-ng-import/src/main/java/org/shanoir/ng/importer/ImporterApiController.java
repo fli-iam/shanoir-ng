@@ -19,21 +19,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.validation.Valid;
 
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.exchange.model.ExExamination;
 import org.shanoir.ng.exchange.model.ExStudy;
 import org.shanoir.ng.exchange.model.ExStudyCard;
 import org.shanoir.ng.exchange.model.ExSubject;
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -86,10 +90,7 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Autowired
 	private DicomDirToModelService dicomDirToModel;
-	
-	@Autowired
-	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
-	
+		
 	@Autowired
 	private ImporterManagerService importerManagerService;
 	
@@ -164,12 +165,30 @@ public class ImporterApiController implements ImporterApi {
 		try {
 			final Long userId = KeycloakUtil.getTokenUserId();
 			importJob.setAnonymisationProfileToUse("Profile Neurinfo");
+			removeUnselectedSeries(importJob);
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					e.getMessage(), null));
+		}
+	}
+
+	private void removeUnselectedSeries(final ImportJob importJob) {
+		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
+			Patient patient = (Patient) patientIt.next();
+			List<Study> studies = patient.getStudies();
+			for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
+				Study study = (Study) studyIt.next();
+				List<Serie> series = study.getSeries();
+				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
+					Serie serie = (Serie) serieIt.next();
+					if (!serie.getSelected()) {
+						series.remove(serie);
+					}
+				}
+			}
 		}
 	}
 	
@@ -328,12 +347,12 @@ public class ImporterApiController implements ImporterApi {
 		 * read DICOMDIR and complete with meta-data from files
 		 */
 		ImportJob importJob = new ImportJob();
-		List<Patient> patients = preparePatientsForImportJob(tempDir);		
+		List<Patient> patients = preparePatientsForImportJob(tempDir);
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);
 		importJob.setAnonymisationProfileToUse(exchange.getAnonymisationProfileToUse());
 		// Work folder is always relative to general import directory and userId (not shown to outside world)
-		importJob.setWorkFolder(File.separator + tempDir.getAbsolutePath());
+		importJob.setWorkFolder(tempDir.getAbsolutePath());
 		/**
 		 * Handle Study and StudyCard settings:
 		 */
@@ -342,12 +361,25 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setFrontStudyId(exStudy.getStudyId());
 			ExStudyCard exStudyCard = exStudy.getExStudyCards().get(0);
 			importJob.setStudyCardName(exStudyCard.getName());
-			// todo: delete later here
-			ExSubject exSubject = exStudy.getExSubjects().get(0);
-			if (exSubject != null && exSubject.getSubjectName() != null) {
-				importJob.setExaminationId(exSubject.getExExaminations().get(0).getId());				
-			} else {
-				// handle creation of subject and exams later here
+			int i = 0;
+			List<ExSubject> exSubjects = exStudy.getExSubjects();
+			for (Iterator<ExSubject> iterator = exSubjects.iterator(); iterator.hasNext();) {
+				ExSubject exSubject = (ExSubject) iterator.next();
+				Subject subject = new Subject();
+				subject.setId(exSubject.getSubjectId());
+				subject.setName(exSubject.getSubjectName());
+				patients.get(i).setSubject(subject);
+				if (exSubject != null && exSubject.getSubjectName() != null) {
+					List<ExExamination> exExaminations = exSubject.getExExaminations();
+					for (Iterator<ExExamination> iterator2 = exExaminations.iterator(); iterator2.hasNext();) {
+						ExExamination exExamination = (ExExamination) iterator2.next();
+						// @TODO: adapt ImportJob later for multiple-exams
+						importJob.setExaminationId(exExamination.getId());
+					}
+				} else {
+					// handle creation of subject and exams later here
+				}
+				i++;
 			}
 		} else {
 			// handle creation of study and study cards later here
@@ -356,6 +388,5 @@ public class ImporterApiController implements ImporterApi {
 		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 		return null;
 	}
-
 
 }

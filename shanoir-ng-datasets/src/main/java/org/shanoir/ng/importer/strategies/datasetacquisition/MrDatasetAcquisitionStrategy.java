@@ -32,6 +32,8 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.service.StudyCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +56,16 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
 
 	@Autowired
-	DicomProcessing dicomProcessing;
+	private DicomProcessing dicomProcessing;
 	
 	@Autowired
-	MrProtocolStrategy mrProtocolStrategy;
+	private MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
-	DatasetStrategy<MrDataset> mrDatasetStrategy;
+	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+	
+	@Autowired
+	private StudyCardService studyCardService;
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
@@ -76,8 +81,13 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		}
 		mrDatasetAcquisition.setRank(rank);
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));		
-		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));	
+		StudyCard studyCard = studyCardService.findByName(importJob.getStudyCardName());
+		if (studyCard != null) {
+			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		} else {
+			throw new Exception("StudyCard referenced in importJob not found by name in database.");
+		}
 		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);

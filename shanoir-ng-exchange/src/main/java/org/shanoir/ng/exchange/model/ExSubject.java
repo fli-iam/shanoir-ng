@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * If the subject is already existing in Shanoir, the subjectName is set,
- * if not the subjectName == null. So we have to create a new subject in sh-ng.
+ * If the subject is already existing in Shanoir, the subjectName or subjectId (or both) is set,
+ * if not the subjectName == null and the subjectId == null. So we have to create a new subject in sh-ng.
  * 
  * @author mkain
  *
@@ -14,13 +14,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ExSubject {
 	
 	/**
-	 * If the subject name is set, an existing subject shall be used for data exchange.
-	 * In case of an import, the subject with the name shall be used.
+	 * If the subject name is set, an existing subject must be used for data exchange.
+	 * In case of an import, the subject with the name must be used.
 	 * So e.g. with ShUp I would set this name and this.subject == null.
 	 * The subject name is unique within sh-ng.
 	 */
 	@JsonProperty("subjectName")
 	private String subjectName;
+	
+	/**
+	 * If subject id is set, an existing subject must be used for data exchange.
+	 * In case of an import, the subject with the name must be used.
+	 * So e.g. with ShUp I would set this name and this.subject == null.
+	 */
+	@JsonProperty("subjectId")
+	private Long subjectId;
 	
 	/**
 	 * If the id == null a complete subject object as used within MS Studies
@@ -64,6 +72,14 @@ public class ExSubject {
 
 	public void setSubjectName(String subjectName) {
 		this.subjectName = subjectName;
+	}
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 
 }
