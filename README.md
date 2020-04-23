@@ -38,9 +38,9 @@ Many thanks to all these giants, on their shoulders we are standing to develop S
 
 You can easily connect and investigate the REST interface of Shanoir-NG using Swagger2.
 Depending on your server domain, below an example for the dev environment, just call:
-MS Studies: https://shanoir-ng-nginx/shanoir-ng/studies/swagger-ui.html
-MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
-MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
+* MS Studies: https://shanoir-ng-nginx/shanoir-ng/studies/swagger-ui.html
+* MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
+* MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
 
 # Installation of Shanoir NG
 
