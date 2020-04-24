@@ -765,7 +765,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
-			throw new ShanoirException("Error while creating serie id folder: folder already exists.");
+			throw new ShanoirException("Error while creating serie id folder: folder already exists. serieId: " + serieID);
 		}
 		List<Image> images = serie.getImages();
 		moveFiles(workFolder, serieIDFolderFile, images);

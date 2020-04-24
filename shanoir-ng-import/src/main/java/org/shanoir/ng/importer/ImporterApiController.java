@@ -155,7 +155,6 @@ public class ImporterApiController implements ImporterApi {
 		if (dicomDirFile.exists()) {
 			patients = dicomDirToModel.readDicomDirToPatients(dicomDirFile);
 		}
-		//imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, dirWithDicomDir.getAbsolutePath(), false);
 		return patients;
 	}
 
