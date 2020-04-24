@@ -57,8 +57,8 @@ spring:
     store-type: none
   http:
     multipart:
-      maxFileSize: 500Mb
-      maxRequestSize: 500Mb
+      maxFileSize: 5000Mb
+      maxRequestSize: 5000Mb
 front.server:
   address: http://shanoir-ng-nginx/shanoir-ng/
   url: http://shanoir-ng-nginx
@@ -121,12 +121,11 @@ shanoir:
       isspectroscopy: seriesDescription==*CSI*
   conversion:
     converters:
-      default: dcm2niix
+      path: /opt/nifti-converters/
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
       convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
       convertas4d: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*; 
-      path: /converters/
 ---
 
 ######################################

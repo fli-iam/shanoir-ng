@@ -120,7 +120,7 @@ public class ShanoirExec {
 
 		if(dcm2niiPath.contains("dcm2niix")){
 			cmd = new String[22];
-			cmd[0] = dcm2niiPath;
+			cmd[0] = "dcm2niix";
 			//BIDS sidecar
 			cmd[1] = "-b";
 			cmd[2] = "y";
@@ -319,7 +319,7 @@ public class ShanoirExec {
 
 		String executingCommand = "";
 		for (final String item : cmd) {
-			executingCommand += (item + " ");
+			executingCommand += item + " ";
 		}
 		LOG.debug("exec : Executing " + executingCommand);
 
@@ -507,7 +507,7 @@ public class ShanoirExec {
 
 		String executingCommand = "";
 		for (final String item : cmd) {
-			executingCommand += (item + " ");
+			executingCommand += item + " ";
 		}
 		LOG.debug("exec : Executing " + executingCommand);
 

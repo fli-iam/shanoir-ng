@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
@@ -289,12 +288,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 */
 	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D) {
 		String converterPath = convertersPath + converter.getName();
-		if (SystemUtils.IS_OS_WINDOWS) {
-			converterPath += "/windows/";
-		} else if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
-			converterPath += "/linux/";
-		}
-		converterPath += converter.getName();
 		// Mcverter
 		if (converter != null && converter.isMcverter()) {
 			is4D = true;
