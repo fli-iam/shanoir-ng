@@ -21,6 +21,10 @@ RUN set -ex && \
       openjdk-8-jre-headless \
       ca-certificates-java -y
 
+#32 bits packages are necessary
+RUN dpkg --add-architecture i386
+RUN apt-get update
+
 RUN apt-get update -qq \
     && apt-get install -y \
     git \
@@ -36,6 +40,12 @@ RUN apt-get update -qq \
     wget \
     jq \
     lib32z1 \
+    libgtk2.0-0 \
+    libsm6 \
+    libxext6 \
+    lib32stdc++6 \
+    libtiff5 \
+    libglib2.0-0:i386 \
     python
 
 # Compile DCM2NIIX from source
@@ -55,7 +65,9 @@ RUN mkdir external
 COPY external ./external
 RUN install -m 0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
 RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii_2014-08-04
+
 RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
+RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
 
 RUN mkdir dcm2nii_2008-03-31
 RUN mkdir dcm2nii_2014-08-04
@@ -64,6 +76,8 @@ RUN mkdir dcm2nii_2014-08-04
 RUN mkdir -p /opt/clidcm/libx64
 RUN install -m 644 external/clidcm/bin/linux/libx64/* /opt/clidcm/libx64/
 RUN chmod 755 /opt/clidcm/libx64/clidcm
+RUN cp -n           external/clidcm/bin/linux/libx64/lib*.so.* /usr/lib/x86_64-linux-gnu/
+
 
 RUN echo "#!/bin/sh" >/opt/nifti-converters/clidcm
 RUN echo "LD_LIBRARY_PATH=/opt/clidcm/libx64/ exec /opt/clidcm/libx64/clidcm \"\$@\"" >/opt/nifti-converters/clidcm
