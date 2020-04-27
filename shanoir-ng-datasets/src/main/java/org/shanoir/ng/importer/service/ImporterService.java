@@ -92,19 +92,13 @@ public class ImporterService {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	private ImportJob importJob;
-
 	private static final String SESSION_PREFIX = "ses-";
 
 	private static final String SUBJECT_PREFIX = "sub-";
 
 	private static final String EEG_PREFIX = "eeg";
 
-	public void setImportJob(final ImportJob importJob) {
-		this.importJob = importJob;
-	}
-
-	public void createAllDatasetAcquisition() throws ShanoirException {
+	public void createAllDatasetAcquisition(ImportJob importJob) throws ShanoirException {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		try {
@@ -116,7 +110,7 @@ public class ImporterService {
 						float progress = 0f;
 						for (Serie serie : study.getSeries() ) {
 							if (serie.getSelected() != null && serie.getSelected()) {
-								createDatasetAcquisitionForSerie(serie, rank, examination);
+								createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 								rank++;
 							}
 							progress += 1f / study.getSeries().size();
@@ -187,7 +181,7 @@ public class ImporterService {
 			throw new ShanoirException(event.getMessage(), e);
 		}
 	}
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) throws Exception {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 		if (serie.getModality() != null
 				&& serie.getDatasets() != null

@@ -51,7 +51,6 @@ import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -161,7 +160,7 @@ public class ImporterServiceTest {
 	}
 
 	@Test
-	public void createAllDatasetAcquisition() throws IOException, ShanoirException {
+	public void createAllDatasetAcquisition() throws Exception {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();
 		Patient patient = new Patient();
@@ -190,7 +189,6 @@ public class ImporterServiceTest {
 		importJob.setPatients(patients );
 		importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
 		importJob.setExaminationId(Long.valueOf(1));
-		service.setImportJob(importJob);
 		
 		Examination examination = new Examination();
 		when(examinationService.findById(importJob.getExaminationId())).thenReturn(examination);
@@ -198,7 +196,7 @@ public class ImporterServiceTest {
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
 		
 		// WHEN we treat this importjob
-		service.createAllDatasetAcquisition();
+		service.createAllDatasetAcquisition(importJob);
 		
 		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
 		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());

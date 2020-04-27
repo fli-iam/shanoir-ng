@@ -65,7 +65,11 @@ export class NotificationsComponent implements OnInit {
     private refresh(items = []) {
         this.isLoading = true;
         if (items.length == 0) {
-           this.getEntities().then(items => this.refresh(items));
+           this.getEntities().then(itemsGot => {
+                if (itemsGot && itemsGot.length > 0) {
+                    this.refresh(itemsGot);
+                }
+            });
             return;
         }
 
