@@ -68,21 +68,21 @@ public class ShanoirUploaderServiceClientNG {
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
-		this.serverURL = ShUpConfig.shanoirNGServerProperties.getProperty(SHANOIR_SERVER_URL);
+		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 		this.serviceURLStudiesNamesAndCenters = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLAcquisitionEquipmentById = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLExaminationsBySubjectId = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_CREATE);
 		this.serviceURLExaminationsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	

@@ -49,7 +49,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 	
-	// MultiFrameExtractor is only used in case of EnhancedMR MRI.	
+	// MultiFrameExtractor is only used in case of EnhancedMR MRI.
 	private MultiframeExtractor emf;
 	
 	/** Returned Default Value when Dicom Tag is not found */
@@ -75,7 +75,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         
         // Imaged nucleus
         final ImagedNucleus imagedNucleus = getImagedNucleus(dicomAttributes, serie.getIsEnhancedMR());
-        LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
+        LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus);
         mrProtocol.setImagedNucleus(imagedNucleus);
         
         // filters : private Siemens tag : (0051,1016)
@@ -269,9 +269,10 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	}
 	
 	private static class FieldComparator implements Comparator<Field> {
-	    public int compare(Field f1, Field f2) {
-	        return (f1.getName().compareTo(f2.getName()));
-	    }   
+	    @Override
+		public int compare(Field f1, Field f2) {
+	        return f1.getName().compareTo(f2.getName());
+	    }
 	}
 
 	/**
@@ -303,8 +304,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final String receivingCoilName = getReceiveCoilName(dicomAttributes, serie.getIsEnhancedMR());
         // Receiving coil type - tag (0018,9051)
         final String receivingCoilType = getReceiveCoilType(dicomAttributes, serie.getIsEnhancedMR());
-        if ((receivingCoilName != null && !receivingCoilName.equals(""))
-                || (receivingCoilType != null && !receivingCoilType.equals(""))) {
+        if (receivingCoilName != null && !receivingCoilName.equals("")
+                || receivingCoilType != null && !receivingCoilType.equals("")) {
             receivingCoil = new CoilDTO();
             receivingCoil.setName(receivingCoilName);
             receivingCoil.setCoilType(CoilType.valueOf(receivingCoilType));
@@ -317,8 +318,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         CoilDTO transmittingCoil = null;
         final String transmittingCoilName = getTransmitCoilName(dicomAttributes, serie.getIsEnhancedMR());
         final String transmittingCoilType = getTransmitCoilType(dicomAttributes, serie.getIsEnhancedMR());
-        if ((transmittingCoilName != null && !transmittingCoilName.equals(""))
-                || (transmittingCoilType != null && !transmittingCoilType.equals(""))) {
+        if (transmittingCoilName != null && !transmittingCoilName.equals("")
+                || transmittingCoilType != null && !transmittingCoilType.equals("")) {
             transmittingCoil = new CoilDTO();
             transmittingCoil.setName(transmittingCoilName);
             if (transmittingCoilType != null) {
@@ -370,8 +371,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         // Magnetization transfer. Authorized values : YES, NO
         
         // TODO Fix this using either field : (0018,0021) check if MT value in sequence (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,0021) )
-        // OR use Tag.MagnetizationTransfer (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9020) )  possible values: ON_RESONANCE OFF_RESONANCE NONE 
-        // 
+        // OR use Tag.MagnetizationTransfer (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9020) )  possible values: ON_RESONANCE OFF_RESONANCE NONE
+        //
         final String magnetizationTransferExtracted = dicomAttributes.getString(Tag.MagnetizationTransfer);
         LOG.debug("extractMetadata : magnetizationTransferExtracted=" + magnetizationTransferExtracted);
         if (magnetizationTransferExtracted != null) {
@@ -404,7 +405,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(dicomAttributes, serie.getIsEnhancedMR()));
         
         return mrProtocolMetadata;
-	}	
+	}
 	
     public String getReceiveCoilName(final Attributes dicomAttributes, final boolean isEnhancedMR) {
         final String result = dicomAttributes.getString(Tag.ReceiveCoilName);
@@ -508,7 +509,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 			return attributes.getDate(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.FLOAT == type) {
 			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
-			if (((int) result) != valueNotFoundValue) {
+			if ((int) result != valueNotFoundValue) {
 				return result;
 			} else {
 				return null;
@@ -529,7 +530,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 			return attributes.getDoubles(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DOUBLE == type) {
 			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
-			if (((int) result) != valueNotFoundValue) {
+			if ((int) result != valueNotFoundValue) {
 				return result;
 			} else {
 				return null;
@@ -752,8 +753,8 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             return dicomAttributes.getString(Tag.ResonantNucleus);
         }
     }
-//	
-//    
+//
+//
 //    public String getString(int[] tagPath) {
 //        return toString(get(tagPath), null);
 //    }
@@ -809,7 +810,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 //        return val;
 //    }
 //
-//    
+//
 //    public StringBuffer toStringBuffer(StringBuffer sb, int maxValLen) {
 //        if (sb == null)
 //            sb = new StringBuffer();

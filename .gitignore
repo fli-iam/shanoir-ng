@@ -19,4 +19,6 @@ target
 .factorypath
 .project
 bin/
-shanoir-uploader/src/main/resources/key
+shanoir-uploader/src/main/resources/profile.OFSEP/key
+shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
+shanoir-uploader/src/main/resources/pseudonymus

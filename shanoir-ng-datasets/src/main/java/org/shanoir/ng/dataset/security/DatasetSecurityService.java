@@ -79,6 +79,46 @@ public class DatasetSecurityService {
         return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
     }
     
+    /**
+     * Check that the connected user has the given right for at least one of the given dataset list.
+     * DatasetIds list is also cleaned here
+     * 
+     * @param datasetIds the datasets ids
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException 
+     */
+    public boolean hasRightOnAtLeastOneDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (datasetIds.isEmpty()) throw new IllegalArgumentException("Dataset ids cannot be null here.");
+    	Set<Long> studyIds = new HashSet<Long>();
+    	Set<Long> notFoundDatasetIds = new HashSet<Long>();
+    	datasetIds.forEach((Long datasetId) -> {
+    		Dataset dataset = datasetRepository.findOne(datasetId);
+    		if (dataset == null) {
+    			// remove not found datasetId from the list and throw exception later
+    			datasetIds.remove(datasetId);
+    			notFoundDatasetIds.add(datasetId);
+    		}
+    		else {
+    			studyIds.add(dataset.getStudyId());
+    		}
+    	});
+    	if (!notFoundDatasetIds.isEmpty()) throw new EntityNotFoundException("Cannot find datasets with ids: " + notFoundDatasetIds.toString());	
+    	if (studyIds.isEmpty()) return false;
+    	Set<Long> validStudyIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	if (validStudyIds.isEmpty()) return false;
+    	datasetIds.forEach((Long datasetId) -> {
+    		Dataset dataset = datasetRepository.findOne(datasetId);
+    		if (!validStudyIds.contains(dataset.getStudyId())) {
+    			// remove not allowed to download datasetId form the list
+    			datasetIds.remove(datasetId);
+    		}
+    	});
+    	if (!datasetIds.isEmpty()) return true;
+    	return false;
+    }
+    
     
     /**
      * Check that the connected user has the given right for the given dataset.

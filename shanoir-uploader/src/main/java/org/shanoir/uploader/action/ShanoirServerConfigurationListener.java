@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.jboss.seam.util.Hex;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
 import org.shanoir.uploader.gui.ShanoirServerConfigurationWindow;
 import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
@@ -35,7 +36,8 @@ public class ShanoirServerConfigurationListener implements ActionListener {
 	private ShanoirServerConfigurationWindow shanoirWindow;
 	private ShanoirUploaderServiceClient loginService;
 
-	public ShanoirServerConfigurationListener(ShanoirServerConfigurationWindow shanoirWindow, ShanoirUploaderServiceClient loginService) {
+	public ShanoirServerConfigurationListener(ShanoirServerConfigurationWindow shanoirWindow,
+			ShanoirUploaderServiceClient loginService) {
 		this.shanoirWindow = shanoirWindow;
 		this.loginService = loginService;
 	}
@@ -71,14 +73,12 @@ public class ShanoirServerConfigurationListener implements ActionListener {
 		// configure button
 		if (event.getSource() == shanoirWindow.configureButton) {
 			logger.info("Shanoir configuration: Starting...");
-			String fileName = shanoirWindow.shanoirUploaderFolder + File.separator
-					+ shanoirWindow.SHANOIR_SERVER_PROPERTIES;
-			final File propertiesFile = new File(fileName);
+			final File propertiesFile = new File(ShUpConfig.profileDirectory, ShUpConfig.PROFILE_PROPERTIES);
 			boolean propertiesExists = propertiesFile.exists();
 			if (propertiesExists) {
 				if (ping(userName, password)) {
 					try {
-						Properties props = loadProperties(fileName);
+						Properties props = loadProperties(propertiesFile.getAbsolutePath());
 						props.setProperty("shanoir.server.user.name", userName);
 						// encrypt password
 						byte[] ibyte = password.getBytes();

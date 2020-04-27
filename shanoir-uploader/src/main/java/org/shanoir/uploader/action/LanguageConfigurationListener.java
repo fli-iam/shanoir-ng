@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.LanguageConfigurationWindow;
 
 public class LanguageConfigurationListener implements ActionListener {
@@ -32,7 +33,7 @@ public class LanguageConfigurationListener implements ActionListener {
 		if (languageWindow.rbEnglish.isSelected()) {
 			logger.info("English language configuration: Starting...");
 			String fileName = languageWindow.shanoirUploaderFolder + File.separator
-					+ languageWindow.LANGUAGE_PROPERTIES;
+					+ ShUpConfig.LANGUAGE_PROPERTIES;
 			final File propertiesFile = new File(fileName);
 			boolean propertiesExists = propertiesFile.exists();
 			if (propertiesExists) {
@@ -68,7 +69,7 @@ public class LanguageConfigurationListener implements ActionListener {
 			logger.info("French language configuration: Starting...");
 
 			String fileName = languageWindow.shanoirUploaderFolder + File.separator
-					+ languageWindow.LANGUAGE_PROPERTIES;
+					+ ShUpConfig.LANGUAGE_PROPERTIES;
 
 			final File propertiesFile = new File(fileName);
 			boolean propertiesExists = propertiesFile.exists();

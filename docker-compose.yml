@@ -27,7 +27,7 @@ services:
   keycloak:
     container_name: keycloak
     env_file:
-      - ./docker-compose/keycloak/variables.env
+      - ./.env
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -73,8 +73,8 @@ services:
       - kc.admin.client.server.url
       - kc.admin.client.realm
       - kc.admin.client.client.id
-      - kc.admin.client.username
-      - kc.admin.client.password
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
       - front.server.url
       - front.server.address
       - spring.mail.host
