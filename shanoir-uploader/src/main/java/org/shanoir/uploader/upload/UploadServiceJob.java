@@ -23,6 +23,7 @@ import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
@@ -112,7 +113,8 @@ public class UploadServiceJob implements Job {
 			// that this file is for sure transferred as the last file to avoid sync problems
 			// on the server, when auto-import starts with still missing files
 			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-					|| file.getName().equals(Exchange.SHANOIR_EXCHANGE_JSON)) {
+					|| file.getName().equals(Exchange.SHANOIR_EXCHANGE_JSON)
+					|| file.getName().equals(ImportJob.IMPORT_JOB_JSON)) {
 				// do not add to list
 		    } else {
 				filesToTransfer.add(file);
@@ -218,11 +220,11 @@ public class UploadServiceJob implements Job {
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + Exchange.SHANOIR_EXCHANGE_JSON);
+			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
 			if (exchangeJsonFile.exists()) {
 				setTempDirIdAndStartImport(tempDirId, exchangeJsonFile);	
 			} else {
-				throw new Exception(Exchange.SHANOIR_EXCHANGE_JSON + " missing in folder.");
+				throw new Exception(ImportJob.IMPORT_JOB_JSON + " missing in folder.");
 			}
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
@@ -240,21 +242,21 @@ public class UploadServiceJob implements Job {
 
 	/**
 	 * @param tempDirId
-	 * @param exchangeJsonFile
+	 * @param importJobJsonFile
 	 * @throws IOException
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws JsonProcessingException
 	 * @throws Exception
 	 */
-	private void setTempDirIdAndStartImport(String tempDirId, File exchangeJsonFile)
+	private void setTempDirIdAndStartImport(String tempDirId, File importJobJsonFile)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		Exchange exchange = objectMapper.readValue(exchangeJsonFile, Exchange.class);
-		exchange.setTempDirId(tempDirId);
+		ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+		importJob.setWorkFolder(tempDirId);
 		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-		String exchangeJson = ow.writeValueAsString(exchange);
-		uploadServiceClientNG.startImport(exchangeJson);
+		String importJobJson = ow.writeValueAsString(importJob);
+		uploadServiceClientNG.startImportJob(importJobJson);
 	}
 	
 }

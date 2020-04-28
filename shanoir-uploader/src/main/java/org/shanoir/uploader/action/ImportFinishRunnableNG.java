@@ -12,14 +12,13 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.shanoir.dicom.importer.PreImportData;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.dicom.importer.UploadJobManager;
 import org.shanoir.dicom.importer.UploadState;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,16 +39,16 @@ public class ImportFinishRunnableNG implements Runnable {
 	
 	private File uploadFolder;
 	
-	private Exchange exchange;
+	private ImportJob importJob;
 	
 	private String subjectName;
 
 	private Anonymizer anonymizer = new Anonymizer();
 	
-	public ImportFinishRunnableNG(final UploadJob uploadJob, final File uploadFolder, final Exchange exchange, final String subjectName) {
+	public ImportFinishRunnableNG(final UploadJob uploadJob, final File uploadFolder, final ImportJob importJob, final String subjectName) {
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
-		this.exchange = exchange;
+		this.importJob = importJob;
 		this.subjectName = subjectName;
 	}
 
@@ -68,16 +67,17 @@ public class ImportFinishRunnableNG implements Runnable {
 		if (anonymizationSuccess) {
 			logger.info(uploadFolder.getName() + ": DICOM files successfully anonymized.");
 			/**
-			 * Write exchange.json to disk
+			 * Write import-job.json to disk
 			 */
 			ObjectMapper objectMapper = new ObjectMapper();
 			try {
-				File exchangeJson = new File(uploadFolder, Exchange.SHANOIR_EXCHANGE_JSON);
-				exchangeJson.createNewFile();
-				objectMapper.writeValue(exchangeJson, exchange);
+				File importJobJson = new File(uploadFolder, ImportJob.IMPORT_JOB_JSON);
+				importJobJson.createNewFile();
+				objectMapper.writeValue(importJobJson, importJob);
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}
+			
 			/**
 			 * Write the UploadJob and schedule upload
 			 * We keep UploadJob here to start the upload and handle errors without

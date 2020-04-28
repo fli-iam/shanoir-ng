@@ -63,6 +63,12 @@ import io.swagger.annotations.ApiParam;
  * The front-end in Angular only communicates with this service.
  * The import ms itself is calling the ms datasets service.
  * 
+ * The Import MS returns only a random ID to the outside world for one import.
+ * Internally each user has its own folder in the importDirectory. So, when
+ * the workFolder in the ImportJob is set to be returned, there is only the
+ * random ID. When the requests arrive MS Import is adding the userId and the
+ * real path value.
+ * 
  * @author mkain
  *
  */
@@ -87,6 +93,9 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Value("${shanoir.import.directory}")
 	private String importDir;
+	
+	@Autowired
+	private DicomDirGeneratorService dicomDirGeneratorService;
 	
 	@Autowired
 	private DicomDirToModelService dicomDirToModel;
@@ -127,8 +136,8 @@ public class ImporterApiController implements ImporterApi {
 			 */
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
-			// Work folder is always relative to general import directory and userId (not shown to outside world)
-			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
+			// Work folder is always relative to general import directory
+			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
@@ -161,16 +170,22 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<Void> startImportJob( @ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
 			throws RestServiceException {
-		try {
-			final Long userId = KeycloakUtil.getTokenUserId();
-			importJob.setAnonymisationProfileToUse("Profile Neurinfo");
+		File userImportDir = getUserImportDir();
+		final Long userId = KeycloakUtil.getTokenUserId();
+		String tempDirId = importJob.getWorkFolder();
+		final File importJobDir = new File(userImportDir, tempDirId);
+		if (importJobDir.exists()) {
+			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			if (!importJob.isFromShanoirUploader()) {
+				importJob.setAnonymisationProfileToUse("Profile Neurinfo");
+			}
 			removeUnselectedSeries(importJob);
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 			return new ResponseEntity<Void>(HttpStatus.OK);
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
+		} else {
+			LOG.error("Missing importJobDir.");
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					e.getMessage(), null));
+					"Missing importJobDir.", null));		
 		}
 	}
 
@@ -313,10 +328,10 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") String tempDirId, @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
 		final File userImportDir = getUserImportDir();
-		final File tempDir = new File(userImportDir, tempDirId);
+		final File importJobDir = new File(userImportDir, tempDirId);
 		// only continue in case of existing temp dir id
-		if (tempDir.exists()) {
-			File fileToWrite = new File(tempDir, file.getOriginalFilename());
+		if (importJobDir.exists()) {
+			File fileToWrite = new File(importJobDir, file.getOriginalFilename());
 			if (fileToWrite.exists()) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 						"Duplicate file name in tempDir, could not create file as file exists already.", null));				
@@ -331,6 +346,9 @@ public class ImporterApiController implements ImporterApi {
 		return null;
 	}
 
+	/**
+	 * Attention: method currently not used, forseen for later usage.
+	 */
 	@Override
 	public ResponseEntity<Void> startImport(@RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException {
 		// 1. Check if uploaded data are complete (to be done a little later)
@@ -338,8 +356,10 @@ public class ImporterApiController implements ImporterApi {
 		final File tempDir = new File(userImportDir, exchange.getTempDirId());
 		
 		final File dicomDir = new File(tempDir, DICOMDIR);
-		DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
-		dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, tempDir);
+		if (!dicomDir.exists()) {
+			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, tempDir);
+			LOG.info("DICOMDIR generated at path: " + dicomDir.getAbsolutePath());
+		}
 		
 		/**
 		 * 2. STEP: prepare patients list to be put into ImportJob:

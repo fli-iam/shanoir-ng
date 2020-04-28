@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
@@ -48,6 +47,8 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
 	
+	private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
+	
 	private static final String SERVICE_IMPORTER_START_IMPORT = "service.importer.start.import";
 
 	private HttpService httpService;
@@ -70,6 +71,8 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private String serviceURLImporterCreateTempDir;
 	
+	private String serviceURLImporterStartImportJob;
+	
 	private String serviceURLImporterStartImport;
 
 	public ShanoirUploaderServiceClientNG() {
@@ -91,6 +94,8 @@ public class ShanoirUploaderServiceClientNG {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		this.serviceURLImporterCreateTempDir = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
+		this.serviceURLImporterStartImportJob = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
 		this.serviceURLImporterStartImport = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
@@ -184,6 +189,15 @@ public class ShanoirUploaderServiceClientNG {
 		if (code == 200) {
 		} else {
 			throw new Exception("Error in uploadFile.");
+		}
+	}
+	
+	public void startImportJob(String importJobJsonStr) throws Exception {
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in startImportJob.");
 		}
 	}
 	

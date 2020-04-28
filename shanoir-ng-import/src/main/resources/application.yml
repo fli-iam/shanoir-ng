@@ -90,7 +90,7 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-    org.shanoir: DEBUG
+    org.shanoir: INFO
 # Shanoir configurations
 shanoir:
   import:

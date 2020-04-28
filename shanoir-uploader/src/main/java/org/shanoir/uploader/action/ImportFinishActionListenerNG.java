@@ -6,12 +6,15 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.ng.exchange.model.ExExamination;
 import org.shanoir.ng.exchange.model.ExStudy;
@@ -33,6 +36,9 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
+import org.shanoir.uploader.model.rest.importer.Instance;
+import org.shanoir.uploader.model.rest.importer.Patient;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
 
@@ -153,10 +159,11 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		}
 				
 		/**
-		 * 3. Fill exchange.json
+		 * 3. Fill import-job.json
 		 */
-		Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
-		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, exchange, subject.getName());
+		//Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
+		ImportJob importJob = prepareImportJob(mainWindow.importDialog, uploadJob, subject.getName(), subject.getId(), examinationId);
+		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
@@ -167,6 +174,55 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		JOptionPane.showMessageDialog(mainWindow.frame,
 				ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
 				"Import", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	private ImportJob prepareImportJob(ImportDialog importDialog, UploadJob uploadJob, String subjectName, Long subjectId, Long examinationId) {
+		ImportJob importJob = new ImportJob();
+		importJob.setFromShanoirUploader(true);
+		// handle study and study card, using ImportDialog
+		Study studyShanoir = (Study) importDialog.studyCB.getSelectedItem();
+		importJob.setFrontStudyId(studyShanoir.getId());
+		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
+		importJob.setStudyCardName(studyCard.getName());
+		// handle patient and subject
+		Patient patient = new Patient();
+		patient.setPatientID(uploadJob.getSubjectIdentifier());
+		Subject subject = new Subject();
+		subject.setId(subjectId);
+		subject.setName(subjectName);
+		patient.setSubject(subject);
+		List<Patient> patients = new ArrayList<Patient>();
+		patients.add(patient);
+		importJob.setPatients(patients);
+		// handle study dicom == examination in Shanoir
+		List<org.shanoir.uploader.model.rest.importer.Study> studiesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Study>();
+		org.shanoir.uploader.model.rest.importer.Study studyImportJob = new org.shanoir.uploader.model.rest.importer.Study();
+		studiesImportJob.add(studyImportJob);
+		patient.setStudies(studiesImportJob);
+		importJob.setExaminationId(examinationId);
+		// handle series for study
+		final Collection<Serie> seriesShUp = uploadJob.getSeries();
+		final List<org.shanoir.uploader.model.rest.importer.Serie> seriesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Serie>();
+		for (org.shanoir.dicom.importer.Serie serieShUp : seriesShUp){
+			org.shanoir.uploader.model.rest.importer.Serie serieImportJob = new org.shanoir.uploader.model.rest.importer.Serie();
+			serieImportJob.setSelected(true);
+			serieImportJob.setSeriesInstanceUID(serieShUp.getId());
+			serieImportJob.setSeriesNumber(serieShUp.getSeriesNumber());
+			serieImportJob.setModality(serieShUp.getModality());
+			serieImportJob.setProtocolName(serieShUp.getProtocol());
+			seriesImportJob.add(serieImportJob);
+			List<Instance> instancesImportJob = new ArrayList<Instance>();
+			for (String filename : serieShUp.getFileNames()){
+				Instance instance = new Instance();
+				String[] myStringArray = {filename};
+				instance.setReferencedFileID(myStringArray);
+				instancesImportJob.add(instance);
+			}
+			serieImportJob.setInstances(instancesImportJob);
+			serieImportJob.setImagesNumber(serieShUp.getFileNames().size());
+		}
+		studyImportJob.setSeries(seriesImportJob);
+		return importJob;
 	}
 
 	private void handleSubjectStudy(final Study study, final Subject subject) {
@@ -183,13 +239,6 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		}
 	}
 
-	/**
-	 * 
-	 * @param importDialog
-	 * @param dicomData
-	 * @return
-	 * @throws ParseException 
-	 */
 	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
 		final Subject subjectDTO = new Subject();
 		/**
@@ -228,10 +277,6 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		return subjectDTO;
 	}
 
-	/**
-	 * @param dicomData
-	 * @param subjectDTO
-	 */
 	private void fillPseudonymusHashValues(final UploadJob uploadJob, final Subject subjectDTO) {
 		PseudonymusHashValues pseudonymusHashValues = new PseudonymusHashValues();
 		pseudonymusHashValues.setFirstNameHash1(uploadJob.getFirstNameHash1());
