@@ -206,7 +206,7 @@ public class ExaminationApiController implements ExaminationApi {
 	 * @param fileName name of the file
 	 * @return the file path of the file
 	 */
-	private String getExtraDataFilePath(Long examinationId, String fileName) {
+	public String getExtraDataFilePath(Long examinationId, String fileName) {
 		return dataDir + "/examination-" + examinationId + "/" + fileName;
 	}
 

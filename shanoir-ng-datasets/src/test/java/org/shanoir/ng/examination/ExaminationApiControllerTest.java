@@ -29,7 +29,10 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
@@ -43,11 +46,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -65,7 +72,29 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ExaminationApiController.class)
 @AutoConfigureMockMvc(secure = false)
+@ContextConfiguration()
+@EnableSpringDataWebSupport
 public class ExaminationApiControllerTest {
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+
+	    System.setProperty("datasets-data", tempFolderPath);
+	}
+
+	@Configuration
+    static class Config {
+		@Bean
+		public ExaminationApiController testExamApiController() {
+			ExaminationApiController api = new ExaminationApiController();
+			return api;
+		}
+    }
 
 	private static final String REQUEST_PATH = "/examinations";
 	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
@@ -81,6 +110,9 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
+
+	@MockBean
+	private Pageable pageable;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -103,7 +135,8 @@ public class ExaminationApiControllerTest {
 	@WithMockUser(authorities = { "adminRole" })
 	public void testDeleteExaminationWithExtraData() throws IOException {
 		// GIVEN an examination to delete with extra data files
-		File extraData = new File("/var/datasets-data/examination-1");
+		File extraData = new File(tempFolderPath + "examination-1");
+		System.out.println("COUCOU: " + extraData.getAbsolutePath());
 		extraData.mkdirs();
 
 		// WHEN we delete the examination
@@ -115,11 +148,6 @@ public class ExaminationApiControllerTest {
 			assertFalse(extraData.exists());
 		} catch (Exception e) {
 			fail();
-		} finally {
-			// Always delete file
-			extraData.delete();
-			File todel = new File("/var/datasets-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
@@ -156,12 +184,7 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testAddExtraData() throws IOException {
 		// GIVEN a file to add to an examination
-
-		File importZip = new File("/tmp/test-import-extra-data.zip");
-		File saved = new File("/var/datasets-data/examination-1/test-import-extra-data.txt");
-		if (saved.exists()) {
-			saved.delete();
-		}
+		File importZip = tempFolder.newFile("test-import-extra-data.zip");
 
 		try {
 			importZip.createNewFile();
@@ -173,15 +196,9 @@ public class ExaminationApiControllerTest {
 			.andExpect(status().isOk());
 
 			// THEN the file is saved
-			assertTrue(saved.exists());
-			saved.delete();
+			assertTrue(new File(tempFolderPath + "/examination-1/test-import-extra-data.txt").exists());
 		} catch (Exception e) {
 			fail();
-		} finally {
-			importZip.delete();
-			saved.delete();
-			File todel = new File("/var/datasets-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
@@ -194,12 +211,9 @@ public class ExaminationApiControllerTest {
 		try {
 			// THEN we have a "no content" answer.
 			mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
-				.andExpect(status().isNoContent());
+			.andExpect(status().isNoContent());
 		} catch (Exception e) {
 			fail();
-		} finally {
-			File todel = new File("/var/datasets-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
@@ -207,16 +221,17 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testDownloadExtraData() throws IOException {
 		// GIVEN an examination with extra-data files
-		File todow = new File("/var/datasets-data/examination-1/file.pdf");
+		File todow = new File(tempFolderPath + "examination-1/file1.pdf");
+		//File todow = new File("/var/datasets-data/examination-1/file.pdf");
 		todow.getParentFile().mkdirs();
 
 		// WHEN we download extra-data
 		try {
 			todow.createNewFile();
 			FileUtils.write(todow, "test");
-			MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
-				.andExpect(status().isOk())
-				.andReturn();
+			MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file1.pdf/"))
+					.andExpect(status().isOk())
+					.andReturn();
 
 			// THEN the file is downloaded
 			assertNotNull(result.getResponse().getContentAsString());
@@ -224,9 +239,6 @@ public class ExaminationApiControllerTest {
 		} catch (Exception e) {
 			System.out.println(e);
 			fail();
-		} finally {
-			File todel = new File("/var/datasets-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
