@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.controler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -187,15 +186,12 @@ public class ExaminationApiController implements ExaminationApi {
 			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 		}
 
-		// Try to determine file's content type
-		String contentType = Files.probeContentType(Paths.get(fileToDownLoad.getAbsolutePath()));
-
 		byte[] data = Files.readAllBytes(fileToDownLoad.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileToDownLoad.getName())
-				.contentType(MediaType.parseMediaType(contentType))
+				.contentType(MediaType.APPLICATION_PDF)
 				.contentLength(data.length)
 				.body(resource);
 	}
