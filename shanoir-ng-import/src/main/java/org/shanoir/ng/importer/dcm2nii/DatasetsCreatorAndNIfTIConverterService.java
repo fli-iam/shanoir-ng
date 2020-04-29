@@ -84,14 +84,11 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	@Autowired
 	private ShanoirExec shanoirExec;
 	
-	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
-	private String doNotSeparateDatasetsInSerie;
+	@Value("${shanoir.import.series.seriesProperties}")
+	private String seriesProperties;
 
 	@Value("${shanoir.conversion.converters.convertwithclidcm}")
 	private String convertWithClidcm;
-
-	@Value("${shanoir.conversion.converters.convertas4d}")
-	private String convertAs4D;
 	
 	@Value("${shanoir.conversion.converters.path}")
 	private String convertersPath;
@@ -132,7 +129,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 					boolean serieIdentifiedForNotSeparating;
 					try {
-						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
+						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
 						// if the serie is not one of the series, that should not be separated, please separate the series,
 						// otherwise just do not separate the series and keep all images for one nii conversion
 						serie.setDatasets(new ArrayList<Dataset>());
@@ -554,7 +551,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			boolean isConvertAs4D=false;
 			boolean isConvertWithClidcm=false;
 			try {
-				isConvertAs4D = checkSerieForPropertiesString(serie, convertAs4D);
+				isConvertAs4D = checkSerieForPropertiesString(serie, seriesProperties);
 				isConvertWithClidcm = checkSerieForPropertiesString(serie, convertWithClidcm);
 			} catch (NoSuchFieldException | SecurityException e1) {
 				LOG.error(e1.getMessage(), e1);
