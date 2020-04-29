@@ -53,7 +53,8 @@ public class ReadyState implements State {
 	private void initUploadService() {
 		try {
 			try {
-				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());
+				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());					
+				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClientNG", ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
 				ShUpOnloadConfig.getJobDataMapMain().put("nominativeDataController", ShUpOnloadConfig.getCurrentNominativeDataController());
 				ShUpOnloadConfig.setUploadServiceJob(JobBuilder.newJob(UploadServiceJob.class)
 						.usingJobData(ShUpConfig.WORK_FOLDER,ShUpOnloadConfig.getWorkFolder().getAbsolutePath())

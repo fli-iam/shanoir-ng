@@ -5,8 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * If the study is already existing in Shanoir, the studyName is set,
- * if not the studyName == null. So we have to create a new study in sh-ng.
+ * If the study is already existing in Shanoir, the studyName or studyId (or both) is set,
+ * if not the studyName == null and the studyId == null. So we have to create a new study in sh-ng.
  * 
  * @author mkain
  *
@@ -14,13 +14,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ExStudy {
 	
 	/**
-	 * If the study name is set, an existing study shall be used for data exchange.
-	 * In case of an import, the study with the name shall be used.
+	 * If the study name is set, an existing study must be used for data exchange.
+	 * In case of an import, the study with the name must be used.
 	 * So e.g. with ShUp I would set this name and this.study == null.
 	 * The study name is unique within sh-ng.
 	 */
 	@JsonProperty("studyName")
 	private String studyName;
+	
+	/**
+	 * If study id is set, an existing study must be used for data exchange.
+	 * In case of an import, the study with the name must be used.
+	 * So e.g. with ShUp I would set this name and this.study == null.
+	 */
+	@JsonProperty("studyId")
+	private Long studyId;
 	
 	/**
 	 * If the id == null a complete study object as used within MS Studies
@@ -68,6 +76,14 @@ public class ExStudy {
 
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }

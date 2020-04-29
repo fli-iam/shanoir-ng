@@ -12,49 +12,60 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.dto;
+package org.shanoir.uploader.model.rest.importer;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.uploader.model.rest.Subject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * This class represents a patient based on Dicom as used in Shanoir.
+ * 
  * @author atouboul
- *
+ * @author mkain
  */
 public class Patient {
-	
-    @JsonProperty("subject")
-    private Subject subject;
-    
-    @JsonProperty("patientID")
-    private String patientID;
 
-    @JsonProperty("patientName")
-    private String patientName;
-    
+	@JsonProperty("patientID")
+	private String patientID;
+
+	@JsonProperty("patientName")
+	private String patientName;
+
 	@JsonProperty("patientBirthName")
 	private String patientBirthName;
 
-    @JsonProperty("patientBirthDate")
-    @LocalDateAnnotations
-    private LocalDate patientBirthDate;
+	@JsonProperty("patientBirthDate")
+	@LocalDateAnnotations
+	private LocalDate patientBirthDate;
 
-    @JsonProperty("patientSex")
-    private String patientSex;
+	@JsonProperty("patientSex")
+	private String patientSex;
 
-    @JsonProperty("studies")
-    private List<Study> studies;
+	@JsonProperty("subject")
+	private Subject subject;
 
-    @JsonProperty("frontExperimentalGroupOfSubjectId")
-    private Long frontExperimentalGroupOfSubjectId;
-    
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public Patient() {}
-    
+
+	public Patient(final Attributes attributes) {
+		this.patientID = attributes.getString(Tag.PatientID);
+		this.patientName = attributes.getString(Tag.PatientName);
+		this.patientBirthName = attributes.getString(Tag.PatientBirthName);
+		this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
+		this.patientSex = attributes.getString(Tag.PatientSex);
+	}
+
+	@JsonProperty("studies")
+	private List<Study> studies;
+
 	public String getPatientID() {
 		return patientID;
 	}
@@ -83,7 +94,7 @@ public class Patient {
 		return patientBirthDate;
 	}
 
-	public void setPatientBirthDate(LocalDate patientBirthDate) {	
+	public void setPatientBirthDate(LocalDate patientBirthDate) {
 		this.patientBirthDate = patientBirthDate;
 	}
 
@@ -109,14 +120,6 @@ public class Patient {
 
 	public void setSubject(Subject subject) {
 		this.subject = subject;
-	}
-
-	public Long getFrontExperimentalGroupOfSubjectId() {
-		return frontExperimentalGroupOfSubjectId;
-	}
-
-	public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
-		this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
 	}
 
 }

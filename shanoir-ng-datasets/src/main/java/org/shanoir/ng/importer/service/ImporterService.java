@@ -19,6 +19,7 @@ import java.io.File;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
@@ -40,7 +41,7 @@ public class ImporterService {
 	private static final String UPLOAD_EXTENSION = ".upload";
 		
 	@Autowired
-	private ExaminationService examinationService;
+	private ExaminationRepository examinationRepository;
 
 	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
@@ -52,16 +53,14 @@ public class ImporterService {
 	private DicomPersisterService dicomPersisterService;
 	
 	public void createAllDatasetAcquisition(ImportJob importJob) throws Exception {
-		Examination examination = examinationService.findById(importJob.getExaminationId());
+		Examination examination = examinationRepository.findOne(importJob.getExaminationId());
 		if (examination != null) {
 			int rank = 0;
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-						if (serie.getSelected() != null && serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
-						}
 					}
 				}
 			}

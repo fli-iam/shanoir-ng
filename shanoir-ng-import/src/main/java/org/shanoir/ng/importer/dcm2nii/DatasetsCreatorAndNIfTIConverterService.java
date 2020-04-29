@@ -138,23 +138,21 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			int numberOfSeries = series.size();
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = (Serie) seriesIt.next();
-				if (serie.getSelected() != null && serie.getSelected()) {
-					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
-					boolean serieIdentifiedForNotSeparating;
-					try {
-						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
-						// if the serie is not one of the series, that should not be separated, please separate the series,
-						// otherwise just do not separate the series and keep all images for one nii conversion
-						serie.setDatasets(new ArrayList<Dataset>());
-						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-						constructNifti(serieIDFolderFile, serie, numberOfSeries, converterId);
-					} catch (NoSuchFieldException | SecurityException e) {
-						LOG.error(e.getMessage());
-					}
-					// as images/non-images are migrated to datasets, clear the list now
-					serie.getImages().clear();
-					serie.getNonImages().clear();
+				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
+				boolean serieIdentifiedForNotSeparating;
+				try {
+					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
+					// if the serie is not one of the series, that should not be separated, please separate the series,
+					// otherwise just do not separate the series and keep all images for one nii conversion
+					serie.setDatasets(new ArrayList<Dataset>());
+					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+					constructNifti(serieIDFolderFile, serie, numberOfSeries, converterId);
+				} catch (NoSuchFieldException | SecurityException e) {
+					LOG.error(e.getMessage());
 				}
+				// as images/non-images are migrated to datasets, clear the list now
+				serie.getImages().clear();
+				serie.getNonImages().clear();
 			}
 		}	
 	}
@@ -767,7 +765,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
-			throw new ShanoirException("Error while creating serie id folder: folder already exists.");
+			throw new ShanoirException("Error while creating serie id folder: folder already exists. serieId: " + serieID);
 		}
 		List<Image> images = serie.getImages();
 		moveFiles(workFolder, serieIDFolderFile, images);

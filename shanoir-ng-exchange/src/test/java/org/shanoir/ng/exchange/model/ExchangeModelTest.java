@@ -26,7 +26,7 @@ public class ExchangeModelTest {
 		exStudy.setStudyName("NATIVE Divers");
 		exchange.setExStudy(exStudy);
 		ExStudyCard exStudyCard = new ExStudyCard();
-		exStudyCard.setId(new Long(1));
+		exStudyCard.setName("Magic studycard");
 		ArrayList<ExStudyCard> exStudyCards = new ArrayList<>();
 		exStudyCards.add(exStudyCard);
 		exStudy.setExStudyCards(exStudyCards);

@@ -3,9 +3,6 @@ package org.shanoir.uploader.service.rest;
 import java.io.File;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
@@ -46,7 +43,13 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 	
-	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";	
+	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
+	
+	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
+	
+	private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
+	
+	private static final String SERVICE_IMPORTER_START_IMPORT = "service.importer.start.import";
 
 	private HttpService httpService;
 	
@@ -65,6 +68,12 @@ public class ShanoirUploaderServiceClientNG {
 	private String serviceURLSubjectsCreate;
 	
 	private String serviceURLExaminationsCreate;
+	
+	private String serviceURLImporterCreateTempDir;
+	
+	private String serviceURLImporterStartImportJob;
+	
+	private String serviceURLImporterStartImport;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
@@ -83,6 +92,12 @@ public class ShanoirUploaderServiceClientNG {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_CREATE);
 		this.serviceURLExaminationsCreate = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+		this.serviceURLImporterCreateTempDir = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
+		this.serviceURLImporterStartImportJob = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+		this.serviceURLImporterStartImport = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
@@ -126,6 +141,17 @@ public class ShanoirUploaderServiceClientNG {
 			return null;
 		}
 	}
+	
+	public String createTempDir() throws Exception {
+		HttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+			String importTempDirId = Util.getMappedObject(response, String.class);
+			return importTempDirId;
+		} else {
+			return null;
+		}
+	}
 
 	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
@@ -157,15 +183,31 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 	
-	public String uploadFile(final String folderName, final File file) throws Exception {
-		final FileDataSource fDS = new FileDataSource(file);
-		final DataHandler dataHandler = new DataHandler(fDS);
-		final String result = null;
-		if (!"200".equals(result)) {
-			logger.error(result);
-			throw new Exception("File upload error occured!");
+	public void uploadFile(String tempDirId, File file) throws Exception {
+		HttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId, file);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in uploadFile.");
 		}
-		return result;
+	}
+	
+	public void startImportJob(String importJobJsonStr) throws Exception {
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in startImportJob.");
+		}
+	}
+	
+	public void startImport(String exchangeJsonStr) throws Exception {
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImport, exchangeJsonStr);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in startImport.");
+		}
 	}
 	
 	/**
