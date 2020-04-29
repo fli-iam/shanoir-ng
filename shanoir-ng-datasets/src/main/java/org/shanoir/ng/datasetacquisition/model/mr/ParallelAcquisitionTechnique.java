@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Parallel acquisition technique.
  * 
@@ -33,9 +36,12 @@ public enum ParallelAcquisitionTechnique {
 
 	// GRAPPA
 	GRAPPA(4),
-
+	
 	// mSENSE
-	M_SENSE(5);
+	M_SENSE(5),
+	
+	// alternative of mSENSE
+	MBSENSE(5);
 
 	private int id;
 
@@ -48,6 +54,8 @@ public enum ParallelAcquisitionTechnique {
 	private ParallelAcquisitionTechnique(final int id) {
 		this.id = id;
 	}
+
+	private static final Logger LOG = LoggerFactory.getLogger(ParallelAcquisitionTechnique.class);
 
 	/**
 	 * Get a parallel acquisition technique by its id.
@@ -79,7 +87,13 @@ public enum ParallelAcquisitionTechnique {
 		if (technique == null) {
 			return null;
 		}
-		return ParallelAcquisitionTechnique.valueOf(technique);
+		try {
+			return ParallelAcquisitionTechnique.valueOf(technique);
+		} catch (IllegalArgumentException e) {
+			LOG.error("ERROR: Parrallel acquisition technique not found: {}, null was set.", technique);
+			// If not found, just return null and log it instead of blocking all import.
+			return null;
+		}
 	}
 	
 	/**

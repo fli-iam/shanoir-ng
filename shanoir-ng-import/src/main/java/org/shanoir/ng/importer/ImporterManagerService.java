@@ -115,13 +115,16 @@ public class ImporterManagerService {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
+				// convert instances to images, as already done after zip file upload
 			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
+
 			// convert instances to images, done here for all kinds of import
 			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), importJob.isFromPacs());
+
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = (Patient) patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
