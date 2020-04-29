@@ -136,7 +136,6 @@ public class ExaminationApiControllerTest {
 	public void testDeleteExaminationWithExtraData() throws IOException {
 		// GIVEN an examination to delete with extra data files
 		File extraData = new File(tempFolderPath + "examination-1");
-		System.out.println("COUCOU: " + extraData.getAbsolutePath());
 		extraData.mkdirs();
 
 		// WHEN we delete the examination
