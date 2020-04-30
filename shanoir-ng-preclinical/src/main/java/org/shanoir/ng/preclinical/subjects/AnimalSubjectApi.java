@@ -20,8 +20,6 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -89,8 +87,6 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubject.class) })
 	@GetMapping(value = "/all", produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
 
 	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
