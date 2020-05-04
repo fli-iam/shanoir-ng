@@ -21,6 +21,8 @@ public class RabbitMQConfiguration {
 
 	////////////////// QUEUES //////////////////
 
+	private static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
+
 	public static final String DELETE_USER_QUEUE = "delete-user-queue";
 
 	public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
@@ -182,6 +184,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue subjectsQueue() {
 		return new Queue(SUBJECTS_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue importerQueue() {
+		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
 
 	@Bean

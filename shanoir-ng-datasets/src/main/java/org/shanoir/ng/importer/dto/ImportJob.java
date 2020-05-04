@@ -100,7 +100,7 @@ public class ImportJob implements Serializable {
 	}
 
 	public void setFromPacs(final boolean fromPacs) {
-		this.fromPacs = fromPacs<<<<<<< HEAD
+		this.fromPacs = fromPacs;
 
 	}
 
