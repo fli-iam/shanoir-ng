@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,9 +23,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  * @author mkain
  */
-public class ImportJob {
+public class ImportJob implements Serializable {
 
-    @JsonProperty("fromDicomZip")
+	private static final long serialVersionUID = 8804929608059674037L;
+
+	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
     @JsonProperty("fromShanoirUploader")
@@ -45,8 +48,15 @@ public class ImportJob {
     @JsonProperty("frontStudyId")
     private Long frontStudyId;
     
+	@JsonProperty("studyCardName")
+	private String studyCardName;
+	
+	// todo: remove this later, when front end uses StudyCards
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
+	
+	@JsonProperty("anonymisationProfileToUse")
+	private String anonymisationProfileToUse;
     
     @JsonProperty("frontConverterId")
     private Long frontConverterId;
@@ -116,6 +126,14 @@ public class ImportJob {
 		this.frontStudyId = frontStudyId;
 	}
 
+	public String getStudyCardName() {
+		return studyCardName;
+	}
+
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
+	}
+
 	public Long getFrontAcquisitionEquipmentId() {
 		return frontAcquisitionEquipmentId;
 	}
@@ -132,7 +150,15 @@ public class ImportJob {
 		this.frontConverterId = frontConverterId;
 	}
 
-    public String getWorkFolder() {
+    public String getAnonymisationProfileToUse() {
+		return anonymisationProfileToUse;
+	}
+
+	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+		this.anonymisationProfileToUse = anonymisationProfileToUse;
+	}
+
+	public String getWorkFolder() {
 		return workFolder;
 	}
 

@@ -19,11 +19,15 @@
 package org.shanoir.ng.dataset.controler;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
@@ -36,6 +40,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -114,5 +119,19 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii, eeg", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, IOException;
     
-    
+    @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @PostMapping(value = "/massiveDownload/{format}", produces = { "application/zip" }, consumes = {
+		"application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
+    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
+				allowableValues = "dcm, nii", defaultValue = "dcm") @Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format,
+    		@ApiParam(value = "ids of the datasets", required = true) @Valid @RequestBody List<Long> datasetIds
+    		) throws RestServiceException, EntityNotFoundException, IOException;
 }

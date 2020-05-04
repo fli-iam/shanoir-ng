@@ -50,6 +50,9 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
+
+	// MultiFrameExtractor is only used in case of EnhancedMR MRI.
+	private MultiframeExtractor emf;
 	
 	/** Returned Default Value when Dicom Tag is not found */
 	private static final int VALUE_NOT_FOUND_VALUE = -999999;
@@ -501,7 +504,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DATE == type) {
 			return attributes.getDate(dicomTag);
 		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.FLOAT == type) {
-			float result = attributes.getFloat(dicomTag, VALUE_NOT_FOUND_VALUE);
+			double result = attributes.getDouble(dicomTag, VALUE_NOT_FOUND_VALUE);
 			if ((int) result != VALUE_NOT_FOUND_VALUE) {
 				return result;
 			} else {

@@ -320,7 +320,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param attributes
 	 */
 	private void addSeriesEquipment(Serie serie, Attributes attributes) {
-		if (!serie.getEquipment().isComplete()) {
+		if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
 			String manufacturer = attributes.getString(Tag.Manufacturer);
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);

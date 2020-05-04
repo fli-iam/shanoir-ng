@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.importer.strategies.dataset;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 

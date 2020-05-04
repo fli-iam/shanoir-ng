@@ -49,8 +49,8 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public boolean login() {
-		String userName = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.name");
-		String password = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.password");
+		String userName = ShUpConfig.profileProperties.getProperty("shanoir.server.user.name");
+		String password = ShUpConfig.profileProperties.getProperty("shanoir.server.user.password");
 		return shanoirUploaderService.login(userName, password);
 	}
 	

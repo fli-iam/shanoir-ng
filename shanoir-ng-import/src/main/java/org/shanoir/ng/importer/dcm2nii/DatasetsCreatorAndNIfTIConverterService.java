@@ -81,15 +81,15 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	private static final String DOUBLE_EQUAL = "==";
 
 	private static final String SEMI_COLON = ";";
-	
+
 	private static final String SERIES = "SERIES";
-	
+
 	@Autowired
 	private NIfTIConverterRepository niftiConverterRepository;
-	
+
 	@Autowired
 	private ShanoirExec shanoirExec;
-	
+
 	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
 	private String doNotSeparateDatasetsInSerie;
 
@@ -98,35 +98,35 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@Value("${shanoir.conversion.dcm2nii.converters.convertas4d}")
 	private String convertAs4D;
-	
+
 	@Value("${shanoir.conversion.dcm2nii.converters.path.linux}")
 	private String convertersPathLinux;
-	
+
 	@Value("${shanoir.conversion.dcm2nii.converters.path.windows}")
 	private String convertersPathWindows;
-	
+
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.linux}")
 	private String clidcmPathLinux;
-	
+
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.windows}")
 	private String clidcmPathWindows;
-	
+
 	/** Logs of the conversion. */
 	private String conversionLogs;
-	
+
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<>();
-	
+
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
 		return niftiConverterRepository.findOne(id);
 	}
-	
+
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public List<NIfTIConverter> findAll() {
 		return niftiConverterRepository.findAll();
 	}
-	
+
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
@@ -162,129 +162,129 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			}
 		}
 	}
-	
-    /**
+
+	/**
 	 *
 	 * Create the nifti dataset expression
 	 * 
 	 **/
 	private ExpressionFormat generateNiftiDatasetExpression(Dataset dataset,Serie serie) {
-        LOG.debug("Create the nifti dataset expressions for dataset : {} in serie {}", dataset.getName(), serie.getSequenceName());
-        final ExpressionFormat datasetExpressionNifti = new ExpressionFormat();
-        datasetExpressionNifti.setType("nii");
-        return datasetExpressionNifti;
+		LOG.debug("Create the nifti dataset expressions for dataset : {} in serie {}", dataset.getName(), serie.getSequenceName());
+		final ExpressionFormat datasetExpressionNifti = new ExpressionFormat();
+		datasetExpressionNifti.setType("nii");
+		return datasetExpressionNifti;
 	}
 
-    /**
+	/**
 	 *
 	 * Create the nifti dataset expressions files
 	 * 
 	 **/
 	private void generateNiftiDatasetFiles(ExpressionFormat datasetExpressionFormat, Dataset dataset,List<File> niftiFileList) {
-        if (niftiFileList != null  && !niftiFileList.isEmpty()) {
-	        for (final File niftiFile : niftiFileList) {
-	            LOG.debug("create DatasetFile : processing the file {}", niftiFile.getName());
-	            final DatasetFile niftiDatasetFile = new DatasetFile();
-	            niftiDatasetFile.setPath(niftiFile.toURI().toString().replaceAll(" ", "%20"));
-	            datasetExpressionFormat.getDatasetFiles().add(niftiDatasetFile);
-	        }
-	
-	        // if necessary, rename the bvec and bval files (for DTI)
-	        renameBvecBval(datasetExpressionFormat);
-	
-	        /*
-	         * if there was some DTI images, then we can now use the
-	         * bvec and bval files to create the diffusion gradients and
-	         * add them to the MR Protocol. Indeed, it is more likely to
-	         * do so now because extracting the diffusion gradients from
-	         * the dicom files is tricky.
-	         */
-	        extractDiffusionGradients(dataset,datasetExpressionFormat);
-        }
-    }
+		if (niftiFileList != null  && !niftiFileList.isEmpty()) {
+			for (final File niftiFile : niftiFileList) {
+				LOG.debug("create DatasetFile : processing the file {}", niftiFile.getName());
+				final DatasetFile niftiDatasetFile = new DatasetFile();
+				niftiDatasetFile.setPath(niftiFile.toURI().toString().replaceAll(" ", "%20"));
+				datasetExpressionFormat.getDatasetFiles().add(niftiDatasetFile);
+			}
 
-	
+			// if necessary, rename the bvec and bval files (for DTI)
+			renameBvecBval(datasetExpressionFormat);
+
+			/*
+			 * if there was some DTI images, then we can now use the
+			 * bvec and bval files to create the diffusion gradients and
+			 * add them to the MR Protocol. Indeed, it is more likely to
+			 * do so now because extracting the diffusion gradients from
+			 * the dicom files is tricky.
+			 */
+			extractDiffusionGradients(dataset,datasetExpressionFormat);
+		}
+	}
+
+
 	/**
-     * Extract from the bvec and bval files the diffusion gradients and fullfill
-     * the mr protocol.
-     *
-     * @param mrProtocol
-     *            the mr protocol
-     * @param mrDataset
-     *            the mr dataset
-     * @param datasetExpressionNifti
-     *            the dataset expression nifti
-     */
-    private void extractDiffusionGradients(Dataset dataset, ExpressionFormat datasetExpressionNifti) {
-    	LOG.debug("extractDiffusionGradients : Begin");
-        if (datasetExpressionNifti != null) {
-            try {
-                boolean bvecOrBvalFound = false;
-                for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
-                    final File file = new File(new URI(datasetFile.getPath()));
-                    if (file.getName().endsWith(BVEC) || file.getName().endsWith(BVAL)) {
-                        bvecOrBvalFound = true;
-                        break;
-                    }
-                }
+	 * Extract from the bvec and bval files the diffusion gradients and fullfill
+	 * the mr protocol.
+	 *
+	 * @param mrProtocol
+	 *            the mr protocol
+	 * @param mrDataset
+	 *            the mr dataset
+	 * @param datasetExpressionNifti
+	 *            the dataset expression nifti
+	 */
+	private void extractDiffusionGradients(Dataset dataset, ExpressionFormat datasetExpressionNifti) {
+		LOG.debug("extractDiffusionGradients : Begin");
+		if (datasetExpressionNifti != null) {
+			try {
+				boolean bvecOrBvalFound = false;
+				for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+					final File file = new File(new URI(datasetFile.getPath()));
+					if (file.getName().endsWith(BVEC) || file.getName().endsWith(BVAL)) {
+						bvecOrBvalFound = true;
+						break;
+					}
+				}
 
-                if (bvecOrBvalFound) {
-                    String[] xValues = null;
-                    String[] yValues = null;
-                    String[] zValues = null;
-                    String[] bValues = null;
-                    for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
-                        final File file = new File(new URI(datasetFile.getPath()));
-                        if (file.getName().endsWith(BVEC)) {
-                            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-	                            String line = null;
-	                            List<String> items = new ArrayList<>();
-	                            while ((line = reader.readLine()) != null) {
-	                                items.add(line);
-	                            }
-	                            xValues = items.get(0).split("\\s");
-	                            yValues = items.get(1).split("\\s");
-	                            zValues = items.get(2).split("\\s");
-                            }
-                        }
-                        if (file.getName().endsWith(BVAL)) {
-                            try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
-	                            String line = null;
-	                            List<String> items = new ArrayList<>();
-	                            while ((line = reader.readLine()) != null) {
-	                                items.add(line);
-	                            }
-	                            bValues = items.get(0).split("\\s");
-                            }
-                        }
-                    }
+				if (bvecOrBvalFound) {
+					String[] xValues = null;
+					String[] yValues = null;
+					String[] zValues = null;
+					String[] bValues = null;
+					for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+						final File file = new File(new URI(datasetFile.getPath()));
+						if (file.getName().endsWith(BVEC)) {
+							try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+								String line = null;
+								List<String> items = new ArrayList<>();
+								while ((line = reader.readLine()) != null) {
+									items.add(line);
+								}
+								xValues = items.get(0).split("\\s");
+								yValues = items.get(1).split("\\s");
+								zValues = items.get(2).split("\\s");
+							}
+						}
+						if (file.getName().endsWith(BVAL)) {
+							try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+								String line = null;
+								List<String> items = new ArrayList<>();
+								while ((line = reader.readLine()) != null) {
+									items.add(line);
+								}
+								bValues = items.get(0).split("\\s");
+							}
+						}
+					}
 
-                    if (xValues != null && yValues != null && zValues != null && bValues != null) {
-                        if (xValues.length == yValues.length && yValues.length == zValues.length
-                                && zValues.length == bValues.length) {
-                            for (int i = 0; i < xValues.length; i++) {
-                                final DiffusionGradient diffusionGradient = new DiffusionGradient();
-                                diffusionGradient.setDiffusionGradientBValue(Double.valueOf(bValues[i]));
-                                diffusionGradient.setDiffusionGradientOrientationX(Double.valueOf(xValues[i]));
-                                diffusionGradient.setDiffusionGradientOrientationY(Double.valueOf(yValues[i]));
-                                diffusionGradient.setDiffusionGradientOrientationZ(Double.valueOf(zValues[i]));
-                                dataset.getDiffusionGradients().add(i, diffusionGradient);
-                                LOG.debug("extractDiffusionGradients : adding diffusion gradient {} dataset {}", diffusionGradient,  dataset.getName());
-                            }
-                        } else {
-                        	LOG.error("extractDiffusionGradients : The matrices doesn't have the same size!!");
-                        }
-                    } else {
-                    	LOG.error("extractDiffusionGradients : error occured when getting the b-vector and b-values");
-                    }
-                }
-            } catch (final URISyntaxException | IOException exc) {
-            	LOG.error("extractDiffusionGradients : {}", exc);
-            }
-        }
-        LOG.debug("extractDiffusionGradients : End");
-    }
-	
+					if (xValues != null && yValues != null && zValues != null && bValues != null) {
+						if (xValues.length == yValues.length && yValues.length == zValues.length
+								&& zValues.length == bValues.length) {
+							for (int i = 0; i < xValues.length; i++) {
+								final DiffusionGradient diffusionGradient = new DiffusionGradient();
+								diffusionGradient.setDiffusionGradientBValue(Double.valueOf(bValues[i]));
+								diffusionGradient.setDiffusionGradientOrientationX(Double.valueOf(xValues[i]));
+								diffusionGradient.setDiffusionGradientOrientationY(Double.valueOf(yValues[i]));
+								diffusionGradient.setDiffusionGradientOrientationZ(Double.valueOf(zValues[i]));
+								dataset.getDiffusionGradients().add(i, diffusionGradient);
+								LOG.debug("extractDiffusionGradients : adding diffusion gradient {} dataset {}", diffusionGradient,  dataset.getName());
+							}
+						} else {
+							LOG.error("extractDiffusionGradients : The matrices doesn't have the same size!!");
+						}
+					} else {
+						LOG.error("extractDiffusionGradients : error occured when getting the b-vector and b-values");
+					}
+				}
+			} catch (final URISyntaxException | IOException exc) {
+				LOG.error("extractDiffusionGradients : {}", exc);
+			}
+		}
+		LOG.debug("extractDiffusionGradients : End");
+	}
+
 	/**
 	 * Execute the Nifti conversion
 	 *
@@ -306,7 +306,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		if (converter != null && converter.isMcverter()) {
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
-		// Clidcm
+			// Clidcm
 		} else if (converter != null && converter.isClidcm()) {
 			// Must catch exception to try the creatbvecandbval even if there was an error
 			// in clidcm conversion
@@ -326,16 +326,16 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			 * dcm2nii .
 			 */
 			createBvecAndBval(outputFolder);
-		// Dicom2Nifti
+			// Dicom2Nifti
 		} else if (converter != null && converter.isDicom2Nifti()) {
 			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
-		// dcm2nii
+			// dcm2nii
 		} else {
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
 		}
 	}
-	
+
 	/**
 	 * Search for a '.prop' file. If found, then creates a '.bvec' and a '.bval'
 	 * file from the '.prop' file.
@@ -366,67 +366,67 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		LOG.debug("createBvecAndBval : end");
 		return bvecAndBval;
 	}
-	
-	/**
-     * Sometimes, dcm2nii creates files named '.bvec' and '.bval'. This methods
-     * renames them with the name of the dataset.
-     *
-     * @param datasetExpressionNifti
-     *            the dataset expression nifti
-     */
-    private void renameBvecBval(final ExpressionFormat datasetExpressionNifti) {
-        LOG.debug("renameBvecBval : Begin");
-        if (datasetExpressionNifti != null) {
-            try {
-                boolean toBeRenamed = false;
-                for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
-                    final File file = new File(new URI(datasetFile.getPath()));
-                    if (BVEC.equalsIgnoreCase(file.getName()) || BVAL.equalsIgnoreCase(file.getName())) {
-                        toBeRenamed = true;
-                        break;
-                    }
-                }
-                if (toBeRenamed) {
-                    LOG.debug("renameBvecBval : .bvec and .bval files to rename");
-                    String name = null;
-                    for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
-                        final File file = new File(new URI(datasetFile.getPath()));
-                        if (file.getName().endsWith(".nii")) {
-                            name = file.getName().substring(0, file.getName().lastIndexOf(".nii"));
-                        }
-                        if (file.getName().endsWith(".nii.gz")) {
-                            name = file.getName().substring(0, file.getName().lastIndexOf(".nii.gz"));
-                        }
-                    }
 
-                    if (name != null) {
-                        for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
-                            final File file = new File(new URI(datasetFile.getPath()));
-                            if (BVEC.equalsIgnoreCase(file.getName())) {
-                                final String newName = name + BVEC;
-                                final String newPath = datasetFile.getPath().replaceAll(BVEC, newName);
-                                file.renameTo(new File(new URI(newPath)));
-                                datasetFile.setPath(newPath);
-                                LOG.debug("renameBvecBval : .bvec renamed to {}", newName);
-                            } else if (BVAL.equalsIgnoreCase(file.getName())) {
-                                final String newName = name + BVAL;
-                                final String newPath = datasetFile.getPath().replaceAll(BVAL, newName);
-                                file.renameTo(new File(new URI(newPath)));
-                                datasetFile.setPath(newPath);
-                                LOG.debug("renameBvecBval : .bval renamed to {}", newName);
-                            }
-                        }
-                    }
-                } else {
-                	LOG.debug("renameBvecBval : no file to rename");
-                }
-            } catch (final URISyntaxException exc) {
-            	LOG.error("renameBvecBval : ", exc);
-            }
-        }
-        LOG.debug("renameBvecBval : End");
-    }
-	
+	/**
+	 * Sometimes, dcm2nii creates files named '.bvec' and '.bval'. This methods
+	 * renames them with the name of the dataset.
+	 *
+	 * @param datasetExpressionNifti
+	 *            the dataset expression nifti
+	 */
+	private void renameBvecBval(final ExpressionFormat datasetExpressionNifti) {
+		LOG.debug("renameBvecBval : Begin");
+		if (datasetExpressionNifti != null) {
+			try {
+				boolean toBeRenamed = false;
+				for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+					final File file = new File(new URI(datasetFile.getPath()));
+					if (BVEC.equalsIgnoreCase(file.getName()) || BVAL.equalsIgnoreCase(file.getName())) {
+						toBeRenamed = true;
+						break;
+					}
+				}
+				if (toBeRenamed) {
+					LOG.debug("renameBvecBval : .bvec and .bval files to rename");
+					String name = null;
+					for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+						final File file = new File(new URI(datasetFile.getPath()));
+						if (file.getName().endsWith(".nii")) {
+							name = file.getName().substring(0, file.getName().lastIndexOf(".nii"));
+						}
+						if (file.getName().endsWith(".nii.gz")) {
+							name = file.getName().substring(0, file.getName().lastIndexOf(".nii.gz"));
+						}
+					}
+
+					if (name != null) {
+						for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+							final File file = new File(new URI(datasetFile.getPath()));
+							if (BVEC.equalsIgnoreCase(file.getName())) {
+								final String newName = name + BVEC;
+								final String newPath = datasetFile.getPath().replaceAll(BVEC, newName);
+								file.renameTo(new File(new URI(newPath)));
+								datasetFile.setPath(newPath);
+								LOG.debug("renameBvecBval : .bvec renamed to {}", newName);
+							} else if (BVAL.equalsIgnoreCase(file.getName())) {
+								final String newName = name + BVAL;
+								final String newPath = datasetFile.getPath().replaceAll(BVAL, newName);
+								file.renameTo(new File(new URI(newPath)));
+								datasetFile.setPath(newPath);
+								LOG.debug("renameBvecBval : .bval renamed to {}", newName);
+							}
+						}
+					}
+				} else {
+					LOG.debug("renameBvecBval : no file to rename");
+				}
+			} catch (final URISyntaxException exc) {
+				LOG.error("renameBvecBval : ", exc);
+			}
+		}
+		LOG.debug("renameBvecBval : End");
+	}
+
 	/**
 	 * Remove unused files that are created during the conversion process.
 	 */
@@ -477,8 +477,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * This method does the actual conversion on calling the converter, either on the level
 	 * of the serie folder or on the level of each dataset folder inside the serie folder.
@@ -502,31 +502,31 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 */
 	private NIfTIConverter datasetToNiftiConversionLauncher(Dataset dataset, File directory, boolean isConvertAs4D) {
 
-				// search for the existing files in the destination folder
-				
-				LOG.info("convertToNifti : create nifti files for the dataset : {}", dataset.getName());
-				if (conversionLogs != null && !"".equals(conversionLogs)) {
-					conversionLogs += "\n";
-				} else {
-					conversionLogs = "";
-				}
+		// search for the existing files in the destination folder
 
-				// TODO ATO : Fix this once nifti conversion process is defined.
-				
-				NIfTIConverter converter = findById(5L);
-				convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
-				LOG.info("conversionLogs : {}", conversionLogs);
-				return converter;
+		LOG.info("convertToNifti : create nifti files for the dataset : {}", dataset.getName());
+		if (conversionLogs != null && !"".equals(conversionLogs)) {
+			conversionLogs += "\n";
+		} else {
+			conversionLogs = "";
+		}
+
+		// TODO ATO : Fix this once nifti conversion process is defined.
+
+		NIfTIConverter converter = findById(5L);
+		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
+		LOG.info("conversionLogs : {}", conversionLogs);
+		return converter;
 
 	}
-	
-	
+
+
 	/**
 	 * This method is needed to identify generated nifti files in the middle of dcm files.
 	 * 
 	 * @return List of nifti files
 	 */
-	
+
 	private List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
 		// If one of the output files is a prop file, there has been an error
 		List<File> niftiFileResult = null;
@@ -555,7 +555,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		removeUnusedFiles();
 		return niftiFileResult;
 	}
-	
+
 	/**
 	 * adapt to generated folders by dicom2nifti converter
 	 * 
@@ -590,7 +590,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		return niiFiles;
 	}
 
-	
+
 	/**
 	 * This method generates the nifti files of serie  in proper datasets for an entire serie.
 	 * It also constructs the associated Nifti ExpressionFormat and DatasetFiles within the Dataset object.
@@ -604,8 +604,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 */
 	private void constructNifti(File serieIDFolderFile, final Serie serie, Long converterId) {
 
-	LOG.debug("convertToNifti : create nifti files for the serie : {}", serieIDFolderFile.getAbsolutePath());
-		
+		LOG.debug("convertToNifti : create nifti files for the serie : {}", serieIDFolderFile.getAbsolutePath());
+
 		if (serie != null) {
 			boolean isConvertAs4D=false;
 			boolean isConvertWithClidcm=false;
@@ -632,7 +632,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles, directory, serieIDFolderFile);
 						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
-						
+
 					}
 				}
 			} else if (serie.getDatasets().size() == 1) {
@@ -653,7 +653,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			}
 		}
 	}
-	
+
 	/**
 	 *  Build dataset Expresion and datasetFiles
 	 * 
@@ -669,8 +669,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		dataset.getExpressionFormats().add(expressionFormat);
 		generateNiftiDatasetFiles(expressionFormat, dataset, niftiGeneratedFiles);
 	}
-	
-	
+
+
 	/**
 	 * This method extract the dicom files in proper dataset(s) (in a serie).
 	 * It also constructs the associated ExpressionFormat and DatasetFiles within the Dataset object.
@@ -704,7 +704,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
 					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(image.getInversionTime());
 					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
-				// new dataset has to be created, new expression format and add image/datasetfile
+					// new dataset has to be created, new expression format and add image/datasetfile
 				} else {
 					Dataset dataset = new Dataset();
 					ExpressionFormat expressionFormat = new ExpressionFormat();
@@ -720,7 +720,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					serie.getDatasets().add(dataset);
 				}
 			}
-		
+
 			boolean success = true;
 			// create a separate folder for each group of images
 			int index = 0;
@@ -767,7 +767,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			serie.getDatasets().add(dataset);
 		}
 	}
-	
+
 
 	/**
 	 * @param image
@@ -780,7 +780,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		datasetFile.setImageOrientationPatient(image.getImageOrientationPatient());
 		return datasetFile;
 	}
-	
+
 	/**
 	 * This method creates a folder for each serie and moves into it the files,
 	 * coming either from the PACS or from the zip upload directory.
@@ -795,7 +795,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
-			throw new ShanoirException("Error while creating serie id folder: folder already exists.");
+			throw new ShanoirException("Error while creating serie id folder: folder already exists. serieId: " + serieID);
 		}
 		List<Image> images = serie.getImages();
 		moveFiles(workFolder, serieIDFolderFile, images);
@@ -825,7 +825,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			}
 		}
 	}
-	
+
 	public static int[] convertIntegers(List<Integer> integers) {
 		int[] ret = new int[integers.size()];
 		for (int i = 0; i < ret.length; i++) {
@@ -833,7 +833,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 		return ret;
 	}
-	
+
 	public static double[] convertDoubles(List<Double> doubles) {
 		double[] ret = new double[doubles.size()];
 		for (int i = 0; i < ret.length; i++) {
@@ -878,5 +878,5 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 		return false;
 	}
-	
+
 }

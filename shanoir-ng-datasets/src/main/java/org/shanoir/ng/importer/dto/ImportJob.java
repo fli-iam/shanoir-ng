@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.io.Serializable;
 import java.util.List;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -22,9 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  *
  */
-public class ImportJob {
+public class ImportJob implements Serializable {
 
-    @JsonProperty("fromDicomZip")
+	private static final long serialVersionUID = 8804929608059674037L;
+
+	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
     @JsonProperty("fromShanoirUploader")
@@ -32,8 +36,11 @@ public class ImportJob {
 
     @JsonProperty("fromPacs")
     private boolean fromPacs;
+    
+	@JsonProperty("workFolder")
+	private String workFolder;
 
-    @JsonProperty("patients")
+	@JsonProperty("patients")
     private List<Patient> patients;
     
     @JsonProperty("examinationId")
@@ -41,12 +48,19 @@ public class ImportJob {
     
     @JsonProperty("frontStudyId")
     private Long frontStudyId;
-
+    
+	@JsonProperty("studyCardName")
+	private String studyCardName;
+	
+	// todo: remove this later, when front end uses StudyCards
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
+	
+	@JsonProperty("anonymisationProfileToUse")
+	private String anonymisationProfileToUse;
     
-	@JsonProperty("workFolder")
-	private String workFolder;
+    @JsonProperty("frontConverterId")
+    private Long frontConverterId;
     
     @JsonProperty("archive")
     private String archive;
@@ -86,7 +100,8 @@ public class ImportJob {
 	}
 
 	public void setFromPacs(final boolean fromPacs) {
-		this.fromPacs = fromPacs;
+		this.fromPacs = fromPacs<<<<<<< HEAD
+
 	}
 
 	public List<Patient> getPatients() {
@@ -113,12 +128,36 @@ public class ImportJob {
 		this.frontStudyId = frontStudyId;
 	}
 
+	public String getStudyCardName() {
+		return studyCardName;
+	}
+
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
+	}
+
 	public Long getFrontAcquisitionEquipmentId() {
 		return frontAcquisitionEquipmentId;
 	}
 
 	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
 		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	}
+
+	public Long getFrontConverterId() {
+		return frontConverterId;
+	}
+
+	public void setFrontConverterId(Long frontConverterId) {
+		this.frontConverterId = frontConverterId;
+	}
+
+    public String getAnonymisationProfileToUse() {
+		return anonymisationProfileToUse;
+	}
+
+	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+		this.anonymisationProfileToUse = anonymisationProfileToUse;
 	}
 
 	public String getWorkFolder() {

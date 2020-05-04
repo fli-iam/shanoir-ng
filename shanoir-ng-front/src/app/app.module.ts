@@ -143,7 +143,6 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
-
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
 import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animalSubject-form.component';

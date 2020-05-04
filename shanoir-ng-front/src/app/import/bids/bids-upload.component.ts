@@ -21,8 +21,6 @@ import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { EegImportJob } from '../shared/eeg-data.model';
-import { BidsElement } from '../../bids/model/bidsElement.model'
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -38,7 +36,6 @@ export class BidsUploadComponent {
     protected extensionError: boolean;
     private modality: string;
     protected errorMessage: string;
-    protected bidsStructure: BidsElement[];
 
     constructor(
             private importService: ImportService, 
@@ -79,7 +76,6 @@ export class BidsUploadComponent {
             .then((importJob: ImportJob) => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
-                this.getBidsStructure(importJob.frontStudyId);
             }).catch(error => {
                 this.setArchiveStatus('error');
                 if (error && error.error && error.error.message) {
@@ -94,10 +90,6 @@ export class BidsUploadComponent {
 
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
-    }
-
-    getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
     }
 
     data = {'frontStudyId': 10,'studyCardId': 68,'frontAcquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};

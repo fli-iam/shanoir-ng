@@ -34,21 +34,21 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
-import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 /**
  * This class actually does the import work and introduces the asynchronous
@@ -85,7 +85,10 @@ public class ImporterManagerService {
 	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
 	
 	@Autowired
-	private RestTemplate restTemplate;
+    private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Value("${shanoir.import.directory}")
 	private String importDir;
@@ -117,38 +120,33 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-			// Analyze DICOM: what gives us a list of images for each serie.
+
+			// convert instances to images, done here for all kinds of import
 			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), importJob.isFromPacs());
-			
+
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
-				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
-				final String subjectName = patient.getSubject().getName();
-				try {
-					ANONYMIZER.anonymizeForShanoir(dicomFiles, "Profile Neurinfo", subjectName, subjectName);
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-					throw new ShanoirException("Error during anonymization.");
+				// perform anonymization only in case of profile explicitly set
+				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
+					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
+					final String subjectName = patient.getSubject().getName();
+					try {
+						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+					} catch (Exception e) {
+						LOG.error(e.getMessage(), e);
+						throw new ShanoirException("Error during anonymization.");
+					}
 				}
 				Long converterId = importJob.getFrontConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
-			// TODO: change this here to async rabbitmq communication.
-			// HttpEntity represents the request
-			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, keycloakHeaders);
-			// Post to dataset MS to finish import
-			ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
-			if (HttpStatus.OK.equals(response.getStatusCode())
-					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-			} else {
-				throw new ShanoirException(ImportErrorModelCode.SC_MS_COMM_FAILURE);
-			}
+			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
-		} catch (FileNotFoundException| ShanoirException e) {
-			LOG.error(e.getMessage());
+		} catch (ShanoirException | FileNotFoundException | AmqpException | JsonProcessingException e) {
+			LOG.error(e.getMessage(), e);
 		}
-		LOG.info("Finished import job for userId: {} with import job folder: ", userId, importJob.getWorkFolder());
+		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 	}
 	
 	/**

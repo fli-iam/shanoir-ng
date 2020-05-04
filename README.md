@@ -33,6 +33,14 @@ that will soon be merged into the "develop" branch. The "develop" branch is oper
 
 Many thanks to all these giants, on their shoulders we are standing to develop Shanoir-NG !
 
+# Access to REST-API on using Swagger2
+
+You can easily connect and investigate the REST interface of Shanoir-NG using Swagger2.
+Depending on your server domain, below an example for the dev environment, just call:
+* MS Studies: https://shanoir-ng-nginx/shanoir-ng/studies/swagger-ui.html
+* MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
+* MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
+
 # Installation of Shanoir NG
 
 The installation of Shanoir NG has two steps :
@@ -85,14 +93,10 @@ If you want to login, please configure a user in Keycloak :
 By default, new user accounts have been created in Keycloak by ms users with temporary passwords.
 Please access to Keycloak admin interface below to reset the password, when you want to login (Manage users - Edit your desired user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured properly, emails with a temporary password will have been sent to each user (not the case in dev environment).
 
-Please use the flags **kcAdminClientUsername**, **kcAdminClientPassword**, **syncAllUsersToKeycloak**
-in the file **/docker-compose/users/Dockerfile** of ms users, to configure in production environment
-the behaviour of user account creation with Keycloak. E.g. if you want to start with an empty users
-database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
-
-**Attention:** for security reasons please change in a production environment the Keycloak admin password
-in the file **/docker-compose/keycloak/variables.env** and in the file **/docker-compose/users/Dockerfile**
-adapt as well the credentials.
+Please use the flag **syncAllUsersToKeycloak** in the file **/docker-compose/users/Dockerfile** of ms users,
+to configure in production environment the behaviour of user account creation within Keycloak. E.g. if you want
+to start with an empty users database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
+If set to true: ms users will synchronise the users in his mysql db into Keycloak during startup (dev env scenario).
 
 ### Configure a mail server
 
