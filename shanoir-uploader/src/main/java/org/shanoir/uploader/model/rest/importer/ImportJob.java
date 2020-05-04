@@ -12,24 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.model;
+package org.shanoir.uploader.model.rest.importer;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * @author atouboul
  * @author mkain
  */
-public class ImportJob implements Serializable {
-
-	private static final long serialVersionUID = 8804929608059674037L;
+public class ImportJob {
+	
+	public static final String IMPORT_JOB_JSON = "import-job.json";
 
 	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
-
+	
     @JsonProperty("fromShanoirUploader")
     private boolean fromShanoirUploader;
 
@@ -150,4 +148,3 @@ public class ImportJob implements Serializable {
 	}
 	
 }
-

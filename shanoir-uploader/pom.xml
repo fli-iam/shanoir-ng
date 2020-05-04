@@ -23,6 +23,12 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>4.3.1</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>org.slf4j</groupId>
+			        <artifactId>slf4j-log4j12</artifactId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 		<!-- dependency log4j -->
 		<dependency>
@@ -35,6 +41,13 @@
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
 			<version>0.0.1</version>
+			<!-- really important: solves slf4j binding issue and avoid GB of logs during upload with httpClient!!! -->
+			<exclusions>
+			    <exclusion>
+			        <groupId>ch.qos.logback</groupId>
+			        <artifactId>logback-classic</artifactId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 		<!-- dependency Shanoir -->
 		<dependency>
@@ -72,6 +85,12 @@
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 			<version>2.0.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>org.slf4j</groupId>
+			        <artifactId>slf4j-log4j12</artifactId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>
