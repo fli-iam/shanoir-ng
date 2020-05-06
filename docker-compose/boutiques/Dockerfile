@@ -12,12 +12,12 @@
 
 FROM openjdk:8-jdk-alpine
 
-RUN apk update && apk add bash && apk add docker && apk add python && apk add py-pip
+RUN apk update && apk add bash && apk add docker && apk add python3 && apk add py3-pip
 
 # RUN apk add openrc --no-cache
 # RUN rc-update add docker boot
 
-RUN pip install boutiques
+RUN pip3 install boutiques
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
