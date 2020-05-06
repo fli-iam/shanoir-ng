@@ -61,6 +61,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -171,7 +172,7 @@ public class ImporterApiController implements ImporterApi {
 	private QueryPACSService queryPACSService;
 
 	@Autowired
-	RabbitTemplate rabbitTemplate;
+	private RabbitTemplate rabbitTemplate;
 
 	public ResponseEntity<Void> uploadFiles(
 			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files)
@@ -880,6 +881,7 @@ public class ImporterApiController implements ImporterApi {
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile)
 			throws RestServiceException, ShanoirException, IOException {
 		// Check that the file is not null and well zpiped
+		try {
 		if (bidsFile == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
@@ -889,13 +891,11 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
 		}
-
 		// Todo: what if we are coming from SHUP ?
 
 		// Create tmp folder and unzip archive
 		final File userImportDir = getUserImportDir();
 		File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, bidsFile, false);
-
 		// Deserialize participants.tsv => Do a call to studies API to create
 		// corresponding subjects
 		File participantsFile = new File(importJobDir.getAbsolutePath() + "/participants.tsv");
@@ -908,13 +908,9 @@ public class ImporterApiController implements ImporterApi {
 		SimpleModule module = new SimpleModule();
 		module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
 		mapper.registerModule(module);
-
 		// Here we wait for the response => to be sure that the subjects are created
-		String participantString = (String) rabbitTemplate.convertSendAndReceive("subject_exchange", "",
-				participantsFile.getAbsolutePath());
-
+		String participantString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_EXCHANGE, "", participantsFile.getAbsolutePath());
 		List<IdName> participants = Arrays.asList(mapper.readValue(participantString, IdName[].class));
-
 		// If we receive a unique subject with no ID => It's an error
 		if (participants.size() == 1 && participants.get(0).getId() == null) {
 			throw new ShanoirException(participants.get(0).getName());
@@ -953,15 +949,12 @@ public class ImporterApiController implements ImporterApi {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
-
 			CommonIdsDTO idsDTO = new CommonIdsDTO(null, sid.getFrontStudyId(), null,
 					sid.getFrontAcquisitionEquipmentId());
-
 			final HttpEntity<CommonIdsDTO> requestBody = new HttpEntity<>(idsDTO, KeycloakUtil.getKeycloakHeader());
 			// Post to dataset MS to finish import and create associated datasets
 			ResponseEntity<CommonIdNamesDTO> response = restTemplate.exchange(studiesCommonMsUrl, HttpMethod.POST,
 					requestBody, CommonIdNamesDTO.class);
-
 			// Check that equipement exists
 			// Check that study exists
 			// All in one with studies MS CommonsApi
@@ -973,12 +966,11 @@ public class ImporterApiController implements ImporterApi {
 			if (response.getBody().getStudy() == null) {
 				throw new ShanoirException("Study with ID " + sid.getFrontStudyId() + " does not exists.");
 			}
-
 			// Subject based on folder name
 			Long subjectId = getSubjectIdByName(subjectName, participants);
 			if (subjectId == null) {
 				throw new ShanoirException(
-						"Subject " + subjectName + " could not be created. Please check participants.tsv file. ");
+						"Subject " + subjectName + " could not be created. Please check participants.tsv file.");
 			}
 
 			// If there is no DICOMDIR: create it
@@ -988,7 +980,6 @@ public class ImporterApiController implements ImporterApi {
 						subjFile.getAbsolutePath() + "/DICOM");
 				creator.start();
 			}
-
 			// Zip data folders to be able to call ImporterAPIController.uploadDicomZipFile
 			FileOutputStream fos = new FileOutputStream(subjFile.getAbsolutePath() + ".zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
@@ -997,7 +988,6 @@ public class ImporterApiController implements ImporterApi {
 
 			zipOut.close();
 			fos.close();
-
 			MockMultipartFile multiPartFile = new MockMultipartFile(subjFile.getName(), subjFile.getName() + ".zip",
 					APPLICATION_ZIP, new FileInputStream(subjFile.getAbsolutePath() + ".zip"));
 
@@ -1047,7 +1037,6 @@ public class ImporterApiController implements ImporterApi {
 						HttpMethod.POST, requestBodyExam, ExaminationDTO.class);
 				job.setExaminationId(examResponse.getBody().getId());
 			}
-
 			// Next API call => StartImportJob
 			ResponseEntity<Void> result = this.startImportJob(job);
 			if (!result.getStatusCode().equals(HttpStatus.OK)) {
@@ -1061,6 +1050,11 @@ public class ImporterApiController implements ImporterApi {
 		// copy /sourceData??, /code and / files (readme, changes, participants.tsv,
 		// participants.json, etc..)
 		return new ResponseEntity<>(job, HttpStatus.OK);
+
+		} catch (Exception e) {
+			System.err.println("Coucou" + e + e.getMessage() + e.getStackTrace());
+			throw e;
+		}
 	}
 
 	/**

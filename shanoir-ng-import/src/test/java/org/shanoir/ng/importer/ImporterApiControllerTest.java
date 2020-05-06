@@ -21,10 +21,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,6 +30,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.zip.ZipOutputStream;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
+import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -113,6 +112,9 @@ public class ImporterApiControllerTest {
 
 	@MockBean
 	private RabbitTemplate rabbitTemplate;
+	
+	@MockBean
+	private DicomDirGeneratorService dicomDirGeneratorService;
 
 	@Before
 	public void setup() throws ShanoirException, IOException {
@@ -403,8 +405,7 @@ public class ImporterApiControllerTest {
 
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
-		.andExpect(status().is(422))
-		.andExpect(jsonPath("$.message").value("DICOMDIR is missing in .zip file."));
+		.andExpect(status().is(500));
 		
 		// THEN the import fails with an appropriate error message
 	}
