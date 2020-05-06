@@ -80,7 +80,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             this.studies = studies;
         });
     }
-    
+
     private getSubjectName(id: number): string {
         if (!this.subjects || this.subjects.length == 0 || !id) return id ? id+'' : '';
         for (let subject of this.subjects) { 

@@ -32,6 +32,7 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -176,6 +177,23 @@ export class StudyComponent extends EntityComponent<Study> {
             .then(subjects => {
                 this.subjects = subjects;
         });
+    }
+
+    getDatasets(): Dataset[] {
+        let datasets = [];
+        if (!this.study) {
+            return [];
+        }
+        for (let subject of this.study.subjectStudyList) {
+            for (let examination of subject.examinations) {
+                for (let acq of examination.datasetAcquisitions) {
+                    for (let dataset of acq.datasets) {
+                        datasets.push(dataset);
+                    }
+                }
+            }
+        }
+        return datasets;
     }
     
     /** Center section management  **/

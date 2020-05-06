@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.dataset.security;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,8 +58,12 @@ public class DatasetSecurityService {
 	 * @return true or false
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-    	if (studyId == null) return false;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	if (studyId == null) {
+			return false;
+		}
         return commService.hasRightOnStudy(studyId, rightStr);
     }
     
@@ -69,54 +74,58 @@ public class DatasetSecurityService {
      * @param datasetId the dataset id
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
     	Dataset dataset = datasetRepository.findOne(datasetId);
-        if (dataset == null) throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
-        if (dataset.getStudyId() == null) return false;
+        if (dataset == null) {
+			throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
+		}
+        if (dataset.getStudyId() == null) {
+			return false;
+		}
         return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
     }
     
     /**
-     * Check that the connected user has the given right for at least one of the given dataset list.
+     * Filters the list of datasets in entry if the given user has the right to do so.
      * DatasetIds list is also cleaned here
      * 
-     * @param datasetIds the datasets ids
+     * @param datasets the datasets
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
-    public boolean hasRightOnAtLeastOneDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-    	if (datasetIds.isEmpty()) throw new IllegalArgumentException("Dataset ids cannot be null here.");
-    	Set<Long> studyIds = new HashSet<Long>();
-    	Set<Long> notFoundDatasetIds = new HashSet<Long>();
-    	datasetIds.forEach((Long datasetId) -> {
-    		Dataset dataset = datasetRepository.findOne(datasetId);
-    		if (dataset == null) {
-    			// remove not found datasetId from the list and throw exception later
-    			datasetIds.remove(datasetId);
-    			notFoundDatasetIds.add(datasetId);
-    		}
-    		else {
-    			studyIds.add(dataset.getStudyId());
-    		}
+    public List<Dataset> hasRightOnAtLeastOneDataset(List<Dataset> datasets, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return datasets;
+		}
+    	// Create empty list
+    	List<Dataset> filteredDatasets = new ArrayList<>();
+
+    	// If the entry is empty, return an empty list
+    	if (datasets == null || datasets.isEmpty()) {
+			return filteredDatasets;
+		}
+    	// Get list of corresponding studies
+    	Set<Long> studyIds = new HashSet<>();
+    	datasets.forEach((Dataset dataset) -> {
+    		studyIds.add(dataset.getStudyId());
     	});
-    	if (!notFoundDatasetIds.isEmpty()) throw new EntityNotFoundException("Cannot find datasets with ids: " + notFoundDatasetIds.toString());	
-    	if (studyIds.isEmpty()) return false;
+
+    	// Check study right
     	Set<Long> validStudyIds = commService.hasRightOnStudies(studyIds, rightStr);
-    	if (validStudyIds.isEmpty()) return false;
-    	datasetIds.forEach((Long datasetId) -> {
-    		Dataset dataset = datasetRepository.findOne(datasetId);
-    		if (!validStudyIds.contains(dataset.getStudyId())) {
-    			// remove not allowed to download datasetId form the list
-    			datasetIds.remove(datasetId);
+
+    	// Build filtered list of datasets
+    	datasets.forEach((Dataset dataset) -> {
+    		if (validStudyIds.contains(dataset.getStudyId())) {
+    			filteredDatasets.add(dataset);
     		}
     	});
-    	if (!datasetIds.isEmpty()) return true;
-    	return false;
+    	return filteredDatasets;
     }
     
     
@@ -128,9 +137,15 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnTrustedDataset(Dataset dataset, String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-        if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null here.");
-        if (dataset.getStudyId() == null) return false;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+        if (dataset == null) {
+			throw new IllegalArgumentException("Dataset cannot be null here.");
+		}
+        if (dataset.getStudyId() == null) {
+			return false;
+		}
         return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
     }
     
@@ -141,19 +156,29 @@ public class DatasetSecurityService {
      * @param dataset the dataset
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     public boolean hasUpdateRightOnDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-    	if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null here.");
-    	if (dataset.getId() == null) throw new IllegalArgumentException("Dataset id cannot be null here.");
-    	if (dataset.getStudyId() == null) return false;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	if (dataset == null) {
+			throw new IllegalArgumentException("Dataset cannot be null here.");
+		}
+    	if (dataset.getId() == null) {
+			throw new IllegalArgumentException("Dataset id cannot be null here.");
+		}
+    	if (dataset.getStudyId() == null) {
+			return false;
+		}
     	Dataset dbDataset = datasetRepository.findOne(dataset.getId());
-    	if (dbDataset == null) throw new EntityNotFoundException("Cannot find dataset with id " + dataset.getId());
+    	if (dbDataset == null) {
+			throw new EntityNotFoundException("Cannot find dataset with id " + dataset.getId());
+		}
     	if (dataset.getStudyId() == dbDataset.getStudyId()) { // study hasn't changed
     		return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
     	} else { // study has changed : check user has right on both studies
-    		return commService.hasRightOnStudy(dataset.getStudyId(), rightStr) && commService.hasRightOnStudy(dbDataset.getStudyId(), rightStr);    		
+    		return commService.hasRightOnStudy(dataset.getStudyId(), rightStr) && commService.hasRightOnStudy(dbDataset.getStudyId(), rightStr);
     	}
     }
     
@@ -207,7 +232,9 @@ public class DatasetSecurityService {
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	for (Examination exam : page) {
-    		if (!checkedIds.contains(exam.getStudyId())) return false;
+    		if (!checkedIds.contains(exam.getStudyId())) {
+				return false;
+			}
     	}
     	return true;
     }
@@ -239,11 +266,15 @@ public class DatasetSecurityService {
     public boolean filterExaminationDTOPage(Page<ExaminationDTO> page, String rightStr) {
     	Set<Long> studyIds = new HashSet<Long>();
     	page.forEach((ExaminationDTO exam) -> {
-    		if (exam.getStudy() != null) studyIds.add(exam.getStudy().getId());
+    		if (exam.getStudy() != null) {
+				studyIds.add(exam.getStudy().getId());
+			}
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	for (ExaminationDTO exam : page) {
-    		if (exam.getStudy() == null || !checkedIds.contains(exam.getStudy().getId())) return false;
+    		if (exam.getStudy() == null || !checkedIds.contains(exam.getStudy().getId())) {
+				return false;
+			}
     	}
     	return true;
     }
@@ -258,7 +289,9 @@ public class DatasetSecurityService {
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
     	Set<Long> studyIds = new HashSet<Long>();
     	list.forEach((ExaminationDTO exam) -> {
-    		if (exam.getStudy() != null) studyIds.add(exam.getStudy().getId());
+    		if (exam.getStudy() != null) {
+				studyIds.add(exam.getStudy().getId());
+			}
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	list.removeIf((ExaminationDTO exam) -> exam.getStudy() == null || !checkedIds.contains(exam.getStudy().getId()));
@@ -273,14 +306,18 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetDTOPage(Page<DatasetDTO> page, String rightStr) {
-    	if (page == null) return true;
+    	if (page == null) {
+			return true;
+		}
     	Set<Long> studyIds = new HashSet<Long>();
     	page.forEach((DatasetDTO dataset) -> {
     		studyIds.add(dataset.getStudyId());
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	for (DatasetDTO dataset : page) {
-    		if (!checkedIds.contains(dataset.getStudyId())) return false;
+    		if (!checkedIds.contains(dataset.getStudyId())) {
+				return false;
+			}
     	}
     	return true;
     }
@@ -291,13 +328,19 @@ public class DatasetSecurityService {
      * @param examinationId the examination id
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     public boolean hasRightOnExamination(Long examinationId, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
     	Examination exam = examinationRepository.findOne(examinationId);
-        if (exam == null) throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
-        if (exam.getStudyId() == null) return false;
+        if (exam == null) {
+			throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
+		}
+        if (exam.getStudyId() == null) {
+			return false;
+		}
         return commService.hasRightOnStudy(exam.getStudyId(), rightStr);
     }
    

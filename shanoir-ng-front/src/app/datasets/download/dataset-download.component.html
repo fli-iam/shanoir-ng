@@ -1,0 +1,11 @@
+<button (click)="prepareDownload()"> DOWNLOAD </button>
+<app-modal #downloadDialog >
+    <div class=".app-modal-body">
+        <p >This is some kind of shitty dialog test</p>
+        <ul>
+            <li *ngFor="let dataset of datasets">{{dataset.name}}
+            </li>
+        </ul>
+        <button class="centered" (click)="download()"> test </button>
+    </div>
+</app-modal>

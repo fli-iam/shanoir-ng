@@ -48,6 +48,7 @@ import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { CoilService } from './coils/shared/coil.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { DatasetDownaloadComponent } from './datasets/download/dataset-download.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
@@ -199,6 +200,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         StudyNamePipe,
         DatasetComponent,
         DatasetListComponent,
+        DatasetDownaloadComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,
