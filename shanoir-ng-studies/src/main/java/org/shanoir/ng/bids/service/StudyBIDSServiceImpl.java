@@ -4,23 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.service.StudyService;
-import org.shanoir.ng.subject.model.HemisphericDominance;
-import org.shanoir.ng.subject.model.ImagedObjectCategory;
-import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
@@ -35,21 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
 @Service
 public class StudyBIDSServiceImpl implements StudyBIDSService {
 
 	private static final String NULL = "null";
-
-	private static final String BIRTH_NAME_HASH = "birth_name_hash1";
-
-	private static final String LAST_NAME_HASH = "last_name_hash1";
-
-	private static final String FIRST_NAME_HASH = "first_name_hash1";
 
 	private static final String IMAGED_OBJECT_CATEGORY = "imaged_object_category";
 
@@ -83,18 +65,6 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 			IMAGED_OBJECT_CATEGORY
 	};
 
-	private static final String[] CSV_PARTICIPANTS_HEADER_IMPORT = {
-			PARTICIPANT_ID,
-			SUBJECT_IDENTIFIER,
-			SEX,
-			BIRTH_DATE,
-			MANUAL_HEMISPHERIC_DOMINANCE,
-			LANGUAGE_HEMISPHERIC_DOMINANCE,
-			IMAGED_OBJECT_CATEGORY,
-			FIRST_NAME_HASH,
-			LAST_NAME_HASH,
-			BIRTH_NAME_HASH
-	};
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(StudyBIDSServiceImpl.class);
@@ -306,68 +276,4 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 		}
 	}
 
-	@Override
-	public List<Subject> participantsDeserializer(File participantsTsv) throws IOException, ShanoirException {
-		if (participantsTsv == null || !participantsTsv.exists()) {
-			return Collections.emptyList();
-		}
-
-		// Get the CSV as String[] lines
-		CsvMapper mapper = new CsvMapper();
-		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(participantsTsv);
-		List<Subject> subjects = new ArrayList<>();
-
-		// Check that the list of column is known
-		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
-		for (String columnFound : columns) {
-			if (Arrays.asList(CSV_PARTICIPANTS_HEADER_IMPORT).indexOf(columnFound) == -1) {
-				throw new ShanoirException("Non existing column in participants.tsv file. Please refer to the .sef documentation: " + columnFound);
-			}
-		}
-
-		// Iterate over the lines to create new subjects and store them
-		while (it.hasNext()) {
-			Subject su = new Subject();
-			String[] row = it.next()[0].split(CSV_SEPARATOR);
-
-			if (columns.contains(PARTICIPANT_ID)) {
-				su.setName(row[columns.indexOf(PARTICIPANT_ID)]);
-			} else {
-				throw new ShanoirException("Error in participants.tsv: column participant_id is mandatory.");
-			}
-			if (columns.contains(SUBJECT_IDENTIFIER)) {
-				su.setIdentifier(NULL.equals(row[columns.indexOf(SUBJECT_IDENTIFIER)]) ? NULL : row[columns.indexOf(SUBJECT_IDENTIFIER)]);
-			}
-			if (columns.contains(SEX)) {
-				su.setSex(NULL.equals(row[columns.indexOf(SEX)])? null: Sex.valueOf(row[columns.indexOf(SEX)]));
-			}
-			if (columns.contains(BIRTH_DATE)) {
-				su.setBirthDate(NULL.equals(row[columns.indexOf(BIRTH_DATE)])? null : LocalDate.parse(row[columns.indexOf(BIRTH_DATE)]));
-			}
-			if (columns.contains(MANUAL_HEMISPHERIC_DOMINANCE)) {
-				su.setManualHemisphericDominance(NULL.equals(row[columns.indexOf(MANUAL_HEMISPHERIC_DOMINANCE)])? null : HemisphericDominance.valueOf(row[columns.indexOf(MANUAL_HEMISPHERIC_DOMINANCE)]));
-			}
-			if (columns.contains(LANGUAGE_HEMISPHERIC_DOMINANCE)) {
-				su.setLanguageHemisphericDominance(NULL.equals(row[columns.indexOf(LANGUAGE_HEMISPHERIC_DOMINANCE)])? null : HemisphericDominance.valueOf(row[columns.indexOf(LANGUAGE_HEMISPHERIC_DOMINANCE)]));
-			}
-			if (columns.contains(IMAGED_OBJECT_CATEGORY)) {
-				su.setImagedObjectCategory(ImagedObjectCategory.valueOf(row[columns.indexOf(IMAGED_OBJECT_CATEGORY)]));
-			} else {
-				throw new ShanoirException("Error in participants.tsv: column imaged_object_category is mandatory.");
-			}
-			if (columns.contains(FIRST_NAME_HASH)) {
-				su.setName(NULL.equals(row[columns.indexOf(FIRST_NAME_HASH)])? null : row[columns.indexOf(FIRST_NAME_HASH)]);
-			}
-			if (columns.contains(LAST_NAME_HASH)) {
-				su.setName(NULL.equals(row[columns.indexOf(LAST_NAME_HASH)])? null : row[columns.indexOf(LAST_NAME_HASH)]);
-			}
-			if (columns.contains(BIRTH_NAME_HASH)) {
-				su.setName(NULL.equals(row[columns.indexOf(BIRTH_NAME_HASH)])? null : row[columns.indexOf(BIRTH_NAME_HASH)]);
-			}
-			subjects.add(su);
-		}
-
-		return subjects;
-	}
 }
