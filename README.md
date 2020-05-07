@@ -52,6 +52,7 @@ into the folder /docker-compose to be used from there by docker-compose
 * Install docker and docker-compose:
     * https://docs.docker.com/install/
     * https://docs.docker.com/compose/install/
+* Make sur docker has enough memory to run Shanoir (6Gb should be enough)
 * If you are on your **developer/local machine**:
     * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
 	* 127.0.0.1       shanoir-ng-nginx
