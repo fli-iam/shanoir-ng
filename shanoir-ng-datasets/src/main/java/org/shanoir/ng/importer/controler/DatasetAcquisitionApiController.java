@@ -21,8 +21,11 @@ import javax.validation.Valid;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +58,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) {
 		try {
 			long startTime = System.currentTimeMillis();
-			importerService.createAllDatasetAcquisition(importJob);
+			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
 		    long endTime = System.currentTimeMillis();
 		    long duration = endTime - startTime;
 		    LOG.info("Creation of dataset acquisition required " + duration + " millis.");
-			createAllDatasetAcquisitions(importJob);
+			createAllDatasetAcquisitions(importJob, KeycloakUtil.getTokenUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -78,12 +81,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@RabbitListener(queues = "importer-queue-dataset")
 	@RabbitHandler
-	public void createNewDatasetAcquisition(String importJobStr) throws JsonParseException, JsonMappingException, IOException {
-		ImportJob importJob = objectMapper.readValue(importJobStr, ImportJob.class);
+	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
+		Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
+
+		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
-			createAllDatasetAcquisitions(importJob);
+			createAllDatasetAcquisitions(importJob, userId);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
+			throw new AmqpRejectAndDontRequeueException(e);
 		} finally {
 			// if the json could not be parsed, no way to know workFolder
 			// so better to throw the exception, as no possibility to clean
@@ -91,9 +97,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 	}
 	
-	private void createAllDatasetAcquisitions(ImportJob importJob) throws Exception {
+	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
 		long startTime = System.currentTimeMillis();
-		importerService.createAllDatasetAcquisition(importJob);
+		importerService.createAllDatasetAcquisition(importJob, userId);
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 		LOG.info("Creation of dataset acquisition required " + duration + " millis.");

@@ -42,6 +42,7 @@ import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.EegImportJob;
@@ -78,6 +79,9 @@ public class ImporterService {
 	private ExaminationService examinationService;
 
 	@Autowired
+	private ExaminationRepository examinationRepository;
+	
+	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
 	@Autowired
@@ -98,11 +102,11 @@ public class ImporterService {
 
 	private static final String EEG_PREFIX = "eeg";
 
-	public void createAllDatasetAcquisition(ImportJob importJob) throws ShanoirException {
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		try {
-			Examination examination = examinationService.findById(importJob.getExaminationId());
+			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
 			if (examination != null) {
 				int rank = 0;
 				for (Patient patient : importJob.getPatients()) {
@@ -131,7 +135,9 @@ public class ImporterService {
 			// Create BIDS folder
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (IOException e2) {
+			} catch (Exception e2) {
+				// Only log exception, don't fail for the moment
+				event.setMessage("Almost success - BIDS folder creation failed");
 				LOG.error("ERROR: Could not create BIDS folder", e2);
 			}
 			// Manage archive

@@ -196,7 +196,7 @@ public class ImporterServiceTest {
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
 		
 		// WHEN we treat this importjob
-		service.createAllDatasetAcquisition(importJob);
+		service.createAllDatasetAcquisition(importJob, 1L);
 		
 		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
 		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());

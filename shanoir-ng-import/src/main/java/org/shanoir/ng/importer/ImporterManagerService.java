@@ -35,6 +35,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -140,6 +141,11 @@ public class ImporterManagerService {
 				Long converterId = importJob.getFrontConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
+	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+	            message.getMessageProperties().setHeader("x-user-id",
+	            		KeycloakUtil.getTokenUserId());
+	            return message;
+	        });
 			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
