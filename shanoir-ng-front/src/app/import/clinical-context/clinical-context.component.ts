@@ -37,17 +37,22 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { slideDown, preventInitialChildAnimations } from '../../shared/animations/animations';
 
 
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../shared/import.step.css']
+    styleUrls: ['clinical-context.component.css', '../shared/import.step.css'],
+    animations: [slideDown, preventInitialChildAnimations]
 })
 export class ClinicalContextComponent implements OnDestroy {
     
     patient: PatientDicom;
     private studyOptions: Option<Study>[] = [];
+    private studycardOptions: Option<StudyCard>[] = [];
     private centerOptions: Option<Center>[] = [];
     private allCenters: Center[];
     private acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
@@ -55,6 +60,7 @@ export class ClinicalContextComponent implements OnDestroy {
     private examinations: SubjectExamination[] = [];
     private niftiConverters: NiftiConverter[] = [];
     private study: Study;
+    private studycard: StudyCard;
     private center: Center;
     private acquisitionEquipment: AcquisitionEquipment;
     private subject: SubjectWithSubjectStudy;
@@ -67,6 +73,7 @@ export class ClinicalContextComponent implements OnDestroy {
         new Option<string>('PATIENT', 'Patient'),
         new Option<string>('PHANTOM', 'Phantom')
     ];
+    public useStudyCard: boolean = true;
     
     constructor(
             private studyService: StudyService,
@@ -77,7 +84,8 @@ export class ClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
-            private acqEqPipe: AcquisitionEquipmentPipe) {
+            private acqEqPipe: AcquisitionEquipmentPipe,
+            private studycardService: StudyCardService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -95,11 +103,16 @@ export class ClinicalContextComponent implements OnDestroy {
             this.reloadSavedData();
             this.onContextChange();
         });
+
+        this.niftiConverters = [];
+        this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
     }
 
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
             let study = this.importDataService.contextBackup.study;
+            let studyCard = this.importDataService.contextBackup.studyCard;
+            let useStudyCard = this.importDataService.contextBackup.useStudyCard;
             let center = this.importDataService.contextBackup.center;
             let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
@@ -107,26 +120,34 @@ export class ClinicalContextComponent implements OnDestroy {
             let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
                 this.study = study;
-                this.onSelectStudy();
-            }
-            if (center) {
-                this.center = center;
-                this.onSelectCenter();
-            }
-            if (acquisitionEquipment) {
-                this.acquisitionEquipment = acquisitionEquipment;
-                this.onSelectAcquisitonEquipment();
-            }
-            if (subject) {
-                this.subject = subject;
-                this.onSelectSubject();
-            }
-            if (examination) {
-                this.examination = examination;
-                this.onSelectExam();
-            }
-            if (niftiConverter) {
-                this.niftiConverter = niftiConverter;
+                this.onSelectStudy().then(() => {
+                    if (this.useStudyCard != useStudyCard) { 
+                        this.useStudyCard = useStudyCard;
+                        this.onToggleUseStudyCard();
+                    } else if (useStudyCard && studyCard){
+                        this.studycard = studyCard;
+                        this.onSelectStudyCard();
+                    }
+                    if (center) {
+                        this.center = center;
+                        this.onSelectCenter();
+                    }
+                    if (acquisitionEquipment) {
+                        this.acquisitionEquipment = acquisitionEquipment;
+                        this.onSelectAcquisitonEquipment();
+                    }
+                    if (subject) {
+                        this.subject = subject;
+                        this.onSelectSubject();
+                    }
+                    if (examination) {
+                        this.examination = examination;
+                        this.onSelectExam();
+                    }
+                    if (niftiConverter) {
+                        this.niftiConverter = niftiConverter;
+                    }
+                });
             }
         }
     }
@@ -180,16 +201,43 @@ export class ClinicalContextComponent implements OnDestroy {
     }
     
     public centerCompatible(center: Center): boolean {
-        return center.acquisitionEquipments && center.acquisitionEquipments.find(this.acqEqCompatible.bind(this)) != undefined;
+        return center.acquisitionEquipments && center.acquisitionEquipments.find(eq => this.acqEqCompatible(eq)) != undefined;
     }
 
-    private onSelectStudy(): void {
-        this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+    private onSelectStudy(): Promise<void> {
+        let end: Promise<void> = Promise.resolve();
+        if (this.useStudyCard) {
+            this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+            if (this.study) {
+                let studyEquipments: AcquisitionEquipment[] = [];
+                this.study.studyCenterList.forEach(sc => {
+                    sc.center.acquisitionEquipments.forEach(eq => {
+                        if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
+                    });
+                });
+                end = this.studycardService.getAllForStudy(this.study.id).then(studycards => {
+                    if (!studycards) studycards = [];
+                    this.studycardOptions = studycards.map(sc => {
+                        let opt = new Option(sc, sc.name);
+                        if (sc.acquisitionEquipment) {
+                            let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
+                            opt.compatible = this.acqEqCompatible(scEq);
+                            if (!this.studycard && opt.compatible) {
+                                this.studycard = sc;
+                                this.onSelectStudyCard();
+                            }
+                        } else opt.compatible = false;
+                        return opt;
+                    });
+                    if (!this.studycard) this.useStudyCard = false;
+                });
+            }
+        }
         this.centerOptions = this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
                 let option = new Option<Center>(studyCenter.center, studyCenter.center.name);
-                if (this.importMode == 'DICOM') {
+                if (!this.useStudyCard && this.importMode == 'DICOM') {
                     option.compatible = studyCenter.center && this.centerCompatible(studyCenter.center);
                     if (option.compatible) {
                         this.center = option.value;
@@ -199,6 +247,34 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.centerOptions.push(option);
             }
         }
+        return end;
+    }
+
+    private onSelectStudyCard(): void {
+        if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
+            this.acquisitionEquipment = null;
+            let scFound = this.study.studyCenterList.find(sc => {
+                let eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
+                if (eqFound) return true;
+                else return false;
+            })
+            this.center = scFound ? scFound.center : null;
+            this.onSelectCenter();
+            this.niftiConverter = this.studycard.niftiConverter;
+            this.onSelectNifti();
+        }
+    }
+
+    onToggleUseStudyCard() {
+        if (!this.useStudyCard) this.studycard = null;
+        else {
+            let studycardOpt = this.studycardOptions.find(sco => sco.compatible == true);
+            if (studycardOpt) {
+                this.studycard = studycardOpt.value;
+                this.onSelectStudyCard();
+            }
+        }
+        
     }
 
     private onSelectCenter(): void {
@@ -240,10 +316,6 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private onSelectExam(): void {
-        this.niftiConverters = [];
-        if (this.examination) {
-            this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
-        }
     }
 
     private onSelectNifti(): void {
@@ -257,7 +329,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.center, this.acquisitionEquipment,
+        return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.niftiConverter);
     }
 
@@ -404,6 +476,10 @@ export class ClinicalContextComponent implements OnDestroy {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
+    private showStudyCardDetails() {
+        window.open('study-card/details/' + this.studycard.id, '_blank');
+    }
+
     private showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
@@ -424,6 +500,7 @@ export class ClinicalContextComponent implements OnDestroy {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
+            && (!context.useStudyCard || context.studyCard)
             && context.center != undefined && context.center != null
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null

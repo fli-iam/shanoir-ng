@@ -11,7 +11,6 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
@@ -58,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" [options]="acquisitionEquipments">
+								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" (change)="onChangeAcqEq()" [options]="acquisitionEquipments">
 								</select-box>
 							</ng-template>
 						</span>

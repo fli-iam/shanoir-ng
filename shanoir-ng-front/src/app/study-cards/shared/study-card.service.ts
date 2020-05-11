@@ -29,6 +29,12 @@ export class StudyCardService extends EntityService<StudyCard> {
 
     getEntityInstance() { return new StudyCard(); }
 
+    getAllForStudy(studyId: number): Promise<StudyCard[]> {
+        return this.http.get<any[]>(this.API_URL + '/byStudy/' + studyId)
+            .toPromise()
+            .then(this.mapEntityList);
+    }
+
     protected mapEntity = (dto: StudyCardDTO): Promise<StudyCard> => {
         let result: StudyCard = this.getEntityInstance();
         this.studyCardDTOService.toEntity(dto, result);

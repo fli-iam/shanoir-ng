@@ -35,6 +35,10 @@ export class ImportComponent implements OnInit {
 
         this.importMode = route.snapshot.firstChild.data['importMode'];
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
+
+        breadcrumbsService.markMilestone();
+        if (this.importMode == 'DICOM') breadcrumbsService.nameStep('1. Upload');
+        else if (this.importMode == 'PACS') breadcrumbsService.nameStep('1. Query');
     }
         
     ngOnInit() {

@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="root" [class.disabled]="disabled">
+<div class="root" [class.disabled]="disabled" *ngIf="!readOnly" >
     <span class="frame"> 
         <span class="input-container">
             <span class="fake-input">{{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}</span>
@@ -25,13 +25,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (ngModelChange)="onTypeText($event)" 
                 [placeholder]="placeholder ? placeholder : 'Select an option...'" 
                 (click)="isOpen() ? close() : open()"
-                (focus)="onInputFocus()" />
+                (focus)="onInputFocus()">
         </span>
         <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
         <span class="commands">
+            <span class="clear button" *ngIf="inputText" (click)="onTypeText(null)"><i class="fas fa-times"></i></span>
             <span class="open button" (click)="isOpen() ? close() : open()"><i class="fas fa-chevron-down"></i></span>
             <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fas fa-eye"></i></span>
-            <span *ngIf="onNewClick.observers.length > 0 && !newHidden" (click)="clickNew()" [class.disabled]="newDisabled" class="button"><i class="far fa-file"></i></span>
+            <span *ngIf="onNewClick.observers.length > 0 && !newHidden" (click)="clickNew()" [class.disabled]="newDisabled" class="button"><i class="far fa-file"></i><i class="fas fa-plus"></i></span>
             <span *ngIf="onAddClick.observers.length > 0 && !addHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
         </span>
     </span>
@@ -79,3 +80,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
 </div>
 <div #hiddenOption id="hiddenOption" class="option"></div>
+
+
+<div class="root" [class.disabled]="disabled" *ngIf="readOnly">
+    <span class="frame">
+        <span class="input-container">{{inputText}}</span>
+        <span class="commands">
+            <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fas fa-eye"></i></span>
+        </span>
+    </span>
+</div>

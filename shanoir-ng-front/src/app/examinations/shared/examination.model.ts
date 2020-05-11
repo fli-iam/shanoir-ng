@@ -18,6 +18,7 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { ExaminationService } from './examination.service';
+import { ExaminationDTO } from './examination.dto';
 
 
 export class Examination extends Entity {
@@ -31,4 +32,9 @@ export class Examination extends Entity {
     subjectWeight: number;
 
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new ExaminationDTO(this), this.replacer);
+    }
 }

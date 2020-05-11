@@ -50,10 +50,12 @@ export class DatasetDTOService {
      */
     public toEntityList(dtos: DatasetDTO[], result?: Dataset[]): Promise<Dataset[]>{
         if (!result) result = [];
-        for (let dto of dtos) {
-            let entity = Dataset.getDatasetInstance(dto.type);
-            DatasetDTOService.mapSyncFields(dto, entity);
-            result.push(entity);
+        if (dtos) {
+            for (let dto of dtos) {
+                let entity = Dataset.getDatasetInstance(dto.type);
+                DatasetDTOService.mapSyncFields(dto, entity);
+                result.push(entity);
+            }
         }
         return Promise.all([
             this.studyService.getStudiesNames().then(studies => {

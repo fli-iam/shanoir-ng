@@ -164,4 +164,16 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.breadcrumbsService.goBack(2);
     }
 
+    onChangeAcqEq() {
+        this.rulesComponent.ruleElements.forEach(ruleComp => {
+            ruleComp.assignmentChildren.forEach(assComp => {
+                if (assComp.assignment.field.toLowerCase().includes('coil')) {
+                    assComp.assignment.value = null
+                    assComp.valueTouched = true;
+                }
+            })
+        })
+        this.form.get('rules').updateValueAndValidity();
+    }
+
 }

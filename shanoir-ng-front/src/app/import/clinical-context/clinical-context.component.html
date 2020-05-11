@@ -13,15 +13,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">3. Set the clinical context</div>
-<fieldset class="step">
+<fieldset class="step" @preventInitialChildAnimations>
 
     <ol>
         <legend>
             Research study
             <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
         </legend>
-        <li class="required">
-            <label class="required-label">Select an existing research study</label> 
+        <li>
+            <label class="required-label">Select a research study</label> 
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="study" 
@@ -32,11 +32,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li class="required">
-            <label class="required-label">Select a center</label> 
+        <li>
+            <label>Use a study card</label> 
+            <span class="right-col">
+                <checkbox [(ngModel)]="useStudyCard" (ngModelChange)="onToggleUseStudyCard($event); onContextChange();" [ngModelOptions]="{standalone: true}"></checkbox>
+            </span>
+        </li>
+        <li *ngIf="useStudyCard" @slideDown>
+            <label>Select a study card</label> 
             <span class="right-col">
                 <select-box 
-                        [disabled]="!study || !centerOptions || centerOptions.length == 0" 
+                        [(ngModel)]="studycard" 
+                        (change)="onSelectStudyCard(); onContextChange();" 
+                        (onViewClick)="showStudyCardDetails()" 
+                        [viewDisabled]="!studycard" 
+                        [options]="studycardOptions">
+                </select-box>
+            </span>
+        </li>
+        <li>
+            <label [class.required-label]="!useStudyCard">Select a center</label> 
+            <span class="right-col">
+                <select-box *ngIf="!useStudyCard || center"
+                        [disabled]="!useStudyCard && (!study || !centerOptions || centerOptions.length == 0)"
+                        [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
                         (change)="onSelectCenter(); onContextChange();" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
@@ -55,11 +74,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </code>
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
-        <li class="required">
-            <label class="required-label">Select an acquisition equipment</label> 
+        <li>
+            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
             <span class="right-col">
-                <select-box 
-                        [disabled]="!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0" 
+                <select-box *ngIf="!useStudyCard || acquisitionEquipment"
+                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"
+                        [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
                         (change)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
@@ -138,7 +158,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             Examination
             <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
         </legend>
-        <li class="required">
+        <li>
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
                 <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (change)="onSelectExam(); onContextChange();"
@@ -151,10 +171,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <ol>
         <legend>Nifti Converter</legend>
-        <li class="required">
-            <label label class="required-label">Select a Nifti converter</label> 
+        <li>
+            <label label [class.required-label]="!useStudyCard">Select a Nifti converter</label> 
             <span class="right-col">
-                <select-box [disabled]="!examination" [(ngModel)]="niftiConverter" (change)="onSelectNifti(); onContextChange();" [optionArr]="niftiConverters">
+                <select-box *ngIf="!useStudyCard || niftiConverter"
+                        [(ngModel)]="niftiConverter" 
+                        (change)="onSelectNifti(); onContextChange();" 
+                        [optionArr]="niftiConverters"
+                        [readOnly]="useStudyCard">
                 </select-box>
             </span>
         </li>

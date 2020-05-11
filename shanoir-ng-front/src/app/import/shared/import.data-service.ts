@@ -20,11 +20,14 @@ import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ImportJob, PatientDicom } from './dicom-data.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
 
 export class ContextData {
     
     constructor (
         public study: Study,
+        public studyCard: StudyCard,
+        public useStudyCard: boolean,
         public center: Center, 
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,

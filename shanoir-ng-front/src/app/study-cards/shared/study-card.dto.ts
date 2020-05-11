@@ -90,10 +90,14 @@ export class StudyCardDTOService {
      */
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
-        for (let dto of dtos) {
-            let entity = new StudyCard();
-            StudyCardDTOService.mapSyncFields(dto, entity);
-            result.push(entity);
+        if (dtos) {
+            if (dtos) {
+                for (let dto of dtos) {
+                    let entity = new StudyCard();
+                    StudyCardDTOService.mapSyncFields(dto, entity);
+                    result.push(entity);
+                }
+            }
         }
         return Promise.all([
             this.studyService.getStudiesNames().then(studies => {

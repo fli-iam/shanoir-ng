@@ -32,6 +32,7 @@ import { Subscription } from 'rxjs';
 
 import { GlobalService } from '../services/global.service';
 import { findLastIndex } from '../../utils/app.utils';
+import { ThrowStmt } from '@angular/compiler';
 
 
 @Component({
@@ -73,6 +74,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private inputText: string;
     private _searchText: string;
     @Input() disabled: boolean = false;
+    @HostBinding('class.read-only') @Input() readOnly: boolean = false;
     @Input() placeholder: string;
     private maxWidth: number;
     private noResult: boolean;
@@ -200,7 +202,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private unSelectOption() {
-        if (this.selectedOptionIndex) {
+        if (this.selectedOptionIndex != undefined && this.selectedOptionIndex != null) {
             this.selectedOptionIndex = null;
         }
         this.firstScrollOptionIndex = 0;
@@ -363,6 +365,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
+        if (this.readOnly) return;
         if ('ArrowDown' == event.key) {
             this.scrollDownByOne();
             event.preventDefault();
@@ -393,71 +396,42 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private scrollDownByOne() {
-        let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex + 1) : 0;
-        let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
-        if (nextIndex == -1) return;
-        else {
+        if (this.isOpen()) {
+            let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex + 1) : 0;
+            let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
+            if (nextIndex == -1) return;
             let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? nextIndex + 1 : 0;
-            if (this.isOpen()) {
-                if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.LIST_LENGTH) {
-                    this.firstScrollOptionIndex += nbSteps;
-                    this.focusedOptionIndex = this.LIST_LENGTH - 1;
-                } else {
-                    this.focusedOptionIndex += nbSteps;
-                }
+            if (this.scrollable && this.focusedOptionIndex + nbSteps >= this.LIST_LENGTH) {
+                this.firstScrollOptionIndex += nbSteps;
+                this.focusedOptionIndex = this.LIST_LENGTH - 1;
             } else {
-                if (this.hasSelectedOption && this.selectedOptionIndex + nbSteps <= this.options.length) {
-                    this.onUserSelectedOptionIndex(this.selectedOptionIndex + nbSteps);
-                } else {
-                    this.onUserSelectedOptionIndex(0);
-                }
+                this.focusedOptionIndex += nbSteps;
             }
+        } else {
+            let nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex + 1 : 0;
+            let nextIndex: number = this.displayableOptions.slice(nextIndexStart).findIndex(opt => {return !opt.disabled});
+            if (nextIndex == -1) return;
+            else this.onUserSelectedOptionIndex(nextIndexStart + nextIndex);
         }
     }
 
     private scrollUpByOne() {
-        let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex - 1) : 0;
-        let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
-        if (nextIndex == -1) return;
-        else {
-            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? this.focusedOptionIndex + this.firstScrollOptionIndex - nextIndex - 1 : 0;
-            if (this.isOpen()) {
-                if (this.scrollable && this.focusedOptionIndex - nbSteps < 0) {
-                    this.firstScrollOptionIndex -= nbSteps;
-                    this.focusedOptionIndex = 0;
-                } else {
-                    this.focusedOptionIndex -= nbSteps;
-                }
-            } else {
-                if (this.hasSelectedOption && this.selectedOptionIndex - nbSteps > 0) {
-                    this.onUserSelectedOptionIndex(this.selectedOptionIndex - nbSteps);
-                } else {
-                    this.onUserSelectedOptionIndex(0);
-                }
-            }
-        }
-
-
-
-
         if (this.isOpen()) {
-            if (this.focusedOptionIndex == null) {
+            let nextIndexStart: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? (this.focusedOptionIndex + this.firstScrollOptionIndex - 1) : 0;
+            let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
+            if (nextIndex == -1) return;
+            let nbSteps: number = (this.focusedOptionIndex != null && this.focusedOptionIndex != undefined) ? this.focusedOptionIndex + this.firstScrollOptionIndex - nextIndex : 0;
+            if (this.scrollable && this.focusedOptionIndex - nbSteps < 0) {
+                this.firstScrollOptionIndex -= nbSteps;
                 this.focusedOptionIndex = 0;
-                return;
-            }
-            if (this.focusedOptionIndex + this.firstScrollOptionIndex > 0) {
-                if (this.scrollable && this.focusedOptionIndex == 0) {
-                    this.firstScrollOptionIndex --;
-                } else {
-                    this.focusedOptionIndex --;
-                }
+            } else {
+                this.focusedOptionIndex -= nbSteps;
             }
         } else {
-            if (this.hasSelectedOption && this.selectedOptionIndex > 0) {
-                this.onUserSelectedOptionIndex(this.selectedOptionIndex - 1);
-            } else {
-                this.onUserSelectedOptionIndex(0);
-            }
+            let nextIndexStart: number = (this.selectedOptionIndex != null && this.selectedOptionIndex != undefined) ? this.selectedOptionIndex - 1 : 0;
+            let nextIndex: number = findLastIndex(this.displayableOptions.slice(0, nextIndexStart + 1), opt => {return !opt.disabled});
+            if (nextIndex == -1) return;
+            else this.onUserSelectedOptionIndex(nextIndex);
         }
     }
 
@@ -557,6 +531,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private onTypeText(text: string) {
         this.unSelectOption();
+        this.onChangeCallback(null);
         this.change.emit(null);
         this.inputText = text;
         this.searchText = text;

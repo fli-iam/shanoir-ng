@@ -11,12 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ElementRef, HostListener } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    OnChanges,
+    Output,
+    QueryList,
+    SimpleChanges,
+    ViewChildren,
+} from '@angular/core';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
-import { AssignmentField } from './action/action.component';
+import { AssignmentField, StudyCardActionComponent } from './action/action.component';
 
 
 @Component({
@@ -35,6 +46,7 @@ export class StudyCardRuleComponent implements OnChanges {
     @Output() copy: EventEmitter<void> = new EventEmitter();
     @Output() delete: EventEmitter<void> = new EventEmitter();
     @Input() showErrors: boolean = false;
+    @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
     touched: boolean = false;
 
     fieldOptions: Option<string>[];

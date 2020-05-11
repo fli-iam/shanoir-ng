@@ -41,11 +41,7 @@ export class DicomUploadComponent {
             private importService: ImportService, 
             private dicomArchiveService: DicomArchiveService,
             private router: Router,
-            private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
-        
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
     }
     
     private uploadArchive(fileEvent: any): void {

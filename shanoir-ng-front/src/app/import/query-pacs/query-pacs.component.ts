@@ -41,11 +41,9 @@ export class QueryPacsComponent{
     private form: FormGroup;
 
     constructor(
-        private breadcrumbsService: BreadcrumbsService, private router: Router,
+        private router: Router,
         private importService: ImportService, private importDataService: ImportDataService,
         private formBuilder: FormBuilder, private msgBoxService: MsgBoxService) {
-            breadcrumbsService.nameStep('1. Query');
-            breadcrumbsService.markMilestone();
             this.buildForm();
     }
 
