@@ -37,6 +37,7 @@ import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
@@ -68,6 +69,9 @@ public class ImporterServiceTest {
 	
 	@Mock
 	private ExaminationService examinationService;
+
+	@Mock
+	private ExaminationRepository examinationRepository;
 
 	@Mock
 	private DatasetAcquisitionContext datasetAcquisitionContext;
@@ -191,7 +195,7 @@ public class ImporterServiceTest {
 		importJob.setExaminationId(Long.valueOf(1));
 		
 		Examination examination = new Examination();
-		when(examinationService.findById(importJob.getExaminationId())).thenReturn(examination);
+		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
 		
