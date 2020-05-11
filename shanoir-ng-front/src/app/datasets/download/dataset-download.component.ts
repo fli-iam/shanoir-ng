@@ -16,11 +16,14 @@ import { Component, ViewChild, Input } from '@angular/core';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { MatDialogRef } from '@angular/material/dialog';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 
 @Component({
     selector: 'dataset-download',
     templateUrl: 'dataset-download.component.html',
+    styleUrls: ['dataset-download.component.css']
 })
 
 /** Button to download datasets. 
@@ -34,17 +37,22 @@ export class DatasetDownaloadComponent {
         
     }
 
-    @Input() datasets: Dataset[];
-    useBids: boolean = false;
-    type: string;
-    @ViewChild('downloadDialog') downloadDialog: ModalComponent;
+    @Input() datasets: Dataset[] = [];
+    @Input() studyId: number;
+    protected useBids: boolean = false;
+    protected type: string = 'nii';
+    protected inError: boolean = false;
+    protected errorMessage: string;
+    protected loading: boolean = false;
+    protected readonly ImagesUrlUtil = ImagesUrlUtil;
 
-    private dataType: string;
+    @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 
     /** Click on first button */
     prepareDownload() {
-        if (!this.datasets || this.datasets.length == 0) {
-            // TODO: display an error in the message box
+        if ((!this.datasets || this.datasets.length == 0) && (!this.studyId)) {
+            this.inError = true;
+            this.errorMessage = 'No datasets available for the current selection.';
         }
         // Display the messageBox with options
         this.downloadDialog.show();
@@ -52,11 +60,18 @@ export class DatasetDownaloadComponent {
 
     /** Download the data */
     public download() {
-        if (!this.datasets || this.datasets.length == 0) {
-            // TODO: return an error
-        }
         // Call service method to download datasets
-        this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.dataType);
+        this.loading = true;
+        if (!this.studyId) {
+            this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type).then(() => this.loading = false);
+        } else {
+            this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+        }
+        this.downloadDialog.hide();
+    }
+
+    public cancel() {
+        this.downloadDialog.hide();
     }
 
 }

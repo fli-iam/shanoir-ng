@@ -54,6 +54,18 @@ export class DatasetService extends EntityService<Dataset> {
         )
     }
 
+    public downloadDatasetsByStudy(studyId: number, format: string) {
+        let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
+    }
+
     download(dataset: Dataset, format: string): void {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         this.downloadToBlob(dataset.id, format).subscribe(

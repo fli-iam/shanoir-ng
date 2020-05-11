@@ -178,23 +178,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.subjects = subjects;
         });
     }
-
-    getDatasets(): Dataset[] {
-        let datasets = [];
-        if (!this.study) {
-            return [];
-        }
-        for (let subject of this.study.subjectStudyList) {
-            for (let examination of subject.examinations) {
-                for (let acq of examination.datasetAcquisitions) {
-                    for (let dataset of acq.datasets) {
-                        datasets.push(dataset);
-                    }
-                }
-            }
-        }
-        return datasets;
-    }
     
     /** Center section management  **/
     private onMonoMultiChange() {
