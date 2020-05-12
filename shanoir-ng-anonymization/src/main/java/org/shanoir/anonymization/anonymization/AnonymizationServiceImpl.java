@@ -30,7 +30,6 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
-import org.shanoir.ng.anonymization.uid.generation.UIDException;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,63 +47,68 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
-	private static final String privateTags = "0xggggeeee";
-	private static final String curveDataTags = "0x50xxxxxx";
-	private static final String overlayCommentsTags = "0x60xx4000";
-	private static final String overlayDataTags = "0x60xx3000";
+	private static final String PRIVATE_TAGS = "0xggggeeee";
+	private static final String CURVE_DATA_TAGS = "0x50xxxxxx";
+	private static final String OVERLAY_COMMENTS_TAGS = "0x60xx4000";
+	private static final String OVERLAY_DATA_TAGS = "0x60xx3000";
+	
+	private Random rand = new Random();
 	
 	private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
+	@Override
 	public void anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
-		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
+		LOG.info("Start anonymization, for {} DICOM files.", totalAmount);
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
-		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
-		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
-		Map<String, String> studyIds = new HashMap<String, String>();
-		LOG.debug("anonymize : totalAmount=" + totalAmount);
+		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> studyInstanceUIDs = new HashMap<>();
+		Map<String, String> studyIds = new HashMap<>();
+		LOG.debug("anonymize : totalAmount={}", totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
 			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
-			final int currentPercent = (int) (current * 100 / totalAmount);
-			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
+			final int currentPercent = current * 100 / totalAmount;
+			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
 		}
 		logInfos("End anonymization", startTime);
 	}
 
+	@Override
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
 			String patientFirstName, String patientID) throws Exception {
 		String patientName = patientLastName + "^" + patientFirstName + "^^^";
 		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
 	}
 
+	@Override
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
-		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
+		LOG.info("Start anonymization, for {} DICOM files.", totalAmount);
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
-		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
-		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
-		Map<String, String> studyIds = new HashMap<String, String>();
-		LOG.debug("anonymize : totalAmount=" + totalAmount);
+		Map<String, String> seriesInstanceUIDs = new HashMap<>();
+		Map<String, String> studyInstanceUIDs = new HashMap<>();
+		Map<String, String> studyIds = new HashMap<>();
+		LOG.debug("anonymize : totalAmount={}", totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
 			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
-			final int currentPercent = (int) (current * 100 / totalAmount);
-			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
+			final int currentPercent = current * 100 / totalAmount;
+			LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
 		}
 		logInfos("End anonymization", startTime);
 	}
@@ -112,7 +116,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	private void logInfos(final String methodName, long startTime) {
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
-		LOG.info(methodName + ", duration (ms): " + elapsedTime);
+		LOG.info("{}, duration (ms): {}", methodName, elapsedTime);
 	}
 
 	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID,
@@ -145,7 +149,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            the image path
 	 * @param profile
 	 *            anonymization profile
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
 			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
@@ -192,7 +196,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				Integer intgggg = Integer.decode("0x" + gggg);
 				// odd: for private tags
 				if (intgggg % 2 == 1) {
-					String action = anonymizationMap.get(privateTags);
+					String action = anonymizationMap.get(PRIVATE_TAGS);
 					String value = datasetAttributes.getString(tagInt);
 					if (value != null && !value.isEmpty()) {
 						checkForPHI(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value);
@@ -214,14 +218,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 						anonymizeTag(tagInt, action, datasetAttributes);
 					}
 				} else {
-					if ((0x50000000 <= tagInt) && (tagInt <= 0x50FFFFFF)) {
-						final String action = anonymizationMap.get(curveDataTags);
+					if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
+						final String action = anonymizationMap.get(CURVE_DATA_TAGS);
 						anonymizeTag(tagInt, action, datasetAttributes);
-					} else if ((0x60004000 <= tagInt) && (tagInt <= 0x60FF4000)) {
-						final String action = anonymizationMap.get(overlayCommentsTags);
+					} else if (0x60004000 <= tagInt && tagInt <= 0x60FF4000) {
+						final String action = anonymizationMap.get(OVERLAY_COMMENTS_TAGS);
 						anonymizeTag(tagInt, action, datasetAttributes);
-					} else if ((0x60003000 <= tagInt) && (tagInt <= 0x60FF3000)) {
-						final String action = anonymizationMap.get(overlayDataTags);
+					} else if (0x60003000 <= tagInt && tagInt <= 0x60FF3000) {
+						final String action = anonymizationMap.get(OVERLAY_DATA_TAGS);
 						anonymizeTag(tagInt, action, datasetAttributes);
 					}
 				}
@@ -263,7 +267,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		List<String> tagsToDelete = tagsToDeleteForManufacturer.get(manufacturer);
 		if (tagsToDelete != null) {
 			for (Iterator<String> iterator = tagsToDelete.iterator(); iterator.hasNext();) {
-				String tagToDelete = (String) iterator.next();
+				String tagToDelete = iterator.next();
 				if (tagString.equals(tagToDelete)) {
 					action = "X";
 					break;
@@ -301,10 +305,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @throws Exception
 	 */
 	private void checkContains(int tagInt, String value, String patientNamePart) throws Exception {
-		if (patientNamePart != null && !patientNamePart.isEmpty() && patientNamePart.length() > 2) {
-			if (value.contains(patientNamePart)) {
-				throw new Exception("Potential PHI found in private tag: " + tagInt + ": " + value);
-			}
+		if (patientNamePart != null && !patientNamePart.isEmpty() && patientNamePart.length() > 2 && value.contains(patientNamePart)) {
+			throw new Exception("Potential PHI found in private tag: " + tagInt + ": " + value);
 		}
 	}
 
@@ -319,10 +321,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            : the list of dicom attributes to modify
 	 */
 	private void anonymizeTag(Integer tagInt, String action, Attributes attributes) {
-		String value = getFinalValueForTag(tagInt, action);
+		String value = getFinalValueForTag(action);
 		if (value == null) {
 			attributes.remove(tagInt);
-		} else if (value == "KEEP") {
+		} else if ("KEEP".equals(value)) {
 			// do nothing
 		} else {
 			anonymizeTagAccordingToVR(attributes, tagInt, value);
@@ -343,7 +345,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			String newUID = null;
 			try {
 				newUID = generator.getNewUID();
-			} catch (UIDException e) {
+			} catch (Exception e) {
 				LOG.error(e.getMessage());
 			}
 			value = newUID;
@@ -362,7 +364,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			String newUID = null;
 			try {
 				newUID = generator.getNewUID();
-			} catch (UIDException e) {
+			} catch (Exception e) {
 				LOG.error(e.getMessage());
 			}
 			value = newUID;
@@ -378,9 +380,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		} else {
 			char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 			StringBuilder sb = new StringBuilder();
-			Random random = new Random();
 			for (int i = 0; i < 10; i++) {
-				char c = chars[random.nextInt(chars.length)];
+				char c = chars[rand.nextInt(chars.length)];
 				sb.append(c);
 			}
 			String output = sb.toString();
@@ -393,13 +394,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	/**
 	 * Get the anonymized value of the tag
 	 * 
-	 * @param tag
-	 *            : the tag to anonymize
 	 * @param action
 	 *            : the action letter to apply
 	 * @return
 	 */
-	private String getFinalValueForTag(final int tag, final String action) {
+	private String getFinalValueForTag(final String action) {
 		String result = "";
 		if (action != null) {
 			if (action.equals("X")) {
@@ -414,8 +413,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				String newUID = null;
 				try {
 					newUID = generator.getNewUID();
-				} catch (UIDException e) {
-					LOG.error(e.getMessage(), e);
+				} catch (Exception e) {
+					LOG.error(e.getMessage());
 				}
 				result = newUID;
 			} else if (action.equals("K")) {
@@ -441,20 +440,20 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		// VR.SL = Signed Long || VR.UL = Unsigned Long
 		// VR.SS = Signed Short || VR.US = Unsigned Short
 		if (vr.equals(VR.SL) || vr.equals(VR.UL) || vr.equals(VR.AT) || vr.equals(VR.SS) || vr.equals(VR.US)) {
-			Integer i_value = Integer.decode(value);
-			attributes.setInt(tag, vr, i_value);
+			Integer iValue = Integer.decode(value);
+			attributes.setInt(tag, vr, iValue);
 		}
 
 		// VR.FD = Floating Point Double
 		else if (vr.equals(VR.FD)) {
-			Double d_value = Double.valueOf(value);
-			attributes.setDouble(tag, vr, d_value);
+			Double dValue = Double.valueOf(value);
+			attributes.setDouble(tag, vr, dValue);
 		}
 
 		// VR.FL = Floating Point Single
 		else if (vr.equals(VR.FL)) {
-			Float f_value = Float.valueOf(value);
-			attributes.setFloat(tag, vr, f_value);
+			Float fValue = Float.valueOf(value);
+			attributes.setFloat(tag, vr, fValue);
 		}
 
 		// VR.OB = Other Byte String
@@ -465,7 +464,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 		// VR.SQ = Sequence of Items || VR.UN = Unknown
 		else if (vr.equals(VR.SQ) || vr.equals(VR.UN)) {
-			// attributes.setSequence(tag);
 			attributes.setNull(tag, vr);
 		}
 

@@ -165,3 +165,45 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
+shanoir:
+  import:
+    upload:
+      folder: /tmp
+
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    data: classpath:/scripts/test-data-h2.sql
+    initialize: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+logging:
+  file: /tmp/shanoir-ng-import.log
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: qualif
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth

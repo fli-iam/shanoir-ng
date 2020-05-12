@@ -38,10 +38,10 @@ public enum MrSequenceVariant {
 	// spoiled
 	SP(5),
 	
-	// MAG prepared;
+	// MAG prepared
 	MP(6),
 	
-	// oversampling phase 
+	// oversampling phase
 	OSP(7),
 	
 	// no sequence variant

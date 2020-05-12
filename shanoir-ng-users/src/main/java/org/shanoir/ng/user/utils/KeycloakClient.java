@@ -88,7 +88,7 @@ public class KeycloakClient {
 	 * @param password
 	 *            user password.
 	 * @return keycloak user id.
-	 * @throws SecurityException 
+	 * @throws SecurityException
 	 */
 	public String createUserWithPassword(final User user, final String password) throws SecurityException {
 		try {
@@ -120,7 +120,7 @@ public class KeycloakClient {
 	 * @param user
 	 *            user to create.
 	 * @return keycloak user id.
-	 * @throws SecurityException 
+	 * @throws SecurityException
 	 */
 	public String createUserWithPassword(final User user) throws SecurityException {
 		return createUserWithPassword(user, user.getPassword());
@@ -154,7 +154,7 @@ public class KeycloakClient {
 
 			// Remove old realm role
 			final List<String> roleNames = roleRepository.getAllNames();
-			final List<RoleRepresentation> roleRepresentations = new ArrayList<RoleRepresentation>(
+			final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
 					userResource.roles().realmLevel().listAll());
 			for (RoleRepresentation roleRepresentation : roleRepresentations) {
 				if (roleNames.contains(roleRepresentation.getName())) {
@@ -179,7 +179,7 @@ public class KeycloakClient {
 	 * @return keycloak user representation.
 	 */
 	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+		final Map<String, List<String>> attributes = new HashMap<>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {

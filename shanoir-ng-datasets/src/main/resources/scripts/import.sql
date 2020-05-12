@@ -22,15 +22,16 @@ VALUES
 	(1, 1, 1, 0, 'StudyCard1', 1, 1),
 	(2, 1, 1, 0, 'StudyCard2', 1, 1),
 	(3, 3, 1, 0, 'StudyCard3', 1, 2),
-	(4, 4, 3, 0, 'StudyCard4', 1, 3);
+	(4, 4, 3, 0, 'StudyCard4', 1, 3),
+	(5, 4, 15, 0, 'Appning', 6, 135);
 
 INSERT INTO examination
-	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id, comment)
+	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id, comment, preclinical)
 VALUES
-	(1, 1, now(), false, 1, 'examination1', 1, 1, 'examination1'),
-	(2, 1, now(), false, 1, 'examination2', 1, 2, 'examination2'),
-	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3'),
-	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4');
+	(1, 1, now(), false, 1, 'examination1', 1, 1, 'examination1', false),
+	(2, 1, now(), false, 1, 'examination2', 1, 2, 'examination2', false),
+	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3', false),
+	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4', false);
 
 INSERT INTO mr_protocol_metadata
 	(dtype, id, name)
@@ -79,14 +80,16 @@ INSERT INTO dataset_metadata
 VALUES 
 	(1, 1, 'MRDataset1'),
 	(2, 1, 'PETDataset1'),
-	(3, 1, 'CTDataset1');
+	(3, 1, 'CTDataset1'),
+    (4, 1, 'EEGDataset');
 
 INSERT INTO dataset
 	(id, dataset_acquisition_id, origin_metadata_id, study_id, subject_id) 
 VALUES 
 	(1, 1, 1, 1, 1),
 	(2, 2, 2, 1, 1),
-	(3, 3, 3, 1, 1);
+	(3, 3, 3, 1, 1),
+	(4, NULL, 4, 1, 1);
 
 INSERT INTO mr_dataset_metadata
 	(id, mr_dataset_nature) 
@@ -107,3 +110,18 @@ INSERT INTO ct_dataset
 	(id) 
 VALUES 
 	(3);
+
+INSERT INTO eeg_dataset
+    (id, channel_count, sampling_frequency)
+VALUES
+    (4, 1, 1);
+
+INSERT INTO event
+    (id, type, description, channel_number, points, dataset_id)
+VALUES
+    (1, "type", "description", 1, 1, 4);
+
+INSERT INTO channel
+    (id, name, reference_type, reference_units, resolution, x, y, z, high_cutoff, low_cutoff, notch, dataset_id)
+VALUES
+    (1, "test", 1, "reference_unit", 1, 1, 1, 1, 1, 1, 1, 4);

@@ -66,7 +66,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 				return examinationToExaminationDTO(entity);
 			}
 		});
-		return new PageImpl<ExaminationDTO>(mappedPage);
+		return new PageImpl<>(mappedPage);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 					entity, new ParameterizedTypeReference<StudySubjectCenterNamesDTO>() {
 					});
 		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - " + e.getMessage());
+			LOG.error("Error on study microservice request - {}", e.getMessage());
 		}
 
 		if (namesResponse != null) {
@@ -97,7 +97,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 					|| HttpStatus.NO_CONTENT.equals(namesResponse.getStatusCode())) {
 				names = namesResponse.getBody();
 			} else {
-				LOG.error("Error on study microservice response - status code: " + namesResponse.getStatusCode());
+				LOG.error("Error on study microservice response - status code: {}", namesResponse.getStatusCode());
 			}
 
 			if (names != null) {

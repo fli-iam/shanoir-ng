@@ -1,0 +1,55 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="BloodGasDataFormComponent content-component" >
+	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'"> 
+				<div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
+			</ng-template>
+			<ng-template ngSwitchDefault> 
+				<div class="header command-zone" i18n="Edit bloodgasdata|Title">Add blood gas data</div>
+			</ng-template>
+		</span>
+
+		<fieldset>
+			<legend *ngIf="!isStandalone">Blood gas data</legend>
+			<ol>
+				<li  class="required">
+					<label i18n="Edit bloodgasdata|File label">File</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template  [ngSwitchCase]="'view'">
+							{{bloodGasData?.filename}}
+						</ng-template>
+						<ng-template  [ngSwitchCase]="'create'">
+							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+						</ng-template>
+						<ng-template  [ngSwitchCase]="'edit'">
+							{{bloodGasData?.filename}}
+							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+						</ng-template>
+					</span>
+				</li>				
+			</ol>
+		</fieldset>
+		<div *ngIf="isStandalone" class="footer command-zone">
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+			</form-footer>
+		</div>
+	</form>
+</div>
