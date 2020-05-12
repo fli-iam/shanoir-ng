@@ -90,6 +90,10 @@ export class BreadcrumbsService {
     public resetMilestone() {
         this.nextMilestone = false;
     }
+
+    public currentStepAsMilestone() {
+        this.processMilestone();
+    }
     
     private processMilestone() {
         this.currentStep.milestone = true;

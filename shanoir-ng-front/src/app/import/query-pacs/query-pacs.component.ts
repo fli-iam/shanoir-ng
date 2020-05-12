@@ -41,10 +41,16 @@ export class QueryPacsComponent{
     private form: FormGroup;
 
     constructor(
-        private router: Router,
-        private importService: ImportService, private importDataService: ImportDataService,
-        private formBuilder: FormBuilder, private msgBoxService: MsgBoxService) {
-            this.buildForm();
+            private breadcrumbsService: BreadcrumbsService, private router: Router,
+            private importService: ImportService, private importDataService: ImportDataService,
+            private formBuilder: FormBuilder, private msgBoxService: MsgBoxService) {
+
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Query';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        this.buildForm();
     }
 
     queryPACS(): void {
