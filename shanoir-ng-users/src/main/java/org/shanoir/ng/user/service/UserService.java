@@ -25,7 +25,6 @@ import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -127,7 +126,7 @@ public interface UserService {
 	 * @param user the user to create.
 	 * @return the created user with its fresh id.
 	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
-	 * @throws SecurityException if the new user could not be register into Keycloak. 
+	 * @throws SecurityException if the new user could not be register into Keycloak.
 	 * In this case the user is not saved in the database either.
 	 */
 	@PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
@@ -139,7 +138,7 @@ public interface UserService {
 	 * @param user the user to create.
 	 * @return the created user with its fresh id.
 	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
-	 * @throws SecurityException if the new user could not be register into Keycloak. 
+	 * @throws SecurityException if the new user could not be register into Keycloak.
 	 * In this case the user is not saved in the database either.
 	 */
 	@PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand() != null && #user.isAccountRequestDemand()")

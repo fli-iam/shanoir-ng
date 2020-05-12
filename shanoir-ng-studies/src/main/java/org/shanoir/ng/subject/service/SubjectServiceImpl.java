@@ -60,7 +60,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		if (subjectRepository.findOne(id) == null) throw new EntityNotFoundException(Subject.class, id);
+		if (subjectRepository.findOne(id) == null) {
+			throw new EntityNotFoundException(Subject.class, id);
+		}
 		subjectRepository.delete(id);
 	}
 
@@ -101,7 +103,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
-			}			
+			}
 		}
 		return subjectRepository.save(subject);
 	}
@@ -132,7 +134,9 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject update(final Subject subject) throws EntityNotFoundException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
-		if (subjectDb == null) throw new EntityNotFoundException(Subject.class, subject.getId());
+		if (subjectDb == null) {
+			throw new EntityNotFoundException(Subject.class, subject.getId());
+		}
 		updateSubjectValues(subjectDb, subject);
 		subjectRepository.save(subjectDb);
 		return subjectDb;
@@ -159,7 +163,9 @@ public class SubjectServiceImpl implements SubjectService {
 		
 		if (subject.getSubjectStudyList() != null) {
 			ListDependencyUpdate.updateWith(subjectDb.getSubjectStudyList(), subject.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) subjectStudy.setSubject(subjectDb);			
+			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) {
+				subjectStudy.setSubject(subjectDb);
+			}
 		}
 		
 		return subjectDb;
@@ -169,12 +175,12 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
-		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<SimpleSubjectDTO>();
+		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-				if (rel.getStudy().getId() == studyId) {
+				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
 					simpleSubjectDTO.setId(sub.getId());
 					simpleSubjectDTO.setName(sub.getName());
@@ -187,6 +193,25 @@ public class SubjectServiceImpl implements SubjectService {
 		return simpleSubjectDTOList;
 	}
 	
+	@Override
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
+		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		if (opt != null) {
+			for (SubjectStudy rel : opt) {
+				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
+				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
+					Subject sub = rel.getSubject();
+					simpleSubjectDTO.setId(sub.getId());
+					simpleSubjectDTO.setName(sub.getName());
+					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
+					simpleSubjectDTOList.add(simpleSubjectDTO);
+				}
+			}
+		}
+		return simpleSubjectDTOList;
+	}
 
 	@Override
 	public Subject findByIdentifier(String identifier) {

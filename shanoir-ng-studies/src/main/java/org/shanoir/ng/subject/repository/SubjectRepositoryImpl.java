@@ -45,7 +45,6 @@ public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 
 	@Override
 	public Subject findSubjectWithSubjectStudyById(Long id) {
-		// TODO Auto-generated method stu
 		Query q = em.createQuery("SELECT s FROM Subject s LEFT JOIN FETCH s.subjectStudyList where s.id=:id",Subject.class);
 		q.setParameter("id", id);
 		return (Subject) q.getSingleResult();

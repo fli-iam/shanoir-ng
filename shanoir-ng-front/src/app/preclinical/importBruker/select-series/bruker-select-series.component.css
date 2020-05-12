@@ -1,0 +1,9 @@
+.tree { margin: 0 50px 20px 0; display: inline-block; vertical-align: top; }
+
+.data-preview { display: inline-block; vertical-align: top; background-color: var(--light-grey); margin: 0 0 20px 0; overflow: hidden; }
+    .data-preview[hidden] { display: none; }
+    .data-preview td { padding: 3px 10px; }
+    .data-preview table { margin: 10px; }
+    .data-preview h3 { background-color: var(--color-b-light); margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
+
+papaya { margin: auto 20px 15px; }

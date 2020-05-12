@@ -16,7 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
 import { ImportJob, DicomQuery } from './dicom-data.model';
-
+import { EegImportJob } from './eeg-data.model';
 
 @Injectable()
 export class ImportService {
@@ -28,6 +28,10 @@ export class ImportService {
             .toPromise();
     }
 
+    uploadEegFile(formData: FormData): Promise<EegImportJob> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
+    }
+
     uploadBidsFile(formData: FormData): Promise<Object> {
         return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
     }
@@ -36,6 +40,16 @@ export class ImportService {
         try {
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
+        }
+        catch (error) {
+            return Promise.reject(error.message || error);
+        }
+    }
+    
+    async startEegImportJob(importJob: EegImportJob): Promise<Object> {
+        try {
+            return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+            .toPromise();
         }
         catch (error) {
             return Promise.reject(error.message || error);

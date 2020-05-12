@@ -78,7 +78,7 @@ public class Subject extends HalEntity {
 	/** Manual Hemispheric dominance. */
 	private Integer manualHemisphericDominance;
 
-	/** Flag to set the subject as pre-clinical subject */ 
+	/** Flag to set the subject as pre-clinical subject */
 	@Column(nullable=false)
 	@ColumnDefault("false")
 	private boolean preclinical;
@@ -90,7 +90,7 @@ public class Subject extends HalEntity {
 
 	/** Personal Comments on this subject. */
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
+	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<>(0);
 
 	/**
 	 * Init HATEOAS links

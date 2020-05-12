@@ -1,0 +1,41 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<h2 i18n="Manage ingredients|Title@@ingredientsListTitle">Manage ingredients</h2>
+    
+    <div [ngSwitch]="mode">
+		<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
+			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
+		</ng-template>
+		<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
+			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
+		</ng-template>
+	</div>
+   
+ <!--  <div>
+    	<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"  
+			[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+	</div>-->  
+  
+  	
+<shanoir-table #ingredientsTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+  	
+
+
+

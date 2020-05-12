@@ -30,7 +30,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -72,6 +71,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/**
 	 * @return the receiveAnonymizationReport
 	 */
+	@Override
 	public boolean isReceiveAnonymizationReport() {
 		return receiveAnonymizationReport;
 	}
@@ -80,6 +80,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	 * @param receiveAnonymizationReport
 	 *            the receiveAnonymizationReport to set
 	 */
+	@Override
 	public void setReceiveAnonymizationReport(boolean receiveAnonymizationReport) {
 		this.receiveAnonymizationReport = receiveAnonymizationReport;
 	}
@@ -87,6 +88,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/**
 	 * @return the receiveNewImportReport
 	 */
+	@Override
 	public boolean isReceiveNewImportReport() {
 		return receiveNewImportReport;
 	}
@@ -95,6 +97,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	 * @param receiveNewImportReport
 	 *            the receiveNewImportReport to set
 	 */
+	@Override
 	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
 		this.receiveNewImportReport = receiveNewImportReport;
 	}
@@ -102,6 +105,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/**
 	 * @return the studyId
 	 */
+	@Override
 	@JsonInclude
 	@Transient
 	public Long getStudyId() {
@@ -119,15 +123,19 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/**
 	 * @return the studyUserRight
 	 */
+	@Override
 	public List<StudyUserRight> getStudyUserRights() {
 		List<StudyUserRight> list = new ArrayList<>();
-		for (Integer id : studyUserRights) list.add(StudyUserRight.getType(id));
+		for (Integer id : studyUserRights) {
+			list.add(StudyUserRight.getType(id));
+		}
 		return list;
 	}
 
 	/**
 	 * @param studyUserRight the studyUserRight to set
 	 */
+	@Override
 	public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
 		this.studyUserRights = new ArrayList<>();
 		if (studyUserRights != null) {
@@ -140,6 +148,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/**
 	 * @return the userId
 	 */
+	@Override
 	public Long getUserId() {
 		return userId;
 	}
@@ -148,14 +157,17 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	 * @param userId
 	 *            the userId to set
 	 */
+	@Override
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 
+	@Override
 	public String getUserName() {
 		return userName;
 	}
 
+	@Override
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}

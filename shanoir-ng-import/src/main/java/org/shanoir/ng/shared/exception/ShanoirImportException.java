@@ -59,4 +59,13 @@ public class ShanoirImportException extends ShanoirException {
 		super(message, errorCode);
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param message
+	 *            message.
+	 */
+	public ShanoirImportException(final String message, Throwable cause) {
+		super(message, cause);
+	}
 }

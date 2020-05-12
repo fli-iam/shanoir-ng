@@ -103,6 +103,10 @@ export class ClinicalContextComponent {
                 this.onSelectCenter();
             }
             if (acquisitionEquipment) {
+                // reload acquisition equipments if we just added one acquisitionEquipment
+                if (this.acquisitionEquipments.indexOf(acquisitionEquipment) == -1) {
+                    this.acquisitionEquipments.push(acquisitionEquipment);
+                }
                 this.acquisitionEquipment = acquisitionEquipment;
                 this.onSelectAcquisitonEquipment();
             }
@@ -141,7 +145,7 @@ export class ClinicalContextComponent {
                 for (let study of allStudies) {
                     if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
-                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
                             if (center) {
                                 if (this.importMode == 'DICOM') {
                                     /* calculate compatibilites only if import from dicom zip */
@@ -236,17 +240,7 @@ export class ClinicalContextComponent {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter);
-    }
-
-    private openCreateCenter = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/center/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
-            });
-        });
+            this.subject, this.examination, this.niftiConverter, null);
     }
 
     private getPrefilledCenter(): Center {
@@ -345,7 +339,10 @@ export class ClinicalContextComponent {
         let newExam = new Examination();
         newExam.study = new IdName(this.study.id, this.study.name);
         newExam.center = new IdName(this.center.id, this.center.name);
-        newExam.subject = this.subject;
+        newExam.subjectStudy = this.subject;
+        newExam.subject = new Subject();
+        newExam.subject.id = this.subject.id;
+        newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;
@@ -362,12 +359,12 @@ export class ClinicalContextComponent {
     }
 
     private get hasCompatibleCenters(): boolean {
-        return this.centers.find(center => center.compatible) != undefined;
+        return this.centers.filter(center => center.compatible)[0] != undefined;
     }
 
     
     private get hasCompatibleEquipments(): boolean {
-        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+        return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 
     private showStudyDetails() {

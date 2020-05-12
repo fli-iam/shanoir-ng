@@ -39,6 +39,8 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class StudyCardApiController implements StudyCardApi {
 
+	private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
+
 	@Autowired
 	private StudyCardService studyCardService;
 	
@@ -56,7 +58,7 @@ public class StudyCardApiController implements StudyCardApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
@@ -92,7 +94,7 @@ public class StudyCardApiController implements StudyCardApi {
 			createdStudyCard = studyCardService.save(studyCard);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 		return new ResponseEntity<>(createdStudyCard, HttpStatus.OK);
 	}
@@ -123,7 +125,7 @@ public class StudyCardApiController implements StudyCardApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 	}
 

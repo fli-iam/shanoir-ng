@@ -41,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 /**
  * This class is used to download files on using WADO URLs:
  * 
@@ -114,7 +113,7 @@ public class WADODownloaderService {
 			if (indexInstanceUID > 0) {
 				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
 				byte[] responseBody = downloadFileFromPACS(url);
-				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);				
+				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
 			} else {
 				// handle and check secondly for WADO-URI URLs by "objectUID="
 				// instanceUID == objectUID
@@ -166,14 +165,14 @@ public class WADODownloaderService {
 	 * 
 	 * @param url
 	 * @param targetFile
-	 * @return 
+	 * @return
 	 * @throws IOException
 	 */
 	private byte[] downloadFileFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
 		ResponseEntity<byte[]> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity, byte[].class, "1");
 		if (response.getStatusCode() == HttpStatus.OK) {
@@ -199,10 +198,8 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
-			throws FileNotFoundException, IOException, MessagingException {
-		ByteArrayInputStream bIS = null;
-		try {
-			bIS = new ByteArrayInputStream(responseBody);
+			throws IOException, MessagingException {
+		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
 			MimeMultipart multipart = new MimeMultipart(datasource);
 			int count = multipart.getCount();
@@ -219,10 +216,6 @@ public class WADODownloaderService {
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
-			}
-		} finally {
-			if (bIS != null) {
-				bIS.close();
 			}
 		}
 	}
