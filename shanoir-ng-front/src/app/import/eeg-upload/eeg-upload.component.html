@@ -1,0 +1,30 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="header command-zone">1. Select Brainvision archive</div>
+<fieldset>
+    <p>Please select a Brainvision or EDF zip archive to import.</p>
+    <p>The files should be organized like this:</p>
+    <p>directory_name.zip -> directory_name/dataset_name.vhdr</p>
+    <p>directory_name.zip -> directory_name/dataset_name.edf</p>
+    <p>Other files linked to a dataset should have the same name (extension does not matter): dataset_name.other <br/>
+    Multiple datasets can be imported at once (dataset1.edf, dataset2.edf, etc...)</p>
+
+    <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+    
+    <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
+        {{errorMessage}}
+    </label>
+</fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

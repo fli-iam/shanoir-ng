@@ -23,10 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -38,7 +37,7 @@ import io.swagger.annotations.ApiResponses;
  *
  */
 
-@Api(value = "subjectStudy", description = "the subject study API")
+@Api(value = "subjectStudy")
 @RequestMapping("/subjectStudy")
 public interface SubjectStudyApi {
 	
@@ -48,8 +47,8 @@ public interface SubjectStudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
+			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') "
 			+ "and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE'))"
 			+ "and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy))")

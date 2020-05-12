@@ -67,9 +67,9 @@ export class CoilComponent extends EntityComponent<Coil> {
                 coil.center = this.acqEquip.center;
                 coil.manufacturerModel = this.acqEquip.manufacturerModel;
             }
-            this.coil.center = this.centers.find(center => center.id == this.coil.center.id);
+            this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
             this.updateManufList(this.coil.center);
-            this.coil.manufacturerModel = this.manufModels.find(manuf => manuf.id == this.entity.manufacturerModel.id);
+            this.coil.manufacturerModel = this.manufModels.filter(manuf => manuf.id == this.entity.manufacturerModel.id)[0];
         });
     }
 

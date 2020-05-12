@@ -35,6 +35,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -61,7 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ImporterManagerService {
 
 	private static Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
-	
+
 	private static final SecureRandom RANDOM = new SecureRandom();
 	
 	/**
@@ -98,7 +99,7 @@ public class ImporterManagerService {
 	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
-		LOG.info("Starting import job for userId: " + userId + " with import job folder: " + importJob.getWorkFolder());
+		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
@@ -109,7 +110,6 @@ public class ImporterManagerService {
 			}
 			List<Patient> patients = importJob.getPatients();
 			// In PACS import the dicom files are still in the PACS, we have to download them first
-			// and then analyze them: what gives us a list of images for each serie.
 			final File importJobDir;
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
@@ -126,7 +126,7 @@ public class ImporterManagerService {
 			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), importJob.isFromPacs());
 
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-				Patient patient = (Patient) patientsIt.next();
+				Patient patient = patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
 				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
 					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
@@ -141,19 +141,18 @@ public class ImporterManagerService {
 				Long converterId = importJob.getFrontConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
+	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+	            message.getMessageProperties().setHeader("x-user-id",
+	            		KeycloakUtil.getTokenUserId());
+	            return message;
+	        });
 			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
-		} catch (ShanoirException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (FileNotFoundException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (AmqpException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (JsonProcessingException e) {
+		} catch (ShanoirException | FileNotFoundException | AmqpException | JsonProcessingException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		LOG.info("Finished import job for userId: " + userId + " with import job folder: " + importJob.getWorkFolder());
+		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 	}
 	
 	/**
@@ -192,17 +191,17 @@ public class ImporterManagerService {
 	 * Calls a c-move for each serie involved, files are received via DicomStoreSCPServer.
 	 * 
 	 * @param patients
-	 * @throws ShanoirException 
+	 * @throws ShanoirException
 	 */
 	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients) throws ShanoirException {
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-			Patient patient = (Patient) patientsIt.next();
+			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-				Study study = (Study) studiesIt.next();
+				Study study = studiesIt.next();
 				List<Serie> series = study.getSeries();
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-					Serie serie = (Serie) seriesIt.next();
+					Serie serie = seriesIt.next();
 					queryPACSService.queryCMOVE(serie);
 					String serieID = serie.getSeriesInstanceUID();
 					File serieIDFolderDir = new File(importJobDir + File.separator + serieID);
@@ -212,13 +211,13 @@ public class ImporterManagerService {
 						throw new ShanoirException("Error while creating serie id folder: folder already exists.");
 					}
 					for (Iterator<Instance> iterator = serie.getInstances().iterator(); iterator.hasNext();) {
-						Instance instance = (Instance) iterator.next();
+						Instance instance = iterator.next();
 						String sopInstanceUID = instance.getSopInstanceUID();
 						File oldFile = new File(dicomStoreSCPServer.getStorageDirPath() + File.separator + serieID + File.separator + sopInstanceUID + DicomStoreSCPServer.DICOM_FILE_SUFFIX);
 						if (oldFile.exists()) {
 							File newFile = new File(importJobDir.getAbsolutePath() + File.separator + serieID + File.separator + oldFile.getName());
 							oldFile.renameTo(newFile);
-							LOG.debug("Moving file: " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
+							LOG.debug("Moving file: {} to ", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 						} else {
 							throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 						}
@@ -241,17 +240,17 @@ public class ImporterManagerService {
 	 * @throws FileNotFoundException
 	 */
 	private ArrayList<File> getDicomFilesForPatient(final ImportJob importJob, final Patient patient, final String workFolderPath) throws FileNotFoundException {
-		Set<File> pathsSet = new HashSet<File>(5000);
+		Set<File> pathsSet = new HashSet<>(5000);
 		List<Study> studies = patient.getStudies();
 		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-			Study study = (Study) studiesIt.next();
+			Study study = studiesIt.next();
 			List<Serie> series = study.getSeries();
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-				Serie serie = (Serie) seriesIt.next();
-				handleSerie(workFolderPath, pathsSet, serie, importJob);
+				Serie serie = seriesIt.next();
+				handleSerie(workFolderPath, pathsSet, serie);
 			}
 		}
-		return new ArrayList<File>(pathsSet);
+		return new ArrayList<>(pathsSet);
 	}
 
 	/**
@@ -264,10 +263,10 @@ public class ImporterManagerService {
 	 * @param importJob
 	 * @throws FileNotFoundException
 	 */
-	private void handleSerie(final String workFolderPath, Set<File> pathsSet, Serie serie, ImportJob importJob) throws FileNotFoundException {
+	private void handleSerie(final String workFolderPath, Set<File> pathsSet, Serie serie) throws FileNotFoundException {
 		List<Image> images = serie.getImages();
 		for (Iterator<Image> imagesIt = images.iterator(); imagesIt.hasNext();) {
-			Image image = (Image) imagesIt.next();
+			Image image = imagesIt.next();
 			String path = image.getPath();
 			File file = new File(workFolderPath + File.separator + path);
 			if(file.exists()) {

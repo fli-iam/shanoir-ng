@@ -62,7 +62,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
 				return delegate.datasetToDatasetDTO(entity);
 			}
 		});
-		return new PageImpl<MrDatasetDTO>(mappedPage.getContent());
+		return new PageImpl<>(mappedPage.getContent());
 	}
 
 }

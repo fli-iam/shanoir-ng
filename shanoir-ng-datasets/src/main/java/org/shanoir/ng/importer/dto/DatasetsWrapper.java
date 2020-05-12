@@ -40,7 +40,7 @@ public class DatasetsWrapper<T> {
 	
 	public List<T> getDatasets() {
 		if (datasets == null) {
-			this.datasets = new ArrayList<T>();
+			this.datasets = new ArrayList<>();
 		}
 		return datasets;
 	}

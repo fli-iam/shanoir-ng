@@ -12,7 +12,7 @@ public class Profile {
 	public Profile(Integer profileColumn) {
 		super();
 		this.profileColumn = profileColumn;
-		anonymizationMap = new HashMap<String, String>();
+		anonymizationMap = new HashMap<>();
 	}
 
 	public Integer getProfileColumn() {

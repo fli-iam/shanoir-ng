@@ -1,0 +1,3 @@
+.modality { margin-bottom: 0; }
+    .modality span { color: var(--color-a); font-weight: bold; }
+.warning { color: var(--color-b); }

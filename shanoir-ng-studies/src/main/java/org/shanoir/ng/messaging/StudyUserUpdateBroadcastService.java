@@ -40,7 +40,7 @@ public class StudyUserUpdateBroadcastService {
 			String str = new ObjectMapper().writeValueAsString(commands);
 			rabbitTemplate.convertAndSend("study-user-exchange", "study-user", str);
 			
-			LOG.debug("Brodcasted study-user changes : " + str);
+			LOG.debug("Brodcasted study-user changes : {}", str);
 			
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");

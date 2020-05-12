@@ -77,13 +77,13 @@ public class DatasetAcquisitionApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException, RestServiceException {
-		// ?
+		assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
 	}
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
-		// ?
+		assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
 	}
 
 	@Test

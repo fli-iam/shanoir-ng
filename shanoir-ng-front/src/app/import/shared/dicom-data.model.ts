@@ -25,6 +25,9 @@ export class ImportJob {
     frontStudyId: number;
     frontAcquisitionEquipmentId: number;
     frontConverterId: number;
+    archive: string;
+    subjectName: String;
+    studyName: String;
 }
 
 export class PatientDicom {

@@ -62,11 +62,28 @@ public class ImportJob implements Serializable {
     @JsonProperty("frontConverterId")
     private Long frontConverterId;
     
-    public boolean isFromDicomZip() {
+    @JsonProperty("archive")
+    private String archive;
+
+	@JsonProperty("subjectName")
+	private String subjectName;
+
+	@JsonProperty("studyName")
+	private String studyName;
+    
+	public String getArchive() {
+		return archive;
+	}
+
+	public void setArchive(final String archive) {
+		this.archive = archive;
+	}
+	
+	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
-	public void setFromDicomZip(boolean fromDicomZip) {
+	public void setFromDicomZip(final boolean fromDicomZip) {
 		this.fromDicomZip = fromDicomZip;
 	}
 
@@ -74,7 +91,7 @@ public class ImportJob implements Serializable {
 		return fromShanoirUploader;
 	}
 
-	public void setFromShanoirUploader(boolean fromShanoirUploader) {
+	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
 		this.fromShanoirUploader = fromShanoirUploader;
 	}
 
@@ -82,15 +99,16 @@ public class ImportJob implements Serializable {
 		return fromPacs;
 	}
 
-	public void setFromPacs(boolean fromPacs) {
+	public void setFromPacs(final boolean fromPacs) {
 		this.fromPacs = fromPacs;
+
 	}
 
 	public List<Patient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(final List<Patient> patients) {
 		this.patients = patients;
 	}
 
@@ -98,7 +116,7 @@ public class ImportJob implements Serializable {
 		return examinationId;
 	}
 
-	public void setExaminationId(Long examinationId) {
+	public void setExaminationId(final Long examinationId) {
 		this.examinationId = examinationId;
 	}
 
@@ -106,7 +124,7 @@ public class ImportJob implements Serializable {
 		return frontStudyId;
 	}
 
-	public void setFrontStudyId(Long frontStudyId) {
+	public void setFrontStudyId(final Long frontStudyId) {
 		this.frontStudyId = frontStudyId;
 	}
 
@@ -122,7 +140,7 @@ public class ImportJob implements Serializable {
 		return frontAcquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
+	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
 		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
 	}
 
@@ -146,8 +164,23 @@ public class ImportJob implements Serializable {
 		return workFolder;
 	}
 
-	public void setWorkFolder(String workFolder) {
+	public void setWorkFolder(final String workFolder) {
 		this.workFolder = workFolder;
 	}
-	
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
 }

@@ -39,6 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<weasis.version>5.14.1</weasis.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
+		<powermock.version>1.7.1</powermock.version>
 	</properties>
 
 	<dependencies>
@@ -104,13 +105,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</exclusions>
 		</dependency>
 		<dependency>
-		    <groupId>org.dcm4che</groupId>
-		    <artifactId>dcm4che-emf</artifactId>
-		    <version>${dcm4che.version}</version>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-dcmr</artifactId>
+			<version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-dcmr</artifactId>
+			<artifactId>dcm4che-emf</artifactId>
 			<version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>
@@ -123,6 +124,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+		 	<groupId>org.apache.httpcomponents</groupId>
+		 	<artifactId>httpclient</artifactId>
+		</dependency> 
+		 <!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime --> 
+		<dependency> 
+			<groupId>org.apache.httpcomponents</groupId> 
+			<artifactId>httpmime</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
@@ -144,6 +171,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				Package shanoir-ng-import.jar as Spring Boot executable:
 				Avoid error: no main manifest attribute, in /shanoir-ng-import.jar
 			-->
+		   <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-surefire-plugin</artifactId>
+		        <version>3.0.0-M4</version>
+		        <configuration>
+		          <classpathDependencyExcludes>
+                     <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
+		          </classpathDependencyExcludes>
+				</configuration>
+		    </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -201,6 +238,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<repositories>
 		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-milestone-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>spring-releases</id>
 			<name>Spring Releases</name>
 			<url>http://repo.spring.io/libs-release-local</url>
@@ -236,7 +281,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<id>qualif</id>
 			<properties>
 				<spring.active.profile>qualif</spring.active.profile>
-				<supervisor.file.name>ms.template.sv.qualif.conf</supervisor.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
 		</profile>
