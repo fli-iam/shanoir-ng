@@ -1,0 +1,106 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="PathologyModelFormComponent content-component">
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+						<div class="header command-zone" i18n="View model|Title">View pathology model</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'"> 
+						<div class="header command-zone" i18n="Edit model|Title">Edit pathology model</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'"> 
+						<div class="header command-zone" i18n="Create model|Title">Add pathology model</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="isModelUnique==false" class="form-validation-alert" i18n="Edit model|PathologyModelUniqueError label">This pathology model already exists!</label>
+						<li class="required">
+							<label i18n="Edit model|Name label" class="required-label">Name</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{model?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="model.name"/>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit pathologyModelName|Name required error@@pathologyModelDetailNameRequiredError">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit model|Pathology label" class="required-label">Pathology</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{model?.pathology?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+                                    <select-box formControlName="pathology" [(ngModel)]="model.pathology">
+                                        <select-option *ngFor="let pathology of pathologies" [value]="pathology">{{pathology.name}}</select-option>
+                                    </select-box>
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
+										<i class="fas fa-plus-square"></i>
+										new pathology
+									</button>
+									<label *ngIf="hasError('pathology', ['required'])" [@slideDown]="hasError('pathology', ['required'])" class="form-validation-alert" i18n="Edit pathologyModelPathology|Pathology required error@@pathologyModelDetailPathologyRequiredError">Pathology is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit model|Comments label">Comment</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{model?.comment}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="model.comment"></textarea>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit model|Specifications label">Specifications</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template  [ngSwitchCase]="'view'">
+									{{model?.filename}}
+								</ng-template>
+								<ng-template  [ngSwitchCase]="'create'">
+									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+								</ng-template>
+								<ng-template  [ngSwitchCase]="'edit'">
+									{{model?.filename}}
+									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+								</ng-template>
+							</span>
+							
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+		</table>
+		<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+		</form-footer>
+    </form>
+</div>

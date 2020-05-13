@@ -22,6 +22,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import {
     AcquisitionEquipmentListComponent,
@@ -38,6 +39,7 @@ import { ManufacturerModelService } from './acquisition-equipments/shared/manufa
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { AppComponent } from './app.component';
 import { routing } from './app.routing';
+import { preclinicalRouting } from './preclinical/preclinical-routing.module'
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
@@ -50,6 +52,7 @@ import { CoilService } from './coils/shared/coil.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { DatasetService } from './datasets/shared/dataset.service';
@@ -66,14 +69,19 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
@@ -93,6 +101,7 @@ import { TableSearchComponent } from './shared/components/table/search/search.co
 import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
+import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
@@ -134,8 +143,55 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
-
-//import { ModalService} from './shared/components/modal/modal.service';
+import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
+import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
+import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animalSubject-form.component';
+import { ReferencesListComponent }   from './preclinical/reference/list/reference-list.component';
+import { ReferenceService }   from './preclinical/reference/shared/reference.service';
+import { ReferenceFormComponent }   from './preclinical/reference/edit/reference-form.component';
+import { PathologiesListComponent }   from './preclinical/pathologies/pathology/list/pathology-list.component';
+import { PathologyService }   from './preclinical/pathologies/pathology/shared/pathology.service';
+import { PathologyFormComponent }   from './preclinical/pathologies/pathology/edit/pathology-form.component';
+import { PathologyModelsListComponent }   from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
+import { PathologyModelService }   from './preclinical/pathologies/pathologyModel/shared/pathologyModel.service';
+import { PathologyModelFormComponent }   from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
+import { SubjectPathologiesListComponent }   from './preclinical/pathologies/subjectPathology/list/subjectPathology-list.component';
+import { SubjectPathologyService }   from './preclinical/pathologies/subjectPathology/shared/subjectPathology.service';
+import { SubjectPathologyFormComponent }   from './preclinical/pathologies/subjectPathology/edit/subjectPathology-form.component';
+import { TherapiesListComponent }   from './preclinical/therapies/therapy/list/therapy-list.component';
+import { TherapyService }   from './preclinical/therapies/therapy/shared/therapy.service';
+import { TherapyFormComponent }   from './preclinical/therapies/therapy/edit/therapy-form.component';
+import { SubjectTherapiesListComponent }   from './preclinical/therapies/subjectTherapy/list/subjectTherapy-list.component';
+import { SubjectTherapyService }   from './preclinical/therapies/subjectTherapy/shared/subjectTherapy.service';
+import { SubjectTherapyFormComponent }   from './preclinical/therapies/subjectTherapy/edit/subjectTherapy-form.component';
+import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
+import { AnestheticFormComponent }      from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
+import { AnestheticService }      from './preclinical/anesthetics/anesthetic/shared/anesthetic.service';
+import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
+import { AnestheticIngredientFormComponent }      from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
+import { AnestheticIngredientService }      from './preclinical/anesthetics/ingredients/shared/anestheticIngredient.service';
+import { ExaminationAnestheticFormComponent }      from './preclinical/anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
+import { ExaminationAnestheticsListComponent } from './preclinical/anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
+import { ExaminationAnestheticService }      from './preclinical/anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
+import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
+import { ContrastAgentFormComponent }      from './preclinical/contrastAgent/edit/contrastAgent-form.component';
+import { ContrastAgentService }      from './preclinical/contrastAgent/shared/contrastAgent.service';
+import { AnimalExaminationFormComponent }      from './preclinical/examination/edit/animal-examination-form.component';
+import { AnimalExaminationListComponent }      from './preclinical/examination/list/animal-examination-list.component';
+import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
+import { ExtraDataListComponent }      from './preclinical/extraData/extraData/list/extradata-list.component';
+import { ExtraDataFormComponent }      from './preclinical/extraData/extraData/edit/extradata-form.component';
+import { ExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
+import { PhysiologicalDataFormComponent }      from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
+import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
+import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
+import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
+import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
+import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
+import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
+import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
+import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 
 @NgModule({
     imports: [
@@ -146,7 +202,9 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        routing
+        routing,
+        NgxJsonViewerModule,
+    	preclinicalRouting
     ],
     declarations: [
         AccountRequestComponent,
@@ -187,6 +245,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         TableComponent,
         PagerComponent,
         TreeNodeComponent,
+        BidsTreeComponent,
         TooltipComponent,
         UserListComponent,
         InstrumentAssessmentComponent,
@@ -197,6 +256,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         SubjectTreeComponent,
         StudyNamePipe,
         DatasetComponent,
+        EegDatasetComponent,
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
@@ -207,9 +267,13 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         ExploredEntityComponent,
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
+        EegSelectSeriesComponent,
         DicomUploadComponent,
+        EegUploadComponent,
+        BidsUploadComponent,
         QueryPacsComponent,
         ClinicalContextComponent,
+        EegClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -219,13 +283,48 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         SelectBoxComponent,
         SelectOptionComponent,
         FinishImportComponent,
+        FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         NotificationsComponent,
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
-        HelpMessageComponent
+        HelpMessageComponent,
+    	AnimalSubjectsListComponent,   
+    	AnimalSubjectFormComponent,
+    	ReferencesListComponent,
+    	ReferenceFormComponent,
+    	PathologiesListComponent,
+    	PathologyFormComponent,
+    	PathologyModelsListComponent,
+    	PathologyModelFormComponent,
+    	SubjectPathologiesListComponent,
+    	SubjectPathologyFormComponent,
+    	TherapiesListComponent,
+    	TherapyFormComponent,
+    	SubjectTherapiesListComponent,
+    	SubjectTherapyFormComponent,
+    	AnestheticsListComponent,
+    	AnestheticFormComponent,
+    	AnestheticIngredientsListComponent,
+    	AnestheticIngredientFormComponent,
+    	ExaminationAnestheticFormComponent,
+    	ExaminationAnestheticsListComponent,
+    	ContrastAgentsListComponent,
+    	ContrastAgentFormComponent,
+    	AnimalExaminationFormComponent,
+    	AnimalExaminationListComponent,
+    	FileUploadComponent,
+    	ExtraDataFormComponent,
+    	PhysiologicalDataFormComponent,
+    	ExtraDataListComponent,
+    	BloodGasDataFormComponent, 
+    	ImportBrukerComponent, 
+    	BrukerUploadComponent,
+        AnimalClinicalContextComponent, 
+        BrukerSelectSeriesComponent, 
+        BrukerFinishImportComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -258,6 +357,21 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         DicomArchiveService,
         DatasetService,
         MsgBoxService,
+    	PathologyService,
+        AnimalSubjectService,
+        ReferenceService,
+    	PathologyModelService,
+    	SubjectPathologyService,
+    	TherapyService,
+    	SubjectTherapyService,
+    	AnestheticIngredientService,
+    	ExaminationAnestheticService,
+    	ContrastAgentService,
+    	ExtraDataService,
+        AnimalExaminationService,
+        AnestheticService,
+    	ImportBrukerService,
+    	EnumUtils,
         {
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,

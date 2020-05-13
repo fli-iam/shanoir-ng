@@ -53,6 +53,7 @@ public class CenterDTO {
 	 * Default constructor.
 	 */
 	public CenterDTO() {
+		// empty constructor
 	}
 
 	/**

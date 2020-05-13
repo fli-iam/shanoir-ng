@@ -72,13 +72,9 @@ public class EquipmentDicom {
 	
 	@JsonIgnore
 	public boolean isComplete() {
-		if (StringUtils.isNotEmpty(this.manufacturer)
+		return StringUtils.isNotEmpty(this.manufacturer)
 			&& StringUtils.isNotEmpty(this.manufacturerModelName)
-			&& StringUtils.isNotEmpty(this.deviceSerialNumber)) {
-			return true;
-		} else {
-			return false;
-		}
+			&& StringUtils.isNotEmpty(this.deviceSerialNumber);
 	}
 
 }

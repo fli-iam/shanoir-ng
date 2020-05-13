@@ -38,6 +38,7 @@ public class DatasetsModalityTypeCheckValidator
 
 	@Override
 	public void initialize(final DatasetsModalityTypeCheck constraintAnnotation) {
+		// This default initializer is empty
 	}
 
 	@Override

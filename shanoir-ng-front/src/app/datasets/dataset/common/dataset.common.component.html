@@ -154,11 +154,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
+			<label i18n="Dataset detail|Dataset processed type subjects@@processedDatasetType">Processed Type</label>
 			<select-processed-dataset-type class="right-col" 
 				[mode]="mode" 
-				[ngModel]="dataset.updatedMetadata.datasetProcessedType ? dataset.updatedMetadata.datasetProcessedType : dataset.originMetadata.datasetProcessedType" 
-				(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event"
+				[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType" 
+				(ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event"
 				[ngModelOptions]="{standalone: true}" >
 			</select-processed-dataset-type>
 		</li>

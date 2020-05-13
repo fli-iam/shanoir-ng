@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -27,11 +28,16 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +71,27 @@ public class ExaminationApiController implements ExaminationApi {
 	@Value("${datasets-data}")
 	private String dataDir;
 
+	private final HttpServletRequest request;
+
+
+	@Autowired
+	BIDSService bidsService;
+
+	@Autowired
+	ShanoirEventService eventService;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExaminationApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
+
 	@Override
 	public ResponseEntity<Void> deleteExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
-
 		try {
+			// delete bids folder
+			bidsService.deleteExam(examinationId);
 			// Check if user rights needed
 			examinationService.deleteById(examinationId);
 
@@ -80,12 +101,12 @@ public class ExaminationApiController implements ExaminationApi {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-			
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (IOException e) {
-			LOG.error("Something went wrong while deleting the file: {}" ,e);
+			LOG.error("Something went wrong while deleting extra-data file: {}" , e);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
@@ -105,10 +126,23 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
 		Page<Examination> examinations = examinationService.findPage(pageable);
-		if (examinations.getContent().size() == 0) {
+		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+	}
+	
+	@Override
+	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
+			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
+		Page<Examination> examinations;
+
+		// Get examinations reachable by connected user
+		examinations = examinationService.findPreclinicalPage(isPreclinical, pageable);
+		if (examinations.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
 	@Override
@@ -129,7 +163,8 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationDTO);
-		return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
 	@Override
@@ -137,15 +172,13 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
 			@ApiParam(value = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException {
-
-		validate(result);
-
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -204,6 +237,48 @@ public class ExaminationApiController implements ExaminationApi {
 	 */
 	private String getExtraDataFilePath(Long examinationId, String fileName) {
 		return dataDir + "/examination-" + examinationId + "/" + fileName;
+	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> exportExaminationById(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+			throws RestServiceException {
+		// Get examination from ID
+		Examination exam = examinationService.findById(examinationId);
+		if (exam.getExtraDataFilePathList() == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		String archiveToExport = null;
+		for (String extraDataFile : exam.getExtraDataFilePathList()) {
+			if (extraDataFile.startsWith(dataDir + "/preclinical/")) {
+				archiveToExport = extraDataFile;
+				break;
+			}
+		}
+		if (archiveToExport == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		File archiveFile = new File(archiveToExport);
+		
+		byte[] data;
+		try {
+			data = Files.readAllBytes(archiveFile.toPath());
+		} catch (IOException e) {
+			LOG.error(e.getMessage());
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(archiveFile.getAbsolutePath());
+		return ResponseEntity.ok()
+				// Content-Disposition
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveFile.getName())
+				// Content-Type
+				.contentType(MediaType.parseMediaType(contentType)) //
+				// Content-Length
+				.contentLength(data.length) //
+				.body(resource);
 	}
 
 	/**

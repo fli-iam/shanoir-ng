@@ -62,7 +62,7 @@ public class ExaminationDTO {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(Long id) {
+	public void setId(final Long id) {
 		this.id = id;
 	}
 
@@ -77,7 +77,7 @@ public class ExaminationDTO {
 	 * @param comment
 	 *            the comment to set
 	 */
-	public void setComment(String comment) {
+	public void setComment(final String comment) {
 		this.comment = comment;
 	}
 
@@ -92,7 +92,7 @@ public class ExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(final LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
@@ -107,7 +107,7 @@ public class ExaminationDTO {
 	 * @param note
 	 *            the note to set
 	 */
-	public void setNote(String note) {
+	public void setNote(final String note) {
 		this.note = note;
 	}
 
@@ -115,7 +115,7 @@ public class ExaminationDTO {
 		return center;
 	}
 
-	public void setCenter(IdName center) {
+	public void setCenter(final IdName center) {
 		this.center = center;
 	}
 
@@ -123,7 +123,7 @@ public class ExaminationDTO {
 		return study;
 	}
 
-	public void setStudy(IdName study) {
+	public void setStudy(final IdName study) {
 		this.study = study;
 	}
 
@@ -138,7 +138,7 @@ public class ExaminationDTO {
 	 * @param subject
 	 *            the subject to set
 	 */
-	public void setSubject(IdName subject) {
+	public void setSubject(final IdName subject) {
 		this.subject = subject;
 	}
 
@@ -153,7 +153,7 @@ public class ExaminationDTO {
 	 * @param subjectWeight
 	 *            the subjectWeight to set
 	 */
-	public void setSubjectWeight(Double subjectWeight) {
+	public void setSubjectWeight(final Double subjectWeight) {
 		this.subjectWeight = subjectWeight;
 	}
 	
@@ -161,15 +161,21 @@ public class ExaminationDTO {
 		return preclinical;
 	}
 
-	public void setPreclinical(boolean preclinical) {
+	public void setPreclinical(final boolean preclinical) {
 		this.preclinical = preclinical;
 	}
 
+	/**
+	 * @return the extraDataFilePathList
+	 */
 	public List<String> getExtraDataFilePathList() {
 		return extraDataFilePathList;
 	}
 
-	public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+	/**
+	 * @param extraDataFilePathList the extraDataFilePathList to set
+	 */
+	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
 		this.extraDataFilePathList = extraDataFilePathList;
 	}
 

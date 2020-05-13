@@ -33,6 +33,8 @@ import org.shanoir.util.file.FileUtil;
  */
 public class DownloadOrCopyRunnable implements Runnable {
 
+	private static final String SERIES = "SERIES";
+
 	private static Logger logger = Logger.getLogger(DownloadOrCopyRunnable.class);
 
 	private static final String UNDERSCORE = "_";
@@ -129,15 +131,36 @@ public class DownloadOrCopyRunnable implements Runnable {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolderFromCD(selectedSeries, uploadFolder);
+			allFileNames = copyFilesToUploadFolder(selectedSeries, uploadFolder);
+			//copyFilesToUploadFolderInSeriesFolder(selectedSeries, uploadFolder);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD.");
 			}
 		}
 		return allFileNames;
 	}
+	
+	private void copyFilesToUploadFolderInSeriesFolder(Set<org.shanoir.dicom.importer.Serie> selectedSeries, final File uploadFolder) {
+		final File seriesFolder = new File(uploadFolder, SERIES);
+		seriesFolder.mkdirs();
+		for (org.shanoir.dicom.importer.Serie serie : selectedSeries) {
+			final File serieIdFolder = new File(seriesFolder, serie.getId());
+			serieIdFolder.mkdirs();
+			List<String> newFileNamesOfSerie = new ArrayList<String>();
+			List<String> oldFileNamesOfSerie = serie.getFileNames();
+			for (Iterator iterator = oldFileNamesOfSerie.iterator(); iterator.hasNext();) {
+				String dicomFileName = (String) iterator.next();				
+				File sourceFile = new File(filePathDicomDir + File.separator + dicomFileName);
+				dicomFileName = dicomFileName.replace(File.separator, UNDERSCORE);
+				File destFile = new File(serieIdFolder, dicomFileName);
+				FileUtil.copyFile(sourceFile, destFile);
+				newFileNamesOfSerie.add(dicomFileName);
+			}
+			serie.setFileNames(newFileNamesOfSerie);
+		}
+	}
 
-	private List<String> copyFilesToUploadFolderFromCD(Set<org.shanoir.dicom.importer.Serie> selectedSeries, final File uploadFolder) {
+	private List<String> copyFilesToUploadFolder(Set<org.shanoir.dicom.importer.Serie> selectedSeries, final File uploadFolder) {
 		List<String> allFileNames = new ArrayList<String>();
 		for (org.shanoir.dicom.importer.Serie serie : selectedSeries) {
 			List<String> newFileNamesOfSerie = new ArrayList<String>();

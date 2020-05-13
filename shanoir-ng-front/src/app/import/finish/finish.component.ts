@@ -124,6 +124,8 @@ export class FinishImportComponent {
             importJob.frontStudyId = this.context.study.id;
             importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
             importJob.frontConverterId = this.context.niftiConverter.id;
+            importJob.subjectName = this.context.subject.name;
+            importJob.studyName = this.context.study.name;
             return this.importService.startImportJob(importJob);
         }
     }

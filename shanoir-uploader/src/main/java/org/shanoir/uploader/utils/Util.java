@@ -2,6 +2,7 @@ package org.shanoir.uploader.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -292,7 +293,7 @@ public final class Util {
 		} else {
 			try {
 				// create pseudonymus folder
-				destinationFolder.mkdir();
+				destinationFolder.mkdirs();
 				String[] folderContents = getResourceListing(ShanoirUploader.class,
 						Pseudonymizer.PSEUDONYMUS_FOLDER + "/");
 				for (int i = 0; i < folderContents.length; i++) {
@@ -307,7 +308,7 @@ public final class Util {
 						final File destinationFolder2 = new File(
 								ShUpConfig.shanoirUploaderFolder + File.separator + folderName + File.separator
 										+ folderContents[i] + File.separator + subFolderContents[j]);
-						copyPropertiesFile(folderName + "/" + folderContents[i] + "/" + subFolderContents[j],
+						copyFileFromJar(folderName + "/" + folderContents[i] + "/" + subFolderContents[j],
 								destinationFolder2);
 						logger.info(folderName + "/" + folderContents[i] + "/" + subFolderContents[j]
 								+ " successfully copied");
@@ -383,26 +384,20 @@ public final class Util {
 		throw new UnsupportedOperationException("Cannot list files for URL " + dirURL);
 	}
 
-	/**
-	 * This method copies the content of the dicom.server.properties in the .jar
-	 * file to the same file in the user.home.
-	 * 
-	 * @param propertiesFile
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public static void copyPropertiesFile(final String fileName, final File propertiesFile) {
+	public static void copyFileFromJar(final String fileName, final File file) {
 		InputStream iS = null;
 		FileOutputStream fOS = null;
 		try {
-			boolean created = propertiesFile.createNewFile();
-			if (created) {
-				iS = Util.class.getResourceAsStream(fileName);
-				fOS = new FileOutputStream(propertiesFile);
-				byte[] buffer = new byte[1024];
-				int len;
-				while ((len = iS.read(buffer)) != -1) {
-					fOS.write(buffer, 0, len);
+			iS = Util.class.getResourceAsStream("/" + fileName);
+			if (iS != null) {
+				boolean created = file.createNewFile();
+				if (created) {
+					fOS = new FileOutputStream(file);
+					byte[] buffer = new byte[1024];
+					int len;
+					while ((len = iS.read(buffer)) != -1) {
+						fOS.write(buffer, 0, len);
+					}
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -457,4 +452,20 @@ public final class Util {
 		}
 	}
 
+	public static void copyFileUsingStream(File source, File dest) throws IOException {
+	    InputStream is = null;
+	    OutputStream os = null;
+	    try {
+	        is = new FileInputStream(source);
+	        os = new FileOutputStream(dest);
+	        byte[] buffer = new byte[1024];
+	        int length;
+	        while ((length = is.read(buffer)) > 0) {
+	            os.write(buffer, 0, length);
+	        }
+	    } finally {
+	        is.close();
+	        os.close();
+	    }
+	}
 }

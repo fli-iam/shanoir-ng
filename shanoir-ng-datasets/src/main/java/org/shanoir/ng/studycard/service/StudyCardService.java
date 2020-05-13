@@ -51,6 +51,14 @@ public interface StudyCardService {
 	 * @return a template or null.
 	 */
 	StudyCard findById(Long id);
+	
+	/**
+	 * Find template by its id.
+	 *
+	 * @param id template id.
+	 * @return a template or null.
+	 */
+	StudyCard findByName(String name);
 
 	/**
 	 * Save a template.

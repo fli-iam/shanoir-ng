@@ -15,10 +15,9 @@
 package org.shanoir.ng.shared.common;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -34,8 +33,8 @@ public interface CommonApi {
 			@ApiResponse(code = 403, message = "forbidden", response = CommonIdNamesDTO.class),
 			@ApiResponse(code = 404, message = "no element found", response = CommonIdNamesDTO.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = CommonIdNamesDTO.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
+	@PostMapping(value = "", produces = { "application/json" }, consumes = {
+			"application/json" })
 	ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
 			@ApiParam(value = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
 
