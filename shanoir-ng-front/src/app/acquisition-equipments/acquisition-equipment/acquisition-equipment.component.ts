@@ -25,7 +25,7 @@ import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
-import { Center } from 'src/app/centers/shared/center.model';
+import { Center } from '../../centers/shared/center.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -79,6 +79,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.nonEditableCenter) {
             this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+        } else if (this.acqEquip.center) {
+            // Clean center
+            let centerSelected: Center = new Center();
+            centerSelected.id = this.acqEquip.center.id;
+            centerSelected.name = this.acqEquip.center.name;
+            this.acqEquip.center = centerSelected;
         }
     }
 

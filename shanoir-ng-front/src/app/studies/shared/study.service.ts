@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
@@ -20,8 +21,8 @@ import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from './study-user-right.enum';
-import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+import { BidsElement } from '../../bids/model/bidsElement.model';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
@@ -48,6 +49,11 @@ export class StudyService extends EntityService<Study> {
     
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+            .toPromise();
+    }
+
+    findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<SubjectWithSubjectStudy[]> {
+        return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
             .toPromise();
     }
 
@@ -89,5 +95,18 @@ export class StudyService extends EntityService<Study> {
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    exportBIDSByStudyId(studyId: number): Promise<void> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+    }
+
+    getBidsStructure(studyId: number): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_STUDY_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
     }
 }

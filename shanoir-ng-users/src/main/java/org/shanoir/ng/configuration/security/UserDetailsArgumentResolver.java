@@ -65,7 +65,7 @@ public class UserDetailsArgumentResolver implements HandlerMethodArgumentResolve
 		final UserContext userContext = new UserContext();
 		userContext.setId(Long.valueOf(token.getId()));
 		userContext.setUsername(token.getPreferredUsername());
-		final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		final List<GrantedAuthority> authorities = new ArrayList<>();
 		if (token.getRealmAccess().getRoles() != null) {
 			for (String roleStr : token.getRealmAccess().getRoles()) {
 				Role role = roleService.findByName(roleStr);

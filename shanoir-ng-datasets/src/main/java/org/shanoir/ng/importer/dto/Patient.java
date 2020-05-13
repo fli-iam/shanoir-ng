@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  *
  */
-
 public class Patient {
 	
     @JsonProperty("subject")
@@ -36,6 +35,9 @@ public class Patient {
 
     @JsonProperty("patientName")
     private String patientName;
+    
+	@JsonProperty("patientBirthName")
+	private String patientBirthName;
 
     @JsonProperty("patientBirthDate")
     @LocalDateAnnotations
@@ -49,6 +51,9 @@ public class Patient {
 
     @JsonProperty("frontExperimentalGroupOfSubjectId")
     private Long frontExperimentalGroupOfSubjectId;
+    
+	// Keep this empty constructor to avoid Jackson deserialization exceptions
+	public Patient() {}
     
 	public String getPatientID() {
 		return patientID;
@@ -64,6 +69,14 @@ public class Patient {
 
 	public void setPatientName(String patientName) {
 		this.patientName = patientName;
+	}
+
+	public String getPatientBirthName() {
+		return patientBirthName;
+	}
+
+	public void setPatientBirthName(String patientBirthName) {
+		this.patientBirthName = patientBirthName;
 	}
 
 	public LocalDate getPatientBirthDate() {

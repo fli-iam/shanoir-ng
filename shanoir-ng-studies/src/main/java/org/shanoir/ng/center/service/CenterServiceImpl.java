@@ -47,7 +47,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		if (center == null) {
 			throw new EntityNotFoundException(Center.class, id);
 		}
-		final List<FieldError> errors = new ArrayList<FieldError>();
+		final List<FieldError> errors = new ArrayList<>();
 		if (!center.getAcquisitionEquipments().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "acquisitionEquipments"));
 		}

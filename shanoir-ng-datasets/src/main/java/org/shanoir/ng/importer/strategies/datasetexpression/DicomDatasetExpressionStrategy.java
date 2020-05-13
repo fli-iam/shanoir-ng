@@ -63,19 +63,17 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	private String dicomWebRS;
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) throws MalformedURLException {
-
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws MalformedURLException {
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
-		if (serie.getIsMultiFrame()) {
+		if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {
 			pacsDatasetExpression.setMultiFrame(true);
-			pacsDatasetExpression.setFrameCount(new Integer(serie.getMultiFrameCount()));
+			pacsDatasetExpression.setFrameCount(serie.getMultiFrameCount());
 		}
 
-		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
+		if (expressionFormat != null && expressionFormat.getType().equals("dcm")) {
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 				LocalDateTime contentTime = null;
 				LocalDateTime acquisitionTime = null;
@@ -90,7 +88,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
 				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);				
+				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
 				final StringBuffer wadoStrBuf = new StringBuffer();
 				wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
 				// Use WADO-RS if true, WADO-URI if otherwise
@@ -104,7 +102,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				}
 				URL wadoURL = new URL(wadoStrBuf.toString());
 				pacsDatasetFile.setPath(wadoURL.toString());
-
+				
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 

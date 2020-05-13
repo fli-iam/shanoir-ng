@@ -82,7 +82,9 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-studies: http://studies:9902/
+# Data folder configuration
 datasets-data: /var/datasets-data
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log

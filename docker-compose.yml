@@ -27,7 +27,7 @@ services:
   keycloak:
     container_name: keycloak
     env_file:
-      - ./docker-compose/keycloak/variables.env
+      - ./.env
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -73,8 +73,8 @@ services:
       - kc.admin.client.server.url
       - kc.admin.client.realm
       - kc.admin.client.client.id
-      - kc.admin.client.username
-      - kc.admin.client.password
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
       - front.server.url
       - front.server.address
       - spring.mail.host
@@ -108,6 +108,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "datasets-data:/var/datasets-data"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
@@ -172,6 +174,48 @@ services:
       - "rabbitmq"
       - "users"
   #
+  # Preclinical microservice
+  #
+  preclinical:
+    container_name: preclinical
+    build: ./docker-compose/preclinical
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java
+      - "tmp:/tmp"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9909:9909"
+     - "9915:9915"
+    depends_on:
+      - "keycloak"
+      - "database"
+      - "rabbitmq"
+      - "users"
+  #
+  # Bruker2Dicom, Dicom2Nifti microservice
+  #
+  preclinical-bruker2dicom:
+    container_name: preclinical-bruker2dicom
+    image: dicomifier.ws
+    command: ["python3", "/root/run.py"]
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - "tmp:/tmp"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "5000:5000"
+    depends_on:
+      - "preclinical"
+  #
   # Solr microservice for Shanoir-NG search
   #
 #  solr:
@@ -188,6 +232,7 @@ services:
 #      - solr-precreate
 #      - mycore
 #
+  #
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:

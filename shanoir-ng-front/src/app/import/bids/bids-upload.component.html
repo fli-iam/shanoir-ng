@@ -1,0 +1,65 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="header command-zone">1. Select Bids archive</div>
+<fieldset>
+    <p>Please select a BIDS/.sef archive to import.</p>
+    <p>The files should be organized like this:</p>
+    <p>import.zip <br/>
+     - dataset_description.json <br/>
+     - README <br/>
+     - participants.tsv <br/>
+     - sourcedata <br/>
+     - - sub-subject_name <br/>
+     - - - shanoir-import.json <br/>
+     - - - DICOM <br/>
+     - - - - [list of images] <br/>
+     - - - BRUKER <br/>
+     - - - - [list of images] <br/>
+     - - - EEG <br/>
+     - - - - [list of images]</p>
+
+    <p> dataset_description.json: https://bids-specification.readthedocs.io/en/latest/03-modality-agnostic-files.html#dataset-description </p>    
+    
+    <p> participants.tsv: a TSV/CSV, tab separated, with column headers:
+     - participant_id (name - mandatory)<br/>
+     - subject_identifier <br/>
+     - sex (M/F)<br/>
+     - birthdate (yyyy/mm/dd)<br/>    
+     - manual_hemispheric_dominance (LEFT/RIGHT/null)<br/>
+     - language_hemispheric_dominance (LEFT/RIGHT/null)<br/>
+     - imaged_object_category (PHANTOM/LIVING_HUMAN_BEING/HUMAN_CADAVER/ANATOMICAL_PIECE/LIVING_ANIMAL/ANIMAL_CADAVER - mandatory)</p>
+
+    <p> Non existing subjects will be created based on their name </p>
+
+    <p> shanoir-import.json is a json constructed following the further example:</p>
+    <p>
+    {{'{'}} <br/>
+    &nbsp;&nbsp;&nbsp;"frontStudyId" : 10,  <i> => Study ID</i><br/>
+    &nbsp;&nbsp;&nbsp;"examinationId": 0, <i>=> Examination ID (can be null or set to 0 to be created)</i><br/>
+    &nbsp;&nbsp;&nbsp;"frontAcquisitionEquipmentId": 1 <i>=> ID of the equipement</i><br/>
+    {{'}'}}
+    </p>
+    <p>
+    If examinationId is set, it must be already existing in Shanoir<br/>
+    If not, it will be created dynamically
+    </p>
+</fieldset>
+
+<upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+    
+<label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
+{{errorMessage}}
+</label>
+

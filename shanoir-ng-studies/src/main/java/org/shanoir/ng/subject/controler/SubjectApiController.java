@@ -16,8 +16,12 @@ package org.shanoir.ng.subject.controler;
 
 import java.util.List;
 
+import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -28,6 +32,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,14 +56,23 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 
+	@Autowired
+	private StudyBIDSService bidsService;
+
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
+			bidsService.deleteSubjectBids(subjectId);
+			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -67,7 +81,7 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
-			return new ResponseEntity<SubjectDTO>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 	}
@@ -113,21 +127,30 @@ public class SubjectApiController implements SubjectApi {
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
 		try {
+			// Update subject BIDS
+			bidsService.updateSubjectBids(subjectId, subject);
 			subjectService.update(subject);
-			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<SimpleSubjectDTO> simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
-		if (simpleSubjectDTOList.isEmpty()) {
-			return new ResponseEntity<List<SimpleSubjectDTO>>(HttpStatus.NO_CONTENT);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+		final List<SimpleSubjectDTO> simpleSubjectDTOList;
+		if ("null".equals(preclinical)) {
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
+		} else {
+			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
 		}
-		return new ResponseEntity<List<SimpleSubjectDTO>>(simpleSubjectDTOList, HttpStatus.OK);
+		if (simpleSubjectDTOList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 
 	@Override
@@ -135,9 +158,9 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
-			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 	}
 
 	private void validate(Subject subject, BindingResult result) throws RestServiceException {

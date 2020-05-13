@@ -1,0 +1,10 @@
+.modality { margin-bottom: 0; }
+    .modality span { color: var(--color-a); font-weight: bold; }
+.warning { color: var(--color-b); }
+input[type="file"] { padding: 0; }
+.loader { height: 14px; vertical-align: sub; }
+.progress { color: var(--color-a); margin-left: 20px; }
+    .progress li { margin: 3px 0; }
+    .progress svg { margin: 0 7px; vertical-align: text-top; }
+.done svg { color: green; }
+.done.error { color: var(--color-error); }

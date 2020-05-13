@@ -35,6 +35,9 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { BidsElement } from '../../bids/model/bidsElement.model'
+
 
 @Component({
     selector: 'study-detail',
@@ -60,6 +63,11 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
+    
+    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    protected bidsLoading: boolean = false;
+    
+    protected bidsStructure: BidsElement[];
 
     constructor(
             private route: ActivatedRoute, 
@@ -75,6 +83,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
+        this.getBidsStructure(this.id);
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -152,7 +161,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public hasEditRight(): boolean {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
-        let studyUser: StudyUser = this.study.studyUserList.find(su => su.userId == KeycloakService.auth.userId);
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
@@ -184,7 +193,7 @@ export class StudyComponent extends EntityComponent<Study> {
     /** Center section management  **/
     private onMonoMultiChange() {
         if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
-            this.selectedCenter = this.centers.find(center => center.id == this.study.studyCenterList[0].center.id);
+            this.selectedCenter = this.centers.filter(center => center.id == this.study.studyCenterList[0].center.id)[0];
         }
     }
 
@@ -306,7 +315,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         selectedUser.selected = true;
 
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.userId == selectedUser.id);
+        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.study.studyUserList.push(backedUpStudyUser);
         } else {
@@ -390,5 +399,22 @@ export class StudyComponent extends EntityComponent<Study> {
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
     }
+
+    private exportBIDS(study: Study) {
+        let studyName: string;
+        this.bidsLoading = true;
+        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
+    }
+
+    getBidsStructure(id: number) {
+       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
+    }
+
+    // removeTimepoint(timepoint: Timepoint): void {
+    //     const index: number = this.study.timepoints.indexOf(timepoint);
+    //     if (index !== -1) {
+    //         this.study.timepoints.splice(index, 1);
+    //     }
+    // }
 
 }
