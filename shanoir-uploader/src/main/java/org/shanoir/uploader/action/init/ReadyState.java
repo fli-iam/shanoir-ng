@@ -53,7 +53,8 @@ public class ReadyState implements State {
 	private void initUploadService() {
 		try {
 			try {
-				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());
+				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());					
+				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClientNG", ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
 				ShUpOnloadConfig.getJobDataMapMain().put("nominativeDataController", ShUpOnloadConfig.getCurrentNominativeDataController());
 				ShUpOnloadConfig.setUploadServiceJob(JobBuilder.newJob(UploadServiceJob.class)
 						.usingJobData(ShUpConfig.WORK_FOLDER,ShUpOnloadConfig.getWorkFolder().getAbsolutePath())
@@ -127,8 +128,7 @@ public class ReadyState implements State {
 	 */
 	private MainWindow initJFrame() {
 		MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
-				ShUpConfig.DICOM_SERVER_PROPERTIES, ShUpConfig.SHANOIR_SERVER_PROPERTIES,
-				ShUpConfig.LANGUAGE_PROPERTIES, ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
+				ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowOpened(WindowEvent e) {

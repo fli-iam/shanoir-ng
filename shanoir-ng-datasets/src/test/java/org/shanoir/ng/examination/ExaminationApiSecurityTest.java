@@ -81,7 +81,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessDenied(t -> { try { api.findExaminationById(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 		assertAccessDenied(api::findExaminations, new PageRequest(0, 10));
 		assertAccessDenied(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
-		assertAccessDenied(api::findExaminationsBySubjectId, 1L);	
+		assertAccessDenied(api::findExaminationsBySubjectId, 1L);
 		assertAccessDenied((t, u) -> { try { api.saveNewExamination(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, new ExaminationDTO(), mockBindingResult);
 		assertAccessDenied((t, u, v) -> { try { api.updateExamination(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockExamDTO(1L), mockBindingResult);
 	}
@@ -105,7 +105,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessAuthorized(t -> { try { api.findExaminationById(t); } catch (RestServiceException e) {}}, 1L);
 		assertAccessAuthorized(api::findExaminations, new PageRequest(0, 10));
 		assertAccessAuthorized(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
-		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);	
+		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewExamination(t, u); } catch (RestServiceException e) {}}, new ExaminationDTO(), mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateExamination(t, u, v); } catch (RestServiceException e) {}}, 1L, mockExamDTO(1L), mockBindingResult);
 	}

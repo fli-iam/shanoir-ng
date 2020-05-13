@@ -21,10 +21,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.keyvalue.core.IterableConverter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,8 +33,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class StudyUserServiceImpl implements StudyUserService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StudyUserServiceImpl.class);
-	
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
@@ -46,9 +41,9 @@ public class StudyUserServiceImpl implements StudyUserService {
 		Long userId = KeycloakUtil.getTokenUserId();
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
 		if (studyUser != null) {
-			return studyUser.getStudyUserRights();			
+			return studyUser.getStudyUserRights();
 		} else {
-			return new ArrayList<StudyUserRight>(); 
+			return new ArrayList<>();
 		}
 	}
 

@@ -56,13 +56,11 @@ public class StreamGobbler extends Thread {
 	 * 
 	 * @see java.lang.Thread#run()
 	 */
+	@Override
 	public void run() {
-		InputStreamReader isr = null;
-		BufferedReader br = null;
-		try {
-			isr = new InputStreamReader(is);
-			br = new BufferedReader(isr);
+		try (InputStreamReader isr = new InputStreamReader(is); BufferedReader br = new BufferedReader(isr)) {
 			String line = null;
+
 			while ((line = br.readLine()) != null) {
 				if (type.equals("ERROR")) {
 					LOG.error(line);
@@ -75,17 +73,8 @@ public class StreamGobbler extends Thread {
 					stringDisplay += "INFO : " + line + "\n";
 				}
 			}
-			br.close();
-			isr.close();
 		} catch (final IOException ioe) {
 			LOG.error(ioe.getMessage());
-		} finally {
-			try {
-				br.close();
-				isr.close();
-			} catch (IOException e) {
-				LOG.error(e.getMessage());
-			}				
 		}
 	}
 
@@ -107,5 +96,5 @@ public class StreamGobbler extends Thread {
 	public void setStringDisplay(String stringDisplay) {
 		this.stringDisplay = stringDisplay;
 	}
-
 }
+

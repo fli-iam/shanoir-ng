@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.common;
 
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -42,6 +44,9 @@ public class CommonServiceImpl implements CommonService {
 	@Autowired
 	private CenterRepository centerRepository;
 
+	@Autowired
+	private AcquisitionEquipmentRepository equipementRepository;
+
 	@Override
 	public CommonIdNamesDTO findByIds(final CommonIdsDTO commonIdsDTO) {
 		CommonIdNamesDTO names = new CommonIdNamesDTO();
@@ -63,7 +68,12 @@ public class CommonServiceImpl implements CommonService {
 				names.setSubject(new IdName(commonIdsDTO.getSubjectId(), subject.getName()));
 			}
 		}
-
+		if (commonIdsDTO.getEquipementId() != null) {
+			final AcquisitionEquipment equipement = equipementRepository.findOne(commonIdsDTO.getEquipementId());
+			if (equipement != null) {
+				names.setEquipement(new IdName(commonIdsDTO.getEquipementId(), equipement.getSerialNumber()));
+			}
+		}
 		return names;
 	}
 

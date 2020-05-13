@@ -131,4 +131,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 		return studyCard.getCenterId();
 	}
 
+	@Override
+	public StudyCard findByName(String name) {
+		return studyCardRepository.findByName(name);
+	}
+
 }

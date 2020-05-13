@@ -4,9 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +31,7 @@ public class IdentifierCalculatorTest {
 	
 	private Date birthDate;
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void setup() {
 		identifierCalculator = new IdentifierCalculator();

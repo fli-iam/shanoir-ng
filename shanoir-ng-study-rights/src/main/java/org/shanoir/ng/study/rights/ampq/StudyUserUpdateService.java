@@ -46,15 +46,17 @@ public class StudyUserUpdateService {
         Map<Long, StudyUser> toBeUpdated = new HashMap<>();
         Set<Long> toBeDeleted = new HashSet<>();
         for (StudyUserCommand command : commands) {
-    		LOG.debug("command : " + command.getType() + ", id : " 
-    				+ (command.getStudyUser() != null && command.getStudyUser().getId() != null ? command.getStudyUser().getId().toString() : "null") + "/" 
-    				+ (command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null"));
-        	if (CommandType.CREATE.equals(command.getType())) 
-        		toBeCreated.add((StudyUser) command.getStudyUser());
-        	else if (CommandType.UPDATE.equals(command.getType())) 
-        		toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
-        	else if (CommandType.DELETE.equals(command.getType())) 
-        		toBeDeleted.add(command.getStudyUserId());
+    		LOG.debug("command : {}, id : {}/{}",
+    				 command.getStudyUser() != null && command.getStudyUser().getId() != null ? command.getStudyUser().getId().toString() : "null",
+    				 command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null",
+    				 command.getType());
+        	if (CommandType.CREATE.equals(command.getType())) {
+				toBeCreated.add((StudyUser) command.getStudyUser());
+			} else if (CommandType.UPDATE.equals(command.getType())) {
+				toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
+			} else if (CommandType.DELETE.equals(command.getType())) {
+				toBeDeleted.add(command.getStudyUserId());
+			}
         }
         
         Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAll(toBeUpdated.keySet());
@@ -66,29 +68,29 @@ public class StudyUserUpdateService {
         }
         
         if (!toBeCreated.isEmpty()) {
-        	LOG.debug("Saving " + toBeCreated.size() + " new study-user(s)");
+        	LOG.debug("Saving {} new study-user(s)", toBeCreated.size());
         	for (StudyUser su : toBeCreated) {
-        		LOG.debug("getId : " + su.getId());
-        		LOG.debug("getUserName : " + su.getUserName());
-        		LOG.debug("getStudyId : " + su.getStudyId());
-        		LOG.debug("getUserId : " + su.getUserId());
-        		LOG.debug("getStudyUserRights : " + su.getStudyUserRights() == null ? "null" : su.getStudyUserRights().size()+"");
+        		LOG.debug("getId : {}", su.getId());
+        		LOG.debug("getUserName : {}", su.getUserName());
+        		LOG.debug("getStudyId : {}", su.getStudyId());
+        		LOG.debug("getUserId : {}", su.getUserId());
+        		LOG.debug("getStudyUserRights :{}",  su.getStudyUserRights() == null ? "null" : su.getStudyUserRights().size());
         		if (su.getStudyUserRights() != null) {
         			for (StudyUserRight right : su.getStudyUserRights()) {
-        				LOG.debug("    ---> : " + right.toString());
-        			}        			
+        				LOG.debug("    ---> : {}", right);
+        			}
         		}
         	}
-        	studyUserRepository.save(toBeCreated);        	
+        	studyUserRepository.save(toBeCreated);
         }
         int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
         if (updateSize > 0) {
-        	LOG.debug("Updating " + updateSize + " study-user(s)");
-        	studyUserRepository.save(toBeUpdatedDb);        	
+        	LOG.debug("Updating {} study-user(s)", updateSize);
+        	studyUserRepository.save(toBeUpdatedDb);
         }
         if (!toBeDeleted.isEmpty()) {
-        	LOG.debug("Deleting " + toBeDeleted.size() + " study-user(s)");
-        	studyUserRepository.deleteByIdIn(toBeDeleted);        	
-        }     	
+        	LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());
+        	studyUserRepository.deleteByIdIn(toBeDeleted);
+        }
     }
 }

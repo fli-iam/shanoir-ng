@@ -84,13 +84,19 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://datasets:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://datasets:9904/datasetacquisition_eeg
+  dicom2nifti: http://preclinical-bruker2dicom:5000/dicom2nifti
+  shanoir-ng-studies-name: http://studies:9902/studies/names
+  shanoir-ng-studies-subjects-names: http://studies:9902/subjects/names
+  shanoir-ng-create-examination: http://datasets:9904/examinations
+  shanoir-ng-studies-commons: http://studies:9902/common
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-import.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-    org.shanoir: DEBUG
+    org.shanoir: INFO
 # Shanoir configurations
 shanoir:
   import:
@@ -149,3 +155,45 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
+shanoir:
+  import:
+    upload:
+      folder: /tmp
+
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    data: classpath:/scripts/test-data-h2.sql
+    initialize: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+logging:
+  file: /tmp/shanoir-ng-import.log
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: qualif
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth

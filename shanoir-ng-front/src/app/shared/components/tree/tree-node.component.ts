@@ -128,7 +128,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
                     node.value = value;
                 }
             });
-            this.notifyParent();
+            if (this.notifyParent != undefined) this.notifyParent();
         }
     }
 

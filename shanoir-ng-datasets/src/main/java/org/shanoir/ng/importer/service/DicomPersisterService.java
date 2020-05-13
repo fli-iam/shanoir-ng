@@ -15,7 +15,6 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.importer.dto.Dataset;
@@ -82,7 +81,7 @@ public class DicomPersisterService {
 									stowRsService.sendDicomFilesToPacs(directoryWithDicomFiles);
 								} else {
 									cStoreService.sendDicomFilesToPacs(directoryWithDicomFiles);
-								}								
+								}
 							} else {
 								throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with empty path found.");
 							}

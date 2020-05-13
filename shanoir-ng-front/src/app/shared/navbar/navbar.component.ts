@@ -51,6 +51,10 @@ export class NavbarComponent {
     isUserAdmin(): boolean {
         return this.keycloakService.isUserAdmin();
     }
+
+    isUserAdminOrExpert(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
     
     canUserImportFromPACS(): boolean {
         return this.keycloakService.canUserImportFromPACS();

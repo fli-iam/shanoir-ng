@@ -5,6 +5,7 @@
 *~
 *.swp
 *.map
+*.pyc
 *.metadata.json
 *.settings/
 .DS_Store
@@ -19,4 +20,6 @@ target
 .factorypath
 .project
 bin/
-shanoir-uploader/src/main/resources/key
+shanoir-uploader/src/main/resources/profile.OFSEP/key
+shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
+shanoir-uploader/src/main/resources/pseudonymus

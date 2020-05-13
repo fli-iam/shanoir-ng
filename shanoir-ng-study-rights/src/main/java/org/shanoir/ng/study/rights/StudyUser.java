@@ -61,6 +61,7 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the receiveAnonymizationReport
 	 */
+	@Override
 	public boolean isReceiveAnonymizationReport() {
 		return receiveAnonymizationReport;
 	}
@@ -69,6 +70,7 @@ public class StudyUser implements StudyUserInterface {
 	 * @param receiveAnonymizationReport
 	 *            the receiveAnonymizationReport to set
 	 */
+	@Override
 	public void setReceiveAnonymizationReport(boolean receiveAnonymizationReport) {
 		this.receiveAnonymizationReport = receiveAnonymizationReport;
 	}
@@ -76,6 +78,7 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the receiveNewImportReport
 	 */
+	@Override
 	public boolean isReceiveNewImportReport() {
 		return receiveNewImportReport;
 	}
@@ -84,6 +87,7 @@ public class StudyUser implements StudyUserInterface {
 	 * @param receiveNewImportReport
 	 *            the receiveNewImportReport to set
 	 */
+	@Override
 	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
 		this.receiveNewImportReport = receiveNewImportReport;
 	}
@@ -91,6 +95,7 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the studyId
 	 */
+	@Override
 	public Long getStudyId() {
 		return studyId;
 	}
@@ -106,15 +111,19 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the studyUserRight
 	 */
+	@Override
 	public List<StudyUserRight> getStudyUserRights() {
 		List<StudyUserRight> list = new ArrayList<>();
-		for (Integer id : studyUserRights) list.add(StudyUserRight.getType(id));
+		for (Integer localId : studyUserRights) {
+			list.add(StudyUserRight.getType(localId));
+		}
 		return list;
 	}
 
 	/**
 	 * @param studyUserRight the studyUserRight to set
 	 */
+	@Override
 	public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
 		this.studyUserRights = new ArrayList<>();
 		if (studyUserRights != null) {
@@ -127,6 +136,7 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the userId
 	 */
+	@Override
 	public Long getUserId() {
 		return userId;
 	}
@@ -135,14 +145,17 @@ public class StudyUser implements StudyUserInterface {
 	 * @param userId
 	 *            the userId to set
 	 */
+	@Override
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 
+	@Override
 	public String getUserName() {
 		return userName;
 	}
 
+	@Override
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
@@ -154,7 +167,7 @@ public class StudyUser implements StudyUserInterface {
 
 	@Override
 	public void setId(Long id) {
-		this.id = id;		
+		this.id = id;
 	}
 
 }
