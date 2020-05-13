@@ -29,3 +29,8 @@ CREATE USER 'datasets'@'localhost' IDENTIFIED BY 'password';
 CREATE USER 'datasets'@'%' IDENTIFIED BY 'password';
 GRANT ALL ON *.* TO 'datasets'@'localhost';
 GRANT ALL ON *.* TO 'datasets'@'%';
+
+CREATE USER 'preclinical'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'preclinical'@'%' IDENTIFIED BY 'password';
+GRANT ALL ON *.* TO 'preclinical'@'localhost';
+GRANT ALL ON *.* TO 'preclinical'@'%';

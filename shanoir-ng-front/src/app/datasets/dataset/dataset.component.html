@@ -29,9 +29,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
+            <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 			<!-- TODO : other types -->
 
-			<fieldset *ngIf="mode=='view' && hasDownloadRight">
+			<fieldset *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'">
 				<legend>Preview</legend>
 				<papaya [params]="papayaParams"></papaya>
 			</fieldset>
@@ -40,10 +41,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[state]="footerState"
 					(edit)="goToEdit()"
 					(cancel)="goToView()"
-					(back)="goBack()">
-				<button *ngIf="mode=='view' && hasDownloadRight" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-				<button *ngIf="mode=='view' && hasDownloadRight" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
-			</form-footer>
+					(back)="goBack()"
+					(save)="save()">
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+			    <button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
+            </form-footer>
 
 		</div>
 	</form>

@@ -41,7 +41,7 @@ public class AnonymizationRulesSingleton {
 
 	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
 
-	private static final String xTagsColumn = "0xTag";
+	private static final String X_TAGS_COLUMN = "0xTag";
 
 	private static final String PROFILE = "Profile ";
 
@@ -50,8 +50,8 @@ public class AnonymizationRulesSingleton {
 	private Map<String, List<String>> tagsToDeleteForManufacturer;
 
 	private AnonymizationRulesSingleton() {
-		this.profiles = new HashMap<String, Profile>();
-		this.tagsToDeleteForManufacturer = new HashMap<String, List<String>>();
+		this.profiles = new HashMap<>();
+		this.tagsToDeleteForManufacturer = new HashMap<>();
 		Integer xtagColumn = null;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
@@ -73,7 +73,7 @@ public class AnonymizationRulesSingleton {
 					Iterator<Cell> cellIterator = row.cellIterator();
 					while (cellIterator.hasNext()) {
 						Cell cell = cellIterator.next();
-						if (cell.getStringCellValue().equals(xTagsColumn)) {
+						if (cell.getStringCellValue().equals(X_TAGS_COLUMN)) {
 							xtagColumn = cell.getColumnIndex();
 						} else if (cell.getStringCellValue().startsWith(PROFILE)) {
 							// init map of profiles here
@@ -86,12 +86,12 @@ public class AnonymizationRulesSingleton {
 					Cell xtagCell = row.getCell(xtagColumn);
 					if (xtagCell != null && xtagCell.getStringCellValue().length() == 10) {
 						String tagString = xtagCell.getStringCellValue();
-						if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
+						if (tagString != null && tagString.length() != 0 && !X_TAGS_COLUMN.equals(tagString)) {
 							Collection<Profile> profilesColl = profiles.values();
 							for (Iterator<Profile> iterator = profilesColl.iterator(); iterator.hasNext();) {
-								Profile profile = (Profile) iterator.next();
+								Profile profile = iterator.next();
 								Cell actionCell = row.getCell(profile.getProfileColumn());
-								profile.getAnonymizationMap().put(tagString, actionCell.getStringCellValue());	
+								profile.getAnonymizationMap().put(tagString, actionCell.getStringCellValue());
 							}
 						}
 					}
@@ -130,7 +130,7 @@ public class AnonymizationRulesSingleton {
 			myWorkBook.close();
 
 		} catch (IOException e) {
-			LOG.error("Unable to read anonymization file: " + e);
+			LOG.error("Unable to read anonymization file: {}", e);
 		}
 
 	}

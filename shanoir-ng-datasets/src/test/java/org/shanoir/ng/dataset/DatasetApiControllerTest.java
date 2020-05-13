@@ -24,11 +24,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +82,15 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private WADODownloaderService downloader;
+	
+	@MockBean
+	private DatasetSecurityService datasetSecurityService;
 
+	@MockBean
+	private EegDatasetMapper eegDatasetMapper;
+
+	@MockBean
+	private BIDSServiceImpl bidsService;
 
 	@Before
 	public void setup() throws ShanoirException {

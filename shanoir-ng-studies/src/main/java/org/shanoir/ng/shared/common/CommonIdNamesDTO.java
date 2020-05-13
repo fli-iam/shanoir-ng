@@ -27,6 +27,7 @@ public class CommonIdNamesDTO {
 	private IdName center;
 	private IdName study;
 	private IdName subject;
+	private IdName equipement;
 
 	/**
 	 * @return the center
@@ -71,6 +72,20 @@ public class CommonIdNamesDTO {
 	 */
 	public void setSubject(IdName subject) {
 		this.subject = subject;
+	}
+
+	/**
+	 * @return the equipement
+	 */
+	public IdName getEquipement() {
+		return equipement;
+	}
+
+	/**
+	 * @param equipement the equipement to set
+	 */
+	public void setEquipement(IdName equipement) {
+		this.equipement = equipement;
 	}
 
 }

@@ -16,6 +16,7 @@ public class ServerUnreachableState implements State {
 	private static Logger logger = Logger.getLogger(ServerUnreachableState.class);
 	
 	public void load(StartupStateContext context) {
+		context.getShUpStartupDialog().updateStartupText("\nShanoir server unreachable, ShanoirUploader stopped.");
 		logger.error("Shanoir Server not reachable.");
 	}
 

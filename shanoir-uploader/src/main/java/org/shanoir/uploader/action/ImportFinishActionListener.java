@@ -171,6 +171,7 @@ public class ImportFinishActionListener implements ActionListener {
 			SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
 			subjectStudyDTO.setStudyId(study.getId());
 			subjectStudyDTO.setSubjectId(subjectId);
+			subjectStudyDTO.setSubjectStudyIdentifier(mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 			subjectStudyDTO.setSubjectType((String) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
 			subjectStudyDTO.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
 			subjectStudyDTO = shanoirUploaderServiceClient.createSubjectStudy(subjectStudyDTO);

@@ -262,6 +262,34 @@
 				}
 			},
 			{
+			  "name": "userId",
+			  "protocol": "openid-connect",
+			  "protocolMapper": "oidc-usermodel-attribute-mapper",
+			  "consentRequired": false,
+			  "config": {
+				"userinfo.token.claim": "false",
+				"user.attribute": "userId",
+				"id.token.claim": "false",
+				"access.token.claim": "true",
+				"claim.name": "userId",
+				"jsonType.label": "long"
+			  }
+			},
+			{
+			  "name": "canImportFromPACS",
+			  "protocol": "openid-connect",
+			  "protocolMapper": "oidc-usermodel-attribute-mapper",
+			  "consentRequired": false,
+			  "config": {
+				"userinfo.token.claim": "false",
+				"user.attribute": "canImportFromPACS",
+				"id.token.claim": "false",
+				"access.token.claim": "true",
+				"claim.name": "canImportFromPACS",
+				"jsonType.label": "boolean"
+			  }
+			},
+			{
 				"name": "family name",
 				"protocol": "openid-connect",
 				"protocolMapper": "oidc-usermodel-property-mapper",

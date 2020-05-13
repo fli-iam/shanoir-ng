@@ -97,7 +97,7 @@ export enum MrDatasetNature {
     }
 
     export function getLabel(nature: MrDatasetNature) {
-        let founded = allMrDatasetNatures.find(entry => entry.value == nature);
+        let founded = allMrDatasetNatures.filter(entry => entry.value == nature)[0];
         return founded ? founded.label : undefined;
     }
 

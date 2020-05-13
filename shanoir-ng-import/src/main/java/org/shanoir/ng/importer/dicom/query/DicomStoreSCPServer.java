@@ -86,7 +86,7 @@ public class DicomStoreSCPServer {
         } catch (Exception e) {
            LOG.error(e.getMessage(), e);
         }
-        LOG.info("DicomStoreSCPServer successfully initialized: " + calledName + ", " + calledHost + ", " + calledPort + ", " + storageDirPath);
+        LOG.info("DicomStoreSCPServer successfully initialized: {}, {}, {}, {}", calledName, calledHost, calledPort, storageDirPath);
 	}
 
 	public String getStorageDirPath() {

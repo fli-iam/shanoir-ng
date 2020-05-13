@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MicroserviceRequestsService {
 	
-	public static final String SUBJECT = "/subject";
+	public static final String SUBJECT = "/subjects";
 	public static final String STUDY = "/studies";
 	public static final String CENTER = "/centers";
 	public static final String COMMON = "/common";

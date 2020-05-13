@@ -25,15 +25,16 @@ public class UseIdOrGenerate extends IdentityGenerator {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Serializable generate(SessionImplementor session, Object obj) throws HibernateException {
-		if (obj == null)
+		if (obj == null) {
 			throw new HibernateException(new NullPointerException());
+		}
 
-		if (!(obj instanceof Identifiable))
+		if (!(obj instanceof Identifiable)) {
 			throw new HibernateException("Object is not a Identifiable. No Id generation");
+		}
 
-		if ((((Identifiable) obj).getId()) == null) {
-			Serializable id = super.generate(session, obj);
-			return id;
+		if (((Identifiable) obj).getId() == null) {
+			return super.generate(session, obj);
 		} else {
 			return ((Identifiable) obj).getId();
 		}

@@ -28,6 +28,10 @@ export class BrowserPaging<T> {
     public setItems(items: T[]) {
         this.items = items;
     }
+    
+    public setColumnDefs(columnDefs: any[]) {
+        this.columnDefs = columnDefs;
+    }
 
     public getPage(pageable: FilterablePageable): Page<T> {
         if ((!this.lastSort || !this.lastSort.equals(pageable.sort)) 

@@ -23,13 +23,20 @@ export class Examination extends Entity {
     id: number;
     examinationDate: Date;
     examinationExecutive: IdName;
-    subject: SubjectWithSubjectStudy;
+    subjectStudy: SubjectWithSubjectStudy;
+    subject: IdName;
+    subjectId: number;
     study: IdName;
+    studyId: number;
     center: IdName;
+    centerId: number;
     comment: string;
     note: string;
     subjectWeight: number;
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
-
+    preclinical: boolean;
+    hasStudyCenterData: boolean = false;
+    extraDataFilePathList: String[];
+    
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 }
