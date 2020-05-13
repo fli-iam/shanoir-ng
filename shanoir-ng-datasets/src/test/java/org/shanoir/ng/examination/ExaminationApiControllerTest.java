@@ -132,7 +132,6 @@ public class ExaminationApiControllerTest {
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
 		given(examinationServiceMock.save(Mockito.any(ExaminationDTO.class))).willReturn(exam);
@@ -141,13 +140,17 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteExaminationTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDeleteExaminationWithExtraData() throws IOException {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		// GIVEN an examination to delete with extra data files
 		File extraData = new File(tempFolderPath + "examination-1");
 		extraData.mkdirs();
@@ -160,18 +163,23 @@ public class ExaminationApiControllerTest {
 			// THEN both examination and files are deleted
 			assertFalse(extraData.exists());
 		} catch (Exception e) {
+			System.err.println("ERROR:" + e.getMessage());
 			fail();
 		}
 	}
 
 	@Test
 	public void findExaminationByIdTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk());
 	}
 
 	@Test
 	public void findExaminationsTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(new PageRequest(0, 10))))
 		.andExpect(status().isOk());
@@ -180,6 +188,8 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
 		.andExpect(status().isOk());
@@ -188,6 +198,8 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateExaminationTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
 		.andExpect(status().isNoContent());
@@ -197,6 +209,8 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testAddExtraData() throws IOException {
 		// GIVEN a file to add to an examination
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		File importZip = tempFolder.newFile("test-import-extra-data.zip");
 
 		try {
@@ -219,6 +233,7 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testDownloadExtraDataNotExisting() throws IOException {
 		// GIVEN an examination with no extra-data
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
 		// WHEN we download extra-data
 		try {
@@ -226,6 +241,7 @@ public class ExaminationApiControllerTest {
 			mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
 			.andExpect(status().isNoContent());
 		} catch (Exception e) {
+			System.out.println(e);
 			fail();
 		}
 	}
@@ -234,6 +250,8 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testDownloadExtraData() throws IOException {
 		// GIVEN an examination with extra-data files
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		File todow = new File(tempFolderPath + "examination-1/file1.pdf");
 		//File todow = new File("/var/datasets-data/examination-1/file.pdf");
 		todow.getParentFile().mkdirs();
@@ -259,16 +277,18 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void exportExaminationTestFileNotExisting() throws Exception {
 		Examination exam = new Examination();
-		exam.setExtraDataFilePathList(Collections.singletonList("/var/datasets-data/preclinical/BusyFile"));
+		exam.setExtraDataFilePathList(Collections.singletonList(tempFolderPath + "/preclinical/BusyFile"));
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isInternalServerError());
 	}
-	
+
 	@Test
 	@WithMockUser
 	public void exportExaminationNoContentTest() throws Exception {
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
 		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
