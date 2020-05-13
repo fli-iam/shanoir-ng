@@ -28,6 +28,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -82,6 +83,9 @@ public class StudyApiSecurityTest {
 	
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
+	
+	@MockBean
+	private StudyBIDSService bidsService;
 	
 	@Before
 	public void setup() {
@@ -197,9 +201,9 @@ public class StudyApiSecurityTest {
 //		given(repository.findAll(Mockito.anyList())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
 //		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
 //				(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
-//		
+//
 //		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
-//		
+//
 //		assertEquals(1, api.findStudies().getBody().size());
 //		assertNotNull(api.findStudies().getBody().get(0).getStudyCenterList());
 //		assertEquals(1, api.findStudies().getBody().get(0).getStudyCenterList().size());
@@ -215,15 +219,15 @@ public class StudyApiSecurityTest {
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);			
+			studyUserList.add(studyUser);
 		}
 		study.setStudyUserList(studyUserList);
 		StudyCenter studyCenter = new StudyCenter();
 		studyCenter.setCenter(ModelsUtil.createCenter());
 		studyCenter.setStudy(study);
-		studyCenter.setId(1L);		
+		studyCenter.setId(1L);
 		study.setStudyCenterList(Arrays.asList(studyCenter));
-		return study;		
+		return study;
 	}
 
 }

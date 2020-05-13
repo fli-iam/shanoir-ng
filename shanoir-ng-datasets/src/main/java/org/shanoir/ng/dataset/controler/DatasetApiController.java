@@ -25,6 +25,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -33,9 +34,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
@@ -48,6 +52,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -65,7 +70,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,6 +81,8 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
+
+	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
 
 	private static final String ZIP = ".zip";
 
@@ -106,6 +112,9 @@ public class DatasetApiController implements DatasetApi {
 	private MrDatasetMapper mrDatasetMapper;
 
 	@Autowired
+	private EegDatasetMapper eegDatasetMapper;
+
+	@Autowired
 	private DatasetService datasetService;
 
 	@Autowired
@@ -117,31 +126,36 @@ public class DatasetApiController implements DatasetApi {
 	private WADODownloaderService downloader;
 
 	@Autowired
+	private BIDSService bidsService;
+
+	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	@org.springframework.beans.factory.annotation.Autowired
-	public DatasetApiController(HttpServletRequest request) {
+	public DatasetApiController(final HttpServletRequest request) {
 		this.request = request;
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
 
 		try {
+			Dataset dataset = datasetService.findById(datasetId);
+			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@Override
 	public ResponseEntity<DatasetDTO> findDatasetById(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) {
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
@@ -151,23 +165,26 @@ public class DatasetApiController implements DatasetApi {
 		if (dataset instanceof MrDataset) {
 			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetDTO((MrDataset) dataset), HttpStatus.OK);
 		}
+		else if (dataset instanceof EegDataset) {
+			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO((EegDataset) dataset), HttpStatus.OK);
+		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> updateDataset(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@ApiParam(value = "study to update", required = true) @Valid @RequestBody final Dataset dataset,
 			final BindingResult result) throws RestServiceException {
 
-		validate(dataset, result);
+		validate(result);
 
 		try {
 			datasetService.update(dataset);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -177,14 +194,14 @@ public class DatasetApiController implements DatasetApi {
 		if (datasets.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadDatasetById(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = "dcm")
+			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") final String format)
 					throws RestServiceException, IOException {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -208,12 +225,15 @@ public class DatasetApiController implements DatasetApi {
 		zipFile.createNewFile();
 
 		try {
-			List<URL> pathURLs = new ArrayList<URL>();
+			List<URL> pathURLs = new ArrayList<>();
 			if ("dcm".equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
 			} else if ("nii".equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				copyNiftiFilesForURLs(pathURLs, workFolder);
+			} else if ("eeg".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} else {
 				throw new RestServiceException(
@@ -232,7 +252,7 @@ public class DatasetApiController implements DatasetApi {
 		ByteArrayResource resource = new ByteArrayResource(data);
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
 				.contentType(MediaType.parseMediaType(contentType))
 				.contentLength(data.length)
 				.body(resource);
@@ -275,7 +295,6 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 2: Check rights => Also filters datasets on rights
 		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
-
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
@@ -342,7 +361,7 @@ public class DatasetApiController implements DatasetApi {
 	 * @param pathURLs
 	 * @throws MalformedURLException
 	 */
-	private void getDatasetFilePathURLs(final Dataset dataset, List<URL> pathURLs, DatasetExpressionFormat format) throws MalformedURLException {
+	private void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
 		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
 		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
 			DatasetExpression datasetExpression = itExpressions.next();
@@ -364,24 +383,24 @@ public class DatasetApiController implements DatasetApi {
 	 * @param zipFilePath
 	 * @throws IOException
 	 */
-	private void zip(String sourceDirPath, String zipFilePath) throws IOException {
+	private void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
 		Path p = Paths.get(zipFilePath);
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
 			Path pp = Paths.get(sourceDirPath);
-			Files.walk(pp)
-			.filter(path -> !Files.isDirectory(path))
-			.forEach(path -> {
-				ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-				try {
-					zos.putNextEntry(zipEntry);
-					Files.copy(path, zos);
-					zos.closeEntry();
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			});
+			try(Stream<Path> walker = Files.walk(pp)) {
+				walker.filter(path -> !path.toFile().isDirectory())
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+					try {
+						zos.putNextEntry(zipEntry);
+						Files.copy(path, zos);
+						zos.closeEntry();
+					} catch (IOException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				});
+			}
 			zos.finish();
-			zos.close();
 		}
 	}
 
@@ -508,15 +527,46 @@ public class DatasetApiController implements DatasetApi {
 	/**
 	 * Validate a dataset
 	 * 
-	 * @param dataset
 	 * @param result
 	 * @throws RestServiceException
 	 */
-	private void validate(Dataset dataset, BindingResult result) throws RestServiceException {
+	private void validate(final BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
 	}
+	
+	/**
+	 * This enum is for coordinates system and associated units
+	 */
+	public enum CoordinatesSystem {
+	    ACPC("mm"),
+	    Allen("mm"),
+	    Analyze("mm"),
+	    BTi_4D("m"),
+	    CTF_MRI("mm"),
+	    CTF_gradiometer("cm"),
+	    CapTrak("mm"),
+	    Chieti("mm"),
+	    DICOM("mm"),
+	    FreeSurfer("mm"),
+	    MNI("mm"),
+	    NIfTI("mm"),
+	    Neuromag_Elekta("m"),
+	    Paxinos_Franklin("mm"),
+	    Talairach_Tournoux("mm"),
+	    Yokogawa("n/a");
+	    
+	    private String unit;
+	    
+	    CoordinatesSystem(final String pUnit) {
+	    	this.unit = pUnit;
+	    }
+	    public String getUnit() {
+	    	return unit;
+	    }
+	}
+	
 }

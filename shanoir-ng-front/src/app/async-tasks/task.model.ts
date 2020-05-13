@@ -19,10 +19,11 @@ import { TaskService } from './task.service';
 export class Task extends Entity {
 
     id: number;
-    label: string;
-    startDate: Date;
-    endDate: Date;
+    creationDate: Date;
+    lastUpdate: Date;
+    status: number;
+    message: string;
     progress: number;
 
-    service = ServiceLocator.injector.get(TaskService);
+    service: TaskService = ServiceLocator.injector.get(TaskService);
 }

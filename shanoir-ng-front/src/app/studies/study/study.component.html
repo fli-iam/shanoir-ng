@@ -161,7 +161,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
+							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" formcontrolname="center" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
 								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
@@ -215,6 +215,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset *ngIf="mode == 'view'">
 				<study-tree [study]="study"></study-tree>
 			</fieldset>
+            <fieldset *ngIf="mode == 'view'">
+                <bids-tree [(list)]="bidsStructure"></bids-tree>
+            </fieldset>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
@@ -222,6 +225,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
+            <button *ngIf="mode=='view'" [disabled]="bidsLoading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="exportBIDS(study)">Download BIDS<i class="fas fa-download"></i></button>
+            <img class="loader" *ngIf="bidsLoading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
 		</form>
         <dataset-download [studyId]="id" > </dataset-download>
 	</div>

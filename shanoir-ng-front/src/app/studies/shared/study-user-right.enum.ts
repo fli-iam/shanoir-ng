@@ -35,7 +35,7 @@ export enum StudyUserRight {
     }
 
     export function getLabel(type: StudyUserRight) {
-        let founded = allStudyUserRights.find(entry => entry.value == type);
+        let founded = allStudyUserRights.filter(entry => entry.value == type)[0];
         return founded ? founded.label : undefined;
     }
 

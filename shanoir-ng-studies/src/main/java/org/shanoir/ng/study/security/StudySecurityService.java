@@ -55,12 +55,14 @@ public class StudySecurityService {
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) throws EntityNotFoundException {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
         Study study = studyRepository.findOne(studyId);
-        if (study == null) throw new EntityNotFoundException("Cannot find study with id " + studyId);
+        if (study == null) {
+			throw new EntityNotFoundException("Cannot find study with id " + studyId);
+		}
         return hasPrivilege(study, right);
     }
     
@@ -70,10 +72,12 @@ public class StudySecurityService {
 	 * @param study the study
 	 * @param rightStr the right
 	 * @return true or false
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
 	 */
     public boolean hasRightOnStudy(Study study, String rightStr) throws EntityNotFoundException {
-    	if (study == null) throw new IllegalArgumentException("study cannot be null here.");
+    	if (study == null) {
+			throw new IllegalArgumentException("study cannot be null here.");
+		}
     	return this.hasRightOnStudy(study.getId(), rightStr);
     }
     
@@ -98,7 +102,7 @@ public class StudySecurityService {
     
     /**
 	 * Check that the connected user has the given right for the given study.
-	 * ! ATTENTION ! This method is meant to be used with a trusted Study, meaning it should not be used with a 
+	 * ! ATTENTION ! This method is meant to be used with a trusted Study, meaning it should not be used with a
      * Study object that comes from the user API but most likely from a Study coming from the database.
 	 * 
 	 * @param study the TRUSTED study
@@ -113,7 +117,7 @@ public class StudySecurityService {
     
     /**
 	 * Check that the connected user has the given right for the given study.
-	 * ! ATTENTION ! This method is meant to be used with a trusted Study, meaning it should not be used with a 
+	 * ! ATTENTION ! This method is meant to be used with a trusted Study, meaning it should not be used with a
      * Study object that comes from the user API but most likely from a Study coming from the database.
 	 * 
 	 * @param study the TRUSTED study
@@ -132,15 +136,21 @@ public class StudySecurityService {
      * @param subjectId the subject id
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
     	Subject subject = subjectRepository.findOne(subjectId);
-    	if (subject == null) throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
-    	if (subject.getSubjectStudyList() == null) return false;
+    	if (subject == null) {
+			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
+		}
+    	if (subject.getSubjectStudyList() == null) {
+			return false;
+		}
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-    		if (hasPrivilege(subjectStudy.getStudy(), right)) return true;
+    		if (hasPrivilege(subjectStudy.getStudy(), right)) {
+				return true;
+			}
     	}
     	return false;
     }
@@ -152,14 +162,18 @@ public class StudySecurityService {
      * @param subjectId the subject id
      * @param rightStr the right
      * @return true or false
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
     	Subject subject = subjectRepository.findOne(subjectId);
-    	if (subject == null) throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
+    	if (subject == null) {
+			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
+		}
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-    		if (!hasPrivilege(subjectStudy.getStudy(), right)) return false;
+    		if (!hasPrivilege(subjectStudy.getStudy(), right)) {
+				return false;
+			}
     	}
     	return true;
     }
@@ -167,10 +181,10 @@ public class StudySecurityService {
     
     /**
      * Check that the connected user has the given right in at least one study to which the subject participates.
-     * ! ATTENTION ! This method is meant to be used with a trusted Subject, meaning it should not be used with a 
+     * ! ATTENTION ! This method is meant to be used with a trusted Subject, meaning it should not be used with a
      * Subject object that comes from the user API but most likely from a Subject coming from the database.
      * 
-     * @param subject the TRUSTED subject 
+     * @param subject the TRUSTED subject
      * @param rightStr
      * @return true or false
      */
@@ -178,7 +192,9 @@ public class StudySecurityService {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	if (subject.getSubjectStudyList() != null) {
     		for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-    			if (hasPrivilege(subjectStudy.getStudy(), right)) return true;
+    			if (hasPrivilege(subjectStudy.getStudy(), right)) {
+					return true;
+				}
     		}
     	}
     	return false;
@@ -193,7 +209,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSubjectDTOsHasRightInOneStudy(List<SubjectDTO> dtos, String rightStr) {
-    	if (dtos == null) return true;
+    	if (dtos == null) {
+			return true;
+		}
     	List<SubjectDTO> newList = new ArrayList<>();
     	Map<Long, SubjectDTO> map = new HashMap<>();
     	for (SubjectDTO dto : dtos) {
@@ -217,7 +235,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSimpleSubjectDTOsHasRightInOneStudy(List<SimpleSubjectDTO> dtos, String rightStr) {
-    	if (dtos == null) return true;
+    	if (dtos == null) {
+			return true;
+		}
     	List<SimpleSubjectDTO> newList = new ArrayList<>();
     	Map<Long, SimpleSubjectDTO> map = new HashMap<>();
     	for (SimpleSubjectDTO dto : dtos) {
@@ -241,7 +261,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSubjectIdNamesDTOsHasRightInOneStudy(List<IdName> dtos, String rightStr) {
-    	if (dtos == null) return true;
+    	if (dtos == null) {
+			return true;
+		}
     	List<IdName> newList = new ArrayList<>();
     	Map<Long, IdName> map = new HashMap<>();
     	for (IdName dto : dtos) {
@@ -266,7 +288,9 @@ public class StudySecurityService {
      */
     public boolean filterStudyDTOsHasRight(List<StudyDTO> dtos, String rightStr) {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
-    	if (dtos == null) return true;
+    	if (dtos == null) {
+			return true;
+		}
     	List<StudyDTO> newList = new ArrayList<>();
     	Map<Long, StudyDTO> map = new HashMap<>();
     	for (StudyDTO dto : dtos) {
@@ -291,7 +315,9 @@ public class StudySecurityService {
      */
     public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
-    	if (dtos == null) return true;
+    	if (dtos == null) {
+			return true;
+		}
     	List<IdName> newList = new ArrayList<>();
     	Map<Long, IdName> map = new HashMap<>();
     	for (IdName dto : dtos) {
@@ -316,7 +342,9 @@ public class StudySecurityService {
      */
     public boolean filterStudiesHasRight(List<Long> ids, String rightStr) {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
-    	if (ids == null) return true;
+    	if (ids == null) {
+			return true;
+		}
     	List<Long> newList = new ArrayList<>();
     	for (Study study : studyRepository.findAll(ids)) {
     		if (hasPrivilege(study, right)) {
@@ -336,7 +364,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean checkRightOnEverySubjectStudyList(Iterable<SubjectStudy> subjectStudyList, String rightStr) {
-    	if (subjectStudyList == null) return false;
+    	if (subjectStudyList == null) {
+			return false;
+		}
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	List<Long> ids = new ArrayList<>();
     	for (SubjectStudy subjectStudy : subjectStudyList) {
@@ -345,10 +375,11 @@ public class StudySecurityService {
     	int nbStudies = 0;
     	for (Study study : studyRepository.findAll(ids)) {
     		nbStudies ++;
-    		if (!hasPrivilege(study, right)) return false;
+    		if (!hasPrivilege(study, right)) {
+				return false;
+			}
     	}
-    	if (nbStudies != ids.size()) return false;
-    	return true;
+    	return nbStudies == ids.size();
     }
     
     
@@ -360,7 +391,9 @@ public class StudySecurityService {
      * @return true or false
      */
     private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
-    	if (study == null) throw new IllegalArgumentException("study cannot be null");
+    	if (study == null) {
+			throw new IllegalArgumentException("study cannot be null");
+		}
     	return hasPrivilege(study.getStudyUserList(), neededRight);
     }
     
@@ -372,13 +405,19 @@ public class StudySecurityService {
      * @return true or false
      */
     private boolean hasPrivilege(List<StudyUser> studyUserList, StudyUserRight neededRight) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
 		Long userId = KeycloakUtil.getTokenUserId();
-		if (studyUserList == null) return false;
+		if (studyUserList == null) {
+			return false;
+		}
 		StudyUser studyUser = studyUserList.stream()
 			.filter(su -> userId.equals(su.getUserId()))
 			.findAny().orElse(null);
-		if (studyUser == null) return false;
+		if (studyUser == null) {
+			return false;
+		}
 		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight);
     }
 }

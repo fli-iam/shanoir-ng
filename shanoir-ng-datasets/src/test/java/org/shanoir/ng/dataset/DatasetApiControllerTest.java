@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -44,6 +45,7 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +76,6 @@ public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
 	private Gson gson;
 
@@ -101,6 +102,12 @@ public class DatasetApiControllerTest {
 	
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
+
+	@MockBean
+	private EegDatasetMapper eegDatasetMapper;
+
+	@MockBean
+	private BIDSServiceImpl bidsService;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -236,7 +243,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
-	public void testMassiveDownloadByStdyWrongFormat() throws Exception {
+	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
 		datasetFile.getParentFile().mkdirs();
@@ -263,7 +270,7 @@ public class DatasetApiControllerTest {
 				.param("studyId", "1"))
 		.andExpect(status().isForbidden());
 	} catch (Exception e) {
-		assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":422,\"message\":\"Bad arguments.\",\"details\":null}");
+		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Bad arguments.\",\"details\":null}", e.getMessage());
 	}
 
 		// THEN we expect a failure

@@ -111,7 +111,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     canEdit(ds: Dataset): boolean {
-        let study: Study = this.studies.find(study => study.id == ds.studyId);
+        let study: Study = this.studies.filter(study => study.id == ds.studyId)[0];
         return this.keycloakService.isUserAdmin() || (
             study &&
             study.studyUserList && 
