@@ -86,7 +86,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -457,7 +456,7 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setFromDicomZip(true);
 			// Work folder is always relative to general import directory and userId (not
 			// shown to outside world)
-			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
+			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
@@ -551,7 +550,7 @@ public class ImporterApiController implements ImporterApi {
 			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegFile, false);
 
 			EegImportJob importJob = new EegImportJob();
-			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			importJob.setWorkFolder(importJobDir.getName());
 
 			List<EegDataset> datasets = new ArrayList<>();
 
@@ -839,7 +838,7 @@ public class ImporterApiController implements ImporterApi {
 			int i = 0;
 			List<ExSubject> exSubjects = exStudy.getExSubjects();
 			for (Iterator<ExSubject> iterator = exSubjects.iterator(); iterator.hasNext();) {
-				ExSubject exSubject = (ExSubject) iterator.next();
+				ExSubject exSubject = iterator.next();
 				Subject subject = new Subject();
 				subject.setId(exSubject.getSubjectId());
 				subject.setName(exSubject.getSubjectName());
@@ -847,7 +846,7 @@ public class ImporterApiController implements ImporterApi {
 				if (exSubject != null && exSubject.getSubjectName() != null) {
 					List<ExExamination> exExaminations = exSubject.getExExaminations();
 					for (Iterator<ExExamination> iterator2 = exExaminations.iterator(); iterator2.hasNext();) {
-						ExExamination exExamination = (ExExamination) iterator2.next();
+						ExExamination exExamination = iterator2.next();
 						// @TODO: adapt ImportJob later for multiple-exams
 						importJob.setExaminationId(exExamination.getId());
 					}
