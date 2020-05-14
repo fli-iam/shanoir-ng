@@ -30,7 +30,10 @@ import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -111,6 +114,17 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+
+	    System.setProperty("study-data", tempFolderPath);
+	}
 	
 	@Before
 	public void setup() throws AccessDeniedException, EntityNotFoundException {
@@ -166,7 +180,7 @@ public class StudyApiControllerTest {
 	public void testDeleteProtocolFile() {
 		// GIVEN a protocol file associated to a study
 		stud.setProtocolFilePaths(Collections.singletonList("test.pdf"));
-		File pFile = new File("/var/study-data/study-1/test.pdf");
+		File pFile = new File(tempFolderPath + "study-1/test.pdf");
 		pFile.getParentFile().mkdirs();
 		try {
 			pFile.createNewFile();
@@ -183,8 +197,6 @@ public class StudyApiControllerTest {
 		} catch (Exception e) {
 			System.err.println(e);
 			fail();
-		} finally {
-			pFile.delete();
 		}
 	}
 
@@ -193,7 +205,7 @@ public class StudyApiControllerTest {
 	public void testDeleteProtocolFileNotExisting() {
 		// GIVEN a protocol file not existing associated to a study
 		stud.setProtocolFilePaths(Collections.singletonList("test.pdf"));
-		File pFile = new File("/var/study-data/study-1/test.pdf");
+		File pFile = new File(tempFolderPath + "study-1/test.pdf");
 		pFile.getParentFile().mkdirs();
 		try {
 			// WHEN the file is deleted
@@ -208,8 +220,6 @@ public class StudyApiControllerTest {
 		} catch (Exception e) {
 			System.err.println(e);
 			fail();
-		} finally {
-			pFile.delete();
 		}
 	}
 
@@ -218,7 +228,7 @@ public class StudyApiControllerTest {
 	public void testDeleteProtocolFileNotLinked() {
 		// GIVEN a protocol file NOT associated to a study
 		stud.setProtocolFilePaths(Collections.singletonList("test2.pdf"));
-		File pFile = new File("/var/study-data/study-1/test.pdf");
+		File pFile = new File(tempFolderPath + "study-1/test.pdf");
 		pFile.getParentFile().mkdirs();
 		try {
 			pFile.createNewFile();
@@ -235,16 +245,15 @@ public class StudyApiControllerTest {
 		} catch (Exception e) {
 			System.err.println(e);
 			fail();
-		} finally {
-			pFile.delete();
 		}
 	}
 
 	@Test
 	@WithMockUser
 	public void testDownloadProtocolFile() throws IOException {
-		File importZip = new File("/tmp/test-import-extra-data.zip");
-		File saved = new File("/var/study-data/study-1/test-import-extra-data.pdf");
+		File importZip = new File(tempFolderPath + "test-import-extra-data.zip");
+		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
+
 		if (saved.exists()) {
 			saved.delete();
 		}
@@ -260,22 +269,16 @@ public class StudyApiControllerTest {
 
 			// THEN the file is saved
 			assertTrue(saved.exists());
-			saved.delete();
 		} catch (Exception e) {
 			fail();
-		} finally {
-			importZip.delete();
-			saved.delete();
-			File todel = new File("/var/study-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
 	@Test
 	@WithMockUser
 	public void testDownloadProtocolFileNotPDF() throws IOException {
-		File importZip = new File("/tmp/test-import-extra-data.zip");
-		File saved = new File("/var/study-data/study-1/test-import-extra-data.txt");
+		File importZip = new File(tempFolderPath + "test-import-extra-data.zip");
+		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.txt");
 		if (saved.exists()) {
 			saved.delete();
 		}
@@ -291,14 +294,8 @@ public class StudyApiControllerTest {
 
 			// THEN the file is not saved as it's not a PDF
 			assertFalse(saved.exists());
-			saved.delete();
 		} catch (Exception e) {
 			fail();
-		} finally {
-			importZip.delete();
-			saved.delete();
-			File todel = new File("/var/study-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
@@ -306,7 +303,7 @@ public class StudyApiControllerTest {
 	@WithMockUser
 	public void testDownloadExtraData() throws IOException {
 		// GIVEN an study with protocol file
-		File todow = new File("/var/study-data/study-1/file.pdf");
+		File todow = new File(tempFolderPath + "study-1/file.pdf");
 		todow.getParentFile().mkdirs();
 
 		// WHEN we download extra-data
@@ -323,9 +320,6 @@ public class StudyApiControllerTest {
 		} catch (Exception e) {
 			System.out.println(e);
 			fail();
-		} finally {
-			File todel = new File("/var/study-data/");
-			FileUtils.deleteDirectory(todel);
 		}
 	}
 
