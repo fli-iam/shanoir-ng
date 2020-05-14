@@ -169,7 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="mode == 'create'">
+					<li *ngIf="mode == 'create' || mode=='edit'">
 						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
 						<span class="right-col" [ngSwitch]="mode">
                                                     <input #input hidden type="file" (change)="attachNewFile($event)"/>
