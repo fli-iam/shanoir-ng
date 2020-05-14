@@ -64,6 +64,8 @@ public class ImportDialogOpenerNG {
 			List<Examination> examinationDTOs = getExaminations(subject);
 			updateImportDialogForExaminations(examinationDTOs, uploadJob);
 			updateImportDialogForMRICenter(uploadJob);
+			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
+			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return;

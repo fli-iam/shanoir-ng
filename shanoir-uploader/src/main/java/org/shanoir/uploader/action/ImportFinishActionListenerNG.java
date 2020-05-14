@@ -16,11 +16,6 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.ng.exchange.model.ExExamination;
-import org.shanoir.ng.exchange.model.ExStudy;
-import org.shanoir.ng.exchange.model.ExStudyCard;
-import org.shanoir.ng.exchange.model.ExSubject;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -83,6 +78,17 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
 			return;
+		}
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			// minimal length for subject common name is 2, same for subject study identifier
+			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
+				|| (!mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
+						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2)) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 		}
 		
 		// block further action
@@ -168,6 +174,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		thread.start();
 		
 		mainWindow.importDialog.setVisible(false);
+		mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
+		mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
 		mainWindow.setCursor(null); // turn off the wait cursor
 		((JButton) event.getSource()).setEnabled(true);
 		
@@ -260,7 +268,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		 */
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
 			subjectDTO.setName(importDialog.subjectTextField.getText());
-		}		
+		}
 		subjectDTO.setImagedObjectCategory((ImagedObjectCategory) importDialog.subjectImageObjectCategoryCB.getSelectedItem());
 		String languageHemDom = (String) importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
 		if (HemisphericDominance.Left.getName().compareTo(languageHemDom) == 0) {
@@ -292,35 +300,35 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
 
-	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long subjectId, Long examinationId) {
-		Exchange exchange = new Exchange();
-		// Study
-		Study study = (Study) importDialog.studyCB.getSelectedItem();
-		ExStudy exStudy = new ExStudy();
-		exStudy.setStudyName(study.getName());
-		exStudy.setStudyId(study.getId());
-		exchange.setExStudy(exStudy);
-		// StudyCard
-		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
-		ExStudyCard exStudyCard = new ExStudyCard();
-		exStudyCard.setName(studyCard.getName());
-		ArrayList<ExStudyCard> exStudyCards = new ArrayList<ExStudyCard>();
-		exStudyCards.add(exStudyCard);
-		exStudy.setExStudyCards(exStudyCards);
-		// Subject
-		ExSubject exSubject = new ExSubject();
-		exSubject.setSubjectName(subjectName);
-		exSubject.setSubjectId(subjectId);
-		ArrayList<ExSubject> exSubjects = new ArrayList<ExSubject>();
-		exSubjects.add(exSubject);
-		exStudy.setExSubjects(exSubjects);
-		// Examination
-		ExExamination exExamination = new ExExamination();
-		exExamination.setId(examinationId);
-		ArrayList<ExExamination> exExaminations = new ArrayList<ExExamination>();
-		exExaminations.add(exExamination);
-		exSubject.setExExaminations(exExaminations);
-		return exchange;
-	}
+//	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long subjectId, Long examinationId) {
+//		Exchange exchange = new Exchange();
+//		// Study
+//		Study study = (Study) importDialog.studyCB.getSelectedItem();
+//		ExStudy exStudy = new ExStudy();
+//		exStudy.setStudyName(study.getName());
+//		exStudy.setStudyId(study.getId());
+//		exchange.setExStudy(exStudy);
+//		// StudyCard
+//		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
+//		ExStudyCard exStudyCard = new ExStudyCard();
+//		exStudyCard.setName(studyCard.getName());
+//		ArrayList<ExStudyCard> exStudyCards = new ArrayList<ExStudyCard>();
+//		exStudyCards.add(exStudyCard);
+//		exStudy.setExStudyCards(exStudyCards);
+//		// Subject
+//		ExSubject exSubject = new ExSubject();
+//		exSubject.setSubjectName(subjectName);
+//		exSubject.setSubjectId(subjectId);
+//		ArrayList<ExSubject> exSubjects = new ArrayList<ExSubject>();
+//		exSubjects.add(exSubject);
+//		exStudy.setExSubjects(exSubjects);
+//		// Examination
+//		ExExamination exExamination = new ExExamination();
+//		exExamination.setId(examinationId);
+//		ArrayList<ExExamination> exExaminations = new ArrayList<ExExamination>();
+//		exExaminations.add(exExamination);
+//		exSubject.setExExaminations(exExaminations);
+//		return exchange;
+//	}
 
 }
