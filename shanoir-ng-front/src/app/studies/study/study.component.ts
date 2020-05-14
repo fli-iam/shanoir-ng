@@ -63,9 +63,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
-    protected bidsLoading: boolean = false;
-    
     protected bidsStructure: BidsElement[];
 
     constructor(
@@ -352,12 +349,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
-    }
-
-    private exportBIDS(study: Study) {
-        let studyName: string;
-        this.bidsLoading = true;
-        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
     }
 
     getBidsStructure(id: number) {

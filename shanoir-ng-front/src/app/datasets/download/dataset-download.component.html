@@ -5,12 +5,14 @@
     <div *ngIf="inError"> class="body" {{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
         <p>Please select download options</p>
-        <!-- <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format </label> -->
-        <p> Please select dataset type (only for DICOM / NIFTI datasets):
+        <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
+        <div *ngIf="!useBids">
+        <p> Please select dataset type (only for DICOM / NIFTI datasets): </p>
         <select-box [(ngModel)]="type">
             <select-option selected value="nii">Nifti</select-option>
             <select-option value="dcm">Dicom</select-option>
         </select-box>
+        </div>
     </div>
     <div class="footer">
         <button *ngIf="!inError" type="button" (click)="download()" >OK</button>

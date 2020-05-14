@@ -15,6 +15,7 @@
 import { Component, ViewChild, Input } from '@angular/core';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { StudyService } from '../../studies/shared/study.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
@@ -33,7 +34,7 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
     - nii.gz or .zip */
 export class DatasetDownaloadComponent {
     
-    constructor(private datasetService: DatasetService) {
+    constructor(private datasetService: DatasetService, private studyService: StudyService) {
         
     }
 
@@ -65,7 +66,11 @@ export class DatasetDownaloadComponent {
         if (!this.studyId) {
             this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type).then(() => this.loading = false);
         } else {
-            this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+            if (this.useBids) {
+                this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
+            } else {
+                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+            }
         }
         this.downloadDialog.hide();
     }
