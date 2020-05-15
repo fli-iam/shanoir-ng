@@ -199,6 +199,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private modeSpecificSave(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
+                this.entity.id = entity.id;
                 this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
