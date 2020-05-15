@@ -141,12 +141,13 @@ export class StudyComponent extends EntityComponent<Study> {
             'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'withExamination': [this.study.withExamination],
-            'clinical': [this.study.clinical, [Validators.required]],
+            'clinical': [this.study.clinical],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.selectedCenter, [this.validateCenter]],
-            'subjectStudyList': [this.study.subjectStudyList]
+            'subjectStudyList': [this.study.subjectStudyList],
+            'protocolFile': []
         });
         return formGroup;
     }
@@ -384,6 +385,7 @@ export class StudyComponent extends EntityComponent<Study> {
         } else {
             this.study.protocolFilePaths = [this.protocolFile.name];
         }
+        this.form.updateValueAndValidity();
     }
 
     protected save(): Promise<void> {

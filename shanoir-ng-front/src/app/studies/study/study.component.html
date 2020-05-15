@@ -185,7 +185,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
 						<span  *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]" class="right-col">
-						    <input #input hidden type="file" (change)="attachNewFile($event)"/>
+						    <input #input hidden formControlName="protocolFile" type="file" (change)="attachNewFile($event)"/>
                             <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
 						</span>
                         <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
