@@ -43,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -63,7 +62,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-@Scope("prototype")
 public class BIDSServiceImpl implements BIDSService {
 	
 	private static final String TABULATION = "\t";
@@ -136,12 +134,12 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Override
 	public void deleteDataset(Dataset dataset) {
-		Long examId = dataset.getDatasetAcquisition().getExamination().getId();
-		Long subjectId = dataset.getSubjectId();
-		Long studyId = dataset.getStudyId();
-
-		File fileToDelete = null;
 		try {
+			Long examId = dataset.getDatasetAcquisition().getExamination().getId();
+			Long subjectId = dataset.getSubjectId();
+			Long studyId = dataset.getStudyId();
+	
+			File fileToDelete = null;
 			// Get study folder
 			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
 			// Get subject folder
@@ -169,16 +167,21 @@ public class BIDSServiceImpl implements BIDSService {
 					}
 				}
 			}
+			
+			if (fileToDelete == null || !fileToDelete.exists()) {
+				return;
+			}
 
 			// And delete metadata files created for bids
 			for (File metaDataFile : fileToDelete.listFiles()) {
-				if (metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
+				if (metaDataFile.getName() != null && metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
 					metaDataFile.delete();
 				}
 			}
 			
-		} catch (IOException e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
+		} catch (Exception e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
+			e.printStackTrace();
 		}
 	}
 
