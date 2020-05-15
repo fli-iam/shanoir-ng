@@ -50,7 +50,7 @@ public class ExaminationDTO {
 	private boolean preclinical;
 
 	private List<String> extraDataFilePathList;
-	
+
 	/**
 	 * @return the id
 	 */

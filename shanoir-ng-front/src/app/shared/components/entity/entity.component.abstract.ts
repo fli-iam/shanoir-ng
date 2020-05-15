@@ -203,6 +203,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
+                this._entity.id = entity.id;
             });
         }
         else if (this.mode == 'edit') {
