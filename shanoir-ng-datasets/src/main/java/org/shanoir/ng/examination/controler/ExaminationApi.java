@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -149,6 +151,32 @@ public interface ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Add extra data to an examination", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "extra-data-upload/{examinationId}",
+	produces = { "application/json" },
+    consumes = { "multipart/form-data" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<Void> addExtraData(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Download extra data from an examination", response = ByteArrayResource.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = ByteArrayResource.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadExtraData(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the bruker archive of the examination corresponding to the given id", response = Resource.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examination", response = Examination.class),
