@@ -135,6 +135,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     buildForm(): FormGroup {
+        let numericRegex = /\-?\d*\.?\d{1,2}/;
+
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
@@ -142,7 +144,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
+            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]]
         });
     }
 
