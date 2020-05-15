@@ -26,6 +26,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
@@ -53,6 +54,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -62,12 +64,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.ApiParam;
 
 @Controller
 public class StudyApiController implements StudyApi {
 
+	@Value("${study-data}")
+	private String dataDir;
 	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
 
 	private static final String ZIP = ".zip";
@@ -110,6 +115,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
+			this.deleteProtocolFile(studyId);
 			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -117,6 +123,9 @@ public class StudyApiController implements StudyApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (IOException e) {
+			LOG.error("Error while deleting protocol file {}", e);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 	
@@ -212,6 +221,74 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(hasOneStudy, HttpStatus.OK);
 	}
 	
+	@Override
+	public ResponseEntity<Void> deleteProtocolFile(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
+		Study study = studyService.findById(studyId);
+		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		String filePath = getProtocolFilePath(studyId, study.getProtocolFilePaths().get(0));
+		File fileToDelete = new File(filePath);
+		if (!fileToDelete.exists()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		Files.delete(Paths.get(filePath));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> downloadProtocolFile(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long examinationId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
+		String filePath = getProtocolFilePath(examinationId, fileName);
+		LOG.info("Retrieving file : {}", filePath);
+		File fileToDownLoad = new File(filePath);
+		if (!fileToDownLoad.exists()) {
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+		}
+
+		// Try to determine file's content type
+		String contentType = "application/pdf";
+
+		byte[] data = Files.readAllBytes(fileToDownLoad.toPath());
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileToDownLoad.getName())
+				.contentType(MediaType.parseMediaType(contentType))
+				.contentLength(data.length)
+				.body(resource);
+	}
+
+	@Override
+	public ResponseEntity<Void> uploadProtocolFile(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+		if (!file.getOriginalFilename().endsWith(".pdf")) {
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+		}
+		String filePath = getProtocolFilePath(studyId, file.getOriginalFilename());
+		File fileToCreate = new File(filePath);
+		fileToCreate.getParentFile().mkdirs();
+		try {
+			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			file.transferTo(new File(filePath));
+		} catch (Exception e) {
+			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	/**
+	 * Gets the protocol file path
+	 * @param studyId id of the study
+	 * @param fileName name of the file
+	 * @return the file path of the file
+	 */
+	private String getProtocolFilePath(Long studyId, String fileName) {
+		return dataDir + "/study-" + studyId + "/" + fileName;
+	}
 	
 	private void validate(Study study, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()

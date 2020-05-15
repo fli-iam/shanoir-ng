@@ -35,8 +35,8 @@ public interface StudyService {
 	 * Delete a study. Do check before if current user can delete study!
 	 *
 	 * @param id study id.
-	 * @throws EntityNotFoundException 
-	 * @throws AccessDeniedException 
+	 * @throws EntityNotFoundException
+	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
@@ -47,11 +47,11 @@ public interface StudyService {
 	 *
 	 * @param id study id.
 	 * @return a study or null.
-	 * @throws AccessDeniedException 
+	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL')")
-	Study findById(Long id); 
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
+	Study findById(Long id);
 
 
 	/**
@@ -81,8 +81,8 @@ public interface StudyService {
 	 * @param study
 	 * @return updated study
 	 * @throws ShanoirStudiesException
-	 * @throws EntityNotFoundException 
-	 * @throws AccessDeniedException 
+	 * @throws EntityNotFoundException
+	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE')")
 	Study update(Study study) throws EntityNotFoundException;

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.admin.client.Keycloak;
@@ -137,7 +136,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 					try {
 						createUsersIfNotExisting();
 						success = true;
-					} catch (ProcessingException e) {
+					} catch (Exception e) {
 						tries++;
 						String msg = "Try " + tries + " failed for updating keycloak users on startup (" + e.getMessage() + ")";
 						LOG.error(msg); // users logs
