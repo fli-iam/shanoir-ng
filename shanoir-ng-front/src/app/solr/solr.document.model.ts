@@ -29,7 +29,6 @@ export class SolrDocument {
 }
 
 export class SolrRequest {
-    keyword: string;
     studyName: string[];
     subjectName: string[];
     examinationComment: string[];

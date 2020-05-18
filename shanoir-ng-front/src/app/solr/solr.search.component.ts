@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, SelectControlValueAccessor } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { BreadcrumbsService } from "../breadcrumbs/breadcrumbs.service";
 import { DatasetService } from "../datasets/shared/dataset.service";
@@ -21,9 +21,8 @@ import { slideDown } from "../shared/animations/animations";
 import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
+import { FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
-import { Study } from "../studies/shared/study.model";
 
 @Component({
     selector: 'solr-search',
@@ -35,6 +34,8 @@ import { Study } from "../studies/shared/study.model";
 export class SolrSearchComponent{
     facetResultPages: FacetResultPage[] = [];
     solrRequest: SolrRequest = new SolrRequest();
+    keywords: string;
+    selections: any[];
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
@@ -55,12 +56,13 @@ export class SolrSearchComponent{
     }
     
     buildForm(): FormGroup {
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9_\W]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
-            'keyword': [this.solrRequest.keyword],
+            'keywords': [this.keywords, Validators.pattern(searchBarRegex)],
             'studyName': [this.solrRequest.studyName],
             'subjectName': [this.solrRequest.subjectName],
-            'examinationComment': [this.solrRequest.examinationComment],
             'datasetName': [this.solrRequest.datasetName],
+            'examinationComment': [this.solrRequest.examinationComment],
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
             'datasetTypes': [this.solrRequest.datasetType],
@@ -95,18 +97,29 @@ export class SolrSearchComponent{
         return null;
     }
 
+    splitKeywords() {
+        let keywords = this.keywords.split(';', this.keywords.split(';').length - 1);
+        Object.keys(this.solrRequest).forEach(key => {
+            keywords.forEach(keyword => {
+                if (keyword.split(':')[0] == key) {
+                    if (!this.solrRequest[key]) this.solrRequest[key] = []; 
+                    if (!this.solrRequest[key].includes(keyword.split(':')[1])) this.solrRequest[key].push(keyword.split(':')[1])
+                }
+            })
+        }) 
+    }
+    
+    updateSelections() {
+        if (this.keywords) this.splitKeywords();
+        this.selections = Object.keys(this.solrRequest).map((key)=>{ return {key:key, value:this.solrRequest[key]} });
+    }
+
     removeAllFacets() {
+        this.selections = null;
+        this.keywords = null;
         for (let key of Object.keys(this.solrRequest)) {
             this.solrRequest[key] = null;
         }
-    }
-
-    showAllStudies() {
-        this.solrRequest.studyName = null;
-    }
-
-    getSelection() {
-        return Object.keys(this.solrRequest).map((key)=>{ return {key:key, value:this.solrRequest[key]} });
     }
 
     removeSelection(keyS:string, valueS: string) {
@@ -114,12 +127,20 @@ export class SolrSearchComponent{
             if (key && this.solrRequest[key] && key == keyS && this.solrRequest[key].includes(valueS)) {
                 this.solrRequest[key] = this.solrRequest[key].filter(item => item !== valueS);
                 if (this.solrRequest[key].length == 0) this.solrRequest[key] = null;
+            } else {
+                this.keywords = null;
             }
         }
     }
 
+    showAllStudies() {
+        this.solrRequest.studyName = null;
+    }
+
     getPage(pageable: Pageable): Promise<SolrResultPage> {
+        this.updateSelections();
         let savedStates = [];
+
         for (let key of Object.keys(this.solrRequest)) {
             if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
         }
@@ -134,9 +155,6 @@ export class SolrSearchComponent{
                     this.facetResultPages[i] = facetResultPage;
                 })
             })
-
-            // this.allStudies.content.forEach((study) => this.facetResultPages[0].content.forEach((facet) =>
-            //     {if(study.value == facet.value) study = facet}))
             
             return solrResultPage;
         });
@@ -196,9 +214,5 @@ export class SolrSearchComponent{
 
     private onRowClick(solrRequest: any) {
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
-    }
-
-    private fulltextSearch(keyword: string, pageable: Pageable) {
-        this.solrService.fulltextSearch(keyword, pageable);
     }
 }

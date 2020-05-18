@@ -35,33 +35,19 @@ export class SolrService {
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
         if (!solrReq.studyName && !solrReq.subjectName && !solrReq.examinationComment && !solrReq.datasetName
-            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature && !solrReq.keyword) {
+            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature) {
                 return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
                 .map((solrResultPage: SolrResultPage) => {
                     return solrResultPage;
                 })
             .toPromise();
-        } else if (!solrReq.keyword) {
+        } else {
             return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(solrReq), { 'params': pageable.toParams() })    
                 .map((solrResultPage: SolrResultPage) => {
                     return solrResultPage;
                 })
             .toPromise();
-        } else if (solrReq.keyword != null && solrReq.keyword != undefined){
-            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_FULLTEXT_SEARCH_URL, JSON.stringify(solrReq.keyword), { 'params': pageable.toParams() })    
-                .map((solrResultPage: SolrResultPage) => {
-                    return solrResultPage;
-                })
-            .toPromise();
-        }   
+        }
     }
-
-   public fulltextSearch(keyword: String, pageable: Pageable): Promise<SolrResultPage> {
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(keyword), { 'params': pageable.toParams() })
-            .map((solrResultPage: SolrResultPage) => {
-                return solrResultPage;
-            })
-        .toPromise();    
-   }
 
 }

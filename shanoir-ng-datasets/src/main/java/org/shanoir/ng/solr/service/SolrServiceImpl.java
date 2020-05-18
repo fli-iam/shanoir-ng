@@ -32,7 +32,9 @@ import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -98,6 +100,7 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null; 
+		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findAllDocsAndFacets(pageable);		
 		} else {
@@ -111,7 +114,7 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null; 
-		
+		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findByFacetCriteria(facet, pageable);
 		} else {
@@ -121,18 +124,19 @@ public class SolrServiceImpl implements SolrService {
 		return result;
 	}
 	
-	@Transactional
-	@Override
-	public SolrResultPage<ShanoirSolrDocument> findByKeyword(String keyword, Pageable pageable) {
-		SolrResultPage<ShanoirSolrDocument> result = null; 
-		
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByKeyword(keyword, pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndKeyword(studyIds, keyword, pageable);
+	private Pageable prepareTextFields(Pageable pageable) {
+		for (Sort.Order order : pageable.getSort()) {
+		    if (order.getProperty().equals("studyName") || order.getProperty().equals("subjectName")
+		    		|| order.getProperty().equals("datasetName") || order.getProperty().equals("datasetNature")
+		    		|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")) {
+		    	pageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), 
+		    			order.getDirection(), order.getProperty().concat("_str"));
+		    } else if (order.getProperty().equals("id")) {
+		    	pageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), 
+		    			order.getDirection(), "datasetId");
+		    }
 		}
-		return result;
+		return pageable;
 	}
-
+	
 }

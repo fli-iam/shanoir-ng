@@ -77,14 +77,4 @@ public interface SolrApi {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable);
 	
-	@ApiOperation(value = "", notes = "Full-text search with keyword and returns solr documents and facets page", response = SolrResultPage.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents and facets", response = Page.class),
-		@ApiResponse(code = 204, message = "nothing found", response = ErrorModel.class),
-		@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
-		@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
-		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> findByKeyword(@ApiParam(value = "keyword", required = true) @Valid @RequestBody String keyword, Pageable pageable);
-	
 }

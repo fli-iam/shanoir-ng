@@ -14,12 +14,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <form class="row" [formGroup]="form">
     <div class="left">
-        <h2>Solr Search</h2>
-        <input type="text" [(ngModel)]="solrRequest.keyword" formControlName="keyword" id="searchBar" placeholder="Search.." (change)="table.refresh()">
+        <h2>Solr Search
+            <tool-tip>
+                Query syntax example: 
+                <b>studyName:test;subjectName:xxxx;datasetName:*restingstate*;</b>
+                <i>Multiple character wildcard searches are allowed by adding * to keyword</i>
+            </tool-tip>
+        </h2>
+        <input type="text" [(ngModel)]="keywords" formControlName="keywords" id="searchBar" placeholder="Search.." (change)="table.refresh()">
+        <label *ngIf="hasError('keywords', ['pattern'])" class="form-validation-alert">Please check the query syntax!</label>
         <ol id="facet">
-            <li *ngIf="(solrRequest | json) !== '{}'">
-                <label>Your selection: </label>
-                <span class="right-col" *ngFor="let item of getSelection()">
+            <li *ngIf="selections">
+                <span class="button" (click)="removeAllFacets(); table.refresh()">
+                    <i class="fas fa-ban"></i> Remove all criteria
+                </span>
+            </li>
+            <li *ngIf="selections">
+                <span class="right-col" *ngFor="let item of selections">
                     <ng-container *ngIf="item.value && item.value.length > 0">
                         {{item.key}}: 
                         <ng-container *ngFor="let value of item.value">
@@ -27,11 +38,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <button (click)="removeSelection(item.key, value); table.refresh()"><i class="fas fa-ban"></i></button>
                         </ng-container>
                     </ng-container>
-                </span>
-            </li>
-            <li *ngIf="(solrRequest | json) !== '{}'">
-                <span class="button" (click)="removeAllFacets(); table.refresh()">
-                    <i class="fas fa-ban"></i> Remove all criteria
                 </span>
             </li>
             <li>
@@ -44,13 +50,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label>Subject Name</label>
+                <label>Subject Name<tool-tip>Use search bar to find more than 200 results</tool-tip></label>
                 <span class="right-col">
                     <checkbox-list [(ngModel)]="solrRequest.subjectName" formControlName="subjectName" [(items)]="facetResultPages[1]" (change)="table.refresh()"></checkbox-list>
                 </span>
             </li>
             <li>
-                <label>Dataset Name</label> 
+                <label>Dataset Name<tool-tip>Use search bar to find more than 200 results</tool-tip></label> 
                 <span class="right-col">
                     <checkbox-list [(ngModel)]="solrRequest.datasetName" formControlName="datasetName" [(items)]="facetResultPages[2]" (change)="table.refresh()"></checkbox-list>
                 </span>
@@ -72,7 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label>Examination Comment</label>
+                <label>Examination Comment<tool-tip>Use search bar to find more than 200 results</tool-tip></label>
                 <span class="right-col">
                     <checkbox-list [(ngModel)]="solrRequest.examinationComment" formControlName="examinationComment" [(items)]="facetResultPages[3]" (change)="table.refresh()"></checkbox-list>
                 </span>

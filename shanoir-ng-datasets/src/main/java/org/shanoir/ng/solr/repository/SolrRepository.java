@@ -43,14 +43,4 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 			"datasetType", "datasetNature"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
-	@Query("datasetName:?0 OR examinationComment:?0 OR subjectName:?0 OR studyName:?0")
-	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findByKeyword(String keyword, Pageable pageable);
-	
-	@Query("studyId:(?0... ) AND (datasetName:?0 OR examinationComment:?0 OR subjectName:?0 OR studyName:?0)")
-	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndKeyword(Collection<Long> studyIds,String keyword, Pageable pageable);
-
 }
