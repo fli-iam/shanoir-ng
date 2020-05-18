@@ -71,6 +71,17 @@ public class ImportFinishActionListener implements ActionListener {
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getId() == null) {
 			return;
 		}
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			// minimal length for subject common name is 2, same for subject study identifier
+			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
+				|| (!mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
+						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2)) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		}
 		
 		// block further action
 		((JButton) event.getSource()).setEnabled(false);

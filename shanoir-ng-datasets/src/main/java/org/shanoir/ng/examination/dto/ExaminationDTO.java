@@ -53,7 +53,7 @@ public class ExaminationDTO {
 	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 	private List<String> extraDataFilePathList;
-	
+
 	/**
 	 * @return the id
 	 */

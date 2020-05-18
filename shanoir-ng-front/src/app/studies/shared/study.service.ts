@@ -21,6 +21,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from './study-user-right.enum';
+import { Observable } from 'rxjs/Observable';
 import { BidsElement } from '../../bids/model/bidsElement.model';
 
 @Injectable()
@@ -65,6 +66,37 @@ export class StudyService extends EntityService<Study> {
         });
     }
 
+    uploadFile(fileToUpload: File, studyId: number): Observable<any> {
+        const endpoint = this.API_URL + '/protocol-file-upload/' + studyId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return this.http.post<any>(endpoint, formData);
+    }
+
+    deleteFile(studyId: number): Observable<any> {
+        const endpoint = this.API_URL + '/protocol-file-delete/' + studyId;
+        return this.http.delete(endpoint);
+    }
+
+    downloadFile(fileName: string, studyId: number): void {
+        const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
+            if (response.status == 200) {
+                this.downloadIntoBrowser(response);
+            }
+        });;
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
     exportBIDSByStudyId(studyId: number): Promise<void> {
         if (!studyId) throw Error('study id is required');
         return this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId,
@@ -77,15 +109,4 @@ export class StudyService extends EntityService<Study> {
         return this.http.get<BidsElement>(AppUtils.BACKEND_API_STUDY_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
             .toPromise();
     }
-
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
-    }
-   
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
-    }
-
 }

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -49,6 +49,7 @@ import { BidsElement } from '../../bids/model/bidsElement.model'
 export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable') table: TableComponent;
+    @ViewChild('input') private fileInput: ElementRef;
 
     private centers: IdName[];
     private subjects: IdName[];
@@ -61,6 +62,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
+    protected protocolFile: File;
     
     protected readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
@@ -115,6 +117,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study = this.newStudy();
         this.getCenters();
         this.selectedCenter = null;
+        this.protocolFile = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -138,12 +141,13 @@ export class StudyComponent extends EntityComponent<Study> {
             'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'withExamination': [this.study.withExamination],
-            'clinical': [this.study.clinical, [Validators.required]],
+            'clinical': [this.study.clinical],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.selectedCenter, [this.validateCenter]],
-            'subjectStudyList': [this.study.subjectStudyList]
+            'subjectStudyList': [this.study.subjectStudyList],
+            'protocolFile': []
         });
         return formGroup;
     }
@@ -351,6 +355,51 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
+    }
+
+    private click() {
+        this.fileInput.nativeElement.click();
+    }
+
+    protected deleteFile(file: any) {
+        if (this.mode == 'create') { 
+            this.study.protocolFilePaths = [];
+            this.protocolFile = null;
+        } else if (this.mode == 'edit') {
+            // TODO: API call
+            this.studyService.deleteFile(this.study.id);
+            this.study.protocolFilePaths = [];
+            this.protocolFile = null;           
+        }
+    }
+
+    protected downloadFile() {
+        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
+    }
+
+    private attachNewFile(event: any) {
+        this.protocolFile = event.target.files[0];
+        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
+            this.msgBoxService.log("error", "Only PDF files are accepted");
+            this.protocolFile = null;
+        } else {
+            this.study.protocolFilePaths = [this.protocolFile.name];
+        }
+        this.form.updateValueAndValidity();
+    }
+
+    protected save(): Promise<void> {
+        let prom = super.save().then(result => {
+            // Once the study is saved, save associated file if changed
+            if (this.protocolFile) {
+                this.studyService.uploadFile(this.protocolFile, this.entity.id).subscribe(response => console.log('result:' + response));
+            }
+        });
+        return prom;
+    }
+
+    getFileName(element): string {
+        return element.split('\\').pop().split('/').pop();
     }
 
     private exportBIDS(study: Study) {

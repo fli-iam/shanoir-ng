@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.bids.service.StudyBIDSService;
+import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -87,6 +88,9 @@ public class StudyApiSecurityTest {
 	@MockBean
 	private StudyBIDSService bidsService;
 	
+	@MockBean
+	private BidsDeserializer bidsDeserializer;
+
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
@@ -138,7 +142,7 @@ public class StudyApiSecurityTest {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL));
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE));
+		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL));
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 	}
 
