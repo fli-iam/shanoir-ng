@@ -289,6 +289,51 @@ targetConn.commit()
 
 print("Import instrument_variable: end")
 
+print("Import numerical_variable: start")
+
+sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCORE_VALUE, MIN_SCORE_VALUE FROM NUMERICAL_VARIABLE""")
+
+query = """INSERT INTO numerical_variable
+    (id, max_score_value, min_score_value)
+    VALUES (%s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import numerical_variable: end")
+
+print("Import coded_variable: start")
+
+sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCALE_ITEM_ID, MIN_SCALE_ITEM_ID FROM CODED_VARIABLE""")
+
+query = """INSERT INTO coded_variable
+    (id, max_scale_item_id, min_scale_item_id)
+    VALUES (%s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import coded_variable: end")
+
+print("Import scale_item: start")
+
+sourceCursor.execute("""SELECT SCALE_ITEM_ID,
+ CORRESPONDING_NUMBER,
+ QUALITATIVE_SCALE_ITEM,
+ QUANTITATIVE_SCALE_ITEM,
+ CODED_VARIABLE_ID,
+ (SELECT LABEL_NAME FROM REF_SCALE_ITEM_TYPE r WHERE s.REF_SCALE_ITEM_TYPE_ID = r.REF_SCALE_ITEM_TYPE_ID),
+ FROM SCALE_ITEM s""")
+
+query = """INSERT INTO scale_item
+    (id, corresponding_number, qualitative_scale_item, quantitative_scale_item, coded_variable_id, ref_scale_item_type)
+    VALUES (%s, %s, %s, %s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import scale_item: end")
+
 print("Import instrument_domains: start")
 
 sourceCursor.execute("SELECT INSTRUMENT_ID, REF_DOMAIN_ID FROM REL_INSTRUMENT_REF_DOMAIN")
@@ -347,6 +392,42 @@ targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 print("Import score: end")
+
+print("Import numerical_score: start")
+
+sourceCursor.execute("SELECT n.SCORE_ID, "
+ + "n.SCIENTIFIC_ARTICLE_ID, "
+ + "n.SCORE_VALUE, "
+ + "n.IS_SCORE_WITH_UNIT_OF_MEASURE FROM NUMERICAL_SCORE n, "
+ + "(SELECT LABEL_NAME FROM REF_NUMERICAL_SCORE_TYPE r WHERE r.REF_NUMERICAL_SCORE_TYPE_ID = n.REF_NUMERICAL_SCORE_TYPE_ID), "
+ + "(SELECT LABEL_NAME FROM REF_UNIT_OF_MEASURE_ID u WHERE u.REF_UNIT_OF_MEASURE_ID = n.REF_UNIT_OF_MEASURE_ID)"
+ + "FROM NUMERICAL_SCORE n"
+ )
+
+query = "INSERT INTO numerical_score (id, ";
+query+= "scientific_article_id, " ;
+query+= "score_value, ";
+query+= "is_score_with_unit_of_measure, ";
+query+= "ref_numerical_score_type, ";
+query+= "ref_unit_of_measure, ";
+query+= "VALUES (%s, %s, %s, %s, %s, %s)";
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import numerical_score: end")
+
+print("Import coded_score: start")
+
+sourceCursor.execute("SELECT SCORE_ID, SCALE_ITEM_ID FROM CODED_SCORE")
+
+query = "INSERT INTO coded_score (id, scale_item_id) VALUES (%s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import coded_score: end")
+
+print("Import numerical_score: start")
 
 print("Import extra_data_file_path: start")
 
