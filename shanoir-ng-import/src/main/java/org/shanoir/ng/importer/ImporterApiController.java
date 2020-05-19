@@ -288,7 +288,7 @@ public class ImporterApiController implements ImporterApi {
 				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
 					Serie serie = serieIt.next();
 					if (!serie.getSelected()) {
-						series.remove(serie);
+						serieIt.remove();
 					}
 				}
 			}

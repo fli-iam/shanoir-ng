@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Serie {
 
 	@JsonProperty("selected")
-	private Boolean selected;
+	private boolean selected;
 
 	@JsonProperty("seriesInstanceUID")
 	private String seriesInstanceUID;
@@ -120,11 +120,11 @@ public class Serie {
 		setEquipment(equipmentDicom);
 	}
 
-	public Boolean getSelected() {
+	public boolean getSelected() {
 		return selected;
 	}
 
-	public void setSelected(Boolean selected) {
+	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
 
