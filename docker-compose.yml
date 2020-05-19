@@ -204,7 +204,7 @@ services:
   #
   preclinical-bruker2dicom:
     container_name: preclinical-bruker2dicom
-    image: lamyj/dicomifier
+    image: dicomifier.ws
     command: ["python3", "/root/run.py"]
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
