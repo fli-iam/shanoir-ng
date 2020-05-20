@@ -19,5 +19,10 @@ COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
 COPY cfg/. /opt/jboss/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
+
+# unset the env var, so that the default value is set by the entrypoint script
+# (like all other env vars)
+ENV PROXY_ADDRESS_FORWARDING ""
+
 ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
 	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]

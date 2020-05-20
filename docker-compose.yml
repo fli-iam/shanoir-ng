@@ -26,12 +26,12 @@ services:
       - shanoir_ng_network
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
-    env_file:
-      - ./.env
     environment:
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
+      - KEYCLOAK_USER
+      - KEYCLOAK_PASSWORD
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -75,8 +75,6 @@ services:
     environment:
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
-      - kc.admin.client.realm
-      - kc.admin.client.client.id
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
       - spring.mail.host

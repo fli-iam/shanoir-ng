@@ -13,7 +13,20 @@ sed "
 	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
 	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 "	/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
+
+
+export DB_VENDOR="${DB_VENDOR:-mysql}"
 export DB_ADDR="${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}"
+export DB_PORT="${DB_PORT:-3306}"
+export DB_DATABASE="${DB_DATABASE:-keycloak}"
+export DB_USER="${DB_USER:-keycloak}"
+export DB_PASSWORD="${DB_PASSWORD:-password}"
+export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
+# FIXME: how about these ones:
+#	DB_PORT_3306_TCP_ADDR=keycloak-database
+#	DB_PORT_3306_TCP_PORT=3306
+
+
 require  SHANOIR_MIGRATION
 oneshot=
 extra=()
