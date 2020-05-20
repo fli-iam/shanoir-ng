@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -92,7 +94,16 @@ public class ShanoirUploaderServiceClientNG {
 
 	private String serviceURLSubjectsByStudyId;
 
+	private Map<Integer, String> apiResponseMessages;
+
 	public ShanoirUploaderServiceClientNG() {
+		apiResponseMessages = new HashMap<Integer, String>();
+		apiResponseMessages.put(200, "ok");
+		apiResponseMessages.put(204, "no item found");
+		apiResponseMessages.put(401, "unauthorized");
+		apiResponseMessages.put(403, "forbidden");
+		apiResponseMessages.put(500, "unexpected error");
+		
 		this.httpService = new HttpService();
 		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 			this.serviceURLStudiesNamesAndCenters = this.serverURL
@@ -199,9 +210,6 @@ public class ShanoirUploaderServiceClientNG {
 			int code = response.getStatusLine().getStatusCode();
 						
 			if (code == 200) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
 				List<Subject> subjects = Util.getMappedList(response, Subject.class);
 				for(Subject subject : subjects) {
 					List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
@@ -210,6 +218,8 @@ public class ShanoirUploaderServiceClientNG {
 					}
 				}
 				return datasetIds;
+			} else {
+				System.out.println("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -221,11 +231,10 @@ public class ShanoirUploaderServiceClientNG {
 			
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
+			} else {
+				System.out.println("Could not get dataset ids from subject id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -237,11 +246,10 @@ public class ShanoirUploaderServiceClientNG {
 			HttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId + "/study/" + studyId);
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
+			} else {
+				System.out.println("Could not get dataset ids from subject id " + subjectId + " and study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -252,9 +260,6 @@ public class ShanoirUploaderServiceClientNG {
 			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
 				AcquisitionEquipment acquisitionEquipment = Util.getMappedObject(response, AcquisitionEquipment.class);
 				return acquisitionEquipment;
 			}
@@ -298,6 +303,8 @@ public class ShanoirUploaderServiceClientNG {
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
 				return response;
+			} else {
+				System.out.println("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;

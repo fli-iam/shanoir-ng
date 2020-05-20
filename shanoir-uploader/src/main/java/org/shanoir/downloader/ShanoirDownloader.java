@@ -9,11 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.HostnameVerifier;
@@ -41,18 +37,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jboss.seam.core.Expressions;
-import org.jboss.seam.core.Expressions.MethodExpression;
-import org.jboss.seam.security.Identity;
-import org.keycloak.adapters.KeycloakDeploymentBuilder;
-import org.keycloak.adapters.installed.KeycloakInstalled;
-import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
-import org.shanoir.util.ShanoirUtil;
 import org.springframework.http.HttpHeaders;
 /**
  * This class intends to be used as a binary executable to download datasets
@@ -347,8 +336,15 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 	}
 	
-	public static void downloadDataset(File destDir, Long datasetId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDataset(File destDir, Long datasetId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+		System.out.println("Downloading dataset " + datasetId + "...");
 		HttpResponse response = shng.downloadDatasetById(datasetId, format);
+		String message = "";
+		if(response == null) {
+			message = "Dataset with id " + datasetId + " not found.";
+			System.out.println(message);
+			return message;
+		}
 
 		Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
 		String fileName = header.getValue();
@@ -357,27 +353,49 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		final File downloadedFile = new File(destDir + "/" + fileName);
 
 		FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
+		return message;
 	}
 
-	public static void downloadDatasetByStudy(File destDir, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetByStudy(File destDir, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsByStudyId(studyId);
+		String message = "";
+		if(datasetIds == null) {
+			message = "No dataset found.";
+			System.out.println(message);
+			return message;
+		}
 		for(Long datasetId : datasetIds) {
 			downloadDataset(destDir, datasetId, format, shng);
 		}
+		return message;
 	}
 
-	public static void downloadDatasetBySubject(File destDir, Long subjectId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetBySubject(File destDir, Long subjectId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectId(subjectId);
+		String message = "";
+		if(datasetIds == null) {
+			message = "No dataset found.";
+			System.out.println(message);
+			return message;
+		}
 		for(Long datasetId : datasetIds) {
 			downloadDataset(destDir, datasetId, format, shng);
 		}
+		return message;
 	}
 
-	public static void downloadDatasetByStudyAndSubject(File destDir, Long subjectId, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetBySubjectIdStudyId(File destDir, Long subjectId, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectIdStudyId(subjectId, studyId);
+		String message = "";
+		if(datasetIds == null) {
+			message = "No dataset found.";
+			System.out.println(message);
+			return message;
+		}
 		for(Long datasetId : datasetIds) {
 			downloadDataset(destDir, datasetId, format, shng);
 		}
+		return message;
 	}
 
 	/**
@@ -385,6 +403,10 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	 * user.
 	 */
 	private void download() {
+		String[] args = cl.getArgs();
+		for(String arg : args) {
+			System.out.println("WARNING: invalid " + arg + " argument. Try -" + arg + " (with the '-' character) instead.");
+		}
 
 		File destDir = new File(SystemUtils.JAVA_IO_TMPDIR);
 		if (cl.hasOption("destDir")) {
@@ -425,7 +447,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			if (cl.hasOption("subjectId") && cl.hasOption("studyId")) {
 				Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
 				Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
-				downloadDatasetByStudyAndSubject(destDir, studyId, subjectId, format, shanoirUploaderServiceClientNG);
+				downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format, shanoirUploaderServiceClientNG);
 			}
 	       
 		} catch (NumberFormatException e) {

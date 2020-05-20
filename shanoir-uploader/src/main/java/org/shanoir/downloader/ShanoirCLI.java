@@ -25,10 +25,9 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 
 /**
- * @author grenard
+ * @author grenard and Arthur M.
  *
- *         This abstract class gathers all the common features of a ShanoirTk
- *         CLI.
+ *         This abstract class gathers all the common features of a ShanoirTk CLI.
  *
  *         ShanoirTkCLI looks after all repetitive process involved by a CLI
  *         such as parsing common options, establishing connection and provides
@@ -45,7 +44,7 @@ public abstract class ShanoirCLI {
 	protected static Logger log = Logger.getLogger(ShanoirCLI.class);
 
 	/**
-	 * @author grenard
+	 * @author grenard and Arthur M.
 	 *
 	 *         This is for overwriting a function used in the establishment of the
 	 *         ssl connection.

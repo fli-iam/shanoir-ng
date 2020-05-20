@@ -845,7 +845,7 @@ public class MainWindow extends JFrame {
 		formatter.setValueClass(Long.class);
 		formatter.setMinimum(Long.MIN_VALUE);
 		formatter.setMaximum(Long.MAX_VALUE);
-		formatter.setAllowsInvalid(false);
+		formatter.setAllowsInvalid(true);
 
 		int posY = 0;
 		JLabel downloadPatientIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientIDLabel"));
@@ -858,6 +858,7 @@ public class MainWindow extends JFrame {
 		downloadPanel.add(downloadPatientIDLabel, gbc_downloadPatientIDLabel);
 
 		JFormattedTextField downloadPatientIDTF = new JFormattedTextField(formatter);
+		downloadPatientIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadPatientIDTF = new GridBagConstraints();
 		gbc_downloadPatientIDTF.insets = new Insets(10, 10, 10, 10);
 		gbc_downloadPatientIDTF.fill = GridBagConstraints.HORIZONTAL;
@@ -877,6 +878,7 @@ public class MainWindow extends JFrame {
 		downloadPanel.add(downloadSubjectIDLabel, gbc_downloadSubjectIDLabel);
 
 		JFormattedTextField downloadSubjectIDTF = new JFormattedTextField(formatter);
+		downloadSubjectIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadSubjectIDTF = new GridBagConstraints();
 		gbc_downloadSubjectIDTF.insets = new Insets(10, 10, 10, 10);
 		gbc_downloadSubjectIDTF.fill = GridBagConstraints.HORIZONTAL;
@@ -896,6 +898,7 @@ public class MainWindow extends JFrame {
 		downloadPanel.add(downloadStudyIDLabel, gbc_downloadStudyIDLabel);
 
 		JFormattedTextField downloadStudyIDTF = new JFormattedTextField(formatter);
+		downloadStudyIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadStudyIDTF = new GridBagConstraints();
 		gbc_downloadStudyIDTF.insets = new Insets(10, 10, 10, 10);
 		gbc_downloadStudyIDTF.fill = GridBagConstraints.HORIZONTAL;
@@ -944,9 +947,9 @@ public class MainWindow extends JFrame {
 		downloadButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadButton"));
 		GridBagConstraints gbc_downloadButton = new GridBagConstraints();
 		gbc_downloadButton.insets = new Insets(0, 0, 5, 0);
-		gbc_downloadButton.gridwidth = 3;
+		// gbc_downloadButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_downloadButton.gridx = 1;
-		gbc_downloadButton.gridy = posY++;
+		gbc_downloadButton.gridy = posY;
 		downloadPanel.add(downloadButton, gbc_downloadButton);
 
 		ImageIcon downloadIcon = new ImageIcon(getClass().getClassLoader().getResource("images/spinner.gif"));
@@ -955,11 +958,12 @@ public class MainWindow extends JFrame {
 		downloadIcon.setImageObserver(downloadAnimationLabel);
 		GridBagConstraints gbc_downloadAnimationLabel = new GridBagConstraints();
 		gbc_downloadAnimationLabel.insets = new Insets(0, 0, 5, 0);
-		gbc_downloadAnimationLabel.gridwidth = 3;
+		// gbc_downloadAnimationLabel.fill = GridBagConstraints.HORIZONTAL;
+		// gbc_downloadAnimationLabel.anchor = GridBagConstraints.EAST;
 		gbc_downloadAnimationLabel.gridx = 1;
 		gbc_downloadAnimationLabel.gridy = posY;
-		downloadPanel.add(downloadAnimationLabel, gbc_downloadAnimationLabel);
 		downloadAnimationLabel.setVisible(false);
+		downloadPanel.add(downloadAnimationLabel, gbc_downloadAnimationLabel);
 
 		downloadButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -981,29 +985,33 @@ public class MainWindow extends JFrame {
 						
 						ShanoirUploaderServiceClientNG shng = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
 
+						String message = "";
+
 						if (!downloadPatientIDTF.getText().isEmpty()) {
 							Long datasetId = Long.parseLong(downloadPatientIDTF.getText());
-							ShanoirDownloader.downloadDataset(fileToSave, datasetId, format, shng);
+							message = ShanoirDownloader.downloadDataset(fileToSave, datasetId, format, shng);
 						}
 
 						if (!downloadStudyIDTF.getText().isEmpty() && downloadSubjectIDTF.getText().isEmpty()) {
 							Long studyId = Long.parseLong(downloadStudyIDTF.getText());
-							ShanoirDownloader.downloadDatasetByStudy(fileToSave, studyId, format, shng);
+							message = ShanoirDownloader.downloadDatasetByStudy(fileToSave, studyId, format, shng);
 						}
 
 						if (downloadStudyIDTF.getText().isEmpty() && !downloadSubjectIDTF.getText().isEmpty()) {
 							Long subjectId = Long.parseLong(downloadSubjectIDTF.getText());
-							ShanoirDownloader.downloadDatasetBySubject(fileToSave, subjectId, format, shng);
+							message = ShanoirDownloader.downloadDatasetBySubject(fileToSave, subjectId, format, shng);
 						}
 
 						if (!downloadStudyIDTF.getText().isEmpty() && !downloadSubjectIDTF.getText().isEmpty()) {
 							Long subjectId = Long.parseLong(downloadSubjectIDTF.getText());
 							Long studyId = Long.parseLong(downloadStudyIDTF.getText());
-							ShanoirDownloader.downloadDatasetByStudyAndSubject(fileToSave, studyId, subjectId, format, shng);
+							message = ShanoirDownloader.downloadDatasetBySubjectIdStudyId(fileToSave, studyId, subjectId, format, shng);
 						}
 						
 						downloadAnimationLabel.setVisible(false);
-						String message = resourceBundle.getString("shanoir.uploader.downloadComplete");
+						if(message == "") {
+							message = resourceBundle.getString("shanoir.uploader.downloadComplete");
+						}
 						JOptionPane.showMessageDialog(frame, message, "Info", JOptionPane.INFORMATION_MESSAGE);
 					}
 				} catch (Exception e) {
