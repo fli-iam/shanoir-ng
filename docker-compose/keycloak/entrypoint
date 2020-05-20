@@ -4,12 +4,17 @@ set -e
 
 . /bin/entrypoint_common
 
+require  SHANOIR_ADMIN_EMAIL
+require  SHANOIR_ADMIN_NAME
 optional SHANOIR_PREFIX
+require  SHANOIR_SMTP_HOST
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 
 mkdir -p /tmp/import
-sed "
+sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
+	s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
+	s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
 	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
 	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 "	/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json

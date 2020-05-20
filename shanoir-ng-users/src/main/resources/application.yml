@@ -19,7 +19,7 @@ server:
     whitelabel:
       enabled: false
   display-name: Shanoir
-  administrator.email: shanoir-dev-test@lists.gforge.inria.fr
+  administrator.email: ${SHANOIR_ADMIN_EMAIL}
 ##### Database #####
 spring:
   datasource:
@@ -56,7 +56,7 @@ spring:
   session:
     store-type: none
   mail:
-    host: SMTP_HOST
+    host: ${SHANOIR_SMTP_HOST}
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr

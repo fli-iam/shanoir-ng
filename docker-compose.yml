@@ -27,8 +27,11 @@ services:
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     environment:
+      - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_ADMIN_NAME
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
@@ -77,8 +80,8 @@ services:
       - SHANOIR_URL_SCHEME
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
-      - spring.mail.host
-      - administrator.email
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
       - SHANOIR_MIGRATION
       - SHANOIR_PREFIX

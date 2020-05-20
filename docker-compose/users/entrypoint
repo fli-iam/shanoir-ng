@@ -9,6 +9,8 @@ require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 
+require	 SHANOIR_ADMIN_EMAIL
+require	 SHANOIR_SMTP_HOST
 
 handle_microservice_migration
 
