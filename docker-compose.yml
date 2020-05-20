@@ -298,6 +298,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_X_FORWARDED
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

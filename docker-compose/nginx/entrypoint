@@ -5,6 +5,12 @@ set -e
 . /bin/entrypoint_common
 
 (
+	require SHANOIR_X_FORWARDED
+	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
+		echo 'proxy_set_header 	X-Forwarded-For $remote_addr;'
+		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
+	fi
+
 	optional SHANOIR_PREFIX
 	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
 ) >/etc/nginx/shanoir.conf
