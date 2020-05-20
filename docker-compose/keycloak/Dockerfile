@@ -18,4 +18,6 @@ COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
 
 COPY cfg/. /opt/jboss/keycloak/
 
-CMD ["-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "-Dkeycloak.import=/opt/jboss/keycloak/shanoir-ng-realm.json", "-Dkeycloak.migration.strategy=IGNORE_EXISTING","-Dkeycloak.profile.feature.scripts=enabled"]
+COPY entrypoint entrypoint_common oneshot /bin/
+ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
+	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]

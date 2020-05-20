@@ -11,6 +11,7 @@
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 FROM openjdk:8-jdk-alpine
+RUN apk add bash
 
 # Installation of dcm4che to manage the store-scu into the PACS
 # dcm4che3, used last version 5.21.0 as available on the 2020-02-14
@@ -23,8 +24,9 @@ ENV PATH /dcm4che-5.21.0/bin:$PATH
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-datasets.jar shanoir-ng-datasets.jar
+COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and to active dev profile
-#ENTRYPOINT ["java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9914,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-datasets.jar"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9914,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-datasets.jar"]
 
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-datasets.jar"]
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-datasets.jar"]

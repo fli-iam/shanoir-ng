@@ -28,6 +28,8 @@ services:
     container_name: keycloak
     env_file:
       - ./.env
+    environment:
+      - SHANOIR_MIGRATION
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -79,8 +81,7 @@ services:
       - front.server.address
       - spring.mail.host
       - administrator.email
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -103,8 +104,7 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -130,8 +130,7 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -156,8 +155,7 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -183,8 +181,7 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java

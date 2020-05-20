@@ -1,0 +1,76 @@
+#!/bin/bash
+
+set -e
+
+. /bin/entrypoint_common
+
+
+require  SHANOIR_MIGRATION
+oneshot=
+extra=()
+case "$SHANOIR_MIGRATION" in
+auto)
+	# create the shanoir-ng realm if it does not exist yet
+	extra+=("-Dkeycloak.import=/opt/jboss/keycloak/shanoir-ng-realm.json"
+		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
+	;;
+init)
+	# wipe out the shanoir-ng realm and recreate it
+	extra+=("-Dkeycloak.migration.action=import"
+		"-Dkeycloak.migration.provider=singleFile"
+		"-Dkeycloak.migration.file=/opt/jboss/keycloak/shanoir-ng-realm.json"
+		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
+        # FIXME: should check additional messages:
+        #   "The batch executed successfully",
+        #   "Initializing master realm",
+        #   "Imported realm shanoir-ng",
+        #   "Added user 'admin' to realm 'master'",
+        #   r" INFO  \[org.jboss.as\] .* Keycloak .* started in \d+ms"
+	oneshot=1
+	;;
+never)
+	# FIXME: should we provide a facade for these too
+	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
+	# TODO: ensure that the realm config is up-to-date
+	#-> add an optional data volume to store the config of the imported realm
+	;;
+
+import)
+	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
+	error "TODO: import"
+	;;
+
+export)
+	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
+	error "TODO: export"
+	;;
+esac
+
+
+abort_if_error
+
+
+# run keycloak
+if [ -n "$oneshot" ] ; then
+	# oneshot run (launch the server and kill it after startup)
+
+	fifo="`tmp_fifo`"
+	trap 'rm "$fifo"' EXIT
+	# filter the output to keep only the interesting messages
+	# (i.e: startup, import/export, warning, errors, ...)
+	sed '	/[0-9] INFO /{
+			/\[org\.jboss\.as\]/p;
+			/\[org\.keycloak\.connections/p
+			/\[org\.keycloak\.exportimport/p
+			/\[org\.keycloak\.services/p
+			d
+		}' <"$fifo" &
+	
+	exec oneshot							\
+		'^ *JBoss Bootstrap Environment'			\
+		' INFO .*org\.jboss\.as.*Keycloak .* started in [0-9]'	\
+		-- env "$@" "${extra[@]}" > "$fifo"
+else
+	# 'normal' run
+	exec env "$@" "${extra[@]}"
+fi

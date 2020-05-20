@@ -35,8 +35,10 @@ RUN keytool -importcert -file /etc/ssl/certs/java/shanoir-ng-nginx.crt -alias sh
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-users.jar shanoir-ng-users.jar
+COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and development profile purpose
-#ENTRYPOINT ["java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9911,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9911,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
 
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
+
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-users.jar"]
