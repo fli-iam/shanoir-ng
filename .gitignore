@@ -23,3 +23,11 @@ bin/
 shanoir-uploader/src/main/resources/profile.OFSEP/key
 shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
 shanoir-uploader/src/main/resources/pseudonymus
+
+/docker-compose/nginx/webapp/
+/docker-compose/*/shanoir-ng-*.jar
+/docker-compose/*/entrypoint_common
+/docker-compose/*/oneshot
+
+/home
+/tmp
