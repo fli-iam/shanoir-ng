@@ -61,13 +61,13 @@ spring:
     properties:
       mail.smtp.from: do-not-reply@inria.fr
 front.server:
-  address: https://shanoir-ng-nginx/shanoir-ng/
-  url: https://shanoir-ng-nginx
+  address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
+  url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: https://shanoir-ng-nginx/auth
+  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-users

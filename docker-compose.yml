@@ -29,6 +29,8 @@ services:
     env_file:
       - ./.env
     environment:
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
     build: ./docker-compose/keycloak
     networks:
@@ -71,14 +73,13 @@ services:
     container_name: users
     build: ./docker-compose/users
     environment:
-      - keycloak.auth-server-url
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - kc.admin.client.server.url
       - kc.admin.client.realm
       - kc.admin.client.client.id
       - KEYCLOAK_USER
       - KEYCLOAK_PASSWORD
-      - front.server.url
-      - front.server.address
       - spring.mail.host
       - administrator.email
       - SHANOIR_MIGRATION
@@ -101,9 +102,8 @@ services:
     container_name: studies
     build: ./docker-compose/studies
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -127,9 +127,8 @@ services:
     container_name: import
     build: ./docker-compose/import
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -152,9 +151,8 @@ services:
     container_name: datasets
     build: ./docker-compose/datasets
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -178,9 +176,8 @@ services:
     container_name: preclinical
     build: ./docker-compose/preclinical
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"

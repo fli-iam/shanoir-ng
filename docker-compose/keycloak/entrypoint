@@ -4,21 +4,28 @@ set -e
 
 . /bin/entrypoint_common
 
+require  SHANOIR_URL_HOST
+require  SHANOIR_URL_SCHEME
 
+mkdir -p /tmp/import
+sed "
+	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
+	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
+"	/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
 require  SHANOIR_MIGRATION
 oneshot=
 extra=()
 case "$SHANOIR_MIGRATION" in
 auto)
 	# create the shanoir-ng realm if it does not exist yet
-	extra+=("-Dkeycloak.import=/opt/jboss/keycloak/shanoir-ng-realm.json"
+	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
 	;;
 init)
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
 		"-Dkeycloak.migration.provider=singleFile"
-		"-Dkeycloak.migration.file=/opt/jboss/keycloak/shanoir-ng-realm.json"
+		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
         # FIXME: should check additional messages:
         #   "The batch executed successfully",

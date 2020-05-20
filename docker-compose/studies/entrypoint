@@ -5,6 +5,8 @@ set -e
 . /bin/entrypoint_common
 
 require  SHANOIR_MIGRATION
+require  SHANOIR_URL_HOST
+require  SHANOIR_URL_SCHEME
 
 handle_microservice_migration
 

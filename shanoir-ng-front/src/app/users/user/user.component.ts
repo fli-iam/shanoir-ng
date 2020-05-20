@@ -22,6 +22,7 @@ import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'user-detail',
@@ -91,7 +92,7 @@ export class UserComponent implements OnInit {
     }
 
     cancelAccountRequest(): void {
-        window.location.href = process.env.LOGOUT_REDIRECT_URL;
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     accept(): void {

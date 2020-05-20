@@ -39,10 +39,10 @@
     {
       "clientId": "shanoir-ng-front",
       "redirectUris": [
-        "https://shanoir-ng-nginx/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
-        "https://shanoir-ng-nginx"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
       ],
       "directAccessGrantsEnabled": true,
       "publicClient": true,

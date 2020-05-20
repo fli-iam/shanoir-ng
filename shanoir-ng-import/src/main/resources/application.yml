@@ -60,13 +60,13 @@ spring:
       maxFileSize: 5000Mb
       maxRequestSize: 5000Mb
 front.server:
-  address: http://shanoir-ng-nginx/shanoir-ng/
-  url: http://shanoir-ng-nginx
+  address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
+  url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: http://shanoir-ng-nginx/auth
+  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-import

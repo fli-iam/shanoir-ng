@@ -14,6 +14,7 @@
 
 import { Component } from '@angular/core';
 
+import * as AppUtils from '../../utils/app.utils';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 @Component({
@@ -34,7 +35,7 @@ export class AccountRequestComponent {
     }
 
     getOut() {
-        window.location.href = process.env.LOGOUT_REDIRECT_URL;
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
 }
