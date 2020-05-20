@@ -53,7 +53,6 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -177,11 +176,7 @@ public class ImporterService {
 			}
 			archives.add(fileName);
 			examination.setExtraDataFilePathList(archives);
-			try {
-				examinationService.update(examination);
-			} catch (EntityNotFoundException e) {
-				LOG.error(e.getMessage());
-			}
+			examinationRepository.save(examination);
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
