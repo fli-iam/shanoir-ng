@@ -46,6 +46,7 @@ import javax.swing.text.NumberFormatter;
 
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
+import org.bouncycastle.util.test.NumberParsing;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -975,6 +976,26 @@ public class MainWindow extends JFrame {
 					JFileChooser fileChooser = new JFileChooser();
 					fileChooser.setDialogTitle(resourceBundle.getString("shanoir.uploader.chooseDirectory"));   
 					fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					
+					Long datasetId = null;
+					Long studyId = null;
+					Long subjectId = null;
+
+					if (!downloadPatientIDTF.getText().isEmpty()) {
+						datasetId = Long.parseLong(downloadPatientIDTF.getText());
+					}
+					if (!downloadStudyIDTF.getText().isEmpty()) {
+						studyId = Long.parseLong(downloadStudyIDTF.getText());
+					}
+					if (!downloadSubjectIDTF.getText().isEmpty()) {
+						subjectId = Long.parseLong(downloadSubjectIDTF.getText());
+					}
+
+					if(datasetId == null && studyId == null && subjectId == null) {
+						String message = resourceBundle.getString("shanoir.uploader.invalidId");
+						throw new Exception(message);
+					}
+
 					int userSelection = fileChooser.showSaveDialog(frame);
 					
 					if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -987,24 +1008,19 @@ public class MainWindow extends JFrame {
 
 						String message = "";
 
-						if (!downloadPatientIDTF.getText().isEmpty()) {
-							Long datasetId = Long.parseLong(downloadPatientIDTF.getText());
+						if (datasetId != null) {
 							message = ShanoirDownloader.downloadDataset(fileToSave, datasetId, format, shng);
 						}
 
-						if (!downloadStudyIDTF.getText().isEmpty() && downloadSubjectIDTF.getText().isEmpty()) {
-							Long studyId = Long.parseLong(downloadStudyIDTF.getText());
+						if (studyId != null && subjectId == null) {
 							message = ShanoirDownloader.downloadDatasetByStudy(fileToSave, studyId, format, shng);
 						}
 
-						if (downloadStudyIDTF.getText().isEmpty() && !downloadSubjectIDTF.getText().isEmpty()) {
-							Long subjectId = Long.parseLong(downloadSubjectIDTF.getText());
+						if (studyId == null && subjectId != null) {
 							message = ShanoirDownloader.downloadDatasetBySubject(fileToSave, subjectId, format, shng);
 						}
 
-						if (!downloadStudyIDTF.getText().isEmpty() && !downloadSubjectIDTF.getText().isEmpty()) {
-							Long subjectId = Long.parseLong(downloadSubjectIDTF.getText());
-							Long studyId = Long.parseLong(downloadStudyIDTF.getText());
+						if (studyId != null && subjectId != null) {
 							message = ShanoirDownloader.downloadDatasetBySubjectIdStudyId(fileToSave, studyId, subjectId, format, shng);
 						}
 						
@@ -1017,7 +1033,7 @@ public class MainWindow extends JFrame {
 				} catch (Exception e) {
 					downloadAnimationLabel.setVisible(false);
 					logger.error(e.getMessage());
-					String message = resourceBundle.getString("shanoir.uploader.downloadError");
+					String message = resourceBundle.getString("shanoir.uploader.downloadError") + " \n\n" + e.getMessage();
 					JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
