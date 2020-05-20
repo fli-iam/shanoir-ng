@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+. /bin/entrypoint_common
+
+(
+	optional SHANOIR_PREFIX
+	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
+) >/etc/nginx/shanoir.conf
+
+require SHANOIR_URL_SCHEME
+require SHANOIR_URL_HOST
+src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
+dst="/etc/nginx/server.conf"
+sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
+
+abort_if_error
+
+nginx -t
+exec "$@"

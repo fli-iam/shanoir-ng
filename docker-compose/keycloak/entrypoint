@@ -4,6 +4,7 @@ set -e
 
 . /bin/entrypoint_common
 
+optional SHANOIR_PREFIX
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 
@@ -12,6 +13,7 @@ sed "
 	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
 	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 "	/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
+export DB_ADDR="${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}"
 require  SHANOIR_MIGRATION
 oneshot=
 extra=()

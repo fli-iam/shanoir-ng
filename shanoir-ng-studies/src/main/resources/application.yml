@@ -21,7 +21,7 @@ server:
 ##### Database #####
 spring:
   datasource:
-    url: jdbc:mysql://database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
     password: password
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
@@ -49,7 +49,7 @@ spring:
   jooq:
     sql-dialect: Mysql
   rabbitmq:
-    host: rabbitmq
+    host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
     username: guest
     password: guest
@@ -83,11 +83,11 @@ keycloak:
         - /*
 # microservices url
 ms.url:
-  shanoir-ng-users: http://users:9901/users
-  shanoir-ng-import: http://import:9903/niftiConverter
-  shanoir-ng-studycards: http://datasets:9904/studycards
-  shanoir-ng-examinations: http://datasets:9904/examinations
-  shanoir-ng-bids: http://datasets:9904/bids
+  shanoir-ng-users: http://${SHANOIR_PREFIX}users:9901/users
+  shanoir-ng-import: http://${SHANOIR_PREFIX}import:9903/niftiConverter
+  shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
+  shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
+  shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
 # data paths
 study-data: /var/study-data
 # Data folder configuration
