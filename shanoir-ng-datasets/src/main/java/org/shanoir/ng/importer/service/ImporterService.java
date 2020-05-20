@@ -172,6 +172,9 @@ public class ImporterService {
 			// TODO: Use Examination API to add a new file to extra-data more simply.
 			// Keep archive informations in examination => Add it to disponible files
 			List<String> archives = examination.getExtraDataFilePathList();
+			if (archives == null) {
+				archives = new ArrayList<String>();
+			}
 			archives.add(fileName);
 			examination.setExtraDataFilePathList(archives);
 			try {
