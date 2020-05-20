@@ -15,6 +15,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node [label]="examination | examinationLabel" awesome="fas fa-user-injured" [deploy]="true">
     <node label="MR dataset acquisitions (has for part) " awesome="fas fa-user-injured" [deploy]="true">
     </node>
-    <node label="Attached files " awesome="fas fa-file" [deploy]="true">
-    </node>
+  
+    <ng-template ngFor let-file [ngForOf]="examination.extraDataFilePathList">
+        <node label="{{file}}" awesome="fas fa-file" [deploy]="true" [buttonPicto]="'fas fa-download'" (buttonClick)=downloadFile(file)>
+        </node>
+    </ng-template>
 </node>
