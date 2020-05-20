@@ -81,6 +81,7 @@ services:
       - KEYCLOAK_PASSWORD
       - spring.mail.host
       - administrator.email
+      - SHANOIR_CERTIFICATE
       - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
     volumes:
