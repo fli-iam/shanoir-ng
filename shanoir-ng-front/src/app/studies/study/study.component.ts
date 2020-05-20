@@ -400,11 +400,6 @@ export class StudyComponent extends EntityComponent<Study> {
         return element.split('\\').pop().split('/').pop();
     }
 
-    private exportBIDS(study: Study) {
-        let studyName: string;
-        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
-    }
-
     getBidsStructure(id: number) {
        this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
     }
