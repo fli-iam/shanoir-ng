@@ -33,12 +33,16 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -72,6 +76,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -84,6 +90,16 @@ public class DatasetApiController implements DatasetApi {
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
+	private static final String T1w = "T1w";
+
+	private static final String SUB_PREFIX = "sub-";
+
+	private static final String SES_PREFIX = "ses-";
+
+	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
+
+	private static final String README_FILE = "README";
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
@@ -106,13 +122,14 @@ public class DatasetApiController implements DatasetApi {
 	private ExaminationService examinationService;
 
 	private final HttpServletRequest request;
-	
+
 	@Autowired
 	private WADODownloaderService downloader;
-	
+
 	@Autowired
 	private BIDSService bidsService;
 
+	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	private static final SecureRandom RANDOM = new SecureRandom();
@@ -276,37 +293,88 @@ public class DatasetApiController implements DatasetApi {
 				.contentLength(data.length)
 				.body(resource);
 	}
-	
+
 	@Override
 	public ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm")
-				@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format,
-			@ApiParam(value = "ids of the datasets", required = true) @Valid @RequestBody final List<Long> datasetIds)
-			throws RestServiceException, EntityNotFoundException, IOException {
-		
-		// Check rights on at least one of the datasets and filter the datasetIds list
-		datasetSecurityService.hasRightOnAtLeastOneDataset(datasetIds, "CAN_DOWNLOAD");
-    	if (datasetIds.isEmpty()) {
+			@ApiParam(value = "ids of the datasets", required=true) @Valid
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+		// STEP 0: Check data integrity
+		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Not allowed to download asked datasets"));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
-    	
-		//TODO now datasetIds are all valid, do massive download with these datasetIds
-    	
-    	String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-    	String tmpFilePath = tmpDir + File.separator + "TODO";
+		// STEP 1: Retrieve all datasets all in one with only the one we can see
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+
+		return massiveDownload(format, datasets);
+	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
+			@ApiParam(value = "id of the study", required=true) @Valid
+			@RequestParam(value = "studyId", required = true) Long studyId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException {
+		// STEP 0: Check data integrity
+		if (studyId == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study ID."));
+		}
+		// STEP 1: Retrieve all datasets all in one with only the one we can see
+		List<Dataset> datasets = datasetService.findByStudyId(studyId);
+
+		return massiveDownload(format, datasets);
+	}
+
+	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets) throws EntityNotFoundException, RestServiceException, IOException {
+		// STEP 2: Check rights => Also filters datasets on rights
+		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
+		// STEP 3: Get the data
+		// Check rights on at least one of the datasets and filter the datasetIds list
+		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+		String tmpFilePath = tmpDir + File.separator + "dataset-list";
+		File tmpFile = new File(tmpFilePath);
+		tmpFile.mkdirs();
+
+		// Get the data
+		try {
+			for (Dataset dataset : datasets) {
+				List<URL> pathURLs = new ArrayList<>();
+				if ("dcm".equals(format)) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile);
+				} else if ("nii".equals(format)) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+					copyNiftiFilesForURLs(pathURLs, tmpFile);
+				} else {
+					throw new RestServiceException(
+							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
+				}
+			}
+		} catch (IOException | MessagingException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
+		}
+		// Zip it
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
-		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-    	byte[] data = Files.readAllBytes(zipFile.toPath());
-    	ByteArrayResource resource = new ByteArrayResource(data);
+
+		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+
+		byte[] data = Files.readAllBytes(zipFile.toPath());
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		FileUtils.deleteDirectory(tmpFile);
+
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
-				.contentType(MediaType.parseMediaType(contentType))
+				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.contentLength(data.length)
 				.body(resource);
 	}
-	
+
 	/**
 	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
 	 * @param urls
@@ -369,6 +437,126 @@ public class DatasetApiController implements DatasetApi {
 				});
 			}
 			zos.finish();
+		}
+	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName)
+					throws RestServiceException, MalformedURLException, IOException {
+		final List<Examination> examinationList = examinationService.findBySubjectId(subjectId);
+		if (examinationList.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Examination found of subject Id.", null));
+		} else {
+			// 1. Create folder
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			long n = RANDOM.nextLong();
+			if (n == Long.MIN_VALUE) {
+				n = 0; // corner case
+			} else {
+				n = Math.abs(n);
+			}
+			String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+			File workFolder = new File(tmpFilePath + DOWNLOAD);
+			workFolder.mkdirs();
+			File zipFile = new File(tmpFilePath + ZIP);
+			zipFile.createNewFile();
+
+			// 2. Create dataset_description.json and README
+			DatasetDescription datasetDesciption = new DatasetDescription();
+			datasetDesciption.setName(studyName);
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDesciption);
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
+
+			// TODO BIDS: 3. Create [ses-<label>/] folder if multi exams
+			/*if (examinationList.size() > 1) {
+				for (Examination examination: examinationList) {
+					String sesLabel = examination.getId().toString();
+					final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
+					for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
+						// TODO BIDS: 5. multi dataset acquisiton: add [_acq-<label>]
+						String acqLabel = datasetAcquisition.getId().toString();
+						final List<Dataset> datasetList = datasetAcquisition.getDatasets();
+						for (Dataset dataset: datasetList) {
+							// TODO BIDS: 6. multi datasets: add [_run-<index>]
+
+							// TODO BIDS: 7. multi MrDatasetNature: add _<modality_label>
+						}
+					}
+				}
+			}*/
+
+			// 8. Get modality label, nii and json of dataset
+			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
+			final Dataset dataset = examinationList.get(0).getDatasetAcquisitions().get(0).getDatasets().get(0);
+			if (dataset == null) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Dataset found for subject Id.", null));
+			}
+
+			// Get modality label
+			String modalityLabel = null;
+			if (((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_MR_DATASET)
+					|| ((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET)) {
+				modalityLabel = T1w;
+			}
+			if (StringUtils.isEmpty(modalityLabel)) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No MrDatasetNature, so could not define modality label and export BIDS!", null));
+			}
+
+			// Get nii and json files
+			try {
+				List<URL> pathURLs = new ArrayList<URL>();
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				copyFilesForBIDSExport(pathURLs, workFolder, subjectName, examinationList.get(0).getId().toString(), modalityLabel);
+			} catch (IOException e) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error exporting nifti files for subject in BIDS.", null));
+			}
+
+			// 9. Create zip file
+			zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+
+			// Try to determine file's content type
+			String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+
+			byte[] data = Files.readAllBytes(zipFile.toPath());
+			ByteArrayResource resource = new ByteArrayResource(data);
+
+			return ResponseEntity.ok()
+					// Content-Disposition
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+					// Content-Type
+					.contentType(MediaType.parseMediaType(contentType)) //
+					// Content-Length
+					.contentLength(data.length) //
+					.body(resource);
+		}
+	}
+
+	/**
+	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+	 * @param urls
+	 * @param workFolder
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
+			final String sesId, final String modalityLabel) throws IOException {
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			URL url =  iterator.next();
+			File srcFile = new File(url.getPath());
+			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
+			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
+			destFolder.mkdirs();
+			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
+			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
+			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
+			Files.copy(srcFile.toPath(), destFile.toPath());
 		}
 	}
 

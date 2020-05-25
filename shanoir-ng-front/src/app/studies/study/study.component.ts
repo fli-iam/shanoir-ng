@@ -32,6 +32,7 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -63,9 +64,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
-    protected bidsLoading: boolean = false;
     
     protected bidsStructure: BidsElement[];
 
@@ -400,12 +398,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
-    }
-
-    private exportBIDS(study: Study) {
-        let studyName: string;
-        this.bidsLoading = true;
-        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
     }
 
     getBidsStructure(id: number) {
