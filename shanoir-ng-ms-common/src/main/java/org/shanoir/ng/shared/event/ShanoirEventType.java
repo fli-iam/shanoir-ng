@@ -59,4 +59,6 @@ public class ShanoirEventType {
 	
 	/** Import Dataset **/
 	public static final String IMPORT_DATASET_EVENT = "importDataset.event";
+
+	public static final String DOWNLOAD_DATASETS_EVENT = "downloadDatasets.event";
 }

@@ -16,7 +16,7 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 	 * @param eventType
 	 * @return a list of ShanoirEvents with given userID and event type
 	 */
-	List<ShanoirEvent> findByUserIdAndEventType(Long userId, String eventType);
+	List<ShanoirEvent> findByUserIdAndEventTypeIn(Long userId, String[] eventType);
 
 	/**
 	 * Deletes all events older than a date.

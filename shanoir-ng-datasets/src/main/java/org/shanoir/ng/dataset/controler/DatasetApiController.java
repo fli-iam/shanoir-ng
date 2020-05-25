@@ -54,10 +54,14 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +131,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private BIDSService bidsService;
+
+	@Autowired
+	private ShanoirEventService eventService;
 
 	@Autowired
 	private DatasetSecurityService datasetSecurityService;
@@ -329,6 +336,9 @@ public class DatasetApiController implements DatasetApi {
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
+		
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, null, KeycloakUtil.getTokenUserId(), "File ready", ShanoirEvent.SUCCESS);
+		eventService.publishEvent(event);
 
 		FileUtils.deleteDirectory(tmpFile);
 
