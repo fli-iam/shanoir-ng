@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i>Multiple character wildcard searches are allowed by adding * to keyword</i>
             </tool-tip>
         </h2>
-        <input type="text" [(ngModel)]="keywords" formControlName="keywords" id="searchBar" placeholder="Search.." (change)="table.refresh()">
+        <input type="text" [(ngModel)]="keyword" formControlName="keywords" id="searchBar" placeholder="Search.." (change)="table.refresh()">
         <label *ngIf="hasError('keywords', ['pattern'])" class="form-validation-alert">Please check the query syntax!</label>
         <ol id="facet">
             <li *ngIf="selections">

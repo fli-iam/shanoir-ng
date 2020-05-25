@@ -95,7 +95,6 @@ export class NavbarComponent {
 
     indexToSolr() {
         this.solrService.indexAll();
-        this.togglePink();
     }
 
 }

@@ -34,7 +34,7 @@ import { SolrService } from "./solr.service";
 export class SolrSearchComponent{
     facetResultPages: FacetResultPage[] = [];
     solrRequest: SolrRequest = new SolrRequest();
-    keywords: string;
+    keyword: string;
     selections: any[];
     columnDefs: any[];
     customActionDefs: any[];
@@ -58,7 +58,7 @@ export class SolrSearchComponent{
     buildForm(): FormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9_\W]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
-            'keywords': [this.keywords, Validators.pattern(searchBarRegex)],
+            'keywords': [this.keyword, Validators.pattern(searchBarRegex)],
             'studyName': [this.solrRequest.studyName],
             'subjectName': [this.solrRequest.subjectName],
             'datasetName': [this.solrRequest.datasetName],
@@ -98,7 +98,7 @@ export class SolrSearchComponent{
     }
 
     splitKeywords() {
-        let keywords = this.keywords.split(';', this.keywords.split(';').length - 1);
+        let keywords = this.keyword.split(';', this.keyword.split(';').length - 1);
         Object.keys(this.solrRequest).forEach(key => {
             keywords.forEach(keyword => {
                 if (keyword.split(':')[0] == key) {
@@ -107,16 +107,16 @@ export class SolrSearchComponent{
                 }
             })
         }) 
-    }
+    }    
     
     updateSelections() {
-        if (this.keywords) this.splitKeywords();
-        this.selections = Object.keys(this.solrRequest).map((key)=>{ return {key:key, value:this.solrRequest[key]} });
+        if (this.keyword) this.splitKeywords();
+        this.selections = Object.keys(this.solrRequest).map((key)=>{return {key:key, value:this.solrRequest[key]} });
     }
 
     removeAllFacets() {
         this.selections = null;
-        this.keywords = null;
+        this.keyword = null;
         for (let key of Object.keys(this.solrRequest)) {
             this.solrRequest[key] = null;
         }
@@ -126,10 +126,9 @@ export class SolrSearchComponent{
         for (let key of Object.keys(this.solrRequest)) {
             if (key && this.solrRequest[key] && key == keyS && this.solrRequest[key].includes(valueS)) {
                 this.solrRequest[key] = this.solrRequest[key].filter(item => item !== valueS);
+                if (this.keyword.includes(valueS)) this.keyword = this.keyword.replace(key + ':' + valueS + ';', '');
                 if (this.solrRequest[key].length == 0) this.solrRequest[key] = null;
-            } else {
-                this.keywords = null;
-            }
+            } 
         }
     }
 
@@ -202,15 +201,6 @@ export class SolrSearchComponent{
         this.selectedDatasetIds = [];
         selection.forEach(sel => this.selectedDatasetIds.push(sel.datasetId));
     }
-
-    // private isStudyAlreadySelected (studyId: number) {
-    //     if (this.selectedStudies.filter(study => study.id == studyId).length > 0) return true;
-    //     else return false;
-    // }
-
-    // private removeFromSelectedStudies(studyId: number) {
-    //     this.selectedStudies = this.selectedStudies.filter(study => study.id !== studyId);
-    // }
 
     private onRowClick(solrRequest: any) {
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);

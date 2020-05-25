@@ -52,13 +52,13 @@ public class SolrApiController implements SolrApi {
 		solrService.deleteAll();		
 		// 2. re-index all
 		solrService.indexAll();		
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@Override
 	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> findAll(Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> documents = solrService.findAll(pageable);
-		if (documents == null) {
+		if (documents.getNumberOfElements() == 0) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
@@ -68,7 +68,7 @@ public class SolrApiController implements SolrApi {
 	public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(
 			@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> documents = solrService.facetSearch(facet, pageable);
-		if (documents == null) {
+		if (documents.getNumberOfElements() == 0) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
