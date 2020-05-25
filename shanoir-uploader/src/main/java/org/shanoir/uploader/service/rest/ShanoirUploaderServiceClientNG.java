@@ -309,6 +309,38 @@ public class ShanoirUploaderServiceClientNG {
 		}
 		return null;
 	}
+
+	public HttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
+		if (datasetIds != null) {
+			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload/").queryParam("datasetIds", datasetIds).queryParam("format", format).build();
+			
+			HttpResponse response = httpService.get(url.toString());
+
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				return response;
+			} else {
+				System.out.println("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		}
+		return null;
+	}
+
+	public HttpResponse downloadDatasetsByStudyId(Long studyId, String format) throws Exception {
+		if (studyId != null) {
+			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownloadByStudy/").queryParam("studyId", studyId).queryParam("format", format).build();
+			
+			HttpResponse response = httpService.get(url.toString());
+
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				return response;
+			} else {
+				System.out.println("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * This method creates a subject on the server.

@@ -336,6 +336,16 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 	}
 	
+	public static void saveResponseToFile(File destDir, HttpResponse response) throws IOException {
+		Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
+		String fileName = header.getValue();
+		fileName = fileName.replace("attachment;filename=", "");
+		
+		final File downloadedFile = new File(destDir + "/" + fileName);
+
+		FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
+	}
+
 	public static String downloadDataset(File destDir, Long datasetId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetId + "...");
 		HttpResponse response = shng.downloadDatasetById(datasetId, format);
@@ -346,27 +356,34 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			return message;
 		}
 
-		Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
-		String fileName = header.getValue();
-		fileName = fileName.replace("attachment;filename=", "");
-		
-		final File downloadedFile = new File(destDir + "/" + fileName);
+		saveResponseToFile(destDir, response);
+		return message;
+	}
 
-		FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
+	public static String downloadDatasets(File destDir, List<Long> datasetIds, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+		System.out.println("Downloading dataset " + datasetIds + "...");
+		HttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
+		String message = "";
+		if(response == null) {
+			message = "Datasets with not found.";
+			System.out.println(message);
+			return message;
+		}
+
+		saveResponseToFile(destDir, response);
 		return message;
 	}
 
 	public static String downloadDatasetByStudy(File destDir, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
-		List<Long> datasetIds = shng.findDatasetIdsByStudyId(studyId);
+		HttpResponse response = shng.downloadDatasetsByStudyId(studyId, format);
 		String message = "";
-		if(datasetIds == null) {
-			message = "No dataset found.";
+		if(response == null) {
+			message = "Datasets of study " + studyId + " not found.";
 			System.out.println(message);
 			return message;
 		}
-		for(Long datasetId : datasetIds) {
-			downloadDataset(destDir, datasetId, format, shng);
-		}
+
+		saveResponseToFile(destDir, response);
 		return message;
 	}
 
@@ -378,9 +395,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			System.out.println(message);
 			return message;
 		}
-		for(Long datasetId : datasetIds) {
-			downloadDataset(destDir, datasetId, format, shng);
-		}
+		message = downloadDatasets(destDir, datasetIds, format, shng);
 		return message;
 	}
 
@@ -392,9 +407,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			System.out.println(message);
 			return message;
 		}
-		for(Long datasetId : datasetIds) {
-			downloadDataset(destDir, datasetId, format, shng);
-		}
+		message = downloadDatasets(destDir, datasetIds, format, shng);
 		return message;
 	}
 

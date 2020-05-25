@@ -92,6 +92,12 @@
 			    </exclusion>
 			</exclusions>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
+		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>
 			<groupId>commons-lang</groupId>
