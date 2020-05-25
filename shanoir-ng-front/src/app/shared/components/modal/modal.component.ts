@@ -20,7 +20,7 @@ import { Component, Input } from '@angular/core';
   <div class="modal fade" tabindex="-1" [ngClass]="{'out': !visible}">
     <div id={{modalDialogId}} class="modal-dialog" (click)="onContainerClicked($event)">
       <div class="content" [ngClass]="{'preout': !visibleAnimate}">
-        <ng-content select=".app-modal-body"></ng-content>
+        <ng-content select=".main"></ng-content>
       </div>
     </div>
   </div>
