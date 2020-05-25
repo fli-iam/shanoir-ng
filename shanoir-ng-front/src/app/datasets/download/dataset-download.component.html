@@ -1,0 +1,22 @@
+<button (click)="prepareDownload()"> Download datasets </button> <img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
+<app-modal #downloadDialog >
+    <div class="main">
+    <div class="header">Massive download</div>
+    <div *ngIf="inError"> class="body" {{errorMessage}}</div>
+    <div *ngIf="!inError" class="body">
+        <p>Please select download options</p>
+        <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
+        <div *ngIf="!useBids">
+        <p> Please select dataset type (only for DICOM / NIFTI datasets): </p>
+        <select-box [(ngModel)]="type">
+            <select-option selected value="nii">Nifti</select-option>
+            <select-option value="dcm">Dicom</select-option>
+        </select-box>
+        </div>
+    </div>
+    <div class="footer">
+        <button *ngIf="!inError" type="button" (click)="download()" >OK</button>
+        <button type="button" (click)="cancel()">Cancel</button>
+    </div>
+</div>
+</app-modal>
