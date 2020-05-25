@@ -355,6 +355,51 @@ export class StudyComponent extends EntityComponent<Study> {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
+    private click() {
+        this.fileInput.nativeElement.click();
+    }
+
+    protected deleteFile(file: any) {
+        if (this.mode == 'create') { 
+            this.study.protocolFilePaths = [];
+            this.protocolFile = null;
+        } else if (this.mode == 'edit') {
+            // TODO: API call
+            this.studyService.deleteFile(this.study.id);
+            this.study.protocolFilePaths = [];
+            this.protocolFile = null;           
+        }
+    }
+
+    protected downloadFile() {
+        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
+    }
+
+    private attachNewFile(event: any) {
+        this.protocolFile = event.target.files[0];
+        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
+            this.msgBoxService.log("error", "Only PDF files are accepted");
+            this.protocolFile = null;
+        } else {
+            this.study.protocolFilePaths = [this.protocolFile.name];
+        }
+        this.form.updateValueAndValidity();
+    }
+
+    protected save(): Promise<void> {
+        let prom = super.save().then(result => {
+            // Once the study is saved, save associated file if changed
+            if (this.protocolFile) {
+                this.studyService.uploadFile(this.protocolFile, this.entity.id).subscribe(response => console.log('result:' + response));
+            }
+        });
+        return prom;
+    }
+
+    getFileName(element): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+
     getBidsStructure(id: number) {
        this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
     }
