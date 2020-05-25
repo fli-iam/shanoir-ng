@@ -17,6 +17,7 @@ import org.dcm4che3.tool.common.FilesetInfo;
 import org.dcm4che3.util.UIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * This bean generates a DICOMDIR file.
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author mkain
  *
  */
-//@Service
+@Service
 public class DicomDirGeneratorService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomDirGeneratorService.class);
