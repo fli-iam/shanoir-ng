@@ -242,8 +242,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
-            <button *ngIf="mode=='view'" [disabled]="bidsLoading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="exportBIDS(study)">Download BIDS<i class="fas fa-download"></i></button>
-            <img class="loader" *ngIf="bidsLoading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
 		</form>
+        <dataset-download [studyId]="id" > </dataset-download>
 	</div>
 </div>

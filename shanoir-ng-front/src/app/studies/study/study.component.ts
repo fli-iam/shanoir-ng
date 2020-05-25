@@ -32,6 +32,7 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -63,9 +64,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
-    protected bidsLoading: boolean = false;
     
     protected bidsStructure: BidsElement[];
 
@@ -355,57 +353,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
-    }
-
-    private click() {
-        this.fileInput.nativeElement.click();
-    }
-
-    protected deleteFile(file: any) {
-        if (this.mode == 'create') { 
-            this.study.protocolFilePaths = [];
-            this.protocolFile = null;
-        } else if (this.mode == 'edit') {
-            // TODO: API call
-            this.studyService.deleteFile(this.study.id);
-            this.study.protocolFilePaths = [];
-            this.protocolFile = null;           
-        }
-    }
-
-    protected downloadFile() {
-        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
-    }
-
-    private attachNewFile(event: any) {
-        this.protocolFile = event.target.files[0];
-        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only PDF files are accepted");
-            this.protocolFile = null;
-        } else {
-            this.study.protocolFilePaths = [this.protocolFile.name];
-        }
-        this.form.updateValueAndValidity();
-    }
-
-    protected save(): Promise<void> {
-        let prom = super.save().then(result => {
-            // Once the study is saved, save associated file if changed
-            if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).subscribe(response => console.log('result:' + response));
-            }
-        });
-        return prom;
-    }
-
-    getFileName(element): string {
-        return element.split('\\').pop().split('/').pop();
-    }
-
-    private exportBIDS(study: Study) {
-        let studyName: string;
-        this.bidsLoading = true;
-        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
     }
 
     getBidsStructure(id: number) {
