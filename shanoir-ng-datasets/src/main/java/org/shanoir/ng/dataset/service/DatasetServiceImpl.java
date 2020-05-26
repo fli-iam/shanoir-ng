@@ -60,6 +60,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<Dataset> findByIdIn(List<Long> ids) {
+		return Utils.toList(repository.findAll(ids));
+	}
+
+	@Override
 	public Dataset create(final Dataset dataset) {
 		return repository.save(dataset);
 	}
@@ -110,6 +115,11 @@ public class DatasetServiceImpl implements DatasetService {
 			
 			return repository.findByStudyIdIn(studyIds, pageable);
 		}
+	}
+
+	@Override
+	public List<Dataset> findByStudyId(Long studyId) {
+		return Utils.toList(repository.findByStudyId(studyId));
 	}
 
 }
