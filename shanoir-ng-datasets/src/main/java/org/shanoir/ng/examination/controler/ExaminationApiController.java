@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -41,7 +40,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,22 +66,11 @@ public class ExaminationApiController implements ExaminationApi {
 	@Autowired
 	private ExaminationService examinationService;
 
-	@Value("${datasets-data}")
-	private String dataDir;
-
-	private final HttpServletRequest request;
-
-
 	@Autowired
 	BIDSService bidsService;
 
 	@Autowired
 	ShanoirEventService eventService;
-
-	@org.springframework.beans.factory.annotation.Autowired
-	public ExaminationApiController(final HttpServletRequest request) {
-		this.request = request;
-	}
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
@@ -96,7 +83,7 @@ public class ExaminationApiController implements ExaminationApi {
 			examinationService.deleteById(examinationId);
 
 			// Delete extra data
-			String dataPath = getExtraDataFilePath(examinationId, "");
+			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
@@ -196,23 +183,17 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<Void> addExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-		String filePath = getExtraDataFilePath(examinationId, file.getOriginalFilename());
-		File fileToCreate = new File(filePath);
-		fileToCreate.getParentFile().mkdirs();
-		try {
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(new File(filePath));
-		} catch (Exception e) {
-			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
+		if (examinationService.addExtraData(examinationId, file) != null) {
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	@Override
 	public 	ResponseEntity<ByteArrayResource> downloadExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
-		String filePath = getExtraDataFilePath(examinationId, fileName);
+		String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -226,58 +207,6 @@ public class ExaminationApiController implements ExaminationApi {
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileToDownLoad.getName())
 				.contentType(MediaType.APPLICATION_PDF)
 				.contentLength(data.length)
-				.body(resource);
-	}
-
-	/**
-	 * Gets the extra data file path
-	 * @param examinationId id of the examination
-	 * @param fileName name of the file
-	 * @return the file path of the file
-	 */
-	private String getExtraDataFilePath(Long examinationId, String fileName) {
-		return dataDir + "/examination-" + examinationId + "/" + fileName;
-	}
-
-	@Override
-	public ResponseEntity<ByteArrayResource> exportExaminationById(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws RestServiceException {
-		// Get examination from ID
-		Examination exam = examinationService.findById(examinationId);
-		if (exam.getExtraDataFilePathList() == null) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-
-		String archiveToExport = null;
-		for (String extraDataFile : exam.getExtraDataFilePathList()) {
-			if (extraDataFile.startsWith(dataDir + "/preclinical/")) {
-				archiveToExport = extraDataFile;
-				break;
-			}
-		}
-		if (archiveToExport == null) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		File archiveFile = new File(archiveToExport);
-		
-		byte[] data;
-		try {
-			data = Files.readAllBytes(archiveFile.toPath());
-		} catch (IOException e) {
-			LOG.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(archiveFile.getAbsolutePath());
-		return ResponseEntity.ok()
-				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveFile.getName())
-				// Content-Type
-				.contentType(MediaType.parseMediaType(contentType)) //
-				// Content-Length
-				.contentLength(data.length) //
 				.body(resource);
 	}
 

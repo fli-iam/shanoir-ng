@@ -16,7 +16,6 @@ package org.shanoir.ng.examination;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -26,8 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,8 +48,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -64,6 +59,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -85,22 +81,13 @@ public class ExaminationApiControllerTest {
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
 	
 	public static String tempFolderPath;
+
 	@BeforeClass
 	public static void beforeClass() {
 		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
 
 	    System.setProperty("datasets-data", tempFolderPath);
 	}
-
-	@Configuration
-    static class Config {
-
-		@Bean
-		public ExaminationApiController testExamApiController() {
-			ExaminationApiController api = new ExaminationApiController(null);
-			return api;
-		}
-    }
 
 	private static final String REQUEST_PATH = "/examinations";
 	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
@@ -141,6 +128,7 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteExaminationTest() throws Exception {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+		given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
 
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
@@ -154,6 +142,8 @@ public class ExaminationApiControllerTest {
 		// GIVEN an examination to delete with extra data files
 		File extraData = new File(tempFolderPath + "examination-1");
 		extraData.mkdirs();
+
+		given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn(extraData.getPath());
 
 		// WHEN we delete the examination
 		try {
@@ -209,8 +199,6 @@ public class ExaminationApiControllerTest {
 	@WithMockUser
 	public void testAddExtraData() throws IOException {
 		// GIVEN a file to add to an examination
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
 		File importZip = tempFolder.newFile("test-import-extra-data.zip");
 
 		try {
@@ -219,12 +207,14 @@ public class ExaminationApiControllerTest {
 
 			// WHEN The file is added to the examination
 
-			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
-			.andExpect(status().isOk());
 
-			// THEN the file is saved
-			assertTrue(new File(tempFolderPath + "/examination-1/test-import-extra-data.txt").exists());
+			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
+			.andExpect(status().isNotAcceptable());
+
+			Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
+
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 	}
@@ -234,6 +224,8 @@ public class ExaminationApiControllerTest {
 	public void testDownloadExtraDataNotExisting() throws IOException {
 		// GIVEN an examination with no extra-data
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
+		given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
 
 		// WHEN we download extra-data
 		try {
@@ -256,6 +248,8 @@ public class ExaminationApiControllerTest {
 		//File todow = new File("/var/datasets-data/examination-1/file.pdf");
 		todow.getParentFile().mkdirs();
 
+		given(examinationServiceMock.getExtraDataFilePath(1L, "file1.pdf")).willReturn(todow.getPath());
+
 		// WHEN we download extra-data
 		try {
 			todow.createNewFile();
@@ -271,26 +265,6 @@ public class ExaminationApiControllerTest {
 			System.out.println(e);
 			fail();
 		}
-	}
-
-	@Test
-	@WithMockUser
-	public void exportExaminationTestFileNotExisting() throws Exception {
-		Examination exam = new Examination();
-		exam.setExtraDataFilePathList(Collections.singletonList(tempFolderPath + "/preclinical/BusyFile"));
-		given(examinationServiceMock.findById(1L)).willReturn(exam);
-
-		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isInternalServerError());
-	}
-
-	@Test
-	@WithMockUser
-	public void exportExaminationNoContentTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
-		mvc.perform(MockMvcRequestBuilders.get("/examinations/preclinical/examinationId/1/export").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
 	}
 
 }

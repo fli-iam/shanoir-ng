@@ -53,8 +53,8 @@ import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.s
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
 	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    
+    @ViewChild('input') private fileInput: ElementRef;
+
     urlupload: string;
     physioData: PhysiologicalData;
     examinationPhysioData: PhysiologicalData = new PhysiologicalData();
@@ -70,7 +70,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     studies: IdName[] = [];
     private subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
-    private inImport: boolean; 
+    private inImport: boolean;
+    private files: File[] = [];
     
     constructor(
         private route: ActivatedRoute,
@@ -151,9 +152,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     private instAssessment() {
     }
 
-    private attachNewFiles() {
-    }
-
     private updateExam(): void{
         this.examination.subjectStudy = new SubjectWithSubjectStudy();
         if (this.examination.subject){
@@ -209,7 +207,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     protected save(): Promise<void> {
         this.updateExamForSave();
-        return super.save();
+        return super.save().then(result => {
+            // Once the exam is saved, save associated files
+            for (let file of this.files) {
+                this.animalExaminationService.postFile(file, this.entity.id).subscribe(response => console.log('result:' + response));
+            }            
+        });;
     }
 
     manageExaminationAnesthetic(examination_id : number) {
@@ -336,11 +339,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
     }
-    
-    protected exportBruker() {
-        this.animalExaminationService.getBrukerArchive(this.examination.id)
-            .then(response => {this.downloadIntoBrowser(response);});;
-    }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         if (response.status == 200) {
@@ -368,13 +366,30 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     closePopin(instAssessmentId?: number) {
         this.instAssessmentModal.hide();
     }
-
-    closeAttachedFilePopin(id?: number) {
-        this.attachNewFilesModal.hide();
-    }
     
     public hasEditRight(): boolean {
         return false;
     }
+    
+    // Extra data file management
+    
+    private setFile() {
+        this.fileInput.nativeElement.click();
+    }
+    
+        getFileName(element: string): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+    
+    protected deleteFile(file: any) {
+        this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+    }
+
+    private attachNewFile(event: any) {
+        let newFile = event.target.files[0];
+        this.examination.extraDataFilePathList.push(newFile.name);
+        this.files.push(newFile);
+    }    
 
 }

@@ -59,7 +59,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.inImport = this.breadcrumbsService.isImporting();
     }
     
-    private click() {
+    private setFile() {
         this.fileInput.nativeElement.click();
     }
     

@@ -879,7 +879,7 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ImportJob> importAsBids(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile)
 			throws RestServiceException, ShanoirException, IOException {
-		// Check that the file is not null and well zpiped
+		// Check that the file is not null and well zipped
 		try {
 		if (bidsFile == null) {
 			throw new RestServiceException(
