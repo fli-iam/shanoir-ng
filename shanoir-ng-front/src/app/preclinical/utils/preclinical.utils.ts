@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-declare const process: {
-    env: {
-        BACKEND_API_PRECLINICAL_MS_URL: string;
-    }
-};
+import { process } from '../../process';
   
 // PRECLINICAL Rest Service
 export const PRECLINICAL_API_ROOT_URL:string = process.env.BACKEND_API_PRECLINICAL_MS_URL;
