@@ -445,23 +445,27 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			if (cl.hasOption("datasetId")) {
 				Long datasetId = Long.parseLong(cl.getOptionValue("datasetId"));
 				downloadDataset(destDir, datasetId, format, shanoirUploaderServiceClientNG);
+			
+			} else {
+
+				if (cl.hasOption("studyId") && !cl.hasOption("subjectId")) {
+					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
+					downloadDatasetByStudy(destDir, studyId, format, shanoirUploaderServiceClientNG);
+				}
+	
+				if (cl.hasOption("subjectId") && !cl.hasOption("studyId")) {
+					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
+					downloadDatasetBySubject(destDir, subjectId, format, shanoirUploaderServiceClientNG);
+				}
+	
+				if (cl.hasOption("subjectId") && cl.hasOption("studyId")) {
+					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
+					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
+					downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format, shanoirUploaderServiceClientNG);
+				}
+				
 			}
 
-			if (cl.hasOption("studyId") && !cl.hasOption("subjectId")) {
-				Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
-				downloadDatasetByStudy(destDir, studyId, format, shanoirUploaderServiceClientNG);
-			}
-
-			if (cl.hasOption("subjectId") && !cl.hasOption("studyId")) {
-				Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
-				downloadDatasetBySubject(destDir, subjectId, format, shanoirUploaderServiceClientNG);
-			}
-
-			if (cl.hasOption("subjectId") && cl.hasOption("studyId")) {
-				Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
-				Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
-				downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format, shanoirUploaderServiceClientNG);
-			}
 	       
 		} catch (NumberFormatException e) {
 			e.printStackTrace();

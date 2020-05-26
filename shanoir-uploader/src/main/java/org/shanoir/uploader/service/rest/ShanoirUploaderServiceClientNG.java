@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -312,7 +313,10 @@ public class ShanoirUploaderServiceClientNG {
 
 	public HttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
 		if (datasetIds != null) {
-			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload/").queryParam("datasetIds", datasetIds).queryParam("format", format).build();
+			String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
+			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIds.toArray(new Object[0])).queryParam("format", format).build();
+			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIdsString).queryParam("format", format).build();
+			String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format=" + format;
 			
 			HttpResponse response = httpService.get(url.toString());
 
@@ -328,7 +332,7 @@ public class ShanoirUploaderServiceClientNG {
 
 	public HttpResponse downloadDatasetsByStudyId(Long studyId, String format) throws Exception {
 		if (studyId != null) {
-			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownloadByStudy/").queryParam("studyId", studyId).queryParam("format", format).build();
+			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownloadByStudy").queryParam("studyId", studyId).queryParam("format", format).build();
 			
 			HttpResponse response = httpService.get(url.toString());
 

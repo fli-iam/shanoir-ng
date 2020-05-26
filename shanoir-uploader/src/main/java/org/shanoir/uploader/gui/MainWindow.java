@@ -849,7 +849,7 @@ public class MainWindow extends JFrame {
 		formatter.setAllowsInvalid(true);
 
 		int posY = 0;
-		JLabel downloadDatasetIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.DatasetIDLabel"));
+		JLabel downloadDatasetIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.datasetIDLabel"));
 		downloadDatasetIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_downloadDatasetIDLabel = new GridBagConstraints();
 		gbc_downloadDatasetIDLabel.anchor = GridBagConstraints.EAST;
@@ -944,140 +944,155 @@ public class MainWindow extends JFrame {
 		gBCFormatTF2.gridy = posY++;
 		downloadPanel.add(niftiformatR, gBCFormatTF2);
 
-		// JLabel outputDirectoryLabel = new JLabel(resourceBundle.getString("shanoir.uploader.outputDirectoryLabel"));
-		// birthDateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		// GridBagConstraints gBCBOutputDirectoryLabel = new GridBagConstraints();
-		// gBCBOutputDirectoryLabel.anchor = GridBagConstraints.EAST;
-		// gBCBOutputDirectoryLabel.insets = new Insets(10, 10, 10, 10);
-		// gBCBOutputDirectoryLabel.gridx = 0;
-		// gBCBOutputDirectoryLabel.gridy = posY;
-		// downloadPanel.add(outputDirectoryLabel, gBCBOutputDirectoryLabel);
+		JLabel outputDirectoryLabel = new JLabel(resourceBundle.getString("shanoir.uploader.outputDirectoryLabel"));
+		birthDateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		GridBagConstraints gBCBOutputDirectoryLabel = new GridBagConstraints();
+		gBCBOutputDirectoryLabel.anchor = GridBagConstraints.EAST;
+		gBCBOutputDirectoryLabel.insets = new Insets(10, 10, 10, 10);
+		gBCBOutputDirectoryLabel.gridx = 0;
+		gBCBOutputDirectoryLabel.gridy = posY;
+		downloadPanel.add(outputDirectoryLabel, gBCBOutputDirectoryLabel);
 
-		// JTextField outputDirectoryTF = new JTextField();
-		// GridBagConstraints gBCOutputDirectoryTF = new GridBagConstraints();
-		// gBCOutputDirectoryTF.insets = new Insets(10, 10, 10, 10);
-		// gBCOutputDirectoryTF.fill = GridBagConstraints.HORIZONTAL;
-		// gBCOutputDirectoryTF.gridx = 1;
-		// gBCOutputDirectoryTF.gridy = posY;
-		// gBCOutputDirectoryTF.gridwidth = 2;
-		// downloadPanel.add(outputDirectoryTF, gBCOutputDirectoryTF);
-		// outputDirectoryTF.setColumns(15);
-		// outputDirectoryTF.setText(System.getProperty("user.home"));
+		JTextField outputDirectoryTF = new JTextField();
+		GridBagConstraints gBCOutputDirectoryTF = new GridBagConstraints();
+		gBCOutputDirectoryTF.insets = new Insets(10, 10, 10, 10);
+		gBCOutputDirectoryTF.fill = GridBagConstraints.HORIZONTAL;
+		gBCOutputDirectoryTF.gridx = 1;
+		gBCOutputDirectoryTF.gridy = posY;
+		// gBCOutputDirectoryTF.gridwidth = 1;
+		downloadPanel.add(outputDirectoryTF, gBCOutputDirectoryTF);
+		outputDirectoryTF.setColumns(15);
+		outputDirectoryTF.setText(System.getProperty("user.home"));
 
-		// JButton outputDirectoryButton;
-		// outputDirectoryButton = new JButton("...");
-		// GridBagConstraints gbc_outputDirectoryButton = new GridBagConstraints();
-		// gbc_outputDirectoryButton.insets = new Insets(0, 0, 5, 0);
-		// gbc_outputDirectoryButton.fill = GridBagConstraints.HORIZONTAL;
-		// gbc_outputDirectoryButton.anchor = GridBagConstraints.EAST;
-		// gbc_outputDirectoryButton.gridx = 2;
-		// gbc_outputDirectoryButton.gridy = posY++;
-		// downloadPanel.add(outputDirectoryButton, gbc_outputDirectoryButton);
+		JButton outputDirectoryButton;
+		outputDirectoryButton = new JButton("...");
+		GridBagConstraints gbc_outputDirectoryButton = new GridBagConstraints();
+		gbc_outputDirectoryButton.insets = new Insets(10, 10, 10, 10);
+		gbc_outputDirectoryButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_outputDirectoryButton.anchor = GridBagConstraints.EAST;
+		gbc_outputDirectoryButton.gridx = 2;
+		gbc_outputDirectoryButton.gridy = posY++;
+		downloadPanel.add(outputDirectoryButton, gbc_outputDirectoryButton);
 		
-		// outputDirectoryButton.addActionListener(new java.awt.event.ActionListener() {
-		// 	public void actionPerformed(java.awt.event.ActionEvent evt) {
+		outputDirectoryButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-		// 		JFileChooser fileChooser = new JFileChooser();
-		// 		fileChooser.setDialogTitle(resourceBundle.getString("shanoir.uploader.chooseDirectory"));   
-		// 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle(resourceBundle.getString("shanoir.uploader.chooseDirectory"));   
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		// 		int userSelection = fileChooser.showSaveDialog(frame);
+				int userSelection = fileChooser.showSaveDialog(frame);
 				
-		// 		if (userSelection == JFileChooser.APPROVE_OPTION) {
+				if (userSelection == JFileChooser.APPROVE_OPTION) {
 
-		// 			File outputDirectory = fileChooser.getSelectedFile();
-		// 			outputDirectoryTF.setText(outputDirectory.getPath());
-		// 		}
+					File outputDirectory = fileChooser.getSelectedFile();
+					outputDirectoryTF.setText(outputDirectory.getPath());
+				}
 				
-		// 	}
-		// });
+			}
+		});
 
-
-		JButton downloadButton;
-		downloadButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadButton"));
+		JButton downloadButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadButton"));
 		GridBagConstraints gbc_downloadButton = new GridBagConstraints();
-		gbc_downloadButton.insets = new Insets(0, 0, 5, 0);
+		gbc_downloadButton.insets = new Insets(10, 10, 10, 10);
 		gbc_downloadButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_downloadButton.gridx = 0;
-		gbc_downloadButton.gridy = posY;
+		gbc_downloadButton.anchor = GridBagConstraints.EAST;
+		gbc_downloadButton.gridx = 1;
+		gbc_downloadButton.gridy = posY++;
 		downloadPanel.add(downloadButton, gbc_downloadButton);
-
-		ImageIcon downloadIcon = new ImageIcon(getClass().getClassLoader().getResource("images/spinner.gif"));
-		JLabel downloadAnimationLabel = new JLabel();
-		downloadAnimationLabel.setIcon(downloadIcon);
-		downloadIcon.setImageObserver(downloadAnimationLabel);
-		GridBagConstraints gbc_downloadAnimationLabel = new GridBagConstraints();
-		gbc_downloadAnimationLabel.insets = new Insets(0, 0, 5, 0);
-		gbc_downloadAnimationLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_downloadAnimationLabel.anchor = GridBagConstraints.EAST;
-		gbc_downloadAnimationLabel.gridx = 1;
-		gbc_downloadAnimationLabel.gridy = posY;
-		// downloadAnimationLabel.setVisible(false);
-		downloadPanel.add(downloadAnimationLabel, gbc_downloadAnimationLabel);
 
 		downloadButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-				try {
-					
-					String format = dicomformatR.isSelected() ? "dcm" : "nii";
-					
-					Long datasetId = null;
-					Long studyId = null;
-					Long subjectId = null;
+				JDialog progressDialog = new JDialog(frame, resourceBundle.getString("shanoir.uploader.downloading"), true);
+				
+				Thread downloadThread = new Thread(() -> {
 
-					if (!downloadDatasetIDTF.getText().isEmpty()) {
-						datasetId = Long.parseLong(downloadDatasetIDTF.getText());
+					try {
+
+						String format = dicomformatR.isSelected() ? "dcm" : "nii";
+						
+						Long datasetId = null;
+						Long studyId = null;
+						Long subjectId = null;
+
+						if (!downloadDatasetIDTF.getText().isEmpty()) {
+							datasetId = Long.parseLong(downloadDatasetIDTF.getText());
+						}
+						if (!downloadStudyIDTF.getText().isEmpty()) {
+							studyId = Long.parseLong(downloadStudyIDTF.getText());
+						}
+						if (!downloadSubjectIDTF.getText().isEmpty()) {
+							subjectId = Long.parseLong(downloadSubjectIDTF.getText());
+						}
+
+						if(datasetId == null && studyId == null && subjectId == null) {
+							String message = resourceBundle.getString("shanoir.uploader.invalidId");
+							throw new Exception(message);
+						}
+
+						// File outputDirectory = new File(outputDirectoryTF.getText());
+						File outputDirectory = new File(System.getProperty("user.home"));
+
+						
+						ShanoirUploaderServiceClientNG shng = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
+						
+						String message = "";
+
+						if (datasetId != null) {
+							message = ShanoirDownloader.downloadDataset(outputDirectory, datasetId, format, shng);
+						}
+						else {
+
+							if (studyId != null && subjectId == null) {
+								message = ShanoirDownloader.downloadDatasetByStudy(outputDirectory, studyId, format, shng);
+							}
+	
+							if (studyId == null && subjectId != null) {
+								message = ShanoirDownloader.downloadDatasetBySubject(outputDirectory, subjectId, format, shng);
+							}
+	
+							if (studyId != null && subjectId != null) {
+								message = ShanoirDownloader.downloadDatasetBySubjectIdStudyId(outputDirectory, subjectId, studyId, format, shng);
+							}
+							
+						}
+
+						
+						progressDialog.dispose();
+
+
+						if(message == "") {
+							message = resourceBundle.getString("shanoir.uploader.downloadComplete");
+						}
+						JOptionPane.showMessageDialog(frame, message, "Info", JOptionPane.INFORMATION_MESSAGE);
+
+					} catch (Exception e) {
+						
+						progressDialog.dispose();
+
+						logger.error(e.getMessage());
+						String message = resourceBundle.getString("shanoir.uploader.downloadError") + " \n\n" + e.getMessage();
+						JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
 					}
-					if (!downloadStudyIDTF.getText().isEmpty()) {
-						studyId = Long.parseLong(downloadStudyIDTF.getText());
-					}
-					if (!downloadSubjectIDTF.getText().isEmpty()) {
-						subjectId = Long.parseLong(downloadSubjectIDTF.getText());
-					}
+				});
+			
+				ImageIcon downloadIcon = new ImageIcon(getClass().getClassLoader().getResource("images/spinner.gif"));
+				JLabel downloadAnimationLabel = new JLabel(downloadIcon, SwingConstants.CENTER);
+				downloadIcon.setImageObserver(downloadAnimationLabel);
+				
+			    progressDialog.add(BorderLayout.CENTER, downloadAnimationLabel);
+			    progressDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			    progressDialog.setSize(300, 75);
+				progressDialog.setLocationRelativeTo(frame);
+				
+				// new Thread(() -> {
+				// 	progressDialog.setVisible(true);
+				// }).start();
 
-					if(datasetId == null && studyId == null && subjectId == null) {
-						String message = resourceBundle.getString("shanoir.uploader.invalidId");
-						throw new Exception(message);
-					}
+				downloadThread.start();
+				progressDialog.setVisible(true);
 
-					// File outputDirectory = new File(outputDirectoryTF.getText());
-					File outputDirectory = new File(System.getProperty("user.home"));
-
-					downloadAnimationLabel.setVisible(true);
-					
-					ShanoirUploaderServiceClientNG shng = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
-
-					String message = "";
-
-					if (datasetId != null) {
-						message = ShanoirDownloader.downloadDataset(outputDirectory, datasetId, format, shng);
-					}
-
-					if (studyId != null && subjectId == null) {
-						message = ShanoirDownloader.downloadDatasetByStudy(outputDirectory, studyId, format, shng);
-					}
-
-					if (studyId == null && subjectId != null) {
-						message = ShanoirDownloader.downloadDatasetBySubject(outputDirectory, subjectId, format, shng);
-					}
-
-					if (studyId != null && subjectId != null) {
-						message = ShanoirDownloader.downloadDatasetBySubjectIdStudyId(outputDirectory, studyId, subjectId, format, shng);
-					}
-					
-					downloadAnimationLabel.setVisible(false);
-					if(message == "") {
-						message = resourceBundle.getString("shanoir.uploader.downloadComplete");
-					}
-					JOptionPane.showMessageDialog(frame, message, "Info", JOptionPane.INFORMATION_MESSAGE);
-
-				} catch (Exception e) {
-					downloadAnimationLabel.setVisible(false);
-					logger.error(e.getMessage());
-					String message = resourceBundle.getString("shanoir.uploader.downloadError") + " \n\n" + e.getMessage();
-					JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
-				}
 			}
 		});
 
