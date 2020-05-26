@@ -39,7 +39,7 @@ public class StudyUserListener {
     public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException  {
     	StudyUserCommand[] commands;
     	try {
-    		LOG.debug("Received study-user commands : " + commandArrStr);
+    		LOG.debug("Received study-user commands : {}", commandArrStr);
 			ObjectMapper mapper = new ObjectMapper();
 			
 			SimpleModule module = new SimpleModule();

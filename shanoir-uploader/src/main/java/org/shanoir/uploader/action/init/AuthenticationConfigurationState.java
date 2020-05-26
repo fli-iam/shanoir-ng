@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.keycloak.adapters.installed.KeycloakInstalled;
@@ -41,6 +44,24 @@ public class AuthenticationConfigurationState implements State {
 				keycloakInstalled.setLocale(Locale.ENGLISH);
 				keycloakInstalled.loginDesktop();
 				ShUpOnloadConfig.setKeycloakInstalled(keycloakInstalled);
+				/**
+				 * Start job, that refreshes token every 20 seconds
+				 */
+				ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+				Runnable task = () -> {
+					try {
+						keycloakInstalled.refreshToken();
+						logger.info("KeycloakInstalled: token has been refreshed.");
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+						context.getShUpStartupDialog().updateStartupText(
+								"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+						context.setState(new ServerUnreachableState());
+						context.nextState();	
+						return;						
+					}
+				};
+				executor.scheduleAtFixedRate(task, 0, 60, TimeUnit.SECONDS);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(
@@ -54,11 +75,11 @@ public class AuthenticationConfigurationState implements State {
 			context.setState(new PacsConfigurationState());
 			context.nextState();
 		} else {
-			String serviceURI = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.namespace.uri");
-			String serviceLocalPart = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.local.part");
+			String serviceURI = ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.qname.namespace.uri");
+			String serviceLocalPart = ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.qname.local.part");
 			URL serviceURL = null;
 			try {
-				serviceURL = new URL(ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.url"));
+				serviceURL = new URL(ShUpConfig.profileProperties.getProperty("shanoir.server.uploader.service.url"));
 			} catch (MalformedURLException e) {
 				logger.error("Property defined in shanoir.server.uploader.service.url (File shanoir_server.properties in .su folder) is not properly configured", e);
 				context.getShUpStartupDialog().updateStartupText(

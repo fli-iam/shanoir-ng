@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<spring.active.profile></spring.active.profile>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
-		<dcm4che.version>5.14.1</dcm4che.version> 
+        <dcm4che.version>5.14.1</dcm4che.version>
 		<docker.image.name>shanoir-ng/datasets</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 		<powermock.version>1.7.1</powermock.version>

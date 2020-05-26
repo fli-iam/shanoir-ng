@@ -3,9 +3,6 @@ package org.shanoir.uploader.service.rest;
 import java.io.File;
 import java.util.List;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
-
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
@@ -46,7 +43,13 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 	
-	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";	
+	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
+	
+	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
+	
+	private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
+	
+	private static final String SERVICE_IMPORTER_START_IMPORT = "service.importer.start.import";
 
 	private HttpService httpService;
 	
@@ -65,24 +68,36 @@ public class ShanoirUploaderServiceClientNG {
 	private String serviceURLSubjectsCreate;
 	
 	private String serviceURLExaminationsCreate;
+	
+	private String serviceURLImporterCreateTempDir;
+	
+	private String serviceURLImporterStartImportJob;
+	
+	private String serviceURLImporterStartImport;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
-		this.serverURL = ShUpConfig.shanoirNGServerProperties.getProperty(SHANOIR_SERVER_URL);
+		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 		this.serviceURLStudiesNamesAndCenters = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLAcquisitionEquipmentById = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLExaminationsBySubjectId = this.serverURL
-			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
+			+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_CREATE);
 		this.serviceURLExaminationsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+		this.serviceURLImporterCreateTempDir = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
+		this.serviceURLImporterStartImportJob = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+		this.serviceURLImporterStartImport = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
@@ -126,6 +141,17 @@ public class ShanoirUploaderServiceClientNG {
 			return null;
 		}
 	}
+	
+	public String createTempDir() throws Exception {
+		HttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+			String importTempDirId = Util.getMappedObject(response, String.class);
+			return importTempDirId;
+		} else {
+			return null;
+		}
+	}
 
 	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
@@ -157,15 +183,31 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 	
-	public String uploadFile(final String folderName, final File file) throws Exception {
-		final FileDataSource fDS = new FileDataSource(file);
-		final DataHandler dataHandler = new DataHandler(fDS);
-		final String result = null;
-		if (!"200".equals(result)) {
-			logger.error(result);
-			throw new Exception("File upload error occured!");
+	public void uploadFile(String tempDirId, File file) throws Exception {
+		HttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId, file);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in uploadFile.");
 		}
-		return result;
+	}
+	
+	public void startImportJob(String importJobJsonStr) throws Exception {
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in startImportJob.");
+		}
+	}
+	
+	public void startImport(String exchangeJsonStr) throws Exception {
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImport, exchangeJsonStr);
+		int code = response.getStatusLine().getStatusCode();
+		if (code == 200) {
+		} else {
+			throw new Exception("Error in startImport.");
+		}
 	}
 	
 	/**
@@ -174,27 +216,50 @@ public class ShanoirUploaderServiceClientNG {
 	 * @param studyId
 	 * @param studyCardId
 	 * @param modeSubjectCommonName
-	 * @param subjectDTO
+	 * @param subject
 	 * @return boolean true, if success
 	 */
 	public Subject createSubject(
-			final Long studyId,
-			final Long studyCardId,
+			final Subject subject,
 			final boolean modeSubjectCommonNameManual,
-			final Subject subjectDTO) {
+			final Long centerId) {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(subjectDTO);
+			String json = ow.writeValueAsString(subject);
 			HttpResponse response;
 			if (modeSubjectCommonNameManual) {
 				response = httpService.post(this.serviceURLSubjectsCreate, json);
 			} else {
-				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId="+ studyCardId, json);
+				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json);
 			}
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
 				Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
 				return subjectDTOCreated;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	/**
+	 * This method updates a subject on the server and therefore updates
+	 * the rel_subject_study list too.
+	 * 
+	 * @param subject
+	 * @return
+	 */
+	public Subject createSubjectStudy(
+			final Subject subject) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(subject);
+			HttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				Subject subjectCreated = Util.getMappedObject(response, Subject.class);
+				return subjectCreated;
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);

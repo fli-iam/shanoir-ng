@@ -40,6 +40,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-datasets</module>
 		<module>../shanoir-ng-import</module>
 		<module>../shanoir-ng-boutiques</module>
+		<module>../shanoir-ng-preclinical</module>
+		<module>../shanoir-ng-exchange</module>
 	</modules>
 
 	<properties>

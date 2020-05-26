@@ -28,9 +28,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 })
 export class CheckboxComponent implements ControlValueAccessor { 
     
-    @Input() @HostBinding('class.on') ngModel: boolean | 'indeterminate' = null;
-
-    @Output() ngModelChange = new EventEmitter();
+    @HostBinding('class.on') model: boolean | 'indeterminate' = false;
     @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
@@ -41,34 +39,31 @@ export class CheckboxComponent implements ControlValueAccessor {
     @HostListener('click', []) 
     onClick() {
         if (this.disabled) return;
-        this.ngModel = !this.ngModel;
-        this.ngModelChange.emit(this.ngModel);
-        this.onChange.emit(this.ngModel);
-        this.onChangeCallback(this.ngModel);
-        this.onTouchedCallback();
+        this.toogle();
     }
 
     @HostListener('keydown', ['$event']) 
     onKeyPress(event: any) {
         if (this.disabled) return;
         if (' ' == event.key) {
-            this.ngModel = !this.ngModel;
-            this.ngModelChange.emit(this.ngModel);
-            this.onChange.emit(this.ngModel);
-            this.onChangeCallback(this.ngModel);
-            this.onTouchedCallback();
+            this.toogle();
             event.preventDefault();
         }
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel'] && !changes['ngModel'].firstChange) {
-            this.onChangeCallback(this.ngModel);
+    private toogle() {
+        if (this.model == true || this.model == 'indeterminate') {
+            this.model = false;
+        } else {
+            this.model = true;
         }
+        this.onChange.emit(this.model);
+        this.onChangeCallback(this.model);
+        this.onTouchedCallback();
     }
     
     writeValue(obj: any): void {
-        this.ngModel = obj;
+        this.model = obj;
     }
     
     registerOnChange(fn: any): void {

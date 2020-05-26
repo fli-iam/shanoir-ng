@@ -63,7 +63,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({ 	
+@JsonSubTypes({
 		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
 		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
 		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
@@ -177,7 +177,7 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	public List<DatasetExpression> getDatasetExpressions() {
 		if (datasetExpressions == null) {
-			datasetExpressions = new ArrayList<DatasetExpression>();
+			datasetExpressions = new ArrayList<>();
 		}
 		return datasetExpressions;
 	}
@@ -249,8 +249,6 @@ public abstract class Dataset extends AbstractEntity {
 			final StringBuilder result = new StringBuilder();
 			result.append(this.getId());
 			if (creationDate != null) {
-				// TODO: change pattern
-//				result.append(" ").append(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(creationDate));
 				result.append(" ").append(creationDate.toString());
 			}
 			String modalityType = originMetadata.getDatasetModalityType().name();

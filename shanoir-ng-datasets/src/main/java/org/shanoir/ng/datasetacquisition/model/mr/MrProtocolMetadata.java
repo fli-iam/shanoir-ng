@@ -35,7 +35,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="dtype", 
+@DiscriminatorColumn(name="dtype",
 discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractEntity {
@@ -247,7 +247,7 @@ public class MrProtocolMetadata extends AbstractEntity {
 	}
 
 	public List<MrScanningSequence> getMrScanningSequence() {
-		List<MrScanningSequence> mrScanningSequenceList = new ArrayList<MrScanningSequence>();
+		List<MrScanningSequence> mrScanningSequenceList = new ArrayList<>();
 		if (mrScanningSequence != null) {
 			for (Integer mrScanningSequenceId : mrScanningSequence) {
 				mrScanningSequenceList.add(MrScanningSequence.getScanningSequence(mrScanningSequenceId));
@@ -257,8 +257,8 @@ public class MrProtocolMetadata extends AbstractEntity {
 	}
 
 	public void setMrScanningSequence(List<String> mrScanningSequenceList) {
-		if (mrScanningSequenceList != null && mrScanningSequenceList.size() > 0) {
-			mrScanningSequence = new ArrayList<Integer>();
+		if (mrScanningSequenceList != null && !mrScanningSequenceList.isEmpty()) {
+			mrScanningSequence = new ArrayList<>();
 			for (String scanningSequence : mrScanningSequenceList) {
 				mrScanningSequence.add(MrScanningSequence.getIdByType(scanningSequence).getId());
 			}
@@ -267,7 +267,7 @@ public class MrProtocolMetadata extends AbstractEntity {
 
 	
 	public List<MrSequenceVariant> getMrSequenceVariant() {
-		List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<MrSequenceVariant>();
+		List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<>();
 		if (mrSequenceVariant != null) {
 			for (Integer mrScanningSequenceId : mrSequenceVariant) {
 				mrSequenceVariantList.add(MrSequenceVariant.getSequenceVariant(mrScanningSequenceId));
@@ -277,8 +277,8 @@ public class MrProtocolMetadata extends AbstractEntity {
 	}
 
 	public void setMrSequenceVariant(List<String> mrSequenceVariantList) {
-		if (mrSequenceVariantList != null && mrSequenceVariantList.size() > 0) {
-			mrSequenceVariant = new ArrayList<Integer>();
+		if (mrSequenceVariantList != null && !mrSequenceVariantList.isEmpty()) {
+			mrSequenceVariant = new ArrayList<>();
 			for (String sequenceVariant : mrSequenceVariantList) {
 				mrSequenceVariant.add(MrSequenceVariant.getIdByType(sequenceVariant).getId());
 			}

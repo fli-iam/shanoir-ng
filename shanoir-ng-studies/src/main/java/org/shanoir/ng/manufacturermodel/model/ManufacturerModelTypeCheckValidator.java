@@ -28,6 +28,7 @@ public class ManufacturerModelTypeCheckValidator
 
 	@Override
 	public void initialize(final ManufacturerModelTypeCheck constraintAnnotation) {
+		// empty initializer
 	}
 
 	@Override

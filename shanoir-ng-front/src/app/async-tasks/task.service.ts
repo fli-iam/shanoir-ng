@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
@@ -30,4 +31,7 @@ export class TaskService extends EntityService<Task> {
 
     getEntityInstance() { return new Task(); }
 
+    getTasks(): Promise<Task[]> {
+       return this.http.get<Task[]>(this.API_URL).toPromise();
+    }
 }

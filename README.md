@@ -1,16 +1,21 @@
-# Shanoir NG - Import, manage and share neuroimaging data
+# Shanoir-NG - Import, manage and share neuroimaging data
 
-Shanoir NG (Next Generation) is a software that helps neuroimaging analysis researchers, radiologists, and MRI operators to organize and share neuroimaging datasets. 
-
-_Here we need to present the main functionnalities of Shanoir (import formats, data model, security and roles, ...)_
-
-Shanoir NG is a complete technological remake of the first version of the Shanoir application, maintaining the key concepts of Shanoir, enhancing the functionalities and the user interface and providing a great flexibility for further improvements.
-
-Shanoir NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under the GNU General Public License v3.0. See the LICENCE file at the root of this project. If you want to contribute, please see the following page : [Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow).
+Shanoir-NG (Next Generation) is a software that helps neuroimaging analysis researchers, radiologists, and MRI operators to organize and share neuroimaging datasets. 
 
 GitHub is a tool for developers if you are seeking information at a user level view please visit http://shanoir.org.
 
+Shanoir-NG is a complete technological remake of the first version of the Shanoir application, maintaining the key concepts of Shanoir, enhancing the functionalities and the user interface and providing a great flexibility for further improvements.
+
+Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under the GNU General Public License v3.0. See the LICENCE file at the root of this project. If you want to contribute, please see the following page : [Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow).
+
+
 # :warning: Disclaimers :warning:
+
+* The latest version of Shanoir-NG is currently on the branch "develop", or on the branch "appning" for the preclinical solution,
+that will soon be merged into the "develop" branch. The "develop" branch is operational, we wait until our go-live in April/May
+2020 is finished before merging "develop" into the "master", to have a real stable production version 1.0 "master" afterwards.
+
+* You can find the installation instruction for "develop" branch below
 
 * Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
 
@@ -28,6 +33,14 @@ GitHub is a tool for developers if you are seeking information at a user level v
 
 Many thanks to all these giants, on their shoulders we are standing to develop Shanoir-NG !
 
+# Access to REST-API on using Swagger2
+
+You can easily connect and investigate the REST interface of Shanoir-NG using Swagger2.
+Depending on your server domain, below an example for the dev environment, just call:
+* MS Studies: https://shanoir-ng-nginx/shanoir-ng/studies/swagger-ui.html
+* MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
+* MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
+
 # Installation of Shanoir NG
 
 The installation of Shanoir NG has two steps :
@@ -39,8 +52,7 @@ The installation of Shanoir NG has two steps :
 * Download or git clone the shanoir-ng code. The `master` branch should be the most stable while `develop` will contain the newests functionalities if you are interested in testing thoses.
 * Execute the Maven build on the parent project with the following commands:
     * cd shanoir-ng-parent/
-    * **mvn install -DskipTests**
-        * the tests will have to be cleaned up soon
+    * mvn install
 * The build creates all .jar and .js executable files and copies them
 into the folder /docker-compose to be used from there by docker-compose
 
@@ -48,6 +60,7 @@ into the folder /docker-compose to be used from there by docker-compose
 * Install docker and docker-compose:
     * https://docs.docker.com/install/
     * https://docs.docker.com/compose/install/
+* Make sur docker has enough memory to run Shanoir (6Gb should be enough)
 * If you are on your **developer/local machine**:
     * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
 	* 127.0.0.1       shanoir-ng-nginx
@@ -76,18 +89,15 @@ If you want to login, please configure a user in Keycloak :
 ### Configure a user in Keycloak
 
 * Access to Keycloak admin interface: http://localhost:8080/auth/admin/
+* The account and password is defined in .env and has to be changed for production scenarios
 
 By default, new user accounts have been created in Keycloak by ms users with temporary passwords.
 Please access to Keycloak admin interface below to reset the password, when you want to login (Manage users - Edit your desired user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured properly, emails with a temporary password will have been sent to each user (not the case in dev environment).
 
-Please use the flags **kcAdminClientUsername**, **kcAdminClientPassword**, **syncAllUsersToKeycloak**
-in the file **/docker-compose/users/Dockerfile** of ms users, to configure in production environment
-the behaviour of user account creation with Keycloak. E.g. if you want to start with an empty users
-database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
-
-**Attention:** for security reasons please change in a production environment the Keycloak admin password
-in the file **/docker-compose/keycloak/variables.env** and in the file **/docker-compose/users/Dockerfile**
-adapt as well the credentials.
+Please use the flag **syncAllUsersToKeycloak** in the file **/docker-compose/users/Dockerfile** of ms users,
+to configure in production environment the behaviour of user account creation within Keycloak. E.g. if you want
+to start with an empty users database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
+If set to true: ms users will synchronise the users in his mysql db into Keycloak during startup (dev env scenario).
 
 ### Configure a mail server
 

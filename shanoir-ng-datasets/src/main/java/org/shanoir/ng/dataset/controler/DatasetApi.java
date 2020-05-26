@@ -20,12 +20,14 @@ package org.shanoir.ng.dataset.controler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
@@ -35,10 +37,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
@@ -47,7 +51,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "dataset", description = "the dataset API")
+@Api(value = "dataset")
 @RequestMapping("/datasets")
 public interface DatasetApi {
 
@@ -57,7 +61,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
@@ -69,7 +73,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
 	ResponseEntity<DatasetDTO> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
@@ -80,8 +84,8 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@PutMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
+			"application/json" })
 	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
@@ -94,39 +98,68 @@ public interface DatasetApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
 			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
 
     @ApiOperation(value = "", nickname = "downloadDatasetById", notes = "If exists, returns a zip file of the dataset corresponding to the given id", response = Resource.class, tags={  })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),
         @ApiResponse(code = 401, message = "unauthorized"),
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/download/{datasetId}", produces = { "application/zip" }, method = RequestMethod.GET)
+    @GetMapping(value = "/download/{datasetId}", produces = { "application/zip" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
-    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", 
-    			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid 
+    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
+    			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
     
     @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),
         @ApiResponse(code = 401, message = "unauthorized"),
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" }, 
-        method = RequestMethod.GET)
+    @GetMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
+        produces = { "application/zip" })
     ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(
     		@ApiParam(value = "id of the subject", required=true) @PathVariable("subjectId") Long subjectId,
     		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
     		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
-	
+  
+    @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/massiveDownload", produces = { "application/zip" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
+    		@ApiParam(value = "ids of the datasets", required=true) @Valid
+    		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
+    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
+
+    @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByStudyId", notes = "If exists, returns a zip file of the datasets corresponding to the given study ID", response = Resource.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/massiveDownloadByStudy", produces = { "application/zip" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @Valid
+    		@RequestParam(value = "studyId", required = true) Long studyId,
+    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException;
+
 }

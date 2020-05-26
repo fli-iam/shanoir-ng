@@ -76,6 +76,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-csv</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

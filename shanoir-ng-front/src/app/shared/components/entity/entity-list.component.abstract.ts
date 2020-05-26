@@ -39,6 +39,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected msgBoxService: MsgBoxService;
     protected breadcrumbsService: BreadcrumbsService;
     public onDelete: Subject<any> =  new Subject<any>();
+    public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
 
     private edit: boolean = false;
@@ -97,7 +98,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    onRowClick(entity: T) {
+    protected onRowClick(entity: T) {
         this.goToView(entity.id);
     }
 

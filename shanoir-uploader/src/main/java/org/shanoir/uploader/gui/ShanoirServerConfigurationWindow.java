@@ -44,15 +44,13 @@ public class ShanoirServerConfigurationWindow extends JDialog {
 	ShanoirServerConfigurationListener sSCL;
 
 	public File shanoirUploaderFolder;
-	public String SHANOIR_SERVER_PROPERTIES;
 	public ServiceConfiguration serviceConfiguration;
 	public ResourceBundle resourceBundle;
 
-	public ShanoirServerConfigurationWindow(File shanoirUploaderFolder, String SHANOIR_SERVER_PROPERTIES,
+	public ShanoirServerConfigurationWindow(File shanoirUploaderFolder,
 			ServiceConfiguration serviceConfiguration, ResourceBundle resourceBundle) {
 
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
-		this.SHANOIR_SERVER_PROPERTIES = SHANOIR_SERVER_PROPERTIES;
 		this.serviceConfiguration = serviceConfiguration;
 		this.resourceBundle = resourceBundle;
 

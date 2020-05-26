@@ -29,6 +29,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -45,6 +46,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -84,6 +86,9 @@ public class SubjectApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
+	@MockBean
+	private StudyBIDSService bidsService;
+
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createSubject();
@@ -101,7 +106,7 @@ public class SubjectApiSecurityTest {
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, null, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
 		assertAccessDenied((t, u, v) -> { try { api.updateSubject(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
-		assertAccessDenied(api::findSubjectsByStudyId, ENTITY_ID);
+		assertAccessDenied(api::findSubjectsByStudyId, ENTITY_ID, "null");
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
 	}
 	
@@ -163,7 +168,7 @@ public class SubjectApiSecurityTest {
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewSubject(t, null, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateSubject(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
-		assertAccessAuthorized(api::findSubjectsByStudyId, ENTITY_ID);
+		assertAccessAuthorized(api::findSubjectsByStudyId, ENTITY_ID, "null");
 		assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
 	}
 	
@@ -176,7 +181,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockNoRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockNoRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockNoRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
 		
@@ -189,8 +194,8 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockNoRights);
 		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
-		assertAccessAuthorized(api::findSubjectsByStudyId, 1L);
-		assertEquals(null, api.findSubjectsByStudyId(1L).getBody());
+		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, "null");
+		assertEquals(null, api.findSubjectsByStudyId(1L, "null").getBody());
 		
 		
 		// Wrong Rights
@@ -200,7 +205,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockWrongRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
@@ -214,8 +219,8 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockWrongRights);
 		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
-		assertAccessAuthorized(api::findSubjectsByStudyId, 1L);
-		assertEquals(null, api.findSubjectsByStudyId(1L).getBody());
+		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
+		assertEquals(null, api.findSubjectsByStudyId(1L, null).getBody());
 
 		
 		// Right rights (!)
@@ -225,7 +230,7 @@ public class SubjectApiSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockRightRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockRightRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
 		
@@ -240,9 +245,9 @@ public class SubjectApiSecurityTest {
 		subjectStudyMock.setSubject(subjectMockRightRights);
 		given(subjectStudyRepository.findByStudy(subjectStudyMock.getStudy())).willReturn(Arrays.asList(subjectStudyMock));
 		given(studyRepository.findOne(1L)).willReturn(subjectStudyMock.getStudy());
-		assertAccessAuthorized(api::findSubjectsByStudyId, 1L);
-		assertNotNull(api.findSubjectsByStudyId(1L).getBody());
-		assertEquals(1, api.findSubjectsByStudyId(1L).getBody().size());
+		assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
+		assertNotNull(api.findSubjectsByStudyId(1L,null).getBody());
+		assertEquals(1, api.findSubjectsByStudyId(1L, null).getBody().size());
 	}
 
 	private void testCreate() throws ShanoirException {
@@ -252,7 +257,7 @@ public class SubjectApiSecurityTest {
 		Subject newSubjectMock = buildSubjectMock(null);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, null, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
 		
-		// Create subject 
+		// Create subject
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(9L));
 		given(studyRepository.findAll(Arrays.asList(9L))).willReturn(studiesMock);
@@ -302,10 +307,10 @@ public class SubjectApiSecurityTest {
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);			
+			studyUserList.add(studyUser);
 		}
 		study.setStudyUserList(studyUserList);
-		return study;		
+		return study;
 	}
 	
 	private Subject buildSubjectMock(Long id) {
@@ -321,8 +326,12 @@ public class SubjectApiSecurityTest {
 		subjectStudy.setSubject(mock);
 		subjectStudy.setStudy(study);
 		
-		if (study.getSubjectStudyList() == null) study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		if (mock.getSubjectStudyList() == null) mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		if (study.getSubjectStudyList() == null) {
+			study.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
+		if (mock.getSubjectStudyList() == null) {
+			mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
 		study.getSubjectStudyList().add(subjectStudy);
 		mock.getSubjectStudyList().add(subjectStudy);
 	}

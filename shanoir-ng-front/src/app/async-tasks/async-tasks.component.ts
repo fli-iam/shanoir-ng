@@ -16,6 +16,7 @@ import { Component, ViewChild } from '@angular/core';
 import { BrowserPaginEntityListComponent } from '../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../shared/components/table/table.component';
 import { Task } from './task.model';
+import { TaskService } from './task.service';
 
 
 @Component({
@@ -25,63 +26,73 @@ import { Task } from './task.model';
 })
 
 export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
-    
+
     @ViewChild('table', { static: false }) table: TableComponent;
 
-    constructor() {       
+    private tasks: Task[];
+    constructor(
+        private taskService: TaskService) {
         super('task');
     }
 
+    ngOnInit() {
+        super.ngOnInit();
+        this.getEntities().then(entities => { this.tasks = entities});
+    }
+
     getOptions() {
-        return {'new': false, 'edit': false, 'view': false, 'delete': false};
+        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload':true};
     }
 
     getEntities(): Promise<Task[]> {
-        let tasks: Task[] = [
-            AsyncTasksComponent.buildTask('Dataset import for subject 54', new Date(), new Date(), 1),
-            AsyncTasksComponent.buildTask('Dataset import for subject 12', new Date(), new Date(), 1),
-            AsyncTasksComponent.buildTask('Dataset import for subject 24', new Date(), null, 0.4),
-            AsyncTasksComponent.buildTask('Dataset import for subject 64', new Date(), null, 0.5),
-            AsyncTasksComponent.buildTask('Dataset import for subject 34', new Date(), new Date(), 1)
-        ];
-        return Promise.resolve(tasks);
+        return this.taskService.getTasks();
     }
 
     // Grid columns definition
     getColumnDefs(): any[] {
         function dateRenderer(date: number) {
             if (date) {
-                return new Date(date).toLocaleDateString();
+                return new Date(date).toLocaleString();
             }
             return null;
         };
         return [
-            { headerName: 'Label', field: 'label', defaultSortCol: true, defaultAsc: true },
-            { headerName: 'Progress', field: 'progress', type: 'progress'},
+            { headerName: 'Message', field: 'message'},
+            { headerName: 'Status', field: 'status', type: 'Status', cellRenderer: function (params: any) {
+                    if (params.data.status == 0) {
+                        return "In progress"
+                    }
+                    if (params.data.status == 1) {
+                        return "Success"
+                    }
+                    if (params.data.status == -1) {
+                        return "Error"
+                    }
+                } 
+            },
+            { headerName: 'Progress', field: 'progress', type: 'progress', cellRenderer: function (params: any) {
+                    return params.data.progress * 100 + '%';
+                } 
+            },
             {
-                headerName: "Start", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.startDate);
+                headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
+                    return dateRenderer(params.data.creationDate);
                 }
             },
             {
-                headerName: "End", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.endDate);
+                headerName: "Last update", field: "lastUpdate", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
+                    return dateRenderer(params.data.lastUpdate);
                 }
             },
         ];
     }
-
+    
     getCustomActionsDefs(): any[] {
-        return [];
-    }
-
-    private static buildTask(label: string, startDate: Date, endDate: Date, progress: number): Task {
-        let task = new Task(); 
-        task.label = label;
-        task.startDate = startDate;
-        task.endDate = endDate;
-        task.progress = progress;
-        return task;
+        return [{title: "Refresh",awesome: "fa-sync", action: item => {
+            this.reloadData();
+            this.table.refresh();
+            }
+        }];
     }
 
 }

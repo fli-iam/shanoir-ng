@@ -5,6 +5,7 @@
 *~
 *.swp
 *.map
+*.pyc
 *.metadata.json
 *.settings/
 .DS_Store
@@ -18,5 +19,14 @@ target
 **/.classpath
 .factorypath
 .project
+.vscode
 bin/
 docker-compose/**/*.jar
+docker-compose/database/3_init_preclinical.sql
+docker-compose/nginx/webapp/
+shanoir-ng-front/node/
+shanoir-uploader/src/main/resources/profile.OFSEP/key
+shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
+shanoir-uploader/src/main/resources/pseudonymus
+shanoir-ng-users/shanoir-events-log.log
+shanoir-ng-preclinical/null*

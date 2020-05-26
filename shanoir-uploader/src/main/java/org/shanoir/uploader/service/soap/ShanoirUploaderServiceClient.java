@@ -49,8 +49,8 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public boolean login() {
-		String userName = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.name");
-		String password = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.password");
+		String userName = ShUpConfig.profileProperties.getProperty("shanoir.server.user.name");
+		String password = ShUpConfig.profileProperties.getProperty("shanoir.server.user.password");
 		return shanoirUploaderService.login(userName, password);
 	}
 	
@@ -151,11 +151,21 @@ public class ShanoirUploaderServiceClient {
 	 * @return boolean true, if success
 	 */
 	public org.shanoir.ws.generated.uploader.SubjectDTO createSubject(
-			final Long studyId,
 			final Long studyCardId,
 			final boolean modeSubjectCommonName,
 			final org.shanoir.ws.generated.uploader.SubjectDTO subjectDTO) {
-		return shanoirUploaderService.createSubject(studyId, studyCardId, modeSubjectCommonName, subjectDTO);
+		return shanoirUploaderService.createSubject(studyCardId, modeSubjectCommonName, subjectDTO);
+	}
+	
+	/**
+	 * This method puts subjects into studies.
+	 * 
+	 * @param subjectStudyDTO
+	 * @return
+	 */
+	public org.shanoir.ws.generated.uploader.SubjectStudyDTO createSubjectStudy(
+			final org.shanoir.ws.generated.uploader.SubjectStudyDTO subjectStudyDTO) {
+		return shanoirUploaderService.createSubjectStudy(subjectStudyDTO);
 	}
 	
 	/**

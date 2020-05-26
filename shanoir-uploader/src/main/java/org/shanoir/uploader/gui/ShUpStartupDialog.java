@@ -42,6 +42,7 @@ public class ShUpStartupDialog extends JFrame {
 	public JPanel imagePanel;
 	public ProxyConfigurationPanel proxyPanel;
 	public LoginConfigurationPanel loginPanel;
+	public SelectProfileConfigurationPanel selectProfilePanel;
 	public JPanel logPanel;
 	public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
 	private static JTextPane startupText;
@@ -66,6 +67,7 @@ public class ShUpStartupDialog extends JFrame {
 		}
 		initInfoPanel();
 		initProxyPanel(sSC);
+		initSelectProfileManualConfigurationPanel(sSC);
 		initLoginPanel(sSC);
 		initStartupText();
 		setContentPane(contentPanel);
@@ -105,6 +107,10 @@ public class ShUpStartupDialog extends JFrame {
 
 	private void initLoginPanel(StartupStateContext sSC) {
 		loginPanel = new LoginConfigurationPanel(sSC);
+	}
+	
+	private void initSelectProfileManualConfigurationPanel(StartupStateContext sSC) {
+		selectProfilePanel = new SelectProfileConfigurationPanel(sSC);
 	}
 
 	private void initStartupText() {
@@ -151,6 +157,15 @@ public class ShUpStartupDialog extends JFrame {
 		additionalPanel.add(loginPanel);
 		loginPanel.repaint();
 		loginPanel.revalidate();
+	}
+
+	public void showSelectProfileForm() {
+		additionalPanel.removeAll();
+		selectProfilePanel.setFocusable(true);
+		selectProfilePanel.requestFocusInWindow();
+		additionalPanel.add(selectProfilePanel);
+		selectProfilePanel.repaint();
+		selectProfilePanel.revalidate();
 	}
 
 }

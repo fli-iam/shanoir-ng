@@ -34,8 +34,7 @@ public class Encryption {
 	 * @param propertyString
 	 * @param propertyFile
 	 */
-	public void decryptIfEncryptedString(File shanoirUploaderFolder, Properties propertyObject, String propertyString,
-			String propertyFile) {
+	public void decryptIfEncryptedString(File propertiesFile, Properties propertyObject, String propertyString) {
 		String unknownString = propertyObject.getProperty(propertyString);
 		try {
 			logger.debug("Start decrypting string " + propertyString);
@@ -51,7 +50,6 @@ public class Encryption {
 				String encryptedPassword = cryptEncryptedString(unknownString);
 				propertyObject.setProperty(propertyString, encryptedPassword);
 				// store encrypted pass
-				final File propertiesFile = new File(shanoirUploaderFolder + File.separator + propertyFile);
 				OutputStream out = new FileOutputStream(propertiesFile);
 				propertyObject.store(out, "SHANOIR Server Configuration");
 				// get non crypted password

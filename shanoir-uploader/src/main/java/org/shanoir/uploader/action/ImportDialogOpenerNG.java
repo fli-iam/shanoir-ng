@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
@@ -9,17 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import javax.swing.JFormattedTextField;
-
 import org.apache.log4j.Logger;
-import org.jdatepicker.impl.JDatePickerImpl;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdList;
@@ -27,7 +22,6 @@ import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 
@@ -57,29 +51,26 @@ public class ImportDialogOpenerNG {
 	}
 
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
-		// login again, in case session has been expired
-//		if (shanoirUploaderServiceClient.login()) {
-			try {
-				Subject subjectDTO = getSubject(uploadJob);
-				ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow);
-				ImportFinishActionListenerNG importFinishAL = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
-				importDialog = new ImportDialog(this.mainWindow,
-						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-						importStudyAndStudyCardCBIL, importFinishAL);
-				updateImportDialogForSubject(subjectDTO); // this has to be done after init of dialog
-				List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
-				updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-				List<Examination> examinationDTOs = getExaminations(subjectDTO);
-				updateImportDialogForExaminations(examinationDTOs, uploadJob);
-				updateImportDialogForMRICenter(uploadJob);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				return;
-			}
-			importDialog.setVisible(true);
-//		} else {
-//			return;
-//		}
+		try {
+			Subject subject = getSubject(uploadJob);
+			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject);
+			ImportFinishActionListenerNG importFinishALNG = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBILNG);
+			importDialog = new ImportDialog(this.mainWindow,
+					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
+					importStudyAndStudyCardCBILNG, importFinishALNG);
+			updateImportDialogForSubject(subject); // this has to be done after init of dialog
+			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
+			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
+			List<Examination> examinationDTOs = getExaminations(subject);
+			updateImportDialogForExaminations(examinationDTOs, uploadJob);
+			updateImportDialogForMRICenter(uploadJob);
+			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
+			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return;
+		}
+		importDialog.setVisible(true);
 	}
 	
 	/**
@@ -115,25 +106,29 @@ public class ImportDialogOpenerNG {
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesNamesAndCenters();
-		for (Iterator iterator = studies.iterator(); iterator.hasNext();) {
-			Study study = (Study) iterator.next();
-			study.setCompatible(new Boolean(false));
-			Long studyId = study.getId();
-			IdList idList = new IdList();
-			idList.getIdList().add(studyId);
-			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
-			// fill missing infos coming from other microservice studies here:
-			if (studyCards != null) {
-				for (Iterator itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
-					StudyCard studyCard = (StudyCard) itStudyCards.next();
-					Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
-					AcquisitionEquipment acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(acquisitionEquipmentId);
-					studyCard.setAcquisitionEquipment(acquisitionEquipment);
+		if (studies != null) {
+			for (Iterator iterator = studies.iterator(); iterator.hasNext();) {
+				Study study = (Study) iterator.next();
+				study.setCompatible(new Boolean(false));
+				Long studyId = study.getId();
+				IdList idList = new IdList();
+				idList.getIdList().add(studyId);
+				List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
+				// fill missing infos coming from other microservice studies here:
+				if (studyCards != null) {
+					for (Iterator itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+						StudyCard studyCard = (StudyCard) itStudyCards.next();
+						Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
+						AcquisitionEquipment acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(acquisitionEquipmentId);
+						studyCard.setAcquisitionEquipment(acquisitionEquipment);
+					}
 				}
+				study.setStudyCards(studyCards);
 			}
-			study.setStudyCards(studyCards);
+			return studies;
+		} else {
+			return null;
 		}
-		return studies;
 	}
 
 	/**
@@ -142,7 +137,7 @@ public class ImportDialogOpenerNG {
 	private void updateImportDialogForStudyAndStudyCard(List<Study> studiesWithStudyCards) {
 		importDialog.studyCB.removeAllItems();
 		importDialog.studyCardCB.removeAllItems();
-		if (!studiesWithStudyCards.isEmpty()) {
+		if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
 			boolean firstCompatibleStudyFound = false;
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
@@ -190,7 +185,7 @@ public class ImportDialogOpenerNG {
 		return foundSubject;
 	}
 
-	private void updateImportDialogForSubject(Subject subjectDTO) {
+	private void updateImportDialogForSubject(Subject subject) {
 		/**
 		 * Insert subject specific items into combo boxes from model classes.
 		 * Should be there nevertheless if subject exists or not.
@@ -210,46 +205,23 @@ public class ImportDialogOpenerNG {
 			importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
 		}
 		// Existing subject found with identifier:
-		if (subjectDTO != null) {
+		if (subject != null) {
 			// Manage subject values here:
-			importDialog.subjectTextField.setText(subjectDTO.getName());
+			importDialog.subjectTextField.setText(subject.getName());
 			importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectTextField.setEnabled(false);
 			importDialog.subjectTextField.setEditable(false);
 			importDialog.subjectTextField.setValueSet(true);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subjectDTO.getImagedObjectCategory());
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
 			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 			importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getLanguageHemisphericDominance());
+					.setSelectedItem(subject.getLanguageHemisphericDominance());
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getManualHemisphericDominance());
+					.setSelectedItem(subject.getManualHemisphericDominance());
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
-			// Manage subject_study values here:
-			List<SubjectStudy> subjectStudyList = subjectDTO.getSubjectStudyList();
-			for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-				SubjectStudy subjectStudyDTO = (SubjectStudy) iterator.next();
-				importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
-				importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-				importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
-				importDialog.subjectTypeCB.setEnabled(false);
-				break; // use the first relation here to display some info
-				/**
-				 * At this time we have found a subject on using the identifier.
-				 * This subject could be in multiple studies, or not, even in a
-				 * study not available to the importing user.
-				 * The subject could be in the future study, the user chooses to
-				 * import into, but could also be in another study. So we display
-				 * the first info we have here, as in the current implementation
-				 * the user can not change and modify anything on using ShUp.
-				 * When we import for the subject and the subject is not yet in
-				 * the selected study, we add it automatically to this study on
-				 * using the same values as in the other study. This could be
-				 * extended later.
-				 */
-			}
 		// No existing subject found with identifier:
 		} else {
 			// Common name
@@ -275,8 +247,6 @@ public class ImportDialogOpenerNG {
 			importDialog.subjectPersonalCommentTextArea.setText("");
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
-			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
-			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		}
 	}
 
@@ -292,33 +262,26 @@ public class ImportDialogOpenerNG {
 	private void updateImportDialogForExaminations(List<Examination> examinationDTOs, UploadJob uploadJob)
 			throws ParseException {
 		importDialog.mrExaminationExistingExamCB.removeAllItems();
+		/**
+		 * Existing examinations found
+		 */
 		if (examinationDTOs != null && !examinationDTOs.isEmpty()) {
 			for (Iterator iterator = examinationDTOs.iterator(); iterator.hasNext();) {
-				Examination examinationDTO = (Examination) iterator.next();
-				importDialog.mrExaminationExistingExamCB.addItem(examinationDTO);
+				Examination examination = (Examination) iterator.next();
+				importDialog.mrExaminationExistingExamCB.addItem(examination);
 			}
 			importDialog.mrExaminationExistingExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(false);
-			disableExaminationNew();
+		/**
+		 * New examination to create and no existing examinations found
+		 */
 		} else {
 			importDialog.mrExaminationExistingExamCB.setEnabled(false);
-			importDialog.mrExaminationNewExamCB.setEnabled(true);
-			importDialog.mrExaminationNewExamCB.setSelected(true);
 		}
+		importDialog.mrExaminationNewExamCB.setEnabled(true);
+		importDialog.mrExaminationNewExamCB.setSelected(true);
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);
 		importDialog.mrExaminationCommentTF.setText(uploadJob.getStudyDescription());
-	}
-
-	private void disableExaminationNew() {
-		importDialog.mrExaminationExamExecutiveCB.setEnabled(false);
-		importDialog.mrExaminationCenterCB.setEnabled(false);
-		((Container) importDialog.mrExaminationDateDP).getComponent(1).setEnabled(false);
-		JFormattedTextField mrExaminationDateDPTF = ((JDatePickerImpl) importDialog.mrExaminationDateDP)
-				.getJFormattedTextField();
-		mrExaminationDateDPTF.setBackground(Color.LIGHT_GRAY);
-		importDialog.mrExaminationCommentTF.setEnabled(false);
 	}
 
 }

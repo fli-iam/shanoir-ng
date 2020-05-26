@@ -33,9 +33,9 @@ public class RoleApiController implements RoleApi {
 	public ResponseEntity<List<Role>> findRoles() {
 		List<Role> roles = roleService.findAll();
 		if (roles.isEmpty()) {
-			return new ResponseEntity<List<Role>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<List<Role>>(roles, HttpStatus.OK);
+			return new ResponseEntity<>(roles, HttpStatus.OK);
 		}
 	}
 

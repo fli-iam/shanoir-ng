@@ -77,10 +77,10 @@ public class UserServiceImpl implements UserService {
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
 		final User userDb = userRepository.findOne(user.getId());
 		if (userDb == null) {
-			LOG.error("User with id " + user.getId() + " not found");
+			LOG.error("User with id {} not found", user.getId());
 			throw new EntityNotFoundException(User.class, user.getId());
 		}
-		if ((userDb.isAccountRequestDemand() == null || !userDb.isAccountRequestDemand()) 
+		if ((userDb.isAccountRequestDemand() == null || !userDb.isAccountRequestDemand())
 				&& (userDb.isExtensionRequestDemand() == null || !userDb.isExtensionRequestDemand())) {
 			throw new AccountNotOnDemandException(user.getId());
 		}
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}
-		if ((user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()) 
+		if ((user.isAccountRequestDemand() == null || !user.isAccountRequestDemand())
 				&& (user.isExtensionRequestDemand() == null || !user.isExtensionRequestDemand())) {
 			throw new AccountNotOnDemandException(userId);
 		}
@@ -189,7 +189,9 @@ public class UserServiceImpl implements UserService {
 	public User create(final User user) throws PasswordPolicyException, SecurityException {
 		/* Password generation */
 		final String newPassword = PasswordUtils.generatePassword();
-		if (!PasswordUtils.checkPasswordPolicy(newPassword)) throw new PasswordPolicyException();
+		if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
+			throw new PasswordPolicyException();
+		}
 		
 		User savedUser = userRepository.save(user);
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
@@ -203,7 +205,9 @@ public class UserServiceImpl implements UserService {
 	public User createAccountRequest(final User user) throws PasswordPolicyException, SecurityException {
 		/* Password generation */
 		final String newPassword = PasswordUtils.generatePassword();
-		if (!PasswordUtils.checkPasswordPolicy(newPassword)) throw new PasswordPolicyException();		
+		if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
+			throw new PasswordPolicyException();
+		}
 
 		user.setRole(roleRepository.findByName("ROLE_USER")); // Set role 'USER'
 		user.setExpirationDate(LocalDate.now().plusYears(1));
