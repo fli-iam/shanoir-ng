@@ -11,9 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import '../assets/css/common.css';
+import '../assets/css/papaya.css';
 
-import { environment } from '../environments/environment'
-import { AppRoutingModule } from './app-routing.module';
+// import { environment } from '../environments/environment'
+// import { AppRoutingModule } from './app-routing.module';
 import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
@@ -38,8 +40,6 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { AppComponent } from './app.component';
-import { routing } from './app.routing';
-import { preclinicalRouting } from './preclinical/preclinical-routing.module'
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
@@ -219,7 +219,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
 
 @NgModule({
     imports: [
-        AppRoutingModule,
+        // AppRoutingModule,
         BrowserAnimationsModule,
         CommonModule,
         FormsModule,
@@ -227,10 +227,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        RouterModule,
-        routing,
         NgxJsonViewerModule,
-    	preclinicalRouting
+        RouterModule
     ],
     declarations: [
         AccountRequestComponent,
@@ -443,7 +441,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     ],
     bootstrap: [AppComponent]
 })
-
 export class AppModule {
 
     constructor(private injector: Injector) {
