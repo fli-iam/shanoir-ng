@@ -139,8 +139,7 @@ Name                  | Value             | Description                         
 `SHANOIR_X_FORWARDED` | `generate\|trust`  | configures whether the nginx container generates the `X-Forwarded-*` HTTP headers (if running stand-alone) or trusts the existing headers (if located behind another reverse-proxy) |
 `SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate |
 `SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below). |
-
-`KEYCLOAK_USER` `KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing users |
+`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
@@ -210,7 +209,7 @@ server directly:
 
 1. go to Keycloak admin interface: http://localhost:8080/auth/admin/
 2. sign in with the credentials configured in
-   `KEYCLOAK_USER`/`KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
+   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
    default, new user accounts are created in Keycloak by the users microservice

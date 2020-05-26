@@ -42,11 +42,16 @@ auto)
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
 	;;
 init)
+	# create the admin account
+	export KEYCLOAK_USER="$SHANOIR_KEYCLOAK_USER"
+	export KEYCLOAK_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
 		"-Dkeycloak.migration.provider=singleFile"
 		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
+
         # FIXME: should check additional messages:
         #   "The batch executed successfully",
         #   "Initializing master realm",
@@ -57,21 +62,19 @@ init)
 	;;
 never)
 	# FIXME: should we provide a facade for these too
-	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
 	# TODO: ensure that the realm config is up-to-date
 	#-> add an optional data volume to store the config of the imported realm
 	;;
 
 import)
-	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
 	error "TODO: import"
 	;;
 
 export)
-	unset KEYCLOAK_USER KEYCLOAK_PASSWORD
 	error "TODO: export"
 	;;
 esac
+unset SHANOIR_KEYCLOAK_USER SHANOIR_KEYCLOAK_PASSWORD
 
 
 abort_if_error
