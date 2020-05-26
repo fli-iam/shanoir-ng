@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -365,7 +366,13 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		HttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
 		String message = "";
 		if(response == null) {
-			message = "Datasets with not found.";
+			if(datasetIds.size() > 0) {
+				String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(", "));
+				message = "Datasets with ids [" + datasetIdsString + "] not found.";
+			} else {
+				message = "Could not get datasets: no dataset ids provided.";
+			}
+			
 			System.out.println(message);
 			return message;
 		}

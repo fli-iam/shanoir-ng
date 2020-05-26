@@ -3,7 +3,6 @@ package org.shanoir.uploader.service.rest;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -24,7 +20,7 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
-import org.springframework.core.io.ByteArrayResource;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -313,9 +309,11 @@ public class ShanoirUploaderServiceClientNG {
 
 	public HttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
 		if (datasetIds != null) {
-			String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
+			
 			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIds.toArray(new Object[0])).queryParam("format", format).build();
 			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIdsString).queryParam("format", format).build();
+			
+			String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
 			String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format=" + format;
 			
 			HttpResponse response = httpService.get(url.toString());
