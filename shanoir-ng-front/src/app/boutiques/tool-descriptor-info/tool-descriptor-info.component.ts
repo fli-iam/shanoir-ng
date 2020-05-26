@@ -14,4 +14,10 @@ export class ToolDescriptorInfoComponent implements OnInit {
   ngOnInit() {
   }
 
+  getTags() {
+    let jsonTags = JSON.stringify(this.descriptor.tags, null, 4);
+    return jsonTags.replace(/{|}|"|/g, '').replace(/:/g, ':\n')
+    // return jsonTags.replace(/{|}|\[|\]|"|/g, '').replace(/:/g, ':\n')
+  }
+
 }

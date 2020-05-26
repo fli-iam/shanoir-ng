@@ -24,6 +24,7 @@ bin/
 docker-compose/**/*.jar
 docker-compose/database/3_init_preclinical.sql
 docker-compose/nginx/webapp/
+docker-compose/boutiques/boutiques
 shanoir-ng-front/node/
 shanoir-uploader/src/main/resources/profile.OFSEP/key
 shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key

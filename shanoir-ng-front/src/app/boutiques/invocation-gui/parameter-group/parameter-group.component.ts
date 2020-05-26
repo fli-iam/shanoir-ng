@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChildren, QueryList } from '@angular/core';
 import { FormControl, FormGroup }        from '@angular/forms';
 import { Parameter }     from '../parameter/parameter';
 import { ParameterComponent }     from '../parameter/parameter.component';
@@ -13,6 +13,7 @@ export class ParameterGroupComponent implements OnInit {
 
   @Input() parameterGroup: ParameterGroup;
   @Input() formGroup: FormGroup;
+  @Output() selectDataClicked = new EventEmitter<Parameter<any>>();
   @ViewChildren(ParameterComponent) parameterComponents !: QueryList<ParameterComponent>;
 
   selectedParameterId: string = null;
@@ -20,6 +21,10 @@ export class ParameterGroupComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+  }
+
+  onSelectData(parameter: Parameter<any>) {
+    this.selectDataClicked.emit(parameter);
   }
 
   onParameterSelectionChange($event: Event) {
@@ -32,7 +37,7 @@ export class ParameterGroupComponent implements OnInit {
       activeControl.updateValueAndValidity();
     })
 
-    //  - after once cycle: the newly selected parameterComponent: make it true (or its previous value if not a flag), mark it dirty and propagate changes
+    //  - after one cycle: the newly selected parameterComponent: make it true (or its previous value if not a flag), mark it dirty and propagate changes
     setTimeout(()=> {
       this.parameterComponents.forEach((parameterComponent, parameterIndex)=> {
         let activeControl = this.formGroup.get(parameterComponent.parameter.id) as FormControl;

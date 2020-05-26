@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetUrlsDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -43,7 +44,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -117,7 +120,35 @@ public interface DatasetApi {
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
-    
+
+    @ApiOperation(value = "", nickname = "getDatasetUrlsById", notes = "If exists, returns a list of URLs of the dataset corresponding to the given id", response = Resource.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "urls", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @RequestMapping(value = "/urls/{datasetId}", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
+    ResponseEntity<DatasetUrlsDTO> getDatasetUrlsById(
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws RestServiceException, MalformedURLException, IOException;
+
+    @ApiOperation(value = "", nickname = "prepareDatasetUrl", notes = "If exists, copy the dataset file at URL in the Boutiques directory", response = Resource.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "urls", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @RequestMapping(value = "/prepare-url/{datasetId}", produces = { "application/json" }, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
+	ResponseEntity<String> prepareDatasetUrl(
+			@ApiParam(value = "url to prepare", required = true) @Valid @RequestBody ObjectNode urlObject,
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
+			throws RestServiceException, IOException;
+	
     @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),

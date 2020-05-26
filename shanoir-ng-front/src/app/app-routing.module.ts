@@ -25,6 +25,9 @@ import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { BoutiquesDatasetListComponent } from './boutiques/dataset-list/dataset-list.component';
+import { BoutiquesDatasetComponent } from './boutiques/dataset/dataset.component';
+import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
@@ -101,6 +104,9 @@ let routes: Routes = [
     }, {
         path: 'boutiques',
         component: BoutiquesComponent
+    }, {
+        path: 'boutiques/:toolId',
+        component: InvocationExecutionComponent
     },
 
 
@@ -187,6 +193,15 @@ let routes: Routes = [
     {
         path: 'dataset/list',
         component: DatasetListComponent,
+    },
+    {
+        path: 'boutiques/dataset/list',
+        component: BoutiquesDatasetListComponent,
+    },
+    {
+        path: 'boutiques/dataset/details/:id',
+        component: BoutiquesDatasetComponent,
+        data: { mode: 'view' },
     },
     {
         path: 'dataset/details/:id',

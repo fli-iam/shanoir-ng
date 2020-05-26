@@ -51,6 +51,9 @@ import { CoilComponent } from './coils/coil/coil.component';
 import { CoilService } from './coils/shared/coil.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetDownaloadComponent } from './datasets/download/dataset-download.component';
+import { BoutiquesDatasetListComponent } from './boutiques/dataset-list/dataset-list.component';
+import { BoutiquesDatasetComponent } from './boutiques/dataset/dataset.component';
+import { FileTreeComponent } from './boutiques/tree/file-tree.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
@@ -147,11 +150,12 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
 import { RouterModule, Routes } from '@angular/router';
 
 // Boutiques
-import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
-import { BoutiquesRxStompConfig } from './boutiques/boutiques-rx-stomp.config';
+// import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
+// import { BoutiquesRxStompConfig } from './boutiques/boutiques-rx-stomp.config';
 import { BoutiquesComponent } from './boutiques/boutiques.component';
 import { ParameterComponent } from './boutiques/invocation-gui/parameter/parameter.component';
 import { ParameterGroupComponent } from './boutiques/invocation-gui/parameter-group/parameter-group.component';
+import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
 import { InvocationComponent } from './boutiques/invocation/invocation.component';
 import { InvocationGuiComponent } from './boutiques/invocation-gui/invocation-gui.component';
 import { ExecutionComponent } from './boutiques/execution/execution.component';
@@ -281,6 +285,9 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         EegDatasetComponent,
         DatasetListComponent,
         DatasetDownaloadComponent,
+        BoutiquesDatasetListComponent,
+        BoutiquesDatasetComponent,
+        FileTreeComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,
@@ -357,7 +364,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	BrukerUploadComponent,
         AnimalClinicalContextComponent, 
         BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent
+        BrukerFinishImportComponent,
+        InvocationExecutionComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -423,15 +431,15 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         TaskService,
         StudyRightsService,
         ToolService,
-        {
-          provide: InjectableRxStompConfig,
-          useValue: BoutiquesRxStompConfig
-        },
-        {
-          provide: RxStompService,
-          useFactory: rxStompServiceFactory,
-          deps: [InjectableRxStompConfig]
-        }
+        // {
+        //   provide: InjectableRxStompConfig,
+        //   useValue: BoutiquesRxStompConfig
+        // },
+        // {
+        //   provide: RxStompService,
+        //   useFactory: rxStompServiceFactory,
+        //   deps: [InjectableRxStompConfig]
+        // }
     ],
     bootstrap: [AppComponent]
 })

@@ -132,6 +132,12 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	public void getDatasetUrlsByIdTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/urls/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
 	@WithMockUser
 	public void updateDatasetTest() throws Exception {
 		String json = gson.toJson(ModelsUtil.createMrDataset());

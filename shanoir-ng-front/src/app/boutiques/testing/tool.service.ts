@@ -3,11 +3,14 @@ import { HttpClient, HttpHeaders, HttpParams, HttpUrlEncodingCodec } from '@angu
 import { ToolInfo } from './tool.model';
 import { getTestTools } from './test-tools';
 import { asyncData } from '.';
+import { BoutiquesData } from '../tool.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ToolService {
+
+  data: BoutiquesData = { sessionId: Date.now(), isProcessing: false };
 
   constructor() {}
 
@@ -47,6 +50,10 @@ export class ToolService {
     return 'fake output from ' + invocation;
   }
 
+  getFakeExecutionOutput() {
+    return { input: ['fake execution output'], error: [], finished: true };
+  }
+
   getAll(): Promise<ToolInfo[]> {
     return asyncData(this.tools).toPromise();
   }
@@ -55,7 +62,7 @@ export class ToolService {
     return asyncData(this.getFakeDescriptor()).toPromise();
   }
 
-  getInvocation(toolId: number): Promise<string> {
+  getDefaultInvocation(toolId: number): Promise<string> {
     return asyncData(this.getFakeInvocation()).toPromise();
   }
 
@@ -65,5 +72,34 @@ export class ToolService {
 
   execute(toolId: number, invocation: any): Promise<string> {
     return asyncData(this.getFakeOutput(invocation)).toPromise();
+  }
+
+  cancelExecution(toolId: string): Promise<string> {
+    return asyncData('fake cancel success').toPromise();
+  }
+
+  getExecutionOutput(toolId: string): Promise<any> {
+    return asyncData(this.getFakeExecutionOutput()).toPromise();
+  }
+
+  downloadOutput(toolId: string): void {
+    asyncData('fake output').subscribe(response => this.downloadIntoBrowser(response));
+  }
+
+  private downloadIntoBrowser(response: any){
+      
+  }
+
+  saveSession(data: BoutiquesData) {
+    this.data = { ...this.data, ...data };
+    sessionStorage.setItem('boutiques', JSON.stringify(this.data));
+  }
+
+  loadSession() {
+    let data = JSON.parse(sessionStorage.getItem('boutiques'));
+    if(data) {
+      this.data = data;
+    }
+    return this.data;
   }
 }

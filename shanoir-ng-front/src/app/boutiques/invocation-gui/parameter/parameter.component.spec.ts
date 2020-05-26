@@ -44,12 +44,10 @@ describe('ParameterComponent', () => {
   it('should create the proper gui when given a parameter and formGroup', () => {
 
     let service = new ParameterControlService();
-    let parameterGroups = {
-      required: new Map<string, ParameterGroup>(),
-      optional: new Map<string, ParameterGroup>()
-    };
-    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor, parameterGroups);
     
+    let formGroups = service.createFormGroupFromDescriptor(fakeDescriptor);
+    let parameterGroups = service.parameterGroups;
+
     // Required group:
 
     let group0Id = '0'+idPrefix+'0';

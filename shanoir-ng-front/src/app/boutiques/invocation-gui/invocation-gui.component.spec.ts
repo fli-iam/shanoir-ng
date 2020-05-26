@@ -1,8 +1,15 @@
 import { Component, Input } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { Router } from '../../breadcrumbs/router';
+import { Router as AngularRouter } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { InvocationGuiComponent } from './invocation-gui.component';
+import { ToolService as FakeToolService }    from '../testing/tool.service';
+import { ToolService }    from '../tool.service';
+import { BreadcrumbsService as FakeBreadcrumbsService } from '../testing/breadcrumbs.service';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ParameterControlService }    from './parameter-control.service';
 import { ParameterGroupComponent }    from './parameter-group/parameter-group.component';
 import { ParameterGroup }    from './parameter-group/parameter-group';
@@ -20,10 +27,19 @@ class ParameterGroupStubComponent {
 describe('InvocationGuiComponent', () => {
   let component: InvocationGuiComponent;
   let fixture: ComponentFixture<InvocationGuiComponent>;
-
+  let routerStub;
   beforeEach(async(() => {
+    routerStub = {
+      navigate: jasmine.createSpy('navigate'),
+    };
     TestBed.configureTestingModule({
-      providers: [ ParameterControlService ],
+      providers: [ 
+        ParameterControlService,
+        { provide: Router, useValue: routerStub } ,
+        { provide: AngularRouter, useValue: AngularRouter } ,
+        { provide: ToolService, useClass: FakeToolService }, 
+        { provide: BreadcrumbsService, useClass: FakeBreadcrumbsService }
+      ],
       declarations: [ InvocationGuiComponent, ParameterGroupStubComponent, ReplaceSpacePipe ],
       imports: [ ReactiveFormsModule ]
     })
@@ -52,8 +68,10 @@ describe('InvocationGuiComponent', () => {
       required: new Map<string, ParameterGroup>(),
       optional: new Map<string, ParameterGroup>()
     };
-    component.form = service.createFormGroupFromDescriptor(fakeDescriptor, component.parameterGroups);
-    
+
+    component.form = service.createFormGroupFromDescriptor(fakeDescriptor);
+    component.parameterGroups = service.parameterGroups;
+
     // Check that GUI is present
     fixture.detectChanges();
 

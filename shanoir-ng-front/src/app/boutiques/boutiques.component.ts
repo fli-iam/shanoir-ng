@@ -5,6 +5,7 @@ import { ServiceLocator } from '../utils/locator.service';
 import { InvocationComponent } from './invocation/invocation.component';
 import { ExecutionComponent } from './execution/execution.component';
 import { ToolInfo } from './tool.model';
+import { Router } from '../breadcrumbs/router';
 
 @Component({
   selector: 'boutiques',
@@ -13,20 +14,15 @@ import { ToolInfo } from './tool.model';
 })
 export class BoutiquesComponent {
 
-  @ViewChild(InvocationComponent, {static: false})
-  invocationComponent: InvocationComponent;
-
-  @ViewChild(ExecutionComponent, {static: false})
-  executionComponent: ExecutionComponent;
-
-  constructor() {
+  constructor(private router: Router, private breadcrumbService: BreadcrumbsService) {
   }
 
   ngAfterViewInit() {
   }
 
   onToolSelected(toolInfo: ToolInfo) {
-    this.invocationComponent.onToolSelected(toolInfo);
-    this.executionComponent.onToolSelected(toolInfo);
+    // Create a breacrumbd step and go to tool url when a tool is selected
+    this.breadcrumbService.nameStep(toolInfo.name);
+    this.router.navigate(['boutiques/' + toolInfo.id]);
   }
 }

@@ -94,7 +94,7 @@ export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/
 
 // Boutiques http api
 const BACKEND_API_BOUTIQUES_MS_URL: string = process.env.BACKEND_API_BOUTIQUES_MS_URL;
-export const BACKEND_API_BOUTIQUES_TOOL_URL: string = BACKEND_API_BOUTIQUES_MS_URL + '/boutiques';
+export const BACKEND_API_BOUTIQUES_TOOL_URL: string = BACKEND_API_BOUTIQUES_MS_URL + '/tool';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';

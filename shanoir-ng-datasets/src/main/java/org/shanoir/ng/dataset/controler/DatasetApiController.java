@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetUrlsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -76,6 +77,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 
 import io.swagger.annotations.ApiParam;
 
@@ -87,6 +90,10 @@ public class DatasetApiController implements DatasetApi {
 	private static final String ZIP = ".zip";
 
 	private static final String DOWNLOAD = ".download";
+
+	private static final String BOUTIQUES = "boutiques";
+
+	private static final String INPUT = "input";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
@@ -206,8 +213,7 @@ public class DatasetApiController implements DatasetApi {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset not found.", null));
 		}
 
 		/* Create folder and file */
@@ -339,6 +345,91 @@ public class DatasetApiController implements DatasetApi {
 				.body(resource);
 	}
 
+	public ResponseEntity<DatasetUrlsDTO> getDatasetUrlsById(
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
+			throws RestServiceException, IOException {
+
+		final Dataset dataset = datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset not found.", null));
+		}
+		
+		DatasetUrlsDTO urls = new DatasetUrlsDTO();
+
+		try {
+			List<URL> pathURLs = new ArrayList<URL>();
+			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+				URL url = iterator.next();
+				String urlString = url.toString();
+				System.out.println(urlString);
+				urls.dcm.add(urlString);
+			}
+			pathURLs.clear();
+			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+				URL url = iterator.next();
+				urls.nii.add(url.toString());
+				String urlString = url.toString();
+				System.out.println(urlString);
+				urls.nii.add(urlString);
+			}
+			
+		} catch (IOException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+		}
+		return new ResponseEntity<DatasetUrlsDTO>(urls, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<String> prepareDatasetUrl(
+			@ApiParam(value = "study to update", required = true) @Valid @RequestBody ObjectNode urlObject,
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
+			throws RestServiceException, IOException {
+
+		final Dataset dataset = datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+		}
+
+		/* Create folder and file */
+		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+		long n = RANDOM.nextLong();
+		if (n == Long.MIN_VALUE) {
+			n = 0; // corner case
+		} else {
+			n = Math.abs(n);
+		}
+		String workFolderId = Long.toString(n);
+		String tmpFilePath = tmpDir + File.separator + BOUTIQUES + File.separator + INPUT + File.separator + workFolderId;
+		File workFolder = new File(tmpFilePath);
+		workFolder.mkdirs();
+		String url = urlObject.get("url").asText();
+		try {
+			List<URL> pathURLs = new ArrayList<URL>();
+
+			if ("dcm".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
+			} else if ("nii".equals(format)) {
+				pathURLs.add(new URL(url));
+				copyNiftiFilesForURLs(pathURLs, workFolder);
+			} else {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+			}
+			
+		} catch (IOException | MessagingException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+		}
+		return new ResponseEntity<String>(workFolderId, HttpStatus.OK);
+	}
+	
 	/**
 	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
 	 * @param urls

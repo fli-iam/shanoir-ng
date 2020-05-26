@@ -1,10 +1,7 @@
-import { Component, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, FormControl }        from '@angular/forms';
 import { Parameter }     from './parameter';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '../../../breadcrumbs/router';
-import { Router as AngularRouter } from '@angular/router';
-import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
   selector: 'parameter',
@@ -15,20 +12,15 @@ export class ParameterComponent {
 
   @Input() parameter: Parameter<any>;
   @Input() formGroup: FormGroup;
+  @Output() selectDataClicked = new EventEmitter<Parameter<any>>();
   @ViewChild('parameterInput', { static: false }) parameterInput: ElementRef;
 
-  constructor(private router: Router, private angularRouter: AngularRouter, private breadcrumbsService: BreadcrumbsService) { }
-
-  ngOnInit() {
-  }
+  constructor() { }
 
   get isValid() { return this.formGroup.controls[this.parameter.id].valid; }
 
   selectData(event: Event) {
-    this.breadcrumbsService.replace = false;
-    // this.breadcrumbsService.
-    this.router.navigate(['dataset/list'], {replaceUrl: false });
-  	return;
+    this.selectDataClicked.emit(this.parameter);
   }
 
   displaySelectData() {
@@ -36,6 +28,7 @@ export class ParameterComponent {
   }
 
   unset(event: Event) {
+    // Mark as pristine, set value to null (or false for flags), and uncheck
     let activeControl = this.formGroup.get(this.parameter.id) as FormControl;
     activeControl.markAsPristine();
     activeControl.setValue(this.parameter.type != 'Flag' ? null : false);
@@ -48,6 +41,7 @@ export class ParameterComponent {
     if(this.parameter.type != 'Flag') {
       return;
     }
+    // If parameter is a flag: set form control value
     let activeControl = this.formGroup.get(this.parameter.id) as FormControl
     activeControl.setValue(eventTarget.checked);
   }

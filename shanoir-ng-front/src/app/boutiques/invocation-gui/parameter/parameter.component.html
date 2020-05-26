@@ -1,11 +1,16 @@
 <div [formGroup]="formGroup" [class]="'invocation-gui-parameter parameter-' + parameter.type | lowercase">
   
-  <label [attr.for]="'invocation-gui-parameter-' + parameter.id" [class]="">{{parameter.name}}</label>
+  <div class="parameter-container">
+    <label [attr.for]="'invocation-gui-parameter-' + parameter.id" [class]="">{{parameter.name}}</label>
 
-  <input #parameterInput [formControlName]="parameter.id" [id]="'invocation-gui-parameter-' + parameter.id" [type]="parameter.getInputType()" [checked]="parameter.value" (change)="onChange($event.target)" [min]="parameter.getMinimum()" [max]="parameter.getMaximum()">
+    <input #parameterInput [formControlName]="parameter.id" [id]="'invocation-gui-parameter-' + parameter.id" [type]="parameter.getInputType()" [checked]="parameter.value" (change)="onChange($event.target)" [min]="parameter.getMinimum()" [max]="parameter.getMaximum()">
 
-  <button class="select-data" *ngIf="parameter.type == 'File'" (click)="selectData($event)">{{displaySelectData()}}</button>
 
-  <button class="unset" *ngIf="parameter.optional" (click)="unset($event)">Unset</button>
+    <button type="button" class="select-data" *ngIf="parameter.type == 'File'" (click)="selectData($event)"><i class="fas fa-database"></i> {{displaySelectData()}}</button>
+
+    <button type="button" class="unset" *ngIf="parameter.optional" (click)="unset($event)" i18n="Unset parameter button@@UnsetParameterButton"><i class="fas fa-times"></i> Unset</button>
+  </div>
+
+  <p class="description">{{parameter.description}}</p>
 
 </div>

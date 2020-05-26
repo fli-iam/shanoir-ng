@@ -29,28 +29,29 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
   @ViewChild('table', { static: true }) table: TableComponent;
 
   constructor(private toolService: ToolService) {
-    super('boutiques tool');
+    super('boutiques');
+    this.breadcrumbsService.nameStep('Boutiques');
   }
 
   getOptions() {
     return {
       new: false,
-      view: true, 
+      view: false, 
       edit: false, 
       delete: false
     };
   }
 
   getEntities(): Promise<ToolInfo[]> {
-    return this.toolService.getAll();
+    return this.toolService.getAll()
   }
 
   getColumnDefs(): any[] {
     let colDef: any[] = [
       { headerName: "Name", field: "name" },
       { headerName: "Description", field: "description" },
-      { headerName: "Id", field: "id" },
-      { headerName: "Downloads", field: "downloads" }
+      { headerName: "Id", field: "id", width: "100px" },
+      { headerName: "Downloads", field: "ndownloads", width: "60px" }
     ];
     return colDef;
   }
