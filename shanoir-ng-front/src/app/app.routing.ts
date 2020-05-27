@@ -124,7 +124,7 @@ let appRoutes: Routes = [
 
 appRoutes = appRoutes.concat(
     getRoutesFor('study', StudyComponent, StudyListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-    getRoutesFor('subject', SubjectComponent, SubjectListComponent, {update: AuthAdminGuard}),
+    getRoutesFor('subject', SubjectComponent, SubjectListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, {update: AuthAdminGuard}),
     getRoutesFor('dataset', DatasetComponent, DatasetListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('center', CenterComponent, CenterListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),

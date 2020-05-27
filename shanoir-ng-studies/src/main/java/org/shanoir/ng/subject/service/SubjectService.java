@@ -146,9 +146,9 @@ public interface SubjectService {
 	 *
 	 * @param subject subject to update.
 	 * @return updated subject.
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	Subject update(Subject subject) throws EntityNotFoundException;
 
 	/**
