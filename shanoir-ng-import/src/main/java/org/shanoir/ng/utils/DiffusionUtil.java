@@ -47,16 +47,16 @@ public final class DiffusionUtil {
 	 * @return the string
 	 */
 	public static String bvalToString(final double[] bval) {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		if (bval != null) {
 			for (int i = 0; i < bval.length; i++) {
-				result += bval[i];
+				result.append(bval[i]);
 				if (i != bval.length - 1) {
-					result += " ";
+					result.append(" ");
 				}
 			}
 		}
-		return result;
+		return result.toString();
 	}
 
 	/**
@@ -68,16 +68,16 @@ public final class DiffusionUtil {
 	 * @return the string
 	 */
 	public static String bvecToString(final double[][] matrix) {
-		String result = "";
+		StringBuilder result = new StringBuilder("");
 		if (matrix != null) {
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[i].length; j++) {
-					result += matrix[i][j] + " ";
+					result.append(matrix[i][j] + " ");
 				}
-				result += "\n";
+				result.append("\n");
 			}
 		}
-		return result;
+		return result.toString();
 	}
 
 	/**
@@ -92,7 +92,7 @@ public final class DiffusionUtil {
 	 * @return the list< file>
 	 */
 	public static List<File> propToBvecBval(final File propFile, final File outputDirectory) {
-		final List<File> resultList = new ArrayList<File>();
+		final List<File> resultList = new ArrayList<>();
 		try {
 			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			final DocumentBuilder db = dbf.newDocumentBuilder();
@@ -105,21 +105,17 @@ public final class DiffusionUtil {
 			if (bvecNodeLst.getLength() != 0) {
 				final Node bvecNode = bvecNodeLst.item(0);
 				final Node bvecValue = bvecNode.getFirstChild();
-				if (bvecValue != null) {
-					if (bvecValue.getNodeValue() != null) {
-						String diffusionGradientOrientation = bvecValue.getNodeValue().trim();
-						bvecAsString = diffusionGradientOrientation.split(" ");
-					}
+				if (bvecValue != null && bvecValue.getNodeValue() != null) {
+					String diffusionGradientOrientation = bvecValue.getNodeValue().trim();
+					bvecAsString = diffusionGradientOrientation.split(" ");
 				}
 			}
 			final NodeList bvalNodeLst = doc.getElementsByTagName("b0");
 			if (bvalNodeLst.getLength() != 0) {
 				final Node bvalNode = bvalNodeLst.item(0);
 				final Node bvalValue = bvalNode.getFirstChild();
-				if (bvalValue != null) {
-					if (bvalValue.getNodeValue() != null) {
-						b0 = bvalValue.getNodeValue().trim();
-					}
+				if (bvalValue != null && bvalValue.getNodeValue() != null) {
+					b0 = bvalValue.getNodeValue().trim();
 				}
 			}
 			if (b0 != null && bvecAsString != null && bvecAsString.length > 1) {
@@ -127,7 +123,9 @@ public final class DiffusionUtil {
 				double[][] bvec = convertBvec(bvecAsString);
 				double[] bval = convertBval(Double.parseDouble(b0), Integer.parseInt(bvecAsString[0]));
 				// write the files
-				assert outputDirectory.isDirectory();
+				if (!outputDirectory.isDirectory()) {
+					throw new IllegalArgumentException("Not a directory: " + outputDirectory);
+				}
 				final String name = FilenameUtils.getBaseName(propFile.getName());
 				final File bvalFile = new File(outputDirectory, name + ".bval");
 				final File bvecFile = new File(outputDirectory, name + ".bvec");
@@ -181,7 +179,7 @@ public final class DiffusionUtil {
 
 		for (int i = 1; i < bvecAsString.length; i++) {
 			int indexX = (i - 1) % 3;
-			int indexY = ((i - 1) / 3) + 1;
+			int indexY = (i - 1) / 3 + 1;
 			bvec[indexX][indexY] = Double.parseDouble(bvecAsString[i]);
 		}
 		return bvec;
@@ -196,11 +194,9 @@ public final class DiffusionUtil {
 	 *            the file
 	 */
 	private static void writeBval(final double[] bval, final File file) {
-		try {
-			final FileWriter wri = new FileWriter(file);
+		try (final FileWriter wri = new FileWriter(file)){
 			final String bvalString = DiffusionUtil.bvalToString(bval);
 			wri.write(bvalString);
-			wri.close();
 		} catch (Exception e) {
 			LOG.error(e.getMessage());
 		}
@@ -215,10 +211,8 @@ public final class DiffusionUtil {
 	 *            the file
 	 */
 	private static void writeBvec(final double[][] bvec, final File file) {
-		try {
-			final FileWriter wri = new FileWriter(file);
+		try (FileWriter wri = new FileWriter(file)){
 			wri.write(DiffusionUtil.bvecToString(bvec));
-			wri.close();
 		} catch (Exception e) {
 			LOG.error(e.getMessage());
 		}

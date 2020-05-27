@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ImportSecurityService {
 	
+	private static final String ROLE_ADMIN = "ROLE_ADMIN";
 	@Autowired
 	StudyRightsService rightsService;
 		
@@ -33,9 +34,13 @@ public class ImportSecurityService {
 	 * @return true or false
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-    	if (studyId == null) return false;
-        return rightsService.hasRightOnStudy(studyId, rightStr);
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		} else if (studyId == null) {
+			return false;
+		} else {
+			return rightsService.hasRightOnStudy(studyId, rightStr);
+		}
     }
     
     /**
@@ -45,7 +50,9 @@ public class ImportSecurityService {
 	 * @return true or false
 	 */
     public boolean hasRightOnOneStudy(String rightStr) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
         return rightsService.hasRightOnAtLeastOneStudy(rightStr);
     }
     
@@ -55,7 +62,9 @@ public class ImportSecurityService {
 	 * @return a boolean
 	 */
     public boolean canImportFromPACS() {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
     	return KeycloakUtil.canImportFromPACS();
     }
 }

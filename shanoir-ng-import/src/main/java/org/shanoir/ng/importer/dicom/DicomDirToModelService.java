@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
@@ -56,37 +57,37 @@ public class DicomDirToModelService {
 		final DicomDirReader dicomDirReader = new DicomDirReader(file);
 		try {
 			// patient level
-			List<Patient> patients = new ArrayList<Patient>();
+			List<Patient> patients = new ArrayList<>();
 			Attributes patientRecord = dicomDirReader.findPatientRecord();
 			while(patientRecord != null) {
 				Patient patient = new Patient(patientRecord);
 				patients.add(patient);
 				// study level
-				List<Study> studies = new ArrayList<Study>();
+				List<Study> studies = new ArrayList<>();
 				Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
 				while(studyRecord != null) {
 					Study study = new Study(studyRecord);
 					studies.add(study);
 					// serie level
-					List<Serie> series = new ArrayList<Serie>();
+					List<Serie> series = new ArrayList<>();
 					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
 					while(serieRecord != null) {
 						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
-					study.setSeries(series);			
-					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);				
+					study.setSeries(series);
+					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
 				}
 				patient.setStudies(studies);
 				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
 			}
 			return patients;
 		} catch (IOException e) {
-			LOG.error("Error while reading first root record of DICOM file: " + e.getMessage());
+			LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
 		} finally {
 			dicomDirReader.close();
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class DicomDirToModelService {
 		if (AcquisitionModality.codeOf(modality) != null) {
 			Serie serie = new Serie(serieRecord);
 			// instance level: could be image or non-image (to filter later)
-			List<Instance> instances = new ArrayList<Instance>();
+			List<Instance> instances = new ArrayList<>();
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
@@ -113,7 +114,7 @@ public class DicomDirToModelService {
 				serie.setInstances(instances);
 				series.add(serie);
 			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: " + serie.getSeriesInstanceUID() + ").");
+				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {} ).", serie.getSeriesInstanceUID());
 			}
 		} else {
 			LOG.info("Serie found with non medical imaging modality and therefore ignored.");

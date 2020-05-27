@@ -31,6 +31,7 @@ public class CurrentUploadsWindowTable implements Observer {
 	public String startUploadState = "START";
 	public String startAutoImportUploadState = "START_AUTOIMPORT";
 	public String finishedUploadState = "FINISHED";
+	public String errorUploadState = "ERROR";
 	public int selectedRow;
 	public int rowsNb;
 
@@ -84,7 +85,8 @@ public class CurrentUploadsWindowTable implements Observer {
 					model.addRow(new Object[] { key, nDUJob.getPatientPseudonymusHash(), nDUJob.getPatientName(),
 						nDUJob.getIPP(), nDUJob.getStudyDate(), nDUJob.getMriSerialNumber(), nDUJob.getUploadPercentage(),
 						(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import") });
-				} else if (UploadState.FINISHED_UPLOAD.equals(nDUJob.getUploadState())) {
+				} else if (UploadState.FINISHED_UPLOAD.equals(nDUJob.getUploadState())
+						|| UploadState.ERROR.equals(nDUJob.getUploadState())) {
 					model.addRow(new Object[] { key, nDUJob.getPatientPseudonymusHash(), nDUJob.getPatientName(),
 							nDUJob.getIPP(), nDUJob.getStudyDate(), nDUJob.getMriSerialNumber(), nDUJob.getUploadPercentage(),
 							(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });					

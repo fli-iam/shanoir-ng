@@ -79,7 +79,8 @@ public class StudyDTO {
 	/**
 	 * Default constructor.
 	 */
-	public StudyDTO() { 
+	public StudyDTO() {
+		// empty constructor
 	}
 
 	/**

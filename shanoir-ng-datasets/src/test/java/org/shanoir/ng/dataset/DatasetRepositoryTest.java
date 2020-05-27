@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +66,7 @@ public class DatasetRepositoryTest {
 	
 	
 	/**
-	 * Test the hierarchy strategy : 
+	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
 	 * 
 	 * @throws ShanoirException
@@ -82,13 +82,13 @@ public class DatasetRepositoryTest {
 		Long id = result.getId();
 		
 		Dataset founded = repository.findOne(id);
-		assertThat(founded instanceof MrDataset);
+		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());	
+		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
 	}
 	
 	/**
-	 * Test the hierarchy strategy : 
+	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
 	 * 
 	 * @throws ShanoirException
@@ -100,19 +100,19 @@ public class DatasetRepositoryTest {
 		Dataset ds = mr; // <----------
 		
 		Dataset result = repository.save(ds); // SAVE AS A DATASET
-		assertThat(result instanceof MrDataset);
+		assertTrue(result instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset)result).getMrQualityProcedureType());
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
 		Dataset founded = repository.findOne(id);
-		assertThat(founded instanceof MrDataset);
+		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
-		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());	
+		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
 	}
 	
 	/**
-	 * Test the hierarchy strategy : 
+	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
 	 * 
 	 * @throws ShanoirException
@@ -133,17 +133,17 @@ public class DatasetRepositoryTest {
 		
 		Dataset foundedMr1 = all.get(0);
 		assertEquals(mr1Id, foundedMr1.getId());
-		assertThat(foundedMr1 instanceof MrDataset);
+		assertTrue(foundedMr1 instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, ((MrDataset)foundedMr1).getMrQualityProcedureType());
 		
 		Dataset foundedMr2 = all.get(1);
 		assertEquals(mr2Id, foundedMr2.getId());
-		assertThat(foundedMr2 instanceof MrDataset);
+		assertTrue(foundedMr2 instanceof MrDataset);
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME, ((MrDataset)foundedMr2).getMrQualityProcedureType());
 		
 		Dataset foundedPet1 = all.get(2);
 		assertEquals(pet1Id, foundedPet1.getId());
-		assertThat(foundedPet1 instanceof PetDataset);
+		assertTrue(foundedPet1 instanceof PetDataset);
 		assertEquals("Pet", ((PetDataset)foundedPet1).getType());
 	}
 	

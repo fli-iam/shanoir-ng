@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public final class PasswordUtils {
 
 	/** Logger */
-	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PasswordUtils.class);
 
 	/** List of letters for passwords */
 	private static final String LOWERCASE_ALPHA = "abcdefghijklmnopqrstuvwxyz";

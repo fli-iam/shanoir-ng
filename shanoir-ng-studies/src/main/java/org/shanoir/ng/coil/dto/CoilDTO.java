@@ -45,6 +45,7 @@ public class CoilDTO {
 	 * Default constructor.
 	 */
 	public CoilDTO() {
+		// empty constructor
 	}
 	
 	/**

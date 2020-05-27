@@ -14,22 +14,38 @@
 
 package org.shanoir.ng.dataset;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.matchers.JUnitMatchers.*;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,19 +87,30 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private DatasetMapper datasetMapperMock;
-	
+
 	@MockBean
 	private MrDatasetMapper mrDatasetMapperMock;
-	
+
 	@MockBean
 	private ExaminationService examinationService;
-	
+
 	@MockBean
 	private WADODownloaderService downloader;
 	
 	@MockBean
 	private DatasetSecurityService datasetSecurityService;
 
+	@MockBean
+	private DatasetSecurityService datasetSecurityService;
+	
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+
+	@MockBean
+	private EegDatasetMapper eegDatasetMapper;
+
+	@MockBean
+	private BIDSServiceImpl bidsService;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -98,13 +125,13 @@ public class DatasetApiControllerTest {
 	@WithMockUser(authorities = { "adminRole" })
 	public void deleteDatasetTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
+		.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void findDatasetByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+		.andExpect(status().isOk());
 	}
 
 	@Test
@@ -117,4 +144,138 @@ public class DatasetApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
 	}
 
+	@Test
+	public void testMassiveDownloadByStudyIdNull() throws Exception {
+		// GIVEN a study with some datasets to export in nii format
+
+		// WHEN we export all the datasets but with null studyId
+		try {
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+					.param("format", "nii")
+					.param("studyId", ""))
+			.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"Please use a valid study ID.\",\"details\":null}");
+		}
+
+		// THEN we have a forbidden http status
+	}
+
+	@Test
+	public void testMassiveDownloadByStudyIdNifti() throws Exception {
+		// GIVEN a study with some datasets to export in nii format
+		// Create a file with some text
+		File datasetFile = testFolder.newFile("test.nii");
+		datasetFile.getParentFile().mkdirs();
+		datasetFile.createNewFile();
+		FileUtils.write(datasetFile, "test");
+
+		// Link it to datasetExpression in a dataset in a study
+		Dataset dataset = new MrDataset();
+		DatasetExpression expr = new DatasetExpression();
+		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		expr.setDatasetFiles(Collections.singletonList(dsFile));
+		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+		dataset.setDatasetExpressions(datasetExpressions);
+
+		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
+
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+				.param("format", "nii")
+				.param("studyId", "1"))
+		.andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
+		.andExpect(content().string(containsString("test")));
+		// THEN all datasets are exported
+	}
+
+	@Test
+	public void testMassiveDownloadByDatasetsId() throws Exception {
+		// GIVEN a list of datasets to export
+		// Create a file with some text
+		File datasetFile = testFolder.newFile("test.nii");
+		datasetFile.getParentFile().mkdirs();
+		datasetFile.createNewFile();
+		FileUtils.write(datasetFile, "test");
+
+		// Link it to datasetExpression in a dataset in a study
+		Dataset dataset = new MrDataset();
+		DatasetExpression expr = new DatasetExpression();
+		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		expr.setDatasetFiles(Collections.singletonList(dsFile));
+		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+		dataset.setDatasetExpressions(datasetExpressions);
+
+		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
+
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+				.param("format", "nii")
+				.param("datasetIds", "1"))
+		.andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
+		.andExpect(content().string(containsString("test")));
+
+
+		// THEN all datasets are exported
+	}
+
+	@Test
+	public void testMassiveDownloadByDatasetsIdNoIds() {
+		// GIVEN a list of datasets to export
+
+		// WHEN we export all the datasets with no datasets ID
+		try {
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+					.param("format", "nii")
+					.param("datasetIds", ""))
+			.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"Please use a valid sets of dataset IDs.\",\"details\":null}");
+		}
+
+
+		// THEN we expect an error
+	}
+
+	@Test
+	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
+		// Create a file with some text
+		File datasetFile = testFolder.newFile("test.nii");
+		datasetFile.getParentFile().mkdirs();
+		datasetFile.createNewFile();
+		FileUtils.write(datasetFile, "test");
+
+		// Link it to datasetExpression in a dataset in a study
+		Dataset dataset = new MrDataset();
+		DatasetExpression expr = new DatasetExpression();
+		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setPath(datasetFile.getAbsolutePath());
+		expr.setDatasetFiles(Collections.singletonList(dsFile));
+		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+		dataset.setDatasetExpressions(datasetExpressions);
+		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+
+		// GIVEN a study with some datasets to export in nii format
+		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
+	try {
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+				.param("format", "otherWRONG")
+				.param("studyId", "1"))
+		.andExpect(status().isForbidden());
+	} catch (Exception e) {
+		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Bad arguments.\",\"details\":null}", e.getMessage());
+	}
+
+		// THEN we expect a failure
+	}
 }

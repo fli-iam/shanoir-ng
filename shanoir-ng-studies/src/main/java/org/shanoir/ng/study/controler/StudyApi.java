@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.study.controler;
 
+import java.io.IOException;
 import java.util.List;
 
+import javax.validation.Valid;
+
+import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -23,14 +27,19 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -151,4 +160,65 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Add protocol file to a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "protocol-file-upload/{studyId}",
+	produces = { "application/json" },
+    consumes = { "multipart/form-data" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<Void> uploadProtocolFile(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Download protocol file from a study", response = ByteArrayResource.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = ByteArrayResource.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "protocol-file-download/{studyId}/{fileName:.+}/")
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadProtocolFile(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long examinationId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
+
+	@ApiOperation(value = "", notes = "Deletes the protocol file of a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "study deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "protocol-file-delete/{studyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteProtocolFile(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException;
+
+    @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/exportBIDS/studyId/{studyId}",
+        produces = { "application/zip" })
+    ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
+
+
+    @ApiOperation(value = "", nickname = "getBids", notes = "If exists, returns a BIDSElement structure corresponding to the given study id", response = BidsElement.class, tags={})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "BidsElement", response = BidsElement.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/bidsStructure/studyId/{studyId}",
+        produces = { "application/json" })
+    ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 }

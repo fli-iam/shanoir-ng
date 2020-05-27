@@ -74,7 +74,8 @@ public class CurrentNominativeDataController {
 						boolean uploadsToDelete = false;
 						for (int i = 0; i < rows; i++) {
 							String uploadState = (String) cuw.table.getModel().getValueAt(i, cuw.uploadStateColumn);
-							if (uploadState.equals(cuw.finishedUploadState)) {
+							if (uploadState.equals(cuw.finishedUploadState)
+									|| uploadState.equals(cuw.errorUploadState)) {
 								DeleteDirectory dt = new DeleteDirectory();
 								dt.delete((String) model.getValueAt(i, 0));
 								uploadsToDelete = true;

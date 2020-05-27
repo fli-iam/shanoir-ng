@@ -71,6 +71,17 @@ public class ImportFinishActionListener implements ActionListener {
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getId() == null) {
 			return;
 		}
+		if (ShUpConfig.isModeSubjectCommonNameManual()) {
+			// minimal length for subject common name is 2, same for subject study identifier
+			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
+				|| (!mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
+						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2)) {
+				JOptionPane.showMessageDialog(mainWindow.frame,
+						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		}
 		
 		// block further action
 		((JButton) event.getSource()).setEnabled(false);
@@ -121,18 +132,27 @@ public class ImportFinishActionListener implements ActionListener {
 			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			long createExaminationId = shanoirUploaderServiceClient.createExamination(study.getId(), subjectId, new Long(center.getId()),
-					new Long(investigator.getId()), examinationDate, examinationComment);
-			if (createExaminationId == -1) {
+			if (investigator != null && center != null && examinationDate != null) {
+				long createExaminationId = shanoirUploaderServiceClient.createExamination(study.getId(), subjectId, new Long(center.getId()),
+						new Long(investigator.getId()), examinationDate, examinationComment);
+				if (createExaminationId == -1) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
+							"Error", JOptionPane.ERROR_MESSAGE);
+					mainWindow.setCursor(null); // turn off the wait cursor
+					((JButton) event.getSource()).setEnabled(true);
+					return;
+				} else {
+					examinationId = new Long(createExaminationId);
+					logger.info("Auto-Import: examination created on server with ID: " + examinationId);
+				}
+			} else {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
 						"Error", JOptionPane.ERROR_MESSAGE);
 				mainWindow.setCursor(null); // turn off the wait cursor
 				((JButton) event.getSource()).setEnabled(true);
 				return;
-			} else {
-				examinationId = new Long(createExaminationId);
-				logger.info("Auto-Import: examination created on server with ID: " + examinationId);
 			}
 		} else {
 			ExaminationDTO examinationDTO = (ExaminationDTO) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
@@ -162,6 +182,7 @@ public class ImportFinishActionListener implements ActionListener {
 			SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
 			subjectStudyDTO.setStudyId(study.getId());
 			subjectStudyDTO.setSubjectId(subjectId);
+			subjectStudyDTO.setSubjectStudyIdentifier(mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 			subjectStudyDTO.setSubjectType((String) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
 			subjectStudyDTO.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
 			subjectStudyDTO = shanoirUploaderServiceClient.createSubjectStudy(subjectStudyDTO);

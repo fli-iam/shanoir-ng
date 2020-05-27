@@ -23,10 +23,14 @@ import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.service.CoilService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,12 +50,17 @@ public class CoilApiController implements CoilApi {
 	@Autowired
 	private CoilService coilService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
+	@Override
 	public ResponseEntity<Void> deleteCoil(
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException {
 
 		try {
 			coilService.deleteById(coilId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
@@ -59,6 +68,7 @@ public class CoilApiController implements CoilApi {
 		}
 	}
 
+	@Override
 	public ResponseEntity<CoilDTO> findCoilById(
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
 		
@@ -69,6 +79,7 @@ public class CoilApiController implements CoilApi {
 		return new ResponseEntity<>(coilMapper.coilToCoilDTO(coil), HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<List<CoilDTO>> findCoils() {
 		final List<Coil> coils = coilService.findAll();
 		if (coils.isEmpty()) {
@@ -77,6 +88,7 @@ public class CoilApiController implements CoilApi {
 		return new ResponseEntity<>(coilMapper.coilsToCoilDTOs(coils), HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<CoilDTO> saveNewCoil(
 			@ApiParam(value = "coil to create", required = true) @Valid @RequestBody Coil coil,
 			final BindingResult result) throws RestServiceException {
@@ -86,9 +98,11 @@ public class CoilApiController implements CoilApi {
 
 		/* Save coil in db. */
 		final Coil createdCoil = coilService.create(coil);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_COIL_EVENT, createdCoil.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(coilMapper.coilToCoilDTO(createdCoil), HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<Void> updateCoil(
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
 			@ApiParam(value = "coil to update", required = true) @Valid @RequestBody Coil coil,
@@ -97,6 +111,7 @@ public class CoilApiController implements CoilApi {
 		validate(result);
 		try {
 			coilService.update(coil);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_COIL_EVENT, coilId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		
 		} catch (EntityNotFoundException e) {
@@ -110,6 +125,6 @@ public class CoilApiController implements CoilApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
 }

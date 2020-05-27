@@ -27,7 +27,7 @@ public class StreamGobbler extends Thread {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StreamGobbler.class);
 
 	/** The is. */
 	private InputStream is;
@@ -56,10 +56,9 @@ public class StreamGobbler extends Thread {
 	 * 
 	 * @see java.lang.Thread#run()
 	 */
+	@Override
 	public void run() {
-		try {
-			final InputStreamReader isr = new InputStreamReader(is);
-			final BufferedReader br = new BufferedReader(isr);
+		try (InputStreamReader isr = new InputStreamReader(is); BufferedReader br = new BufferedReader(isr)) {
 			String line = null;
 
 			while ((line = br.readLine()) != null) {
@@ -74,7 +73,6 @@ public class StreamGobbler extends Thread {
 					stringDisplay += "INFO : " + line + "\n";
 				}
 			}
-			isr.close();
 		} catch (final IOException ioe) {
 			LOG.error(ioe.getMessage());
 		}

@@ -48,13 +48,20 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Dataset datasetDb = repository.findOne(id);
-		if (datasetDb == null) throw new EntityNotFoundException(Dataset.class, id);
+		if (datasetDb == null) {
+			throw new EntityNotFoundException(Dataset.class, id);
+		}
 		repository.delete(id);
 	}
 
 	@Override
 	public Dataset findById(final Long id) {
 		return repository.findOne(id);
+	}
+
+	@Override
+	public List<Dataset> findByIdIn(List<Long> ids) {
+		return Utils.toList(repository.findAll(ids));
 	}
 
 	@Override
@@ -65,7 +72,9 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset update(final Dataset dataset) throws EntityNotFoundException {
 		final Dataset datasetDb = repository.findOne(dataset.getId());
-		if (datasetDb == null) throw new EntityNotFoundException(Dataset.class, dataset.getId());
+		if (datasetDb == null) {
+			throw new EntityNotFoundException(Dataset.class, dataset.getId());
+		}
 		updateDatasetValues(datasetDb, dataset);
 		return repository.save(datasetDb);
 	}
@@ -80,15 +89,7 @@ public class DatasetServiceImpl implements DatasetService {
 	 */
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
 		datasetDb.setCreationDate(dataset.getCreationDate());
-		//datasetDb.setDatasetAcquisition(dataset.getDatasetAcquisition());
-		//datasetDb.setDatasetExpressions(dataset.getDatasetExpressions());
-		//datasetDb.setDatasetProcessing(dataset.getDatasetProcessing());
-		//datasetDb.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
 		datasetDb.setId(dataset.getId());
-		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
-		//datasetDb.setProcessings(dataset.getProcessings());
-		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
-		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
@@ -107,13 +108,18 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return repository.findAll(pageable);			
+			return repository.findAll(pageable);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
 			return repository.findByStudyIdIn(studyIds, pageable);
 		}
+	}
+
+	@Override
+	public List<Dataset> findByStudyId(Long studyId) {
+		return Utils.toList(repository.findByStudyId(studyId));
 	}
 
 }

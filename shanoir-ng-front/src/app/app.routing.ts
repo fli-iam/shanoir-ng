@@ -24,16 +24,22 @@ import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
@@ -77,6 +83,14 @@ let appRoutes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
+            }, {   
+                path: 'eeg',
+                component: EegUploadComponent,
+                data: {importMode: 'EEG'}
+            }, {   
+                path: 'bids',
+                component: BidsUploadComponent,
+                data: {importMode: 'BIDS'}
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
@@ -86,11 +100,21 @@ let appRoutes: Routes = [
                 path: 'series',
                 component: SelectSeriesComponent
             }, {
+                path: 'eegseries',
+                component: EegSelectSeriesComponent
+            }, {
                 path: 'context',
                 component: ClinicalContextComponent
             }, {
+                path: 'eegcontext',
+                component: EegClinicalContextComponent
+            }, {
                 path: 'finish',
                 component: FinishImportComponent
+            }
+            , {
+                path: 'eegfinish',
+                component: FinishEegImportComponent
             }
         ]
     }, {
@@ -117,8 +141,7 @@ appRoutes = appRoutes.concat(
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 
 
-function getRoutesFor(entityName: string, entityComponent, listComponent, 
-       // auth): Routes {
+export function getRoutesFor(entityName: string, entityComponent, listComponent, 
         auth: {read?: any, create?: any, update?: any} ): Routes {
 
     return [

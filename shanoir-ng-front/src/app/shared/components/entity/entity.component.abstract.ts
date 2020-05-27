@@ -48,7 +48,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     protected keycloakService: KeycloakService;
-    private msgBoxService: MsgBoxService; 
+    protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -199,12 +199,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private modeSpecificSave(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
+                this.entity.id = entity.id;
+                this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
+                this._entity.id = entity.id;
             });
         }
         else if (this.mode == 'edit') {
             return this.entity.update().then(() => {
+                this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
             });
@@ -253,7 +257,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    private chooseRouteAfterSave(entity: Entity) {
+    protected chooseRouteAfterSave(entity: Entity) {
         this.breadcrumbsService.currentStep.notifySave(entity);
         if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
             this.breadcrumbsService.goBack();
@@ -275,7 +279,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         let replace: boolean = this.breadcrumbsService.currentStep && (
                 this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToEdit(id)
-                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate());
+                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate()
+                // Create route can be contained in incoming route (more arguments for example)
+                || this.breadcrumbsService.currentStep.route.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
         this.router.navigate([this.entityRoutes.getRouteToView(id)], {replaceUrl: replace});
     }
 

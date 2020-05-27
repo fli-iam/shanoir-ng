@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -38,6 +39,14 @@ import org.thymeleaf.context.Context;
  */
 @Service
 public class EmailServiceImpl implements EmailService {
+
+	private static final String EXPIRATION_DATE = "expirationDate";
+
+	private static final String LASTNAME = "lastname";
+
+	private static final String FIRSTNAME = "firstname";
+
+	private static final String SERVER_ADDRESS = "serverAddress";
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -63,11 +72,11 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("Shanoir Account Expiration");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
 			final String content = build("notifyAccountWillExpire", variables);
 			messageHelper.setText(content, true);
 		};
@@ -85,9 +94,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("New user account request from " + shanoirServerAddress);
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
-			variables.put("serverAddress", shanoirServerAddress);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			final String content = build("notifyAdminAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
@@ -125,9 +134,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("Shanoir Account Creation");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyCreateUser", variables);
@@ -144,9 +153,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("Shanoir Account Creation");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyNewUser", variables);
@@ -163,9 +172,9 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
 			variables.put("newPassword", password);
 			final String content = build("notifyUserResetPassword", variables);
 			messageHelper.setText(content, true);
@@ -176,8 +185,8 @@ public class EmailServiceImpl implements EmailService {
 	private String build(final String templateFile, final Map<String, Object> variables) {
 		final Context context = new Context();
 		if (variables != null) {
-			for (final String variable : variables.keySet()) {
-				context.setVariable(variable, variables.get(variable));
+			for (final Entry<String, Object> entry : variables.entrySet()) {
+				context.setVariable(entry.getKey(), entry.getValue());
 			}
 		}
 		return templateEngine.process(templateFile, context);
@@ -192,7 +201,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
 			final String content = build("notifyAdminAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
@@ -209,7 +218,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
 			final String content = build("notifyAdminAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
@@ -226,7 +235,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
 			final String content = build("notifyAdminExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
@@ -243,7 +252,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(adminEmails.toArray(new String[0]));
 			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("user", user);
 			final String content = build("notifyAdminExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
@@ -257,10 +266,10 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("Granted: Your Shanoir account has been activated");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			final String content = build("notifyUserAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -273,11 +282,11 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
-			final Map<String, Object> variables = new HashMap<String, Object>();
+			final Map<String, Object> variables = new HashMap<>();
 			variables.put("administratorEmail", administratorEmail);
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			final String content = build("notifyUserAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
@@ -290,11 +299,11 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("Granted: Your Shanoir account extension has been extended");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -307,11 +316,11 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setFrom(administratorEmail);
 			messageHelper.setTo(user.getEmail());
 			messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			variables.put(EXPIRATION_DATE, formatter.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};

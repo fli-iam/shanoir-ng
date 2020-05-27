@@ -23,7 +23,7 @@ public class ExpressionFormat {
 
 	private String type;
 	
-	private List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
+	private List<DatasetFile> datasetFiles = new ArrayList<>();
 	
 	private NIfTIConverter niftiConverter;
 
@@ -37,7 +37,7 @@ public class ExpressionFormat {
 
 	public List<DatasetFile> getDatasetFiles() {
 		if (datasetFiles == null) {
-			datasetFiles = new ArrayList<DatasetFile>();
+			datasetFiles = new ArrayList<>();
 		}
 		return datasetFiles;
 	}

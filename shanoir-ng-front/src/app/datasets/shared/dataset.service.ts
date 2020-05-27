@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -25,7 +25,7 @@ import { Dataset } from './dataset.model';
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
-
+    
     getEntityInstance(entity: Dataset) { 
         return AppUtils.getEntityInstance(entity);
     }
@@ -40,6 +40,30 @@ export class DatasetService extends EntityService<Dataset> {
             })
             .map(this.mapPage)
             .toPromise();
+    }
+
+    public downloadDatasets(ids: number[], format: string) {
+        let params = new HttpParams().set("datasetIds", ids.join(',')).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
+    }
+
+    public downloadDatasetsByStudy(studyId: number, format: string) {
+        let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
     }
 
     download(dataset: Dataset, format: string): void {

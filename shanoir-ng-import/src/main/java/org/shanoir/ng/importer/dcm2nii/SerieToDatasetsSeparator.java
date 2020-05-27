@@ -97,10 +97,8 @@ public class SerieToDatasetsSeparator {
 		if (echoTime.hashCode() != other.echoTime.hashCode()) {
 			return false;
 		}
-		if (!imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient)) {
-			return false;
-		}
-		return true;
+		return imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient);
+
 	}
 
 	/**
@@ -123,9 +121,7 @@ public class SerieToDatasetsSeparator {
 			if (diff != 0) {
 				if (Math.abs(diff) < 0.0001) {
 					LOG.warn(
-							"imageOrientationEquals : Attention! The image orientation is not strictly parallel. Found "
-									+ imageOrientationPatient[i] + " != " + otherImageOrientationPatient[i]
-									+ ". However, we tolerate this difference.");
+							"imageOrientationEquals : Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
 				} else {
 					return false;
 				}

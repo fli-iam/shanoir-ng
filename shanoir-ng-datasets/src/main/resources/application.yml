@@ -83,21 +83,44 @@ keycloak:
 datasets-data: /var/datasets-data
 # Solr
 spring.data.solr.host: http://solr:8983/solr/shanoir/
+# microservices url
+ms.url:
+  shanoir-ng-studies: http://studies:9902/
+# Data folder configuration
+datasets-data: /var/datasets-data
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-    org.shanoir: WARN
+    org.shanoir: INFO
         
   
 ### ============================================================= ###
-##                  Dicom Server Configuration                    ##
+###                  Dicom Server Configuration                   ###
 ### ============================================================= ###
 dcm4chee-arc:
-  address: http://dcm4chee-arc:8081
-  wado-rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
+  # Attention: the below values are used twice: 1) to address the PACS e.g.
+  # to actually send the dicoms (in StowRs- or CStoreDicomService) to the
+  # Shanoir backup PACS and 2) to generate the WADO download URLs in the
+  # class DicomDatasetExpressionStrategy
+  protocol: http://
+  host: dcm4chee-arc
+  port.web: 8081
+  port.dcm: 11112
+  # flag for either using the DicomWeb protocol (REST) or the Dicom protocol
+  # if false: 1) c-store used to send dicom files to PACS and 2) generated
+  # URLs in db are in WADO-URI format
+  # if true: 2) stow-rs used to send dicom files to PACS and 2) generated URLs
+  # in db are in WADO-RS format
+  # default is true as we want to use new protocols in sh-ng
+  dicom.web: false
+  dicom.c-store.aet.called: DCM4CHEE
+  # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/DCM4CHEE/wado" for dcm4chee3
+  dicom.wado.uri: /dcm4chee-arc/aets/DCM4CHEE/wado
+  dicom.web.rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
 
 ---
 

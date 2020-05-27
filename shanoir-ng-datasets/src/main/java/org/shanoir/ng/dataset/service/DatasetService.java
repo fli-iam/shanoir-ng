@@ -51,6 +51,16 @@ public interface DatasetService {
 	Dataset findById(Long id);
 
 	/**
+	 * Find datasets by their ids.
+	 *
+	 * @param ids datasets ids.
+	 * @return a list if datasets or an empty list.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+	List<Dataset> findByIdIn(List<Long> id);
+
+	/**
 	 * Save a dataset.
 	 *
 	 * @param dataset dataset to create.
@@ -86,5 +96,10 @@ public interface DatasetService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
 	public Page<Dataset> findPage(final Pageable pageable);
+
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
+	public List<Dataset> findByStudyId(Long studyId);
 
 }

@@ -26,11 +26,15 @@ import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +60,9 @@ public class CenterApiController implements CenterApi {
 	@Autowired
 	private CenterUniqueConstraintManager uniqueConstraintManager;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> deleteCenter(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
@@ -63,8 +70,8 @@ public class CenterApiController implements CenterApi {
 
 		try {
 			centerService.deleteByIdCheckDependencies(centerId);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (UndeletableDependenciesException e) {
@@ -74,7 +81,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
-	public ResponseEntity<CenterDTO> findCenterById( 
+	public ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		
 		final Center center = centerService.findById(centerId);
@@ -121,6 +128,7 @@ public class CenterApiController implements CenterApi {
 
 		/* Save center in db. */
 		final Center createdCenter = centerService.create(center);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_CENTER_EVENT, createdCenter.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(centerMapper.centerToCenterDTO(createdCenter), HttpStatus.OK);
 	}
 
@@ -132,9 +140,10 @@ public class CenterApiController implements CenterApi {
 
 		validate(center, result);
 
-		try {	
+		try {
 			/* Update center in db. */
 			centerService.update(center);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
@@ -150,6 +159,6 @@ public class CenterApiController implements CenterApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
-		} 
+		}
 	}
 }

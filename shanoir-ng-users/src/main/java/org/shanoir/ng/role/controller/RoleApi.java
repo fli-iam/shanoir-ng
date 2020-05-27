@@ -19,15 +19,14 @@ import java.util.List;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "role", description = "the role API")
+@Api(value = "role")
 @RequestMapping("/roles")
 public interface RoleApi {
 
@@ -37,7 +36,7 @@ public interface RoleApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Role.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Role.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "", produces = { "application/json" })
 	ResponseEntity<List<Role>> findRoles();
 
 }
