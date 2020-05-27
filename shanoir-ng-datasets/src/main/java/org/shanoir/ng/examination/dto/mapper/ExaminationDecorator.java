@@ -71,31 +71,17 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
 		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
 
-		final StudyIdsDTO studyIds = new StudyIdsDTO();
-		studyIds.setStudyId(examination.getStudyId());
-		studyIds.setSubjectId(examination.getSubjectId());
-		studyIds.setCenterId(examination.getCenterId());
-
-		HttpEntity<StudyIdsDTO> entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
-
-		// Request to study MS to get study name, subject name and center name
-		ResponseEntity<StudySubjectCenterNamesDTO> namesResponse = null;
-		try {
-			namesResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.COMMON, HttpMethod.POST,
-					entity, new ParameterizedTypeReference<StudySubjectCenterNamesDTO>() {
-					});
-		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - {}", e.getMessage());
+		if (examination.getCenterId() != null) {
+			final Center center = centerRepository.findOne(examination.getCenterId());
+			if (center != null) {
+				examinationDTO.setCenter(new IdName(examination.getCenterId(), center.getName()));
+			}
 		}
 
-		if (namesResponse != null) {
-			StudySubjectCenterNamesDTO names = null;
-			if (HttpStatus.OK.equals(namesResponse.getStatusCode())
-					|| HttpStatus.NO_CONTENT.equals(namesResponse.getStatusCode())) {
-				names = namesResponse.getBody();
-			} else {
-				LOG.error("Error on study microservice response - status code: {}", namesResponse.getStatusCode());
+		if (examination.getStudyId() != null) {
+			final Study study = studyRepository.findOne(examination.getStudyId());
+			if (study != null) {
+				examinationDTO.setStudy(new IdName(examination.getStudyId(), study.getName()));
 			}
 		}
 		

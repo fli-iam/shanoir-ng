@@ -99,9 +99,6 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private DatasetSecurityService datasetSecurityService;
-
-	@MockBean
-	private DatasetSecurityService datasetSecurityService;
 	
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
