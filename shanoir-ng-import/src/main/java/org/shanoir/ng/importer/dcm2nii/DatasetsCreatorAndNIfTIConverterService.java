@@ -142,7 +142,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			List<Serie> series = study.getSeries();
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-				if (serie.getSelected() != null && serie.getSelected()) {
+				if (serie.getSelected()) {
 					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 					boolean serieIdentifiedForNotSeparating;
 					try {

@@ -150,7 +150,7 @@ public interface SubjectService {
 	 * @throws EntityNotFoundException 
 	 * @throws MicroServiceCommunicationException 
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN', 'EXPERT')")
 	Subject update(Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException;
 
 	/**

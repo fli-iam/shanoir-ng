@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Examination service.
@@ -120,4 +121,13 @@ public interface ExaminationService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPreclinicalPage(boolean isPreclinical, Pageable pageable);
 
+	/**
+	 * Add an extra data file to examination
+	 * @param examinationId the examination ID
+	 * @param file the file to add
+	 * @return true if it's a success, false otherwise
+	 */
+	String addExtraData(Long examinationId, MultipartFile file);
+
+	String getExtraDataFilePath(Long examinationId, String fileName);
 }
