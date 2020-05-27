@@ -58,11 +58,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) {
 		try {
-			long startTime = System.currentTimeMillis();
-			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
-		    long endTime = System.currentTimeMillis();
-		    long duration = endTime - startTime;
-		    LOG.info("Creation of dataset acquisition required " + duration + " millis.");
 			createAllDatasetAcquisitions(importJob, KeycloakUtil.getTokenUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
