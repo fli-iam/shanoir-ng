@@ -85,14 +85,11 @@ public class SolrServiceImpl implements SolrService {
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			//TODO to be removed: massive test data
-			for (int i = 0; i < 1000; i++) {
-				ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName() + i,
-						shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-						shanoirMetadata.getExaminationComment() + i, DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-						shanoirMetadata.getSubjectName() + i, shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
-				addToIndex(doc);
-			}
+			ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
+					shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+					shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+					shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
+			addToIndex(doc);
 		}
 	}
 	
