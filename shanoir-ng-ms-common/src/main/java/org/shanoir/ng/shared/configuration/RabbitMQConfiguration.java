@@ -80,9 +80,9 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
-	private static final String STUDY_NAME_UPDATE = "study_name_update";
+	public static final String STUDY_NAME_UPDATE = "study_name_update";
 
-	private static final String SUBJECT_NAME_UPDATE = "subject_name_update";
+	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
 
 
 	////////////////// EXCHANGES //////////////////
