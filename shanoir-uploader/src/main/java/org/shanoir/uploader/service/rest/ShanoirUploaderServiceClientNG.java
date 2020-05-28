@@ -216,7 +216,7 @@ public class ShanoirUploaderServiceClientNG {
 				}
 				return datasetIds;
 			} else {
-				System.out.println("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -231,7 +231,7 @@ public class ShanoirUploaderServiceClientNG {
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
 			} else {
-				System.out.println("Could not get dataset ids from subject id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get dataset ids from subject id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -246,7 +246,7 @@ public class ShanoirUploaderServiceClientNG {
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
 			} else {
-				System.out.println("Could not get dataset ids from subject id " + subjectId + " and study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get dataset ids from subject id " + subjectId + " and study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -301,7 +301,7 @@ public class ShanoirUploaderServiceClientNG {
 			if (code == 200) {
 				return response;
 			} else {
-				System.out.println("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -322,7 +322,7 @@ public class ShanoirUploaderServiceClientNG {
 			if (code == 200) {
 				return response;
 			} else {
-				System.out.println("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
@@ -338,7 +338,7 @@ public class ShanoirUploaderServiceClientNG {
 			if (code == 200) {
 				return response;
 			} else {
-				System.out.println("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				logger.error("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
