@@ -25,6 +25,7 @@ import { FilterablePageable, Page } from '../../../../shared/components/table/pa
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -35,12 +36,16 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 })
 export class ExtraDataListComponent  extends BrowserPaginEntityListComponent<ExtraData> {
     @Input() examination_id:number;
-    @ViewChild('extradataTable', { static: false }) table: TableComponent;
+    @ViewChild('extradataTable') table: TableComponent;
 
     constructor(
         private extradataService: ExtraDataService) {
             super('preclinical-extradata');
      }
+     
+    getService(): EntityService<ExtraData> {
+        return this.extradataService;
+    }
     
     getEntities(): Promise<ExtraData[]> {
         if(this.examination_id){

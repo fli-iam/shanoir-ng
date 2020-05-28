@@ -22,6 +22,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'anesthetic-list',
@@ -31,7 +32,7 @@ import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
 })
 export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<Anesthetic>{
     
-    @ViewChild('anestheticsTable', { static: false }) table: TableComponent;
+    @ViewChild('anestheticsTable') table: TableComponent;
     
     constructor(
         private anestheticsService: AnestheticService, 
@@ -39,6 +40,10 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
     ) 
     {
         super('preclinical-anesthetic');
+    }
+    
+    getService(): EntityService<Anesthetic> {
+        return this.anestheticsService;
     }
     
     getOptions() {

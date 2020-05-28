@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'center-detail',
@@ -42,6 +43,10 @@ export class CenterComponent extends EntityComponent<Center> {
 
     get center(): Center { return this.entity; }
     set center(center: Center) { this.entity = center; }
+
+    getService(): EntityService<Center> {
+        return this.centerService;
+    }
 
     initView(): Promise<void> {
         return this.centerService.get(this.id).then(center => {

@@ -34,7 +34,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
 
     constructor(
             private datasetService: DatasetService,

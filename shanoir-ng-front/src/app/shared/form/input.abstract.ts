@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Input } from '@angular/core';
+import { Input, Directive } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { Mode } from '../components/entity/entity.component.abstract';
 
+@Directive()
 export abstract class AbstractInput implements ControlValueAccessor {
 
     @Input() mode: Mode;

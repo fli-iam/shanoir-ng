@@ -46,7 +46,7 @@ export class DatasetDownaloadComponent {
     protected loading: boolean = false;
     protected readonly ImagesUrlUtil = ImagesUrlUtil;
 
-    @ViewChild('downloadDialog', { static: false }) downloadDialog: ModalComponent;
+    @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 
     /** Click on first button */
     prepareDownload() {

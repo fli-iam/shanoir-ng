@@ -25,6 +25,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'coil',
@@ -50,6 +51,10 @@ export class CoilComponent extends EntityComponent<Coil> {
     get coil(): Coil { return this.entity; }
     set coil(coil: Coil) { this.entity = coil; }
 
+    getService(): EntityService<Coil> {
+        return this.coilService;
+    }
+    
     initView(): Promise<void> {
         return this.coilService.get(this.id).then(coil => {
             this.coil = coil;

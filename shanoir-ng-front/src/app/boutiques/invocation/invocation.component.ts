@@ -19,7 +19,7 @@ export class InvocationComponent implements OnInit {
   
   @Output() invocationChanged = new EventEmitter<any>();
 
-  @ViewChild(InvocationGuiComponent, { static: false }) invocationGUI: InvocationGuiComponent;
+  @ViewChild(InvocationGuiComponent) invocationGUI: InvocationGuiComponent;
 
 
   descriptor: any = null

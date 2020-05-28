@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, Input, QueryList, Renderer, ViewChild } from '@angular/core';
+import { Component, ContentChildren, ElementRef, forwardRef, Input, QueryList, ViewChild, Renderer2 } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { menuAnimDur, menuSlideDown } from '../../animations/animations';
@@ -45,7 +45,7 @@ export class DropdownMenuComponent {
     private static documentListenerInit = false;
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
 
-    constructor(public elementRef: ElementRef, private renderer: Renderer) {
+    constructor(public elementRef: ElementRef, private renderer: Renderer2) {
         this.elementRef = elementRef;
         this.renderer = renderer;
         this.mode = "top";
@@ -71,7 +71,7 @@ export class DropdownMenuComponent {
             subscription.unsubscribe();
         });
 
-        this.renderer.setElementClass(this.elementRef.nativeElement, this.mode + "-mode", true);
+        this.renderer.addClass(this.elementRef.nativeElement, this.mode + "-mode");
     }
 
     public open(event: Event) {

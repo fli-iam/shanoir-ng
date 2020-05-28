@@ -18,6 +18,7 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'coil-list',
@@ -26,12 +27,16 @@ import { CoilService } from '../shared/coil.service';
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
 
     constructor(
             private coilService: CoilService) {
                 
         super('coil');
+    }
+    
+    getService(): EntityService<Coil> {
+        return this.coilService;
     }
 
     getOptions() {

@@ -24,6 +24,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 export type Mode =  "view" | "edit" | "create";
 
@@ -46,14 +47,18 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     public ingredientSelected : AnestheticIngredient;
     @Output() onIngredientAdded = new EventEmitter();
     @Output() onIngredientDeleted = new EventEmitter();
-    @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
+    @ViewChild('ingredientsTable') table: TableComponent;
 
     
 
     constructor(
         private ingredientsService: AnestheticIngredientService) {
             super('preclinical-anesthetic-ingredient');
-     }
+    }
+
+    getService(): EntityService<AnestheticIngredient> {
+        return this.ingredientsService;
+    }
     
     getEntities(): Promise<AnestheticIngredient[]> {
         if (this.anesthetic && this.anesthetic.id){

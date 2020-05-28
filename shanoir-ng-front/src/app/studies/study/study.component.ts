@@ -38,6 +38,7 @@ import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { BidsElement } from '../../bids/model/bidsElement.model'
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -49,8 +50,8 @@ import { BidsElement } from '../../bids/model/bidsElement.model'
 
 export class StudyComponent extends EntityComponent<Study> {
     
-    @ViewChild('memberTable', { static: false }) table: TableComponent;
-    @ViewChild('input', { static: false }) private fileInput: ElementRef;
+    @ViewChild('memberTable') table: TableComponent;
+    @ViewChild('input') private fileInput: ElementRef;
 
     centers: IdName[];
     subjects: IdName[];
@@ -79,6 +80,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public get study(): Study { return this.entity; }
     public set study(study: Study) { this.entity = study; }
+
+    getService(): EntityService<Study> {
+        return this.studyService;
+    }
 
     initView(): Promise<void> {
         this.getBidsStructure(this.id);

@@ -17,6 +17,7 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ToolInfo } from '../tool.model';
 import { ToolService } from '../tool.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'tool-list',
@@ -31,6 +32,10 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
   constructor(private toolService: ToolService) {
     super('boutiques');
     this.breadcrumbsService.nameStep('Boutiques');
+  }
+
+  getService(): EntityService<ToolInfo> {
+      return this.toolService;
   }
 
   getOptions() {

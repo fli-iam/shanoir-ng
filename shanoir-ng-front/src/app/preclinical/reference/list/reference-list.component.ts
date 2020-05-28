@@ -18,6 +18,7 @@ import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'reference-list',
@@ -27,11 +28,15 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
 })
     
 export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Reference>{
-  @ViewChild('referenceTable', { static: false }) table: TableComponent;
+  @ViewChild('referenceTable') table: TableComponent;
     
     constructor(
         private referenceService: ReferenceService) {
             super('preclinical-reference');
+    }
+    
+    getService(): EntityService<Reference> {
+        return this.referenceService;
     }
      
     getOptions() {

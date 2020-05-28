@@ -32,6 +32,7 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'subject-therapy-form',
@@ -67,6 +68,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
 
     get subjectTherapy(): SubjectTherapy { return this.entity; }
     set subjectTherapy(subjectTherapy: SubjectTherapy) { this.entity = subjectTherapy; }
+
+    getService(): EntityService<SubjectTherapy> {
+        return this.subjectTherapyService;
+    }
 
     initView(): Promise<void> {
         return new  Promise<void>(resolve => {

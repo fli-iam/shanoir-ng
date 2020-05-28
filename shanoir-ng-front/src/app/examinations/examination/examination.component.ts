@@ -27,6 +27,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination',
@@ -35,8 +36,8 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
-    @ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
-    @ViewChild('input', { static: false }) private fileInput: ElementRef;
+    @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
+    @ViewChild('input') private fileInput: ElementRef;
 
     private centers: IdName[];
     public studies: IdName[];
@@ -66,6 +67,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
     
+    getService(): EntityService<Examination> {
+        return this.examinationService;
+    }
+
     set entity(exam: Examination) {
         super.entity = exam;
         this.getSubjects();

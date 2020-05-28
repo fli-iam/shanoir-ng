@@ -49,7 +49,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     public selectedEntity: T;
     private entityList: T[] = [];
 
-   @ViewChild('subjectEntityTable', { static: false }) table: TableComponent;
+   @ViewChild('subjectEntityTable') table: TableComponent;
 
     public abstract getEntityName();
 

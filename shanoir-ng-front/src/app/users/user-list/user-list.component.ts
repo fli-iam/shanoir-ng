@@ -17,6 +17,7 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -26,10 +27,14 @@ import { UserService } from '../shared/user.service';
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{
-    @ViewChild('userTable', { static: false }) table: TableComponent;
+    @ViewChild('userTable') table: TableComponent;
 
     constructor(private userService: UserService) {
            super('user');
+    }
+    
+    getService(): EntityService<User> {
+        return this.userService;
     }
 
     getOptions() {

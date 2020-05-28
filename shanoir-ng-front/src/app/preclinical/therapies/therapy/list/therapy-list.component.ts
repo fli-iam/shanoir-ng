@@ -23,6 +23,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 
@@ -33,13 +34,17 @@ import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
   providers: [TherapyService]
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy>{
-  @ViewChild('therapiesTable', { static: false }) table: TableComponent;
+  @ViewChild('therapiesTable') table: TableComponent;
     
     constructor(
         private therapyService: TherapyService, 
         private subjectTherapyService: SubjectTherapyService) {
             super('preclinical-therapy');
         }
+
+    getService(): EntityService<Therapy> {
+        return this.therapyService;
+    }
 
     getOptions() {
         return {

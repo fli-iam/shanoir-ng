@@ -25,6 +25,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'boutiques-dataset-detail',
@@ -49,7 +50,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         {headerName: "Format", field: "format"}
     ];
 
-    @ViewChild('fileTable', { static: false }) table: TableComponent;
+    @ViewChild('fileTable') table: TableComponent;
     
     constructor(
             private toolService: ToolService,
@@ -66,6 +67,10 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
     
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
+    }
+
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
 

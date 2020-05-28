@@ -13,7 +13,7 @@
  */
 
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
+import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild, Directive } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -26,8 +26,11 @@ import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { ShanoirError } from '../../models/error.model';
 import { Router } from '../../../breadcrumbs/router';
+import { EntityService } from './entity.abstract.service';
+
 
 export type Mode =  "view" | "edit" | "create";
+@Directive()
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
 
     protected id: number;
@@ -198,7 +201,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      */
     private modeSpecificSave(): Promise<void> {
         if (this.mode == 'create') {
-            return this.entity.create().then((entity) => {
+            return this.getService().create(this.entity).then((entity) => {
                 this.entity.id = entity.id;
                 this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
@@ -207,7 +210,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             });
         }
         else if (this.mode == 'edit') {
-            return this.entity.update().then(() => {
+            return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
@@ -267,9 +270,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    delete(): void {
-        this.entity.delete();
-    }
+    // delete(): void {
+    //     this.getService().delete(this.entity.id);
+    // }
 
     goToView(id?: number): void {
         if (!id) {
@@ -332,4 +335,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             console.log('entity', this.entity);
         }
     }
+
+    abstract getService(): EntityService<T>;
 }

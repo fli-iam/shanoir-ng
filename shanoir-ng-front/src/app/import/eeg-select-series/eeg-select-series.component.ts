@@ -30,7 +30,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 })
 export class EegSelectSeriesComponent {
 
-    @ViewChild('selectAll', { static: false }) tree: TreeNodeComponent;
+    @ViewChild('selectAll') tree: TreeNodeComponent;
     protected datasets: EegDataset[];
     protected selectedDatasets: EegDataset[] = [];
     protected datasetDetail: EegDataset;

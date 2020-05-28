@@ -24,6 +24,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'subject-detail',
@@ -51,6 +52,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) { this.entity = subject; }
+
+    getService(): EntityService<Subject> {
+        return this.subjectService;
+    }
 
     ngOnInit() {
         super.ngOnInit();

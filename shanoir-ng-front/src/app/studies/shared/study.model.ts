@@ -16,11 +16,9 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectStudy, SubjectStudyDTO } from '../../subjects/shared/subject-study.model';
 import { User } from '../../users/shared/user.model';
-import { ServiceLocator } from '../../utils/locator.service';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
-import { StudyService } from './study.service';
 import { Timepoint } from './timepoint.model';
 import { Id } from '../../shared/models/id.model';
 
@@ -61,8 +59,6 @@ export class Study extends Entity {
     protected getIgnoreList(): string[] {
         return super.getIgnoreList().concat(['completeMembers']);
     }
-    
-    service: StudyService = ServiceLocator.injector.get(StudyService);
 
     // Override
     public stringify() {

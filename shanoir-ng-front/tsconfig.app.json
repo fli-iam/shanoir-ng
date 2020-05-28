@@ -9,7 +9,7 @@
     "src/polyfills.ts"
   ],
   "include": [
-    "src/**/*.ts", "./node_modules/ng-autosize/**/*.ts"
+    "src/**/*.d.ts", "./node_modules/ng-autosize/**/*.ts"
   ],
   "exclude": [
     "src/test.ts",

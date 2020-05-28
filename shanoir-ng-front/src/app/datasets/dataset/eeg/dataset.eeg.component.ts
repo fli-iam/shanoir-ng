@@ -29,7 +29,7 @@ export class EegDatasetComponent implements OnInit  {
 
     @Input() protected mode: Mode;
     @Input() protected dataset: EegDataset;
-    @ViewChild('channelsTable', { static: false }) table: TableComponent;
+    @ViewChild('channelsTable') table: TableComponent;
 
     protected columnDefs: any[];
 

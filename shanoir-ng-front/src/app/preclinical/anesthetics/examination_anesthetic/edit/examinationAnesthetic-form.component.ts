@@ -28,6 +28,7 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -64,7 +65,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
     set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
-    
+    getService(): EntityService<ExaminationAnesthetic> {
+        return this.examAnestheticService;
+    }    
 
     initView(): Promise<void> {
         this.getEnums();

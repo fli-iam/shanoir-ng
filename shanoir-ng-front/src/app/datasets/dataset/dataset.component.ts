@@ -21,6 +21,7 @@ import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -49,6 +50,10 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
     
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
+    }
+
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
             if (this.keycloakService.isUserAdmin()) {

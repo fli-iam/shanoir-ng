@@ -42,6 +42,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -52,8 +53,8 @@ import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.s
 @ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
-	@ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal', { static: false }) attachNewFilesModal: ModalComponent;
+	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
+    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     
     urlupload: string;
     physioData: PhysiologicalData;
@@ -91,6 +92,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     get examination(): Examination { return this.entity; }
     set examination(examination: Examination) { this.entity = examination; }
+
+    getService(): EntityService<Examination> {
+        return this.animalExaminationService;
+    }
 
     initView(): Promise<void> {
         return this.animalExaminationService.get(this.id).then(examination => {

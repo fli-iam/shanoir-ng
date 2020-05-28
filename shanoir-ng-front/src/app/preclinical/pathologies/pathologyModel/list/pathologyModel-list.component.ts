@@ -22,6 +22,7 @@ import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -31,7 +32,7 @@ import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
   providers: [PathologyModelService]
 })
 export class PathologyModelsListComponent   extends BrowserPaginEntityListComponent<PathologyModel> {
-  @ViewChild('modelsTable', { static: false }) table: TableComponent;
+  @ViewChild('modelsTable') table: TableComponent;
     
   constructor(
     private modelService: PathologyModelService, 
@@ -40,6 +41,10 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
         super('preclinical-pathology-model');
     }
 
+    getService(): EntityService<PathologyModel> {
+        return this.modelService;
+    }
+    
     getEntities(): Promise<PathologyModel[]> {
         return this.modelService.getAll();
     }

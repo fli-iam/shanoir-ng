@@ -28,7 +28,7 @@ export class FileUploadComponent {
     @Input() extraFields:string[];
     @Input() multiple: boolean = false;
     @Input() auto: boolean = false;
-    @ViewChild('fileInput', { static: false }) inputEl: ElementRef;
+    @ViewChild('fileInput') inputEl: ElementRef;
     @Output() selectedFile = new EventEmitter();
     
     fileUploadReady:FileUploadReady;

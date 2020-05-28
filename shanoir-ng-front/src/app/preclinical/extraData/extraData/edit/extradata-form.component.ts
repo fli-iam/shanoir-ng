@@ -25,6 +25,7 @@ import { Mode } from "../../../shared/mode/mode.model";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'extra-data-upload-form',
@@ -49,6 +50,10 @@ export class ExtraDataFormComponent extends EntityComponent<ExtraData>{
 
     get extradata(): ExtraData { return this.entity; }
     set extradata(extradata: ExtraData) { this.entity = extradata; }
+
+    getService(): EntityService<ExtraData> {
+        return this.extradataService;
+    }
 
     initView(): Promise<void> {
         return this.extradataService.getExtraData(""+this.examination_id).then(extradata => {

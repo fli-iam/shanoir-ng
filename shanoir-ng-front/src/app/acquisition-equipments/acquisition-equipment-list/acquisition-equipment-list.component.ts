@@ -21,6 +21,7 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -29,13 +30,13 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {
 
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
     private acqEquips: AcquisitionEquipment[];
 
     private createAcqEquip = false;
     private selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
 
-    @ViewChild('coilModal', { static: false }) coilModal: ModalComponent;
+    @ViewChild('coilModal') coilModal: ModalComponent;
 
 
     constructor(
@@ -44,6 +45,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
         super('acquisition-equipment');
     }
 
+    getService(): EntityService<AcquisitionEquipment> {
+        return this.acqEquipService;
+    }
+    
     getOptions() {
         return {
             new: true,

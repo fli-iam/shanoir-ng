@@ -33,6 +33,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'anesthetic-form',
@@ -44,7 +45,7 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    @ViewChild('ingredientsTable', { static: false }) table: TableComponent; 
+    @ViewChild('ingredientsTable') table: TableComponent; 
 
     private anestheticTypes: Enum[] = [];
     ingredientsToDelete: AnestheticIngredient[] = [];
@@ -76,6 +77,9 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     get anesthetic(): Anesthetic { return this.entity; }
     set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
+    getService(): EntityService<Anesthetic> {
+        return this.anestheticService;
+    }
 
     initView(): Promise<void> {
         this.createColumnDefs();

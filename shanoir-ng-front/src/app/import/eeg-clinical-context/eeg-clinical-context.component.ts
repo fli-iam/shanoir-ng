@@ -45,7 +45,7 @@ import { FilterablePageable, Page } from '../../shared/components/table/pageable
 
 export class EegClinicalContextComponent implements OnInit {
     
-    @ViewChild('eventsTable', { static: false }) table: TableComponent;
+    @ViewChild('eventsTable') table: TableComponent;
     
     protected studies: Study[] = [];
     protected centers: Center[] = [];

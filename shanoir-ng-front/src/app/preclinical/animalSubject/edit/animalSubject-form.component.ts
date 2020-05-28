@@ -47,6 +47,7 @@ import { Frequency } from '../../shared/enum/frequency';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'animalSubject-form',
@@ -59,7 +60,7 @@ import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathol
 @ModesAware
 export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {
 
-    @ViewChild('subjectPathologiesTable', { static: false }) tablePathology: TableComponent; 
+    @ViewChild('subjectPathologiesTable') tablePathology: TableComponent; 
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -74,8 +75,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
-    @ViewChild('therapiesComponent', { static: false }) therapiesComponent: SubjectTherapiesListComponent;
-    @ViewChild('pathologiesComponent', { static: false }) pathologiesComponent: SubjectPathologiesListComponent;
+    @ViewChild('therapiesComponent') therapiesComponent: SubjectTherapiesListComponent;
+    @ViewChild('pathologiesComponent') pathologiesComponent: SubjectPathologiesListComponent;
     private subjectStudyList: SubjectStudy[] = [];
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
@@ -100,6 +101,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
+
+    getService(): EntityService<PreclinicalSubject> {
+        return this.animalSubjectService;
+    }
 
     private addToCache(key: string, toBeCached: any) {
         if (!this.breadcrumbsService.currentStep.isPrefilled(key))	{

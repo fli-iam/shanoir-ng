@@ -13,7 +13,7 @@ export class ParameterComponent {
   @Input() parameter: Parameter<any>;
   @Input() formGroup: FormGroup;
   @Output() selectDataClicked = new EventEmitter<Parameter<any>>();
-  @ViewChild('parameterInput', { static: false }) parameterInput: ElementRef;
+  @ViewChild('parameterInput') parameterInput: ElementRef;
 
   constructor() { }
 

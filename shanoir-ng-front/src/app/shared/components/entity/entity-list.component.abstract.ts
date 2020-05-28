@@ -25,6 +25,7 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.abstract';
+import { EntityService } from './entity.abstract.service';
 
 
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
@@ -111,7 +112,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                 ServiceLocator.rootViewContainerRef
             ).subscribe(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
@@ -169,5 +170,6 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             subscribtion.unsubscribe();
         }
     }
-
+    
+    abstract getService(): EntityService<T>;
 }

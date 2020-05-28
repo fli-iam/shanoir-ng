@@ -33,7 +33,7 @@ import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
     providers: [AnimalExaminationService]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
-    @ViewChild('examTable', { static: false }) table: TableComponent;
+    @ViewChild('examTable') table: TableComponent;
     
     constructor(
         private animalExaminationService: AnimalExaminationService, 

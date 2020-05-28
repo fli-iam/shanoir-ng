@@ -44,6 +44,9 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     get manufModel(): ManufacturerModel { return this.entity; }
     set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
 
+    getService(): EntityService<ManufacturerModel> {
+        return this.manufModelService;
+    }
 
     initView(): Promise<void> {
         return this.getManufacturerModel();

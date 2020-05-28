@@ -30,7 +30,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(
