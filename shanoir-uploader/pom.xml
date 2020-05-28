@@ -239,6 +239,7 @@
 								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
 								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
 								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
+								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
 							</tasks>
 						</configuration>
 						<goals>

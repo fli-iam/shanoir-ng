@@ -20,6 +20,6 @@
 ### ====================================================================== ###
 
 MAIN_CLASS=org.shanoir.downloader.ShanoirDownloader
-MAIN_JAR=./target/shanoir-downloader-6.0.3-jar-with-dependencies.jar
+MAIN_JAR=shanoir-uploader-6.0.3-jar-with-dependencies.jar
 
-$JAVA_HOME/bin/java -cp $MAIN_JAR $MAIN_CLASS
+$JAVA_HOME/bin/java -cp $MAIN_JAR $MAIN_CLASS "$@"
