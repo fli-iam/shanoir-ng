@@ -35,16 +35,15 @@ import { ExaminationAnestheticFormComponent } from './anesthetics/examination_an
 import { ImportBrukerComponent } from './importBruker/importBruker.component';
 import { AuthAdminOrExpertGuard } from '../shared/roles/auth-admin-or-expert-guard';
 
-import { getRoutesFor } from '../app.routing'
 import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './importBruker/select-series/bruker-select-series.component';
 import { AnimalClinicalContextComponent } from './importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './importBruker/finish/bruker-finish.component';
-import { ModuleWithProviders } from '@angular/compiler/src/core';
 import { SubjectTherapyFormComponent } from './therapies/subjectTherapy/edit/subjectTherapy-form.component';
 import { SubjectTherapiesListComponent } from './therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { AnestheticIngredientFormComponent } from './anesthetics/ingredients/edit/anestheticIngredient-form.component';
 import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/list/anestheticIngredient-list.component';
+import { NgModule } from '@angular/core';
 
 let routes : Routes = [
     {
@@ -291,3 +290,9 @@ let routes : Routes = [
 //   );
 
 //   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 
+
+@NgModule({
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule]
+  })
+export class PreclinicalRoutingModule { }
