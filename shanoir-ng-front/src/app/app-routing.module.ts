@@ -52,6 +52,12 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { BoutiquesComponent } from './boutiques/boutiques.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
+import { BidsUploadComponent } from './import/bids/bids-upload.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
+
 
 let routes: Routes = [
     {
@@ -93,6 +99,23 @@ let routes: Routes = [
             }, {
                 path: 'finish',
                 component: FinishImportComponent
+            }, {   
+                path: 'eeg',
+                component: EegUploadComponent,
+                data: {importMode: 'EEG'}
+            }, {   
+                path: 'bids',
+                component: BidsUploadComponent,
+                data: {importMode: 'BIDS'}
+            }, {
+                path: 'eegseries',
+                component: EegSelectSeriesComponent
+            }, {
+                path: 'eegcontext',
+                component: EegClinicalContextComponent
+            }, {
+                path: 'eegfinish',
+                component: FinishEegImportComponent
             }
         ]
     }, {
