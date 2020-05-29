@@ -21,6 +21,7 @@ import { ExaminationService } from '../shared/examination.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -39,6 +40,10 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         
         super('examination');
         this.studyService.findStudiesIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+    }
+
+    getService(): EntityService<Examination> {
+        return this.examinationService;
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {

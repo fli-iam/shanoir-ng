@@ -26,6 +26,7 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'acquisition-equipment-detail',

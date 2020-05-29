@@ -43,7 +43,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     form: FormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
-    @ViewChild('formContainer', { static:null }) formContainerElement: ElementRef;
+    @ViewChild('formContainer', { static: false }) formContainerElement: ElementRef;
 
     /* services */
     private entityRoutes: EntityRoutes;

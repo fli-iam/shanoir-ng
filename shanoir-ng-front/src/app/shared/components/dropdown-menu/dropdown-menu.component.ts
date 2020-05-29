@@ -33,7 +33,7 @@ export class DropdownMenuComponent {
     @Input() link: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
-    @ViewChild('container', { static: null }) container: ElementRef;
+    @ViewChild('container', { static: false }) container: ElementRef;
     @Input() mode: "top" | "tree";
 
     public opened: boolean = true;

@@ -55,7 +55,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) options: QueryList<SelectOptionComponent>;
-    @ViewChild('label', {read: ElementRef, static: null }) labelNode: ElementRef;
+    @ViewChild('label', {read: ElementRef, static: false }) labelNode: ElementRef;
     selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;

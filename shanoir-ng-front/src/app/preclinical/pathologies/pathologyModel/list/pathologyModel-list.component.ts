@@ -31,7 +31,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
   styleUrls: ['pathologyModel-list.component.css'], 
   providers: [PathologyModelService]
 })
-export class PathologyModelsListComponent   extends BrowserPaginEntityListComponent<PathologyModel> {
+export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {
   @ViewChild('modelsTable') table: TableComponent;
     
   constructor(
@@ -133,7 +133,7 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
                 ServiceLocator.rootViewContainerRef
             ).subscribe(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-pathology-model sucessfully deleted');

@@ -25,6 +25,7 @@ import { EntityListComponent } from '../../../shared/components/entity/entity-li
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -43,7 +44,11 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     {
             super('preclinical-examination');
             this.manageDelete();
-     }
+    }
+
+    getService(): EntityService<Examination> {
+        return this.animalExaminationService;
+    }
     
     getEntities(): Promise<Examination[]> {
         return this.animalExaminationService.getAll();
@@ -96,7 +101,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                 ServiceLocator.rootViewContainerRef
             ).subscribe(res => {
                 if (res) {
-                    selectedExamination.delete().then(() => {
+                    this.getService().delete(selectedExamination.id).then(() => {
                         this.onDelete.next(selectedExamination);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-examination sucessfully deleted');

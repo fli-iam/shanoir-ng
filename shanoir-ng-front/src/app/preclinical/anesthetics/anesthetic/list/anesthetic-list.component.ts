@@ -114,7 +114,7 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
                 ServiceLocator.rootViewContainerRef
             ).subscribe(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-anesthetic sucessfully deleted');

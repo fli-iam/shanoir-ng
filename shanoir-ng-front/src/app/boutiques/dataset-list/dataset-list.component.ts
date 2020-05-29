@@ -25,6 +25,7 @@ import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'boutiques-dataset-list',
@@ -45,6 +46,10 @@ export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
         super('dataset', false);
         this.fetchStudies();
         this.fetchSubjects();
+    }
+
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
     }
     
     getPage(pageable: Pageable): Promise<Page<Dataset>> {

@@ -313,6 +313,9 @@ export class TableComponent implements OnInit {
         }
     }
 
+    unSelectAll() {
+    }
+
     clearSelection() {
         this.selection = new Map();
         this.emitSelectionChange();
