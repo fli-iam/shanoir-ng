@@ -52,6 +52,8 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { BoutiquesComponent } from './boutiques/boutiques.component';
+import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
 
 let appRoutes: Routes = [
     {
@@ -119,6 +121,12 @@ let appRoutes: Routes = [
     }, {
         path: 'task',
         component: AsyncTasksComponent
+    }, {
+        path: 'boutiques',
+        component: BoutiquesComponent
+    }, {
+        path: 'boutiques/:toolId',
+        component: InvocationExecutionComponent
     }
 ];
 

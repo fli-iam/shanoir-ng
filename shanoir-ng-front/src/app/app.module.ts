@@ -16,6 +16,7 @@ import '../assets/css/papaya.css';
 
 // import { environment } from '../environments/environment'
 // import { AppRoutingModule } from './app-routing.module';
+import { routing } from './app.routing';
 import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
@@ -228,7 +229,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         MyDatePickerModule,
         ReactiveFormsModule,
         NgxJsonViewerModule,
-        RouterModule
+        // RouterModule,
+        routing
     ],
     declarations: [
         AccountRequestComponent,
