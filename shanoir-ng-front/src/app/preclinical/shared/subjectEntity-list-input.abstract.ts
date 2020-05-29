@@ -27,13 +27,15 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 
-// @Component({
-//     providers:  [{
-//       provide: NG_VALUE_ACCESSOR,
-//       useExisting: forwardRef(() => SubjectAbstractListInput),
-//       multi: true
-//     }]
-// })
+@Component({
+    selector: 'abstract-subject-pathology-list',
+    templateUrl: 'subjectEntity-list-input.abstract.html',
+    providers:  [{
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SubjectAbstractListInput),
+      multi: true
+    }]
+})
 
 @ModesAware
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> implements ControlValueAccessor {

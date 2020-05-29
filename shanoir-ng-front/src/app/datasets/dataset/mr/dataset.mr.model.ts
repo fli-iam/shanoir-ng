@@ -13,7 +13,6 @@
  */
 
 import { Dataset } from "../../shared/dataset.model";
-import { allOfEnum } from '../../../utils/app.utils';
 
 declare type MrQualityProcedureType = 'MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME' | 'MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME';
 
@@ -92,6 +91,15 @@ export enum MrDatasetNature {
         { value: MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET, label: "H1SpectroscopicImagingDataset" }
     ];
     
+    export function allOfEnum<T>(enumClass): Array<T> {
+        let list: Array<T> = [];
+        for (let key in enumClass) {
+            if (key != 'all' && isNaN(Number(key)))
+            list.push(enumClass[key]);
+        }
+        return list;
+    }
+
     export function all(): Array<MrDatasetNature> {
         return allOfEnum<MrDatasetNature>(MrDatasetNature);
     }
