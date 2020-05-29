@@ -49,26 +49,26 @@ import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-cat
 export class AnimalClinicalContextComponent  {
     
     patient: PatientDicom;
-    private studies: Study[] = [];
-    private centers: Center[] = [];
-    private acquisitionEquipments: AcquisitionEquipment[] = [];
-    private subjects: SubjectWithSubjectStudy[] = [];
-    private examinations: SubjectExamination[] = [];
-    private niftiConverters: NiftiConverter[] = [];
-    private study: Study;
-    private center: Center;
-    private acquisitionEquipment: AcquisitionEquipment;
-    private subject: SubjectWithSubjectStudy;
-    private examination: SubjectExamination;
-    private niftiConverter: NiftiConverter;
+    public studies: Study[] = [];
+    public centers: Center[] = [];
+    public acquisitionEquipments: AcquisitionEquipment[] = [];
+    public subjects: SubjectWithSubjectStudy[] = [];
+    public examinations: SubjectExamination[] = [];
+    public niftiConverters: NiftiConverter[] = [];
+    public study: Study;
+    public center: Center;
+    public acquisitionEquipment: AcquisitionEquipment;
+    public subject: SubjectWithSubjectStudy;
+    public examination: SubjectExamination;
+    public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     
     constructor(
-            private studyService: StudyService,
-            private centerService: CenterService,
-            private niftiConverterService: NiftiConverterService,
+            public studyService: StudyService,
+            public centerService: CenterService,
+            public niftiConverterService: NiftiConverterService,
             private animalSubjectService: AnimalSubjectService,
-            private examinationService: ExaminationService,
+            public examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
@@ -162,7 +162,7 @@ export class AnimalClinicalContextComponent  {
     }
     
 
-    private onSelectStudy(): void {
+    public onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study.id && this.study.studyCenterList) {
@@ -178,7 +178,7 @@ export class AnimalClinicalContextComponent  {
         this.onContextChange();
     }
 
-    private onSelectCenter(): void {
+    public onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
@@ -192,7 +192,7 @@ export class AnimalClinicalContextComponent  {
         this.onContextChange();
     }
 
-    private onSelectAcquisitonEquipment(): void {
+    public onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
@@ -203,7 +203,7 @@ export class AnimalClinicalContextComponent  {
         this.onContextChange();
     }
 
-    private onSelectSubject(): void {
+    public onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -218,7 +218,7 @@ export class AnimalClinicalContextComponent  {
         this.onContextChange();
     }
     
-    private onSelectExam(): void {
+    public onSelectExam(): void {
         this.niftiConverters = [];
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
@@ -227,7 +227,7 @@ export class AnimalClinicalContextComponent  {
     }
 
 
-    private onContextChange() {
+    public onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -254,7 +254,7 @@ export class AnimalClinicalContextComponent  {
         return center;
     }
 
-    private openCreateAcqEqt() {
+    public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -271,7 +271,7 @@ export class AnimalClinicalContextComponent  {
         return acqEpt;
     }
 
-    private openCreateSubject = () => {
+    public openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/preclinical-subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
@@ -318,7 +318,7 @@ export class AnimalClinicalContextComponent  {
         return names;
     }
     
-    private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
+    public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
         if (!subject) return;
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
         subjectWithSubjectStudy.id = subject.id;
@@ -328,7 +328,7 @@ export class AnimalClinicalContextComponent  {
         return subjectWithSubjectStudy;
     }
 
-    private openCreateExam = () => {
+    public openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/preclinical-examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
@@ -365,23 +365,23 @@ export class AnimalClinicalContextComponent  {
     }
 
     
-    private get hasCompatibleEquipments(): boolean {
+    public get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 
-    private showStudyDetails() {
+    public showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    private showCenterDetails() {
+    public showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    private showAcquistionEquipmentDetails() {
+    public showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    private showSubjectDetails() {
+    public showSubjectDetails() {
         if (this.animalSubject.id){
         	window.open('preclinical-subject/details/' + this.animalSubject.id , '_blank');
         }else{
@@ -389,7 +389,7 @@ export class AnimalClinicalContextComponent  {
         }
     }
 
-    private showExaminationDetails() {
+    public showExaminationDetails() {
         window.open('preclinical-examination/details/' + this.examination.id , '_blank');
     }
 
@@ -406,11 +406,11 @@ export class AnimalClinicalContextComponent  {
             );
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['importsBruker/finish']);
     }
 
-    private compareEntities(e1: Entity, e2: Entity) : boolean {
+    public compareEntities(e1: Entity, e2: Entity) : boolean {
         return e1 && e2 && e1.id === e2.id;
     }
 }

@@ -147,7 +147,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         }
     }
 
-    protected onRowClick(entity: T) {
+    public onRowClick(entity: T) {
         // do nothing to avoid wrong route
     }
 

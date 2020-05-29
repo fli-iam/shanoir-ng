@@ -23,8 +23,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'ng-autosize';
-// import { MyDatePickerModule } from 'mydatepicker';
-import { AngularMyDatePickerModule } from 'angular-mydatepicker';
+import { MyDatePickerModule } from 'mydatepicker';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import {
@@ -226,8 +225,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         FormsModule,
         HttpClientModule,
         MatDialogModule,
-        // MyDatePickerModule,
-        AngularMyDatePickerModule,
+        MyDatePickerModule,
         ReactiveFormsModule,
         NgxJsonViewerModule,
         RouterModule

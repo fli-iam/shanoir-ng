@@ -38,13 +38,13 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     therapyTypes: Enum[] = [];
-    private isTherapyUnique: Boolean = true;
+    public isTherapyUnique: Boolean = true;
     
     constructor(
         private route: ActivatedRoute,
         private therapyService: TherapyService, 
         private referenceService: ReferenceService,
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
             super(route, 'preclinical-therapy');
         }

@@ -47,15 +47,15 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
     @ViewChild('ingredientsTable') table: TableComponent; 
 
-    private anestheticTypes: Enum[] = [];
+    public anestheticTypes: Enum[] = [];
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    private isAnestheticUnique: Boolean = true;
+    public isAnestheticUnique: Boolean = true;
     names: Reference[];
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    private columnDefs: any[];
+    public columnDefs: any[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -68,7 +68,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private anestheticService: AnestheticService,
         private ingredientService: AnestheticIngredientService,
         private referenceService: ReferenceService,
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
         super(route, 'preclinical-anesthetic');
         this.manageSaveEntity();

@@ -47,21 +47,21 @@ export class EegClinicalContextComponent implements OnInit {
     
     @ViewChild('eventsTable') table: TableComponent;
     
-    protected studies: Study[] = [];
-    protected centers: Center[] = [];
-    protected acquisitionEquipments: AcquisitionEquipment[] = [];
-    protected examinations: SubjectExamination[] = [];
-    protected study: Study;
-    protected center: Center;
-    protected acquisitionEquipment: AcquisitionEquipment;
-    protected examination: SubjectExamination;
-    protected subjects: SubjectWithSubjectStudy[] = [];
-    protected subject: SubjectWithSubjectStudy;
-    protected columnDefs: any[];
-    protected hasPosition: boolean;
+    public studies: Study[] = [];
+    public centers: Center[] = [];
+    public acquisitionEquipments: AcquisitionEquipment[] = [];
+    public examinations: SubjectExamination[] = [];
+    public study: Study;
+    public center: Center;
+    public acquisitionEquipment: AcquisitionEquipment;
+    public examination: SubjectExamination;
+    public subjects: SubjectWithSubjectStudy[] = [];
+    public subject: SubjectWithSubjectStudy;
+    public columnDefs: any[];
+    public hasPosition: boolean;
     
-    protected CoordSystems = CoordSystems;
-    protected coordsystem : string;
+    public CoordSystems = CoordSystems;
+    public coordsystem : string;
 
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;
@@ -190,7 +190,7 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-   protected getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
+   public getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
         return new Promise((resolve) => {
             this.eventsPromise.then(() => {
                 resolve(this.browserPaging.getPage(pageable));
@@ -198,7 +198,7 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-    private onSelectStudy(): void {
+    public onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
@@ -210,7 +210,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectCenter(): void {
+    public onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
@@ -220,7 +220,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectAcquisitonEquipment(): void {
+    public onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
@@ -230,7 +230,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectSubject(): void {
+    public onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -240,13 +240,13 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectExam(): void {
+    public onSelectExam(): void {
     }
 
-    private onSelectCoord(): void {
+    public onSelectCoord(): void {
     }
 
-    private onContextChange() {
+    public onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -273,7 +273,7 @@ export class EegClinicalContextComponent implements OnInit {
         return center;
     }
 
-    private openCreateAcqEqt() {
+    public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -289,7 +289,7 @@ export class EegClinicalContextComponent implements OnInit {
         return acqEpt;
     }
 
-    private openCreateSubject = () => {
+    public openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
@@ -319,7 +319,7 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectWithSubjectStudy;
     }
 
-    private openCreateExam = () => {
+    public openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
@@ -350,23 +350,23 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectExam;
     }
 
-    private showStudyDetails() {
+    public showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    private showCenterDetails() {
+    public showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    private showAcquistionEquipmentDetails() {
+    public showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    private showSubjectDetails() {
+    public showSubjectDetails() {
         window.open('subject/details/' + this.subject.id, '_blank');
     }
 
-    private showExaminationDetails() {
+    public showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
     }
     
@@ -386,7 +386,7 @@ export class EegClinicalContextComponent implements OnInit {
         );
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/eegfinish']);
     }
 }

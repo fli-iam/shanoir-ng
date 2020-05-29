@@ -36,6 +36,9 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @ModesAware
 export class PathologyFormComponent extends EntityComponent<Pathology>{
 
+    public isPathologyUnique = true;
+    public isModelUnique = true;
+
     constructor(
         private route: ActivatedRoute,
         private pathologyService: PathologyService) {

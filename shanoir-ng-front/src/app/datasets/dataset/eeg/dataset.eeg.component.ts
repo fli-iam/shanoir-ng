@@ -28,10 +28,10 @@ import{ Channel }from '../eeg/dataset.eeg.model';
 export class EegDatasetComponent implements OnInit  {
 
     @Input() protected mode: Mode;
-    @Input() protected dataset: EegDataset;
+    @Input() public dataset: EegDataset;
     @ViewChild('channelsTable') table: TableComponent;
 
-    protected columnDefs: any[];
+    public columnDefs: any[];
 
     private browserPaging: BrowserPaging<Channel>;
     private channelPromise: Promise<any>;

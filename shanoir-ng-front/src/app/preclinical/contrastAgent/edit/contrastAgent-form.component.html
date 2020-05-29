@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="name" required formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange($event)">
+									<select id="name" required formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
 									</select>
 									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">
@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.manufactured_name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="manufactured_name" formControlName="manufactured_name" [(ngModel)]="agent.manufactured_name" (ngModelChange)="onAgentChange($event)"/>
+									<input type="text" id="manufactured_name" formControlName="manufactured_name" [(ngModel)]="agent.manufactured_name" (ngModelChange)="onAgentChange()"/>
 								</ng-template>
 							</span>
 						</li>
@@ -68,7 +68,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.dose}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="dose" formControlName="dose" [(ngModel)]="agent.dose" (ngModelChange)="onAgentChange($event)"/>
+									<input type="text" id="dose" formControlName="dose" [(ngModel)]="agent.dose" (ngModelChange)="onAgentChange()"/>
 								</ng-template>
 							</span>
 						</li>
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.dose_unit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="agent.dose_unit" (ngModelChange)="onAgentChange($event)">
+									<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="agent.dose_unit" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let unit of dose_units" [ngValue]="unit">{{unit?.value}}</option>
 									</select>
 								</ng-template>
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.concentration}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="concentration" formControlName="concentration" [(ngModel)]="agent.concentration" (ngModelChange)="onAgentChange($event)"/>
+									<input type="text" id="concentration" formControlName="concentration" [(ngModel)]="agent.concentration" (ngModelChange)="onAgentChange()"/>
 								</ng-template>
 							</span> 							
 						</li>
@@ -103,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.concentration_unit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="concentration_unit" formControlName="concentration_unit" [(ngModel)]="agent.concentration_unit" (ngModelChange)="onAgentChange($event)">
+									<select id="concentration_unit" formControlName="concentration_unit" [(ngModel)]="agent.concentration_unit" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let unit of concentration_units" [ngValue]="unit">{{unit?.value}}</option>
 									</select>
 								</ng-template>
@@ -116,7 +116,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{enumUtils.getEnumValue(intervals,agent.injection_interval)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="agent.injection_interval" (ngModelChange)="onAgentChange($event)">
+									<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="agent.injection_interval" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let interval of intervals" [value]="interval.key">{{interval?.value}}</option>
 									</select>
 								</ng-template>
@@ -129,7 +129,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{enumUtils.getEnumValue(sites,agent.injection_site)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="agent.injection_site" (ngModelChange)="onAgentChange($event)">
+									<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="agent.injection_site" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let site of sites" [value]="site.key">{{site?.value}}</option>
 									</select>
 								</ng-template>
@@ -142,7 +142,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{enumUtils.getEnumValue(injtypes,agent.injection_type)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="injectionType" formControlName="injectionType" [(ngModel)]="agent.injection_type" (ngModelChange)="onAgentChange($event)">
+									<select id="injectionType" formControlName="injectionType" [(ngModel)]="agent.injection_type" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype?.value}}</option>
 									</select>
 								</ng-template>

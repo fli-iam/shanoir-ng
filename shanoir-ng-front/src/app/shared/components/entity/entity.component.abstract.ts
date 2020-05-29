@@ -33,7 +33,7 @@ export type Mode =  "view" | "edit" | "create";
 @Directive()
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
 
-    protected id: number;
+    public id: number;
     private _entity: T;
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
@@ -50,7 +50,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected router: Router;
     private location: Location;
     protected formBuilder: FormBuilder;
-    protected keycloakService: KeycloakService;
+    public keycloakService: KeycloakService;
     protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
@@ -77,11 +77,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.addBCStep();
     }
 
-    protected get entity(): T {
+    public get entity(): T {
         return this._entity;
     }
 
-    protected set entity(entity: T) {
+    public set entity(entity: T) {
         this._entity = entity;
     }
 
@@ -310,7 +310,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.location.back();
     }
 
-    private compareEntities(e1: Entity, e2: Entity) : boolean {
+    public compareEntities(e1: Entity, e2: Entity) : boolean {
         return e1 && e2 && e1.id === e2.id;
     }
 

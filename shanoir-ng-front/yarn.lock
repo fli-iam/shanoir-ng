@@ -1620,13 +1620,6 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
-angular-mydatepicker@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/angular-mydatepicker/-/angular-mydatepicker-0.9.1.tgz#92e97bb007f4b4c8434dc017313af02b16b79644"
-  integrity sha512-CgVoD8v1nR/q7P26hzBDda71KU7Ugs8Hu5Wla4PP8rVC5FAJF47kS8T3zD6HHiClbU8i7Lw/bY1vVhniuzS25Q==
-  dependencies:
-    tslib "^1.9.0"
-
 angular2-uuid@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/angular2-uuid/-/angular2-uuid-1.1.1.tgz#72f03cd532b7f40032eb1ecfb9f8457384be956e"
@@ -5818,10 +5811,10 @@ mute-stream@0.0.8:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-mydatepicker@^2.6.1:
-  version "2.6.10"
-  resolved "https://registry.yarnpkg.com/mydatepicker/-/mydatepicker-2.6.10.tgz#b0a80ba81c704ad6ec212852fac1b48a281bc88a"
-  integrity sha512-O/go04CIuXqJ8hI3q8jPDqIyavcsBFNl/gRudVK0rDuY0lIw7rr3sJeN3QJwK+u8NXqZ5YbN0lybFWkiYnfvng==
+mydatepicker@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/mydatepicker/-/mydatepicker-9.0.1.tgz#0d7ecd70f18e4e92a9bf671d868c25e3ce2eff75"
+  integrity sha512-n7Gyjg7krb6/9lbIwj+lzEDTUG4uLe9upc+0Rdluo4KChFNfIEiEwM2SsEHm0klcCi19FjBxbHlx0Q+mbFmhuw==
 
 nan@^2.12.1:
   version "2.14.1"

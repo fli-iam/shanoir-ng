@@ -19,10 +19,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View subject|Title">View subject</div>
 				</ng-template>
-				<ng-template [ngSwitchCase]="Modes.edit"> 
+				<ng-template [ngSwitchCase]="GetModes().edit"> 
 					<div class="header command-zone" i18n="Edit subject|Title">Edit subject</div>
 				</ng-template>
-				<ng-template [ngSwitchCase]="Modes.create"> 
+				<ng-template [ngSwitchCase]="GetModes().create"> 
 					<div class="header command-zone" i18n="Create subject|Title">Create subject</div>
 				</ng-template>
 			</span>

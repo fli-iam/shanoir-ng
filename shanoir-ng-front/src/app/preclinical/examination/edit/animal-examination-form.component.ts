@@ -69,7 +69,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     examinationExtradatas: ExtraData[] = [];
     centers: IdName[] = [];
     studies: IdName[] = [];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
     private inImport: boolean; 
     
@@ -151,10 +151,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         });
     }
 
-    private instAssessment() {
+    public instAssessment() {
     }
 
-    private attachNewFiles() {
+    public attachNewFiles() {
     }
 
     private updateExam(): void{
@@ -190,7 +190,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
     
     
-    private getSubjects(): void {
+    public getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
             .findSubjectsByStudyIdPreclinical(this.examination.study.id, this.examination.preclinical)
@@ -340,7 +340,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData.extradatatype = "Blood gas data"
     }
     
-    protected exportBruker() {
+    public exportBruker() {
         this.animalExaminationService.getBrukerArchive(this.examination.id)
             .then(response => {this.downloadIntoBrowser(response);});;
     }

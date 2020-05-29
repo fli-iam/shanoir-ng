@@ -16,8 +16,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
-// import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'angular-mydatepicker';
+import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -112,13 +111,13 @@ export class ExtensionRequestComponent implements OnInit {
 
     public myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
-        // height: '20px',
-        // width: '160px'
+        height: '20px',
+        width: '160px'
     };
 
     onDateChanged(event: IMyDateModel) {
-        if (event.singleDate.formatted !== '') {
-            this.selectedDateNormal = event.singleDate.formatted;
+        if (event.formatted !== '') {
+            this.selectedDateNormal = event.formatted;
         }
     }
 

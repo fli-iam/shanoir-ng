@@ -57,7 +57,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
         private anestheticService: AnestheticService,
-        private enumUtils: EnumUtils) 
+        public enumUtils: EnumUtils) 
     {
         super(route, 'preclinical-examination-anesthetics');
     }

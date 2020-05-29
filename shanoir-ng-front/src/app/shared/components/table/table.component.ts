@@ -278,7 +278,7 @@ export class TableComponent implements OnInit {
         this.goToPage(1);
     }
 
-    private getNbSelected(): number {
+    public getNbSelected(): number {
         return this.selection ? this.selection.size : 0;
     }
 

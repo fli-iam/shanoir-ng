@@ -55,7 +55,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         private route: ActivatedRoute,
         private contrastAgentsService: ContrastAgentService,
         private referenceService: ReferenceService, 
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
         super(route, 'preclinical-contrast-agent');
     }

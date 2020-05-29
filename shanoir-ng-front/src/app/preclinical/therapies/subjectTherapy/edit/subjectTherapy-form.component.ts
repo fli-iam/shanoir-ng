@@ -60,7 +60,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         private  subjectTherapyService: SubjectTherapyService, 
         private therapyService: TherapyService,
         private referenceService: ReferenceService, 
-        private enumUtils: EnumUtils
+        public enumUtils: EnumUtils
         ) {
 
             super(route, 'preclinical-subject-therapy');

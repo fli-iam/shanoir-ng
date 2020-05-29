@@ -48,6 +48,7 @@ import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Mode } from '../../shared/mode/mode.model';
 
 @Component({
     selector: 'animalSubject-form',
@@ -62,9 +63,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     @ViewChild('subjectPathologiesTable') tablePathology: TableComponent; 
 
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    public readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[];
+    public studies: IdName[];
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
     species: Reference[] = [];
     strains: Reference[] = [];
@@ -82,6 +83,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     private pathologies: SubjectPathology[] = [];
     private selectedStudy : IdName;
     private hasNameUniqueError: boolean = false; 
+    public existingSubjectError = false;
 
     differ: KeyValueDiffer<string, any>;
 
@@ -98,6 +100,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.differ = this.differs.find({}).create();
 
     }
+
+    public GetModes(): any { return (<any>this).Modes; }
 
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
@@ -545,7 +549,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
     }
 
-    protected validateForm(eventName: string) {
+    public validateForm(eventName: string) {
         if (["create", "delete"].indexOf(eventName) != -1) {
            this.form.get("therapies").updateValueAndValidity({onlySelf: false, emitEvent: true});
            this.form.get("pathologies").updateValueAndValidity({onlySelf: false, emitEvent: true});

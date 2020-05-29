@@ -71,7 +71,7 @@ export class EnumUtils {
         return enumArray;        
     }
     
-    getEnumValue(enumArray:Enum[],key:string): string{
+    getEnumValue(enumArray:Enum[],key:any): string{
         for(let current of enumArray){
             if(current.key == key) return current.value;
         }

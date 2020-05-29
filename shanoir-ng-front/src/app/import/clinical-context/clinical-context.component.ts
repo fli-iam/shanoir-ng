@@ -373,7 +373,7 @@ export class ClinicalContextComponent {
     }
 
     
-    private get hasCompatibleEquipments(): boolean {
+    public get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipments.filter(ae => ae.compatible)[0] != undefined;
     }
 

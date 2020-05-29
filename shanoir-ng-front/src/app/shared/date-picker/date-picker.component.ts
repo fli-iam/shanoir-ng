@@ -14,8 +14,7 @@
 
 import { AfterViewChecked, Component, ElementRef, forwardRef } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
-// import { IMyOptions } from 'mydatepicker';
-import { IMyOptions } from 'angular-mydatepicker';
+import { IMyOptions } from 'mydatepicker';
 
 
 // @Component({
@@ -85,9 +84,9 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
 
     options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
-        // height: '21px',
-        // width: '160px',
-        // indicateInvalidDate: false
+        height: '21px',
+        width: '160px',
+        indicateInvalidDate: false
     };
 
     constructor(private element: ElementRef) { }

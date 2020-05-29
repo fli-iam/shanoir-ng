@@ -33,15 +33,15 @@ import { EventSourcePolyfill } from 'event-source-polyfill';
 export class NotificationsComponent implements OnInit {
   
     protected animate: number = 0;
-    protected isOpen: boolean = false;
-    protected nbProcess: number = 0;
-    protected nbDone: number = 0;
-    protected newProcess: boolean = false;
-    protected newDones: boolean = true;
-    protected ImagesUrlUtil = ImagesUrlUtil;
+    public isOpen: boolean = false;
+    public nbProcess: number = 0;
+    public nbDone: number = 0;
+    public newProcess: boolean = false;
+    public newDones: boolean = true;
+    public ImagesUrlUtil = ImagesUrlUtil;
     protected tasks: Task[] = [];
-    protected tasksDone: Task[] = [];
-    protected tasksInProgress: Task[] = [];
+    public tasksDone: Task[] = [];
+    public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
 
@@ -62,7 +62,7 @@ export class NotificationsComponent implements OnInit {
         return this.taskService.getTasks();
     }
 
-    private refresh(items = []) {
+    public refresh(items = []) {
         this.isLoading = true;
         if (items.length == 0) {
            this.getEntities().then(itemsGot => {
@@ -108,7 +108,7 @@ export class NotificationsComponent implements OnInit {
         })
     }
 
-    private toggle() {
+    public toggle() {
         if (this.isOpen) this.close();
         else {
              this.open();

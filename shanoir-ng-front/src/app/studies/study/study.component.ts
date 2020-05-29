@@ -66,7 +66,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
     
-    protected bidsStructure: BidsElement[];
+    public bidsStructure: BidsElement[];
 
     constructor(
             private route: ActivatedRoute, 
@@ -360,11 +360,11 @@ export class StudyComponent extends EntityComponent<Study> {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
-    private click() {
+    public click() {
         this.fileInput.nativeElement.click();
     }
 
-    protected deleteFile(file: any) {
+    public deleteFile() {
         if (this.mode == 'create') { 
             this.study.protocolFilePaths = [];
             this.protocolFile = null;
@@ -376,11 +376,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    protected downloadFile() {
+    public downloadFile() {
         this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         this.protocolFile = event.target.files[0];
         if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
             this.msgBoxService.log("error", "Only PDF files are accepted");

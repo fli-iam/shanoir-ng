@@ -101,7 +101,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    protected onRowClick(entity: T) {
+    public onRowClick(entity: T) {
         this.goToView(entity.id);
     }
 

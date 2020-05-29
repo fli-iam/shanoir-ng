@@ -39,13 +39,13 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
 
-    private centers: IdName[];
+    public centers: IdName[];
     public studies: IdName[];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private files: File[] = [];
-    private inImport: boolean; 
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    public inImport: boolean; 
+    public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
 
     constructor(
@@ -60,7 +60,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.inImport = this.breadcrumbsService.isImporting();
     }
     
-    private click() {
+    public click() {
         this.fileInput.nativeElement.click();
     }
     
@@ -148,12 +148,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return false;
     }
 
-    protected deleteFile(file: any) {
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);

@@ -40,6 +40,8 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     uploadUrl: string;
     fileToUpload: File = null;
 
+    public isModelUnique = true;
+
     constructor(
         private route: ActivatedRoute,
         private modelService: PathologyModelService, 

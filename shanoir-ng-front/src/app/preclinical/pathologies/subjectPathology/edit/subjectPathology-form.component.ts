@@ -15,7 +15,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
-// import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { SubjectPathology }    from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';

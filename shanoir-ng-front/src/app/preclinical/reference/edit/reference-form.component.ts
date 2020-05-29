@@ -36,10 +36,10 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
 
     categories: string[];
     reftypes: string[];
-    private isFreeCategory: boolean = false;
-    private isFreeRefType: boolean = false;
-    private isEditableCategory: boolean = true;
-    private isEditableRefType: boolean = true;
+    public isFreeCategory: boolean = false;
+    public isFreeRefType: boolean = false;
+    public isEditableCategory: boolean = true;
+    public isEditableRefType: boolean = true;
 
     constructor(
             private route: ActivatedRoute,

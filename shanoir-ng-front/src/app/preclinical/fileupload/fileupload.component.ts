@@ -41,7 +41,7 @@ export class FileUploadComponent {
         this.progressObserver = observer}).share();    
     }
     
-    private prepareUploadRequest(){
+    public prepareUploadRequest(){
         
         this.fileUploadReady = new FileUploadReady();
         let inputEl: HTMLInputElement = this.inputEl.nativeElement;

@@ -34,14 +34,14 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class BrukerUploadComponent {
 
-    @Input() protected keepArchive: boolean;
+    @Input() public keepArchive: boolean;
 
-    private archiveStatus: Status = 'none';
-    private extensionError: boolean;
-    private dicomDirMissingError: boolean;
-    private modality: string;
+    public archiveStatus: Status = 'none';
+    public extensionError: boolean;
+    public dicomDirMissingError: boolean;
+    public modality: string;
     
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    public readonly ImagesUrlUtil = ImagesUrlUtil;
     
     protected archive: string;
     protected archiveFolder: string;
@@ -62,7 +62,7 @@ export class BrukerUploadComponent {
     }
     
     
-    private uploadArchive(fileEvent: any): void {
+    public uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.uploadBruker(fileEvent);   
     }
@@ -112,7 +112,7 @@ export class BrukerUploadComponent {
             );
     }
 
-    protected storeArchiveChanged() {
+    public storeArchiveChanged() {
         // Get the name of the file to get
         if (this.keepArchive) {
             let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
@@ -132,7 +132,7 @@ export class BrukerUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['importsBruker/series']);
     }
 
