@@ -73,7 +73,7 @@ export class SubjectPathologyService extends EntityService<SubjectPathology>{
     }
 
     getAllSubjectForPathologyModel(pid: number): Promise<SubjectPathology[]> {
-    	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${pid}`;
+    	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/model/${pid}/`;
     	return this.http.get<SubjectPathology[]>(url)
             .map(entities => entities.map((entity) => this.toRealObject(entity)))            
             .toPromise();
