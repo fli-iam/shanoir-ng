@@ -234,7 +234,7 @@ services:
 
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
-  # ldap:
+  ldap:
     container_name: ldap
     image: dcm4che/slapd-dcm4chee:2.4.44-13.0
     logging:
@@ -297,6 +297,7 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "C:/Users/yyao/git/shanoir-ng/shanoir-ng-front/dist:/etc/nginx/html:ro"
     networks:
       - shanoir_ng_network    
     ports:
