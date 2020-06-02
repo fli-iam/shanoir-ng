@@ -98,8 +98,7 @@ export class SelectSeriesComponent {
             });
         } else {
             listOfPromises = serie.images.map((image) => {
-                let url = AppUtils.BACKEND_API_IMAGE_VIEWER_URL + this.workFolder + '/' + image.path;
-                return this.importService.downloadImage(url);
+                return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
             });
          }
         let promiseOfList = Promise.all(listOfPromises);
