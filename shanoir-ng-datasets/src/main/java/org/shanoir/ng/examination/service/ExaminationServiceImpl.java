@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -37,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Examination service implementation.
@@ -69,6 +72,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		examinationRepository.delete(id);
 	}
+
+	@Value("${datasets-data}")
+	private String dataDir;
+
 
 	@Override
 	public Page<Examination> findPage(final Pageable pageable) {
@@ -176,5 +183,33 @@ public class ExaminationServiceImpl implements ExaminationService {
 		// Get list of studies reachable by connected user
 		return examinationRepository.findByStudyIdInAndPreclinical(getStudiesForUser(), isPreclinical, pageable);
 	}
+
+	@Override
+	public String addExtraData(final Long examinationId, final MultipartFile file) {
+		String filePath = getExtraDataFilePath(examinationId, file.getOriginalFilename());
+		File fileToCreate = new File(filePath);
+		fileToCreate.getParentFile().mkdirs();
+		try {
+			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			file.transferTo(new File(filePath));
+		} catch (Exception e) {
+			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
+			e.printStackTrace();
+			return null;
+		}
+		return filePath;
+	}
+
+	/**
+	 * Gets the extra data file path
+	 * @param examinationId id of the examination
+	 * @param fileName name of the file
+	 * @return the file path of the file
+	 */
+	@Override
+	public String getExtraDataFilePath(Long examinationId, String fileName) {
+		return dataDir + "/examination-" + examinationId + "/" + fileName;
+	}
+
 
 }

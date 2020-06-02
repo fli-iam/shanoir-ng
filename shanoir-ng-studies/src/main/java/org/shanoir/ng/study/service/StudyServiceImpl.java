@@ -75,12 +75,15 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
-		if (study == null) throw new EntityNotFoundException(Study.class, id);
+		if (study == null) {
+			throw new EntityNotFoundException(Study.class, id);
+		}
 		
 		if (study.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
-			for (StudyUser su : study.getStudyUserList()) 
-				commands.add(new StudyUserCommand(CommandType.DELETE, su.getId()));	
+			for (StudyUser su : study.getStudyUserList()) {
+				commands.add(new StudyUserCommand(CommandType.DELETE, su.getId()));
+			}
 			try {
 				studyUserCom.broadcast(commands);
 			} catch (MicroServiceCommunicationException e) {
@@ -88,7 +91,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		
-		studyRepository.delete(id);			
+		studyRepository.delete(id);
 	}
 
 	@Override
@@ -100,7 +103,7 @@ public class StudyServiceImpl implements StudyService {
 	public Study create(final Study study) {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				studyCenter.setStudy(study);			} 
+				studyCenter.setStudy(study);			}
 
 		}
 		if (study.getSubjectStudyList() != null) {
@@ -133,7 +136,9 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException {
 		final Study studyDb = studyRepository.findOne(study.getId());
-		if (studyDb == null) throw new EntityNotFoundException(Study.class, study.getId());
+		if (studyDb == null) {
+			throw new EntityNotFoundException(Study.class, study.getId());
+		}
 		
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
@@ -146,12 +151,20 @@ public class StudyServiceImpl implements StudyService {
 
 		if (study.getStudyCenterList() != null) {
 			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
-			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) studyCenter.setStudy(studyDb);			
+			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
+				studyCenter.setStudy(studyDb);
+			}
 		}
 		
 		if (study.getSubjectStudyList() != null) {
 			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) subjectStudy.setStudy(studyDb);			
+			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
+				subjectStudy.setStudy(studyDb);
+			}
+		}
+		LOG.error("coucou" + study.getProtocolFilePaths());
+		if (study.getProtocolFilePaths() != null) {
+			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
 		
 		updateStudyUsers(studyDb, study.getStudyUserList());
@@ -165,7 +178,7 @@ public class StudyServiceImpl implements StudyService {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return Utils.copyList(studyRepository.findAll());
-		} else {			
+		} else {
 			return Utils.copyList(studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
 					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId()));
 		}
@@ -173,25 +186,32 @@ public class StudyServiceImpl implements StudyService {
 
 	@Transactional
 	private void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
-		if (studyUsers == null) return;
+		if (studyUsers == null) {
+			return;
+		}
 		// New lists of created / updated to send via RabbitMQ
 		List<StudyUser> toBeCreated = new ArrayList<>();
 		List<StudyUser> toBeUpdated = new ArrayList<>();
 
 		// Build maps of existing / replacing study users
 		Map<Long, StudyUser> existing = new HashMap<>();
-		for (StudyUser su : study.getStudyUserList()) existing.put(su.getId(), su);
+		for (StudyUser su : study.getStudyUserList()) {
+			existing.put(su.getId(), su);
+		}
 		Map<Long, StudyUser> replacing = new HashMap<>();
 		for (StudyUser su : studyUsers) {
-			if (su.getId() == null) toBeCreated.add(su);
-			else replacing.put(su.getId(), su);
+			if (su.getId() == null) {
+				toBeCreated.add(su);
+			} else {
+				replacing.put(su.getId(), su);
+			}
 		}
 		
 		// Buid sets of ids to know which ones need to be deleted / updated / created
 		Set<Long> idsToBeDeleted = new HashSet<>(existing.keySet());
 		idsToBeDeleted.removeAll(replacing.keySet());
 		Set<Long> idsToBeUpdated = new HashSet<>(replacing.keySet());
-		idsToBeUpdated.removeAll(idsToBeDeleted);		
+		idsToBeUpdated.removeAll(idsToBeDeleted);
 		
 		// For those which need an update, update them with the replacing values
 		for (Long id : idsToBeUpdated) {
@@ -210,20 +230,28 @@ public class StudyServiceImpl implements StudyService {
 				su.setStudy(study);
 			}
 			// save them first to get their id
-			for (StudyUser su : studyUserRepository.save(toBeCreated)) created.add(su);
+			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
+				created.add(su);
+			}
 			//studyUserRepository.save(toBeCreated);
-			study.getStudyUserList().addAll(created);			
+			study.getStudyUserList().addAll(created);
 		}
 
 		// Remove deleted
-		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList()); 
+		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList());
 		
 		// Send updates via RabbitMQ
 		try {
 			List<StudyUserCommand> commands = new ArrayList<>();
-			for (Long id : idsToBeDeleted) commands.add(new StudyUserCommand(CommandType.DELETE, id));
-			for (StudyUser su : created) commands.add(new StudyUserCommand(CommandType.CREATE, su));
-			for (StudyUser su : toBeUpdated) commands.add(new StudyUserCommand(CommandType.UPDATE, su));
+			for (Long id : idsToBeDeleted) {
+				commands.add(new StudyUserCommand(CommandType.DELETE, id));
+			}
+			for (StudyUser su : created) {
+				commands.add(new StudyUserCommand(CommandType.CREATE, su));
+			}
+			for (StudyUser su : toBeUpdated) {
+				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
+			}
 			
 			studyUserCom.broadcast(commands);
 			

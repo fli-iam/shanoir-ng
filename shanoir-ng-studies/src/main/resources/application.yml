@@ -55,6 +55,10 @@ spring:
     password: guest
   session:
     store-type: none
+  http:
+    multipart:
+      maxFileSize: 500Mb
+      maxRequestSize: 500Mb
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
@@ -84,6 +88,8 @@ ms.url:
   shanoir-ng-studycards: http://datasets:9904/studycards
   shanoir-ng-examinations: http://datasets:9904/examinations
   shanoir-ng-bids: http://datasets:9904/bids
+# data paths
+study-data: /var/study-data
 # Data folder configuration
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
