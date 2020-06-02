@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master,develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ master,develop ]
 
 jobs:
   build:
@@ -21,4 +21,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: /shanoir-ng-parent/mvn install
+      run: mvn -f /shanoir-ng-parent/pom.xml install
