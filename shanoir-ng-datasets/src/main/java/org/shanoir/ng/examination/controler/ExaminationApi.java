@@ -25,7 +25,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -177,19 +176,5 @@ public interface ExaminationApi {
 	ResponseEntity<ByteArrayResource> downloadExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
-
-	@ApiOperation(value = "", notes = "If exists, returns the bruker archive of the examination corresponding to the given id", response = Resource.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examination", response = Examination.class),
-	        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-	        @ApiResponse(code = 401, message = "unauthorized"),
-	        @ApiResponse(code = 403, message = "forbidden"),
-	        @ApiResponse(code = 404, message = "no dataset found"),
-	        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/preclinical/examinationId/{examinationId}/export",
-		produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<ByteArrayResource> exportExaminationById(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws RestServiceException, IOException;
 
 }

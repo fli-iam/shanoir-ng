@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
@@ -85,6 +86,8 @@ public class SubjectPathologyApiControllerTest {
 	private PathologyService pathologiesServiceMock;
 	@MockBean
 	private RefsService refsServiceMock;
+	@MockBean
+    private PathologyModelService pathoService;
 
 	@Before
 	public void setup() throws ShanoirException {
