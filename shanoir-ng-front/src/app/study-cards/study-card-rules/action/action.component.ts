@@ -11,13 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
 import { StudyCardAssignment } from '../../shared/study-card.model';
-import { Coil } from '../../../coils/shared/coil.model';
-import { Observable, Subscription } from 'rxjs';
 
 
 

@@ -52,5 +52,13 @@ public enum Operation {
 	public int getId() {
 		return id;
 	}
+	
+	public boolean isNumerical() {
+		return this.equals(BIGGER_THAN) || this.equals(EQUALS) || this.equals(SMALLER_THAN);
+	}
+	
+	public boolean isTextual() {
+		return this.equals(CONTAINS) || this.equals(ENDS_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH);
+	}
 
 }

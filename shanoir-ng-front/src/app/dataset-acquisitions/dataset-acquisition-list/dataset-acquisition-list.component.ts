@@ -51,6 +51,7 @@ export class DatasetAcquisitionListComponent extends BrowserPaginEntityListCompo
 
     getColumnDefs(): any[] {
         let colDef: any[] = [
+            {headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", 
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id

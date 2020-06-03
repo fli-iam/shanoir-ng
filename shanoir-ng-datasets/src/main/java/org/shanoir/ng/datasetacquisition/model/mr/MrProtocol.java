@@ -210,7 +210,7 @@ public class MrProtocol extends AbstractEntity {
 	private Double temporalResolution;
 
 	/** Metadata updated by study card. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocolSCMetadata updatedMetadata;
 
 	/**

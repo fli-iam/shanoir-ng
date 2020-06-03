@@ -36,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{manufModel.datasetModalityType}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
+								<select-box [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
 									(change)="onModalityChange($event)" formControlName="datasetModalityType">
 								</select-box>
 							</ng-template>
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
+								<select-box [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>

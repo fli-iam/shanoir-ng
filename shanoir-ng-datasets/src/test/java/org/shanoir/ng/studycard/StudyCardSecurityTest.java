@@ -98,7 +98,7 @@ public class StudyCardSecurityTest {
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findStudyCardByAcqEqId, 1L);
-		assertEquals(1, api.findStudyCardByAcqEqId(1L).getBody().size());
+		assertEquals(2, api.findStudyCardByAcqEqId(1L).getBody().size());
 		
 		assertAccessAuthorized(api::findStudyCardById, 1L);
 		assertAccessAuthorized(api::findStudyCardByStudyId, 1L);
@@ -119,7 +119,7 @@ public class StudyCardSecurityTest {
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findStudyCardByAcqEqId, 1L);
-		assertEquals(1, api.findStudyCardByAcqEqId(1L).getBody().size());
+		assertEquals(2, api.findStudyCardByAcqEqId(1L).getBody().size());
 		
 		assertAccessAuthorized(api::findStudyCardById, 1L);
 		assertAccessAuthorized(api::findStudyCardByStudyId, 1L);

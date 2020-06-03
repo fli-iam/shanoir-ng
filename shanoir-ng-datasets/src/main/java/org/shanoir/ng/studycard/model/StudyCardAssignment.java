@@ -30,19 +30,19 @@ public class StudyCardAssignment extends AbstractEntity {
 
 	/** The dataset field to update. */
 	@NotNull
-	private String field;
+	private Long field;
 	
 	/** The value to set. */
 	@NotNull
 	private String value;
 
-
-	public String getField() {
-		return field;
+	public AssignmentField getField() {
+		if (field == null) return null;
+		else return AssignmentField.getEnum(field);
 	}
 
-	public void setField(String field) {
-		this.field = field;
+	public void setField(AssignmentField field) {
+		this.field = field.getId();
 	}
 
 	public String getValue() {

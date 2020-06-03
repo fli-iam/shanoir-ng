@@ -42,6 +42,7 @@ import { StudyCardRule } from '../shared/study-card.model';
 import { AssignmentField } from './action/action.component';
 import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
+import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 
 
 @Component({
@@ -82,24 +83,25 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             private breadcrumbService: BreadcrumbsService) {
      
         this.allCoilsPromise = this.coilService.getAll();
-        
+
         this.fields = [
-            new AssignmentField('Dataset modality type', 'datasetMetadata.modalityType', [
+            new AssignmentField('Dataset modality type', 'MODALITY_TYPE', [
                 new Option<string>('Mr', 'Mr'), 
                 new Option<string>('Pet', 'Pet')
             ]),
-            new AssignmentField('Protocol name', 'mrProtocolMetadata.name'),
-            new AssignmentField('Protocol comment', 'mrProtocolMetadata.comment'),
-            new AssignmentField('Transmitting coil', 'mrProtocolMetadata.transmittingCoilId', this.coilOptions),
-            new AssignmentField('Receiving coil', 'mrProtocolMetadata.receivingCoilId', this.coilOptions),
-            new AssignmentField('Explored entity', 'datasetMetadata.exploredEntity', ExploredEntity.toOptions()),
-            new AssignmentField('Acquisition contrast', 'mrProtocolMetadata.acquisitionContrast', AcquisitionContrast.toOptions()),
-            new AssignmentField('MR sequence application', 'mrProtocolMetadata.mrSequenceApplication', MrSequenceApplication.toOptions()),
-            new AssignmentField('MR sequence physics', 'mrProtocolMetadata.mrSequencePhysics', MrSequencePhysics.toOptions()),
-            new AssignmentField('New name for the dataset', 'datasetMetadata.name'),
-            new AssignmentField('Dataset comment', 'datasetMetadata.comment'),
-            new AssignmentField('MR sequence name', 'mrProtocolMetadata.mrSequenceName'),
-            new AssignmentField('Contrast agent used', 'mrProtocolMetadata.contrastAgentUsed', ContrastAgent.toOptions())
+            new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
+            new AssignmentField('Protocol comment', 'PROTOCOL_COMMENT'),
+            new AssignmentField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),
+            new AssignmentField('Receiving coil', 'RECEIVING_COIL', this.coilOptions),
+            new AssignmentField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.toOptions()),
+            new AssignmentField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.toOptions()),
+            new AssignmentField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.toOptions()),
+            new AssignmentField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.toOptions()),
+            new AssignmentField('New name for the dataset', 'NAME'),
+            new AssignmentField('Dataset comment', 'COMMENT'),
+            new AssignmentField('MR sequence name', 'MR_SEQUENCE_NAME'),
+            new AssignmentField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.toOptions()),
+            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.toOptions())
         ];
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 

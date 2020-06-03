@@ -121,9 +121,10 @@ export class FinishImportComponent {
             if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
             else if (this.importMode == 'PACS') importJob.fromPacs = true;
             importJob.examinationId = this.context.examination.id;
-            importJob.frontStudyId = this.context.study.id;
-            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
-            importJob.frontConverterId = this.context.niftiConverter.id;
+            //importJob.frontStudyId = this.context.study.id;
+            importJob.studyCardId = this.context.studyCard.id;
+            //importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
+            //importJob.frontConverterId = this.context.niftiConverter.id;
             return this.importService.startImportJob(importJob);
         }
     }

@@ -50,6 +50,7 @@ export class QueryPacsComponent{
             breadcrumbsService.currentStep.label = '1. Query';
         });
         breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'PACS';
         this.buildForm();
     }
 

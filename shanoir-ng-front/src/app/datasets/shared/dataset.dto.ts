@@ -19,6 +19,8 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
+import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
+import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 
 @Injectable()
 export class DatasetDTOService {
@@ -90,14 +92,30 @@ export class DatasetDTOService {
             entity.subject = new Subject();
             entity.subject.id = dto.subjectId;
         }
+        if (entity.type == 'Mr') {
+            this.mapSyncFieldsMr(dto as MrDatasetDTO, entity as MrDataset);
+        }
         return entity;
+    }
+
+    static mapSyncFieldsMr(dto: MrDatasetDTO, entity: MrDataset): MrDataset {
+        entity.diffusionGradients = dto.diffusionGradients;
+        entity.echoTime = dto.echoTime;
+        entity.flipAngle = dto.flipAngle;
+        entity.inversionTime = dto.inversionTime;
+        entity.repetitionTime = dto.repetitionTime;
+        entity.mrQualityProcedureType = dto.mrQualityProcedureType;
+        entity.originMrMetadata = dto.originMrMetadata;
+        entity.updatedMrMetadata = dto.updatedMrMetadata;
+        entity.firstImageAcquisitionTime = dto.firstImageAcquisitionTime;
+        entity.lastImageAcquisitionTime = dto.lastImageAcquisitionTime;
+        return entity
     }
 }
 
 
 export class DatasetDTO {
 
-    
     id: number;
 	creationDate: Date;
     //groupOfSubjectsId: number;
@@ -121,4 +139,21 @@ export class DatasetDTO {
             this.type = dataset.type;
         }
     }
+}
+
+export class MrDatasetDTO extends DatasetDTO {
+	diffusionGradients: DiffusionGradient[];
+	echoTime: EchoTime[];
+	flipAngle: FlipAngle[];
+	inversionTime: InversionTime[];
+	mrQualityProcedureType: MrQualityProcedureType;
+	originMrMetadata: MrDatasetMetadataDTO;
+	repetitionTime: RepetitionTime[];
+	updatedMrMetadata: MrDatasetMetadataDTO;
+	firstImageAcquisitionTime: string;
+	lastImageAcquisitionTime: string;
+}
+
+export class MrDatasetMetadataDTO {
+    mrDatasetNature: MrDatasetNature;
 }

@@ -16,36 +16,24 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-/**
- * @author atouboul
- *
- */
 public class ImportJob {
 
-    @JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
-    @JsonProperty("fromShanoirUploader")
     private boolean fromShanoirUploader;
 
-    @JsonProperty("fromPacs")
     private boolean fromPacs;
+    
+	private String workFolder;
 
-    @JsonProperty("patients")
     private List<Patient> patients;
     
-    @JsonProperty("examinationId")
     private Long examinationId;
-
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
     
-	@JsonProperty("workFolder")
-	private String workFolder;
+    private Long studyCardId;
     
-	public boolean isFromDicomZip() {
+    
+    public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
@@ -85,19 +73,21 @@ public class ImportJob {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
-	}
-
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
-	}
-
-	public String getWorkFolder() {
+    public String getWorkFolder() {
 		return workFolder;
 	}
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
 	}
+
+	public Long getStudyCardId() {
+		return studyCardId;
+	}
+
+	public void setStudyCardId(Long studyCardId) {
+		this.studyCardId = studyCardId;
+	}
+	
 }
+

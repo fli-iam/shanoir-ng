@@ -29,19 +29,19 @@ public class StudyCardCondition extends AbstractEntity {
 	private static final long serialVersionUID = 6708188853533591193L;
 	
 	@NotNull
-	private String dicomTag;
+	private int dicomTag;
 	
 	private String dicomValue;
 	
 	@NotNull
-	private Operation operation;
+	private int operation;
 
 
-	public String getDicomTag() {
+	public int getDicomTag() {
 		return dicomTag;
 	}
 
-	public void setDicomTag(String dicomTag) {
+	public void setDicomTag(int dicomTag) {
 		this.dicomTag = dicomTag;
 	}
 
@@ -54,10 +54,10 @@ public class StudyCardCondition extends AbstractEntity {
 	}
 
 	public Operation getOperation() {
-		return operation;
+		return Operation.getType(operation);
 	}
 
 	public void setOperation(Operation operation) {
-		this.operation = operation;
+		this.operation = operation.getId();
 	}
 }

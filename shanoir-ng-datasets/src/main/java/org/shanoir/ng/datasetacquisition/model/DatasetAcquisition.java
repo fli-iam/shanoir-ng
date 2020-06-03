@@ -80,7 +80,11 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	
 	/** Applied study card. */
 	@ManyToOne
+	@JoinColumn(name = "studycard_id")
 	StudyCard studyCard;
+	
+	/** Used to know if the study card that was applied matches the study card's last version or anterior */
+	Long studyCardTimestamp;
 
 	/** Rank of the session in the examination protocol. */
 	private Integer rank;

@@ -14,8 +14,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService, Step } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
+import { findLastIndex } from '../utils/app.utils';
 
 
 @Component({
@@ -25,7 +26,6 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 })
 export class ImportComponent implements OnInit {
 
-    private importMode: "DICOM" | "PACS";
     private hasOneStudy: boolean = true;
 
     constructor(
@@ -33,8 +33,14 @@ export class ImportComponent implements OnInit {
             private rightsService: StudyRightsService,
             private route: ActivatedRoute) {
 
-        this.importMode = route.snapshot.firstChild.data['importMode'];
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
+    }
+
+    get importMode(): 'DICOM' | 'PACS' {
+        let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
+        if (lastIndex != -1) {
+            return this.breadcrumbsService.steps[lastIndex].importMode;
+        }
     }
         
     ngOnInit() {

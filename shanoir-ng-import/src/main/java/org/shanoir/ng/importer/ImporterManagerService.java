@@ -124,7 +124,7 @@ public class ImporterManagerService {
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
 				final String subjectName = patient.getSubject().getName();
 				ANONYMIZER.anonymizeForShanoir(dicomFiles, "Shanoir Profile", subjectName, subjectName);
-				Long converterId = importJob.getFrontConverterId();
+				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
 			// TODO: change this here to async rabbitmq communication.

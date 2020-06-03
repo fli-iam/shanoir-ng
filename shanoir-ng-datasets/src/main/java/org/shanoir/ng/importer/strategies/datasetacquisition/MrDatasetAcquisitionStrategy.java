@@ -32,6 +32,9 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.StudyCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +63,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
+	StudyCardService studyCardService;
+	
+	@Autowired 
+	StudyCardProcessingService studyCardProcessingService;
+	
+	@Autowired
 	DatasetStrategy<MrDataset> mrDatasetStrategy;
 	
 	@Override
@@ -76,8 +85,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		}
 		mrDatasetAcquisition.setRank(rank);
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));		
-		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
+		StudyCard studyCard = null;
+		if (importJob.getStudyCardId() != null) {
+			studyCard = getStudyCard(importJob.getStudyCardId());
+			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());			
+		} else {
+			LOG.warn("No studycard given for this import");
+		}
 		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
@@ -103,7 +118,18 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 		
+		if (studyCard != null) {
+			studyCardProcessingService.applyStudyCard(mrDatasetAcquisition, studyCard, dicomAttributes);			
+		}
+		
 		return mrDatasetAcquisition;
+	}
+
+	private StudyCard getStudyCard(Long studyCardId) {
+		StudyCard studyCard = studyCardService.findById(studyCardId);
+		if (studyCard == null) throw new IllegalArgumentException("No study card found with id " + studyCardId);
+		if (studyCard.getAcquisitionEquipmentId() == null) throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+		return studyCard;
 	}
 	
 	

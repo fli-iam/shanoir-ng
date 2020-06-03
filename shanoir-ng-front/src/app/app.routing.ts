@@ -77,12 +77,10 @@ let appRoutes: Routes = [
                 redirectTo: '/home'
             }, {   
                 path: 'upload',
-                component: DicomUploadComponent,
-                data: {importMode: 'DICOM'}
+                component: DicomUploadComponent
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
-                data: {importMode: 'PACS'},
                 canActivate: [CanImportFromPACSGuard]
             }, {
                 path: 'series',

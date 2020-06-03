@@ -42,6 +42,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -205,10 +206,10 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			List<URL> pathURLs = new ArrayList<URL>();
 			if ("dcm".equals(format)) {
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
 			} else if ("nii".equals(format)) {
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} else {
 				throw new RestServiceException(
@@ -246,27 +247,6 @@ public class DatasetApiController implements DatasetApi {
 			File srcFile = new File(url.getPath());
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			Files.copy(srcFile.toPath(), destFile.toPath());
-		}
-	}
-
-	/**
-	 * Reads all dataset files depending on the format attached to one dataset.
-	 * @param dataset
-	 * @param pathURLs
-	 * @throws MalformedURLException
-	 */
-	private void getDatasetFilePathURLs(final Dataset dataset, List<URL> pathURLs, DatasetExpressionFormat format) throws MalformedURLException {
-		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
-			DatasetExpression datasetExpression = (DatasetExpression) itExpressions.next();
-			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
-				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
-					DatasetFile datasetFile = (DatasetFile) itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-					pathURLs.add(url);
-				}
-			}
 		}
 	}
 	
@@ -369,7 +349,7 @@ public class DatasetApiController implements DatasetApi {
 			// Get nii and json files
 			try {
 				List<URL> pathURLs = new ArrayList<URL>();
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 				copyFilesForBIDSExport(pathURLs, workFolder, subjectName, examinationList.get(0).getId().toString(), modalityLabel);
 			} catch (IOException e) {
 				throw new RestServiceException(
