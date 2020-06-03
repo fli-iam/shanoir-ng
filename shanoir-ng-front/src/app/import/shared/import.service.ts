@@ -62,11 +62,17 @@ export class ImportService {
      * to Papaya, as we can not and want not to modify Papaya. So we download for Papaya.
      * @param url 
      */
-    downloadImage(url: string): Promise<ArrayBuffer> {
+    downloadImage(url: string, path: string): Promise<ArrayBuffer> {
         if (!url) throw Error('Cannot download a image without an url');
         return this.http.get(url,
-            { observe: 'response', responseType: 'arraybuffer' }
+            { observe: 'response', params: { path: encodeURIComponent(path) }, responseType: 'arraybuffer' }
             ).map(response => response.body).toPromise();
+    }
+
+    test(url: string, path?: string): Promise<any> {
+        if (!url) throw Error('Cannot download a image without an url');
+        let options = { params: { path: encodeURIComponent(path) } };
+        return path ? this.http.get(url, options).toPromise() : this.http.get(url).toPromise();
     }
 
     queryPACS(dicomQuery: DicomQuery): Promise<ImportJob> {
