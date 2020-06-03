@@ -83,8 +83,6 @@ keycloak:
       - name: datasets secured api
       - patterns:
         - /*
-# Data
-datasets-data: /var/datasets-data
 # Solr
 spring.data.solr.host: http://solr:8983/solr/shanoir/
 # microservices url
