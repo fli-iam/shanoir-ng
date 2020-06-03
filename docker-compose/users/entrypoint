@@ -12,6 +12,8 @@ require  SHANOIR_URL_SCHEME
 require	 SHANOIR_ADMIN_EMAIL
 require	 SHANOIR_SMTP_HOST
 
+optional SHANOIR_CERTIFICATE
+
 handle_microservice_migration
 
 case "$SHANOIR_MIGRATION" in
@@ -41,13 +43,8 @@ keystore="/etc/ssl/certs/java/cacerts"
 crt="/etc/ssl/certs/java/shanoir-ng-nginx.crt"
 key="/etc/ssl/certs/java/shanoir-ng-nginx.key"
 
-match  SHANOIR_CERTIFICATE '^(auto|manual)$'
-case "$SHANOIR_CERTIFICATE" in
-manual)
-	[ -f "$crt"      ] || error "missing pem certificate: $crt"
-	[ -f "$keystore" ] || error "missing java keystore: $keystore"
-	;;
-auto)
+if [ "$SHANOIR_CERTIFICATE" = auto ]
+then
 	if [ ! -f "$crt" ] || [ "`openssl x509 -in "$crt"  -subject|grep ^subject=`" \
 				!= "subject=CN = $SHANOIR_URL_HOST" ]
 	then
@@ -63,8 +60,7 @@ auto)
 		mv /tmp/key   "$key"
 		mv /tmp/crt   "$crt"
 	fi
-	;;
-esac
+fi
 
 
 abort_if_error
