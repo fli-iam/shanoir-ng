@@ -21,6 +21,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Create directory /shanoir-ng-logs
-      run: mkdir /var/log/shanoir-ng-logs
+      run: sudo mkdir /var/log/shanoir-ng-logs
     - name: Build with Maven
       run: mvn -f ./shanoir-ng-parent/pom.xml install
