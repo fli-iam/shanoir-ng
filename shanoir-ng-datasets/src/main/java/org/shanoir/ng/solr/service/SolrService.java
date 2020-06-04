@@ -38,8 +38,6 @@ public interface SolrService {
 	
 	void indexAll();
 	
-	void deleteAll();
-	
 	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable);

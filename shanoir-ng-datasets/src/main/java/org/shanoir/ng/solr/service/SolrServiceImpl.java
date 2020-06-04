@@ -71,7 +71,6 @@ public class SolrServiceImpl implements SolrService {
 	}
 	
 	@Transactional
-	@Override
 	public void deleteAll() {
 		solrRepository.deleteAll();
 	}
@@ -80,7 +79,10 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() {
-		// 1. get all datasets
+		// 1. delete all
+		deleteAll();
+		
+		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
 		while (docIt.hasNext()) {

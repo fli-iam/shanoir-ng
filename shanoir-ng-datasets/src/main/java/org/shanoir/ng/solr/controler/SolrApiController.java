@@ -48,9 +48,6 @@ public class SolrApiController implements SolrApi {
 	@Override
 	public ResponseEntity<Void> indexAll() throws RestServiceException {
 		
-		// 1. delete all
-		solrService.deleteAll();		
-		// 2. re-index all
 		solrService.indexAll();		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
