@@ -52,7 +52,6 @@ public class InstrumentBasedAssessment extends AbstractEntity {
 	private Instrument instrument;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrumentBasedAssessment")
-	@JsonIgnore
 	private List<VariableAssessment> variableAssessmentList;
 
 	/**

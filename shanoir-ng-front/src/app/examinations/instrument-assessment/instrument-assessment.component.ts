@@ -13,7 +13,7 @@
  */
 
 import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
-import { Instrument } from '../instrument-assessment/instrument.model'
+import { InstrumentBasedAssessment, Instrument, VariableAssessment } from '../instrument-assessment/instrument.model'
 
 @Component({
     selector: 'instrument-assessment-detail',
@@ -21,5 +21,16 @@ import { Instrument } from '../instrument-assessment/instrument.model'
 })
 
 export class InstrumentAssessmentComponent {
-    @Input() instrument: Instrument;
+    @Input() instrumentBasedAssesment: InstrumentBasedAssessment;
+
+    getInstrumentVarName(varAssess: VariableAssessment, instrument: Instrument): string {
+        for (let varia of instrument.instrumentVariables) {
+            for (let ass of varia.variableAssessmentList) {
+                if (ass.id == varAssess.id) {
+                    return varia.name;
+                }
+            }
+        }
+        return 'not found';
+    }
 }

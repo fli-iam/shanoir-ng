@@ -80,6 +80,7 @@ public class InstrumentVariable extends AbstractEntity {
 
 	/** The Variable Assessment list. */
 	@OneToMany(mappedBy = "instrumentVariable", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<VariableAssessment> variableAssessments;
 
 	/**
