@@ -13,9 +13,10 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
+import * as AppUtils from '../../../../utils/app.utils';
 
 import { PathologyModel } from './pathologyModel.model';
 import { Pathology } from '../../pathology/shared/pathology.model';
@@ -41,10 +42,11 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         return `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/upload/specs/`+model_id;
     }
 
-    getDownloadUrl(model: PathologyModel): string {
-        return `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model.id;
+    downloadFile(model: PathologyModel): Promise<void> {
+        return this.http.get(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model.id,
+            { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
     }
-    
     
      postFile(fileToUpload: File,  model_id: number): Observable<any> {
         const endpoint = this.getUploadUrl(model_id);
@@ -53,6 +55,16 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         return this.http
             .post(endpoint, formData)
             .map(response => response);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+   
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
     
     

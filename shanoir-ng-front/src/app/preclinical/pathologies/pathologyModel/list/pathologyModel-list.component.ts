@@ -87,7 +87,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
         
     downloadModelSpecifications = (model:PathologyModel) => {
     	if (model.filename){
-        	window.open(this.modelService.getDownloadUrl(model));
+        	this.modelService.downloadFile(model);
         }else{
         	this.openInformationDialog(model);
         }

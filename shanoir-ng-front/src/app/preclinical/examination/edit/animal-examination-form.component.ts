@@ -54,8 +54,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
 	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    
+    @ViewChild('input') private fileInput: ElementRef;
+
     urlupload: string;
     physioData: PhysiologicalData;
     examinationPhysioData: PhysiologicalData = new PhysiologicalData();
@@ -71,7 +71,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     studies: IdName[] = [];
     public subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
-    private inImport: boolean; 
+    private inImport: boolean;
+    private files: File[] = [];
     
     constructor(
         private route: ActivatedRoute,
@@ -140,6 +141,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     buildForm(): FormGroup {
+        let numericRegex = /\-?\d*\.?\d{1,2}/;
+
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
@@ -147,7 +150,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
+            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]]
         });
     }
 
@@ -212,7 +215,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     public save(): Promise<void> {
         this.updateExamForSave();
-        return super.save();
+        return super.save().then(result => {
+            // Once the exam is saved, save associated files
+            for (let file of this.files) {
+                this.animalExaminationService.postFile(file, this.entity.id).subscribe(response => console.log('result:' + response));
+            }            
+        });;
     }
 
     manageExaminationAnesthetic(examination_id : number) {
@@ -371,13 +379,30 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     closePopin(instAssessmentId?: number) {
         this.instAssessmentModal.hide();
     }
-
-    closeAttachedFilePopin(id?: number) {
-        this.attachNewFilesModal.hide();
-    }
     
     public hasEditRight(): boolean {
         return false;
     }
+    
+    // Extra data file management
+    
+    private setFile() {
+        this.fileInput.nativeElement.click();
+    }
+    
+        getFileName(element: string): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+    
+    protected deleteFile(file: any) {
+        this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+    }
+
+    private attachNewFile(event: any) {
+        let newFile = event.target.files[0];
+        this.examination.extraDataFilePathList.push(newFile.name);
+        this.files.push(newFile);
+    }    
 
 }

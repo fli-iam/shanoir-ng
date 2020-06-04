@@ -176,6 +176,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     public hasEditRight(): boolean {
-        return this.keycloakService.isUserAdmin();
+        return this.keycloakService.isUserAdminOrExpert();
     }
 }

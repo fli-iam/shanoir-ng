@@ -49,6 +49,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -202,6 +203,41 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
+
+		List<Long> datasetIds = new ArrayList<Long>();
+		for(Examination examination : examinations) {
+			ResponseEntity<List<Long>> response = findDatasetIdsBySubjectIdStudyId(subjectId, examination.getStudyId());
+			if(response.getStatusCode() == HttpStatus.OK) {
+				datasetIds.addAll(response.getBody());
+			}
+		}
+		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		
+		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		List<Long> datasetIds = new ArrayList<Long>();
+		for(Examination examination : examinations) {
+			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+				for(Dataset dataset : datasetAcquisition.getDatasets()) {
+					datasetIds.add(dataset.getId());
+				}
+			}
+		}
+		return new ResponseEntity<>(datasetIds, HttpStatus.OK);
 	}
 
 	@Override
