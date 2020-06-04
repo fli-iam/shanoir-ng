@@ -79,8 +79,6 @@ export class BrukerSelectSeriesComponent {
 
     private initPapaya(serie: SerieDicom): void {
         if (!serie) return;
-        this.importService.test("https://shanoir-ng-nginx/shanoir-ng/import/importer/get_test").then( value=> console.log(value) );
-        this.importService.test("https://shanoir-ng-nginx/shanoir-ng/import/importer/get_test2", serie.images[1].path).then( value=> console.log(value) );
         let listOfPromises;
         if (this.dataFiles) {
             listOfPromises = serie.images.map((image) => {

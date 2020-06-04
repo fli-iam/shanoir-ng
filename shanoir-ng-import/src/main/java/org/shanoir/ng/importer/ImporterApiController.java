@@ -1101,7 +1101,8 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
 			throws RestServiceException, IOException {
 
-		String pathInfo = path;
+		final File userImportDir = getUserImportDir();
+		String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
 		URL url = new URL("file:///" + pathInfo);
 		final URLConnection uCon = url.openConnection();
 		final InputStream is = uCon.getInputStream();
@@ -1122,15 +1123,5 @@ public class ImporterApiController implements ImporterApi {
 				.contentType(MediaType.parseMediaType("application/dicom"))
 				.contentLength(uCon.getContentLength())
 				.body(resource);
-	}
-
-	@Override
-	public ResponseEntity<String> getTest() {
-		return ResponseEntity.ok("Test");
-	}
-
-	@Override
-	public ResponseEntity<String> getTest2(@ApiParam(value = "path") @RequestParam(value = "path") String path) {
-		return ResponseEntity.ok("Test2, path: " + path);
 	}
 }

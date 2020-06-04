@@ -168,22 +168,4 @@ public interface ImporterApi {
     @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
         @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
-
-    @ApiOperation(value = "Get test", notes = "Get test", response = Void.class, tags={ "", })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "get dicom image", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @GetMapping(value = "/get_test/", produces = { "application/dicom" })
-        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<String> getTest();
-    
-    @ApiOperation(value = "Get test 2", notes = "Get test 2", response = Void.class, tags={ "", })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "get dicom image", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @GetMapping(value = "/get_test2/", produces = { "application/dicom" })
-        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-	ResponseEntity<String> getTest2(@ApiParam(value = "path") @RequestParam(value = "path") String path);
 }
