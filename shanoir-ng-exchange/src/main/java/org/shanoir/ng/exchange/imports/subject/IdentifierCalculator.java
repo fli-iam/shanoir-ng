@@ -68,7 +68,7 @@ public class IdentifierCalculator {
 		String hex = "";
 		int hashInt = -1;
 		final MessageDigest msgDigest = MessageDigest.getInstance(SHA);
-		msgDigest.update(subjectIdentifierSeed.getBytes("UTF-8"));
+		msgDigest.update(subjectIdentifierSeed.getBytes(UTF_8));
 		byte[] hash = msgDigest.digest();
 		for (int i = 0; i < hash.length; i++) {
 			hashInt = hash[i] & 0xFF;
