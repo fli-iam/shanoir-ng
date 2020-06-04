@@ -7,7 +7,7 @@
     "url": "https://github.com/fli-iam/shanoir-ng.git"
   },
   "scripts": {
-    "build": "npm run build:aot && rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
+  	"build": "npm run build:aot && rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
     "build:dev": "rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
     "build:aot": "rimraf aot && ngc -p tsconfig-aot.json",
     "i18n": "ng-xi18n --i18nFormat=xlf2",
@@ -40,12 +40,11 @@
     "@angular/upgrade": "5.1.1",
     "@types/node": "8.5.1",
     "angular-in-memory-web-api": "0.5.2",
+    "ngx-json-viewer": "2.4.0",
     "angular-sha": "^0.3.3",
     "core-js": "2.5.3",
     "js-sha1": "^0.6.0",
     "mydatepicker": "2.6.1",
-    "ngx-json-viewer": "2.4.0",
-    "npm": "^3.5.2",
     "reflect-metadata": "0.1.10",
     "rxjs": "5.5.5",
     "systemjs": "0.20.19",

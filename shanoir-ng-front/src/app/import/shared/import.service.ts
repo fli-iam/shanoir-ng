@@ -69,12 +69,6 @@ export class ImportService {
             ).map(response => response.body).toPromise();
     }
 
-    test(url: string, path?: string): Promise<any> {
-        if (!url) throw Error('Cannot download a image without an url');
-        let options = { params: { path: encodeURIComponent(path) } };
-        return path ? this.http.get(url, options).toPromise() : this.http.get(url).toPromise();
-    }
-
     queryPACS(dicomQuery: DicomQuery): Promise<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_QUERY_PACS, dicomQuery)
             .toPromise();
