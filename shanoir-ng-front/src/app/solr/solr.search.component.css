@@ -61,4 +61,7 @@
 #facet li:hover {
     background-color: #eee;
 }
-  
+
+:host ::ng-deep tool-tip.larger .help .content{
+    width: 360px;
+}

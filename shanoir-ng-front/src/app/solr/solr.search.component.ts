@@ -144,16 +144,17 @@ export class SolrSearchComponent{
             if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
         }
         return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
-            solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
+            if (solrResultPage) { 
+                solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
             
-            if (!savedStates[0]) this.allStudies = solrResultPage['facetResultPages'][0];
-            solrResultPage['facetResultPages'].forEach((facetResultPage, i) => {
-                facetResultPage.content.forEach((facetField, j) => {
-                    if (savedStates[i] && savedStates[i].includes(facetField.value)) facetField.checked = true;
-                    facetResultPage.content[j] = facetField;
-                    this.facetResultPages[i] = facetResultPage;
-                })
-            })
+                if (!savedStates[0]) this.allStudies = solrResultPage['facetResultPages'][0];
+                solrResultPage['facetResultPages'].forEach((facetResultPage, i) => {
+                    facetResultPage.content.forEach((facetField, j) => {
+                        if (savedStates[i] && savedStates[i].includes(facetField.value)) facetField.checked = true;
+                        facetResultPage.content[j] = facetField;
+                        this.facetResultPages[i] = facetResultPage;
+                    })
+                })} 
             
             return solrResultPage;
         });
@@ -202,7 +203,7 @@ export class SolrSearchComponent{
         selection.forEach(sel => this.selectedDatasetIds.push(sel.datasetId));
     }
 
-    private onRowClick(solrRequest: any) {
+    onRowClick(solrRequest: any) {
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
     }
 }
