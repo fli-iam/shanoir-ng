@@ -157,9 +157,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     public instAssessment() {
     }
 
-    public attachNewFiles() {
-    }
-
     private updateExam(): void{
         this.examination.subjectStudy = new SubjectWithSubjectStudy();
         if (this.examination.subject){
@@ -386,20 +383,20 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     // Extra data file management
     
-    private setFile() {
+    public setFile() {
         this.fileInput.nativeElement.click();
     }
     
-        getFileName(element: string): string {
+    getFileName(element: string): string {
         return element.split('\\').pop().split('/').pop();
     }
     
-    protected deleteFile(file: any) {
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);

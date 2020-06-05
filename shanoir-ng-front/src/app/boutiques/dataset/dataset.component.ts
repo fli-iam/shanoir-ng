@@ -58,7 +58,6 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
             private route: ActivatedRoute,
             private dicomArchiveService: DicomArchiveService,
             private studyRightsService: StudyRightsService) {
-
         super(route, 'dataset');
         this.mode = "view";
         this.breadcrumbsService.nameStep('Select dataset');

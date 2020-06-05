@@ -17,15 +17,19 @@ import { EntityService } from '../../../../shared/components/entity/entity.abstr
 import { SubjectPathology } from './subjectPathology.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class SubjectPathologyService extends EntityService<SubjectPathology>{
 
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new SubjectPathology(); }
 
-    
     getSubjectPathologies(preclinicalSubject: PreclinicalSubject): Promise<SubjectPathology[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectPathology[]>(url)

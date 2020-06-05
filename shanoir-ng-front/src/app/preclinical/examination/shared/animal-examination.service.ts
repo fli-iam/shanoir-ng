@@ -13,7 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Examination } from '../../../examinations/shared/examination.model';
@@ -26,6 +26,10 @@ import { Page, Pageable } from '../../../shared/components/table/pageable.model'
 export class AnimalExaminationService extends EntityService<Examination>{
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new Examination(); }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {

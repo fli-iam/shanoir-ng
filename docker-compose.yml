@@ -387,11 +387,11 @@ volumes:
   solr-data:
   certificate-share-data:
   tmp:                      # see shanoir-ng-boutiques/README.md to know why the tmp volumes must be bound to tmp/ on the host
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: /tmp
+    # driver: local
+    # driver_opts:
+    #   o: bind
+    #   type: none
+    #   device: /tmp
   # boutiques:
   #   driver: local
   #   driver_opts:

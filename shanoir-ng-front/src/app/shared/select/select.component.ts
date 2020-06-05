@@ -55,7 +55,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) options: QueryList<SelectOptionComponent>;
-    @ViewChild('label', {read: ElementRef, static: false }) labelNode: ElementRef;
+    @ViewChild('label', { static: true }) labelNode: ElementRef;
     selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
@@ -135,6 +135,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     
     private updateLabel() {
         Array.from(this.labelNode.nativeElement.children).forEach(child => {
+            console.log('remove this.labelNode.nativeElement')
             this.renderer.removeChild(this.labelNode.nativeElement, child);
         });
         if (this.selectedOption) {
@@ -145,6 +146,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             cloned.children[0].style.overflow = 'hidden';
             cloned.children[0].style.textOverflow = 'ellipsis';
             cloned.children[0].style.color = 'var(--dark-grey)';
+            console.log('append this.labelNode.nativeElement')
             this.renderer.appendChild(this.labelNode.nativeElement, cloned);
         }
     }
