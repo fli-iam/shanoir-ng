@@ -24,24 +24,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
-import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -59,7 +60,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectApiController.class)
-@ContextConfiguration(classes = {SubjectApiController.class, SubjectMappingUtilsService.class, RestTemplate.class, MicroserviceRequestsService.class})
+@ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
 @AutoConfigureMockMvc(secure = false)
 public class SubjectApiControllerTest {
 
@@ -82,6 +83,12 @@ public class SubjectApiControllerTest {
 	
 	@MockBean
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
+	
+	@MockBean
+	StudyBIDSService bidsService;
+
+	@MockBean
+	private ShanoirEventService eventService;
 
 	@Before
 	public void setup() throws EntityNotFoundException {
@@ -93,12 +100,14 @@ public class SubjectApiControllerTest {
 		doNothing().when(subjectServiceMock).deleteById(1L);
 		given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());
-		given(subjectServiceMock.create(Mockito.mock(Subject.class))).willReturn(new Subject());
+		Subject subject = new Subject();
+		subject.setId(Long.valueOf(123));
+		given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject );
 		given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
@@ -117,7 +126,7 @@ public class SubjectApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createSubject())))
@@ -125,7 +134,7 @@ public class SubjectApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateSubjectTest() throws Exception {
 		Subject subject = ModelsUtil.createSubject();
 		subject.setId(1L);

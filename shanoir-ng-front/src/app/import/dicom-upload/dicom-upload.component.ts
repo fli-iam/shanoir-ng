@@ -90,7 +90,6 @@ export class DicomUploadComponent {
 
     private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
-        //this.updateValidity();
     }
 
     get valid(): boolean {

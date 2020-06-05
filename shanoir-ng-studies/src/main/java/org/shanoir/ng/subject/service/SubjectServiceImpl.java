@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,6 +41,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SubjectServiceImpl implements SubjectService {
+
+	private static final String FORMAT_CENTER_CODE = "000";
+
+	private static final String FORMAT_SUBJECT_CODE = "0000";
 
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -54,7 +60,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		if (subjectRepository.findOne(id) == null) throw new EntityNotFoundException(Subject.class, id);
+		if (subjectRepository.findOne(id) == null) {
+			throw new EntityNotFoundException(Subject.class, id);
+		}
 		subjectRepository.delete(id);
 	}
 
@@ -95,21 +103,44 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
+			}
+		}
+		return subjectRepository.save(subject);
+	}
+	
+	@Override
+	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
+		if (subject.getSubjectStudyList() != null) {
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				subjectStudy.setSubject(subject);
 			}			
 		}
+		// the first 3 numbers are the center code, search for highest existing subject with center code
+		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
+		String commonNameCenter = formatterCenter.format(centerId);
+		int maxCommonNameNumber = 0;
+		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
+		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
+			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
+			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		}
+		maxCommonNameNumber += 1;
+		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
+		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+		subject.setName(subjectName);
 		return subjectRepository.save(subject);
 	}
 
 	@Override
 	public Subject update(final Subject subject) throws EntityNotFoundException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
-		if (subjectDb == null) throw new EntityNotFoundException(Subject.class, subject.getId());
+		if (subjectDb == null) {
+			throw new EntityNotFoundException(Subject.class, subject.getId());
+		}
 		updateSubjectValues(subjectDb, subject);
 		subjectRepository.save(subjectDb);
 		return subjectDb;
 	}
-	
-	
 
 	/*
 	 * Update some values of template to save them in database.
@@ -132,7 +163,9 @@ public class SubjectServiceImpl implements SubjectService {
 		
 		if (subject.getSubjectStudyList() != null) {
 			ListDependencyUpdate.updateWith(subjectDb.getSubjectStudyList(), subject.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) subjectStudy.setSubject(subjectDb);			
+			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) {
+				subjectStudy.setSubject(subjectDb);
+			}
 		}
 		
 		return subjectDb;
@@ -142,12 +175,12 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
-		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<SimpleSubjectDTO>();
+		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-				if (rel.getStudy().getId() == studyId) {
+				if (studyId.equals(rel.getStudy().getId())) {
 					Subject sub = rel.getSubject();
 					simpleSubjectDTO.setId(sub.getId());
 					simpleSubjectDTO.setName(sub.getName());
@@ -160,6 +193,25 @@ public class SubjectServiceImpl implements SubjectService {
 		return simpleSubjectDTOList;
 	}
 	
+	@Override
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
+		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		if (opt != null) {
+			for (SubjectStudy rel : opt) {
+				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
+				if (studyId.equals(rel.getStudy().getId()) && preclinical == rel.getSubject().isPreclinical()) {
+					Subject sub = rel.getSubject();
+					simpleSubjectDTO.setId(sub.getId());
+					simpleSubjectDTO.setName(sub.getName());
+					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
+					simpleSubjectDTOList.add(simpleSubjectDTO);
+				}
+			}
+		}
+		return simpleSubjectDTOList;
+	}
 
 	@Override
 	public Subject findByIdentifier(String identifier) {
@@ -172,6 +224,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (centerCode == null || "".equals(centerCode)) {
 			return null;
 		}
-		return subjectRepository.findFromCenterCode(centerCode);
+		return subjectRepository.findSubjectFromCenterCode(centerCode + "%");
 	}
+
 }

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -25,6 +25,8 @@ import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { DatasetService } from '../../datasets/shared/dataset.service'
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 @Component({
     selector: 'examination',
@@ -34,21 +36,31 @@ import { ExaminationService } from '../shared/examination.service';
 export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
+    @ViewChild('input') private fileInput: ElementRef;
+
     private centers: IdName[];
     public studies: IdName[];
     private subjects: SubjectWithSubjectStudy[];
+    private examinationExecutives: Object[];
+    private files: File[] = [];
     private inImport: boolean; 
+    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    protected bidsLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
             private examinationService: ExaminationService,
             private centerService: CenterService,
-            private studyService: StudyService, 
+            private studyService: StudyService,
+            private datasetService: DatasetService,
             protected breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
+    }
+    
+    private setFile() {
+        this.fileInput.nativeElement.click();
     }
     
     set examination(examination: Examination) { this.entity = examination; }
@@ -126,11 +138,32 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     private instAssessment() {
     }
 
-    private attachNewFiles() {
-    }
-
     public hasEditRight(): boolean {
         return false;
     }
 
+    protected deleteFile(file: any) {
+        this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+    }
+
+    private attachNewFile(event: any) {
+        let newFile = event.target.files[0];
+        this.examination.extraDataFilePathList.push(newFile.name);
+        this.files.push(newFile);
+    }
+
+    protected save(): Promise<void> {
+        let prom = super.save().then(result => {
+            // Once the exam is saved, save associated files
+            for (let file of this.files) {
+                this.examinationService.postFile(file, this.entity.id).subscribe(response => console.log('result:' + response));
+            }            
+        });
+        return prom;
+    }
+
+    getFileName(element): string {
+        return element.split('\\').pop().split('/').pop();
+    }
 }

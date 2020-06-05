@@ -1,0 +1,273 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.shanoir.uploader</groupId>
+	<artifactId>shanoir-uploader</artifactId>
+	<version>6.0.3</version>
+	<packaging>jar</packaging>
+
+	<name>ShanoirUploader</name>
+	<url>http://shanoir.org</url>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<keycloak.version>4.6.0.Final</keycloak.version>
+	</properties>
+
+	<dependencies>
+		<!-- dependency httpcomponents -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.3.1</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>org.slf4j</groupId>
+			        <artifactId>slf4j-log4j12</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<!-- dependency log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.13</version>
+		</dependency>
+		<!-- dependency Shanoir-NG exchange -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-exchange</artifactId>
+			<version>0.0.1</version>
+			<!-- really important: solves slf4j binding issue and avoid GB of logs during upload with httpClient!!! -->
+			<exclusions>
+			    <exclusion>
+			        <groupId>ch.qos.logback</groupId>
+			        <artifactId>logback-classic</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<!-- dependency Shanoir -->
+		<dependency>
+			<groupId>org.shanoir</groupId>
+			<artifactId>shanoir</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- dependency ShanoirWs -->
+		<dependency>
+			<groupId>org.shanoir</groupId>
+			<artifactId>shanoir-ws</artifactId>
+			<version>0.4</version>
+		</dependency>
+		<!-- dependency Shanoir ng anonymization -->
+		<dependency>
+			<groupId>org.shanoir.anonymization</groupId>
+			<artifactId>anonymization</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- dependency for avoiding Maven errors -->
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- dependency for Quartz library -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.0.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>org.slf4j</groupId>
+			        <artifactId>slf4j-log4j12</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
+		</dependency>
+		<!-- dependency for Apache commons-lang library -->
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<!-- dependency for JBoss Seam (used by components coming from Shanoir, 
+			e.g. like StreamGobbler) -->
+		<dependency>
+			<groupId>org.jboss.seam</groupId>
+			<artifactId>jboss-seam</artifactId>
+			<version>2.2.0.GA</version>
+		</dependency>
+		<!-- dependency jdatepicker to select dates -->
+		<dependency>
+			<groupId>org.jdatepicker</groupId>
+			<artifactId>jdatepicker</artifactId>
+			<version>1.3.4</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<!-- ********************************************************** Dependency 
+			to KeycloakInstalled, to connect desktop apps (e.g. Swing or JavaFX) with 
+			Keycloak, see https://www.keycloak.org/docs/latest/securing_apps/index.html#_installed_adapter 
+			********************************************************** -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-installed-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		<!-- ********************************************************** ** DCM4CHE 
+			dependencies ********************************** ********************************************************** -->
+		<!-- dependency DCM4CHE core -->
+		<dependency>
+			<groupId>dcm4che</groupId>
+			<artifactId>dcm4che-core</artifactId>
+		</dependency>
+		<!-- dependency DCM4CHE tool echo -->
+		<dependency>
+			<groupId>dcm4che.tool</groupId>
+			<artifactId>dcm4che-tool-dcmecho</artifactId>
+		</dependency>
+		<!-- dependency DCM4CHE tool dcmqr custom -->
+		<dependency>
+			<groupId>dcm4che2.tool</groupId>
+			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- dependency DCM4CHE tool dcmrcv -->
+		<dependency>
+			<groupId>dcm4che.tool</groupId>
+			<artifactId>dcm4che-tool-dcmrcv</artifactId>
+		</dependency>
+		<!-- dependency commons-cli used by DCM4CHE tool echo -->
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<!-- dependency DCM4CHE net used by DCM4CHE tool echo -->
+		<dependency>
+			<groupId>dcm4che</groupId>
+			<artifactId>dcm4che-net</artifactId>
+			<version>2.0.22</version>
+		</dependency>
+		<!-- dependency slf4j-api used by DCM4CHE tool echo -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<!-- dependency slf4j-impl used by DCM4CHE tool echo -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>dcm4che</groupId>
+				<artifactId>dcm4che-core</artifactId>
+				<version>2.0.22</version>
+			</dependency>
+			<dependency>
+				<groupId>dcm4che.tool</groupId>
+				<artifactId>dcm4che-tool-dcmecho</artifactId>
+				<version>2.0.22</version>
+			</dependency>
+			<dependency>
+				<groupId>dcm4che.tool</groupId>
+				<artifactId>dcm4che-tool-dcmrcv</artifactId>
+				<version>2.0.22</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dcm4che</groupId>
+				<artifactId>dcm4che-core</artifactId>
+				<version>5.10.6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>dcm4che</id>
+			<name>dcm4che Repository</name>
+			<url>http://maven.dcm4che.org</url>
+		</repository>
+		<repository>
+			<id>jboss</id>
+			<name>JBoss Release Repository</name>
+			<url>http://repository.jboss.org/maven2</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<!-- Place any Ant task here. You can add anything you can add between 
+				<target> and </target> in a build.xml. -->
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<configuration>
+							<tasks>
+								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
+								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
+								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
+								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifestEntries>
+							<Permissions>all-permissions</Permissions>
+							<Codebase>*</Codebase>
+							<Application-Name>ShanoirUploader</Application-Name>
+						</manifestEntries>
+						<manifest>
+							<mainClass>org.shanoir.uploader.ShanoirUploader</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

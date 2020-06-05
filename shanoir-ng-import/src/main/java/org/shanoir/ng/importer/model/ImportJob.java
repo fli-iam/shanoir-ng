@@ -14,13 +14,16 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author atouboul
  * @author mkain
  */
-public class ImportJob {
+public class ImportJob implements Serializable {
+
+	private static final long serialVersionUID = 8804929608059674037L;
 
     private boolean fromDicomZip;
 
@@ -38,11 +41,37 @@ public class ImportJob {
     
     private Long converterId;
     
-    public boolean isFromDicomZip() {
+    private Long frontStudyId;
+    
+	private String studyCardName;
+	
+	// todo: remove this later, when front end uses StudyCards
+    private Long frontAcquisitionEquipmentId;
+	
+	private String anonymisationProfileToUse;
+    
+    private Long frontConverterId;
+
+    private String archive;
+
+	private String subjectName;
+
+	private String studyName;
+
+    
+	public String getArchive() {
+		return archive;
+	}
+
+	public void setArchive(final String archive) {
+		this.archive = archive;
+	}
+
+	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
-	public void setFromDicomZip(boolean fromDicomZip) {
+	public void setFromDicomZip(final boolean fromDicomZip) {
 		this.fromDicomZip = fromDicomZip;
 	}
 
@@ -50,7 +79,7 @@ public class ImportJob {
 		return fromShanoirUploader;
 	}
 
-	public void setFromShanoirUploader(boolean fromShanoirUploader) {
+	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
 		this.fromShanoirUploader = fromShanoirUploader;
 	}
 
@@ -58,7 +87,7 @@ public class ImportJob {
 		return fromPacs;
 	}
 
-	public void setFromPacs(boolean fromPacs) {
+	public void setFromPacs(final boolean fromPacs) {
 		this.fromPacs = fromPacs;
 	}
 
@@ -66,7 +95,7 @@ public class ImportJob {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(final List<Patient> patients) {
 		this.patients = patients;
 	}
 
@@ -74,7 +103,7 @@ public class ImportJob {
 		return examinationId;
 	}
 
-	public void setExaminationId(Long examinationId) {
+	public void setExaminationId(final Long examinationId) {
 		this.examinationId = examinationId;
 	}
 
@@ -84,6 +113,31 @@ public class ImportJob {
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
+	}
+
+	public Long getFrontStudyId() {
+		return frontStudyId;
+	}
+
+	public void setFrontStudyId(final Long frontStudyId) {
+		this.frontStudyId = frontStudyId;
+	}
+
+	public String getStudyCardName() {
+		return studyCardName;
+	}
+
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
+	}
+
+	public Long getFrontAcquisitionEquipmentId() {
+		return frontAcquisitionEquipmentId;
+	}
+
+	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
+		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+
 	}
 
 	public Long getStudyCardId() {
@@ -101,6 +155,33 @@ public class ImportJob {
 	public void setConverterId(Long converterId) {
 		this.converterId = converterId;
 	}
-	
+
+	public void setFrontConverterId(final Long frontConverterId) {
+		this.frontConverterId = frontConverterId;
+	}
+
+    public String getAnonymisationProfileToUse() {
+		return anonymisationProfileToUse;
+	}
+
+	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+		this.anonymisationProfileToUse = anonymisationProfileToUse;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
 }
 

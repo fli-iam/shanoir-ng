@@ -41,7 +41,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 				return examinationToExaminationDTO(entity);
 			}
 		});
-		return new PageImpl<ExaminationDTO>(mappedPage);
+		return new PageImpl<>(mappedPage);
 	}
 
 	@Override

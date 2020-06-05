@@ -27,6 +27,8 @@ import org.springframework.data.repository.CrudRepository;
 public interface StudyCardRepository extends CrudRepository<StudyCard, Long> {
 
 	List<StudyCard> findByStudyIdIn(List<Long> studyIdList);
+	
+	StudyCard findByName(String name);
 
 	List<StudyCard> findByStudyId(Long studyId);
 	

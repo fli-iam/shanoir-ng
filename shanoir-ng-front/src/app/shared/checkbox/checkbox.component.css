@@ -25,10 +25,14 @@
 
 div {
     color: var(--color-c);
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: 1px;
+    right: 1px;
 }
 
 div svg {
-    height: 90%;
+    height: 100%;
     width: 100%;
-    margin-top: 5%;
 }

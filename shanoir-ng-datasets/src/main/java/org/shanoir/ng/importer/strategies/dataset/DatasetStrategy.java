@@ -36,9 +36,9 @@ import org.shanoir.ng.importer.dto.Serie;
 
 public interface DatasetStrategy<T extends org.shanoir.ng.dataset.model.Dataset> {
 
-	DatasetsWrapper<T> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie, ImportJob importJob);
+	DatasetsWrapper<T> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie, ImportJob importJob) throws Exception;
 
-	T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,	ImportJob importJob);
+	T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,	ImportJob importJob) throws Exception;
 
 	String computeDatasetName(String name, int index);
 

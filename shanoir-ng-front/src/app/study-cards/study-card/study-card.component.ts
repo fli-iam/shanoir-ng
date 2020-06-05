@@ -119,7 +119,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     private fetchNiftiConverters() {
         this.niftiConverterService.getAll()
-            .then(converters => this.niftiConverters = converters);
+            .then(converters => this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name)));
     }
 
     private onStudyChange(study: IdName, form: FormGroup) {

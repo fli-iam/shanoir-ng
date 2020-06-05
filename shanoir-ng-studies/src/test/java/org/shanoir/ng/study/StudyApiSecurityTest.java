@@ -28,6 +28,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.bids.service.StudyBIDSService;
+import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -83,6 +85,12 @@ public class StudyApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
+	@MockBean
+	private StudyBIDSService bidsService;
+	
+	@MockBean
+	private BidsDeserializer bidsDeserializer;
+
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
@@ -134,7 +142,7 @@ public class StudyApiSecurityTest {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL));
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
-		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE));
+		given(repository.findOne(ENTITY_ID)).willReturn(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL));
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 	}
 
@@ -197,9 +205,9 @@ public class StudyApiSecurityTest {
 //		given(repository.findAll(Mockito.anyList())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
 //		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
 //				(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
-//		
+//
 //		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
-//		
+//
 //		assertEquals(1, api.findStudies().getBody().size());
 //		assertNotNull(api.findStudies().getBody().get(0).getStudyCenterList());
 //		assertEquals(1, api.findStudies().getBody().get(0).getStudyCenterList().size());
@@ -210,19 +218,21 @@ public class StudyApiSecurityTest {
 		Study study = ModelsUtil.createStudy();
 		study.setId(id);
 		List<StudyUser> studyUserList = new ArrayList<>();
-		StudyUser studyUser = new StudyUser();
-		studyUser.setUserId(LOGGED_USER_ID);
-		studyUser.setUserName(LOGGED_USER_USERNAME);
-		studyUser.setStudy(study);
-		studyUser.setStudyUserRights(Arrays.asList(rights));
-		studyUserList.add(studyUser);			
+		for (StudyUserRight right : rights) {
+			StudyUser studyUser = new StudyUser();
+			studyUser.setUserId(LOGGED_USER_ID);
+			studyUser.setUserName(LOGGED_USER_USERNAME);
+			studyUser.setStudy(study);
+			studyUser.setStudyUserRights(Arrays.asList(right));
+			studyUserList.add(studyUser);
+		}
 		study.setStudyUserList(studyUserList);
 		StudyCenter studyCenter = new StudyCenter();
 		studyCenter.setCenter(ModelsUtil.createCenter());
 		studyCenter.setStudy(study);
-		studyCenter.setId(1L);		
+		studyCenter.setId(1L);
 		study.setStudyCenterList(Arrays.asList(studyCenter));
-		return study;		
+		return study;
 	}
 
 }

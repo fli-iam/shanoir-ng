@@ -28,6 +28,8 @@ public class CommonIdsDTO {
 
 	private Long subjectId;
 
+	private Long equipementId;
+
 	/**
 	 * @return the centerId
 	 */
@@ -73,4 +75,17 @@ public class CommonIdsDTO {
 		this.subjectId = subjectId;
 	}
 
+	/**
+	 * @return the equipementId
+	 */
+	public Long getEquipementId() {
+		return equipementId;
+	}
+
+	/**
+	 * @param equipementId the equipementId to set
+	 */
+	public void setEquipementId(Long equipementId) {
+		this.equipementId = equipementId;
+	}
 }

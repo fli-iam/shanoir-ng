@@ -1,0 +1,86 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="TherapyFormComponent content-component">
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+						<div class="header command-zone" i18n="View therapy|Title">View therapy</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'"> 
+						<div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'"> 
+						<div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="!isTherapyUnique" class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">This therapy already exists!</label>
+						<li class="required">
+							<label i18n="Edit therapy|Name label" class="required-label">Name</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{therapy?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="therapy.name"/>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit therapy|Name required error@@therapyDetailNameRequiredError">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit therapy|Location label" class="required-label">Type</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									{{TherapyType.getLabel(therapy.therapyType)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+                                    <select-box formControlName="therapyType" [(ngModel)]="therapy.therapyType" [options]="TherapyType.toOptions()">
+                                    </select-box>
+									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit therapy|Comment label">Comment</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{therapy?.comment}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="therapy.comment"></textarea>
+								</ng-template>
+							</span>
+							
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+		</table>
+		<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()">
+		</form-footer>
+    </form>
+</div>

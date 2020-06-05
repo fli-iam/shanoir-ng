@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.dto;
 
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
@@ -46,7 +47,9 @@ public class ExaminationDTO {
 	private Double subjectWeight;
 	
 	private boolean preclinical;
-	
+
+	private List<String> extraDataFilePathList;
+
 	/**
 	 * @return the id
 	 */
@@ -58,7 +61,7 @@ public class ExaminationDTO {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(Long id) {
+	public void setId(final Long id) {
 		this.id = id;
 	}
 
@@ -73,7 +76,7 @@ public class ExaminationDTO {
 	 * @param comment
 	 *            the comment to set
 	 */
-	public void setComment(String comment) {
+	public void setComment(final String comment) {
 		this.comment = comment;
 	}
 
@@ -88,7 +91,7 @@ public class ExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(final LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
@@ -103,11 +106,10 @@ public class ExaminationDTO {
 	 * @param note
 	 *            the note to set
 	 */
-	public void setNote(String note) {
+	public void setNote(final String note) {
 		this.note = note;
 	}
 
-	
 	/**
 	 * @return the subjectWeight
 	 */
@@ -119,7 +121,7 @@ public class ExaminationDTO {
 	 * @param subjectWeight
 	 *            the subjectWeight to set
 	 */
-	public void setSubjectWeight(Double subjectWeight) {
+	public void setSubjectWeight(final Double subjectWeight) {
 		this.subjectWeight = subjectWeight;
 	}
 	
@@ -127,7 +129,7 @@ public class ExaminationDTO {
 		return preclinical;
 	}
 
-	public void setPreclinical(boolean preclinical) {
+	public void setPreclinical(final boolean preclinical) {
 		this.preclinical = preclinical;
 	}
 
@@ -154,4 +156,19 @@ public class ExaminationDTO {
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
 	}
+	
+	/**
+	 * @return the extraDataFilePathList
+	 */
+	public List<String> getExtraDataFilePathList() {
+		return extraDataFilePathList;
+	}
+
+	/**
+	 * @param extraDataFilePathList the extraDataFilePathList to set
+	 */
+	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+		this.extraDataFilePathList = extraDataFilePathList;
+	}
+
 }

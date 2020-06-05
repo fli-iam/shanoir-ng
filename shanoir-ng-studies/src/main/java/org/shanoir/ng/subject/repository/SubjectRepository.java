@@ -21,8 +21,17 @@ import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for Subject.
+ * 
+ * mkain: For the method findSubjectFromCenterCode I would have preferred to use
+ * JPQL or Spring Data Jpa with method names. Both did not work for me: 1) JPQL
+ * does not support "limit 1". With JPQL I would have to use Pageable to implement
+ * the same, but as I want to give back one subject, I see no sense in asking the
+ * caller to work with PageRequest(0,1), what looks strange too. 2) With Spring
+ * Data Jpa I was not able to combine findFirstByOrderDesc and StartsWith, that
+ * is why I am using nativeQuery here.
  *
  * @author msimon
+ * @author mkain
  */
 public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
 
@@ -44,7 +53,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Subject findByIdentifier(String identifier);
 	
-	
-	@Query("SELECT s FROM Subject s WHERE s.name LIKE CONCAT(:centerCode,'%','%','%','%')")
-	public Subject findFromCenterCode(@Param("centerCode") String centerCode);
+	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode ORDER BY name DESC LIMIT 1", nativeQuery = true)
+	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
+
 }

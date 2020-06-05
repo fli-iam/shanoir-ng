@@ -15,8 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
-        <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
-        <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
+        <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
     <!-- Text search -->
     <span *ngIf="browserSearch" class="text-search">
@@ -67,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
     [class.edit]="editMode">
-    <td *ngIf="selectionAllowed" class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
+    <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <td 
         *ngFor="let col of columnDefs" 

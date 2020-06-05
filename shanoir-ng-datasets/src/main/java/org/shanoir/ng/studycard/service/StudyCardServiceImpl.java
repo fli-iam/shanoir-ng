@@ -108,4 +108,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 		return this.studyCardRepository.findByAcquisitionEquipmentId(acqEqId);
 	}
 
+	@Override
+	public StudyCard findByName(String name) {
+		return studyCardRepository.findByName(name);
+	}
+
 }

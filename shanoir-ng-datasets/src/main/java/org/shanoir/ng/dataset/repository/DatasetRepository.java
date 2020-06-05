@@ -23,4 +23,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	Page<Dataset> findByStudyIdIn(Iterable<Long> studyIds, Pageable pageable);
 
-} 
+	Iterable<Dataset> findByStudyId(Long studyId);
+
+}

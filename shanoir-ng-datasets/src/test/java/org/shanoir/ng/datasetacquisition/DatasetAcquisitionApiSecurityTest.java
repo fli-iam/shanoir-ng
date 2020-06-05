@@ -88,7 +88,7 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessDenied(api::findByStudyCard, 1L);
 		assertAccessDenied(api::findDatasetAcquisitions);
 
-		assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
+		assertAccessDenied(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) { fail(e1.toString()); } }, new ImportJob());
 		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDsAcq(1L), mockBindingResult);
 		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 	}
@@ -111,9 +111,10 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
 
 		ImportJob importJob = new ImportJob(); importJob.setExaminationId(1L);
-		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		assertAccessDenied(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) { fail(e1.toString()); } }, new ImportJob());
 		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDsAcq(1L), mockBindingResult);
 		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
+
 	}
 	
 	@Test
@@ -136,10 +137,12 @@ public class DatasetAcquisitionApiSecurityTest {
 		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		Examination exam = ModelsUtil.createExamination(); exam.setId(1L);
 		ImportJob importJob = new ImportJob();
+		importJob.setFrontStudyId(2L);
 		importJob.setExaminationId(3L);
-		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		assertAccessDenied(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) { fail(e1.toString()); } }, importJob);
+		importJob.setFrontStudyId(1L);
 		importJob.setExaminationId(1L);
-		assertAccessAuthorized(api::createNewDatasetAcquisition, importJob);
+		assertAccessAuthorized(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) {} }, importJob);
 		
 		DatasetAcquisition dsAcqDB = api.findDatasetAcquisitionById(1L).getBody();
 		given(commService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
@@ -167,7 +170,7 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessAuthorized(api::findDatasetAcquisitions);
 		assertEquals(3, api.findDatasetAcquisitions().getBody().size());
 
-		assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
+		assertAccessAuthorized(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) {} }, new ImportJob());
 		assertAccessAuthorized((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDsAcq(1L), mockBindingResult);
 		assertAccessAuthorized(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { }}, 4L);
 	}

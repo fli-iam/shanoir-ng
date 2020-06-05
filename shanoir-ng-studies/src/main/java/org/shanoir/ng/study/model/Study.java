@@ -41,12 +41,10 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.Timepoint;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -75,7 +73,6 @@ public class Study extends HalEntity {
 	private boolean clinical;
 
 	/** Coordinator. */
-	// TODO: replace by investigator
 	private Long coordinatorId;
 
 	/** Is with downloadable by default. */

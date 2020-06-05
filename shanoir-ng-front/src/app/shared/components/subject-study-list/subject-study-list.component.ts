@@ -41,7 +41,8 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     @Input() selectableList: Subject[] | Study[];
     private selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
-    
+    @Input() displaySubjectType: boolean = true;
+
     private get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
     }

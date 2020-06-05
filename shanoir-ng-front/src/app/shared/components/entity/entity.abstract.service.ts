@@ -69,7 +69,7 @@ export abstract class EntityService<T extends Entity> {
         });            
     }
 
-    private toRealObject(entity: T): T {
+    protected toRealObject(entity: T): T {
         let trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
             let value = entity[key];

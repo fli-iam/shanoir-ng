@@ -40,6 +40,14 @@ public interface StudyCardService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
 	StudyCard findById(Long id);
+	
+	/**
+	 * Find template by its id.
+	 *
+	 * @param id template id.
+	 * @return a template or null.
+	 */
+	StudyCard findByName(String name);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
@@ -36,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Examination service implementation.
@@ -69,6 +72,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationRepository.delete(id);
 	}
 
+	@Value("${datasets-data}")
+	private String dataDir;
+
+
 	@Override
 	public Page<Examination> findPage(final Pageable pageable) {
 		// Get list of studies reachable by connected user
@@ -95,7 +102,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
-		if (examinationDb == null) throw new EntityNotFoundException(Examination.class, examination.getId());
+		if (examinationDb == null) {
+			throw new EntityNotFoundException(Examination.class, examination.getId());
+		}
 		updateExaminationValues(examinationDb, examination);
 		examinationRepository.save(examinationDb);
 		return examinationDb;
@@ -117,7 +126,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
 					entity, IdName[].class);
 		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - " + e.getMessage());
+			LOG.error("Error on study microservice request - {}", e.getMessage());
 		}
 
 		final List<Long> studyIds = new ArrayList<>();
@@ -127,7 +136,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
 				studies = response.getBody();
 			} else {
-				LOG.error("Error on study microservice response - status code: " + response.getStatusCode());
+				LOG.error("Error on study microservice response - status code: {}",response.getStatusCode());
 			}
 
 			if (studies != null) {
@@ -151,20 +160,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
-		// examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
-		// examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
-		// examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
-		// examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-		// examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
-		// examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
-		// examinationDb.setInvestigatorId(examination.getInvestigatorId());
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudyId(examination.getStudyId());
-		// examinationDb.setSubjectId(examination.getSubjectId());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
-		// examinationDb.setTimepoint(examination.getTimepoint());
-		// examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 		return examinationDb;
 	}
 
@@ -172,5 +171,39 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
 		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
 	}
+
+	@Override
+	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
+		// Get list of studies reachable by connected user
+		return examinationRepository.findByStudyIdInAndPreclinical(getStudiesForUser(), isPreclinical, pageable);
+	}
+
+	@Override
+	public String addExtraData(final Long examinationId, final MultipartFile file) {
+		String filePath = getExtraDataFilePath(examinationId, file.getOriginalFilename());
+		File fileToCreate = new File(filePath);
+		fileToCreate.getParentFile().mkdirs();
+		try {
+			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			file.transferTo(new File(filePath));
+		} catch (Exception e) {
+			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
+			e.printStackTrace();
+			return null;
+		}
+		return filePath;
+	}
+
+	/**
+	 * Gets the extra data file path
+	 * @param examinationId id of the examination
+	 * @param fileName name of the file
+	 * @return the file path of the file
+	 */
+	@Override
+	public String getExtraDataFilePath(Long examinationId, String fileName) {
+		return dataDir + "/examination-" + examinationId + "/" + fileName;
+	}
+
 
 }

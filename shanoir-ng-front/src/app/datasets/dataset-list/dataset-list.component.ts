@@ -105,5 +105,4 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     canDelete(ds: Dataset): boolean {
         return this.canEdit(ds);
     }
-    
 }

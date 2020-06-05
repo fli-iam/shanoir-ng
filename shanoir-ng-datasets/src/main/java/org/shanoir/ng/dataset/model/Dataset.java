@@ -63,7 +63,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({ 	
+@JsonSubTypes({
 		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
 		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
 		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
@@ -135,7 +135,8 @@ public abstract class Dataset extends AbstractEntity {
 	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
 	private Long importedStudyId;
 	
-	
+	/** Subject. */
+	private Long studyId;
 
 	/** Subject. */
 	private Long subjectId;
@@ -179,7 +180,7 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	public List<DatasetExpression> getDatasetExpressions() {
 		if (datasetExpressions == null) {
-			datasetExpressions = new ArrayList<DatasetExpression>();
+			datasetExpressions = new ArrayList<>();
 		}
 		return datasetExpressions;
 	}
@@ -251,8 +252,6 @@ public abstract class Dataset extends AbstractEntity {
 			final StringBuilder result = new StringBuilder();
 			result.append(this.getId());
 			if (creationDate != null) {
-				// TODO: change pattern
-//				result.append(" ").append(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(creationDate));
 				result.append(" ").append(creationDate.toString());
 			}
 			String modalityType = originMetadata.getDatasetModalityType().name();
@@ -333,6 +332,10 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 	/**

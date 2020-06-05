@@ -41,6 +41,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected breadcrumbsService: BreadcrumbsService;
     protected windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
+    public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
     private selectedId:  number;
 
@@ -104,10 +105,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    onRowClick(entity: T) {
-        // if (this.windowService.isWide()) this.selectedId = entity.id;
-        // else 
-            this.goToView(entity.id);
+    protected onRowClick(entity: T) {
+        this.goToView(entity.id);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {

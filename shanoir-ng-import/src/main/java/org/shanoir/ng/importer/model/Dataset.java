@@ -26,7 +26,7 @@ public class Dataset {
 	@JsonProperty("name")
 	private String name;
 	
-	private List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
+	private List<ExpressionFormat> expressionFormats = new ArrayList<>();
 
 	@JsonProperty("diffusionGradients")
 	private List<DiffusionGradient> diffusionGradients;
@@ -61,7 +61,7 @@ public class Dataset {
 
 	public List<DiffusionGradient> getDiffusionGradients() {
 		if (diffusionGradients == null) {
-			diffusionGradients = new ArrayList<DiffusionGradient>();
+			diffusionGradients = new ArrayList<>();
 		}
 		return diffusionGradients;
 	}
@@ -72,7 +72,7 @@ public class Dataset {
 
 	public Set<Double> getRepetitionTimes() {
 		if (repetitionTimes == null) {
-			this.repetitionTimes = new HashSet<Double>();
+			this.repetitionTimes = new HashSet<>();
 		}
 		return this.repetitionTimes;
 	}
@@ -83,7 +83,7 @@ public class Dataset {
 
 	public Set<Double> getInversionTimes() {
 		if (inversionTimes == null) {
-			this.inversionTimes = new HashSet<Double>();
+			this.inversionTimes = new HashSet<>();
 		}
 		return this.inversionTimes;
 	}
@@ -94,7 +94,7 @@ public class Dataset {
 
 	public Set<Double> getFlipAngles() {
 		if (flipAngles == null) {
-			this.flipAngles = new HashSet<Double>();
+			this.flipAngles = new HashSet<>();
 		}
 		return this.flipAngles;
 	}
@@ -105,7 +105,7 @@ public class Dataset {
 
 	public Set<EchoTime> getEchoTimes() {
 		if (echoTimes == null) {
-			this.echoTimes =  new HashSet<EchoTime>();
+			this.echoTimes =  new HashSet<>();
 		}
 		return this.echoTimes;
 	}

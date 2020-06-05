@@ -19,6 +19,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { ExaminationService } from './examination.service';
 import { ExaminationDTO } from './examination.dto';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 
 
 export class Examination extends Entity {
@@ -27,10 +28,14 @@ export class Examination extends Entity {
     subject: IdName | Subject;
     study: IdName | Study;
     center: IdName | Center;
+    examinationExecutive: IdName;
+    subjectStudy: SubjectWithSubjectStudy;
     comment: string;
     note: string;
     subjectWeight: number;
-
+    extraDataFilePathList: string[] = [];
+    preclinical: boolean;
+    hasStudyCenterData: boolean = false;  
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 
     // Override

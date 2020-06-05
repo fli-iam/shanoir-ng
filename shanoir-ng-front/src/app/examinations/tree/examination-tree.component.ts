@@ -14,7 +14,7 @@
 import { Component, Input } from '@angular/core';
 
 import { Examination } from '../shared/examination.model';
-
+import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-tree',
@@ -24,6 +24,14 @@ import { Examination } from '../shared/examination.model';
 
 export class ExaminationTreeComponent {
 
+    constructor(private examinationService: ExaminationService,) {
+        
+    }
+
     @Input() examination: Examination;
+
+    downloadFile(file) {
+        this.examinationService.downloadFile(file, this.examination.id);
+    }
 
 }

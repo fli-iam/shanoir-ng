@@ -330,7 +330,7 @@ export class ClinicalContextComponent implements OnDestroy {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter);
+            this.subject, this.examination, this.niftiConverter, null);
     }
 
     private openCreateCenter = () => {
@@ -447,7 +447,10 @@ export class ClinicalContextComponent implements OnDestroy {
         let newExam = new Examination();
         newExam.study = new IdName(this.study.id, this.study.name);
         newExam.center = new IdName(this.center.id, this.center.name);
-        newExam.subject = this.subject;
+        newExam.subjectStudy = this.subject;
+        newExam.subject = new Subject();
+        newExam.subject.id = this.subject.id;
+        newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;

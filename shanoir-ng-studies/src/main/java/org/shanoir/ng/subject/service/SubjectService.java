@@ -62,6 +62,18 @@ public interface SubjectService {
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId);
 	
+	
+	/**
+	 * Get all the subjects of a study
+	 *
+	 * @param studyId
+	 * @param preclinical is the subject preclinical or not
+	 * @return list of subjects
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(Long studyId, boolean preclinical);
+	
 	/**
 	 * Find subject by data.
 	 *
@@ -111,7 +123,6 @@ public interface SubjectService {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findSubjectFromCenterCode(String centerCode);
 	
-	
 	/**
 	 * Save a subject.
 	 *
@@ -121,16 +132,23 @@ public interface SubjectService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	Subject create(Subject subject);
 	
-	
+	/**
+	 * Save a subject and auto-increment the common name on using the centerId.
+	 *
+	 * @param subject subject to create.
+	 * @return created subject.
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	Subject createAutoIncrement(Subject subject, Long centerId);
 	
 	/**
 	 * Update a subject.
 	 *
 	 * @param subject subject to update.
 	 * @return updated subject.
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	Subject update(Subject subject) throws EntityNotFoundException;
 
 	/**

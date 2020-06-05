@@ -131,7 +131,7 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testEditAsExpert() throws ShanoirException {
-		assertAccessDenied(service::update, mockExisting);
+		assertAccessAuthorized(service::update, mockExisting);
 		
 		Subject subjectMock1 = buildSubjectMock(ENTITY_ID);
 		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_SEE_ALL);
@@ -167,7 +167,7 @@ public class SubjectServiceSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockNoRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockNoRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockNoRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
 		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
 		assertAccessDenied(service::findByIdentifier, "identifier");
@@ -180,7 +180,7 @@ public class SubjectServiceSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockWrongRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockWrongRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockWrongRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
 		assertAccessDenied(service::findByData, NAME);
 		assertAccessDenied(service::findById, 1L);
 		assertAccessDenied(service::findByIdentifier, "identifier");
@@ -193,7 +193,7 @@ public class SubjectServiceSecurityTest {
 		given(repository.findOne(1L)).willReturn(subjectMockRightRights);
 		given(repository.findByIdentifier("identifier")).willReturn(subjectMockRightRights);
 		given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockRightRights);
-		given(repository.findFromCenterCode("centerCode")).willReturn(subjectMockRightRights);
+		given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
 		assertAccessAuthorized(service::findByData, NAME);
 		assertAccessAuthorized(service::findById, 1L);
 		assertAccessAuthorized(service::findByIdentifier, "identifier");
@@ -208,7 +208,7 @@ public class SubjectServiceSecurityTest {
 		Subject newSubjectMock = buildSubjectMock(null);
 		assertAccessDenied(service::create, newSubjectMock);
 		
-		// Create subject 
+		// Create subject
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(9L));
 		given(studyRepository.findAll(Arrays.asList(new Long[] { 9L }))).willReturn(studiesMock);
@@ -247,14 +247,16 @@ public class SubjectServiceSecurityTest {
 		Study study = ModelsUtil.createStudy();
 		study.setId(id);
 		List<StudyUser> studyUserList = new ArrayList<>();
-		StudyUser studyUser = new StudyUser();
-		studyUser.setUserId(LOGGED_USER_ID);
-		studyUser.setUserName(LOGGED_USER_USERNAME);
-		studyUser.setStudy(study);
-		studyUser.setStudyUserRights(Arrays.asList(rights));
-		studyUserList.add(studyUser);			
+		for (StudyUserRight right : rights) {
+			StudyUser studyUser = new StudyUser();
+			studyUser.setUserId(LOGGED_USER_ID);
+			studyUser.setUserName(LOGGED_USER_USERNAME);
+			studyUser.setStudy(study);
+			studyUser.setStudyUserRights(Arrays.asList(right));
+			studyUserList.add(studyUser);
+		}
 		study.setStudyUserList(studyUserList);
-		return study;		
+		return study;
 	}
 	
 	private Subject buildSubjectMock(Long id) {
@@ -270,8 +272,12 @@ public class SubjectServiceSecurityTest {
 		subjectStudy.setSubject(mock);
 		subjectStudy.setStudy(study);
 		
-		if (study.getSubjectStudyList() == null) study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		if (mock.getSubjectStudyList() == null) mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		if (study.getSubjectStudyList() == null) {
+			study.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
+		if (mock.getSubjectStudyList() == null) {
+			mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
 		study.getSubjectStudyList().add(subjectStudy);
 		mock.getSubjectStudyList().add(subjectStudy);
 	}

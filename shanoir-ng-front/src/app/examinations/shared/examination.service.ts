@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
@@ -46,21 +47,37 @@ export class ExaminationService extends EntityService<Examination> {
         .then(this.mapPage);
     }
 
-    postFile(fileToUpload: File): Observable<any> {
-        throw new Error('this is not yet implemented');
-        // const endpoint = 'your-destination-url';
-        // const formData: FormData = new FormData();
-        // formData.append('fileKey', fileToUpload, fileToUpload.name);
-        // return this.http
-        //     .post(endpoint, formData)
-        //     .map(response => response);
-    }
-
     protected mapEntity = (entity: ExaminationDTO, result?: Examination): Promise<Examination> => {
         return this.examinationDtoService.toEntity(entity);
     }
 
     protected mapEntityList = (entities: any[], result?: Examination[]): Promise<Examination[]> => {
         return this.examinationDtoService.toEntityList(entities);
+    }
+        
+    postFile(fileToUpload: File, examId: number): Observable<any> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return this.http.post<any>(endpoint, formData);
+    }
+
+    downloadFile(fileName: string, examId: number): void {
+        const endpoint = this.API_URL + '/extra-data-download/' + examId + "/" + fileName + "/";
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
+            if (response.status == 200) {
+                this.downloadIntoBrowser(response);
+            }
+        });
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
     }
 }

@@ -104,7 +104,7 @@ public class StudyServiceSecurityTest {
 		assertAccessDenied(service::findById, 1L);
 		
 		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT));
-		assertAccessDenied(service::findById, 1L);
+		assertAccessAuthorized(service::findById, 1L);
 		
 		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
 		assertAccessAuthorized(service::findById, 1L);

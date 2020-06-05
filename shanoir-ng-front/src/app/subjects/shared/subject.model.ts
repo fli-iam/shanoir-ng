@@ -28,12 +28,22 @@ export class Subject extends Entity {
     name: string;
     identifier: string;
     birthDate: Date;
+    preclinical: boolean;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
+
+    public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
+        let subject = new Subject();
+        subject.id = id;
+        subject.name = name;
+        subject.identifier = identifier;
+        subject.subjectStudyList = [subjectStudy];
+        return subject;
+    }
 
     service = ServiceLocator.injector.get(SubjectService);
     
@@ -63,7 +73,8 @@ export class SubjectDTO {
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: Id[] = [];
-
+    preclinical: boolean;
+	
     constructor(subject: Subject) {
         this.id = subject.id;
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
@@ -75,6 +86,7 @@ export class SubjectDTO {
         this.imagedObjectCategory = subject.imagedObjectCategory;
         this.sex = subject.sex;
         this.selected = subject.selected;
+        this.preclinical = subject.preclinical;
         this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
             let dto = new SubjectStudyDTO(ss);
             dto.subject = null;

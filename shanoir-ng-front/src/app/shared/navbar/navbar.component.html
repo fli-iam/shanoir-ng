@@ -19,7 +19,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <dropdown-menu label="Manage data">
                 <menu-item label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="study" [icon]="ImagesUrlUtil.FOLDER_12_ICON_PATH"></menu-item>
                 <menu-item label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="subject" [icon]="ImagesUrlUtil.USER_ICON_PATH"></menu-item>
+                <menu-item label="Preclinical Subjects" link="preclinical-subject" [icon]="ImagesUrlUtil.RAT_ICON_PATH"></menu-item>
                 <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination" [icon]="ImagesUrlUtil.STETHOSCOPE_ICON_PATH"></menu-item>
+                <menu-item label="Preclinical Examinations" link="preclinical-examination" [icon]="ImagesUrlUtil.EXAMINATION_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" [icon]="ImagesUrlUtil.X_RAY_1_ICON_PATH"></menu-item>
                 <menu-item label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="dataset" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center" [icon]="ImagesUrlUtil.HOSPITAL_ICON_PATH"></menu-item>   
@@ -28,12 +30,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <menu-item label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="coil" [icon]="ImagesUrlUtil.WIFI_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" [icon]="ImagesUrlUtil.USERS_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" [icon]="ImagesUrlUtil.PODIUM_ICON_PATH"></menu-item>
+               	<menu-item label="Pathology Models" link="preclinical-pathology-model" [icon]="ImagesUrlUtil.VIRUS_ICON_PATH"></menu-item>
+                <menu-item label="Therapies" link="preclinical-therapy" [icon]="ImagesUrlUtil.PILL_ICON_PATH"></menu-item>
+                <menu-item label="Anesthetics" link="preclinical-anesthetic" [icon]="ImagesUrlUtil.SLEEP_ICON_PATH"></menu-item>   
             </dropdown-menu>
 
-            <dropdown-menu label="Import data">
+            <dropdown-menu label="Import data" *ngIf="isUserAdminOrExpert()">
                 <menu-item label="From DICOM CD/DVD" i18n-label="Import data menu|From DICOM CD/DVD@@navbarFromDICOMCDDVD" link="imports/upload" [icon]="ImagesUrlUtil.COMPACT_DISC_ICON_PATH"></menu-item>
+                <menu-item label="From BRUKER" i18n-label="Import data menu|From BRUKER@@navbarFromBRUKER" link="importsBruker" [icon]="ImagesUrlUtil.BRUKER_ICON_PATH"></menu-item>
+                <menu-item label="From EEG archives" i18n-label="Import data menu|From EEG@@navbarFromEEG" link="imports/eeg" [icon]="ImagesUrlUtil.EEG_ICON_PATH"></menu-item>
+                <menu-item label="From BIDS archive" i18n-label="Import data menu|From BIDS@@navbarFromBIDS" link="imports/bids" [icon]="ImagesUrlUtil.BIDS_ICON_PATH"></menu-item>
                 <menu-item label="From Neurinfo PACS" i18n-label="Import data menu|From Neurinfo PACS@@navbarFromNeurinfoPACS" *ngIf="canUserImportFromPACS()" link="imports/pacs" [icon]="ImagesUrlUtil.NEURINFO_ICON_PATH"></menu-item>
-                <menu-item label="From ShanoirUploader" i18n-label="Import data menu|From ShanoirUploader@@navbarFromShanoirUploader" link="" [icon]="ImagesUrlUtil.SHANOIR_UP_TRANSP_LOGO_PATH"></menu-item>
+   		<menu-item label="From ShanoirUploader" i18n-label="Import data menu|From ShanoirUploader@@navbarFromShanoirUploader" link="" [icon]="ImagesUrlUtil.SHANOIR_UP_TRANSP_LOGO_PATH"></menu-item>
                 <menu-item label="Processed datasets (NifTi)" i18n-label="Import data menu|Processed datasets (NifTi)@@navbarProcessedDatasets" link="" [icon]="ImagesUrlUtil.NIFTI_ICON_PATH"></menu-item>
                 <menu-item label="From files ..." i18n-label="Import data menu|From files@@navbarFromFiles" link="" [icon]="ImagesUrlUtil.FOLDER_7_ICON_PATH"></menu-item>
             </dropdown-menu>
@@ -45,7 +53,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                 </menu-item>
-            </dropdown-menu>
+                <menu-item label="Preclinical References" link="preclinical-reference" [icon]="ImagesUrlUtil.AGENDA_ICON_PATH"></menu-item>
+           </dropdown-menu>
 
             <dropdown-menu label="Tasks">
                 <menu-item label="Manage my tasks" i18n-label="Administration menu|Manage tasks@@navbarManageTasks" link="task" [icon]="ImagesUrlUtil.NOTEPAD_ICON_PATH"></menu-item>

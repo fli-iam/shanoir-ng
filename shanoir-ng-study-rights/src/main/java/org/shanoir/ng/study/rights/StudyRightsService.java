@@ -38,10 +38,12 @@ public class StudyRightsService {
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
 		Long userId = KeycloakUtil.getTokenUserId();
-		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+		if (userId == null) {
+			throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-		return 
-				founded.getStudyUserRights() != null 
+		return
+				founded.getStudyUserRights() != null
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
     }
     
@@ -73,7 +75,9 @@ public class StudyRightsService {
      */
 	public Set<Long> hasRightOnStudies(Set<Long> studyIds, String rightStr) {
 		Long userId = KeycloakUtil.getTokenUserId();
-		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the studies " + studyIds);
+		if (userId == null) {
+			throw new IllegalStateException("UserId should not be null. Cannot check rights on the studies " + studyIds);
+		}
 		Iterable<StudyUser> founded = repo.findByUserIdAndStudyIdIn(userId, studyIds);
 		Set<Long> validIds = new HashSet<>();
 		for (StudyUser su : founded) {
@@ -81,7 +85,7 @@ public class StudyRightsService {
 				validIds.add(su.getStudyId());
 			}
 		}
-		return validIds;		
+		return validIds;
 	}
 
 	/**
@@ -92,14 +96,16 @@ public class StudyRightsService {
 	 */
 	public boolean hasRightOnAtLeastOneStudy(String rightStr) {
 		Long userId = KeycloakUtil.getTokenUserId();
-		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights.");
+		if (userId == null) {
+			throw new IllegalStateException("UserId should not be null. Cannot check rights.");
+		}
 		Iterable<StudyUser> founded = repo.findByUserId(userId);
 		for (StudyUser su : founded) {
 			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) {
 				return true;
 			}
 		}
-		return false;	
+		return false;
 	}
     
 
