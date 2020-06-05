@@ -168,6 +168,41 @@ targetConn.commit()
 print("Delete examination: end")
 
 
+print("Delete numerical_variable: start")
+query = "DELETE FROM numerical_variable"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete numerical_variable: end")
+
+
+print("Delete coded_variable: start")
+query = "DELETE FROM coded_variable"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete coded_variable: end")
+
+
+print("Delete scale_item: start")
+query = "DELETE FROM scale_item"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete scale_item: end")
+
+
+print("Delete numerical_score: start")
+query = "DELETE FROM numerical_score"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete numerical_score: end")
+
+
+print("Delete coded_score: start")
+query = "DELETE FROM coded_score"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete coded_score: end")
+
+
 print("Delete instrument_variable: start")
 query = "DELETE FROM instrument_variable"
 targetCursor.execute(query)
@@ -186,7 +221,7 @@ print("Delete instrument: start")
 query = "DELETE FROM instrument"
 targetCursor.execute(query)
 targetConn.commit()
-print("Delete instrument: end2")
+print("Delete instrument: end")
 
 
 print("Delete mr_protocol: start")
@@ -294,7 +329,7 @@ print("Import numerical_variable: start")
 sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCORE_VALUE, MIN_SCORE_VALUE FROM NUMERICAL_VARIABLE""")
 
 query = """INSERT INTO numerical_variable
-    (id, max_score_value, min_score_value)
+    (instrument_variable_id, max_score_value, min_score_value)
     VALUES (%s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -307,7 +342,7 @@ print("Import coded_variable: start")
 sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCALE_ITEM_ID, MIN_SCALE_ITEM_ID FROM CODED_VARIABLE""")
 
 query = """INSERT INTO coded_variable
-    (id, max_scale_item_id, min_scale_item_id)
+    (instrument_variable_id, max_scale_item_id, min_scale_item_id)
     VALUES (%s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -322,7 +357,7 @@ sourceCursor.execute("""SELECT SCALE_ITEM_ID,
  QUALITATIVE_SCALE_ITEM,
  QUANTITATIVE_SCALE_ITEM,
  CODED_VARIABLE_ID,
- (SELECT LABEL_NAME FROM REF_SCALE_ITEM_TYPE r WHERE s.REF_SCALE_ITEM_TYPE_ID = r.REF_SCALE_ITEM_TYPE_ID),
+ (SELECT LABEL_NAME FROM REF_SCALE_ITEM_TYPE r WHERE s.REF_SCALE_ITEM_TYPE_ID = r.REF_SCALE_ITEM_TYPE_ID)
  FROM SCALE_ITEM s""")
 
 query = """INSERT INTO scale_item
@@ -398,9 +433,9 @@ print("Import numerical_score: start")
 sourceCursor.execute("SELECT n.SCORE_ID, "
  + "n.SCIENTIFIC_ARTICLE_ID, "
  + "n.SCORE_VALUE, "
- + "n.IS_SCORE_WITH_UNIT_OF_MEASURE FROM NUMERICAL_SCORE n, "
+ + "n.IS_SCORE_WITH_UNIT_OF_MEASURE, "
  + "(SELECT LABEL_NAME FROM REF_NUMERICAL_SCORE_TYPE r WHERE r.REF_NUMERICAL_SCORE_TYPE_ID = n.REF_NUMERICAL_SCORE_TYPE_ID), "
- + "(SELECT LABEL_NAME FROM REF_UNIT_OF_MEASURE_ID u WHERE u.REF_UNIT_OF_MEASURE_ID = n.REF_UNIT_OF_MEASURE_ID)"
+ + "(SELECT LABEL_NAME FROM REF_UNIT_OF_MEASURE u WHERE u.REF_UNIT_OF_MEASURE_ID = n.REF_UNIT_OF_MEASURE_ID)"
  + "FROM NUMERICAL_SCORE n"
  )
 
@@ -420,7 +455,7 @@ print("Import coded_score: start")
 
 sourceCursor.execute("SELECT SCORE_ID, SCALE_ITEM_ID FROM CODED_SCORE")
 
-query = "INSERT INTO coded_score (id, scale_item_id) VALUES (%s, %s)"
+query = "INSERT INTO coded_score (score_id, scale_item_id) VALUES (%s, %s)"
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
