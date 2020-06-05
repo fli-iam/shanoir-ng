@@ -423,44 +423,6 @@ public class ImporterApiControllerTest {
 		// THEN all the datas are correctly imported
 	}
 
-	/**
-	 * This methods returns a dicom file
-	 * 
-	 * @param path
-	 *            the dicom file path
-	 * @throws ShanoirException
-	 *             when something gets wrong during the import
-	 * @throws IOException
-	 *             when IO fails
-	 * @throws RestServiceException
-	 */
-	// @Override
-	// public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
-	// 		throws RestServiceException, IOException {
-
-	// 	String pathInfo = path;
-	// 	URL url = new URL("file:///" + pathInfo);
-	// 	final URLConnection uCon = url.openConnection();
-	// 	final InputStream is = uCon.getInputStream();
-
-	// 	ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-	// 	int nRead;
-	// 	byte[] data = new byte[BUFFER_SIZE];
-	// 	while ((nRead = is.read(data, 0, data.length)) != -1) {
-	// 		buffer.write(data, 0, nRead);
-	// 	}
-	 
-	// 	buffer.flush();
-	// 	byte[] byteArray = buffer.toByteArray();
-		
-	// 	ByteArrayResource resource = new ByteArrayResource(byteArray);
-
-	// 	return ResponseEntity.ok()
-	// 			.contentType(MediaType.parseMediaType("application/dicom"))
-	// 			.contentLength(uCon.getContentLength())
-	// 			.body(resource);
-	// }
-	
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testGetDicomImageNoPath() throws Exception {
@@ -468,18 +430,6 @@ public class ImporterApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
 				.param("path", ""))
 		.andExpect(status().is(200));
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testGetDicomImage() throws Exception {
-		
-		createFile(true, true, true, true);
-
-		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
-				.param("path", "/tmp/test-import-as-bids.zip"))
-		.andExpect(status().isOk())
-		.andExpect(content().contentType("application/dicom"));
 	}
 
 	@After
