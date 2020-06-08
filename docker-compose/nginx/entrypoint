@@ -21,6 +21,27 @@ src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
 dst="/etc/nginx/server.conf"
 sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
 
+
+# change theme colors
+override_colors()
+{
+	local spec
+	for spec in $SHANOIR_COLORS ; do
+		if [[ "$spec" =~ ^([A-Za-z0-9-]+):(#[0-9A-Fa-f]{3,6})$ ]] ; then
+			local name="${BASH_REMATCH[1]}"
+			local value="${BASH_REMATCH[2]}"
+
+			sed -i "s/^\( *--color-$name *:\).*/\1 $value;/" /etc/nginx/html/assets/css/common.css /etc/nginx/html/app.css
+		else
+			error "malformatted color spec in SHANOIR_COLORS: '$spec'  (expected: name:#xxxxxx)"
+		fi
+
+	done
+}
+
+optional SHANOIR_COLORS
+override_colors
+
 abort_if_error
 
 nginx -t
