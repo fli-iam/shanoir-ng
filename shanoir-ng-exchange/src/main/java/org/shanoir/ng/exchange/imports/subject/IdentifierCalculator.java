@@ -61,13 +61,14 @@ public class IdentifierCalculator {
 	 * @param birthDate
 	 * @return
 	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
 	 */
-	public String calculateIdentifier(final String firstName, final String lastName, final Date birthDate) throws NoSuchAlgorithmException {
+	public String calculateIdentifier(final String firstName, final String lastName, final Date birthDate) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		final String subjectIdentifierSeed = firstName + lastName + birthDate;
 		String hex = "";
 		int hashInt = -1;
 		final MessageDigest msgDigest = MessageDigest.getInstance(SHA);
-		msgDigest.update(subjectIdentifierSeed.getBytes());
+		msgDigest.update(subjectIdentifierSeed.getBytes(UTF_8));
 		byte[] hash = msgDigest.digest();
 		for (int i = 0; i < hash.length; i++) {
 			hashInt = hash[i] & 0xFF;
