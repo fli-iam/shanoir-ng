@@ -20,7 +20,7 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { ExaminationService } from './examination.service';
 import { ExaminationDTO } from './examination.dto';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-
+import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 
 export class Examination extends Entity {
     id: number;
@@ -33,6 +33,7 @@ export class Examination extends Entity {
     comment: string;
     note: string;
     subjectWeight: number;
+    instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
     preclinical: boolean;
     hasStudyCenterData: boolean = false;  

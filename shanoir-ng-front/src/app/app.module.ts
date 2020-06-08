@@ -63,7 +63,6 @@ import { UploadExtraDataComponent } from './examinations/attached-files/upload-e
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
-import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { ExaminationDTOService } from './examinations/shared/examination.dto';
 import { ExaminationPipe } from './examinations/shared/examination.pipe';
 import { ExaminationService } from './examinations/shared/examination.service';
@@ -236,7 +235,6 @@ import { ServiceLocator } from './utils/locator.service';
         ExaminationComponent,
         ExaminationPipe,
         ExaminationTreeComponent,
-        NewInstrumentComponent,
         UploadExtraDataComponent,
         ExtensionRequestComponent,
         HeaderComponent,
