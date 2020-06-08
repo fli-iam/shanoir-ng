@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.shanoir-ng</groupId>
+	<artifactId>shanoir-ng-exchange</artifactId>
+	<packaging>jar</packaging>
+	<version>0.0.1</version>
+
+	<name>shanoir-ng-exchange</name>
+	<description>
+		Exchange project for Shanoir NG: contains import and
+		export basic code and is the basis of SEF,
+		the Shanoir Exchange Format.
+		Used by MS Import and ShanoirUploader.
+	</description>
+
+	<properties>
+		<!-- as sh-ng is currently based on Spring Boot 1.4.1, we use the same 
+			version of Spring Context here -->
+		<spring.version>4.3.3.RELEASE</spring.version>
+		<dcm4che.version>5.14.1</dcm4che.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<!-- Spring framework, for dependency injection -->
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- dcm4che3 dependencies -->
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-core</artifactId>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-emf</artifactId>
+			<version>${dcm4che.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-dcmr</artifactId>
+			<version>${dcm4che.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.dcm4che.tool</groupId>
+			<artifactId>dcm4che-tool-storescu</artifactId>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>dcm4che-snapshots</id>
+			<name>Dcm4Che Snapshots</name>
+			<url>http://maven.dcm4che.org</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+</project>
