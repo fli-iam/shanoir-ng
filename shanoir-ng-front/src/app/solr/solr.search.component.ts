@@ -126,7 +126,7 @@ export class SolrSearchComponent{
         for (let key of Object.keys(this.solrRequest)) {
             if (key && this.solrRequest[key] && key == keyS && this.solrRequest[key].includes(valueS)) {
                 this.solrRequest[key] = this.solrRequest[key].filter(item => item !== valueS);
-                if (this.keyword.includes(valueS)) this.keyword = this.keyword.replace(key + ':' + valueS + ';', '');
+                if (this.keyword && this.keyword.includes(valueS)) this.keyword = this.keyword.replace(key + ':' + valueS + ';', '');
                 if (this.solrRequest[key].length == 0) this.solrRequest[key] = null;
             } 
         }
@@ -137,27 +137,28 @@ export class SolrSearchComponent{
     }
 
     getPage(pageable: Pageable): Promise<SolrResultPage> {
-        this.updateSelections();
-        let savedStates = [];
+        if (this.form.valid) {
+            this.updateSelections();
+            let savedStates = [];
 
-        for (let key of Object.keys(this.solrRequest)) {
-            if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
+            for (let key of Object.keys(this.solrRequest)) {
+                if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
+            }
+            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+                if (solrResultPage) { 
+                    solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
+                
+                    if (!savedStates[0]) this.allStudies = solrResultPage['facetResultPages'][0];
+                    solrResultPage['facetResultPages'].forEach((facetResultPage, i) => {
+                        facetResultPage.content.forEach((facetField, j) => {
+                            if (savedStates[i] && savedStates[i].includes(facetField.value)) facetField.checked = true;
+                            facetResultPage.content[j] = facetField;
+                            this.facetResultPages[i] = facetResultPage;
+                        })
+                    })} 
+                return solrResultPage;
+            });
         }
-        return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
-            if (solrResultPage) { 
-                solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-            
-                if (!savedStates[0]) this.allStudies = solrResultPage['facetResultPages'][0];
-                solrResultPage['facetResultPages'].forEach((facetResultPage, i) => {
-                    facetResultPage.content.forEach((facetField, j) => {
-                        if (savedStates[i] && savedStates[i].includes(facetField.value)) facetField.checked = true;
-                        facetResultPage.content[j] = facetField;
-                        this.facetResultPages[i] = facetResultPage;
-                    })
-                })} 
-            
-            return solrResultPage;
-        });
     }
 
     // Grid columns definition

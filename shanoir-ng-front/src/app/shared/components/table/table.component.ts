@@ -225,7 +225,7 @@ export class TableComponent implements OnInit {
         this.isLoading = true;
         this.getPage(this.getPageable()).then(page => {
             this.page = page;
-            this.maxResultsField = page.size;
+            this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
             setTimeout(() => this.isLoading = false, 200);
         });
@@ -319,13 +319,15 @@ export class TableComponent implements OnInit {
     }
 
     computeSelectAll() {
-        let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
-        if (selectedOnCurrentPage.length == this.page.content.length) {
-            this.selectAll = true;
-        } else if (selectedOnCurrentPage.length == 0) {
-            this.selectAll = false;
-        } else {
-            this.selectAll = 'indeterminate';
+        if (this.page) {
+            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+            if (selectedOnCurrentPage.length == this.page.content.length) {
+                this.selectAll = true;
+            } else if (selectedOnCurrentPage.length == 0) {
+                this.selectAll = false;
+            } else {
+                this.selectAll = 'indeterminate';
+            }
         }
     }
 
