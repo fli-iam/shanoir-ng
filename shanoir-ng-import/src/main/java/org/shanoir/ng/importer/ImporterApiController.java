@@ -1104,7 +1104,8 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
 			throws RestServiceException, IOException {
 
-		String pathInfo = path;
+		final File userImportDir = getUserImportDir();
+		String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
 		URL url = new URL("file:///" + pathInfo);
 		final URLConnection uCon = url.openConnection();
 		final InputStream is = uCon.getInputStream();
