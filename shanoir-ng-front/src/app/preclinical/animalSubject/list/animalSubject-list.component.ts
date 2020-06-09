@@ -104,6 +104,16 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         return [];
     }
 
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+
     getSubjectWithId(subjectId: number): Subject {
     	if (this.subjects){
     		for (let s of this.subjects){
