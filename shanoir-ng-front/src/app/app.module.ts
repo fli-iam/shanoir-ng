@@ -162,7 +162,6 @@ import { KeycloakHttpInterceptor } from './shared/keycloak/keycloak.http.interce
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
-import { NavbarComponent } from './shared/navbar/navbar.component';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
@@ -246,7 +245,6 @@ import { ServiceLocator } from './utils/locator.service';
         ManufacturerModelPipe,
         ModalComponent,
         MenuItemComponent,
-        NavbarComponent,
         StudyComponent,
         StudyListComponent,
         StudyTreeComponent,
