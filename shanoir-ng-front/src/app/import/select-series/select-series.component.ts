@@ -32,7 +32,6 @@ export class SelectSeriesComponent {
 
     patients: PatientDicom[];
     workFolder: string;
-    dataFiles: any;
     detailedPatient: Object;
     detailedSerie: Object;
     detailedStudy: Object;
@@ -51,7 +50,6 @@ export class SelectSeriesComponent {
         breadcrumbsService.nameStep('2. Series');
         this.patients = this.importDataService.patientList.patients;
         this.workFolder = this.importDataService.patientList.workFolder;
-        if (this.importDataService.inMemoryExtracted) {this.dataFiles = this.importDataService.inMemoryExtracted;}
     }
 
 
@@ -91,16 +89,9 @@ export class SelectSeriesComponent {
     }
 
     private initPapaya(serie: SerieDicom): void {
-        let listOfPromises;
-        if (this.dataFiles) {
-            listOfPromises = serie.images.map((image) => {
-                return this.dataFiles.files[image.path].async("arraybuffer");
-            });
-        } else {
-            listOfPromises = serie.images.map((image) => {
-                return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
-            });
-         }
+        let listOfPromises = serie.images.map((image) => {
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+        });
         let promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then((values) => {
             let params: object[] = [];

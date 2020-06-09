@@ -16,7 +16,6 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../shared/dicom-archive.service';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
@@ -38,8 +37,7 @@ export class BidsUploadComponent {
     public errorMessage: string;
 
     constructor(
-            private importService: ImportService, 
-            private bidsArchiveService: DicomArchiveService,
+            private importService: ImportService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
@@ -51,19 +49,7 @@ export class BidsUploadComponent {
 
     public uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
-        this.loadInMemory(fileEvent);   
         this.uploadToServer(fileEvent.target.files);
-    }
-
-    private loadInMemory(fileEvent: any) {
-    	this.bidsArchiveService.clearFileInMemory();
-    	this.bidsArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
-                this.bidsArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
-                    this.importDataService.inMemoryExtracted = response;
-                });
-            });
     }
 
     private uploadToServer(file: any) {

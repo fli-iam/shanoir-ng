@@ -31,7 +31,6 @@ import { InvocationExecutionComponent } from './boutiques/invocation-execution/i
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
-import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
@@ -57,6 +56,7 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
+import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 
 
 let routes: Routes = [
@@ -118,9 +118,6 @@ let routes: Routes = [
                 component: FinishEegImportComponent
             }
         ]
-    }, {
-        path: 'new-instrument',
-        component: NewInstrumentComponent
     }, {
         path: 'task',
         component: AsyncTasksComponent
@@ -392,6 +389,31 @@ let routes: Routes = [
         data: { mode: 'create' },
         canActivate: [AuthAdminOrExpertGuard],
     },
+    {
+		path: 'instrument',
+		redirectTo: 'instrument/list',
+	},
+	{
+		path: 'instrument/list',
+		component: HomeComponent,
+	},
+	{
+		path: 'instrument/details/:id',
+		component: InstrumentAssessmentComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'instrument/edit/:id',
+		component: InstrumentAssessmentComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'instrument/create',
+		component: InstrumentAssessmentComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
 
 ];
 

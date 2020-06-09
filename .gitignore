@@ -15,6 +15,7 @@ scripts/.DS_Store
 shanoir-ng-main.log
 shanoir-ng-nginx/webapp
 shanoir-ng-resource-server.log
+docker-compose-dev.yml
 target
 **/.classpath
 .factorypath

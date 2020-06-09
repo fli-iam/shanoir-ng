@@ -14,7 +14,6 @@
 
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { ImportJob } from '../../../import/shared/dicom-data.model';
-import { DicomArchiveService } from '../../../import/shared/dicom-archive.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { slideDown } from '../../../shared/animations/animations';
 import { ImportService } from '../../../import/shared/import.service';
@@ -49,7 +48,6 @@ export class BrukerUploadComponent {
 
     constructor(
             private importService: ImportService, 
-            private dicomArchiveService: DicomArchiveService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService, 
