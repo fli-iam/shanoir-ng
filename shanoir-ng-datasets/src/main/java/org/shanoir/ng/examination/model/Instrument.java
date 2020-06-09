@@ -29,11 +29,14 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.validation.Unique;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Instrument.
  * 
- * @author ifakhfakh
+ * @author ifakhfakh, JCome
  *
  */
 @Entity
@@ -46,6 +49,7 @@ public class Instrument extends AbstractEntity {
 
 	/** The acronym. */
 	@NotNull
+	@Unique
 	private String acronym;
 
 	/** The child instrument list. */
@@ -54,6 +58,7 @@ public class Instrument extends AbstractEntity {
 
 	/** List of the instrument based assessment related to this instrument. */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "instrument", fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<InstrumentBasedAssessment> instrumentBasedAssessments;
 
 	/** Scientific Article. It must be an instrument definition article. */
@@ -85,6 +90,7 @@ public class Instrument extends AbstractEntity {
 	/** The parent instrument. */
 	@ManyToOne
 	@JoinColumn(name = "parent_instrument_id")
+	@JsonIgnore
 	private Instrument parentInstrument;
 
 	/** Instrument passation mode. */

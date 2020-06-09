@@ -11,53 +11,11 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
-<div class="content-component">
-    <form [formGroup]="instAssessmentForm" class="max-content" novalidate>
-		<div class="layout">
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'"> 
-					<h2 class="header command-zone"i18n="View instAssessment|Title@@instAssessmentDetailViewTitle">Details on Instrument Based Assessement</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'"> 
-					<h2 class="header command-zone"i18n="Edit instAssessment|Title@@instAssessmentDetailEditTitle">Edit Instrument Based Assessement</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'"> 
-					<h2 class="header command-zone"i18n="Create instAssessment|Title@@instAssessmentDetailCreateTitle">Create Instrument Based Assessement</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-                    <li class="required">
-                        <label i18n="instAssessment detail|User question label@@instAssessmentDetailUserQuestion" class="required-label">Which Instrument the assessment is based on ?
-							</label> 
-						<select id="select" required formControlName="select">
-							<option>all</option>
-						</select>
-					</li>
-					<li class="required">
-						<a [routerLink]="['/new-instrument']">
-							New instrument request
-						</a>
-					</li>
-				</ol>
-			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="instAssessment detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
-					<button i18n="instAssessment detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
-					<button i18n="instAssessment detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
-						<button type="submit" i18n="instAssessment detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="instAssessment detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!instAssessmentForm.valid">Update<i class="far fa-save"></i></button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="instAssessment detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!instAssessmentForm.valid">Create<i class="far fa-save"></i></button>
-					</ng-template>
-				</span>
-			</div>
-        </div>
-    </form>
-</div>
+  <node [label]="instrumentBasedAssesment.instrument.acronym">
+    <ng-template ngFor let-varAssess [ngForOf]="instrumentBasedAssesment.variableAssessmentList">
+        <node [label]="getInstrumentVarName(varAssess, instrumentBasedAssesment.instrument)" (isOpen)="true">
+           <node *ngFor="let score of varAssess.scoreList" [label]="score.scaleItem ? score.scaleItem.qualitativeScaleItem : score.id">
+           </node>
+        </node>
+    </ng-template>
+  </node>

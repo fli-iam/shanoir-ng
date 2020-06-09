@@ -27,7 +27,6 @@ import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
-import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
@@ -47,6 +46,7 @@ import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
+import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
@@ -114,9 +114,6 @@ let appRoutes: Routes = [
             }
         ]
     }, {
-        path: 'new-instrument',
-        component: NewInstrumentComponent
-    }, {
         path: 'task',
         component: AsyncTasksComponent
     }
@@ -132,6 +129,7 @@ appRoutes = appRoutes.concat(
     getRoutesFor('coil', CoilComponent, CoilListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('user', UserComponent, UserListComponent, {create: AuthAdminGuard, update: AuthAdminGuard}),
     getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('instrument', InstrumentAssessmentComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
 );
 

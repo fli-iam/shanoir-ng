@@ -15,6 +15,7 @@
 import { Entity } from "../../shared/components/entity/entity.abstract";
 import { IdName } from "../../shared/models/id-name.model";
 import { SubjectWithSubjectStudy } from "../../subjects/shared/subject.with.subject-study.model";
+import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 
 export class Examination extends Entity {
     id: number;
@@ -30,6 +31,7 @@ export class Examination extends Entity {
     comment: string;
     note: string;
     subjectWeight: number;
+    instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
     preclinical: boolean;
     hasStudyCenterData: boolean = false;  
