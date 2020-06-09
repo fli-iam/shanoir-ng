@@ -16,8 +16,6 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../shared/dicom-archive.service';
-import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { EegImportJob } from '../shared/eeg-data.model';
@@ -40,7 +38,6 @@ export class EegUploadComponent {
 
     constructor(
             private importService: ImportService, 
-            private eegArchiveService: DicomArchiveService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
@@ -51,19 +48,7 @@ export class EegUploadComponent {
 
     private uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
-        this.loadInMemory(fileEvent);   
         this.uploadToServer(fileEvent.target.files);
-    }
-
-    private loadInMemory(fileEvent: any) {
-    	this.eegArchiveService.clearFileInMemory();
-    	this.eegArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
-                this.eegArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
-                    this.importDataService.inMemoryExtracted = response;
-                });
-            });
     }
 
     private uploadToServer(file: any) {
