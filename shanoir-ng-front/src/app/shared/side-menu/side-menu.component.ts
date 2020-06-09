@@ -30,6 +30,7 @@ export class SideMenuComponent {
     private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     private username: string = "";
     private dataOpened: boolean = true;
+    private eqOpened: boolean = true;
     private uploadOpened: boolean = true;
     private adminOpened: boolean = true;
 

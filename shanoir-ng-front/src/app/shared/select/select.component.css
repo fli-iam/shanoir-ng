@@ -89,6 +89,6 @@ input:focus:hover { cursor: initial; }
 
 toggle-switch { margin: 0 10px; }
 
-.fa-plus { position: absolute; font-size: 6px; left: 7px; top: 1px; }
+.new-file .fa-plus { position: absolute; font-size: 6px; left: 7px; top: 1px; }
 
 :host().read-only { border: none !important; }

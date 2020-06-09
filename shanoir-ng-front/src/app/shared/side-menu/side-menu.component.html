@@ -30,29 +30,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <ul class="menu-list">
 
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Manage data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="dataOpened" class="sub-menu" [@slideDown]="dataOpened">
         <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>
         <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
+        <li routerLink="/preclinical-subject/list" routerLinkActive="active"><i class="fas fa-hippo"></i>Preclinical subjects</li>
         <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Examinations</li>
+        <li routerLink="/preclinical-examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Preclinical examinations</li>
         <li routerLink="/dataset-acquisition/list" routerLinkActive="active"><i class="fas fa-procedures"></i>Dataset acquisitions</li>
-        <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>
+        <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>      
+    </div>
+    <li (click)="eqOpened = !eqOpened"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="eqOpened" class="sub-menu" [@slideDown]="eqOpened">
         <li routerLink="/center/list" routerLinkActive="active"><i class="fas fa-hospital"></i>Centers</li>
-        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipment</li>
+        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fab fa-accusoft"></i>Study Cards</li>
+        <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active"><i class="fas fa-virus"></i>Pathology models</li>
+        <li routerLink="/preclinical-therapy/list" routerLinkActive="active"><i class="fas fa-pills"></i>Therapies</li>
+        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>        
     </div>
     <li (click)="uploadOpened = !uploadOpened"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="uploadOpened" class="sub-menu" [@slideDown]="uploadOpened">
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
+        <li routerLink="/importsBruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
+        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-hat-wizard"></i>From EEG archives</li>
+        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li>
         <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
-        <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
+        <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
         <li routerLink="" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets (NifTi)</li>
-        <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li>
+        <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
     </div>
     <li (click)="adminOpened = !adminOpened" *ngIf="isUserAdmin()"><i class="fas fa-cogs"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="isUserAdmin() && adminOpened" class="sub-menu" [@slideDown]="adminOpened">
         <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
+        <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
     </div>
     <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Tasks</li>
 

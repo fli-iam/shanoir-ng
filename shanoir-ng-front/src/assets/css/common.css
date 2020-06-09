@@ -121,7 +121,7 @@ form { color: var(--dark-grey); position: relative; }
     form .right-col button:hover { background-color: inherit; color: inherit; }
     form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
+    form .right-col button svg { vertical-align: -1; color: var(--color-a); }
 
   form.disabled::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: var(--very-light-grey); opacity: 0.5; }
 
