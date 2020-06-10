@@ -33,8 +33,8 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardProcessingService;
-import org.shanoir.ng.studycard.service.StudyCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
 
 	@Autowired
-	private StudyCardService studyCardService;
+	private StudyCardRepository studyCardRepository;
 
 	
 	@Override
@@ -125,12 +125,9 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	}
 
 	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardService.findById(studyCardId);
+		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
 		if (studyCard == null) throw new IllegalArgumentException("No study card found with id " + studyCardId);
 		if (studyCard.getAcquisitionEquipmentId() == null) throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
 		return studyCard;
 	}
-	
-	
-
 }

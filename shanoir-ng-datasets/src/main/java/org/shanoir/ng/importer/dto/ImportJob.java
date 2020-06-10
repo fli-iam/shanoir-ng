@@ -40,15 +40,15 @@ public class ImportJob implements Serializable {
     
     private Long studyCardId;
     
-    private Long frontStudyId;
+    private Long studyId;
 
 	private String studyCardName;
 	
-    private Long frontAcquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 	
 	private String anonymisationProfileToUse;
     
-    private Long frontConverterId;
+    private Long converterId;
     
     private String archive;
 
@@ -122,12 +122,12 @@ public class ImportJob implements Serializable {
 		this.studyCardId = studyCardId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	public void setFrontStudyId(final Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setStudyId(final Long StudyId) {
+		this.studyId = StudyId;
 	}
 
 	public String getStudyCardName() {
@@ -138,20 +138,20 @@ public class ImportJob implements Serializable {
 		this.studyCardName = studyCardName;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getacquisitionEquipmentId() {
+		return acquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setacquisitionEquipmentId(final Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 
-	public Long getFrontConverterId() {
-		return frontConverterId;
+	public Long getConverterId() {
+		return converterId;
 	}
 
-	public void setFrontConverterId(Long frontConverterId) {
-		this.frontConverterId = frontConverterId;
+	public void setConverterId(Long ConverterId) {
+		this.converterId = ConverterId;
 	}
 
     public String getAnonymisationProfileToUse() {

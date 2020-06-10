@@ -137,10 +137,10 @@ public class DatasetAcquisitionApiSecurityTest {
 		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		Examination exam = ModelsUtil.createExamination(); exam.setId(1L);
 		ImportJob importJob = new ImportJob();
-		importJob.setFrontStudyId(2L);
+		importJob.setStudyId(2L);
 		importJob.setExaminationId(3L);
 		assertAccessDenied(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) { fail(e1.toString()); } }, importJob);
-		importJob.setFrontStudyId(1L);
+		importJob.setStudyId(1L);
 		importJob.setExaminationId(1L);
 		assertAccessAuthorized(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) {} }, importJob);
 		

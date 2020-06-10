@@ -242,7 +242,7 @@ public class ImporterService {
 			Examination examination = examinationService.findById(importJob.getExaminationId());
 
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -329,7 +329,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				//datasetToCreate.setStudyId(importJob.getFrontStudyId());
+				//datasetToCreate.setStudyId(importJob.getStudyId());
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
