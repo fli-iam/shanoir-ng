@@ -171,7 +171,7 @@ export class SolrSearchComponent{
         };
 
         let columnDefs: any = [
-            {headerName: "Id", field: "id", type: "number", width: "30px", defaultSortCol: true, defaultAsc: false},
+            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Type", field: "datasetType", width: "30px"},
             {headerName: "Nature", field: "datasetNature", width: "30px"},
