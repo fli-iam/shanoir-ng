@@ -94,9 +94,6 @@ public class ImporterManagerService {
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
-	@Value("${ms.url.shanoir-ng-datasets}")
-	private String datasetsMsUrl;
-	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
 		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());

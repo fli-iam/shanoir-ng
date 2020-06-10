@@ -41,16 +41,14 @@ public class ImportJob implements Serializable {
     
     private Long converterId;
     
-    private Long frontStudyId;
+    private Long studyId;
     
 	private String studyCardName;
 	
 	// todo: remove this later, when front end uses StudyCards
-    private Long frontAcquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 	
 	private String anonymisationProfileToUse;
-    
-    private Long frontConverterId;
 
     private String archive;
 
@@ -115,12 +113,12 @@ public class ImportJob implements Serializable {
 		this.workFolder = workFolder;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	public void setFrontStudyId(final Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setStudyId(final Long studyId) {
+		this.studyId = studyId;
 	}
 
 	public String getStudyCardName() {
@@ -131,12 +129,12 @@ public class ImportJob implements Serializable {
 		this.studyCardName = studyCardName;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
 
 	}
 
@@ -154,10 +152,6 @@ public class ImportJob implements Serializable {
 
 	public void setConverterId(Long converterId) {
 		this.converterId = converterId;
-	}
-
-	public void setFrontConverterId(final Long frontConverterId) {
-		this.frontConverterId = frontConverterId;
 	}
 
     public String getAnonymisationProfileToUse() {
