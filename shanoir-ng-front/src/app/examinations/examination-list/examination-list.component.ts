@@ -43,8 +43,6 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
         return this.examinationService.getPage(pageable).then(function(page) {
-                // Filter only preclinical exams
-                page.content = page.content.filter(exam => !exam.preclinical);
                 return page;
             });
     }
