@@ -196,7 +196,7 @@ export class SolrSearchComponent{
     }
 
     massiveDownload(type: string) {
-        this.datasetService.massiveDownload(this.selectedDatasetIds, 'type');
+        this.datasetService.downloadDatasets(this.selectedDatasetIds, type);
     }
 
     onSelectionChange (selection) {
