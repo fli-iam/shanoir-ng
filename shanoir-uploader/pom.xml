@@ -4,7 +4,7 @@
 
 	<groupId>org.shanoir.uploader</groupId>
 	<artifactId>shanoir-uploader</artifactId>
-	<version>6.0.3</version>
+	<version>6.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>ShanoirUploader</name>
@@ -54,12 +54,16 @@
 			<groupId>org.shanoir</groupId>
 			<artifactId>shanoir</artifactId>
 			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/shanoir-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency ShanoirWs -->
 		<dependency>
 			<groupId>org.shanoir</groupId>
 			<artifactId>shanoir-ws</artifactId>
 			<version>0.4</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/shanoir-ws-0.4.jar</systemPath>
 		</dependency>
 		<!-- dependency Shanoir ng anonymization -->
 		<dependency>
@@ -149,6 +153,8 @@
 			<groupId>dcm4che2.tool</groupId>
 			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
 			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/dcm4che2-tool-dcmqr-custom-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency DCM4CHE tool dcmrcv -->
 		<dependency>
