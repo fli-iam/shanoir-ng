@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{user.firstName}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
+							<input type="text" id="firstName" formControlName="firstName" [(ngModel)]="user.firstName"/>
 						</ng-template>
 						<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
 						<label *ngIf="hasError('firstName', ['length'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be between 2 and 50!</label>
@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{user.lastName}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
+							<input type="text" id="lastName" formControlName="lastName" [(ngModel)]="user.lastName"/>
 						</ng-template>
 						<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
 						<label *ngIf="hasError('lastName', ['length'])" class="form-validation-alert" i18n="Edit user|Last name length error@@editUserLastNameLengthError">Last Name length must be between 2 and 50!</label>
@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{user.email}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
+							<input type="email" id="email" formControlName="email" [(ngModel)]="user.email"/>
 						</ng-template>
 						<label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
 						<label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
@@ -88,7 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{user.role.displayName}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="role" required formControlName="role" [(ngModel)]="user.role">
+							<select id="role" formControlName="role" [(ngModel)]="user.role">
 								<option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
 							</select>
 						</ng-template>

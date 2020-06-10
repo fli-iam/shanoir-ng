@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="toggleForm" class="AnestheticIngredientFormComponent content-component">
+<div *ngIf="toggleForm" #formContainer class="AnestheticIngredientFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -24,13 +24,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<fieldset>
 					<ol>
 						<li class="required">
-							<label i18n="Edit anestheticingredient|Name label" class="required-label">Name</label>  
+							<label i18n="Edit anestheticingredient|Name label">Name</label>  
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="name" required formControlName="name" [(ngModel)]="ingredient.name">
+									<select id="name" formControlName="name" [(ngModel)]="ingredient.name">
 										<option *ngFor="let name of names" [ngValue]="name">{{name.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new ingredient name" (click)="goToRefPage('anesthetic','ingredient')">
@@ -42,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit anestheticingredient|Concentration label" class="required-label">Concentration</label> 
+							<label i18n="Edit anestheticingredient|Concentration label">Concentration</label> 
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.concentration}}
@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit anestheticingredient|ConcentrationUnit label" class="required-label">Concentration Unit</label> 
+							<label i18n="Edit anestheticingredient|ConcentrationUnit label">Concentration Unit</label> 
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.concentration_unit?.value}}

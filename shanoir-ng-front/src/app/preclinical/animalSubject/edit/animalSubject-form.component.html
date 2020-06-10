@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component detail" [@preventInitialChildAnimations]>
+<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span class="right-col" [ngSwitch]="mode">
@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
 					<li>
-						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
+						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{preclinicalSubject.subject.imagedObjectCategory}}
@@ -44,13 +44,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Edit subject|Name label" class="required-label">Common name</label>
+						<label i18n="Edit subject|Name label">Common name</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.subject?.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-									<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
 									<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
 									<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
 									<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ol>
                     <ol *ngIf="animalSelected()" [@slideDown]="animalSelected()">
 					<li>
-						<label i18n="Subject detail|Sex label@@subjectDetailSex" class="required-label">Sex</label>
+						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<div [ngSwitch]="preclinicalSubject.subject.sex">
@@ -78,7 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Edit subject|Specie label" class="required-label">Species</label>
+						<label i18n="Edit subject|Specie label">Species</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.specie?.value}}
@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li >
-						<label i18n="Edit subject|Strain label" class="required-label">Strain</label>
+						<label i18n="Edit subject|Strain label">Strain</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.strain?.value}}
@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li >
-						<label i18n="Edit subject|Biotype label" class="required-label">Biological type</label> 
+						<label i18n="Edit subject|Biotype label">Biological type</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.biotype?.value}}
@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>							
 					</li>
 					<li >
-						<label i18n="Edit subject|Provider label" class="required-label">Provider</label>
+						<label i18n="Edit subject|Provider label">Provider</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.provider?.value}}
@@ -130,7 +130,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Edit subject|Stabulation label" class="required-label">Stabulation</label> 
+						<label i18n="Edit subject|Stabulation label">Stabulation</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.stabulation?.value}}

@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label i18n="Edit user|First name label@@editUserFirstName" class="required-label">First Name</label>
                 <span class="right-col">
-                    <input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
+                    <input type="text" id="firstName" formControlName="firstName" [(ngModel)]="user.firstName"/>
                     <label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
                     <label *ngIf="hasError('firstName', ['length'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be between 2 and 50!</label>
                 </span>
@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label i18n="Edit user|Last name label@@editUserLastName" class="required-label">Last Name</label>
                 <span class="right-col">
-                    <input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
+                    <input type="text" id="lastName" formControlName="lastName" [(ngModel)]="user.lastName"/>
                     <label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
                     <label *ngIf="hasError('lastName', ['length'])" class="form-validation-alert" i18n="Edit user|Last name length error@@editUserLastNameLengthError">Last Name length must be between 2 and 50!</label>
                 </span>
@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label i18n="Edit user|Email label@@editUserEmail" class="required-label">Email</label>
                 <span class="right-col">
-                    <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
+                    <input type="email" id="email" formControlName="email" [(ngModel)]="user.email"/>
                     <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
                     <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
                     <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>

@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="TherapyFormComponent content-component">
+<div #formContainer class="TherapyFormComponent content-component">
     <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<ol>
 						<label *ngIf="!isTherapyUnique" class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">This therapy already exists!</label>
 						<li class="required">
-							<label i18n="Edit therapy|Name label" class="required-label">Name</label>
+							<label i18n="Edit therapy|Name label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{therapy?.name}}
@@ -46,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit therapy|Location label" class="required-label">Type</label>
+							<label i18n="Edit therapy|Location label">Type</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
 									{{TherapyType.getLabel(therapy.therapyType)}}
