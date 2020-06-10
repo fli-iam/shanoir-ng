@@ -22,4 +22,12 @@ target
 bin/
 shanoir-uploader/src/main/resources/profile.OFSEP/key
 shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
+shanoir-uploader/src/main/resources/profile.OFSEP-NG-qualif/key
+shanoir-uploader/src/main/resources/profile.OFSEP-NG/key
 shanoir-uploader/src/main/resources/pseudonymus
+*.jar
+shanoir-ng-tests/tests/geckodriver.log
+shanoir-ng-users/shanoir-events-log.log
+shanoir-ng-preclinical/nullbruker/
+.env.bak
+docker-compose/nginx/webapp
