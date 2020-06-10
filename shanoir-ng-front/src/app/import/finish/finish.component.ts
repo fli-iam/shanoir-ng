@@ -121,10 +121,10 @@ export class FinishImportComponent {
             if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
             else if (this.importMode == 'PACS') importJob.fromPacs = true;
             importJob.examinationId = this.context.examination.id;
-            importJob.frontStudyId = this.context.study.id;
+            importJob.studyId = this.context.study.id;
             importJob.studyCardId = this.context.studyCard.id;
-            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
-            importJob.frontConverterId = this.context.niftiConverter.id;
+            importJob.acquisitionEquipmentId = this.context.acquisitionEquipment.id;
+            importJob.converterId = this.context.niftiConverter.id;
             importJob.subjectName = this.context.subject.name;
             importJob.studyName = this.context.study.name;
             return this.importService.startImportJob(importJob);

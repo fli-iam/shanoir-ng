@@ -32,12 +32,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li>
+        <!-- <li>
             <label>Use a study card</label> 
             <span class="right-col">
                 <checkbox [(ngModel)]="useStudyCard" (ngModelChange)="onToggleUseStudyCard($event); onContextChange();" [ngModelOptions]="{standalone: true}"></checkbox>
             </span>
-        </li>
+        </li> -->
         <li *ngIf="useStudyCard" @slideDown>
             <label>Select a study card</label> 
             <span class="right-col">

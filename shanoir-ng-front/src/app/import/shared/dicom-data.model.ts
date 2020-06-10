@@ -22,10 +22,10 @@ export class ImportJob {
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;
-    frontStudyId: number;
+    studyId: number;
     studyCardId: number;
-    frontAcquisitionEquipmentId: number;
-    frontConverterId: number;
+    acquisitionEquipmentId: number;
+    converterId: number;
     archive: string;
     subjectName: String;
     studyName: String;

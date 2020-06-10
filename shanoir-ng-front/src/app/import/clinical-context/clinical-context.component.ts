@@ -112,7 +112,7 @@ export class ClinicalContextComponent implements OnDestroy {
         if (this.importDataService.contextBackup) {
             let study = this.importDataService.contextBackup.study;
             let studyCard = this.importDataService.contextBackup.studyCard;
-            let useStudyCard = this.importDataService.contextBackup.useStudyCard;
+            let useStudyCard = true; //this.importDataService.contextBackup.useStudyCard;
             let center = this.importDataService.contextBackup.center;
             let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
@@ -122,7 +122,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.study = study;
                 this.onSelectStudy().then(() => {
                     if (this.useStudyCard != useStudyCard) { 
-                        this.useStudyCard = useStudyCard;
+                        //this.useStudyCard = useStudyCard;
                         this.onToggleUseStudyCard();
                     } else if (useStudyCard && studyCard){
                         this.studycard = studyCard;
@@ -229,7 +229,7 @@ export class ClinicalContextComponent implements OnDestroy {
                         } else opt.compatible = false;
                         return opt;
                     });
-                    if (!this.studycard) this.useStudyCard = false;
+                    //if (!this.studycard) this.useStudyCard = false;
                 });
             }
         }
