@@ -191,9 +191,9 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
-        return eq1.serialNumber === eq2.deviceSerialNumber
-        && eq1.manufacturerModel.name === eq2.manufacturerModelName
-        && eq1.manufacturerModel.manufacturer.name === eq2.manufacturer;
+        return eq1.serialNumber.trim().toLowerCase() === eq2.deviceSerialNumber.trim().toLowerCase()
+        && eq1.manufacturerModel.name.trim().toLowerCase() === eq2.manufacturerModelName.trim().toLowerCase()
+        && eq1.manufacturerModel.manufacturer.name.trim().toLowerCase() === eq2.manufacturer.trim().toLowerCase();
     }
 
     public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
