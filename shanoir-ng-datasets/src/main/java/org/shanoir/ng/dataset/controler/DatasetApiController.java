@@ -334,7 +334,14 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		String tmpFilePath = tmpDir + File.separator + "dataset-list";
+		String tmpFilePath = tmpDir + File.separator + "Dataset-list_[";
+		for (Dataset dataset : datasets) {
+			tmpFilePath += dataset.getId() + ",";
+		}
+		// Remove last comma and close brackets
+	    tmpFilePath = tmpFilePath.substring(0, tmpFilePath.length() - 1);
+	    tmpFilePath += "]";
+
 		File tmpFile = new File(tmpFilePath);
 		tmpFile.mkdirs();
 
