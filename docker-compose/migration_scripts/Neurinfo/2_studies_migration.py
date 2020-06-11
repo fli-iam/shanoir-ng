@@ -169,7 +169,7 @@ print("Reimport study_center: end")
 
 
 print("Reimport study_user: start")    
-sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, U.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
+sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, u.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
 query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
