@@ -719,10 +719,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(ECHO_TIME_ID) FROM ECHO_TIME")
 et_next_id = sourceCursor.fetchone()[0] + 1
 # Echo times linked to many dataset
+sourceCursor.execute("SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1")
+echo_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID 
-	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
-	WHERE et.ECHO_TIME_ID IN 
-	(SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+        FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
+        WHERE et.ECHO_TIME_ID IN %s""", [echo_times])
 echo_times = []
 et_ids = []
 for row in sourceCursor.fetchall():
@@ -749,10 +750,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(FLIP_ANGLE_ID) FROM FLIP_ANGLE")
 fa_next_id = sourceCursor.fetchone()[0] + 1
 # Flip angles linked to many dataset
+sourceCursor.execute("SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1")
+flip_angles = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, md.DATASET_ID 
 	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
-	WHERE fa.FLIP_ANGLE_ID IN 
-	(SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1)""")
+	WHERE fa.FLIP_ANGLE_ID IN %s""", [flip_angles])
 flip_angles = []
 fa_ids = []
 for row in sourceCursor.fetchall():
@@ -779,10 +781,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(INVERSION_TIME_ID) FROM INVERSION_TIME")
 it_next_id = sourceCursor.fetchone()[0] + 1
 # Inversion times linked to many dataset
+sourceCursor.execute("SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+inversion_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, md.DATASET_ID 
 	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
-	WHERE it.INVERSION_TIME_ID IN 
-	(SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	WHERE it.INVERSION_TIME_ID IN %s""", [inversion_times])
 inversion_times = []
 it_ids = []
 for row in sourceCursor.fetchall():
@@ -809,10 +812,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(REPETITION_TIME_ID) FROM REPETITION_TIME")
 rt_next_id = sourceCursor.fetchone()[0] + 1
 # Repetition times linked to many dataset
+sourceCursor.execute("SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+repetition_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, md.DATASET_ID 
 	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
-	WHERE rt.REPETITION_TIME_ID IN 
-	(SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	WHERE rt.REPETITION_TIME_ID IN %s""", [repetition_times])
 repetition_times = []
 rt_ids = []
 for row in sourceCursor.fetchall():
