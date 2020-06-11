@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         {{item.key}}: 
                         <ng-container *ngFor="let value of item.value">
                             {{value}} 
-                            <button (click)="removeSelection(item.key, value); table.refresh()"><i class="fas fa-ban"></i></button>
+                            <span class="button" (click)="removeSelection(item.key, value); table.refresh()"><i class="fas fa-ban"></i></span>
                         </ng-container>
                     </ng-container>
                 </span>
