@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
@@ -118,7 +119,7 @@ public interface SubjectApi {
 	ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException;
+			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the subjects of a study", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),

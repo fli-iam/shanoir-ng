@@ -25,7 +25,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @author ifakhfakh
  *
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackageClasses = {ShanoirImportApplication.class})
 @EnableSwagger2
 public class ShanoirImportApplication {
 

@@ -31,8 +31,6 @@ public interface CenterRepository extends CrudRepository<Center, Long> {
 
 	Center findByName(String name);
 	
-	String findNameById(Long id);
-	
 	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c")
 	public List<IdName> findIdsAndNames();
 	

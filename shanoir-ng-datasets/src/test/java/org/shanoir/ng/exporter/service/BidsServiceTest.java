@@ -71,12 +71,23 @@ public class BidsServiceTest {
 	Examination exam = ModelsUtil.createExamination();
 	Subject subject = new Subject();
 
+	
+	public static String tempFolderPath;
+
 	@Before
 	public void setUp() throws IOException {
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
 
-		ReflectionTestUtils.setField(service, "bidsStorageDir", "/tmp");
+        String property = "java.io.tmpdir";
+        tempFolderPath = System.getProperty(property) + "/tmpTest/";
+        File tempFile = new File(tempFolderPath);
+        tempFile.mkdirs();
+
+        File file = new File(tempFolderPath);
+		file.mkdirs();
+	    System.setProperty("bidsStorageDir", tempFolderPath);
+		ReflectionTestUtils.setField(service, "bidsStorageDir", tempFolderPath);
 
 		exam.setId(Long.valueOf("13851681"));
 		// Create a full study with some data and everything
@@ -95,7 +106,7 @@ public class BidsServiceTest {
 		exam.setDatasetAcquisitions(Collections.singletonList(dsa));
 		
 		// Create some dataFile and register it to be copied
-		File dataFile = new File("/tmp/test.test");
+		File dataFile = new File(tempFolderPath + "test.test");
 		dataFile.createNewFile();
 
 		DatasetExpression dsExpr = new DatasetExpression();
@@ -125,7 +136,7 @@ public class BidsServiceTest {
 		service.exportAsBids(exam.getStudyId(), studyName);
 		
 		// THEN the bids folder is generated with study - subject - exam - data
-		File studyFile = new File("/tmp/stud-" + exam.getStudyId() + "_" + studyName);
+		File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
 		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
@@ -174,7 +185,7 @@ public class BidsServiceTest {
 		exam2.setDatasetAcquisitions(datasetAcqs);
 
 		// Create some dataFile and register it to be copied
-		File dataFile2 = new File("/tmp/test.test");
+		File dataFile2 = new File(tempFolderPath + "test.test");
 		if (!dataFile2.exists()) {
 			dataFile2.createNewFile();
 		}
@@ -192,7 +203,7 @@ public class BidsServiceTest {
 		service.addDataset(exam2, subject.getName(), studyName);
 		
 		// THEN the data is added too
-		File studyFile = new File("/tmp/stud-" + exam2.getStudyId() + "_" + studyName);
+		File studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
 		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
@@ -207,7 +218,7 @@ public class BidsServiceTest {
 		service.deleteDataset(ds2);
 		
 		// THEN it is also deleted in the BIDS folder
-		studyFile = new File("/tmp/stud-" + exam2.getStudyId() + "_" + studyName);
+		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
 		subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
@@ -222,7 +233,7 @@ public class BidsServiceTest {
 		service.deleteExam(exam2.getId());
 		
 		// THEN it is also deleted in the BIDS folder
-		studyFile = new File("/tmp/stud-" + exam2.getStudyId() + "_" + studyName);
+		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
 		subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
@@ -241,12 +252,12 @@ public class BidsServiceTest {
 	}
 
 	@After
-	public void tearDown() throws IOException {
-	    File studyFile = new File("/tmp/stud-" + exam.getStudyId() + "_" + studyName);
-	    FileUtils.deleteDirectory(studyFile);
-	    File dataFile = new File("/tmp/test.test");
-		dataFile.delete();
+	public void tearDown() {
+		// delete files
+        File tempFile = new File(tempFolderPath);
+        if (tempFile.exists()) {
+        	FileUtils.deleteQuietly(tempFile);
+        }
 	}
-
-	
 }
+

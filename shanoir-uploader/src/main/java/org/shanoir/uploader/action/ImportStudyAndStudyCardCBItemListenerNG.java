@@ -44,10 +44,12 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
 				// put center into exam using study card and acq equipment
-				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
-				IdName center = acqEquipment.getCenter();
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+				if (acqEquipment != null) {
+					IdName center = acqEquipment.getCenter();
+					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
+				}
 				// add investigators
 				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
 				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				

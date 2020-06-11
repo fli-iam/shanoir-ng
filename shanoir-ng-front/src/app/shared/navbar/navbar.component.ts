@@ -17,6 +17,7 @@ import { Component, ViewChildren, QueryList } from '@angular/core';
 import { DropdownMenuComponent } from '../components/dropdown-menu/dropdown-menu.component'
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { SolrService } from '../../solr/solr.service';
 
 @Component({
     selector: 'navbar',
@@ -36,7 +37,8 @@ export class NavbarComponent {
     /* Icons */
     public ImagesUrlUtil = ImagesUrlUtil;
 
-    constructor(private keycloakService: KeycloakService) {
+    constructor(private keycloakService: KeycloakService,
+        private solrService: SolrService) {
     }
 
     ngAfterViewInit() {
@@ -93,6 +95,10 @@ export class NavbarComponent {
 
     public cascadingClose() {
         this.closeChildren();
+    }
+
+    indexToSolr() {
+        this.solrService.indexAll();
     }
 
 }

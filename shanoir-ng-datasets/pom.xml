@@ -137,6 +137,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Solr -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-solr</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -18,8 +18,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -29,9 +31,13 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Subject service implementation.
@@ -57,6 +63,9 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -105,7 +114,8 @@ public class SubjectServiceImpl implements SubjectService {
 				subjectStudy.setSubject(subject);
 			}
 		}
-		return subjectRepository.save(subject);
+		Subject subjectDb = subjectRepository.save(subject);
+		return subjectDb;
 	}
 	
 	@Override
@@ -132,7 +142,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Subject update(final Subject subject) throws EntityNotFoundException {
+	public Subject update(final Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
@@ -149,8 +159,11 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @param template template with new values.
 	 * @return database template with new values.
 	 */
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
+	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 
+		if (subject.getName() != subjectDb.getName()) {
+			updateSubjectName(new IdName(subject.getId(), subject.getName()));
+		}
 		subjectDb.setName(subject.getName());
 		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
@@ -171,7 +184,15 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
-	
+	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+					new ObjectMapper().writeValueAsString(subject));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
+		} 
+	}
 
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
@@ -218,7 +239,6 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectRepository.findByIdentifier(identifier);
 	}
 
-	
 	@Override
 	public Subject findSubjectFromCenterCode(final String centerCode) {
 		if (centerCode == null || "".equals(centerCode)) {
@@ -226,5 +246,4 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return subjectRepository.findSubjectFromCenterCode(centerCode + "%");
 	}
-
 }
