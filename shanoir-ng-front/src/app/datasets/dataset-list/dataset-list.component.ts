@@ -62,8 +62,8 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             {headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
             {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
-            {headerName: "Subject", field: "subject.name"},
-            {headerName: "Study", field: "study.name"},
+            {headerName: "Subject", field: "subject.name", orderBy: ["subjectId"]},
+            {headerName: "Study", field: "study.name", orderBy: ["datasetAcquisition.examination.studyId"]},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];

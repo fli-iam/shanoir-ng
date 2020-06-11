@@ -335,6 +335,7 @@ export class TableComponent implements OnInit {
     }
 
     computeSelectAll() {
+        if (this.page == null) return;
         let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
         if (selectedOnCurrentPage.length == this.page.content.length) {
             this.selectAll = true;

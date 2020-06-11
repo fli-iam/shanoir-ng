@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.service;
 
 import java.util.List;
 
+import org.shanoir.ng.configuration.amqp.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -24,6 +25,8 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -108,7 +111,7 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Dataset> findAll() {
 		return Utils.toList(repository.findAll());
 	}
-
+ 
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -116,8 +119,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			
-			return repository.findByStudyIdIn(studyIds, pageable);
+			return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
 		}
 	}
 

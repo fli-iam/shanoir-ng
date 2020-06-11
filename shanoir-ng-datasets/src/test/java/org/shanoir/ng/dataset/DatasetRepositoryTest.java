@@ -15,9 +15,11 @@
 package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +36,8 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -152,5 +156,23 @@ public class DatasetRepositoryTest {
 		assertNotNull(repository.findOne(1L).getDatasetAcquisition());
 		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
 	}
+	
+	@Test
+	public void findByStudyTest() throws ShanoirException {
+		boolean founded = false;
+		for (Dataset ds : repository.findAll()) {
+			if (ds.getStudyId() == 1L) {
+				founded = true;
+				break;
+			}
+		}
+		assertEquals(true, founded);
+		
+		List<Long> studyIds = new ArrayList<Long>();
+		studyIds.add(1L); studyIds.add(2L);
+		Pageable pageable = new PageRequest(0, 10);
+		assertNotEquals(0, repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable).getTotalElements());
+	}
+	
 	
 }
