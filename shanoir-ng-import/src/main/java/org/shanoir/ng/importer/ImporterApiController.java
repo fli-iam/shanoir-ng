@@ -220,7 +220,13 @@ public class ImporterApiController implements ImporterApi {
 			List<Patient> patients = preparePatientsForImportJob(importJobDir);
 
 			/**
-			 * 3. STEP: create ImportJob
+			 * 3. STEP: split instances into non-images and images and get additional meta-data
+			 * from first dicom file of each serie, meta-data missing in dicomdir.
+			 */
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+	
+			/**
+			 * . STEP: create ImportJob
 			 */
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
@@ -394,77 +400,28 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> importDicomZipFile(
 			@ApiParam(value = "file detail") @RequestBody final String dicomZipFilename) throws RestServiceException {
+		// We use this when coming from BRUKER upload
 		if (dicomZipFilename == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		File tempFile = new File(dicomZipFilename);
-
-		// Import dicomfile
-		ResponseEntity<ImportJob> dicomFile = importDicomZipFile(tempFile);
-
-		// Delete temp file which is useless now
-		tempFile.delete();
-
-		return dicomFile;
-	}
-
-	private ResponseEntity<ImportJob> importDicomZipFile(final File dicomZipFile) throws RestServiceException {
-		if (!isZipFileFromFile(dicomZipFile)) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
-		}
+		MockMultipartFile multiPartFile;
 		try {
-			LOG.info("importDicomZipFile step1 unzip file ");
-			/**
-			 * 1. STEP: Handle file management. Always create a userId specific folder in
-			 * the import work folder (the root of everything): split imports to clearly
-			 * separate them into separate folders for each user
-			 */
-			final Long userId = KeycloakUtil.getTokenUserId();
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
-			final File userImportDir = new File(userImportDirFilePath);
-			if (!userImportDir.exists()) {
-				userImportDir.mkdirs(); // create if not yet existing
-			}
-			File importJobDir = saveTempFileCreateFolderAndUnzipFromFile(userImportDir, dicomZipFile);
-			LOG.info("...unzipped into  {}", userImportDir);
+			multiPartFile = new MockMultipartFile(tempFile.getName(), tempFile.getName(), APPLICATION_ZIP, new FileInputStream(tempFile.getAbsolutePath()));
 
-			/**
-			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
-			 * Patient - Study - Serie - Instance
-			 */
-			LOG.info("importDicomZipFile step2 read DICOMDIR ");
-			List<Patient> patients = null;
-			File dicomDirFile = new File(importJobDir.getAbsolutePath() + File.separator + DICOMDIR);
-			if (dicomDirFile.exists()) {
-				patients = dicomDirToModel.readDicomDirToPatients(dicomDirFile);
-			}
-			/**
-			 * 3. STEP: split instances into non-images and images and get additional
-			 * meta-data from first dicom file of each serie, meta-data missing in dicomdir.
-			 */
-			LOG.info("importDicomZipFile step3 split instances into non-images and images ");
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(),
-					false);
-
-			/**
-			 * 4. STEP: create ImportJob
-			 */
-			LOG.info("importDicomZipFile step3 importJob {}", importJobDir.getAbsolutePath());
-			ImportJob importJob = new ImportJob();
-			importJob.setFromDicomZip(true);
-			// Work folder is always relative to general import directory and userId (not
-			// shown to outside world)
-			importJob.setWorkFolder(importJobDir.getName());
-			importJob.setPatients(patients);
-			return new ResponseEntity<>(importJob, HttpStatus.OK);
+			// Import dicomfile
+			return uploadDicomZipFile(multiPartFile);
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
+			LOG.error("ERROR while loading zip fiole, please contact an administrator");
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+		} finally {
+			// Delete temp file which is useless now
+			tempFile.delete();
 		}
 	}
+
 
 	private boolean isZipFileFromFile(final File file) {
 		return file != null && file.getName().endsWith(ZIP_FILE_SUFFIX);
