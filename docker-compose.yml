@@ -204,7 +204,7 @@ services:
   #
   preclinical-bruker2dicom:
     container_name: preclinical-bruker2dicom
-    image: dicomifier.ws
+    image: jcomedouteau/dicomifier.ws
     command: ["python3", "/root/run.py"]
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -218,21 +218,20 @@ services:
   #
   # Solr microservice for Shanoir-NG search
   #
-#  solr:
-#    container_name: solr
-#    image: solr
-#    volumes:
-#      - "solr-data:/opt/solr/server/solr/mycores"
-#    networks:
-#      - shanoir_ng_network
-#    ports:
-#      - "8983:8983"
-#    entrypoint:
-#      - docker-entrypoint.sh
-#      - solr-precreate
-#      - mycore
-#
-  #
+  solr:
+    container_name: solr
+    image: solr:8.1
+    volumes:
+      - "solr-data:/opt/solr/server/solr/shanoir"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "8983:8983"
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - shanoir
+
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
