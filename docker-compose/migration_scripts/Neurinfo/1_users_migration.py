@@ -16,7 +16,7 @@ cursor = conn.cursor()
 
 print("Update users: start")
 query = "UPDATE users SET role_id=3 WHERE role_id=2"
-cursor.executemany(query, users)
+cursor.execute(query)
 conn.commit()
 print("Update users: end")
 
