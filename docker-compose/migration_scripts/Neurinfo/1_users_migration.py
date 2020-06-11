@@ -4,7 +4,12 @@
 import os
 import pymysql
 
-conn = pymysql.connect(host="localhost", user="user", password="password", database="users", charset="utf8")
+conn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "user",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
+        database    = os.environ.get("TGT_DATABASE")    or "users",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 cursor = conn.cursor()
 
