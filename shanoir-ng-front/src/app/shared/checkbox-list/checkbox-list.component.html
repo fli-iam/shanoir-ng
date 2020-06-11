@@ -1,0 +1,27 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<!-- TODO: search bar -->
+
+<!-- Select / Unselect All -->
+<!-- <input type="checkbox" [(ngModel)]="selectAll" (change)="selectUnselectAll($event.target.checked)" /> Select / Unselect All -->
+<!-- List of checkboxes -->
+<div class="items" *ngIf="items && items.content">
+    <label *ngFor="let item of items.content | slice: itemsPersPage*currentPage : itemsPersPage*(currentPage+1)">
+        <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" [disabled]="!item.valueCount"/>
+            {{item.value}} - {{item.valueCount}}
+    </label>
+    <button [disabled]="currentPage == 0" (click)="setPage(currentPage - 1)">-</button>
+    <button [disabled]="currentPage + 1 == totalPages" (click)="setPage(currentPage + 1)">+</button>
+</div>

@@ -14,10 +14,17 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import java.io.IOException;
+
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.ampq.StudyUserListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +51,12 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ExaminationRepository examRepo;
+	
+	@Autowired 
+	private StudyRepository studyRepository;
+	
+	@Autowired 
+	private SubjectRepository subjectRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -55,6 +68,56 @@ public class RabbitMQDatasetsService {
     public void receiveMessage(String commandArrStr) {
 		listener.receiveMessageImport(commandArrStr);
     }
+	
+	
+	@RabbitListener(bindings = @QueueBinding(
+	        value = @Queue(value = RabbitMQConfiguration.STUDY_NAME_UPDATE, durable = "true"),
+	        exchange = @Exchange(value = RabbitMQConfiguration.STUDY_NAME_UPDATE, ignoreDeclarationExceptions = "true",
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.DIRECT))
+	)
+    public void receiveStudyNameUpdate(final String studyStr) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		IdName receivedStudy = new IdName();
+		try {
+			receivedStudy = objectMapper.readValue(studyStr, IdName.class);
+			Study existingStudy = studyRepository.findOne(receivedStudy.getId());
+			if (existingStudy != null) {
+				// update existing study's name
+				existingStudy.setName(receivedStudy.getName());
+				studyRepository.save(existingStudy);
+			} else {
+				// create new study
+				Study newStudy = new Study(receivedStudy.getId(), receivedStudy.getName());
+				studyRepository.save(newStudy);
+			}
+		} catch (IOException e) {
+			LOG.error("Could not read value transmit as Study class through RabbitMQ");
+		}
+    }
+
+	@RabbitListener(bindings = @QueueBinding(
+	        value = @Queue(value = RabbitMQConfiguration.SUBJECT_NAME_UPDATE, durable = "true"),
+	        exchange = @Exchange(value = RabbitMQConfiguration.SUBJECT_NAME_UPDATE, ignoreDeclarationExceptions = "true",
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.DIRECT))
+	)
+    public void receiveSubjectNameUpdate(final String subjectStr) {
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		IdName receivedSubject = new IdName();
+		try {
+			receivedSubject = objectMapper.readValue(subjectStr, IdName.class);
+			Subject existingSubject = subjectRepository.findOne(receivedSubject.getId());
+			if (existingSubject != null) {
+				existingSubject.setName(receivedSubject.getName());
+				subjectRepository.save(existingSubject);
+			} else {
+				Subject newSubject = new Subject(receivedSubject.getId(), receivedSubject.getName());
+				subjectRepository.save(newSubject);
+			}
+		} catch (IOException e) {
+			LOG.error("Could not read value transmit as Subject class through RabbitMQ");
+		}
+	}
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
@@ -65,7 +128,7 @@ public class RabbitMQDatasetsService {
 	        value = @Queue(value = RabbitMQConfiguration.DELETE_USER_QUEUE, durable = "true"),
 	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	)
+	)	
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());

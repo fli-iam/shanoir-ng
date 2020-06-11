@@ -18,11 +18,12 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
+public interface StudyRepository extends CrudRepository<Study, Long> {
 
 	/**
 	 * Get all studies
@@ -50,6 +51,13 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 */
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUseRightId);
 	
+	/**
+	 * Get ids and names of all studies.
+	 * 
+	 * @return IdName list.
+	 */
+	@Query("select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name) from Study s")
+	List<IdName> findIdsAndNames();
 	
 	/**
 	 * Find id and name for all studies in which user has a defined role

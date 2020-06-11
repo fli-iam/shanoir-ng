@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.shared.configuration;
 
 import org.springframework.amqp.core.FanoutExchange;
@@ -80,6 +79,11 @@ public class RabbitMQConfiguration {
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
+
+	public static final String STUDY_NAME_UPDATE = "study_name_update";
+
+	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
+
 
 	////////////////// EXCHANGES //////////////////
 
@@ -218,5 +222,15 @@ public class RabbitMQConfiguration {
 	@Bean
 	public FanoutExchange fanoutSubjectExchange() {
 	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+	}
+
+	@Bean
+	public static Queue studyNameUpdateQueue() {
+		return new Queue(STUDY_NAME_UPDATE, true);
+	}
+	
+	@Bean
+	public static Queue subjectNameUpdateQueue() {
+		return new Queue(SUBJECT_NAME_UPDATE, true);
 	}
 }
