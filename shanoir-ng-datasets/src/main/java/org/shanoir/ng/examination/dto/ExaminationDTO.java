@@ -19,6 +19,7 @@ package org.shanoir.ng.examination.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
@@ -48,6 +49,8 @@ public class ExaminationDTO {
 	private Double subjectWeight;
 	
 	private boolean preclinical;
+
+	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 	private List<String> extraDataFilePathList;
 
@@ -163,6 +166,14 @@ public class ExaminationDTO {
 
 	public void setPreclinical(final boolean preclinical) {
 		this.preclinical = preclinical;
+	}
+
+	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
+		return instrumentBasedAssessmentList;
+	}
+
+	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
+		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
 	}
 
 	/**

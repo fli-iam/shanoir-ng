@@ -115,13 +115,38 @@ public class ImportDialogOpenerNG {
 				idList.getIdList().add(studyId);
 				List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
 				// fill missing infos coming from other microservice studies here:
+				Boolean compatibleStudyCard = false;
 				if (studyCards != null) {
 					for (Iterator itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
 						Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
 						AcquisitionEquipment acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(acquisitionEquipmentId);
 						studyCard.setAcquisitionEquipment(acquisitionEquipment);
+						if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
+								&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
+							if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
+								String manufacturerSC = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
+								String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
+								if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
+										&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
+										&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
+									studyCard.setCompatible(true);
+									compatibleStudyCard = true;
+								} else {
+									studyCard.setCompatible(false);
+								}
+							} else {
+								studyCard.setCompatible(false);
+							}
+						} else {
+							studyCard.setCompatible(false);
+						}
 					}
+				}
+				if (compatibleStudyCard) {
+					study.setCompatible(true);
+				} else {
+					study.setCompatible(false);
 				}
 				study.setStudyCards(studyCards);
 			}

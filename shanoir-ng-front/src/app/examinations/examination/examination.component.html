@@ -157,27 +157,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<!--{{examination.note}}-->
-							</ng-template>
+                            <ng-template ngFor let-instrumentBased [ngForOf]="examination.instrumentBasedAssessmentList">
+								<instrument-assessment-detail [instrumentBasedAssesment]="instrumentBased">
+                                </instrument-assessment-detail>
+                            </ng-template>
+                            <!--
 							<ng-template ngSwitchDefault>
 								<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-								disabled (click)="instAssessment()">
+								(click)="instAssessment()">
 									<i class="fas fa-plus-square"></i>
 									new Instrument Based Assessment										
 								</button>
 							</ng-template>
+                            -->
 						</span>
 					</li>
 					<li *ngIf="mode == 'create' || mode=='edit'">
 						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
 						<span class="right-col" [ngSwitch]="mode">
-                                                    <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                                                    <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                                                    <ul>
-                                                        <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
-                                                        </li>
-                                                    </ul>
+                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+                            <ul>
+                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                </li>
+                            </ul>
 						</span>
 					</li>
 				</ol>

@@ -4,7 +4,7 @@
 
 	<groupId>org.shanoir.uploader</groupId>
 	<artifactId>shanoir-uploader</artifactId>
-	<version>6.0.3</version>
+	<version>6.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>ShanoirUploader</name>
@@ -54,12 +54,16 @@
 			<groupId>org.shanoir</groupId>
 			<artifactId>shanoir</artifactId>
 			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/shanoir-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency ShanoirWs -->
 		<dependency>
 			<groupId>org.shanoir</groupId>
 			<artifactId>shanoir-ws</artifactId>
 			<version>0.4</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/shanoir-ws-0.4.jar</systemPath>
 		</dependency>
 		<!-- dependency Shanoir ng anonymization -->
 		<dependency>
@@ -91,6 +95,12 @@
 			        <artifactId>slf4j-log4j12</artifactId>
 			    </exclusion>
 			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
 		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>
@@ -143,6 +153,8 @@
 			<groupId>dcm4che2.tool</groupId>
 			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
 			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/dcm4che2-tool-dcmqr-custom-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency DCM4CHE tool dcmrcv -->
 		<dependency>
@@ -232,6 +244,8 @@
 							<tasks>
 								<copy file="start-shup-windows-java.bat" tofile="target/start-shup-windows-java.bat" />
 								<copy file="start-shup-linux-mac-java.sh" tofile="target/start-shup-linux-mac-java.sh" />
+								<copy file="downloadDataset.sh" tofile="target/downloadDataset.sh" />
+								<copy file="downloadDataset.bat" tofile="target/downloadDataset.bat" />
 							</tasks>
 						</configuration>
 						<goals>

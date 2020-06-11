@@ -148,9 +148,8 @@ public class CenterApiController implements CenterApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		} 
 	}
-	
 	
 	private void validate(Center center, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()
