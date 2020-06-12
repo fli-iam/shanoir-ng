@@ -4,8 +4,18 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="studies", password="password", database="studies", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "studies",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
+        database    = os.environ.get("TGT_DATABASE")    or "studies",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
@@ -159,7 +169,7 @@ print("Reimport study_center: end")
 
 
 print("Reimport study_user: start")    
-sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, U.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
+sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, u.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
 query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
