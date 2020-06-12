@@ -44,6 +44,8 @@ public class RabbitMQConfiguration {
 
 	public static final String SHANOIR_EVENTS_QUEUE = "shanoir_events_queue";
 
+	public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir_events_queue_import";
+	
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
 	public static final String STUDY_USER_QUEUE = "study-user";
@@ -84,6 +86,7 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
 
+	public static final String USER_ADMIN_STUDY_QUEUE = "user-admin-study-queue";
 
 	////////////////// EXCHANGES //////////////////
 
@@ -93,6 +96,7 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECTS_EXCHANGE = "subjects-exchange";
 
+	public static final String STUDY_ADMIN_EXCHANGE = "study-admin-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -102,6 +106,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue getShanoirEventsQueue() {
     	return new Queue(SHANOIR_EVENTS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue getShanoirEventsQueueImport() {
+    	return new Queue(SHANOIR_EVENTS_QUEUE_IMPORT, true);
     }
 
 	@Bean
@@ -225,6 +234,11 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public FanoutExchange adminStudyExchange() {
+	    return new FanoutExchange(STUDY_ADMIN_EXCHANGE, true, false);
+	}
+
+	@Bean
 	public static Queue studyNameUpdateQueue() {
 		return new Queue(STUDY_NAME_UPDATE, true);
 	}
@@ -232,5 +246,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
 		return new Queue(SUBJECT_NAME_UPDATE, true);
+	}
+
+	@Bean
+	public static Queue userAdminStudyQueue() {
+		return new Queue(USER_ADMIN_STUDY_QUEUE, true);
 	}
 }

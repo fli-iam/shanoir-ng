@@ -15,13 +15,19 @@
 package org.shanoir.ng.email;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.shanoir.ng.events.ShanoirEvent;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -47,7 +53,15 @@ public class EmailServiceImpl implements EmailService {
 	private static final String FIRSTNAME = "firstname";
 
 	private static final String SERVER_ADDRESS = "serverAddress";
-
+	
+	private static final String STUDY_NAME = "studyName";
+	
+	private static final String SUBJECT = "subject";
+	
+	private static final String EXAMINATION = "examination";
+	
+	
+	
 	@Autowired
 	private JavaMailSender mailSender;
 
@@ -62,6 +76,9 @@ public class EmailServiceImpl implements EmailService {
 
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
 
@@ -327,4 +344,68 @@ public class EmailServiceImpl implements EmailService {
 		mailSender.send(messagePreparator);
 	}
 
+	@Override
+	public void notifyStudyManagerDataImported(ShanoirEvent event) {
+		// Build the message
+		
+		// Do nothing if it's not a success
+		if (event.getStatus() != org.shanoir.ng.shared.event.ShanoirEvent.SUCCESS) {
+			return;
+		}
+		String message = event.getMessage();
+		
+		String patternStr = "(.*)\\((\\d+)\\)\\: Successfully created datasets for subject (.*) in examination (\\d+)";
+        Pattern pattern = Pattern.compile(patternStr);
+        Matcher matcher = pattern.matcher(message);
+        if (!matcher.find()) {
+        	return;
+        }
+
+        String studyName =matcher.group(1);
+        String studyId =matcher.group(2);
+        String subjectName =matcher.group(3);
+
+		// Here call a study microservice (with a cache ? replicated ?)
+		List<Long> admins = this.getStudyAdministrator(studyId);
+		
+		for (Long id : admins) {
+			User admin = userRepository.findOne(id);
+			
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Data imported to " + studyName);
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(STUDY_NAME, studyName);
+				variables.put(SUBJECT, subjectName);
+				variables.put(EXAMINATION, event.getObjectId());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminDataImported", variables);
+				messageHelper.setText(content, true);
+			};
+
+			// Send the message
+			mailSender.send(messagePreparator);
+		}
+		
+	}
+
+	/**
+	 * This methods call Study Microservice to get administrator users IDs for the thing
+	 * @param studyId
+	 * @return
+	 */
+	public List<Long> getStudyAdministrator(String studyId) {
+		try {
+			ArrayList<Long> response =  (ArrayList<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, studyId);
+			return response;
+		} catch (Exception e) {
+			// Could not do the thing
+			e.printStackTrace();
+			return Collections.emptyList();
+		}
+	}
 }
