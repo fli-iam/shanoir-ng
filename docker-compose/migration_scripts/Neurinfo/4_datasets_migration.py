@@ -274,17 +274,61 @@ print("Delete dataset_metadata: end")
 print("######## CLEANING OF TARGET DB MS DATASETS: FINISHED ###################")
 
 
-
-
-
-
 print("######## IMPORTING OF TARGET DB MS DATASETS: START ###################")
 print("Import study cards: start")
-sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, CENTER_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM STUDY_CARD")
-query = "INSERT INTO study_cards (id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM STUDY_CARD")
+query = "INSERT INTO study_cards (id, acquisition_equipment_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Import study cards: end")
+
+print("Import study card rules: start")
+sourceCursor.execute("SELECT STUDY_CARD_RULE_ID, STUDY_CARD_ID FROM STUDY_CARD_RULE")
+query = "INSERT INTO study_card_rule (id, study_card_id) VALUES (%s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import study card rules: end")
+
+print("Import study card conditions: start")
+sourceCursor.execute("SELECT STUDY_CARD_CONDITION_ID, STUDY_CARD_RULE_ID, DICOM_TAG, DICOM_VALUE, REF_COMPARISON_SIGN_ID FROM STUDY_CARD_CONDITION")
+query = "INSERT INTO study_card_condition (id, study_card_rule_id, dicom_tag, dicom_value, operation) VALUES (%s, %s, %s, %s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import study card conditions: end")
+
+print("Import study card assignments: start")
+sourceCursor.execute("SELECT STUDY_CARD_ASSIGNMENT_ID, FIELD, VALUE FROM STUDY_CARD_ASSIGNMENT")
+study_card_assignment_list = list()
+for row in sourceCursor.fetchall():
+    study_card_rule = list(row)
+	if 'refDatasetModalityType' == study_card_rule[1]:
+		study_card_rule[1] = 1
+	else if 'protocolName' == study_card_rule[1]:
+		study_card_rule[1] = 2
+	else if 'transmittingCoil' == study_card_rule[1]:
+		study_card_rule[1] = 4
+	else if 'receivingCoil' == study_card_rule[1]:
+		study_card_rule[1] = 5
+	else if 'refExploredEntity' == study_card_rule[1]:
+		study_card_rule[1] = 6
+	else if 'refAcquisitionContrast' == study_card_rule[1]:
+		study_card_rule[1] = 7
+	else if 'refMrSequenceApplication' == study_card_rule[1]:
+		study_card_rule[1] = 8
+	else if 'refMrSequencePhysics' == study_card_rule[1]:
+		study_card_rule[1] = 9
+	else if 'name' == study_card_rule[1]:
+		study_card_rule[1] = 10
+	else if 'comment' == study_card_rule[1]:
+		study_card_rule[1] = 11
+	else if 'mrSequenceName' == study_card_rule[1]:
+		study_card_rule[1] = 12
+	else if 'refContrastAgentUsed' == study_card_rule[1]:
+		study_card_rule[1] = 13
+query = "INSERT INTO study_card_assignment (id, field, value) VALUES (%s, %s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import study card assignments: end")
 
 
 print("Import scientific_article: start")
