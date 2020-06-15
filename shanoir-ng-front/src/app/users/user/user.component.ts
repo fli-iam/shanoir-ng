@@ -11,17 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { Location } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { IMyDate } from 'mydatepicker';
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
-import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+
 
 @Component({
     selector: 'user-detail',
@@ -29,199 +29,101 @@ import { UserService } from '../shared/user.service';
     styleUrls: ['user.component.css']
 })
 
-export class UserComponent implements OnInit {
-    @Input() requestAccountMode: boolean = false;
-    @Output() closing = new EventEmitter();
-    user: User = new User();
-    userForm: FormGroup;
-    roles: Role[];
-    isEmailUnique: boolean = true;
-    isDateValid: boolean = true;
-    selectedDateNormal: IMyDate;
-    accountRequestInfo: AccountRequestInfo;
-    private accountRequestInfoValid: boolean = false;
-    private id: number;
-    @Input() mode: "view" | "edit" | "create";
+export class UserComponent extends EntityComponent<User> {
 
-    constructor(private router: Router, private location: Location, private route: ActivatedRoute,
-        private userService: UserService, private roleService: RoleService, private fb: FormBuilder) {
-            this.mode = this.route.snapshot.data['mode'];
-            this.id = +this.route.snapshot.params['id'];
+    private roles: Role[];
+    private denyLoading: boolean = false;
+    private acceptLoading: boolean = false;
+
+    constructor(
+            private route: ActivatedRoute,
+            private userService: UserService,
+            private roleService: RoleService) {
+            
+        super(route, 'user');
     }
 
-    ngOnInit(): void {
-        if (this.requestAccountMode) {
-            this.mode = "create";
-        } else {
-            this.getRoles();
-        }
-        this.buildForm();
+    public get user(): User { return this.entity; }
+    public set user(user: User) { this.entity = user; }
+
+    initView(): Promise<void> {
+        return this.loadUserAndRoles();
     }
 
-    getRoles(): void {
-        this.roleService
-            .getRoles()
-            .then(roles => {
-                this.roles = roles;
-                this.getUser();
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting roles list!");
-            });
+    initEdit(): Promise<void> {
+        return this.loadUserAndRoles();
     }
 
-    getUser(): void {
-        if (this.mode == 'create') {
-            this.user = new User();
-        } else {
-            this.userService.get(this.id).then((user: User) => {
-                user.role = this.getRoleById(user.role.id);
-                this.user = user;
-                if (user.extensionRequestDemand) {
-                    this.user.expirationDate = user.extensionRequestInfo.extensionDate;
-                }
-                this.accountRequestInfo = this.user.accountRequestInfo;
-            });
-        }
+    initCreate(): Promise<void> {
+        this.user = new User();
+        this.getRoles();
+        return Promise.resolve();
     }
 
-    getOut(): void {
-        this.location.back();
+    private loadUserAndRoles(): Promise<void> {
+        let userPromise: Promise<void> = this.userService.get(this.id).then((user: User) => {
+            this.user = user;
+            if (user.extensionRequestDemand && user.extensionRequestInfo) {
+                this.user.expirationDate = user.extensionRequestInfo.extensionDate;
+            }
+        });
+        Promise.all([userPromise, this.getRoles()]).then(() => {
+            this.user.role = this.getRoleById(this.user.role.id);
+        });
+        return userPromise;
     }
 
-    cancelAccountRequest(): void {
-        window.location.href = process.env.LOGOUT_REDIRECT_URL;
+    getRoles(): Promise<void> {
+        return this.roleService.getRoles().then(roles => {
+            this.roles = roles;
+        });
     }
 
     accept(): void {
-        this.submit();
+        this.acceptLoading = true;
         this.userService.confirmAccountRequest(this.id, this.user)
             .then((user) => {
-                this.getOut();
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    this.isEmailUnique = false;
-                }
+                this.msgBoxService.log('info', 'User saved and confirmed !');
+                this.goBack();
+                this.acceptLoading = false;
+            }).catch(reason => {
+                this.acceptLoading = false;
+                throw reason;
             });
     }
 
     deny(): void {
+        this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
-            .then(res => {
-                this.getOut();
-            })
-            .catch((error) => {
-                // TODO: display error
-                //log.error("error deny account request!");
-                console.log("error deny account request!");
-            });
-    }
-
-    create(): void {
-        this.submit();
-        this.userService.create(this.user)
             .then((user) => {
-                this.getOut();
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    this.isEmailUnique = false;
-                }
+                this.msgBoxService.log('info', 'The request has been denied !');
+                this.goBack();
+                this.denyLoading = false;
+            }).catch(reason => {
+                this.denyLoading = false;
+                throw reason;
             });
     }
 
-    accountRequest(): void {
-        this.submit();
-        this.userService.requestAccount(this.user)
-            .then((res) => {
-                this.getOut();
-            }, (reason: any) => {
-                if ( reason && reason.error.code == 422) {
-                    this.isEmailUnique = false;
-                } else {
-                    this.getOut();
-                }
-            });
-    }
-
-    update(): void {
-        this.submit();
-        this.userService.update(this.id, this.user)
-            .then((user) => {
-                this.getOut();
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    this.isEmailUnique = false;
-                }
-            });
-    }
-
-    submit(): void {
-        // this.user = this.userForm.value;
-        this.user.accountRequestInfo = this.accountRequestInfo;
-    }
-
-    isUserFormValid(): boolean {
-        if (this.userForm.valid && this.isDateValid) {
-            if (this.requestAccountMode) {
-                if (this.accountRequestInfoValid) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    buildForm(): void {
+    buildForm(): FormGroup {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
-        let roleFC: FormControl;
-        if (this.requestAccountMode) {
-            roleFC = new FormControl(this.user.role);
-        } else {
-            roleFC = new FormControl(this.user.role, Validators.required);
-        }
-        this.userForm = this.fb.group({
+        let userForm = this.formBuilder.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'username': new FormControl(this.user.username),
-            'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
+            'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
             'expirationDate': [this.user.expirationDate],
-            'extensionMotivation': [(this.user.extensionRequestInfo) ? this.user.extensionRequestInfo.extensionMotivation : ''],
-            'role': roleFC,
-            'canAccessToDicomAssociation': new FormControl('false')
+            'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
+            'role': [this.user.role, [Validators.required]],
+            'canAccessToDicomAssociation': new FormControl('false'),
+            'accountRequestInfo': [this.user.accountRequestInfo]
         });
-
-        this.userForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); // (re)set validation messages now
-    }
-
-    onValueChanged(data?: any) {
-        if (!this.userForm) { return; }
-        const form = this.userForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
+        if (this.user.extensionRequestDemand) {
+            userForm.get('expirationDate').setValidators([DatepickerComponent.validator, Validators.required, DatepickerComponent.inFutureValidator]);
+        } else {
+            userForm.get('expirationDate').setValidators([DatepickerComponent.validator, Validators.required]);
         }
+        return userForm;
     }
-
-    formErrors = {
-        'firstName': '',
-        'lastName': '',
-        'email': '',
-        'role': ''
-    };
 
     getRoleById(id: number): Role {
         for (let role of this.roles) {
@@ -230,14 +132,6 @@ export class UserComponent implements OnInit {
             }
         }
         return null;
-    }
-
-    saveARI(ari: AccountRequestInfo): void {
-        this.accountRequestInfo = ari;
-    }
-
-    updateARIValid(ariValid: boolean): void {
-        this.accountRequestInfoValid = ariValid;
     }
 
 }

@@ -20,12 +20,16 @@ import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
+import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
+import { ServiceLocator } from '../../utils/locator.service';
 
 
 @Injectable()
 export class ExaminationService extends EntityService<Examination> {
 
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
+
+    protected examinationDtoService: ExaminationDTOService = ServiceLocator.injector.get(ExaminationDTOService);
 
     getEntityInstance() { return new Examination(); }
 
@@ -39,10 +43,18 @@ export class ExaminationService extends EntityService<Examination> {
             AppUtils.BACKEND_API_EXAMINATION_URL, 
             { 'params': pageable.toParams() }
         )
-        .map(this.mapPage)
-        .toPromise();
+        .toPromise()
+        .then(this.mapPage);
     }
 
+    protected mapEntity = (entity: ExaminationDTO, result?: Examination): Promise<Examination> => {
+        return this.examinationDtoService.toEntity(entity);
+    }
+
+    protected mapEntityList = (entities: any[], result?: Examination[]): Promise<Examination[]> => {
+        return this.examinationDtoService.toEntityList(entities);
+    }
+        
     postFile(fileToUpload: File, examId: number): Observable<any> {
         const endpoint = this.API_URL + '/extra-data-upload/' + examId;
         const formData: FormData = new FormData();
@@ -56,7 +68,7 @@ export class ExaminationService extends EntityService<Examination> {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);
             }
-        });;
+        });
     }
 
     private getFilename(response: HttpResponse<any>): string {

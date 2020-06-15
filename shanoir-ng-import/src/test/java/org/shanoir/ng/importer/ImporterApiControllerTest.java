@@ -143,7 +143,7 @@ public class ImporterApiControllerTest {
 	    	if (importJson) {
 		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
 		    	importJsonFile.createNewFile();
-		    	FileUtils.write(importJsonFile, "{\"frontStudyId\": 1,\"frontAcquisitionEquipmentId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
+		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"acquisitionEquipmentId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
 	    	}
 	    }
 	    File importZip = new File("/tmp/test-import-as-bids.zip");

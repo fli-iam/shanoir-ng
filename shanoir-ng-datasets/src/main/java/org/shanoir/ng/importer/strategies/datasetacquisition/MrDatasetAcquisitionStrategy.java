@@ -33,7 +33,8 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +62,15 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Autowired
 	private MrProtocolStrategy mrProtocolStrategy;
 	
-	@Autowired
-	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+	@Autowired 
+	private StudyCardProcessingService studyCardProcessingService;
 	
 	@Autowired
-	private StudyCardService studyCardService;
+	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+
+	@Autowired
+	private StudyCardRepository studyCardRepository;
+
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
@@ -81,19 +86,13 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setRank(rank);
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
-		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-		StudyCard studyCard = studyCardService.findByName(importJob.getStudyCardName());
-		if (studyCard != null) {
-			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		StudyCard studyCard = null;
+		if (importJob.getStudyCardId() != null) {
+			studyCard = getStudyCard(importJob.getStudyCardId());
+			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());			
 		} else {
-			if (importJob.getFrontAcquisitionEquipmentId() != null) {
-				// todo: remove this later, when studycards are in web GUI import integrated
-				mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-			} else {
-				throw new Exception("StudyCard/AcqEqu referenced in importJob not found by name in database.");
-			}
+			LOG.warn("No studycard given for this import");
 		}
-		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
@@ -118,9 +117,17 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 		
+		if (studyCard != null) {
+			studyCardProcessingService.applyStudyCard(mrDatasetAcquisition, studyCard, dicomAttributes);			
+		}
+		
 		return mrDatasetAcquisition;
 	}
-	
-	
 
+	private StudyCard getStudyCard(Long studyCardId) {
+		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
+		if (studyCard == null) throw new IllegalArgumentException("No study card found with id " + studyCardId);
+		if (studyCard.getAcquisitionEquipmentId() == null) throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+		return studyCard;
+	}
 }

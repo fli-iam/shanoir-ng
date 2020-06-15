@@ -20,16 +20,16 @@ public class EegImportJob {
 	private Long examinationId;
 
 	/** Corresponding study. */
-	@JsonProperty("frontStudyId")
-	private Long frontStudyId;
+	@JsonProperty("studyId")
+	private Long studyId;
 
 	/** Corresponding subject. */
 	@JsonProperty("subjectId")
 	private Long subjectId;
 
 	/** Not mandatyory, acquisition equipement. */
-	@JsonProperty("frontAcquisitionEquipmentId")
-	private Long frontAcquisitionEquipmentId;
+	@JsonProperty("acquisitionEquipmentId")
+	private Long acquisitionEquipmentId;
 
 	@JsonProperty("datasets")
 	List<EegDataset> datasets;
@@ -64,20 +64,20 @@ public class EegImportJob {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	public void setFrontStudyId(Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 
 	public String getWorkFolder() {

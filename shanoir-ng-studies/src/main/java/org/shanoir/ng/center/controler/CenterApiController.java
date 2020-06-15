@@ -111,7 +111,8 @@ public class CenterApiController implements CenterApi {
 	
 
 	@Override
-	public ResponseEntity<List<IdName>> findCentersNames(Long studyId) {
+	public ResponseEntity<List<IdName>> findCentersNames(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -148,9 +149,8 @@ public class CenterApiController implements CenterApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		} 
 	}
-	
 	
 	private void validate(Center center, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()

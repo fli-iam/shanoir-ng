@@ -146,10 +146,10 @@ public class DatasetServiceSecurityTest {
 
 	private void testFindAll() throws ShanoirException {
 		List<Dataset> dsList = new ArrayList<>();
-		MrDataset ds1 = mockDataset(1L); ds1.setStudyId(1L); dsList.add(ds1);
-		MrDataset ds2 = mockDataset(2L); ds1.setStudyId(1L); dsList.add(ds2);
-		MrDataset ds3 = mockDataset(3L); ds1.setStudyId(1L); dsList.add(ds3);
-		MrDataset ds4 = mockDataset(4L); ds1.setStudyId(2L); dsList.add(ds4);
+		MrDataset ds1 = mockDataset(1L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds1);
+		MrDataset ds2 = mockDataset(2L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds2);
+		MrDataset ds3 = mockDataset(3L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds3);
+		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);
 		given(datasetRepository.findAll()).willReturn(dsList);
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		assertEquals(3, service.findAll().size());		
@@ -157,10 +157,10 @@ public class DatasetServiceSecurityTest {
 	
 	private void testFindPage() throws ShanoirException {
 		List<Dataset> dsList = new ArrayList<>();
-		MrDataset ds1 = mockDataset(1L); ds1.setStudyId(1L); dsList.add(ds1);
-		MrDataset ds2 = mockDataset(2L); ds1.setStudyId(1L); dsList.add(ds2);
-		MrDataset ds3 = mockDataset(3L); ds1.setStudyId(1L); dsList.add(ds3);
-		MrDataset ds4 = mockDataset(4L); ds1.setStudyId(2L); dsList.add(ds4);		
+		MrDataset ds1 = mockDataset(1L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds1);
+		MrDataset ds2 = mockDataset(2L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds2);
+		MrDataset ds3 = mockDataset(3L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds3);
+		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);		
 		Pageable pageable = new PageRequest(0, 10);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
@@ -171,9 +171,9 @@ public class DatasetServiceSecurityTest {
 		assertAccessDenied(service::findPage, pageable);
 		
 		List<Dataset> dsList2 = new ArrayList<>();
-		MrDataset ds11 = mockDataset(1L); ds11.setStudyId(1L); dsList2.add(ds11);
-		MrDataset ds21 = mockDataset(2L); ds21.setStudyId(1L); dsList2.add(ds21);
-		MrDataset ds31 = mockDataset(3L); ds31.setStudyId(1L); dsList2.add(ds31);
+		MrDataset ds11 = mockDataset(1L); ds11.getDatasetAcquisition().getExamination().setStudyId(1L); dsList2.add(ds11);
+		MrDataset ds21 = mockDataset(2L); ds21.getDatasetAcquisition().getExamination().setStudyId(1L); dsList2.add(ds21);
+		MrDataset ds31 = mockDataset(3L); ds31.getDatasetAcquisition().getExamination().setStudyId(1L); dsList2.add(ds31);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList2));
 		given(datasetRepository.findByStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList2));
 		
@@ -183,7 +183,7 @@ public class DatasetServiceSecurityTest {
 	
 	private void testCreate() throws ShanoirException {
 		MrDataset mrDs = mockDataset();
-		mrDs.setStudyId(10L);
+		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
@@ -202,14 +202,14 @@ public class DatasetServiceSecurityTest {
 	private void testUpdateDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		MrDataset mrDs = mockDataset(1L);
-		mrDs.setStudyId(10L);
+		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
 		given(datasetRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
 		assertAccessDenied(service::update, mrDs);
 	}
 	
 	private void testDeleteByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
-		mrDs.setStudyId(10L);
+		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
 		given(datasetRepository.findOne(1L)).willReturn(mrDs);
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
@@ -222,7 +222,7 @@ public class DatasetServiceSecurityTest {
 
 	private void testUpdateByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
-		mrDs.setStudyId(10L);
+		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
 		given(datasetRepository.findOne(1L)).willReturn(mrDs);
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
@@ -232,16 +232,16 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(30L, "CAN_ADMINISTRATE")).willReturn(true);
 		
 		MrDataset mrDsUpdated = mockDataset(1L);
-		mrDsUpdated.setStudyId(10L);
+		mrDsUpdated.getDatasetAcquisition().getExamination().setStudyId(10L);
 		mrDsUpdated.setSubjectId(123L);
 		assertAccessDenied(service::update, mrDsUpdated);
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
 		assertAccessAuthorized(service::update, mrDsUpdated);
 		
-		mrDsUpdated.setStudyId(20L);
+		mrDsUpdated.getDatasetAcquisition().getExamination().setStudyId(20L);
 		assertAccessDenied(service::update, mrDsUpdated);
 		
-		mrDsUpdated.setStudyId(30L);
+		mrDsUpdated.getDatasetAcquisition().getExamination().setStudyId(30L);
 		assertAccessAuthorized(service::update, mrDsUpdated);
 	}
 
