@@ -18,6 +18,7 @@ export class FooterState {
         public mode: "view" | "edit" | "create",
         public canEdit: boolean = true,
         public valid: boolean = false,
+        public dirty: boolean = false,
         public loading: boolean = false
     ) {}
 }

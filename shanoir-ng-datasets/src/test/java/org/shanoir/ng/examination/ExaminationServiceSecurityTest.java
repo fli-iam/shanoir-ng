@@ -30,11 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -97,7 +95,6 @@ public class ExaminationServiceSecurityTest {
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam());
-		assertAccessDenied(service::save, mockExamDTO());
 		assertAccessDenied(service::update, mockExam(1L));
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
@@ -110,7 +107,6 @@ public class ExaminationServiceSecurityTest {
 		testFindBySubjectId();
 		testFindBySubjectIdStudyId();
 		testCreate();
-		testCreateDTO();
 		testUpdateDenied();
 		testDeleteDenied();
 	}
@@ -123,7 +119,6 @@ public class ExaminationServiceSecurityTest {
 		testFindBySubjectId();
 		testFindBySubjectIdStudyId();
 		testCreate();
-		testCreateDTO();
 		testUpdateDenied();
 		testDeleteByExpert();
 	}
@@ -136,7 +131,6 @@ public class ExaminationServiceSecurityTest {
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam());
-		assertAccessAuthorized(service::save, mockExamDTO());
 		assertAccessAuthorized(service::update, mockExam(1L));
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
 	}
@@ -220,20 +214,19 @@ public class ExaminationServiceSecurityTest {
 		assertAccessAuthorized(service::save, mrDs);
 	}
 	
-	private void testCreateDTO() throws ShanoirException {
-		ExaminationDTO dto = mockExamDTO();
-		IdName studyDto = new IdName();
-		studyDto.setId(10L);
-		dto.setStudy(studyDto);
-		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
-		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
-		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
-		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied(service::save, dto);
-		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
-		assertAccessAuthorized(service::save, dto);
-	}
-	
+//	private void testCreateDTO() throws ShanoirException {
+//		ExaminationDTO dto = mockExamDTO();
+//		IdName studyDto = new IdName();
+//		studyDto.setId(10L);
+//		dto.setStudy(studyDto);
+//		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
+//		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
+//		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
+//		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(false);
+//		assertAccessDenied(service::save, dto);
+//		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
+//		assertAccessAuthorized(service::save, dto);
+//	}
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
@@ -271,16 +264,6 @@ public class ExaminationServiceSecurityTest {
 	
 	private Examination mockExam() {
 		return mockExam(null);
-	}
-	
-	private ExaminationDTO mockExamDTO(Long id) {
-		ExaminationDTO dto = new ExaminationDTO();
-		dto.setId(id);
-		return dto;
-	}
-	
-	private ExaminationDTO mockExamDTO() {
-		return mockExamDTO(null);
 	}
 
 }

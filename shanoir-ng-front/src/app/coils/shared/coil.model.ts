@@ -28,7 +28,7 @@ export class Coil extends Entity {
     serialNumber: string;
     center: Center;
     manufacturerModel: ManufacturerModel;
-    coilType:CoilType;
+    coilType: CoilType;
 
     service: CoilService = ServiceLocator.injector.get(CoilService);
 

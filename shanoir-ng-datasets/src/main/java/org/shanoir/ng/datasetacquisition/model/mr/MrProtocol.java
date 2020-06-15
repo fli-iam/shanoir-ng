@@ -25,6 +25,8 @@ import javax.persistence.OneToOne;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * MR protocol.
  * 
@@ -98,6 +100,7 @@ public class MrProtocol extends AbstractEntity {
 	private Double imagingFrequency;
 
 	/** The MR Dataset acquisition. */
+	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "mrProtocol")
 	private MrDatasetAcquisition mrDatasetAcquisition;
 
@@ -185,7 +188,7 @@ public class MrProtocol extends AbstractEntity {
 	private Double temporalResolution;
 
 	/** Metadata updated by study card. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocolSCMetadata updatedMetadata;
 
 	/**

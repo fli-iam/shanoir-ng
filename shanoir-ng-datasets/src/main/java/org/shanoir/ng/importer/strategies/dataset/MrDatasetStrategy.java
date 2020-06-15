@@ -134,7 +134,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 		// Set the study and the subject
 		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
-		mrDataset.setStudyId(importJob.getFrontStudyId());
+
+		//mrDataset.setStudyId(importJob.getStudyId());
 
 		// Set the modality from dicom fields
 		// TODO  :VERIFY NOT NEEDED ANY MORE ?

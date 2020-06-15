@@ -27,9 +27,9 @@ export abstract class EntityService<T extends Entity> {
     protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     getAll(): Promise<T[]> {
-        return this.http.get<T[]>(this.API_URL)
-            .map(this.mapEntityList)
-            .toPromise();
+        return this.http.get<any[]>(this.API_URL)
+            .toPromise()
+            .then(this.mapEntityList);
     }
 
     delete(id: number): Promise<void> {
@@ -38,15 +38,15 @@ export abstract class EntityService<T extends Entity> {
     }
 
     get(id: number): Promise<T> {
-        return this.http.get<T>(this.API_URL + '/' + id)
-            .map(this.mapEntity)
-            .toPromise();
+        return this.http.get<any>(this.API_URL + '/' + id)
+            .toPromise()
+            .then(this.mapEntity);
     }
 
     create(entity: T): Promise<T> {
         return this.http.post<any>(this.API_URL, entity.stringify())
-            .map(this.mapEntity)
-            .toPromise();
+            .toPromise()
+            .then(this.mapEntity);
     }
 
     update(id: number, entity: T): Promise<void> {
@@ -54,20 +54,22 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    protected mapEntity = (entity: T): T => {
-        return this.toRealObject(entity);
+    protected mapEntity = (entity: any): Promise<T> => {
+        return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: T[]): T[] => {
-        return entities ? entities.map(this.mapEntity) : [];
+    protected mapEntityList = (entities: any[]): Promise<T[]> => {
+        return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
     }
 
-    protected mapPage = (page: Page<T>): Page<T> => {
-            page.content = page.content.map(this.mapEntity);
+    protected mapPage = (page: Page<T>): Promise<Page<T>> => {
+        return this.mapEntityList(page.content).then(entities => {
+            page.content = entities;
             return page;
+        });            
     }
 
-    protected toRealObject(entity: T) {
+    protected toRealObject(entity: T): T {
         let trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
             let value = entity[key];

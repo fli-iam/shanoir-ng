@@ -73,7 +73,7 @@ public interface StudyService {
 	 * @throws MicroServiceCommunicationException 
 	 * @throws ShanoirStudiesException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study create(Study study) throws MicroServiceCommunicationException;
 
 	

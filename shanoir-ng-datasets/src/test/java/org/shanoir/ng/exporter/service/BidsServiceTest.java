@@ -160,7 +160,7 @@ public class BidsServiceTest {
 		exam2.setSubjectId(subject.getId());
 
 		EegDataset ds2 = new EegDataset();
-		ds2.setStudyId(exam2.getStudyId());
+		//ds2.setStudyId(exam2.getStudyId());
 		ds2.setSubjectId(exam2.getSubjectId());
 		ds2.setId(Long.valueOf("16843"));
 		ds2.setChannels(Collections.emptyList());

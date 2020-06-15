@@ -15,7 +15,6 @@
 package org.shanoir.ng.dataset.model;
 
 import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
@@ -37,7 +36,6 @@ public class DatasetMetadata extends AbstractEntity {
 	 * Flag to indicate whether this dataset is related to a single subject or
 	 * to multiple subjects.
 	 */
-	@NotNull
 	private Integer cardinalityOfRelatedSubjects;
 
 	/**

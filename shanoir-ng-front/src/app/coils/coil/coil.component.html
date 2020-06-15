@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required formControlName="name" [(ngModel)]="coil.name" />
+								<input type="text" id="name" formControlName="name" [(ngModel)]="coil.name" />
 							</ng-template>
 						</span>
 					</li>
@@ -57,8 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.coilType}}
 							</ng-template> 
 								<ng-template ngSwitchDefault>
-								<select-box formControlName="coilType" [(ngModel)]="coil.coilType">
-									<select-option *ngFor="let coilType of coilTypes" [value]="coilType">{{coilType}}</select-option>
+								<select-box formControlName="coilType" [(ngModel)]="coil.coilType" [optionArr]="coilTypes">
 								</select-box>
 							</ng-template>
 						</span>
@@ -88,8 +87,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										[newDisabled]="form.get('center').disabled"
 										formControlName="center" 
 										[ngModel]="coil.center"  
-										(change)="updateManufList($event)">
-									<select-option *ngFor="let center of centers" [value]="center">{{center?.name}}</select-option>
+										(ngModelChange)="updateManufList($event)"
+										[optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
@@ -104,8 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" (onNewClick)="openNewManufModel()" [newDisabled]="form.get('acquiEquipModel').disabled">
-									<select-option *ngFor="let manufacturerModel of manufModels" [value]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</select-option>
+								<select-box formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" (onNewClick)="openNewManufModel()" [newDisabled]="form.get('acquiEquipModel').disabled" [optionArr]="manufModels" [pipe]="manufModelPipe">
 								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
 							</ng-template>
