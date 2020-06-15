@@ -13,6 +13,7 @@
  */
 package org.shanoir.ng.shared.configuration;
 
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -83,6 +84,8 @@ public class RabbitMQConfiguration {
 	public static final String STUDY_NAME_UPDATE = "study_name_update";
 
 	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
+	
+	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
 
 	////////////////// EXCHANGES //////////////////
@@ -93,6 +96,7 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECTS_EXCHANGE = "subjects-exchange";
 
+	public static final String DATASET_SUBJECT_EXCHANGE = "dataset-subjects-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -205,6 +209,11 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static Queue datasetSubjectQueue() {
+		return new Queue(DATASET_SUBJECT_QUEUE, true);
+	}
+	
+	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
@@ -218,6 +227,12 @@ public class RabbitMQConfiguration {
 	public TopicExchange topicExchange() {
 	    return new TopicExchange(EVENTS_EXCHANGE);
 	}
+
+	@Bean
+	public DirectExchange directExchange() {
+	    return new DirectExchange(DATASET_SUBJECT_EXCHANGE, true, false);
+	}
+
 
 	@Bean
 	public FanoutExchange fanoutSubjectExchange() {

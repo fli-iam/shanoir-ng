@@ -4,8 +4,18 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="root", password="", database="datasets", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "root",
+        password    = os.environ.get("TGT_PASSWORD")    or "",
+        database    = os.environ.get("TGT_DATABASE")    or "datasets",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
@@ -700,7 +710,7 @@ print("Import mr_dataset: end")
 print("Import echo_time: start")
 # Echo times linked to only one dataset
 sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, COUNT(md.DATASET_ID) as countids 
-	FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
+	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
 	GROUP BY et.ECHO_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO echo_time (id, echo_number, echo_time_value, mr_dataset_id) VALUES (%s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -709,10 +719,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(ECHO_TIME_ID) FROM ECHO_TIME")
 et_next_id = sourceCursor.fetchone()[0] + 1
 # Echo times linked to many dataset
+sourceCursor.execute("SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1")
+echo_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID 
-	FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
-	WHERE et.ECHO_TIME_ID IN 
-	(SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+        FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
+        WHERE et.ECHO_TIME_ID IN %s""", [echo_times])
 echo_times = []
 et_ids = []
 for row in sourceCursor.fetchall():
@@ -730,7 +741,7 @@ print("Import echo_time: end")
 print("Import flip_angle: start")
 # Flip angles linked to only one dataset
 sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
+	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
 	GROUP BY fa.FLIP_ANGLE_ID HAVING countids = 1""")
 query = "INSERT INTO flip_angle (id, flip_angle_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -739,10 +750,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(FLIP_ANGLE_ID) FROM FLIP_ANGLE")
 fa_next_id = sourceCursor.fetchone()[0] + 1
 # Flip angles linked to many dataset
+sourceCursor.execute("SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1")
+flip_angles = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, md.DATASET_ID 
-	FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
-	WHERE fa.FLIP_ANGLE_ID IN 
-	(SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
+	WHERE fa.FLIP_ANGLE_ID IN %s""", [flip_angles])
 flip_angles = []
 fa_ids = []
 for row in sourceCursor.fetchall():
@@ -760,7 +772,7 @@ print("Import flip_angle: end")
 print("Import inversion_time: start")
 # Inversion times linked to only one dataset
 sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
+	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
 	GROUP BY it.INVERSION_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO inversion_time (id, inversion_time_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -769,10 +781,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(INVERSION_TIME_ID) FROM INVERSION_TIME")
 it_next_id = sourceCursor.fetchone()[0] + 1
 # Inversion times linked to many dataset
+sourceCursor.execute("SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+inversion_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, md.DATASET_ID 
-	FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
-	WHERE it.INVERSION_TIME_ID IN 
-	(SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
+	WHERE it.INVERSION_TIME_ID IN %s""", [inversion_times])
 inversion_times = []
 it_ids = []
 for row in sourceCursor.fetchall():
@@ -790,7 +803,7 @@ print("Import inversion_time: end")
 print("Import repetition_time: start")
 # Repetition times linked to only one dataset
 sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
+	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
 	GROUP BY rt.REPETITION_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO repetition_time (id, repetition_time_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -799,10 +812,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(REPETITION_TIME_ID) FROM REPETITION_TIME")
 rt_next_id = sourceCursor.fetchone()[0] + 1
 # Repetition times linked to many dataset
+sourceCursor.execute("SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+repetition_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, md.DATASET_ID 
-	FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
-	WHERE rt.REPETITION_TIME_ID IN 
-	(SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
+	WHERE rt.REPETITION_TIME_ID IN %s""", [repetition_times])
 repetition_times = []
 rt_ids = []
 for row in sourceCursor.fetchall():
