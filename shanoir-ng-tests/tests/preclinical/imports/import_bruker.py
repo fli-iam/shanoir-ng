@@ -1,5 +1,6 @@
 import os
 import time
+import random
 
 def test_shanoir_import_dicom(driver_to_use, shanoir_util_to_use, selenium_util_to_use):
     global driver
@@ -37,24 +38,76 @@ def test_shanoir_import_dicom(driver_to_use, shanoir_util_to_use, selenium_util_
     selenium_util.wait_to_be_clickable_and_click("//button[contains(., 'Next')]")
 
     # Create a new dataset
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an existing research study']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an existing research study']//select/option[text() = 'NATIVE Divers']")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an existing research study']//select-box")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an existing research study']//select-box//select-option//div[text() = 'NATIVE Divers']")
 
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a center']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a center']//select/option[text() = 'CHU Rennes']")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a center']//select-box")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a center']//select-box//select-option//div[text() = 'CHU Rennes']")
     
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an acquisition equipment']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an acquisition equipment']//select/option[text() = 'SIEMENS - Verio 3T (MR) 40296 - CHU Rennes']")    
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an acquisition equipment']//select-box")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an acquisition equipment']//select-box//select-option//div[text() = 'SIEMENS - Verio 3T (MR) 40296 - CHU Rennes']")    
     
-    # Create a new subject
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a subject']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a subject']//select/option[text() = 'subject1']")    
+    # TODO: Create a new subject
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a subject']//select-box//span/*[(local-name()='svg') and (@data-icon='file')]")    
 
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an examination']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an examination']//select/option[contains(.,'examination1')]")    
- 
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a Nifti converter']//select")
-    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a Nifti converter']//select/option[contains(.,'dcm2nii_2008-03-31')]")    
+    # Maybe test here to add pathological / anesthetic
+    random_int = random.randint(1, 100000)
+
+    fields = [{
+        'name': 'name',
+        'value': 'test_preclinical_' + str(random_int),
+        'type': 'text',
+        'label': 'Name'
+    }, {
+        'name': 'specie',
+        'value': 'Rat',
+        'type': 'select',
+        'label': 'Specie'
+    }, {
+        'name': 'strain',
+        'value': 'Wistar',
+        'type': 'select',
+        'label': 'Strain'
+    }, {
+        'name': 'biotype',
+        'value': 'Wild',
+        'type': 'select',
+        'label': 'Biological type'
+    }, {
+        'name': 'provider',
+        'value': 'Janvier',
+        'type': 'select',
+        'label': 'Provider'
+    }, {
+        'name': 'stabulation',
+        'value': 'Paris',
+        'type': 'select',
+        'label': 'Stabulation'
+    }]
+
+    shanoir_util.add_entity(fields, False)
+
+    # TODO: Create a new examination
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select an examination']//select-box//span/*[(local-name()='svg') and (@data-icon='file')]")
+
+    random_year = random.randint(1000, 3000)
+
+    examFields = [{
+        'name': 'examinationDate',
+        'value': '12/12/' + str(random_year),
+        'type': 'date',
+        'label': 'Examination date'
+    },{
+        'name': 'subjectWeight',
+        'value': '10',
+        'type': 'text',
+        'label': 'Subject Weight'
+    }]
+
+    shanoir_util.add_entity(examFields, False)
+
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a Nifti converter']//select-box")
+    selenium_util.wait_to_be_clickable_and_click("//ol/li[label/text() = 'Select a Nifti converter']//select-box//select-option//div[text() = 'dcm2niix']")    
 
     # Next page
     selenium_util.wait_to_be_clickable_and_click("//button[contains(., 'Next')]")
@@ -66,11 +119,9 @@ def test_shanoir_import_dicom(driver_to_use, shanoir_util_to_use, selenium_util_
     time.sleep(2)
     
     # Check that the dataset is now present
-    shanoir_util.go_to_entity("Manage data", "Subject");
     shanoir_util.go_to_entity("Manage data", "Dataset");
     shanoir_util.check_if_shanoir_table_has_rows();
 
-    driver.save_screenshot("screenshot.png")
     id_to_delete = shanoir_util.get_max_id("Id");
 
     # Delete every added dataset element
@@ -78,4 +129,14 @@ def test_shanoir_import_dicom(driver_to_use, shanoir_util_to_use, selenium_util_
         print id_to_delete
         shanoir_util.delete(str(id_to_delete))
         id_to_delete = int(id_to_delete) - 1
+    
+    # Delete examination
+    shanoir_util.go_to_entity("Manage data", "Preclinical Examinations")
+    fieldReferenceValue = examFields[0]['value']
+    shanoir_util.delete(fieldReferenceValue)
+
+    # Search then delete subject
+    shanoir_util.go_to_entity("Manage data", "Preclinical Subjects")
+    fieldReferenceValue = fields[0]['value']
+    shanoir_util.delete(fieldReferenceValue)
     
