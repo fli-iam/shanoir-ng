@@ -12,7 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { allOfEnum } from "../../utils/app.utils";
+import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
+import { Option } from "../../shared/select/select.component";
 
 export enum ImagedObjectCategory {
     PHANTOM = 'PHANTOM',
@@ -21,21 +22,24 @@ export enum ImagedObjectCategory {
     ANATOMICAL_PIECE = 'ANATOMICAL_PIECE', 
     LIVING_ANIMAL = 'LIVING_ANIMAL',
     ANIMAL_CADAVER = 'ANIMAL_CADAVER'
-} 
-export namespace ImagedObjectCategory {
-
-    export function all(): Array<ImagedObjectCategory> {
-        return allOfEnum<ImagedObjectCategory>(ImagedObjectCategory);
-    }
+}  export namespace ImagedObjectCategory {
     
-    export function allPreClinical(preclinical : boolean): Array<ImagedObjectCategory> {
+    export function getLabel(type: ImagedObjectCategory): string {
+        return capitalsAndUnderscoresToDisplayable(type);
+    }
+
+    export function toOptions(preclinical: boolean = false): Option<ImagedObjectCategory>[] {
+        return all(preclinical).map(prop => new Option<ImagedObjectCategory>(prop, getLabel(prop)));
+    }
+
+    export function all(preclinical: boolean = false): Array<ImagedObjectCategory> {
     	let allPreclinicalImagedObjectCategory: Array<ImagedObjectCategory> = new Array();
         if (preclinical){
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_ANIMAL);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANIMAL_CADAVER);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.PHANTOM);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANATOMICAL_PIECE);
-        }else{
+        } else{
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_HUMAN_BEING);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.HUMAN_CADAVER);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.PHANTOM);

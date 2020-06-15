@@ -4,7 +4,7 @@
     color: var(--very-light-grey); 
     display: inline-block;
     position: fixed; 
-    top: 0; right: 0; left: 0; 
+    top: 0; right: 0; left: 300px; 
     width: 500px;
     border-radius: 0 0 3px 3px;
     z-index: 1000;

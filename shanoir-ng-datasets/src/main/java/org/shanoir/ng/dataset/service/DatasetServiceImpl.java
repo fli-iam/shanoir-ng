@@ -90,7 +90,11 @@ public class DatasetServiceImpl implements DatasetService {
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
-		datasetDb.setStudyId(dataset.getStudyId());
+		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
+		//datasetDb.setProcessings(dataset.getProcessings());
+		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
+		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
+		//datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		if (dataset instanceof MrDataset) {

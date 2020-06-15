@@ -95,4 +95,11 @@ public class CenterRepositoryTest {
 		assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
 	}
 	
+	@Test
+	public void findNamesByStudyIdTest() throws Exception {
+		List<IdName> centersDb = repository.findIdsAndNames(1L);
+		assertNotNull(centersDb);
+		assertThat(centersDb.size()).isEqualTo(2);
+	}
+	
 }

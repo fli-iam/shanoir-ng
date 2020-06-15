@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -24,7 +24,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 })
 
 export class TableComponent implements OnInit {
-    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
     selection: Map<number, any> = new Map();
@@ -40,12 +40,13 @@ export class TableComponent implements OnInit {
 
     private page: Page<Object>;
     private isLoading: boolean = false;
+    private isError: boolean = false;
     private maxResultsField: number;
-    private lastSortedCol: Object = null;
+    private lastSortedCol: any = null;
     private lastSortedAsc: boolean = true;
     private currentPage: number = 1;
-    private filter: Filter;
-    private loaderImageUrl: string = "assets/images/loader.gif";
+    private filter: Filter = new Filter(null, null);
+    private firstLoading: boolean = true;
     
 
     constructor(
@@ -62,10 +63,12 @@ export class TableComponent implements OnInit {
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+                .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1);
+            this.goToPage(1)
+                .then(() => this.firstLoading = false);
         }
     }
 
@@ -93,7 +96,7 @@ export class TableComponent implements OnInit {
 
 
     private onRowClick(item: Object) {
-        this.rowClick.emit(item);
+        if (!this.rowDisabled(item)) this.rowClick.emit(item);
     }
 
 
@@ -102,15 +105,20 @@ export class TableComponent implements OnInit {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
-        } else if (col.field == undefined) {
+        } else if (!col.field) {
             return null;
         } else {
-            return this.getFieldRawValue(item, col["field"]);
+            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) return fieldValue;
+            else if (col.defaultField) 
+                return this.getFieldRawValue(item, col["defaultField"]);
+            else
+                return;
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        if (path == undefined || path == null) return;
+        if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -220,14 +228,23 @@ export class TableComponent implements OnInit {
         return type != null ? "cell-" + type : "";
     }
 
-    private goToPage(p: number): void {
+    private goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
-        this.getPage(this.getPageable()).then(page => {
+        return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
             this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
-            setTimeout(() => this.isLoading = false, 200);
+            setTimeout(() => {
+                this.isError = false;
+                this.isLoading = false;
+            }, 200);
+        }).catch(reason => {
+            setTimeout(() => {
+                this.isError = true;
+                this.isLoading = false;
+                throw reason;
+            }, 200);
         });
     }
 
@@ -235,7 +252,7 @@ export class TableComponent implements OnInit {
      * Call to refresh from outsilde
      */
     public refresh() {
-        this.goToPage(this.currentPage);
+        this.goToPage(this.currentPage, true);
     }
 
     private getPageable(): Pageable {
@@ -372,5 +389,11 @@ export class TableComponent implements OnInit {
 
     private rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('table items', this.items);
+        }
     }
 }

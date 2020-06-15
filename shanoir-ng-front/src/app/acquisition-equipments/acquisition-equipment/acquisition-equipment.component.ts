@@ -19,13 +19,14 @@ import { ActivatedRoute } from '@angular/router';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
+import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -47,7 +48,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private route: ActivatedRoute, 
             private acqEquipService: AcquisitionEquipmentService, 
             private manufModelService: ManufacturerModelService,
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            private manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
     }
@@ -95,7 +97,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     buildForm(): FormGroup {
         this.prefill();
         let form: FormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator]],
+            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
         });
@@ -115,17 +117,21 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+                })
+            );
         });
     }
 
     private registerManufAndSerialUnicityValidator(form: FormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
-        form.get('manufacturerModel').valueChanges.subscribe(value => {
-            form.get('serialNumber').updateValueAndValidity();
-        })
+        this.subscribtions.push(
+            form.get('manufacturerModel').valueChanges.subscribe(value => {
+                form.get('serialNumber').updateValueAndValidity();
+            })
+        );
     }
 
     private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
@@ -133,6 +139,14 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
                 && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {       
             return {unique: true};
+        }
+        return null;
+    }
+
+    private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
+        let valueStr: string = control.value;
+        if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
+            return { spaces: true }
         }
         return null;
     }

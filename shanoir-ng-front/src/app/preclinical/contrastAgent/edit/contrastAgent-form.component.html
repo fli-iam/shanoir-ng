@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="ContrastAgentFormComponent content-component">
+<div #formContainer class="ContrastAgentFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>validate> 
 		<table class="layout">
 			<tr><td colspan="2">
@@ -33,13 +33,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<fieldset>
 					<ol>
 						<li class="required">
-							<label i18n="Edit contrastagent|Name label" class="required-label">Name</label>
+							<label i18n="Edit contrastagent|Name label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="name" required formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange($event)">
+									<select id="name" formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange($event)">
 										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
 									</select>
 									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">

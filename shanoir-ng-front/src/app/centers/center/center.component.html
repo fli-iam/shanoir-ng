@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<span [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
 				<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>
@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{center.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="isNameUniqueError=false" />
+							<input type="text" id="name" formControlName="name" [(ngModel)]="center.name" (change)="isNameUniqueError=false" />
 							<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
 							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
 							<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
