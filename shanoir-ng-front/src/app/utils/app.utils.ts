@@ -60,6 +60,10 @@ export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/da
 // Dataset acquisition http api
 export const BACKEND_API_DATASET_ACQUISITION_URL: string = BACKEND_API_DATASET_MS_URL + '/datasetacquisition';
 
+// Solr http api
+export const BACKEND_API_SOLR_URL: string = BACKEND_API_DATASET_MS_URL + '/solr';
+export const BACKEND_API_SOLR_INDEX_URL: string = BACKEND_API_SOLR_URL + '/index';
+export const BACKEND_API_SOLR_FULLTEXT_SEARCH_URL: string = BACKEND_API_SOLR_URL + '/search';
 // BIDS http api
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';

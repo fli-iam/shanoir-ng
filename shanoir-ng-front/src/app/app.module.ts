@@ -15,7 +15,7 @@ import '../assets/css/common.css';
 import '../assets/css/papaya.css';
 
 import { CommonModule } from '@angular/common';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -136,6 +136,7 @@ import { TherapiesListComponent } from './preclinical/therapies/therapy/list/the
 import { TherapyService } from './preclinical/therapies/therapy/shared/therapy.service';
 import { RoleService } from './roles/role.service';
 import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
+import { CheckboxListComponent } from './shared/checkbox-list/checkbox-list.component';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
@@ -172,6 +173,8 @@ import { WindowService } from './shared/services/window.service';
 import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
+import { SolrSearchComponent } from './solr/solr.search.component';
+import { SolrService } from './solr/solr.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
@@ -203,6 +206,7 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+
 
 @NgModule({
     imports: [
@@ -311,6 +315,8 @@ import { ServiceLocator } from './utils/locator.service';
         PetProtocolComponent,
         DicomTagPipe,
         AutoAdjustInputComponent,
+        SolrSearchComponent,
+        CheckboxListComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -413,7 +419,8 @@ import { ServiceLocator } from './utils/locator.service';
         DicomService,
         ManufacturerModelPipe,
         SubjectExaminationPipe,
-        DatasetDTOService
+        DatasetDTOService,
+        SolrService
     ],
     bootstrap: [AppComponent],
 })

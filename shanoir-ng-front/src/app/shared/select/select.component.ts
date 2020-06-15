@@ -32,7 +32,6 @@ import { Subscription } from 'rxjs';
 
 import { GlobalService } from '../services/global.service';
 import { findLastIndex } from '../../utils/app.utils';
-import { ThrowStmt } from '@angular/compiler';
 
 
 @Component({

@@ -18,7 +18,8 @@ import { Option } from '../shared/select/select.component';
 export enum DatasetModalityType {
 
     PET = 'PET',
-    MR = 'MR'
+    MR = 'MR',
+    CT = 'CT'
 
 } export namespace DatasetModalityType {
     

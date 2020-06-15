@@ -11,26 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.shared.repository;
 
-package org.shanoir.ng.study.repository;
-
-import java.util.List;
-
-import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.model.Study;
+import org.springframework.data.repository.CrudRepository;
 
 /**
- * Custom repository for studies.
- * 
- * @author msimon
+ * @author yyao
  *
  */
-public interface StudyRepositoryCustom {
-
-	/**
-	 * Find id and name for all studies.
-	 * 
-	 * @return list of studies.
-	 */
-	List<IdName> findIdsAndNames();
+public interface StudyRepository extends CrudRepository<Study, Long> {
 
 }
