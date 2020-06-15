@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -17,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import io.swagger.annotations.ApiParam;
 
 /**
  * API to manage asynchronous tasks:
@@ -54,6 +59,14 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 		taskList.sort(comparator);
 
 		return new ResponseEntity<>(taskList, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<ShanoirEvent>> findTasksByType(
+    		@ApiParam(value = "types of events to retrieve", required=true) @Valid
+    		@RequestParam(value = "types", required = true) List<String> types) {
+		
+		return null;
 	}
 
 	@Override

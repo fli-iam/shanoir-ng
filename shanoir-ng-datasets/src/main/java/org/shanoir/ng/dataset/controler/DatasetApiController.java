@@ -306,7 +306,9 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format,
+    		@ApiParam(value = "Decide if you want to download files directly or using tasks interface.", allowableValues = "true, false", defaultValue = "true") @Valid
+    		@RequestParam(value = "direct", required = false, defaultValue="true") boolean direct) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
@@ -315,7 +317,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		return massiveDownload(format, datasets);
+		return massiveDownload(format, datasets, direct);
 	}
 
 	@Override
@@ -332,10 +334,10 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByStudyId(studyId);
 
-		return massiveDownload(format, datasets);
+		return massiveDownload(format, datasets, false);
 	}
 
-	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets) throws EntityNotFoundException, RestServiceException, IOException {
+	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets, boolean direct) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 2: Check rights => Also filters datasets on rights
 		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
 		// STEP 3: Get the data
@@ -359,11 +361,25 @@ public class DatasetApiController implements DatasetApi {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
 				}
+				
+				if (direct) {
+					// Publish event to download files
+					
+					ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), tmpFile.getAbsolutePath(), ShanoirEvent.IN_PROGRESS);
+					eventService.publishEvent(event);
+
+					// TODO: Do something to delete temporary files ?
+					
+					// Return no content
+					return (ResponseEntity<ByteArrayResource>) ResponseEntity.noContent();
+				}
+				
 			}
 		} catch (IOException | MessagingException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
 		}
+
 		// Zip it
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();

@@ -170,7 +170,9 @@ public interface DatasetApi {
     		@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format,
+    		@ApiParam(value = "Decide if you want to download files directly or using tasks interface.", allowableValues = "true, false", defaultValue = "true") @Valid
+    		@RequestParam(value = "direct", required = false, defaultValue="true") boolean direct) throws RestServiceException, EntityNotFoundException, IOException;
 
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByStudyId", notes = "If exists, returns a zip file of the datasets corresponding to the given study ID", response = Resource.class, tags={  })
     @ApiResponses(value = {
