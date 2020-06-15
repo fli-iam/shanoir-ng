@@ -3,9 +3,6 @@ package org.shanoir.ng.exporter.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,15 +31,12 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Subject;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test class for BIDS service class.
@@ -54,13 +48,10 @@ import org.springframework.web.client.RestTemplate;
 public class BidsServiceTest {
 
 	@Mock
-	private MicroserviceRequestsService microservicesRequestsService;
-
-	@Mock
-	private RestTemplate restTemplate;
-
-	@Mock
 	private ExaminationService examService;
+
+	@Mock
+	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
 	@Spy
@@ -125,9 +116,9 @@ public class BidsServiceTest {
 
 		// Mock on rest template to get the list of subjects
 		Subject[] subjects = {subject};
-		ResponseEntity<Subject[]> reponse = new ResponseEntity<Subject[]>(subjects , HttpStatus.OK);
-		given(restTemplate.exchange(any(String.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(Subject[].class)))
-		.willReturn(reponse);
+		ObjectMapper mapper = new ObjectMapper();
+		String value = mapper.writeValueAsString(subjects);
+		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, exam.getStudyId())).willReturn(value);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
@@ -151,9 +142,10 @@ public class BidsServiceTest {
 		// GIVEN a study with existing BIDS folder
 		// Mock on rest template to get the list of subjects
 		Subject[] subjects = {subject};
-		ResponseEntity<Subject[]> reponse = new ResponseEntity<Subject[]>(subjects , HttpStatus.OK);
-		given(restTemplate.exchange(any(String.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(Subject[].class)))
-		.willReturn(reponse);
+		ObjectMapper mapper = new ObjectMapper();
+		String value = mapper.writeValueAsString(subjects);
+		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, exam.getStudyId())).willReturn(value);
+
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
