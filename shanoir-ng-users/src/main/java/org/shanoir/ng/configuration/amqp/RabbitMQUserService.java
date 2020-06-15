@@ -83,7 +83,10 @@ public class RabbitMQUserService {
 		LOG.error("receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
-			emailService.notifyStudyManagerDataImported(event);
+			// Do nothing if it's not a success
+			if (event.getStatus() == org.shanoir.ng.shared.event.ShanoirEvent.SUCCESS) {
+				emailService.notifyStudyManagerDataImported(event);
+			}
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

@@ -15,7 +15,6 @@
 package org.shanoir.ng.email;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -347,11 +346,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerDataImported(ShanoirEvent event) {
 		// Build the message
-		
-		// Do nothing if it's not a success
-		if (event.getStatus() != org.shanoir.ng.shared.event.ShanoirEvent.SUCCESS) {
-			return;
-		}
+
 		String message = event.getMessage();
 		
 		String patternStr = "(.*)\\((\\d+)\\)\\: Successfully created datasets for subject (.*) in examination (\\d+)";
@@ -400,7 +395,7 @@ public class EmailServiceImpl implements EmailService {
 	 */
 	public List<Long> getStudyAdministrator(String studyId) {
 		try {
-			ArrayList<Long> response =  (ArrayList<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, studyId);
+			List<Long> response =  (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, studyId);
 			return response;
 		} catch (Exception e) {
 			// Could not do the thing
