@@ -10,7 +10,15 @@
     "fromDisplayName" : "SHANOIR_ADMIN_NAME",
     "port" : "SMTP_PORT"
   },
-
+  "sslRequired": "all",
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
   "roles": {
     "realm": [
       {
