@@ -123,7 +123,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
-			}			
+			}
 		}
 		// the first 3 numbers are the center code, search for highest existing subject with center code
 		DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
@@ -191,11 +191,16 @@ public class SubjectServiceImpl implements SubjectService {
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
-		} 
+		}
 	}
 
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
+		return this.findAllSubjectsOfStudyId(studyId);
+	}
+
+	@Override
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
 		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
 		if (opt != null) {
