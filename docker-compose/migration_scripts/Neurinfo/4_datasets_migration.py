@@ -868,23 +868,12 @@ print("Import dataset_expression: end")
 
 
 print("Import dataset_file: start")
-sourceCursor.execute("SELECT DATASET_FILE_ID, 0, PATH, DATASET_EXPRESSION_ID FROM DATASET_FILE")
+sourceCursor.execute("""
+        SELECT DATASET_FILE_ID, (PACS_DATASET_FILE.DATASET_FILE_ID IS NOT NULL), PATH, DATASET_EXPRESSION_ID
+            FROM DATASET_FILE LEFT JOIN PACS_DATASET_FILE USING (DATASET_FILE_ID)""")
 bulk_insert(targetCursor, "dataset_file", "id, pacs, path, dataset_expression_id", sourceCursor)
 targetConn.commit()
 print("Import dataset_file: end")
-
-
-print("Import pacs_dataset_file: start")
-sourceCursor.execute("SELECT DATASET_FILE_ID FROM PACS_DATASET_FILE")
-query = "UPDATE dataset_file SET pacs = 1 WHERE id = %s"
-while True:
-  many_rows = sourceCursor.fetchmany(100000)
-  if not many_rows:
-    break
-  print("Fetching 100.000")
-  targetCursor.executemany(query, many_rows)
-targetConn.commit()
-print("Import pacs_dataset_file: end")
 
 
 print("Import input_of_dataset_processing: start")
