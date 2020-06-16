@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ExaminationDatasetAcquisition } from "../../dataset-acquisitions/shared/examination-dataset-acquisition.model";
+import { DatasetAcquisition } from "../../dataset-acquisitions/shared/dataset-acquisition.model";
 
 export class SubjectExamination {
     id: number;
     comment: string;
     examinationDate: Date;
-    datasetAcquisitions: ExaminationDatasetAcquisition[];
+    datasetAcquisitions: DatasetAcquisition[];
 }

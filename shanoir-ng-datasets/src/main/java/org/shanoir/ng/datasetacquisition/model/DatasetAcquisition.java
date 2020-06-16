@@ -35,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.studycard.model.StudyCard;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -68,7 +69,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/** Related Acquisition Equipment. */
 	@NotNull
 	private Long acquisitionEquipmentId;
-
+	
 	/** Datasets. */
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
@@ -78,6 +79,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@ManyToOne
 	@JoinColumn(name = "examination_id")
 	private Examination examination;
+	
+	/** Applied study card. */
+	@ManyToOne
+	@JoinColumn(name = "studycard_id")
+	StudyCard studyCard;
+	
+	/** Used to know if the study card that was applied matches the study card's last version or anterior */
+	Long studyCardTimestamp;
 
 	/** Rank of the session in the examination protocol. */
 	private Integer rank;
@@ -176,6 +185,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	 */
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
+	}
+	
+	public StudyCard getStudyCard() {
+		return studyCard;
+	}
+
+	public void setStudyCard(StudyCard studyCard) {
+		this.studyCard = studyCard;
 	}
 
 	/**

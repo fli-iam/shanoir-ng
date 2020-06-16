@@ -92,9 +92,8 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         this.getSelectedExamination(entity.id).then(selectedExamination => {
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?'
+            ).then(res => {
                 if (res) {
                     selectedExamination.delete().then(() => {
                         this.onDelete.next(selectedExamination);

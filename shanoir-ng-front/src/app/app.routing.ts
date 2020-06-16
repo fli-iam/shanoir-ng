@@ -11,17 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { ModuleWithProviders } from '@angular/core';
-import { RouterModule, Routes, CanActivate } from '@angular/router';
-import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
+import { RouterModule, Routes } from '@angular/router';
+
+import { AcquisitionEquipmentListComponent} from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
+import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
+import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
@@ -40,10 +43,12 @@ import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
-import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
+import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
@@ -51,7 +56,7 @@ import { AccountRequestComponent } from './users/account-request/account-request
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { SolrSearchComponent } from './solr/solr.search.component';
 
 let appRoutes: Routes = [
@@ -94,7 +99,6 @@ let appRoutes: Routes = [
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
-                data: {importMode: 'PACS'},
                 canActivate: [CanImportFromPACSGuard]
             }, {
                 path: 'series',
@@ -120,6 +124,18 @@ let appRoutes: Routes = [
     }, {
         path: 'task',
         component: AsyncTasksComponent
+    }, {
+        path: 'study-card/select-rule',
+        children: [
+            {
+                path: 'list/:id',
+                component: StudyCardForRulesListComponent,
+            }, {
+                path: 'select/:id',
+                component: StudyCardComponent,
+                data: { mode: 'view', select: true }
+            }
+        ]
     }
 ];
 
@@ -132,9 +148,11 @@ appRoutes = appRoutes.concat(
     getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('coil', CoilComponent, CoilListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('user', UserComponent, UserListComponent, {create: AuthAdminGuard, update: AuthAdminGuard}),
-    getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-    getRoutesFor('instrument', InstrumentAssessmentComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-    getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
+    getRoutesFor('manufacturer', ManufacturerComponent, null, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('manufacturer-model', ManufacturerModelComponent, null, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('study-card', StudyCardComponent, StudyCardListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('dataset-acquisition', DatasetAcquisitionComponent, DatasetAcquisitionListComponent, {update: AuthAdminOrExpertGuard}),
+    getRoutesFor('instrument', InstrumentAssessmentComponent, null, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
 );
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 
@@ -142,30 +160,42 @@ export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);
 export function getRoutesFor(entityName: string, entityComponent, listComponent, 
         auth: {read?: any, create?: any, update?: any} ): Routes {
 
-    return [
+    let routes = [];
+    routes.push(
         {
             path: entityName,
             redirectTo: entityName + '/list',
             pathMatch: 'full',
-        }, {
-            path: entityName + '/list',
-            component: listComponent,
-            canActivate: auth.read ? [auth.read] : undefined,
-        }, {
-            path: entityName+'/details/:id',
-            component: entityComponent,
-            data: { mode: 'view' },
-            canActivate: auth.read ? [auth.read] : undefined,
-        }, {
-            path: entityName+'/edit/:id',
-            component: entityComponent,
-            data: { mode: 'edit' },
-            canActivate: auth.update ? [auth.update] : undefined,
-        }, {
-            path: entityName+'/create',
-            component: entityComponent,
-            data: { mode: 'create' },
-            canActivate: auth.create ? [auth.create] : undefined,
         }
-    ];
+    );
+    if (entityComponent) {
+        routes.push(
+            {
+                path: entityName + '/details/:id',
+                component: entityComponent,
+                data: { mode: 'view' },
+                canActivate: auth.read ? [auth.read] : undefined,
+            }, {
+                path: entityName + '/edit/:id',
+                component: entityComponent,
+                data: { mode: 'edit' },
+                canActivate: auth.update ? [auth.update] : undefined,
+            }, {
+                path: entityName + '/create',
+                component: entityComponent,
+                data: { mode: 'create' },
+                canActivate: auth.create ? [auth.create] : undefined,
+            }
+        );
+    }
+    if (listComponent) {
+        routes.push(
+            {
+                path: entityName + '/list',
+                component: listComponent,
+                canActivate: auth.read ? [auth.read] : undefined,
+            }
+        );
+    }
+    return routes;
 };

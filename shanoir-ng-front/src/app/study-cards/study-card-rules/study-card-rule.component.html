@@ -1,0 +1,62 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="conditions">
+	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
+		<condition 
+				[(condition)]="rule.conditions[i]" 
+				[mode]="mode" 
+				[class.edit]="mode != 'view'" 
+				(conditionChange)="change.emit(rule)"
+				(delete)="deleteCondition(i)"
+				[showErrors]="showErrors">
+		</condition>
+	</div>
+	<div *ngIf="rule.conditions.length == 0">
+		<span class="always"><i class="fas fa-infinity"></i>Always</span>
+	</div>
+	<div>
+		<span *ngIf="mode != 'view'" class="add" (click)="addNewCondition()"><i class="fas fa-plus"></i>Add a condition</span>
+	</div>
+</div>
+
+<div class="separator">
+	<span class="rule-controls top" *ngIf="mode != 'view'" >
+		<span (click)="copy.emit()"><i class="far fa-copy"></i></span>
+		<span (click)="moveUp.emit()"><i class="fas fa-long-arrow-alt-up"></i></span>
+	</span>
+	<span class="sep-symbol"><i class="fas fa-angle-double-right"></i></span>
+	<span class="rule-controls bottom" *ngIf="mode != 'view'" >
+		<span (click)="delete.emit()" class="rule-delete"><i class="far fa-times-circle"></i></span>
+		<span (click)="moveDown.emit()"><i class="fas fa-long-arrow-alt-down"></i></span>
+	</span>
+</div>
+
+<div class="actions">
+	<div *ngFor="let action of rule.assignments; let i = index" class="action">
+		<action 
+				[(assignment)]="rule.assignments[i]" 
+				[mode]="mode" 
+				[fieldOptions]="fieldOptions" 
+				[fields]="fields" 
+				[class.edit]="mode != 'view'"
+				(actionChange)="change.emit(rule)"
+				(delete)="deleteAction(i)"
+				[showErrors]="showErrors">
+		</action>
+	</div>
+	<div *ngIf="mode != 'view'">
+		<span *ngIf="mode != 'view'" class="add" (click)="addNewAction()" [class.error]="rule.assignments.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
+	</div>
+</div>

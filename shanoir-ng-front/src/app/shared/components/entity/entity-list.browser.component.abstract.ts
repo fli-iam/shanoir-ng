@@ -18,13 +18,17 @@ import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
 import { OnInit } from "@angular/core";
 
-export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit{
+export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
     private entitiesPromise: Promise<void>;
     private browserPaging: BrowserPaging<T>;
-    private entities: T[];
+    protected entities: T[];
 
     ngOnInit() {
+        this.loadEntities();
+    }
+    
+    private loadEntities() {
         this.entitiesPromise = this.getEntities().then((entities) => {
             this.entities = entities;
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
@@ -33,11 +37,15 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.manageAfterAdd();
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<T>> {
-        return new Promise((resolve) => {
+    getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
+        return new Promise((resolve, reject) => {
             this.entitiesPromise.then(() => {
-                this.browserPaging.setItems(this.entities);
+                if (forceRefresh) {
+                    this.loadEntities();
+                }
                 resolve(this.browserPaging.getPage(pageable));
+            }).catch(reason => {
+                reject(reason);
             });
         });
     }

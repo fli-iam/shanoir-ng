@@ -19,9 +19,9 @@ import { EegDataset } from "../../datasets/dataset/eeg/dataset.eeg.model"
 export class EegImportJob {
     workFolder: string;
     examinationId: number;
-    frontStudyId: number;
+    studyId: number;
     subjectId: number;
-    frontAcquisitionEquipmentId: number;
+    acquisitionEquipmentId: number;
     datasets: EegDataset[];
     coordinatesSystem: String;
     subjectName: String;

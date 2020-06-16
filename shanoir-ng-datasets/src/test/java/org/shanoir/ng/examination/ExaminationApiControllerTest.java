@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,7 +35,6 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
-import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -121,7 +121,7 @@ public class ExaminationApiControllerTest {
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
-		given(examinationServiceMock.save(Mockito.any(ExaminationDTO.class))).willReturn(exam);
+		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
 	}
 
 	@Test
