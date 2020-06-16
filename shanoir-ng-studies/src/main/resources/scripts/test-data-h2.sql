@@ -39,6 +39,12 @@ VALUES
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (1,'France','CHU Rennes','','','','Rennes','');
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (2,'France','CHU Reims','','','','Reims','');
 
+insert into study_center 
+	(id, center_id, study_id) 
+values 
+	(1, 1, 1),
+	(2, 2, 1);
+
 INSERT INTO manufacturer
 	(id, name)
 VALUES 

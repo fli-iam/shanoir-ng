@@ -128,9 +128,8 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?'
+            ).then(res => {
                 if (res) {
                     this.animalSubjectService.delete(entity.animalSubject.id).then((res) => {
                         this.animalSubjectService.deleteSubject(entity.subject.id).then((res2) => {

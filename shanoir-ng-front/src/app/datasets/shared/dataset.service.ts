@@ -19,15 +19,20 @@ import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
+
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
-    
+
+    private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+
     getEntityInstance(entity: Dataset) { 
-        return AppUtils.getEntityInstance(entity);
+        return AppUtils.getDatasetInstance(entity.type);
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
@@ -38,8 +43,8 @@ export class DatasetService extends EntityService<Dataset> {
                 }
                 return page;
             })
-            .map(this.mapPage)
-            .toPromise();
+            .toPromise()
+            .then(this.mapPage);
     }
 
     public downloadDatasets(ids: number[], format: string) {
@@ -99,5 +104,17 @@ export class DatasetService extends EntityService<Dataset> {
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    protected mapEntity = (dto: DatasetDTO): Promise<Dataset> => {
+        let result: Dataset = AppUtils.getDatasetInstance(dto.type);
+        this.datasetDTOService.toEntity(dto, result);
+        return Promise.resolve(result);
+    }
+
+    protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
+        let result: Dataset[] = [];
+        this.datasetDTOService.toEntityList(dtos, result);
+        return Promise.resolve(result);
     }
 }

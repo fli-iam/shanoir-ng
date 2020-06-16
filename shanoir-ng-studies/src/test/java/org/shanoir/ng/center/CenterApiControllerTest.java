@@ -127,6 +127,12 @@ public class CenterApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
+	
+	@Test
+	public void findCentersNamesByStudyIdTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES + "/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
+	}
 
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })

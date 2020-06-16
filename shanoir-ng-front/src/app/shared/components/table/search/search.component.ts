@@ -24,9 +24,8 @@ import { Filter } from '../pageable.model';
 export class TableSearchComponent implements OnChanges {
 
     @Input() columnDefs: any[];
-    @Output() onChange: EventEmitter<Filter> = new EventEmitter<Filter>();
-    private searchField: string;
-    private searchStr: string;
+    @Input() filter: Filter; 
+    @Output() filterChange: EventEmitter<Filter> = new EventEmitter<Filter>();
     private searchableColumns: any[] = [];
 
     ngOnChanges(changes: SimpleChanges) {
@@ -47,12 +46,12 @@ export class TableSearchComponent implements OnChanges {
     }
 
     private search() {
-        this.onChange.emit(new Filter(this.searchStr, this.searchField));
+        this.filterChange.emit(this.filter);
     }
 
     public resetSearch(): void {
-        this.searchStr = "";
-        this.searchField = "";
+        this.filter.searchStr = "";
+        this.filter.searchField = "";
         this.search();
     }
    

@@ -58,9 +58,9 @@ export class EegUploadComponent {
     private loadInMemory(fileEvent: any) {
     	this.eegArchiveService.clearFileInMemory();
     	this.eegArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
+            .then(_ => {
                 this.eegArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
+                .then(response => {
                     this.importDataService.inMemoryExtracted = response;
                 });
             });
