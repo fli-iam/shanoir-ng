@@ -25,6 +25,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'coil',
@@ -43,7 +44,8 @@ export class CoilComponent extends EntityComponent<Coil> {
     constructor(
             private route: ActivatedRoute,
             private coilService: CoilService, 
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            private manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');
     }
 
@@ -93,7 +95,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     buildForm(): FormGroup {
-        return this.formBuilder.group({
+        let form: FormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
@@ -101,6 +103,11 @@ export class CoilComponent extends EntityComponent<Coil> {
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
+        form.valueChanges.subscribe(() => {
+            if (this.coil.center && !this.prefilledManuf) this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
+            else this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+        })
+        return form;
     }
 
     private updateManufList(center: Center): void {
@@ -123,18 +130,22 @@ export class CoilComponent extends EntityComponent<Coil> {
     private openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as Coil).center = entity as Center;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as Coil).center = entity as Center;
+                })
+            );
         });
     }
 
     private openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
+                })
+            );
         });
     }
 

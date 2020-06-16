@@ -23,6 +23,8 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { Option } from '../../shared/select/select.component';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -31,7 +33,8 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
 
-    private manufs: Manufacturer[];
+    manufs: Manufacturer[];
+    datasetModalityTypes: Option<DatasetModalityType>[];
 
     constructor(
             private route: ActivatedRoute,
@@ -39,10 +42,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             private manufService: ManufacturerService) {
 
         super(route, 'manufacturer-model');
+        this.datasetModalityTypes = DatasetModalityType.toOptions();
     }
 
-    private get manufModel(): ManufacturerModel { return this.entity; }
-    private set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
+    get manufModel(): ManufacturerModel { return this.entity; }
+    set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
 
 
     initView(): Promise<void> {
@@ -121,9 +125,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     private openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
+                })
+            );
         });
     }
 }

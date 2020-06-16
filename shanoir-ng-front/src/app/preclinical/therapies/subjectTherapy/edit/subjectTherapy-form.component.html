@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div  *ngIf="toggleForm" class="RefFormComponent content-component">
+<div #formContainer *ngIf="toggleForm" class="RefFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -31,13 +31,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<fieldset>
 					<ol>
 						<li class="required">
-							<label i18n="Edit subjectTherapy|Therapy label" class="required-label">Therapy</label>
+							<label i18n="Edit subjectTherapy|Therapy label">Therapy</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{subjectTherapy?.therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="therapy" required formControlName="therapy" [(ngModel)]="subjectTherapy.therapy">
+									<select id="therapy" formControlName="therapy" [(ngModel)]="subjectTherapy.therapy">
 										<option *ngFor="let therapy of therapies" [ngValue]="therapy">{{therapy.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin() " i18n="Edit subjectTherapy|Add a new therapy" (click)="goToAddTherapy()">
@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</li>
 						<div *ngIf="displayDoseFrequency()">
 							<li class="required">
-								<label i18n="Edit subjectTherapy|Dose label" class="required-label">Dose</label>
+								<label i18n="Edit subjectTherapy|Dose label">Dose</label>
 								<span class="right-col" [ngSwitch]="mode">
 									<ng-template [ngSwitchCase]="'view'"> 
 											{{subjectTherapy?.dose}}
@@ -61,20 +61,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</span>
 							</li>
 							<li class="required">
-								<label i18n="Edit subjectTherapy|DoseUnit label" class="required-label">Dose Unit</label>
+								<label i18n="Edit subjectTherapy|DoseUnit label">Dose Unit</label>
 								<span class="right-col" [ngSwitch]="mode">
 									<ng-template [ngSwitchCase]="'view'"> 
 											{{subjectTherapy?.dose_unit?.value}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
-										<select id="dose_unit" required formControlName="dose_unit" [(ngModel)]="subjectTherapy.dose_unit">
+										<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="subjectTherapy.dose_unit">
 											<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 										</select>
 									</ng-template>
 								</span>								
 							</li>
                             <li class="required">
-                                <label i18n="Edit subjectTherapy|Molecule label" class="required-label">Molecule</label>
+                                <label i18n="Edit subjectTherapy|Molecule label">Molecule</label>
                                 <span class="right-col" [ngSwitch]="mode">
                                     <ng-template [ngSwitchCase]="'view'"> 
                                             {{subjectTherapy?.molecule}}
@@ -85,13 +85,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </span>                             
                             </li>
 							<li class="required">
-								<label i18n="Edit subjectTherapy|Frequency label" class="required-label">Frequency</label>
+								<label i18n="Edit subjectTherapy|Frequency label">Frequency</label>
 								<span class="right-col" [ngSwitch]="mode">
 									<ng-template [ngSwitchCase]="'view'"> 
 											{{enumUtils.getEnumValue(frequencies,subjectTherapy.frequency)}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
-										<select id="frequency" required formControlName="frequency" [(ngModel)]="subjectTherapy.frequency">
+										<select id="frequency" formControlName="frequency" [(ngModel)]="subjectTherapy.frequency">
 											<option *ngFor="let frequency of frequencies" [value]="frequency.key">{{frequency.value}}</option>
 										</select>
 									</ng-template>

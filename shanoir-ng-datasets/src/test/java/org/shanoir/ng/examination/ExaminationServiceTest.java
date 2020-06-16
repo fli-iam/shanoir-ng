@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -33,20 +32,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Examination service test.
@@ -59,12 +53,11 @@ import org.springframework.web.client.RestTemplate;
 public class ExaminationServiceTest {
 
 	private static final Long EXAMINATION_ID = 1L;
-	private static final Long STUDY_ID = 1L;
 	private static final String UPDATED_EXAMINATION_COMMENT = "examination 2";
 
 	@Mock
 	private ExaminationRepository examinationRepository;
-
+	
 	@Mock
 	private KeycloakUtil keycloakUtil;
 
@@ -74,11 +67,11 @@ public class ExaminationServiceTest {
 	@Mock
 	private RabbitTemplate rabbitTemplate;
 
-	@Mock
-	private RestTemplate restTemplate;
-
 	@InjectMocks
 	private ExaminationServiceImpl examinationService;
+	
+	@MockBean
+	private StudyRightsService rightsService;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -97,20 +90,6 @@ public class ExaminationServiceTest {
 		examinationService.deleteById(EXAMINATION_ID);
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).delete(Mockito.anyLong());
-	}
-
-	@Test
-	public void findAllTest() throws ShanoirException {
-		IdName idNameDTO = new IdName();
-		idNameDTO.setId(STUDY_ID);
-		IdName[] tab = { idNameDTO };
-		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
-		Matchers.<Class<IdName[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
-		final Page<Examination> examinations = examinationService.findPage(new PageRequest(0, 10));
-		Assert.assertNotNull(examinations);
-		Assert.assertTrue(examinations.getContent().size() == 1);
-
-		Mockito.verify(examinationRepository, Mockito.times(1)).findByStudyIdIn(Arrays.asList(STUDY_ID), new PageRequest(0, 10));
 	}
 
 	@Test

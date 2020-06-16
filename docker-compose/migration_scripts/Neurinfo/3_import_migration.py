@@ -4,8 +4,18 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="import", password="password", database="import", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "import",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
+        database    = os.environ.get("TGT_DATABASE")    or "import",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()

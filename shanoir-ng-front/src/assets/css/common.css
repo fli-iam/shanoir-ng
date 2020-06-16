@@ -13,6 +13,7 @@
     --color-overlay: rgba(70, 70, 70, 0.8); 
 
     --color-a: #5f0f4e;
+    --color-a-light: #6C1C5B;
     --color-b: #675682;
     --color-b-light: #E3E0E8;
     --color-b-light2: #827498;
@@ -41,6 +42,7 @@ select:disabled { opacity: 0.5; }
 svg { vertical-align: -1; }
 a:link, a:visited { color: inherit; text-decoration: none; }
 a:hover, a:active { color: var(--color-a); text-decoration: none; }
+a:hover { cursor: pointer; }
 
 
 @-webkit-keyframes autofill {
@@ -72,7 +74,7 @@ h2 + shanoir-table { margin-top: 20px; }
 textarea, input, select, select-box, datepicker { 
   border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
 }
-textarea:focus, input:focus, select:focus, select-box:focus, datepicker:focus {
+textarea:focus, input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
 textarea.ng-invalid.ng-touched,
@@ -81,7 +83,7 @@ select.ng-invalid.ng-touched,
 select-box.ng-invalid.ng-touched,
 datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); padding-bottom: 0; }
 
-form { color: var(--dark-grey); }
+form { color: var(--dark-grey); position: relative; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { cursor: default; border: none !important; }
@@ -90,15 +92,15 @@ form { color: var(--dark-grey); }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
-  form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 220px; }
-  form fieldset { border: 0; padding: 0; margin: 20px 0; display: inline-block; vertical-align: top; min-width: 504px; }
+  form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
+  form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
   form fieldset ~ fieldset { margin-right: 20px; } 
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
     form fieldset fieldset label { margin-left: 183px; }
   form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; }
-  form li > label { display: inline-block; vertical-align: sub; width: 250px; }
+  form li > label { display: inline-block; width: 250px; vertical-align: top; }
   form fieldset ol { margin: 0; padding: 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
     form fieldset li input,
@@ -108,56 +110,58 @@ form { color: var(--dark-grey); }
       form li.info svg { margin-right: 6px; vertical-align: -3; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { }
-  form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
+  form .header { padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
-  form .right-col { display: inline-block; vertical-align: top; min-width: 250px; line-height: 20px; }
+  form .right-col { display: inline-block; min-width: 250px; line-height: 20px; vertical-align: top; }
   form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button:hover { background-color: inherit; color: inherit; }
     form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
+    form .right-col button svg { vertical-align: -1; color: var(--color-a); }
+
+  form.disabled::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: var(--very-light-grey); opacity: 0.5; }
 
   /* Date picker style overriding */
-  form my-date-picker input.selection { height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; border-radius: 0 !important; }
-  form my-date-picker .selectiongroup { background-color: transparent !important; }
-  form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
-  form my-date-picker input.selection { text-align: left !important; padding: 0 !important; }
-  form my-date-picker button.btnpicker,
-  form my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
+  my-date-picker input.selection { height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; border-radius: 0 !important; }
+  my-date-picker .selectiongroup { background-color: transparent !important; }
+  my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
+  my-date-picker input.selection { text-align: left !important; padding: 0 !important; }
+  my-date-picker button.btnpicker,
+  my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
   /* form my-date-picker button.btnpicker:hover,
   form my-date-picker button.btnclear:hover { color: var(--color-a) !important; background-color: transparent !important; } */
-    form my-date-picker button.btnpicker span,
-    form my-date-picker button.btnclear span { font-size: 12px !important; }
-  form my-date-picker .icon-calendar { line-height: 17px !important; }
-  form my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
-  form my-date-picker .mydp .caltable,
-  form my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
-  form my-date-picker .mydp .daycell { height: 23px !important; }
-  form my-date-picker .mydp .selector { width: auto !important; position: absolute; }
-  form my-date-picker .mydp td + td { border-left: none; }
-  form my-date-picker .mydp .daycell,
-  form my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
-  form my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
-  form my-date-picker .mydp .icon-left,
-  form my-date-picker .mydp .icon-right { font-size: 12px !important; }
-  form my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
-  form my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
-  form my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
-  form my-date-picker .mydp .caltable, 
-  form my-date-picker .mydp .daycell, 
-  form my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
-  form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
+    my-date-picker button.btnpicker span,
+    my-date-picker button.btnclear span { font-size: 12px !important; }
+  my-date-picker .icon-calendar { line-height: 17px !important; }
+  my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
+  my-date-picker .mydp .caltable,
+  my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
+  my-date-picker .mydp .daycell { height: 23px !important; }
+  my-date-picker .mydp .selector { width: auto !important; position: absolute; }
+  my-date-picker .mydp td + td { border-left: none; }
+  my-date-picker .mydp .daycell,
+  my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
+  my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
+  my-date-picker .mydp .icon-left,
+  my-date-picker .mydp .icon-right { font-size: 12px !important; }
+  my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
+  my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
+  my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
+  my-date-picker .mydp .caltable, 
+  my-date-picker .mydp .daycell, 
+  my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
+  my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 .left-icon svg { margin-right: 7px; vertical-align: -2; }
 .right-icon svg { margin-left: 7px; vertical-align: -2; }
 
 .content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
-.main-content { padding: 0 20px 10px 20px; position: relative; }
 .max-content { display: inline-block; }
+.main-offline { padding: 10px 20px; }
 
 .error-message label { color: var(--color-error); }
 .error-message li { color: var(--color-error); }

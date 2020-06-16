@@ -101,7 +101,15 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
     
     public static validator = (control: AbstractControl): ValidationErrors | null => {
         if (control.value == 'invalid') {
-            return { format: true}
+            return { format: true }
+        }
+        return null;
+    }
+
+    public static inFutureValidator = (control: AbstractControl): ValidationErrors | null => {
+        if (control.value != 'invalid') {
+            let date: Date = control.value;
+            if (date && date.getTime && date.getTime() < Date.now()) return { future: true }
         }
         return null;
     }

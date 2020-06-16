@@ -149,9 +149,10 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
-		final Examination createdExamination = examinationService.save(examinationDTO);
+
+		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+		return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
 	@Override

@@ -23,5 +23,9 @@ export class Reference extends Entity{
   value: string;
 
   service: ReferenceService = ServiceLocator.injector.get(ReferenceService);
+
+  get label(): string {
+    return this.value;
+  }
 }
 

@@ -58,9 +58,9 @@ export class BidsUploadComponent {
     private loadInMemory(fileEvent: any) {
     	this.bidsArchiveService.clearFileInMemory();
     	this.bidsArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
+            .then(_ => {
                 this.bidsArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
+                .then(response => {
                     this.importDataService.inMemoryExtracted = response;
                 });
             });
@@ -92,6 +92,6 @@ export class BidsUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    data = {'frontStudyId': 10,'studyCardId': 68,'frontAcquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
+    data = {'studyId': 10,'studyCardId': 68,'acquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
 }
     
