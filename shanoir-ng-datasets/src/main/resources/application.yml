@@ -57,6 +57,10 @@ spring:
     password: guest
   session:
     store-type: none
+  http:
+    multipart:
+      maxFileSize: 5000Mb
+      maxRequestSize: 5000Mb
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -79,6 +83,8 @@ keycloak:
       - name: datasets secured api
       - patterns:
         - /*
+# Solr
+spring.data.solr.host: http://solr:8983/solr/shanoir/
 # microservices url
 ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/

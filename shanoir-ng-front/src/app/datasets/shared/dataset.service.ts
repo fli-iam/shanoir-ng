@@ -12,22 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
+
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
-    
+
+    private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+
     getEntityInstance(entity: Dataset) { 
-        return AppUtils.getEntityInstance(entity);
+        return AppUtils.getDatasetInstance(entity.type);
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
@@ -38,8 +43,32 @@ export class DatasetService extends EntityService<Dataset> {
                 }
                 return page;
             })
-            .map(this.mapPage)
-            .toPromise();
+            .toPromise()
+            .then(this.mapPage);
+    }
+
+    public downloadDatasets(ids: number[], format: string) {
+        let params = new HttpParams().set("datasetIds", ids.join(',')).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
+    }
+
+    public downloadDatasetsByStudy(studyId: number, format: string) {
+        let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
     }
 
     download(dataset: Dataset, format: string): void {
@@ -59,6 +88,14 @@ export class DatasetService extends EntityService<Dataset> {
         ).map(response => response);
     }
 
+    exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
+        if (!subjectId) throw Error('subject id is required');
+        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId 
+            + '/subjectName/' + subjectName + '/studyName/' + studyName, 
+            { observe: 'response', responseType: 'blob' }
+        ).subscribe(response => {this.downloadIntoBrowser(response);});
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
@@ -67,5 +104,17 @@ export class DatasetService extends EntityService<Dataset> {
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    protected mapEntity = (dto: DatasetDTO): Promise<Dataset> => {
+        let result: Dataset = AppUtils.getDatasetInstance(dto.type);
+        this.datasetDTOService.toEntity(dto, result);
+        return Promise.resolve(result);
+    }
+
+    protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
+        let result: Dataset[] = [];
+        this.datasetDTOService.toEntityList(dtos, result);
+        return Promise.resolve(result);
     }
 }

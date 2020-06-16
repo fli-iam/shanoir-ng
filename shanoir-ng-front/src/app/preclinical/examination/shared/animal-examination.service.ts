@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
@@ -34,12 +35,11 @@ export class AnimalExaminationService extends EntityService<Examination>{
         ).toPromise();
     }
 
-    getBrukerArchive(examinationId): Promise<HttpResponse<Blob>> {
-        return this.http.get(
-            AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/examinationId/' + examinationId  + '/export',
-            { observe: 'response', responseType: 'blob' }
-        ).toPromise();
+    postFile(fileToUpload: File, examId: number): Observable<any> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return this.http.post<any>(endpoint, formData);
     }
-
 
 }

@@ -1,10 +1,15 @@
+.overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; content: ""; animation: entrance 0.3s; }
+
 .main { text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color);
-    color: var(--dark-grey); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
+        background-color: var(--very-light-grey); color: var(--color-a); border-radius: 2px; }
 
-    .header { font-size: 20px; color: var(--color-a); font-weight: bold; padding: 10px; background-color: var(--light-grey); }
+.header { font-size: 20px; font-weight: bold; padding: 14px 10px 10px; }
 
-    .body { padding: 0 10px; }
+.body { padding: 0 20px; }
 
-    .footer { background-color: var(--light-grey); padding: 10px; }
-        .footer button { padding: 5px 10px; line-height: normal; min-width: auto; border: 0; color: var(--very-light-grey) !important; }
-            .footer button * { color: var(--very-light-grey) !important; }
+.footer { padding: 15px 20px 20px; }
+
+@keyframes entrance {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

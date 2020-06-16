@@ -1,0 +1,503 @@
+<!DOCTYPE QtCreatorProject>
+<qtcreator>
+ <data>
+  <variable>RunConfiguration0-BaseEnvironmentBase</variable>
+  <value type="int">2</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-CommandLineArguments</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">C:\IRM Data\gdcmSampleData\IMAGES</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>RunConfiguration0-ProFile</variable>
+  <value type="QString">clidcm.pro</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-RunConfiguration.name</variable>
+  <value type="QString">clidcm</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UseDyldImageSuffix</variable>
+  <value type="bool">false</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UseTerminal</variable>
+  <value type="bool">true</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UserEnvironmentChanges</variable>
+  <valuelist type="QVariantList"/>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UserSetName</variable>
+  <value type="bool">false</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UserSetWorkingDirectory</variable>
+  <value type="bool">false</value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-UserWorkingDirectory</variable>
+  <value type="QString"></value>
+ </data>
+ <data>
+  <variable>RunConfiguration0-type</variable>
+  <value type="QString">Qt4ProjectManager.Qt4RunConfiguration</value>
+ </data>
+ <data>
+  <variable>activeRunConfiguration</variable>
+  <value type="int">0</value>
+ </data>
+ <data>
+  <variable>activebuildconfiguration</variable>
+  <value type="QString">Release</value>
+ </data>
+ <data>
+  <variable>buildConfiguration-Debug</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
+   <value key="QtVersionId" type="int">0</value>
+   <value key="ToolChain" type="int">2</value>
+   <value key="addQDumper" type=""></value>
+   <value key="buildConfiguration" type="int">10</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildConfiguration-Release</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
+   <value key="QtVersionId" type="int">0</value>
+   <value key="ToolChain" type="int">2</value>
+   <value key="addQDumper" type=""></value>
+   <value key="buildConfiguration" type="int">8</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-buildstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">CLIENTNAME=Console</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\QuickTime\QTSystem\;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\soft\dcm4che-2.0.18\dcm4che-2.0.18-bin\dcm4che-2.0.18\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VISTAL_FMT=NIFTI</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">C:/workspace/Shanoir/external/clidcm/src/clidcm.pro</value>
+    <value type="QString">-spec</value>
+    <value type="QString">win32-g++</value>
+    <value type="QString">-r</value>
+    <value type="QString">CONFIG+=debug_and_release</value>
+    <value type="QString">-unix</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">c:/soft/qt/qt/bin/qmake.exe</value>
+   <value key="abstractProcess.enabled" type="bool">false</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <valuelist key="qmakeArgs" type="QVariantList">
+    <value type="QString">-unix</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-buildstep1</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">CLIENTNAME=Console</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\QuickTime\QTSystem\;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\soft\dcm4che-2.0.18\dcm4che-2.0.18-bin\dcm4che-2.0.18\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VISTAL_FMT=NIFTI</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <value key="abstractProcess.IgnoreReturnValue" type="bool">false</value>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">debug</value>
+    <value type="QString">-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">C:/soft/Qt/mingw/bin/mingw32-make.exe</value>
+   <value key="abstractProcess.enabled" type="bool">true</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <valuelist key="makeargs" type="QVariantList">
+    <value type="QString">debug</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Debug-cleanstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">CLIENTNAME=Console</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\QuickTime\QTSystem\;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\soft\dcm4che-2.0.18\dcm4che-2.0.18-bin\dcm4che-2.0.18\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre1.6.0_04\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VISTAL_FMT=NIFTI</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <value key="abstractProcess.IgnoreReturnValue" type="bool">true</value>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">clean</value>
+    <value type="QString">-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">C:/soft/Qt/mingw/bin/mingw32-make.exe</value>
+   <value key="abstractProcess.enabled" type="bool">true</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <value key="cleanConfig" type="bool">true</value>
+   <valuelist key="makeargs" type="QVariantList">
+    <value type="QString">clean</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">ASL.LOG=Destination=file;OnFirstLog=command,environment,parent</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\download\dcm4che-2.0.22-bin\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/;C:\Program Files\QuickTime\QTSystem\</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">C:/workspace/Shanoir/external/clidcm/src/clidcm.pro</value>
+    <value type="QString">-spec</value>
+    <value type="QString">win32-g++</value>
+    <value type="QString">-r</value>
+    <value type="QString">CONFIG+=debug_and_release</value>
+    <value type="QString">CONFIG+=release</value>
+    <value type="QString">-unix</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">c:/soft/qt/qt/bin/qmake.exe</value>
+   <value key="abstractProcess.enabled" type="bool">false</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <valuelist key="qmakeArgs" type="QVariantList">
+    <value type="QString">-unix</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-buildstep1</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">ASL.LOG=Destination=file;OnFirstLog=command,environment,parent</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\download\dcm4che-2.0.22-bin\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/;C:\Program Files\QuickTime\QTSystem\</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <value key="abstractProcess.IgnoreReturnValue" type="bool">false</value>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">release</value>
+    <value type="QString">-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">C:/soft/Qt/mingw/bin/mingw32-make.exe</value>
+   <value key="abstractProcess.enabled" type="bool">true</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <valuelist key="makeargs" type="QVariantList">
+    <value type="QString">release</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfiguration-Release-cleanstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Release</value>
+   <valuelist key="abstractProcess.Environment" type="QVariantList">
+    <value type="QString">AEXRS=C:\Program Files\Altiris\Recovery Solution Agent\</value>
+    <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\aferial\Application Data</value>
+    <value type="QString">APR_ICONV_PATH=C:\Program Files\Subversion\iconv</value>
+    <value type="QString">ASL.LOG=Destination=file;OnFirstLog=command,environment,parent</value>
+    <value type="QString">CLASSPATH=.;C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Fichiers communs</value>
+    <value type="QString">COMPUTERNAME=SPINE</value>
+    <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
+    <value type="QString">CYGWIN=tty</value>
+    <value type="QString">DEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">FP_NO_HOST_CHECK=NO</value>
+    <value type="QString">HOMEDRIVE=Z:</value>
+    <value type="QString">HOMEPATH=\</value>
+    <value type="QString">HOMESHARE=\\nas1a\aferial</value>
+    <value type="QString">JAVA_HOME=C:\Program Files\Java\jdk1.6.0_04</value>
+    <value type="QString">LOGONSERVER=\\DC1</value>
+    <value type="QString">NUMBER_OF_PROCESSORS=2</value>
+    <value type="QString">OS=Windows_NT</value>
+    <value type="QString">PATH=C:\soft\Qt\mingw\bin;C:\soft\Qt\qt\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\Fichiers communs\Roxio Shared\DLLShared\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Graphviz2.24\bin;C:\soft\ant\bin;C:\Program Files\QuickTime\QTSystem\C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\soft\apache-maven-2.2.1\bin;C:\Program Files\PostgreSQL\8.4\bin;C:\Program Files\MySQL\MySQL Server 5.1\bin;C:\Program Files\CMake 2.8\bin;C:\Program Files\GnuWin32\bin;C:\soft\lcc\bin;C:\soft\nmake;C:\soft\MinGW\bin;C:\Program Files\Subversion\bin;C:\soft\dcmtk-3.5.4-win32-i386\bin;C:\download\dcm4che-2.0.22-bin\bin;C:\soft\CMake 2.8\bin;C:\soft\Qt\bin;C:\soft\GnuWin32\bin;C:/soft/Qt/mingw/bin/;C:\Program Files\QuickTime\QTSystem\</value>
+    <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 15 Stepping 10, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=0f0a</value>
+    <value type="QString">PROGRAMFILES=C:\Program Files</value>
+    <value type="QString">QTDIR=C:/soft/Qt/qt</value>
+    <value type="QString">QTJAVA=C:\Program Files\Java\jre6\lib\ext\QTJava.zip</value>
+    <value type="QString">ROXIOCENTRAL=C:\Program Files\Fichiers communs\Roxio Shared\9.0\Roxio Central33\</value>
+    <value type="QString">SESSIONNAME=Console</value>
+    <value type="QString">SHANOIR_HOME=C:\workspace\Shanoir</value>
+    <value type="QString">SYSTEMDRIVE=C:</value>
+    <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
+    <value type="QString">TEMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\aferial\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=IRISA.FR</value>
+    <value type="QString">USERDOMAIN=IRISA</value>
+    <value type="QString">USERNAME=aferial</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\aferial</value>
+    <value type="QString">VBOX_INSTALL_PATH=C:\Program Files\Sun\VirtualBox\</value>
+    <value type="QString">VSEDEFLOGDIR=C:\Documents and Settings\All Users\Application Data\McAfee\DesktopProtection</value>
+    <value type="QString">WINDIR=C:\WINDOWS</value>
+   </valuelist>
+   <value key="abstractProcess.IgnoreReturnValue" type="bool">true</value>
+   <valuelist key="abstractProcess.arguments" type="QVariantList">
+    <value type="QString">clean</value>
+    <value type="QString">-w</value>
+   </valuelist>
+   <value key="abstractProcess.command" type="QString">C:/soft/Qt/mingw/bin/mingw32-make.exe</value>
+   <value key="abstractProcess.enabled" type="bool">true</value>
+   <value key="abstractProcess.workingDirectory" type="QString">C:/workspace/Shanoir/external/clidcm/src</value>
+   <value key="cleanConfig" type="bool">true</value>
+   <valuelist key="makeargs" type="QVariantList">
+    <value type="QString">clean</value>
+   </valuelist>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildconfigurations</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">Debug</value>
+   <value type="QString">Release</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>buildstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString"></value>
+   <value key="mkspec" type="QString"></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildstep1</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString"></value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>buildsteps</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">trolltech.qt4projectmanager.qmake</value>
+   <value type="QString">trolltech.qt4projectmanager.make</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>cleanstep0</variable>
+  <valuemap type="QVariantMap">
+   <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString"></value>
+   <value key="clean" type="bool">true</value>
+  </valuemap>
+ </data>
+ <data>
+  <variable>cleansteps</variable>
+  <valuelist type="QVariantList">
+   <value type="QString">trolltech.qt4projectmanager.make</value>
+  </valuelist>
+ </data>
+ <data>
+  <variable>defaultFileEncoding</variable>
+  <value type="QByteArray">System</value>
+ </data>
+ <data>
+  <variable>project</variable>
+  <valuemap type="QVariantMap"/>
+ </data>
+</qtcreator>

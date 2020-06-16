@@ -1,0 +1,115 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<form class="row" [formGroup]="form">
+    <div class="left">
+        <h2>Solr Search
+            <tool-tip class="larger">
+                Query syntax example: 
+                <b>studyName:test;subjectName:xxxx;datasetName:*restingstate*;</b>
+                <i>Multiple character wildcard searches are allowed by adding * to keyword</i>
+            </tool-tip>
+        </h2>
+        <input type="text" [(ngModel)]="keyword" formControlName="keywords" id="searchBar" placeholder="Search.." (change)="table.refresh()">
+        <label *ngIf="hasError('keywords', ['pattern'])" class="form-validation-alert">Please check the query syntax!</label>
+        <ol id="facet">
+            <li *ngIf="selections">
+                <span class="button" (click)="removeAllFacets(); table.refresh()">
+                    <i class="fas fa-ban"></i> Remove all criteria
+                </span>
+            </li>
+            <li *ngIf="selections">
+                <span class="right-col" *ngFor="let item of selections">
+                    <ng-container *ngIf="item.value && item.value.length > 0">
+                        {{item.key}}: 
+                        <ng-container *ngFor="let value of item.value">
+                            {{value}} 
+                            <span class="button" (click)="removeSelection(item.key, value); table.refresh()"><i class="fas fa-ban"></i></span>
+                        </ng-container>
+                    </ng-container>
+                </span>
+            </li>
+            <li>
+                <label>Study Name</label>
+                <span class="right-col">
+                        <span class="button" (click)="showAllStudies(); table.refresh()">
+                            &#9664; Show all studies
+                        </span>
+                    <checkbox-list [(ngModel)]="solrRequest.studyName" formControlName="studyName" [(items)]="facetResultPages[0]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Subject Name<tool-tip>Use search bar to find more than 200 results</tool-tip></label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.subjectName" formControlName="subjectName" [(items)]="facetResultPages[1]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Dataset Name<tool-tip>Use search bar to find more than 200 results</tool-tip></label> 
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.datasetName" formControlName="datasetName" [(items)]="facetResultPages[2]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Dataset Creation Date</label>
+                <br/>
+                <label>between </label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="solrRequest.datasetStartDate" formControlName="startDate"></datepicker>
+                    <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+                </span>
+                <br/>
+                <label>and </label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="solrRequest.datasetEndDate" formControlName="endDate"></datepicker>
+                    <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+                    <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
+                </span>
+            </li>
+            <li>
+                <label>Examination Comment<tool-tip>Use search bar to find more than 200 results</tool-tip></label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.examinationComment" formControlName="examinationComment" [(items)]="facetResultPages[3]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Dataset ModalityType</label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.datasetType" formControlName="datasetTypes" [(items)]="facetResultPages[4]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Mr Dataset Nature</label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="solrRequest.datasetNature" formControlName="datasetNatures" [(items)]="facetResultPages[5]" (change)="table.refresh()"></checkbox-list>
+                </span>
+            </li>
+            <!-- criteres choisis -->
+            <button class="Button" (click)="table.refresh()" [disabled]="!form.valid">Search</button>
+        </ol>
+    </div>
+    <div class="right">
+        <h2>Results</h2>
+        <shanoir-table #table
+            [getPage]="getPage.bind(this)" 
+            [maxResults]="50"
+            [columnDefs]="columnDefs" 
+            [customActionDefs]="customActionDefs"
+            (rowClick)="onRowClick($event)"
+            [browserSearch]="false"
+            [selectionAllowed]="true"
+            (selectionChange)="onSelectionChange($event)">
+        </shanoir-table>
+    </div>
+</form>

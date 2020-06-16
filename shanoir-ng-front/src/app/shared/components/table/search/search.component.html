@@ -13,9 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <button (click)="resetSearch()" title="clear search"><i class="fas fa-broom"></i></button>
-<input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
+<input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" type="text" placeholder="search..."/> 
 to filter
-<select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
+<select class="search-field" [(ngModel)]="filter.searchField" (change)="search()"> 
     <option value="">*</option>
     <option *ngFor="let col of searchableColumns" value="{{col.field}}">
         {{col.headerName}}

@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -31,7 +31,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ol>
                     <li>
 						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">Modality type</label> 
-						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" (change)="onModalityChange($event)" formControlName="datasetModalityType"></select-dataset-type>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.datasetModalityType}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select-box [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
+									(change)="onModalityChange($event)" formControlName="datasetModalityType">
+								</select-box>
+							</ng-template>
+						</span>
                     </li>
 					<li>
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">Manufacturer</label> 
@@ -42,8 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()">
-									<select-option *ngFor="let manufacturer of manufs" [value]="manufacturer">{{manufacturer.name}}</select-option>
+								<select-box [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>

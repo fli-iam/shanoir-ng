@@ -1,0 +1,184 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<fieldset>
+	<legend>Mr protocol</legend>
+	<ol>
+		<li>
+			<label>Acquisition duration</label>
+			<span class="right-col">{{protocol.acquisitionDuration}}</span>
+		</li>
+		<li>
+			<label>Acquisition resolution X</label>
+			<span class="right-col">{{protocol.acquisitionResolutionX}}</span>
+		</li>
+		<li>
+			<label>Acquisition resolution Y</label>
+			<span class="right-col">{{protocol.acquisitionResolutionY}}</span>
+		</li>
+		<li>
+			<label>Diffusion gradients</label>
+			<span class="right-col">{{protocol.diffusionGradients}}</span>
+		</li>
+		<li>
+			<label>Echo train length</label>
+			<span class="right-col">{{protocol.echoTrainLength}}</span>
+		</li>
+		<li>
+			<label>Filters</label>
+			<span class="right-col">{{protocol.filters}}</span>
+		</li>
+		<li>
+			<label>FOV X</label>
+			<span class="right-col">{{protocol.fovX}}</span>
+		</li>
+		<li>
+			<label>FOV Y</label>
+			<span class="right-col">{{protocol.fovY}}</span>
+		</li>
+		<li>
+			<label>Imaged nucleus</label>
+			<span class="right-col">{{protocol.imagedNucleus}}</span>
+		</li>
+		<li>
+			<label>Imaging frequency</label>
+			<span class="right-col">{{protocol.imagingFrequency}}</span>
+		</li>
+		<li>
+			<label>Number of averages</label>
+			<span class="right-col">{{protocol.numberOfAverages}}</span>
+		</li>
+		<li>
+			<label>Number of phase encoding steps</label>
+			<span class="right-col">{{protocol.numberOfPhaseEncodingSteps}}</span>
+		</li>
+		<li>
+			<label>Number of temporal positions</label>
+			<span class="right-col">{{protocol.numberOfTemporalPositions}}</span>
+		</li>
+		<li>
+			<label>Patient position</label>
+			<span class="right-col">{{protocol.patientPosition}}</span>
+		</li>
+		<li>
+			<label>Percent phase FOV</label>
+			<span class="right-col">{{protocol.percentPhaseFov}}</span>
+		</li>
+		<li>
+			<label>Percent sampling</label>
+			<span class="right-col">{{protocol.percentSampling}}</span>
+		</li>
+		<li>
+			<label>Pixel bandwidth</label>
+			<span class="right-col">{{protocol.pixelBandwidth}}</span>
+		</li>
+		<li>
+			<label>Pixel spacing X</label>
+			<span class="right-col">{{protocol.pixelSpacingX}}</span>
+		</li>
+		<li>
+			<label>Pixel spacing Y</label>
+			<span class="right-col">{{protocol.pixelSpacingY}}</span>
+		</li>
+		<li>
+			<label>Slice spacing</label>
+			<span class="right-col">{{protocol.sliceSpacing}}</span>
+		</li>
+		<li>
+			<label>Slice thickness</label>
+			<span class="right-col">{{protocol.sliceThickness}}</span>
+		</li>
+		<li>
+			<label>Temporal resolution</label>
+			<span class="right-col">{{protocol.temporalResolution}}</span>
+		</li>
+	</ol>
+</fieldset>
+<fieldset>
+	<legend>Mr protocol metadata</legend>
+	<ol>
+		<li>
+			<label>Acquisition contrast</label>
+			<span class="right-col">{{protocol.updatedMetadata?.acquisitionContrast ? protocol.updatedMetadata.acquisitionContrast : protocol.originMetadata?.acquisitionContras }}</span>
+		</li>
+		<li>
+			<label>Contrast agent concentration</label>
+			<span class="right-col">{{protocol.updatedMetadata?.contrastAgentConcentration ? protocol.updatedMetadata.contrastAgentConcentration : protocol.originMetadata?.contrastAgentConcentration}}</span>
+		</li>
+		<li>
+			<label>Contrast agent used</label>
+			<span class="right-col">{{protocol.updatedMetadata?.contrastAgentUsed ? protocol.updatedMetadata.contrastAgentUsed : protocol.originMetadata?.contrastAgentUsed}}</span>
+		</li>
+		<li>
+			<label>Injected volume</label>
+			<span class="right-col">{{protocol.updatedMetadata?.injectedVolume ? protocol.updatedMetadata.injectedVolume : protocol.originMetadata?.injectedVolume}}</span>
+		</li>
+		<li>
+			<label>Magnetization transfer</label>
+			<span class="right-col">{{protocol.updatedMetadata?.magnetizationTransfer ? protocol.updatedMetadata.magnetizationTransfer : protocol.originMetadata?.magnetizationTransfer}}</span>
+		</li>
+		<li>
+			<label>Mr scanning sequence</label>
+			<span class="right-col">{{protocol.updatedMetadata?.mrScanningSequence ? protocol.updatedMetadata.mrScanningSequence : protocol.originMetadata?.mrScanningSequence}}</span>
+		</li>
+		<li>
+			<label>Mr sequence KSpace fill</label>
+			<span class="right-col">{{protocol.updatedMetadata?.mrSequenceKSpaceFill ? protocol.updatedMetadata.mrSequenceKSpaceFill : protocol.originMetadata?.mrSequenceKSpaceFill}}</span>
+		</li>
+		<li>
+			<label>Mr sequence name</label>
+			<span class="right-col">{{protocol.updatedMetadata?.mrSequenceName ? protocol.updatedMetadata.mrSequenceName : protocol.originMetadata?.mrSequenceName}}</span>
+		</li>
+		<li>
+			<label>Mr sequence variant</label>
+			<span class="right-col">{{protocol.updatedMetadata?.mrSequenceVariant ? protocol.updatedMetadata.mrSequenceVariant : protocol.originMetadata?.mrSequenceVariant}}</span>
+		</li>
+		<li>
+			<label>name</label>
+			<span class="right-col">{{protocol.updatedMetadata?.name ? protocol.updatedMetadata.name : protocol.originMetadata?.name}}</span>
+		</li>
+		<li>
+			<label>Parallel acquisition</label>
+			<span class="right-col">{{protocol.updatedMetadata?.parallelAcquisition ? protocol.updatedMetadata.parallelAcquisition : protocol.originMetadata?.parallelAcquisition}}</span>
+		</li>
+		<li>
+			<label>Parallel acquisition technique</label>
+			<span class="right-col">{{protocol.updatedMetadata?.parallelAcquisitionTechnique ? protocol.updatedMetadata.parallelAcquisitionTechnique : protocol.originMetadata?.parallelAcquisitionTechnique}}</span>
+		</li>
+		<li>
+			<label>Receiving coil id</label>
+			<span class="right-col">{{protocol.updatedMetadata?.receivingCoilId ? protocol.updatedMetadata.receivingCoilId : protocol.originMetadata?.receivingCoilId}}</span>
+		</li>
+		<li>
+			<label>Slice order</label>
+			<span class="right-col">{{protocol.updatedMetadata?.sliceOrder ? protocol.updatedMetadata.sliceOrder : protocol.originMetadata?.sliceOrder}}</span>
+		</li>
+		<li>
+			<label>Slice orientation at acquisition</label>
+			<span class="right-col">{{protocol.updatedMetadata?.sliceOrientationAtAcquisition ? protocol.updatedMetadata.sliceOrientationAtAcquisition : protocol.originMetadata?.sliceOrientationAtAcquisition}}</span>
+		</li>
+		<li>
+			<label>Time reduction factor for the in plane direction</label>
+			<span class="right-col">{{protocol.updatedMetadata?.timeReductionFactorForTheInPlaneDirection ? protocol.updatedMetadata.timeReductionFactorForTheInPlaneDirection : protocol.originMetadata?.timeReductionFactorForTheInPlaneDirection}}</span>
+		</li>
+		<li>
+			<label>Time reduction factor for the out of plane direction</label>
+			<span class="right-col">{{protocol.updatedMetadata?.timeReductionFactorForTheOutOfPlaneDirection ? protocol.updatedMetadata.timeReductionFactorForTheOutOfPlaneDirection : protocol.originMetadata?.timeReductionFactorForTheOutOfPlaneDirection}}</span>
+		</li>
+		<li>
+			<label>transmitting coil id</label>
+			<span class="right-col">{{protocol.updatedMetadata?.transmittingCoilId ? protocol.updatedMetadata.transmittingCoilId : protocol.originMetadata?.transmittingCoilId}}</span>
+		</li>
+	</ol>
+</fieldset>

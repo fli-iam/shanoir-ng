@@ -12,10 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { User } from '../shared/user.model';
+import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+import { UserService } from '../shared/user.service'
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 @Component({
     selector: 'accountRequest',
@@ -23,19 +28,73 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 })
 
 export class AccountRequestComponent {
-    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
-    public requestSent: boolean = false;
-    public errorOnRequest: boolean = false;
+    
+    private user: User;
+    private form: FormGroup;
 
-    closeAccountRequest(res: any) {
-        if (!res) {
-            this.errorOnRequest = true;
-        }
-        this.requestSent = true;
+    private requestSent: boolean = false;
+    private errorOnRequest: boolean = false;
+
+    
+    constructor(
+            private fb: FormBuilder, 
+            private userService: UserService,
+            private location: Location) {}
+
+    ngOnInit(): void {
+        this.user = new User();
+        this.user.accountRequestInfo = new AccountRequestInfo();
+        this.buildForm();
     }
 
-    getOut() {
+    buildForm(): void {
+        const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
+        this.form = this.fb.group({
+            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
+            'accountRequestInfo': [this.user.accountRequestInfo, [Validators.required]]
+        });
+    }
+
+    accountRequest(): void {
+        this.userService.requestAccount(this.user)
+            .then((res) => {
+                 this.requestSent = true;
+            }, (err: String) => {
+                if (err.indexOf("email should be unique") != -1) {
+                    console.log('email error')
+                } else {
+                    throw err;
+                }
+            });
+    }
+
+    getOut(): void {
+        this.location.back();
+    }
+
+    cancelAccountRequest(): void {
         window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && control.touched && !control.valid) {
+            return control.errors;
+        }
+    }
+
+    hasError(fieldName: string, errors: string[]) {
+        let formError = this.formErrors(fieldName);
+        if (formError) {
+            for(let errorName of errors) {
+                if(formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
+
 
 }

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { DatasetProcessingType } from "../../shared/enums/dataset-processing-type";
+import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
 import { Dataset } from "./dataset.model";
 
 export class DatasetProcessing {

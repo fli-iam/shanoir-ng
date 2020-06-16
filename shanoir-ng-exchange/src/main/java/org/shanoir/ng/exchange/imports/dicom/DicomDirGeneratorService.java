@@ -58,13 +58,15 @@ public class DicomDirGeneratorService {
 	private int addReferenceTo(File f, File dicomDir) throws IOException {
 		int n = 0;
 		if (f.isDirectory()) {
-			for (String s : f.list())
+			for (String s : f.list()) {
 				n += addReferenceTo(new File(f, s), dicomDir);
+			}
 			return n;
 		}
 		// do not add reference to DICOMDIR
-		if (f.equals(dicomDir))
+		if (f.equals(dicomDir)) {
 			return 0;
+		}
 
 		Attributes fmi;
 		Attributes dataset;
@@ -78,11 +80,12 @@ public class DicomDirGeneratorService {
 			LOG.error("failed to parse image '" + f + "' - " + e.getMessage());
 			return 0;
 		} finally {
-			if (din != null)
+			if (din != null) {
 				try {
 					din.close();
 				} catch (Exception ignore) {
 				}
+			}
 		}
 		char prompt = '.';
 		if (fmi == null) {

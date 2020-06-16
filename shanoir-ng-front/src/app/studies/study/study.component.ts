@@ -24,6 +24,7 @@ import { BrowserPaging } from '../../shared/components/table/browser-paging.mode
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
@@ -32,10 +33,10 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { Option } from '../../shared/select/select.component';
 import { BidsElement } from '../../bids/model/bidsElement.model'
 
 
@@ -51,7 +52,6 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable') table: TableComponent;
     @ViewChild('input') private fileInput: ElementRef;
 
-    private centers: IdName[];
     private subjects: IdName[];
     private selectedCenter: IdName;
     
@@ -64,10 +64,14 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
     
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
-    protected bidsLoading: boolean = false;
-    
     protected bidsStructure: BidsElement[];
+
+    centerOptions: Option<IdName>[];
+    userOptions: Option<User>[];
+    studyStatusOptions: Option<string>[] = [
+        new Option<string>('IN_PROGRESS', 'In Progress'),
+        new Option<string>('FINISHED', 'Finished')
+    ];
 
     constructor(
             private route: ActivatedRoute, 
@@ -98,7 +102,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         Promise.all([
             studyPromise,
-            this.userService.getAll().then(users => this.users = users)
+            this.fetchUsers()
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
@@ -109,11 +113,10 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, centers]) => {
             this.onMonoMultiChange();
         });
-
         return studyPromise.then(() => null);
     }
 
-    initCreate(): Promise<void> {
+    async initCreate(): Promise<void> {
         this.study = this.newStudy();
         this.getCenters();
         this.selectedCenter = null;
@@ -125,13 +128,23 @@ export class StudyComponent extends EntityComponent<Study> {
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
 
-        this.userService.getAll().then(users => {
-            this.users = users;
+        this.fetchUsers().then(users => {
             // Add the connected user by default
             let connectedUser: User = users.find(user => this.isMe(user));
             this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
         });
         return Promise.resolve();
+    }
+
+    private fetchUsers(): Promise<User[]> {
+        return this.userService.getAll().then(users => {
+            this.users = users;
+            this.userOptions = [];
+            if (users) {
+                users.forEach(user => this.userOptions.push(new Option<User>(user, user.lastName + ' ' + user.firstName)));
+            }
+            return users;
+        });
     }
 
     buildForm(): FormGroup {
@@ -177,10 +190,17 @@ export class StudyComponent extends EntityComponent<Study> {
         return study;
     }
 
-    private getCenters(): Promise<IdName[]> {
+    private getCenters() {
         return this.centerService
             .getCentersNames()
-            .then(centers => this.centers = centers);
+            .then(centers => {
+                this.centerOptions = [];
+                if (centers) {
+                    centers.forEach(center => {
+                        this.centerOptions.push(new Option<IdName>(center, center.name));
+                    });
+                }
+            });
     }
         
     private getSubjects(): void {
@@ -194,7 +214,8 @@ export class StudyComponent extends EntityComponent<Study> {
     /** Center section management  **/
     private onMonoMultiChange() {
         if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
-            this.selectedCenter = this.centers.filter(center => center.id == this.study.studyCenterList[0].center.id)[0];
+            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
+            if (option) this.selectedCenter = option.value; 
         }
     }
 
@@ -209,6 +230,10 @@ export class StudyComponent extends EntityComponent<Study> {
         studyCenter.center.id = this.selectedCenter.id;
         studyCenter.center.name = this.selectedCenter.name;
         this.study.studyCenterList.push(studyCenter);
+
+        let option = this.centerOptions.find(option => option.value.id == this.selectedCenter.id);
+        if (option) option.disabled = true;
+
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
@@ -235,6 +260,9 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.monoCenter = true;
             this.onMonoMultiChange();
         }
+        let option = this.centerOptions.find(option => option.value.id == centerId);
+        if (option) option.disabled = false;
+        this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
     
@@ -314,7 +342,10 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
-        selectedUser.selected = true;
+        if (this.userOptions) {
+            let option = this.userOptions.find(opt => opt.value.id == selectedUser.id);
+            if (option) option.disabled = true;
+        }
 
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
@@ -345,7 +376,10 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('subjectStudyList').markAsDirty();
         this.form.updateValueAndValidity();
         StudyUser.completeMember(item, this.users);
-        item.user.selected = false;
+        if (this.userOptions) {
+            let option = this.userOptions.find(opt => opt.value.id == item.user.id);
+            if (option) option.disabled = true;
+        }
     }
 
     private onStudyUserEdit() {
@@ -400,12 +434,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
-    }
-
-    private exportBIDS(study: Study) {
-        let studyName: string;
-        this.bidsLoading = true;
-        this.studyService.exportBIDSByStudyId(study.id).then(() => this.bidsLoading = false);
     }
 
     getBidsStructure(id: number) {

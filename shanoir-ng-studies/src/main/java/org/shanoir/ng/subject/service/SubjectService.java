@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -146,10 +147,11 @@ public interface SubjectService {
 	 *
 	 * @param subject subject to update.
 	 * @return updated subject.
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	Subject update(Subject subject) throws EntityNotFoundException;
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	Subject update(Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException;
 
 	/**
 	 * Delete a subject.
@@ -159,5 +161,13 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
+
+
+	/**
+	 * This method should not be used directly. Same as findAllSubjectsOfStudy but with no roles
+	 * @param studyId
+	 * @return
+	 */
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
 
 }

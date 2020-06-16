@@ -34,8 +34,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class BrukerUploadComponent {
 
-    @Input() protected keepArchive: boolean;
-
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
@@ -112,9 +110,9 @@ export class BrukerUploadComponent {
             );
     }
 
-    protected storeArchiveChanged() {
+    protected storeArchiveChanged(event: boolean) {
         // Get the name of the file to get
-        if (this.keepArchive) {
+        if (event) {
             let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
             let archiveName  = '/tmp/bruker/convert/' + archiveFileName + '/' + this.archiveFolder + '/' + this.archive;
             this.importDataService.archiveUploaded.archive = archiveName;
@@ -125,7 +123,6 @@ export class BrukerUploadComponent {
 
      private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
-        //this.updateValidity();
     }
 
     get valid(): boolean {

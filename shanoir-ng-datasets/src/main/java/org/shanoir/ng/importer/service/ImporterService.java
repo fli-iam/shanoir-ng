@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +54,6 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -62,7 +62,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Scope("prototype")
@@ -127,6 +129,7 @@ public class ImporterService {
 			} else {
 				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
+
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Successfully created datasets for examination " + examination.getId());
@@ -150,33 +153,18 @@ public class ImporterService {
 				LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
 				return;
 			}
-			String fileName = niftiStorageDir + File.separator + "preclinical" + File.separator + examination.getStudyId() + File.separator + examination.getId() + File.separator;
-
-			File archive = new File(fileName);
-
-			// Create archive directory
-			if (!archive.exists()) {
-				archive.mkdirs();
-			}
-
-			fileName += importJob.getArchive().substring(importJob.getArchive().lastIndexOf(File.separator));
-			Path destPath = new File(fileName).toPath();
-
-			try {
-				Files.copy(archiveFile.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e1) {
-				LOG.info("Could not copy archive to destination, not saved: {}", importJob.getArchive());
-				return;
-			}
-
-			// Keep archive informations in examination
-			List<String> archives = new ArrayList<>();
-			archives.add(fileName);
-			examination.setExtraDataFilePathList(archives);
-			try {
-				examinationService.update(examination);
-			} catch (EntityNotFoundException e) {
-				LOG.error(e.getMessage());
+			MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
+			
+			// Add bruker archive as extra data
+			String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
+			if (fileName != null) {
+				List<String> archives = examination.getExtraDataFilePathList();
+				if (archives == null) {
+					archives = new ArrayList<>();
+				}
+				archives.add(archiveFile.getName());
+				examination.setExtraDataFilePathList(archives);
+				examinationRepository.save(examination);
 			}
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
@@ -185,6 +173,7 @@ public class ImporterService {
 			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
 			throw new ShanoirException(event.getMessage(), e);
+
 		}
 	}
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
@@ -253,7 +242,7 @@ public class ImporterService {
 			Examination examination = examinationService.findById(importJob.getExaminationId());
 
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -340,7 +329,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				datasetToCreate.setStudyId(importJob.getFrontStudyId());
+				//datasetToCreate.setStudyId(importJob.getStudyId());
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());

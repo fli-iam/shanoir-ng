@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="BloodGasDataFormComponent content-component" >
+<div #formContainer class="BloodGasDataFormComponent content-component" >
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'"> 

@@ -4,8 +4,18 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="root", password="", database="datasets", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "root",
+        password    = os.environ.get("TGT_PASSWORD")    or "",
+        database    = os.environ.get("TGT_DATABASE")    or "datasets",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
@@ -21,6 +31,27 @@ targetCursor.execute(query)
 targetConn.commit()
 
 print("######## CLEANING OF TARGET DB MS DATASETS: START ###################")
+print("Delete study_card_assignment: start")
+query = "DELETE FROM study_card_assignment"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete study_card_assignment: end")
+
+
+print("Delete study_card_condition: start")
+query = "DELETE FROM study_card_condition"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete study_card_condition: end")
+
+
+print("Delete study_card_rule: start")
+query = "DELETE FROM study_card_rule"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete study_card_rule: end")
+
+
 print("Delete study_cards: start")
 query = "DELETE FROM study_cards"
 targetCursor.execute(query)
@@ -168,6 +199,41 @@ targetConn.commit()
 print("Delete examination: end")
 
 
+print("Delete numerical_variable: start")
+query = "DELETE FROM numerical_variable"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete numerical_variable: end")
+
+
+print("Delete coded_variable: start")
+query = "DELETE FROM coded_variable"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete coded_variable: end")
+
+
+print("Delete scale_item: start")
+query = "DELETE FROM scale_item"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete scale_item: end")
+
+
+print("Delete numerical_score: start")
+query = "DELETE FROM numerical_score"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete numerical_score: end")
+
+
+print("Delete coded_score: start")
+query = "DELETE FROM coded_score"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete coded_score: end")
+
+
 print("Delete instrument_variable: start")
 query = "DELETE FROM instrument_variable"
 targetCursor.execute(query)
@@ -186,7 +252,7 @@ print("Delete instrument: start")
 query = "DELETE FROM instrument"
 targetCursor.execute(query)
 targetConn.commit()
-print("Delete instrument: end2")
+print("Delete instrument: end")
 
 
 print("Delete mr_protocol: start")
@@ -239,17 +305,73 @@ print("Delete dataset_metadata: end")
 print("######## CLEANING OF TARGET DB MS DATASETS: FINISHED ###################")
 
 
-
-
-
-
 print("######## IMPORTING OF TARGET DB MS DATASETS: START ###################")
 print("Import study cards: start")
-sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, CENTER_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM STUDY_CARD")
-query = "INSERT INTO study_cards (id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM STUDY_CARD")
+query = "INSERT INTO study_cards (id, acquisition_equipment_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Import study cards: end")
+
+print("Import study card rules: start")
+sourceCursor.execute("SELECT STUDY_CARD_RULE_ID, STUDY_CARD_ID FROM STUDY_CARD_RULE")
+query = "INSERT INTO study_card_rule (id, study_card_id) VALUES (%s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import study card rules: end")
+
+print("Import study card conditions: start")
+sourceCursor.execute("SELECT STUDY_CARD_CONDITION_ID, STUDY_CARD_RULE_ID, DICOM_TAG, DICOM_VALUE, REF_COMPARISON_SIGN_ID FROM STUDY_CARD_CONDITION")
+query = "INSERT INTO study_card_condition (id, rule_id, dicom_tag, dicom_value, operation) VALUES (%s, %s, %s, %s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import study card conditions: end")
+
+print("Import study card assignments: start")
+sourceCursor.execute("SELECT STUDY_CARD_ASSIGNMENT_ID, FIELD, VALUE, STUDY_CARD_RULE_ID FROM STUDY_CARD_ASSIGNMENT")
+study_card_assignment_list = list()
+for row in sourceCursor.fetchall():
+	study_card_rule = list(row)
+	if 'refDatasetModalityType' == study_card_rule[1]:
+		study_card_rule[1] = 1
+		study_card_assignment_list.append(study_card_rule)
+	elif 'protocolName' == study_card_rule[1]:
+		study_card_rule[1] = 2
+		study_card_assignment_list.append(study_card_rule)
+	elif 'transmittingCoil' == study_card_rule[1]:
+		study_card_rule[1] = 4
+		study_card_assignment_list.append(study_card_rule)
+	elif 'receivingCoil' == study_card_rule[1]:
+		study_card_rule[1] = 5
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refExploredEntity' == study_card_rule[1]:
+		study_card_rule[1] = 6
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refAcquisitionContrast' == study_card_rule[1]:
+		study_card_rule[1] = 7
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refMrSequenceApplication' == study_card_rule[1]:
+		study_card_rule[1] = 8
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refMrSequencePhysics' == study_card_rule[1]:
+		study_card_rule[1] = 9
+		study_card_assignment_list.append(study_card_rule)
+	elif 'name' == study_card_rule[1]:
+		study_card_rule[1] = 10
+		study_card_assignment_list.append(study_card_rule)
+	elif 'comment' == study_card_rule[1]:
+		study_card_rule[1] = 11
+		study_card_assignment_list.append(study_card_rule)
+	elif 'mrSequenceName' == study_card_rule[1]:
+		study_card_rule[1] = 12
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refContrastAgentUsed' == study_card_rule[1]:
+		study_card_rule[1] = 13
+		study_card_assignment_list.append(study_card_rule)
+query = "INSERT INTO study_card_assignment (id, field, value, rule_id) VALUES (%s, %s, %s, %s)"
+targetCursor.executemany(query, study_card_assignment_list)
+targetConn.commit()
+print("Import study card assignments: end")
 
 
 print("Import scientific_article: start")
@@ -288,6 +410,51 @@ targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 print("Import instrument_variable: end")
+
+print("Import numerical_variable: start")
+
+sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCORE_VALUE, MIN_SCORE_VALUE FROM NUMERICAL_VARIABLE""")
+
+query = """INSERT INTO numerical_variable
+    (instrument_variable_id, max_score_value, min_score_value)
+    VALUES (%s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import numerical_variable: end")
+
+print("Import coded_variable: start")
+
+sourceCursor.execute("""SELECT INSTRUMENT_VARIABLE_ID, MAX_SCALE_ITEM_ID, MIN_SCALE_ITEM_ID FROM CODED_VARIABLE""")
+
+query = """INSERT INTO coded_variable
+    (instrument_variable_id, max_scale_item_id, min_scale_item_id)
+    VALUES (%s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import coded_variable: end")
+
+print("Import scale_item: start")
+
+sourceCursor.execute("""SELECT SCALE_ITEM_ID,
+ CORRESPONDING_NUMBER,
+ QUALITATIVE_SCALE_ITEM,
+ QUANTITATIVE_SCALE_ITEM,
+ CODED_VARIABLE_ID,
+ (SELECT LABEL_NAME FROM REF_SCALE_ITEM_TYPE r WHERE s.REF_SCALE_ITEM_TYPE_ID = r.REF_SCALE_ITEM_TYPE_ID)
+ FROM SCALE_ITEM s""")
+
+query = """INSERT INTO scale_item
+    (id, corresponding_number, qualitative_scale_item, quantitative_scale_item, coded_variable_id, ref_scale_item_type)
+    VALUES (%s, %s, %s, %s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import scale_item: end")
 
 print("Import instrument_domains: start")
 
@@ -347,6 +514,42 @@ targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 print("Import score: end")
+
+print("Import numerical_score: start")
+
+sourceCursor.execute("SELECT n.SCORE_ID, "
+ + "n.SCIENTIFIC_ARTICLE_ID, "
+ + "n.SCORE_VALUE, "
+ + "n.IS_SCORE_WITH_UNIT_OF_MEASURE, "
+ + "(SELECT LABEL_NAME FROM REF_NUMERICAL_SCORE_TYPE r WHERE r.REF_NUMERICAL_SCORE_TYPE_ID = n.REF_NUMERICAL_SCORE_TYPE_ID), "
+ + "(SELECT LABEL_NAME FROM REF_UNIT_OF_MEASURE u WHERE u.REF_UNIT_OF_MEASURE_ID = n.REF_UNIT_OF_MEASURE_ID)"
+ + "FROM NUMERICAL_SCORE n"
+ )
+
+query = "INSERT INTO numerical_score (id, ";
+query+= "scientific_article_id, " ;
+query+= "score_value, ";
+query+= "is_score_with_unit_of_measure, ";
+query+= "ref_numerical_score_type, ";
+query+= "ref_unit_of_measure, ";
+query+= "VALUES (%s, %s, %s, %s, %s, %s)";
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import numerical_score: end")
+
+print("Import coded_score: start")
+
+sourceCursor.execute("SELECT SCORE_ID, SCALE_ITEM_ID FROM CODED_SCORE")
+
+query = "INSERT INTO coded_score (score_id, scale_item_id) VALUES (%s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import coded_score: end")
+
+print("Import numerical_score: start")
 
 print("Import extra_data_file_path: start")
 
@@ -584,7 +787,7 @@ print("Import mr_dataset: end")
 print("Import echo_time: start")
 # Echo times linked to only one dataset
 sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, COUNT(md.DATASET_ID) as countids 
-	FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
+	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
 	GROUP BY et.ECHO_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO echo_time (id, echo_number, echo_time_value, mr_dataset_id) VALUES (%s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -593,10 +796,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(ECHO_TIME_ID) FROM ECHO_TIME")
 et_next_id = sourceCursor.fetchone()[0] + 1
 # Echo times linked to many dataset
+sourceCursor.execute("SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1")
+echo_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID 
-	FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
-	WHERE et.ECHO_TIME_ID IN 
-	(SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN mr_dataset md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+        FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
+        WHERE et.ECHO_TIME_ID IN %s""", [echo_times])
 echo_times = []
 et_ids = []
 for row in sourceCursor.fetchall():
@@ -614,7 +818,7 @@ print("Import echo_time: end")
 print("Import flip_angle: start")
 # Flip angles linked to only one dataset
 sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
+	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
 	GROUP BY fa.FLIP_ANGLE_ID HAVING countids = 1""")
 query = "INSERT INTO flip_angle (id, flip_angle_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -623,10 +827,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(FLIP_ANGLE_ID) FROM FLIP_ANGLE")
 fa_next_id = sourceCursor.fetchone()[0] + 1
 # Flip angles linked to many dataset
+sourceCursor.execute("SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1")
+flip_angles = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, md.DATASET_ID 
-	FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
-	WHERE fa.FLIP_ANGLE_ID IN 
-	(SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN mr_dataset md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
+	WHERE fa.FLIP_ANGLE_ID IN %s""", [flip_angles])
 flip_angles = []
 fa_ids = []
 for row in sourceCursor.fetchall():
@@ -644,7 +849,7 @@ print("Import flip_angle: end")
 print("Import inversion_time: start")
 # Inversion times linked to only one dataset
 sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
+	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
 	GROUP BY it.INVERSION_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO inversion_time (id, inversion_time_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -653,10 +858,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(INVERSION_TIME_ID) FROM INVERSION_TIME")
 it_next_id = sourceCursor.fetchone()[0] + 1
 # Inversion times linked to many dataset
+sourceCursor.execute("SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+inversion_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, md.DATASET_ID 
-	FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
-	WHERE it.INVERSION_TIME_ID IN 
-	(SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN mr_dataset md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
+	WHERE it.INVERSION_TIME_ID IN %s""", [inversion_times])
 inversion_times = []
 it_ids = []
 for row in sourceCursor.fetchall():
@@ -674,7 +880,7 @@ print("Import inversion_time: end")
 print("Import repetition_time: start")
 # Repetition times linked to only one dataset
 sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
+	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
 	GROUP BY rt.REPETITION_TIME_ID HAVING countids = 1""")
 query = "INSERT INTO repetition_time (id, repetition_time_value, mr_dataset_id) VALUES (%s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -683,10 +889,11 @@ targetConn.commit()
 sourceCursor.execute("SELECT MAX(REPETITION_TIME_ID) FROM REPETITION_TIME")
 rt_next_id = sourceCursor.fetchone()[0] + 1
 # Repetition times linked to many dataset
+sourceCursor.execute("SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1")
+repetition_times = tuple(itertools.chain(*sourceCursor.fetchall()))
 sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, md.DATASET_ID 
-	FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
-	WHERE rt.REPETITION_TIME_ID IN 
-	(SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN mr_dataset md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1)""")
+	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
+	WHERE rt.REPETITION_TIME_ID IN %s""", [repetition_times])
 repetition_times = []
 rt_ids = []
 for row in sourceCursor.fetchall():

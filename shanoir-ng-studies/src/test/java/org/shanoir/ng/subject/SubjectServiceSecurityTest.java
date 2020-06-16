@@ -39,7 +39,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -132,7 +131,7 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testEditAsExpert() throws ShanoirException {
-		assertAccessDenied(service::update, mockExisting);
+		assertAccessAuthorized(service::update, mockExisting);
 		
 		Subject subjectMock1 = buildSubjectMock(ENTITY_ID);
 		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_SEE_ALL);
@@ -209,7 +208,7 @@ public class SubjectServiceSecurityTest {
 		Subject newSubjectMock = buildSubjectMock(null);
 		assertAccessDenied(service::create, newSubjectMock);
 		
-		// Create subject 
+		// Create subject
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(9L));
 		given(studyRepository.findAll(Arrays.asList(new Long[] { 9L }))).willReturn(studiesMock);
@@ -251,12 +250,13 @@ public class SubjectServiceSecurityTest {
 		for (StudyUserRight right : rights) {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
+			studyUser.setUserName(LOGGED_USER_USERNAME);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);			
+			studyUserList.add(studyUser);
 		}
 		study.setStudyUserList(studyUserList);
-		return study;		
+		return study;
 	}
 	
 	private Subject buildSubjectMock(Long id) {
@@ -272,8 +272,12 @@ public class SubjectServiceSecurityTest {
 		subjectStudy.setSubject(mock);
 		subjectStudy.setStudy(study);
 		
-		if (study.getSubjectStudyList() == null) study.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		if (mock.getSubjectStudyList() == null) mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		if (study.getSubjectStudyList() == null) {
+			study.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
+		if (mock.getSubjectStudyList() == null) {
+			mock.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		}
 		study.getSubjectStudyList().add(subjectStudy);
 		mock.getSubjectStudyList().add(subjectStudy);
 	}
