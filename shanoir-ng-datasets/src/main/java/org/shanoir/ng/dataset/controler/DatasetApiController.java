@@ -19,16 +19,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -48,7 +43,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.dataset.service.DatasetUtils; 
+import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
@@ -64,6 +59,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -287,7 +283,7 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
 		}
-		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
@@ -307,9 +303,7 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-			@RequestParam(value = "format", required = false, defaultValue="dcm") String format,
-    		@ApiParam(value = "Decide if you want to download files directly or using tasks interface.", allowableValues = "true, false", defaultValue = "true") @Valid
-    		@RequestParam(value = "direct", required = false, defaultValue="true") boolean direct) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
@@ -318,7 +312,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		return massiveDownload(format, datasets, direct);
+		return massiveDownload(format, datasets);
 	}
 
 	@Override
@@ -335,10 +329,10 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByStudyId(studyId);
 
-		return massiveDownload(format, datasets, false);
+		return massiveDownload(format, datasets);
 	}
 
-	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets, boolean direct) throws EntityNotFoundException, RestServiceException, IOException {
+	public ResponseEntity<ByteArrayResource> massiveDownload(String format, List<Dataset> datasets) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 2: Check rights => Also filters datasets on rights
 		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
 		// STEP 3: Get the data
@@ -347,36 +341,31 @@ public class DatasetApiController implements DatasetApi {
 		String tmpFilePath = tmpDir + File.separator + "dataset-list";
 		File tmpFile = new File(tmpFilePath);
 		tmpFile.mkdirs();
+		
+		List<ShanoirEvent> events = new ArrayList<>();
 
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
+				LOG.info("treating dataset: " + dataset.getName());
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getName());
+				datasetFile.mkdirs();
 				List<URL> pathURLs = new ArrayList<>();
 				if ("dcm".equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile);
 				} else if ("nii".equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, tmpFile);
+					copyNiftiFilesForURLs(pathURLs, datasetFile);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
 				}
-				
-				if (direct) {
-					// Publish event to download files
-					
-					ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), tmpFile.getAbsolutePath(), ShanoirEvent.IN_PROGRESS);
-					eventService.publishEvent(event);
-
-					// TODO: Do something to delete temporary files ?
-					
-					// Return no content
-					return (ResponseEntity<ByteArrayResource>) ResponseEntity.noContent();
-				}
-				
+				ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getName() + " : " + format, ShanoirEvent.SUCCESS);
+				events.add(event);
 			}
 		} catch (IOException | MessagingException e) {
+			e.printStackTrace();
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
 		}
@@ -385,7 +374,27 @@ public class DatasetApiController implements DatasetApi {
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
 
-		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+		
+		long fileSize = FileUtils.sizeOf(zipFile);
+
+		// Nginx limit is set to 5Gb => Plit by dataset if file is bigger
+	
+		boolean fileIsTooBig = fileSize > 5000000000L;
+
+		if (fileIsTooBig) {
+			// Publish events to download files on by one
+			
+			for (ShanoirEvent event : events) {
+				// publish all events for every datasets
+				eventService.publishEvent(event);
+			}
+
+			// Here delete zip file only
+			FileUtils.deleteQuietly(zipFile);
+			FileUtils.deleteQuietly(tmpFile);
+			return new ResponseEntity<>(HttpStatus.PAYLOAD_TOO_LARGE);
+		}
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
@@ -414,7 +423,7 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(url.getPath());
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
-			Files.copy(srcFile.toPath(), destFile.toPath());
+			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
@@ -439,33 +448,6 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 
-	/**
-	 * Zip
-	 * 
-	 * @param sourceDirPath
-	 * @param zipFilePath
-	 * @throws IOException
-	 */
-	private void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
-		Path p = Paths.get(zipFilePath);
-		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-			Path pp = Paths.get(sourceDirPath);
-			try(Stream<Path> walker = Files.walk(pp)) {
-				walker.filter(path -> !path.toFile().isDirectory())
-				.forEach(path -> {
-					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-					try {
-						zos.putNextEntry(zipEntry);
-						Files.copy(path, zos);
-						zos.closeEntry();
-					} catch (IOException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				});
-			}
-			zos.finish();
-		}
-	}
 
 	@Override
 	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
@@ -546,7 +528,7 @@ public class DatasetApiController implements DatasetApi {
 			}
 
 			// 9. Create zip file
-			zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+			Utils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 			// Try to determine file's content type
 			String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());

@@ -24,6 +24,7 @@ export class Task extends Entity {
     status: number;
     message: string;
     progress: number;
+    objectId: number;
 
     service: TaskService = ServiceLocator.injector.get(TaskService);
 }

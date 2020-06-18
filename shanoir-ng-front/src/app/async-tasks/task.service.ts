@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
+import { HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -29,4 +29,20 @@ export class TaskService extends EntityService<Task> {
     getTasks(): Promise<Task[]> {
        return this.http.get<Task[]>(this.API_URL).toPromise();
     }
+
+    getTaskOfTypes(types: String[]): Promise<Task[]> {
+       const params = new HttpParams().set('types', types.join(','));
+       return this.http.get<Task[]>(this.API_URL + "/types", {params}).toPromise();
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
 }

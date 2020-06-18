@@ -34,6 +34,7 @@ import { ManufacturerService } from './acquisition-equipments/shared/manufacture
 import { AppComponent } from './app.component';
 import { routing } from './app.routing';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { DownloadTasksComponent } from './async-tasks/download-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -297,6 +298,7 @@ import { ServiceLocator } from './utils/locator.service';
         HelpMessageComponent,
         NotificationsComponent,
         AsyncTasksComponent,
+        DownloadTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent,

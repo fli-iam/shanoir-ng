@@ -36,44 +36,66 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 	@Autowired
 	ShanoirEventsService taskService;
 
-    public static final List<SseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
+	public static final List<SseEmitter> emitters = Collections.synchronizedList(new ArrayList<>());
 
 	@Override
 	public ResponseEntity<List<ShanoirEvent>> findTasks() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		String[] eventTypes = {ShanoirEventType.IMPORT_DATASET_EVENT, ShanoirEventType.DOWNLOAD_DATASETS_EVENT};
-		List<ShanoirEvent> taskList = taskService.getEventsByUserAndType(userId, eventTypes);
-		
-		// Get only event with last updates < 7 days
-		Date now = new Date();
-		Long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
- 		taskList = taskList.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
+		String[] eventTypes = {ShanoirEventType.IMPORT_DATASET_EVENT};
+		return findTasksByType(eventTypes);
+	}
 
- 		// Order by last update date
-		Comparator<ShanoirEvent> comparator = new Comparator<ShanoirEvent>() {
-			@Override
-			public int compare(ShanoirEvent event1, ShanoirEvent event2) {
-				return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
-			}
-		};
-		taskList.sort(comparator);
+	@Override
+	public ResponseEntity<List<ShanoirEvent>> findTasksByType (
+			@ApiParam(value = "types of events to retrieve", required=true) @Valid
+			@RequestParam(value = "types", required = true) String[] types) {
+		Long userId = KeycloakUtil.getTokenUserId();
+
+		List<ShanoirEvent> taskList = taskService.getEventsByUserAndType(userId, types);
+
+		taskList = filterByDateAndOrder(taskList, 7);
+
+		if (taskList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 
 		return new ResponseEntity<>(taskList, HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<ShanoirEvent>> findTasksByType(
-    		@ApiParam(value = "types of events to retrieve", required=true) @Valid
-    		@RequestParam(value = "types", required = true) List<String> types) {
-		
-		return null;
+	public ResponseEntity<SseEmitter> updateTasks() throws IOException {
+		SseEmitter emitter = new SseEmitter(-1L);
+		emitters.add(emitter);
+		emitter.onCompletion(() -> emitters.remove(emitter));
+		return new ResponseEntity<>(emitter,HttpStatus.OK);
 	}
 
-	@Override
-    public ResponseEntity<SseEmitter> updateTasks() throws IOException {
-        SseEmitter emitter = new SseEmitter(-1L);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        return new ResponseEntity<>(emitter,HttpStatus.OK);
-    }
+	/**
+	 * This method filter a list of event by dates (number of days before today) and order them
+	 * @param events the liost of events to filter / order
+	 * @param days the number of days before today we want the event
+	 * @return a filtered and ordered lsiot of events
+	 */
+	private List<ShanoirEvent> filterByDateAndOrder(List<ShanoirEvent> events, int days) {
+		if (events == null || events.isEmpty()) {
+			return Collections.emptyList();
+		}
+		// Get only event with last updates < 7 days
+		Date now = new Date();
+		Long nowMinusSevenDays = now.getTime() - days * DateUtils.MILLIS_PER_DAY;
+		events = events.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
+
+		// Order by last update date
+		Comparator<ShanoirEvent> comparator = new Comparator<ShanoirEvent>() {
+			@Override
+			public int compare(ShanoirEvent event1, ShanoirEvent event2) {
+				if (event1.getLastUpdate().equals(event2.getLastUpdate())) {
+					return 0;
+				}
+				return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
+			}
+		};
+		events.sort(comparator);
+
+		return events;
+	}
 }

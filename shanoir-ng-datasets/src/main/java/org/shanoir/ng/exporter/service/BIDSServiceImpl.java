@@ -424,7 +424,8 @@ public class BIDSServiceImpl implements BIDSService {
 				// TODO: center_id / comment / weigth / other examination things ?
 				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 
-			} catch (IOException exception) {
+			} catch (Exception exception) {
+				exception.printStackTrace();
 				LOG.error("File could not be treated: {}", srcFile.getAbsolutePath(), exception);
 			}
 		}

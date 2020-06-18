@@ -89,7 +89,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
         if (this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
-            this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});
+            this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '60px'});
         }
     }
 

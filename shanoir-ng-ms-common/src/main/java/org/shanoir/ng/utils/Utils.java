@@ -15,8 +15,15 @@
 package org.shanoir.ng.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.slf4j.Logger;
@@ -51,10 +58,12 @@ public class Utils {
 	}
 
 	public static boolean equalsIgnoreNull(Object o1, Object o2) {
-		if (o1 == null)
+		if (o1 == null) {
 			return o2 == null;
-		if (o2 == null)
+		}
+		if (o2 == null) {
 			return o1 == null;
+		}
 		if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
 			return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
 		}
@@ -93,7 +102,9 @@ public class Utils {
 		
 	public static <T> List<T> copyList(List<T> list) {
     	List<T> copy = new ArrayList<T>();
-    	for (T item : list) copy.add(item);
+    	for (T item : list) {
+			copy.add(item);
+		}
     	return copy;
     }
 
@@ -109,7 +120,9 @@ public class Utils {
 				}
 				i++;
 			}
-			if (deletedIndex > -1) list.remove(deletedIndex);
+			if (deletedIndex > -1) {
+				list.remove(deletedIndex);
+			}
 		}
 	}
 	
@@ -123,5 +136,33 @@ public class Utils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Zip the content of sourceDirPath file in zipFilePath file zip
+	 * 
+	 * @param sourceDirPath
+	 * @param zipFilePath
+	 * @throws IOException
+	 */
+	public static void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
+		Path p = Paths.get(zipFilePath);
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
+			Path pp = Paths.get(sourceDirPath);
+			try(Stream<Path> walker = Files.walk(pp)) {
+				walker.filter(path -> !path.toFile().isDirectory())
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+					try {
+						zos.putNextEntry(zipEntry);
+						Files.copy(path, zos);
+						zos.closeEntry();
+					} catch (IOException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				});
+			}
+			zos.finish();
+		}
 	}
 }

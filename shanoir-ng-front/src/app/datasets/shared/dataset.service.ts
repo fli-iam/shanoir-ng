@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse, HttpParams } from '@angular/common/http';
+import { HttpResponse, HttpParams, HttpErrorResponse} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -22,6 +22,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 
 @Injectable()
@@ -30,6 +31,7 @@ export class DatasetService extends EntityService<Dataset> {
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
 
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+    private msgService: MsgBoxService = ServiceLocator.injector.get(MsgBoxService);
 
     getEntityInstance(entity: Dataset) { 
         return AppUtils.getDatasetInstance(entity.type);
@@ -64,18 +66,24 @@ export class DatasetService extends EntityService<Dataset> {
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
             { observe: 'response', responseType: 'blob', params: params})
-            .toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
+            .toPromise().then(retour => {
+                    this.downloadIntoBrowser(retour);
             }
-        )
+        ).catch((err: HttpErrorResponse) => {
+            if (err.status == 413) {
+                this.msgService.log("error", "Downloaded file was too big. Please go to tasks menu to download datasets one by one.")
+            } else {
+                this.msgService.log("error", err["error"]);
+            }
+      });
+
     }
 
     download(dataset: Dataset, format: string): void {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         this.downloadToBlob(dataset.id, format).subscribe(
             response => {
-                this.downloadIntoBrowser(response);
+                    this.downloadIntoBrowser(response);
             }
         );
     }

@@ -50,7 +50,7 @@ public interface AsyncTaskApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<ShanoirEvent>> findTasksByType(
     		@ApiParam(value = "types of events to retrieve", required=true) @Valid
-    		@RequestParam(value = "types", required = true) List<String> types);
+    		@RequestParam(value = "types", required = true) String[] types);
 
 	@ApiOperation(value = "", notes = "Pushes a new event emitter to front", response = SseEmitter.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found tasks", response = SseEmitter.class),
