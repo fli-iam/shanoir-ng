@@ -87,6 +87,8 @@ public class ImporterApiControllerTest {
 
 	private static final String IMPORT_AS_BIDS = "/importer/importAsBids/";
 
+	private static final String GET_DICOM = "/importer/get_dicom/";
+
 	private Gson gson;
 	
 	@Autowired
@@ -420,7 +422,16 @@ public class ImporterApiControllerTest {
 		
 		// THEN all the datas are correctly imported
 	}
-	
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testGetDicomImageNoPath() throws Exception {
+		
+		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
+				.param("path", ""))
+		.andExpect(status().is(200));
+	}
+
 	@After
 	public void tearDown() throws IOException {
 	    File importDir = new File("/tmp/test-import-as-bids");

@@ -45,7 +45,7 @@ export class FinishEegImportComponent {
             private importDataService: ImportDataService) {
         
         // Initialize context    
-        if (!this.importDataService.inMemoryExtracted || !importDataService.eegImportJob) {
+        if (!importDataService.eegImportJob) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
