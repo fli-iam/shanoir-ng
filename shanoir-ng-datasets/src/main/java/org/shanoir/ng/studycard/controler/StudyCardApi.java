@@ -72,7 +72,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
@@ -96,7 +96,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCards();
 
 	@ApiOperation(value = "", notes = "Saves a new study card", response = StudyCard.class, tags = {})
