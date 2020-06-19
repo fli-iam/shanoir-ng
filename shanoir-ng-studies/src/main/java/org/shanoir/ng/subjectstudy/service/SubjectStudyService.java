@@ -42,7 +42,7 @@ public interface SubjectStudyService {
 	 * @return updated subject study.
 	 * @throws EntityNotFoundException 
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE')))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE')))")
 	SubjectStudy update(SubjectStudy subjectStudy) throws EntityNotFoundException;
 
 }
