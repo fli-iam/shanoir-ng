@@ -11,11 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component } from '@angular/core';
+import { SolrService } from '../../solr/solr.service';
 import { slideDown } from '../animations/animations';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { MsgBoxService } from '../msg-box/msg-box.service';
+
 
 
 @Component({
@@ -34,7 +36,10 @@ export class SideMenuComponent {
     private uploadOpened: boolean = true;
     private adminOpened: boolean = true;
 
-    constructor(private keycloakService: KeycloakService) {
+    constructor(
+            private keycloakService: KeycloakService, 
+            private solrService: SolrService,
+            private msgboxService: MsgBoxService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
         }
@@ -55,6 +60,12 @@ export class SideMenuComponent {
     
     canUserImportFromPACS(): boolean {
         return this.keycloakService.canUserImportFromPACS();
+    }
+
+    indexToSolr() {
+        this.solrService.indexAll().then(() => {
+            this.msgboxService.log('info', 'Indexation lanched !');
+        });
     }
 
 }
