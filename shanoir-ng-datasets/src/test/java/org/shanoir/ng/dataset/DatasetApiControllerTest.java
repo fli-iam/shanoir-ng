@@ -15,13 +15,14 @@
 package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.matchers.JUnitMatchers.*;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -40,14 +42,19 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -55,6 +62,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -71,6 +79,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(secure = false)
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+	    "maxDownloadSize=200",
+	})
 public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
@@ -96,9 +107,6 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private DatasetSecurityService datasetSecurityService;
-	
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -106,6 +114,12 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private BIDSServiceImpl bidsService;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
+    
 	@Before
 	public void setup() throws ShanoirException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
@@ -155,6 +169,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 2)
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
@@ -165,6 +180,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		DatasetMetadata metadata = new DatasetMetadata();
+		metadata.setName("datasetName");
+		dataset.setOriginMetadata(metadata );
+		dataset.setId(1L);
+	
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -187,6 +207,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 2)
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
@@ -197,6 +218,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		DatasetMetadata metadata = new DatasetMetadata();
+		metadata.setName("datasetName");
+		dataset.setOriginMetadata(metadata );
+		dataset.setId(1L);
+	
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -239,6 +265,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 2)
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
@@ -248,6 +275,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		DatasetMetadata metadata = new DatasetMetadata();
+		metadata.setName("datasetName");
+		dataset.setOriginMetadata(metadata );
+		dataset.setId(1L);
+		
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -270,5 +302,61 @@ public class DatasetApiControllerTest {
 	}
 
 		// THEN we expect a failure
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 2)
+	public void testMassiveDownloadByDatasetsIdFileTooBig() throws Exception {
+		// GIVEN a list of datasets to export
+		// Create a file with some text
+		
+		String format = "nii";
+		
+		File datasetFile = testFolder.newFile("testToBig.nii");
+		datasetFile.getParentFile().mkdirs();
+		datasetFile.createNewFile();
+		String repeated = String.join("", Collections.nCopies(100, "Ceci est un texte repete beaucoup plus long pour faire un fichier plus grand"));
+
+		FileUtils.write(datasetFile, repeated, Charset.forName("UTF8"));
+		
+		// Link it to datasetExpression in a dataset in a study
+		Dataset dataset = new MrDataset();
+		
+		DatasetMetadata metadata = new DatasetMetadata();
+		metadata.setName("datasetName");
+		dataset.setOriginMetadata(metadata );
+		dataset.setId(1L);
+		
+		DatasetExpression expr = new DatasetExpression();
+		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		expr.setDatasetFiles(Collections.singletonList(dsFile));
+		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+		dataset.setDatasetExpressions(datasetExpressions);
+
+		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
+
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+				.param("format", format)
+				.param("datasetIds", "1"))
+		.andExpect(status().isPayloadTooLarge());
+
+		// CHECK sent events
+		ArgumentCaptor<ShanoirEvent> eventCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
+
+		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
+		
+		ShanoirEvent event = eventCaptor.getValue();
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, event.getEventType());
+		assertEquals(dataset.getId().toString(), event.getObjectId());
+		// This is important as this is parsed to get the
+		assertEquals(dataset.getName() + " : " + format, event.getMessage());
+		assertEquals(ShanoirEvent.SUCCESS, event.getStatus());
+		
+
+		// THEN payload is too large but events are emited
 	}
 }

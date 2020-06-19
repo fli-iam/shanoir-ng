@@ -61,6 +61,7 @@ spring:
     multipart:
       maxFileSize: 5000Mb
       maxRequestSize: 5000Mb
+maxDownloadSize: 5000000000
 front.server:
   address: http://shanoir-ng-nginx/shanoir-ng/
   url: http://shanoir-ng-nginx

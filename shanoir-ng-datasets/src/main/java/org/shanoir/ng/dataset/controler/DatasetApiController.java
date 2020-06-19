@@ -136,6 +136,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
+	@Value("${maxDownloadSize}")
+	private long maxFileSize;
+
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	@org.springframework.beans.factory.annotation.Autowired
@@ -378,9 +381,9 @@ public class DatasetApiController implements DatasetApi {
 		
 		long fileSize = FileUtils.sizeOf(zipFile);
 
-		// Nginx limit is set to 5Gb => Plit by dataset if file is bigger
+		// Nginx limit is set to 5Gb => split by dataset if file is bigger
 	
-		boolean fileIsTooBig = fileSize > 5000000000L;
+		boolean fileIsTooBig = fileSize > maxFileSize;
 
 		if (fileIsTooBig) {
 			// Publish events to download files on by one
@@ -398,9 +401,6 @@ public class DatasetApiController implements DatasetApi {
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
-		
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, null, KeycloakUtil.getTokenUserId(), "File ready", ShanoirEvent.SUCCESS);
-		eventService.publishEvent(event);
 
 		FileUtils.deleteDirectory(tmpFile);
 
