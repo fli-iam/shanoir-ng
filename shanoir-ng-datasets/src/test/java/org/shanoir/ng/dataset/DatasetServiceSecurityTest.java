@@ -164,7 +164,7 @@ public class DatasetServiceSecurityTest {
 		Pageable pageable = new PageRequest(0, 10);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
-		given(datasetRepository.findByStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList));
+		given(datasetRepository.findByDatasetAcquisitionExaminationStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		
@@ -175,7 +175,7 @@ public class DatasetServiceSecurityTest {
 		MrDataset ds21 = mockDataset(2L); ds21.getDatasetAcquisition().getExamination().setStudyId(1L); dsList2.add(ds21);
 		MrDataset ds31 = mockDataset(3L); ds31.getDatasetAcquisition().getExamination().setStudyId(1L); dsList2.add(ds31);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList2));
-		given(datasetRepository.findByStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList2));
+		given(datasetRepository.findByDatasetAcquisitionExaminationStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList2));
 		
 		assertAccessAuthorized(service::findPage, pageable);
 	}

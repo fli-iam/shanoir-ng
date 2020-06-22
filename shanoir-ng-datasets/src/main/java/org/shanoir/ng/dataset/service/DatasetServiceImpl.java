@@ -117,13 +117,13 @@ public class DatasetServiceImpl implements DatasetService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
-			return repository.findByStudyIdIn(studyIds, pageable);
+			return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
 		}
 	}
 
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
-		return Utils.toList(repository.findByStudyId(studyId));
+		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
 	}
 
 }
