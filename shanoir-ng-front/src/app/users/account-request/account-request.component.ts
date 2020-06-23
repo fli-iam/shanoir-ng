@@ -15,6 +15,7 @@
 import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
+import * as AppUtils from '../../utils/app.utils';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
@@ -74,9 +75,8 @@ export class AccountRequestComponent {
     }
 
     cancelAccountRequest(): void {
-        window.location.href = process.env.LOGOUT_REDIRECT_URL;
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
-
 
     formErrors(field: string): any {
         if (!this.form) return;

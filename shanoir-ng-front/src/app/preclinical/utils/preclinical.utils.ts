@@ -11,9 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import * as AppUtils from '../../utils/app.utils';
 
 // PRECLINICAL Rest Service
-export const PRECLINICAL_API_ROOT_URL:string = process.env.BACKEND_API_PRECLINICAL_MS_URL;
+export const PRECLINICAL_API_ROOT_URL:string = AppUtils.BACKEND_API_PRECLINICAL_MS_URL;
 
 //Subjects http api
 export const PRECLINICAL_API_SUBJECTS_URL:string = PRECLINICAL_API_ROOT_URL + '/subject';
