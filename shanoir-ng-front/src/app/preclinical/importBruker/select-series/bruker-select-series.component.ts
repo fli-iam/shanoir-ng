@@ -101,6 +101,6 @@ export class BrukerSelectSeriesComponent {
     }
 
     private next() {
-        this.router.navigate(['importsBruker/context']);
+        this.router.navigate(['imports/brukercontext']);
     }
 }
