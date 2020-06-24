@@ -186,6 +186,11 @@ public class ImporterService {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
+			
+			// TODO: put studyCard in bruker import
+			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
+			}
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionRepository.save(datasetAcquisition);
 			long startTime = System.currentTimeMillis();

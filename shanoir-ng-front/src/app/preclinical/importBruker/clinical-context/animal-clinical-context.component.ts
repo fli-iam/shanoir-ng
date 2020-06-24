@@ -441,7 +441,7 @@ export class AnimalClinicalContextComponent implements OnDestroy {
     }
 
     private next() {
-        this.router.navigate(['importsBruker/finish']);
+        this.router.navigate(['imports/brukerfinish']);
     }
 
     private compareEntities(e1: Entity, e2: Entity) : boolean {

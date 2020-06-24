@@ -111,7 +111,6 @@ import { FileUploadComponent } from './preclinical/fileupload/fileupload.compone
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
-import { ImportBrukerComponent } from './preclinical/importBruker/importBruker.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
@@ -123,7 +122,6 @@ import { PathologyModelService } from './preclinical/pathologies/pathologyModel/
 import { SubjectPathologyFormComponent } from './preclinical/pathologies/subjectPathology/edit/subjectPathology-form.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subjectPathology-list.component';
 import { SubjectPathologyService } from './preclinical/pathologies/subjectPathology/shared/subjectPathology.service';
-import { preclinicalRouting } from './preclinical/preclinical-routing.module';
 import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
 import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
 import { ReferenceService } from './preclinical/reference/shared/reference.service';
@@ -218,7 +216,6 @@ import { ServiceLocator } from './utils/locator.service';
         ReactiveFormsModule,
         routing,
         NgxJsonViewerModule,
-    	preclinicalRouting
     ],
     declarations: [
         AccountRequestComponent,
@@ -346,7 +343,6 @@ import { ServiceLocator } from './utils/locator.service';
     	PhysiologicalDataFormComponent,
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
-    	ImportBrukerComponent, 
     	BrukerUploadComponent,
         AnimalClinicalContextComponent, 
         BrukerSelectSeriesComponent, 

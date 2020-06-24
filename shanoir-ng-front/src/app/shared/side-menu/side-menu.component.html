@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li (click)="uploadOpened = !uploadOpened"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="uploadOpened" class="sub-menu" [@slideDown]="uploadOpened">
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
-        <li routerLink="/importsBruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
+        <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
         <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-hat-wizard"></i>From EEG archives</li>
         <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li>
         <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
