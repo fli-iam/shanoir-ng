@@ -11,12 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SolrService } from '../../solr/solr.service';
 import { slideDown } from '../animations/animations';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { MsgBoxService } from '../msg-box/msg-box.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 
 
@@ -27,7 +28,7 @@ import { MsgBoxService } from '../msg-box/msg-box.service';
     animations: [ slideDown ]
 })
 
-export class SideMenuComponent {
+export class SideMenuComponent implements OnInit {
 
     private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     private username: string = "";
@@ -35,14 +36,20 @@ export class SideMenuComponent {
     private eqOpened: boolean = true;
     private uploadOpened: boolean = true;
     private adminOpened: boolean = true;
+    private tasksOpened: boolean = false;
 
     constructor(
             private keycloakService: KeycloakService, 
             private solrService: SolrService,
-            private msgboxService: MsgBoxService) {
+            private msgboxService: MsgBoxService,
+            public notificationsService: NotificationsService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
         }
+    }
+
+    ngOnInit(): void {
+        this.notificationsService.refresh();
     }
 
     logout(event: Event): void {

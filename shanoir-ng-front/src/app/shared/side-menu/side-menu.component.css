@@ -28,5 +28,8 @@ a:hover, a:active { color: white; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
 .chevron svg { margin-top: 7px; }
+.notifications {  }
 
 .user, .logo, .menu-list { float: right; }
+
+progress-bar { width: 100px; }

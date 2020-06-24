@@ -28,6 +28,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <ul class="menu-list">
+    <li (click)="tasksOpened = !tasksOpened" class="notifications">
+        <button class="awesome" (click)="notificationsService.refresh()" >
+            <i class="fas fa-sync"></i>
+        </button>
+        <span>
+            <span class="notif">
+                <i class="fas fa-hourglass-half"></i>
+                <span class="number" [class.highlight]="">{{notificationsService.nbProcess}}</span>
+            </span>
+            <span class="notif">
+                <i class="fas fa-flag-checkered"></i>
+                <span class="number" [class.highlight]="">{{notificationsService.nbDone}}</span>
+            </span>
+        </span>
+        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
+        <li *ngFor="let item of notificationsService.tasksInProgress">
+            {{item.eventType == 'importDataset.event' ? 'Import in progress': item.message}}
+            <progress-bar progress="{{item.progress}}"></progress-bar>
+        </li>
+        <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li>
+    </div>
 
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fab fa-searchengin"></i>Solr search</li>
