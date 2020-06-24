@@ -247,7 +247,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.centerOptions.push(option);
             }
         }
-        return end;
+        return end.then(() => this.onContextChange());
     }
 
     private onSelectStudyCard(): void {
@@ -263,6 +263,8 @@ export class ClinicalContextComponent implements OnDestroy {
             this.niftiConverter = this.studycard.niftiConverter;
             this.onSelectNifti();
         }
+        this.importDataService.contextBackup.studyCard = this.studycard;
+        this.onContextChange();
     }
 
     onToggleUseStudyCard() {
@@ -293,6 +295,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.acquisitionEquipmentOptions.push(option);
             }
         }
+        this.onContextChange();
     }
 
     private onSelectAcquisitonEquipment(): void {
@@ -303,6 +306,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 .findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
         }
+        this.onContextChange();
     }
 
     private onSelectSubject(): void {
@@ -313,12 +317,15 @@ export class ClinicalContextComponent implements OnDestroy {
             .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
             .then(examinations => this.examinations = examinations);
         }
+        this.onContextChange();
     }
 
     private onSelectExam(): void {
+        this.onContextChange();
     }
 
     private onSelectNifti(): void {
+        this.onContextChange();
     }
 
     private onContextChange() {
