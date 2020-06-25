@@ -14,7 +14,7 @@
 
 import { Pipe, PipeTransform } from "@angular/core";
 
-import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
+import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
 import { ManufacturerModel } from './manufacturer-model.model';
 
 @Pipe({ name: "manufModelLabel" })

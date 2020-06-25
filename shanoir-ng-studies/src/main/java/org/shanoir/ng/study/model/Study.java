@@ -114,7 +114,7 @@ public class Study extends HalEntity {
 
 	/** Relations between the investigators, the centers and the studies. */
 	@NotEmpty
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyCenter> studyCenterList;
 
 	@NotNull

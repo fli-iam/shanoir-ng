@@ -3,7 +3,7 @@
     <#if section = "title">
         ${msg("errorTitle")}
     <#elseif section = "header">
-        ${msg("errorTitleHtml")}
+        <@errorTitleHtml?interpret />
     <#elseif section = "form">
         <div id="kc-error-message">
             <p class="instruction">${message.summary}</p>

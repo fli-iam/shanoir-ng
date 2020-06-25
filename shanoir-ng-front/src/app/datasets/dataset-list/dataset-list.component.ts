@@ -62,8 +62,8 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
             {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
-            {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => this.getSubjectName(params.data.subjectId)},
-            {headerName: "Study", field: "studyId", cellRenderer: (params: any) => this.getStudyName(params.data.studyId)},
+            {headerName: "Subject", field: "subject.name"},
+            {headerName: "Study", field: "study.name"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
@@ -81,22 +81,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         });
     }
 
-    private getSubjectName(id: number): string {
-        if (!this.subjects || this.subjects.length == 0 || !id) return id ? id+'' : '';
-        for (let subject of this.subjects) { 
-            if (subject.id == id) return subject.name;
-        }
-        throw new Error('Cannot find subject for id = ' + id);
-    }
-    
-    private getStudyName(id: number): string {
-        if (!this.studies || this.studies.length == 0 || !id) return id+'';
-        for (let study of this.studies) {
-            if (study.id == id) return study.name;
-        }
-        throw new Error('Cannot find study for id = ' + id);
-    }
-
     getCustomActionsDefs(): any[] {
         return [];
     }
@@ -111,11 +95,10 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     canEdit(ds: Dataset): boolean {
-        let study: Study = this.studies.filter(study => study.id == ds.studyId)[0];
         return this.keycloakService.isUserAdmin() || (
-            study &&
-            study.studyUserList && 
-            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
+            ds.study &&
+            ds.study.studyUserList && 
+            ds.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
     }
 

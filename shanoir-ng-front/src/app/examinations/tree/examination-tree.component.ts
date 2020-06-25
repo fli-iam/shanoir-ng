@@ -11,14 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { Examination } from '../shared/examination.model';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { ExaminationService } from '../shared/examination.service'
+import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination-tree',
@@ -33,8 +29,6 @@ export class ExaminationTreeComponent {
     }
 
     @Input() examination: Examination;
-    public fileIconPath: string = ImagesUrlUtil.FILE_ICON_PATH;
-    public folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
 
     downloadFile(file) {
         this.examinationService.downloadFile(file, this.examination.id);

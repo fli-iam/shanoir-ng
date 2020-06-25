@@ -38,11 +38,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable).then(function(page) {
-                // Filter only preclinical exams
-                page.content = page.content.filter(exam => !exam.preclinical);
-                return page;
-            });
+        return this.examinationService.getPage(pageable).then(page => {
+            return page;
+        });
     }
 
     getColumnDefs(): any[] {
@@ -53,27 +51,20 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             return null;
         };
         let colDef: any[] = [
-            { headerName: "Examination id", field: "id" },
             {
-                headerName: "Subject", field: "subjectId", 
-                cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""
-            },
-            {
-                headerName: "Examination date", field: "examinationDate", type: "date",
-                cellRenderer: function (params: any) {
+                headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
+                    return (params.data.subject) ? params.data.subject.name : '';
+                }
+            },{
+                headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
-                },
-                width: "100px"
-            },
-            {
-                headerName: "Research study", field: "studyId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id]),
-                cellRenderer: (params: any) => (params.data.study) ? params.data.study.name : ""
-            },
-            {
-                headerName: "Center", field: "centerId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id]),
-                cellRenderer: (params: any) => (params.data.center) ? params.data.center.name : ""
+                }, width: "100px"
+            },{
+                headerName: "Research study", field: "study.name",
+                route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
+            },{
+                headerName: "Center", field: "center.name",
+                route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
         return colDef;       

@@ -18,8 +18,6 @@ import java.io.Serializable;
 import java.util.List;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * @author atouboul
  *
@@ -28,47 +26,34 @@ public class ImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
 
-	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
-    @JsonProperty("fromShanoirUploader")
     private boolean fromShanoirUploader;
 
-    @JsonProperty("fromPacs")
     private boolean fromPacs;
-    
-	@JsonProperty("workFolder")
+
 	private String workFolder;
 
-	@JsonProperty("patients")
     private List<Patient> patients;
     
-    @JsonProperty("examinationId")
     private Long examinationId;
     
-    @JsonProperty("frontStudyId")
-    private Long frontStudyId;
+    private Long studyCardId;
     
-	@JsonProperty("studyCardName")
+    private Long studyId;
+
 	private String studyCardName;
 	
-	// todo: remove this later, when front end uses StudyCards
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 	
-	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
     
-    @JsonProperty("frontConverterId")
-    private Long frontConverterId;
+    private Long converterId;
     
-    @JsonProperty("archive")
     private String archive;
 
-	@JsonProperty("subjectName")
 	private String subjectName;
 
-	@JsonProperty("studyName")
 	private String studyName;
     
 	public String getArchive() {
@@ -78,6 +63,7 @@ public class ImportJob implements Serializable {
 	public void setArchive(final String archive) {
 		this.archive = archive;
 	}
+	
 	
 	public boolean isFromDicomZip() {
 		return fromDicomZip;
@@ -120,12 +106,28 @@ public class ImportJob implements Serializable {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+    public String getWorkFolder() {
+		return workFolder;
 	}
 
-	public void setFrontStudyId(final Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setWorkFolder(String workFolder) {
+		this.workFolder = workFolder;
+	}
+
+	public Long getStudyCardId() {
+		return studyCardId;
+	}
+
+	public void setStudyCardId(Long studyCardId) {
+		this.studyCardId = studyCardId;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(final Long StudyId) {
+		this.studyId = StudyId;
 	}
 
 	public String getStudyCardName() {
@@ -136,20 +138,20 @@ public class ImportJob implements Serializable {
 		this.studyCardName = studyCardName;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getacquisitionEquipmentId() {
+		return acquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setacquisitionEquipmentId(final Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 
-	public Long getFrontConverterId() {
-		return frontConverterId;
+	public Long getConverterId() {
+		return converterId;
 	}
 
-	public void setFrontConverterId(Long frontConverterId) {
-		this.frontConverterId = frontConverterId;
+	public void setConverterId(Long ConverterId) {
+		this.converterId = ConverterId;
 	}
 
     public String getAnonymisationProfileToUse() {
@@ -158,14 +160,6 @@ public class ImportJob implements Serializable {
 
 	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
 		this.anonymisationProfileToUse = anonymisationProfileToUse;
-	}
-
-	public String getWorkFolder() {
-		return workFolder;
-	}
-
-	public void setWorkFolder(final String workFolder) {
-		this.workFolder = workFolder;
 	}
 
 	public String getSubjectName() {
@@ -184,3 +178,4 @@ public class ImportJob implements Serializable {
 		this.studyName = studyName;
 	}
 }
+

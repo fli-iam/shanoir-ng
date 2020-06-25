@@ -11,17 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { CoordSystems } from '../../enum/coord-system.enum';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
 import { slideDown } from '../../shared/animations/animations';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
@@ -31,9 +36,8 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { TableComponent } from '../../shared/components/table/table.component';
-import { Event }from '../../datasets/dataset/eeg/dataset.eeg.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { Option } from '../../shared/select/select.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 
 @Component({
@@ -65,6 +69,12 @@ export class EegClinicalContextComponent implements OnInit {
 
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;
+
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
+    ];
     
     constructor(
             private studyService: StudyService,
@@ -72,7 +82,9 @@ export class EegClinicalContextComponent implements OnInit {
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            public acqEqPipe: AcquisitionEquipmentPipe,
+            public subjectExaminationPipe: SubjectExaminationPipe) {
 
         // No channels => no import
         if (!this.importDataService.eegImportJob.datasets ) {
@@ -254,7 +266,7 @@ export class EegClinicalContextComponent implements OnInit {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.center, this.acquisitionEquipment,
+        return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
             this.subject, this.examination, null, this.coordsystem);
     }
 
@@ -369,10 +381,6 @@ export class EegClinicalContextComponent implements OnInit {
     private showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
     }
-    
-    public get systemCoordKeys() {
-        return Object.keys(CoordSystems);
-    }
 
     get valid(): boolean {
         let context = this.getContext();
@@ -395,23 +403,4 @@ export class EventContext {
     public description: string;
     public number: number;
     public dataset_name: string;
-}
-
-export enum CoordSystems {
-    ACPC = "ACPC",
-    Allen= "Allen",     
-    Analyze= "Analyze",  
-    BTi_4D= "BTi/4D",
-    CTF_MRI= "CTF MRI", 
-    CTF_gradiometer = "CTF gradiometer",
-    CapTrak= "CapTrak",
-    Chieti= "Chieti",
-    DICOM= "DICOM",
-    FreeSurfer= "FreeSurfer",  
-    MNI= "MNI",
-    NIfTI= "NIfTI",
-    Neuromag_Elekta= "Neuromag/Elekta",
-    Paxinos_Franklin= "Paxinos-Franklin",
-    Talairach_Tournoux= "Talairach-Tournoux", 
-    Yokogawa= "Yokogawa"
 }

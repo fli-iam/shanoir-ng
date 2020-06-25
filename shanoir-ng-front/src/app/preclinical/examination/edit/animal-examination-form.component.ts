@@ -161,15 +161,15 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     private updateExamForSave(): void{
-        this.examination.centerId = this.examination.center.id;
-        this.examination.studyId = this.examination.study.id;
-        this.examination.subjectId = this.examination.subject.id;
+        this.examination.center = this.examination.center;
+        this.examination.study = this.examination.study;
+        this.examination.subject = this.examination.subject;
     }
     
     private getCenters(): void {
         this.centers = [];
         this.centerService
-            .getCentersNamesForExamination()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
             });

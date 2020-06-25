@@ -47,6 +47,7 @@ import { Frequency } from '../../shared/enum/frequency';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
+import { Option } from '../../../shared/select/select.component';
 
 @Component({
     selector: 'animalSubject-form',
@@ -84,6 +85,17 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     differ: KeyValueDiffer<string, any>;
 
+    catOptions: Option<ImagedObjectCategory>[] = [
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.LIVING_HUMAN_BEING, 'Living human being'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.HUMAN_CADAVER, 'Human cadaver'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.ANATOMICAL_PIECE, 'Anatomical piece')
+    ];
+
+    genderOptions: Option<string>[] = [
+        new Option<string>('F', 'Female'),
+        new Option<string>('M', 'Male'),
+    ];
 
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,

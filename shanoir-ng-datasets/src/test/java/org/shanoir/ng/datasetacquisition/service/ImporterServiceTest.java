@@ -121,9 +121,9 @@ public class ImporterServiceTest {
 		dataset.setChannels(Collections.singletonList(chan));
 		dataset.setEvents(Collections.singletonList(event));
 		importJob.setSubjectId(Long.valueOf(1));
-		importJob.setFrontStudyId(Long.valueOf(1));
+		importJob.setStudyId(Long.valueOf(1));
 		importJob.setExaminationId(Long.valueOf(1));
-		importJob.setFrontAcquisitionEquipmentId(Long.valueOf(1));
+		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName("What about us");
 		dataset.setName("Charles Trenet");
 		importJob.setWorkFolder("Julien Clerc");

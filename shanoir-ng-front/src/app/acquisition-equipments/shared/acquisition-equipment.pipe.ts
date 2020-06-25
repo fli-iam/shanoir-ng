@@ -15,13 +15,13 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 import { AcquisitionEquipment } from "./acquisition-equipment.model";
-import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
+import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
 import { ManufacturerModel } from './manufacturer-model.model';
 
 @Pipe({ name: "acqEqptLabel" })
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
-    transform(acqEqpt: AcquisitionEquipment) {
+    transform(acqEqpt: AcquisitionEquipment): string {
         if (acqEqpt && acqEqpt.manufacturerModel) {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")

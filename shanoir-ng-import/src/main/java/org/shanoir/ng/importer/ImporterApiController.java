@@ -14,12 +14,16 @@
 
 package org.shanoir.ng.importer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -76,9 +80,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Controller;
@@ -133,6 +139,12 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
+
+	/** The Constant KB. */
+	private static final int KB = 1024;
+
+	/** The Constant BUFFER_SIZE. */
+	private static final int BUFFER_SIZE = 10 * KB;
 
 	@Value("${ms.url.shanoir-ng-datasets-eeg}")
 	private String datasetsMsUrl;
@@ -789,7 +801,7 @@ public class ImporterApiController implements ImporterApi {
 		 */
 		ExStudy exStudy = exchange.getExStudy();
 		if (exStudy != null && exStudy.getStudyId() != null) {
-			importJob.setFrontStudyId(exStudy.getStudyId());
+			importJob.setStudyId(exStudy.getStudyId());
 			ExStudyCard exStudyCard = exStudy.getExStudyCards().get(0);
 			importJob.setStudyCardName(exStudyCard.getName());
 			int i = 0;
@@ -905,8 +917,8 @@ public class ImporterApiController implements ImporterApi {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
-			CommonIdsDTO idsDTO = new CommonIdsDTO(null, sid.getFrontStudyId(), null,
-					sid.getFrontAcquisitionEquipmentId());
+			CommonIdsDTO idsDTO = new CommonIdsDTO(null, sid.getStudyId(), null,
+					sid.getAcquisitionEquipmentId());
 			final HttpEntity<CommonIdsDTO> requestBody = new HttpEntity<>(idsDTO, KeycloakUtil.getKeycloakHeader());
 			// Post to dataset MS to finish import and create associated datasets
 			ResponseEntity<CommonIdNamesDTO> response = restTemplate.exchange(studiesCommonMsUrl, HttpMethod.POST,
@@ -917,10 +929,10 @@ public class ImporterApiController implements ImporterApi {
 			// This is not necessary if we further use the studyCard
 			if (response.getBody().getEquipement() == null) {
 				throw new ShanoirException(
-						"Equipement with ID " + sid.getFrontAcquisitionEquipmentId() + " does not exists.");
+						"Equipement with ID " + sid.getAcquisitionEquipmentId() + " does not exists.");
 			}
 			if (response.getBody().getStudy() == null) {
-				throw new ShanoirException("Study with ID " + sid.getFrontStudyId() + " does not exists.");
+				throw new ShanoirException("Study with ID " + sid.getStudyId() + " does not exists.");
 			}
 			// Subject based on folder name
 			Long subjectId = getSubjectIdByName(subjectName, participants);
@@ -954,8 +966,8 @@ public class ImporterApiController implements ImporterApi {
 			job = entity.getBody();
 
 			// Construire l'arborescence
-			job.setFrontAcquisitionEquipmentId(sid.getFrontAcquisitionEquipmentId());
-			job.setFrontStudyId(sid.getFrontStudyId());
+			job.setAcquisitionEquipmentId(sid.getAcquisitionEquipmentId());
+			job.setStudyId(sid.getStudyId());
 
 			job.setFromPacs(false);
 			job.setFromShanoirUploader(false);
@@ -982,7 +994,7 @@ public class ImporterApiController implements ImporterApi {
 				// Construct DTO
 				examDTO.setCenter(new IdName(Long.valueOf(1), null));
 				examDTO.setPreclinical(false); // Pour le moment on fait que du DICOM
-				examDTO.setStudy(new IdName(sid.getFrontStudyId(), response.getBody().getStudy().getName()));
+				examDTO.setStudy(new IdName(sid.getStudyId(), response.getBody().getStudy().getName()));
 				examDTO.setSubject(new IdName(subjectId, subjectName));
 				examDTO.setExaminationDate(job.getPatients().get(0).getStudies().get(0).getStudyDate());
 				examDTO.setComment(job.getPatients().get(0).getStudies().get(0).getStudyDescription());
@@ -1031,4 +1043,42 @@ public class ImporterApiController implements ImporterApi {
 		return null;
 	}
 
+	/**
+	 * This methods returns a dicom file
+	 * 
+	 * @param path
+	 *            the dicom file path
+	 * @throws ShanoirException
+	 *             when something gets wrong during the import
+	 * @throws IOException
+	 *             when IO fails
+	 * @throws RestServiceException
+	 */
+	@Override
+	public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
+			throws RestServiceException, IOException {
+
+		final File userImportDir = getUserImportDir();
+		String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
+		URL url = new URL("file:///" + pathInfo);
+		final URLConnection uCon = url.openConnection();
+		final InputStream is = uCon.getInputStream();
+
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		int nRead;
+		byte[] data = new byte[BUFFER_SIZE];
+		while ((nRead = is.read(data, 0, data.length)) != -1) {
+			buffer.write(data, 0, nRead);
+		}
+	 
+		buffer.flush();
+		byte[] byteArray = buffer.toByteArray();
+		
+		ByteArrayResource resource = new ByteArrayResource(byteArray);
+
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType("application/dicom"))
+				.contentLength(uCon.getContentLength())
+				.body(resource);
+	}
 }

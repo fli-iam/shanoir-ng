@@ -129,6 +129,7 @@ public class ImporterService {
 			} else {
 				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
+
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getFrontStudyId() + ")"
@@ -187,6 +188,11 @@ public class ImporterService {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
+			
+			// TODO: put studyCard in bruker import
+			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
+			}
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionRepository.save(datasetAcquisition);
 			long startTime = System.currentTimeMillis();
@@ -243,7 +249,7 @@ public class ImporterService {
 			Examination examination = examinationService.findById(importJob.getExaminationId());
 
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -330,7 +336,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				datasetToCreate.setStudyId(importJob.getFrontStudyId());
+				//datasetToCreate.setStudyId(importJob.getStudyId());
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());

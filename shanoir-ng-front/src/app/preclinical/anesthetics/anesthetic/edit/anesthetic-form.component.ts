@@ -33,6 +33,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { Option } from '../../../../shared/select/select.component';
 
 @Component({
     selector: 'anesthetic-form',
@@ -46,10 +47,10 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
     @ViewChild('ingredientsTable') table: TableComponent; 
 
-    private anestheticTypes: Enum[] = [];
+    AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    private isAnestheticUnique: Boolean = true;
+    isAnestheticUnique: Boolean = true;
     names: Reference[];
     units: Reference[];
 
@@ -82,7 +83,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -106,7 +106,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -133,7 +132,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.createColumnDefs();
@@ -188,12 +186,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeIngredient(item) });
         }
-    }
-
-    
-
-    getEnum(): void {
-        this.anestheticTypes = this.enumUtils.getEnumArrayFor('AnestheticType');
     }
 
     loadUnits(){

@@ -87,6 +87,8 @@ public class ImporterApiControllerTest {
 
 	private static final String IMPORT_AS_BIDS = "/importer/importAsBids/";
 
+	private static final String GET_DICOM = "/importer/get_dicom/";
+
 	private Gson gson;
 	
 	@Autowired
@@ -141,7 +143,7 @@ public class ImporterApiControllerTest {
 	    	if (importJson) {
 		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
 		    	importJsonFile.createNewFile();
-		    	FileUtils.write(importJsonFile, "{\"frontStudyId\": 1,\"frontAcquisitionEquipmentId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
+		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"acquisitionEquipmentId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
 	    	}
 	    }
 	    File importZip = new File("/tmp/test-import-as-bids.zip");
@@ -420,7 +422,16 @@ public class ImporterApiControllerTest {
 		
 		// THEN all the datas are correctly imported
 	}
-	
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testGetDicomImageNoPath() throws Exception {
+		
+		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
+				.param("path", ""))
+		.andExpect(status().is(200));
+	}
+
 	@After
 	public void tearDown() throws IOException {
 	    File importDir = new File("/tmp/test-import-as-bids");
