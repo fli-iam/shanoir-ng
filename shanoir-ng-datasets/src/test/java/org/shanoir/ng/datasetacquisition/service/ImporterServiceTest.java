@@ -195,7 +195,7 @@ public class ImporterServiceTest {
 		importJob.setExaminationId(Long.valueOf(1));
 		importJob.setSubjectName("subjectName");
 		importJob.setStudyName("studyName");
-		importJob.setFrontStudyId(1L);
+		importJob.setStudyId(1L);
 		
 		Examination examination = new Examination();
 		examination.setId(2L);
