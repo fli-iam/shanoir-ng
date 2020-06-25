@@ -36,7 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Service
 public class RabbitMQStudiesService {
-	
+
 	@Autowired
 	private StudyRepository studyRepo;
 
@@ -47,24 +47,23 @@ public class RabbitMQStudiesService {
 	 * @throws JsonProcessingException
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-	        value = @Queue(value = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, durable = "true"),
-	        exchange = @Exchange(value = RabbitMQConfiguration.STUDY_ADMIN_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))
+			value = @Queue(value = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_ADMIN_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))
 	@Transactional
 	public List<Long> manageAdminsStudy(String studyId) throws JsonProcessingException {
 		try {
-		Study study = studyRepo.findOne(Long.valueOf(studyId));
-		if (study == null) {
-			return Collections.emptyList();
-		}
-		// Filter administrators and map to get only IDs
-		List<Long> ids = study.getStudyUserList().stream()
-				.filter(studyUser -> studyUser.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE) && studyUser.isReceiveAnonymizationReport())
-				.map(studyUser -> studyUser.getId())
-				.collect(Collectors.toList());
-		return ids;
+			Study study = studyRepo.findOne(Long.valueOf(studyId));
+			if (study == null) {
+				return Collections.emptyList();
+			}
+			// Filter administrators and map to get only IDs
+			List<Long> ids = study.getStudyUserList().stream()
+					.filter(studyUser -> studyUser.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE) && studyUser.isReceiveAnonymizationReport())
+					.map(studyUser -> studyUser.getId())
+					.collect(Collectors.toList());
+			return ids;
 		} catch (Exception e) {
-			e.printStackTrace();
 			return Collections.emptyList();
 		}
 	}

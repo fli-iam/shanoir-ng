@@ -398,8 +398,7 @@ public class EmailServiceImpl implements EmailService {
 			List<Long> response =  (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, studyId);
 			return response;
 		} catch (Exception e) {
-			// Could not do the thing
-			e.printStackTrace();
+			// Cannot get administrators, return empty list
 			return Collections.emptyList();
 		}
 	}
