@@ -184,7 +184,7 @@ export class Step {
     public entity: any;
     public data: any = {};
     public importStart: boolean = false;
-    public importMode: 'DICOM' | 'PACS';
+    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
 
     private onSave(): Subject<any> {
         this.subscribers++;
