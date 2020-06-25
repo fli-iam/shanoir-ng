@@ -132,7 +132,7 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage(importJob.getStudyName() + "(" + importJob.getFrontStudyId() + ")"
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
 			+": Successfully created datasets for subject " + importJob.getSubjectName()
 			+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
