@@ -29,9 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li (click)="tasksOpened = !tasksOpened" class="notifications">
-        <button class="awesome" (click)="notificationsService.refresh()" >
-            <i class="fas fa-sync"></i>
-        </button>
+        Tasks
         <span>
             <span class="notif">
                 <i class="fas fa-hourglass-half"></i>
@@ -41,15 +39,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fas fa-flag-checkered"></i>
                 <span class="number" [class.highlight]="">{{notificationsService.nbDone}}</span>
             </span>
+            <button class="awesome" (click)="notificationsService.refresh()" >
+                <i class="fas fa-sync"></i>
+            </button>
         </span>
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
-        <li *ngFor="let item of notificationsService.tasksInProgress">
-            {{item.eventType == 'importDataset.event' ? 'Import in progress': item.message}}
-            <progress-bar progress="{{item.progress}}"></progress-bar>
+        <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Manage my tasks</li>
+        <li *ngFor="let item of notificationsService.tasksInProgress" class="single-task">
+            <i class="fas fa-chevron-right"></i>
+            {{item.eventType == 'importDataset.event' ? 'Import in progress' : item.message}} - {{item.progress * 100 | number:'0.0-0'}}%
+            <!-- <progress-bar progress="{{item.progress}}"></progress-bar> -->
         </li>
-        <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li>
+        <!-- <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li> -->
     </div>
 
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
@@ -91,6 +94,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
     </div>
-    <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Tasks</li>
 
 </ul>

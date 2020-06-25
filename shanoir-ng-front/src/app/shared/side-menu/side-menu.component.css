@@ -19,12 +19,13 @@ a:hover, a:active { color: white; }
 
 .menu-list { margin-top: 20px; min-width: 300px; }
 .menu-list li { font-size: 16px; padding: 5px 10px; cursor: pointer; }
-.menu-list li:hover,
-.menu-list .sub-menu li:hover { background-color: var(--color-b); cursor: pointer; }
+.menu-list li:not(.single-task):hover,
+.menu-list .sub-menu li:not(.single-task):hover { background-color: var(--color-b); cursor: pointer; }
 .menu-list li > svg { margin-right: 7px; width: 30px; vertical-align: -3px; }
 .menu-list .sub-menu { background-color: var(--color-a-light); overflow: hidden; }
 .menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 30px; }
 .menu-list .sub-menu li > svg { vertical-align: -2px; }
+.menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
 .chevron svg { margin-top: 7px; }
