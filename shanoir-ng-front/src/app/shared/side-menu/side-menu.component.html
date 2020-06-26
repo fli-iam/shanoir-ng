@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
         <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Manage my tasks</li>
         <li *ngFor="let item of notificationsService.tasksInProgress" class="single-task">
-            <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-circle"></i>
             {{item.eventType == 'importDataset.event' ? 'Import in progress' : item.message}} - {{item.progress * 100 | number:'0.0-0'}}%
             <!-- <progress-bar progress="{{item.progress}}"></progress-bar> -->
         </li>
