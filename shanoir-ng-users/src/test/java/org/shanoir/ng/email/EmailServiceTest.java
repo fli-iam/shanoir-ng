@@ -19,6 +19,8 @@ import static org.mockito.BDDMockito.given;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -27,10 +29,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.events.ShanoirEvent;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -59,11 +65,14 @@ public class EmailServiceTest {
 	public GreenMail greenMail;
 	
 	@MockBean
+	private RabbitTemplate rabbitTemplate;
+	
+	@MockBean
 	private UserRepository userRepositoryMock;
 
 	
 	@Before
-	public void initGreenMail() {		
+	public void initGreenMail() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);
 		greenMail.start();
@@ -134,12 +143,38 @@ public class EmailServiceTest {
 		emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
 		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
 	}
+	
+	@Test
+	public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
+		// GIVEN a list of administrators to contact
+		ShanoirEvent event = new ShanoirEvent();
+
+		event.setMessage("StudyName(12)"
+		+": Successfully created datasets for subject SubjectName"
+		+ " in examination 23");
+		
+		List<Long> admins = Collections.singletonList(Long.valueOf(13));
+
+		// send back a list of administrators
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, "12")).thenReturn(admins );
+		User admin = new User();
+		admin.setLastName("lastname");
+		admin.setFirstName("firstName");
+		admin.setEmail("admin@test.shanoir.fr");
+		given(userRepositoryMock.findOne(13L)).willReturn(admin );
+
+		// WHEN we receive an event with elements stating that data was imported successfuly
+		emailService.notifyStudyManagerDataImported(event);
+		
+		// THEN an email is sent to the administrators
+		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "Some data has been imported to study");
+	}
 
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
 			throws IOException, MessagingException {
 		final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 		assertTrue(receivedMessages.length > 0);
-		final String subject = (String) receivedMessages[0].getSubject();
+		final String subject = receivedMessages[0].getSubject();
 		assertTrue(subject.contains(expectedSubject));
 		final String content = (String) receivedMessages[0].getContent();
 		assertTrue(content.contains(expectedContent));

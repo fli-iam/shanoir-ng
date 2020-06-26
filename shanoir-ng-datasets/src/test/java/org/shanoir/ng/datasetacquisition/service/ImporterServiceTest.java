@@ -193,8 +193,12 @@ public class ImporterServiceTest {
 		importJob.setPatients(patients );
 		importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
 		importJob.setExaminationId(Long.valueOf(1));
+		importJob.setSubjectName("subjectName");
+		importJob.setStudyName("studyName");
+		importJob.setStudyId(1L);
 		
 		Examination examination = new Examination();
+		examination.setId(2L);
 		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
@@ -208,6 +212,9 @@ public class ImporterServiceTest {
 		List<ShanoirEvent> values = argument.getAllValues();
 		ShanoirEvent task = values.get(0);
 		assertTrue(task.getStatus() == 1);
+		// NOTE: This test is important as we use the message to send an mail to study admin further.
+		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
+		assertEquals("studyName(1): Successfully created datasets for subject subjectName in examination 2", task.getMessage());
 		
 		// THEN datasets are created
 		// Check what we save at the end
