@@ -79,4 +79,10 @@ export class NotificationsService {
         })
     }
 
+    totalProgress(): number {
+        let total: number = 0;
+        this.tasksInProgress.forEach(task => total += task.progress);
+        return total/this.tasksInProgress.length;
+    }
+
 }

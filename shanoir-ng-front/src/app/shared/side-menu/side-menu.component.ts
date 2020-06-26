@@ -49,7 +49,7 @@ export class SideMenuComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.notificationsService.refresh();
+        this.notificationsService.connect();
     }
 
     logout(event: Event): void {

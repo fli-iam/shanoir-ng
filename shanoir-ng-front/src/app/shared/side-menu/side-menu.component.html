@@ -28,21 +28,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <ul class="menu-list">
+    <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
     <li (click)="tasksOpened = !tasksOpened" class="notifications">
-        Tasks
-        <span>
-            <span class="notif">
-                <i class="fas fa-hourglass-half"></i>
-                <span class="number" [class.highlight]="">{{notificationsService.nbProcess}}</span>
-            </span>
-            <span class="notif">
-                <i class="fas fa-flag-checkered"></i>
-                <span class="number" [class.highlight]="">{{notificationsService.nbDone}}</span>
-            </span>
-            <button class="awesome" (click)="notificationsService.refresh()" >
-                <i class="fas fa-sync"></i>
-            </button>
-        </span>
+        <i class="fas fa-tasks"></i>Tasks
+        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
+        <!-- <button class="awesome" (click)="notificationsService.refresh()" >
+            <i class="fas fa-sync"></i>
+        </button> -->
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
@@ -54,8 +46,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <!-- <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li> -->
     </div>
-
-    <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fab fa-searchengin"></i>Solr search</li>
     <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="dataOpened" class="sub-menu" [@slideDown]="dataOpened">

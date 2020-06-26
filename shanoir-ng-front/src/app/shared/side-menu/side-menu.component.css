@@ -29,7 +29,7 @@ a:hover, a:active { color: white; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
 .chevron svg { margin-top: 7px; }
-.notifications {  }
+.notif { font-size: 10px; }
 
 .user, .logo, .menu-list { float: right; }
 
