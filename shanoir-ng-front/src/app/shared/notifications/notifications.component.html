@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button class="awesome" (click)="refresh()" >
         <i class="fas fa-sync"></i>
     </button>
-    <span (click)="toggle()">
+    <span>
         <span class="notif">
             <i class="fas fa-hourglass-half"></i>
             <span class="number" [class.highlight]="newProcess">{{nbProcess}}</span>
@@ -27,19 +27,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     </span>
 <span>
-<div *ngIf="isOpen" [@menuSlideDown]="isOpen" class="dropdown">
-    
-    <div class="subtitle"><i class="fas fa-hourglass-half"></i> {{nbProcess}} works in progress</div>
-    <ul>
-        <li *ngFor="let item of tasksInProgress"> {{item.message}} <progress-bar progress="{{item.progress}}"></progress-bar></li>
-    </ul>
-    <li class="horizontal-bar"><hr/></li>
-    <div class="subtitle"><i class="fas fa-flag-checkered"></i>{{nbDone}} works done</div>
-    <ul>
-        <li *ngFor="let item of tasksDone"> {{item.message}} </li>
-    </ul>
-    <li class="horizontal-bar"><hr/></li>
-    <ul>
-        <menu-item label="Manage my tasks" i18n-label="Administration menu|Manage tasks@@navbarManageTasks" link="task" [icon]="ImagesUrlUtil.NOTEPAD_ICON_PATH"></menu-item>
-    </ul>
-</div>
+

@@ -1,12 +1,12 @@
-:host() { color: var(--dark-grey); display: inline-block; position: relative; height: 100%; }
-
+/*:host() { color: var(--dark-grey); display: inline-block; position: relative; height: 100%; }
+*/
 .notif { line-height: 27px; display: inline-block; padding: 0 8px; }
 :host():hover .notif { cursor: pointer; /*background-color: var(--color-a); color: var(--very-light-grey);*/ }
 .notif svg { vertical-align: -2; font-size: 14px; }
 .number { padding: 0px 5px; }
-.number.highlight {  border-radius: 10px; background-color: var(--color-c); color: var(--very-light-grey); }
+.number.highlight {  border-radius: 10px; background-color: var(--color-red); color: var(--very-light-grey); }
 /*:host():hover .number.highlight { background-color: var(--very-light-grey); cursor: pointer;  color: var(--color-a); }*/
-button { background-color: transparent; color: var(--dark-grey); }
+button { background-color: transparent; }
 
 .dropdown { 
     background-color: var(--light-grey); 

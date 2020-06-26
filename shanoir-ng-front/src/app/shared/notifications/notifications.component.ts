@@ -20,6 +20,8 @@ import { Task } from '../../async-tasks/task.model'
 import { TaskService } from '../../async-tasks/task.service'
 import * as AppUtils from '../../utils/app.utils'
 import { KeycloakService } from '../../shared/keycloak/keycloak.service'
+import { Router } from '@angular/router';
+
 
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
@@ -33,7 +35,6 @@ import { EventSourcePolyfill } from 'event-source-polyfill';
 export class NotificationsComponent implements OnInit {
   
     protected animate: number = 0;
-    protected isOpen: boolean = false;
     protected nbProcess: number = 0;
     protected nbDone: number = 0;
     protected newProcess: boolean = false;
@@ -45,12 +46,11 @@ export class NotificationsComponent implements OnInit {
     protected isLoading = false;
     protected source;
 
-    constructor(public elementRef: ElementRef, private taskService: TaskService, private keycloakService: KeycloakService) {
-        document.addEventListener('click', () => {
-            if (!elementRef.nativeElement.contains(event.target)) {
-                if (this.isOpen) this.close();
-            }
-        });
+    constructor(
+             public elementRef: ElementRef,
+             private taskService: TaskService,
+             private keycloakService: KeycloakService,
+             private router: Router) {
     }
 
     ngOnInit(): void {
@@ -74,6 +74,9 @@ export class NotificationsComponent implements OnInit {
         }
 
         this.tasks = items;
+        let newDone = 0;
+        let newProcess = 0;
+
         this.nbProcess = 0;
         this.nbDone = 0;
         this.tasksDone = [];
@@ -81,12 +84,20 @@ export class NotificationsComponent implements OnInit {
         for (let task of this.tasks) {
             if (task.status == 1) {
                 this.tasksDone.push(task);
-                this.nbDone +=1;
+                newDone +=1;
             } else {
                 this.tasksInProgress.push(task);
-                 this.nbProcess +=1;
+                newProcess +=1;
             }
         }
+        if (this.nbDone < newDone) {
+            this.newDones = true;
+        }
+        if (this.nbProcess < newProcess) {
+            this.newProcess = true;
+        }
+        this.nbDone = newDone;
+        this.nbProcess = newProcess;
         this.isLoading = false;
     }
 
@@ -109,19 +120,9 @@ export class NotificationsComponent implements OnInit {
     }
 
     private toggle() {
-        if (this.isOpen) this.close();
-        else {
-             this.open();
-             this.refresh();
-        }
-    }
-
-    private close() {
-        this.isOpen = false;
-    }
-
-    private open() {
-        this.isOpen = true;
+        this.newDones = false;
+        this.newProcess = false;
+        this.router.navigate(['/task']);
     }
 
 }
