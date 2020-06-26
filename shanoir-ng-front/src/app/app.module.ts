@@ -161,7 +161,7 @@ import { KeycloakHttpInterceptor } from './shared/keycloak/keycloak.http.interce
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
-import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { NotificationsService } from './shared/notifications/notifications.service';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -292,7 +292,6 @@ import { ServiceLocator } from './utils/locator.service';
         FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
-        NotificationsComponent,
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
@@ -416,7 +415,8 @@ import { ServiceLocator } from './utils/locator.service';
         ManufacturerModelPipe,
         SubjectExaminationPipe,
         DatasetDTOService,
-        SolrService
+        SolrService,
+        NotificationsService
     ],
     bootstrap: [AppComponent],
 })
