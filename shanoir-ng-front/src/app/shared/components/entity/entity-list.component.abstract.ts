@@ -21,6 +21,7 @@ import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
@@ -38,9 +39,11 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private entityRoutes: EntityRoutes;
     protected msgBoxService: MsgBoxService;
     protected breadcrumbsService: BreadcrumbsService;
+    protected windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
+    private selectedId:  number;
 
     private edit: boolean = false;
     private view: boolean = true;
@@ -48,7 +51,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private new: boolean = false;
 
     constructor(
-            private readonly ROUTING_NAME: string) {
+            protected readonly ROUTING_NAME: string) {
         
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
@@ -56,6 +59,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
+        this.windowService = ServiceLocator.injector.get(WindowService);
         
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();
@@ -84,6 +88,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (this.delete) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
+        if (this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
+            this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});
+        }
     }
 
     private completeCustomActions(): void {
@@ -105,9 +112,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected openDeleteConfirmDialog = (entity: T) => {
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete ' + this.ROUTING_NAME + ' n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete ' + this.ROUTING_NAME, 
+                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+            ).then(res => {
                 if (res) {
                     entity.delete().then(() => {
                         this.onDelete.next(entity);
@@ -162,10 +170,16 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.router.navigate([this.entityRoutes.getRouteToList()]);
     }
 
+    dateRenderer(date: number): string {
+        if (date) {
+            return new Date(date).toLocaleDateString();
+        }
+        return null;
+    };
+
     ngOnDestroy() {
         for(let subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
     }
-
 }

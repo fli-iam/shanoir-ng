@@ -13,19 +13,38 @@
 -- Populates database for test
 
 INSERT INTO study_cards 
-	(id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id)
 VALUES 
-	(1, 1, 1, 0, 'StudyCard1', 1, 1),
-	(2, 1, 1, 0, 'StudyCard2', 1, 1),
-	(3, 3, 1, 0, 'StudyCard3', 1, 2),
-	(4, 4, 3, 0, 'StudyCard4', 1, 3);
+	(1,1,false,'StudyCard1',1,1),
+	(2,1,false,'StudyCard2',1,1),
+	(3,3,false,'StudyCard3',1,2),
+	(4,4,false,'StudyCard4',1,3);
+	
+INSERT INTO study_card_rule 
+VALUES (3,1),(4,1),(5,1),(6,1);
+
+INSERT INTO study_card_assignment 
+VALUES 
+	(3,11,'WORKED !!!!!',3),
+	(4,14,'TIME_OF_FLIGHT_MR_DATASET',4),
+	(5,5,'5',4),
+	(6,11,'ERROR',5),
+	(7,11,'OVERRIDEN',6),
+	(8,4,'4',6);
+
+INSERT INTO study_card_condition 
+VALUES 
+	(2,528446,'tse_vfl_WIP607',2,3),
+	(3,1573009,'200',6,5),
+	(4,1573009,'150',5,5),
+	(5,1573009,'150',5,6),
+	(6,1573013,'781.00',2,6);
 
 INSERT INTO Examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)
 VALUES 
 	(1, 1, parsedatetime('2017/01/01', 'yyyy/MM/dd'), false, 1, 'examination1', 1, 1),
 	(2, 1, parsedatetime('2017/02/01', 'yyyy/MM/dd'), false, 1, 'examination2', 1, 2),
-	(3, 1, parsedatetime('2017/03/01', 'yyyy/MM/dd'), false, 1, 'examination3', 1, 3);
+	(3, 1, parsedatetime('2017/03/01', 'yyyy/MM/dd'), false, 1, 'examination3', 3, 3);
 
 INSERT INTO mr_protocol_metadata
 	(id, name, dtype)
@@ -41,18 +60,33 @@ INSERT INTO pet_protocol
 	(id, dimensionx, dimensiony, number_of_slices, voxel_sizex, voxel_sizey, voxel_sizez)
 VALUES
 	(1, 10, 10, 5, 2, 2, 2);
+	
+INSERT INTO ct_protocol
+	(id)
+VALUES
+	(1);
 
 INSERT INTO dataset_acquisition
-	(id, acquisition_equipment_id, examination_id, rank, software_release, sorting_index) 
+	(id, acquisition_equipment_id, examination_id, rank, software_release, sorting_index, studycard_id) 
 VALUES 
-	(1, 1, 1, 1, 'v1.0', 1),
-	(2, 1, 2, 1, 'v1.0', 1),
-	(3, 1, 2, 1, 'v1.0', 1);
+	(1, 1, 1, 1, 'v1.0', 1, 1),
+	(2, 1, 2, 1, 'v1.0', 1, 1),
+	(3, 1, 3, 1, 'v1.0', 1, null);
 
 INSERT INTO mr_dataset_acquisition
 	(id, mr_protocol_id) 
 VALUES 
 	(1, 1);
+	
+INSERT INTO pet_dataset_acquisition
+	(id, pet_protocol_id) 
+VALUES 
+	(2, 1);
+	
+INSERT INTO ct_dataset_acquisition
+	(id, ct_protocol_id) 
+VALUES 
+	(3, 1);
 
 INSERT INTO dataset_metadata
 	(id, cardinality_of_related_subjects, name) 
@@ -87,4 +121,3 @@ INSERT INTO ct_dataset
 	(id) 
 VALUES 
 	(3);
-	

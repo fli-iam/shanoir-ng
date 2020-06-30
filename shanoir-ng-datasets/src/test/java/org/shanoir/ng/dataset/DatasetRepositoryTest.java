@@ -147,4 +147,10 @@ public class DatasetRepositoryTest {
 		assertEquals("Pet", ((PetDataset)foundedPet1).getType());
 	}
 	
+	@Test
+	public void loadingStrategyTest() throws ShanoirException {
+		assertNotNull(repository.findOne(1L).getDatasetAcquisition());
+		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
+	}
+	
 }

@@ -33,7 +33,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class BrukerUploadComponent {
-
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
@@ -55,8 +54,12 @@ export class BrukerUploadComponent {
             private importDataService: ImportDataService, 
             private importBrukerService: ImportBrukerService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'BRUKER';
     }
     
     
@@ -130,7 +133,7 @@ export class BrukerUploadComponent {
     }
 
     private next() {
-        this.router.navigate(['importsBruker/series']);
+        this.router.navigate(['imports/brukerseries']);
     }
 
 }

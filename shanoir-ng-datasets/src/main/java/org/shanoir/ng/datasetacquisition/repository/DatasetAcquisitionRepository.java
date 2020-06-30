@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.repository.CrudRepository;
 
@@ -24,5 +26,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  */
 public interface DatasetAcquisitionRepository extends CrudRepository<DatasetAcquisition, Long> {
+
+	List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
 
 }

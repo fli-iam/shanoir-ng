@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
-    <form #formContainer *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+<div #formContainer class="content-component">
+    <form #formContainer *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 

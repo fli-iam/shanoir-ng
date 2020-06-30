@@ -101,7 +101,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
-            // 'Examination executive': [this.examination.examinationExecutive],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
@@ -111,7 +110,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     private getCenters(): void {
         this.centerService
-            .getCentersNamesForExamination()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
             });
@@ -158,7 +157,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         let prom = super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
-                this.examinationService.postFile(file, this.entity.id).subscribe(response => console.log('result:' + response));
+                this.examinationService.postFile(file, this.entity.id); //.subscribe(response => console.log('result:' + response));
             }            
         });
         return prom;

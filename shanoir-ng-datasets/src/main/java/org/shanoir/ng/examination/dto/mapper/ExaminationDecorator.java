@@ -16,16 +16,7 @@ package org.shanoir.ng.examination.dto.mapper;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.model.Center;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
@@ -37,20 +28,6 @@ import org.springframework.data.domain.Page;
  *
  */
 public abstract class ExaminationDecorator implements ExaminationMapper {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(ExaminationDecorator.class);
-	
-	@Autowired
-	private CenterRepository centerRepository;
-	
-	@Autowired
-	private StudyRepository studyRepository;
-	
-	@Autowired
-	private SubjectRepository subjectRepository;
 
 	@Autowired
 	private ExaminationMapper delegate;
@@ -70,28 +47,6 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	@Override
 	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
 		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
-
-		if (examination.getCenterId() != null) {
-			final Center center = centerRepository.findOne(examination.getCenterId());
-			if (center != null) {
-				examinationDTO.setCenter(new IdName(examination.getCenterId(), center.getName()));
-			}
-		}
-
-		if (examination.getStudyId() != null) {
-			final Study study = studyRepository.findOne(examination.getStudyId());
-			if (study != null) {
-				examinationDTO.setStudy(new IdName(examination.getStudyId(), study.getName()));
-			}
-		}
-		
-		if (examination.getSubjectId() != null) {
-			final Subject subject = subjectRepository.findOne(examination.getSubjectId());
-			if (subject != null) {
-				examinationDTO.setSubject(new IdName(examination.getSubjectId(), subject.getName()));
-			}
-		}
-
 		return examinationDTO;
 	}
 

@@ -92,7 +92,8 @@ public interface CenterApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<IdName>> findCentersNames(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+	ResponseEntity<List<IdName>> findCentersNames(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "Saves a new center", response = CenterDTO.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created center", response = CenterDTO.class),

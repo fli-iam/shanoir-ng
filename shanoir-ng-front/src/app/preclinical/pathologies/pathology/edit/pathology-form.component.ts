@@ -11,21 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { Component, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { Location } from '@angular/common';
-
-import { Pathology }    from '../shared/pathology.model';
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { ModesAware } from '../../../shared/mode/mode.decorator';
+import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
 
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
-import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
-import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 
 @Component({
     selector: 'pathology-form',

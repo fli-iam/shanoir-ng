@@ -147,8 +147,8 @@ public interface SubjectService {
 	 *
 	 * @param subject subject to update.
 	 * @return updated subject.
-	 * @throws EntityNotFoundException 
-	 * @throws MicroServiceCommunicationException 
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	Subject update(Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException;
@@ -161,5 +161,13 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
+
+
+	/**
+	 * This method should not be used directly. Same as findAllSubjectsOfStudy but with no roles
+	 * @param studyId
+	 * @return
+	 */
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
 
 }

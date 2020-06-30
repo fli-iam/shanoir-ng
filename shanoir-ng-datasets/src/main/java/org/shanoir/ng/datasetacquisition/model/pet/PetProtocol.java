@@ -21,6 +21,8 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * PET protocol.
  * 
@@ -81,6 +83,7 @@ public class PetProtocol extends AbstractEntity {
 	private String numberOfSubsets;
 
 	/** The PET Dataset acquisition. */
+	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "petProtocol")
 	private PetDatasetAcquisition petDatasetAcquisition;
 

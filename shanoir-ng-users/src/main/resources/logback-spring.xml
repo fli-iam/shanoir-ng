@@ -15,22 +15,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <configuration>
+    <property name="SHANOIR_CONSOLE_LOG_LEVEL" value="${SHANOIR_CONSOLE_LOG_LEVEL:-WARN}" />
+
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
 
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><pattern>${CONSOLE_LOG_PATTERN}</pattern></encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter"> 
+            <level>${SHANOIR_CONSOLE_LOG_LEVEL}</level>
+        </filter>
+    </appender>
+
     <appender name="EVENT_FILE_LOG" class="ch.qos.logback.core.FileAppender">
-        <file>shanoir-events-log.log</file>
+        <file>/var/log/shanoir-ng-logs/shanoir-events.log</file>
         <append>true</append>
         <encoder>
             <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
-    
+
     <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>
-
     <root level="INFO">
         <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

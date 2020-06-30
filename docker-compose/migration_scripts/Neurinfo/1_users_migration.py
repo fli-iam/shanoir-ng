@@ -15,8 +15,15 @@ cursor = conn.cursor()
 
 
 print("Update users: start")
-query = "UPDATE users SET role_id=3 WHERE role_id=2"
-cursor.execute(query)
+for query in """
+    UPDATE users SET role_id=3 WHERE role_id=2;
+    
+    ALTER TABLE `users` MODIFY `creation_date` date DEFAULT NULL;
+    ALTER TABLE `users` MODIFY `expiration_date` date DEFAULT NULL;
+    ALTER TABLE `users` MODIFY `extension_date` date DEFAULT NULL;
+    ALTER TABLE `users` MODIFY `last_login` date DEFAULT NULL;
+        """.split(";"):
+    cursor.execute(query)
 conn.commit()
 print("Update users: end")
 

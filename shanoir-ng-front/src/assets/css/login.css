@@ -2,7 +2,7 @@
 html { display: table;  width: 100%; height: 100%; }
 body { background-color: var(--color-a); display: table-cell; vertical-align: middle; }
 
-#kc-container { margin-bottom: 200px; }
+#kc-container { margin-bottom: 200px; color: var(--color-b-light); text-align: center; }
 
 .logo {	text-align: center; }
 	.logo img { margin: 20px; }

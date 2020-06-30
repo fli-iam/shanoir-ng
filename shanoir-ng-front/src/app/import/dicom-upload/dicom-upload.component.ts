@@ -16,7 +16,6 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../shared/dicom-archive.service';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
@@ -39,30 +38,21 @@ export class DicomUploadComponent {
 
     constructor(
             private importService: ImportService, 
-            private dicomArchiveService: DicomArchiveService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'DICOM';
     }
     
     private uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
-        this.loadInMemory(fileEvent);   
         this.uploadToServer(fileEvent.target.files);
-    }
-
-    private loadInMemory(fileEvent: any) {
-    	this.dicomArchiveService.clearFileInMemory();
-    	this.dicomArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
-                this.dicomArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
-                    this.importDataService.inMemoryExtracted = response;
-                });
-            });
     }
 
     private uploadToServer(file: any) {

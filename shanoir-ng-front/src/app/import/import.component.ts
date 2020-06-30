@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
-import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { BreadcrumbsService, Step } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
+import { findLastIndex } from '../utils/app.utils';
 
 
 @Component({
@@ -26,25 +26,24 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 })
 export class ImportComponent implements OnInit {
 
-    private importMode: "DICOM" | "PACS";
     private hasOneStudy: boolean = true;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
             private rightsService: StudyRightsService,
-            private keycloakService: KeycloakService,
-            private route: ActivatedRoute, 
-            private router: Router) {
+            private route: ActivatedRoute) {
 
-        route.url.subscribe(() => {
-            if (this.route.snapshot.firstChild && this.route.snapshot.firstChild.data['importMode']) {
-                this.importMode = this.route.snapshot.firstChild.data['importMode'];
-            }
-        })
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
+    }
+
+    get importMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '' {
+        let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
+        if (lastIndex != -1) {
+            return this.breadcrumbsService.steps[lastIndex].importMode;
+        }
     }
         
     ngOnInit() {
-        this.breadcrumbsService.currentStep.importStart = true;  
+        this.breadcrumbsService.currentStep.importStart = true;
     }
 }

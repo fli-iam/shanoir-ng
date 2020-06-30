@@ -11,18 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import '../assets/css/common.css';
+import '../assets/css/papaya.css';
 
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -46,20 +45,25 @@ import { CenterService } from './centers/shared/center.service';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { CoilService } from './coils/shared/coil.service';
+import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
+import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
+import { MrProtocolComponent } from './dataset-acquisitions/modality/mr/mr-protocol.component';
+import { PetProtocolComponent } from './dataset-acquisitions/modality/pet/pet-protocol.component';
+import { DatasetAcquisitionDTOService } from './dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownaloadComponent } from './datasets/download/dataset-download.component';
-import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
+import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
-import { ExploredEntityComponent } from './datasets/shared/explored-entity/explored-entity.component';
-import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-dataset-type/processed-dataset-type.component';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
+import { ExaminationDTOService } from './examinations/shared/examination.dto';
 import { ExaminationPipe } from './examinations/shared/examination.pipe';
 import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
@@ -107,7 +111,6 @@ import { FileUploadComponent } from './preclinical/fileupload/fileupload.compone
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
-import { ImportBrukerComponent } from './preclinical/importBruker/importBruker.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
@@ -119,7 +122,6 @@ import { PathologyModelService } from './preclinical/pathologies/pathologyModel/
 import { SubjectPathologyFormComponent } from './preclinical/pathologies/subjectPathology/edit/subjectPathology-form.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subjectPathology-list.component';
 import { SubjectPathologyService } from './preclinical/pathologies/subjectPathology/shared/subjectPathology.service';
-import { preclinicalRouting } from './preclinical/preclinical-routing.module';
 import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
 import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
 import { ReferenceService } from './preclinical/reference/shared/reference.service';
@@ -131,6 +133,7 @@ import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/thera
 import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
 import { TherapyService } from './preclinical/therapies/therapy/shared/therapy.service';
 import { RoleService } from './roles/role.service';
+import { AutoAdjustInputComponent } from './shared/auto-ajust-input/auto-ajust-input.component';
 import { CheckboxListComponent } from './shared/checkbox-list/checkbox-list.component';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
 import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
@@ -158,15 +161,14 @@ import { KeycloakHttpInterceptor } from './shared/keycloak/keycloak.http.interce
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
-import { NavbarComponent } from './shared/navbar/navbar.component';
-//import { ModalService} from './shared/components/modal/modal.service';
-import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { NotificationsService } from './shared/notifications/notifications.service';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { SelectBoxComponent } from './shared/select/select.component';
-import { SelectOptionComponent } from './shared/select/select.option.component';
 import { GlobalService } from './shared/services/global.service';
+import { WindowService } from './shared/services/window.service';
+import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
 import { SolrSearchComponent } from './solr/solr.search.component';
@@ -176,6 +178,17 @@ import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
 import { StudyTreeComponent } from './studies/tree/study-tree.component';
+import { DicomService } from './study-cards/shared/dicom.service';
+import { StudyCardDTOService } from './study-cards/shared/study-card.dto';
+import { StudyCardService } from './study-cards/shared/study-card.service';
+import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
+import { StudyCardActionComponent } from './study-cards/study-card-rules/action/action.component';
+import { StudyCardConditionComponent } from './study-cards/study-card-rules/condition/condition.component';
+import { DicomTagPipe } from './study-cards/study-card-rules/condition/dicom-tag.pipe';
+import { StudyCardRuleComponent } from './study-cards/study-card-rules/study-card-rule.component';
+import { StudyCardRulesComponent } from './study-cards/study-card-rules/study-card-rules.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
 import { StudyNamePipe } from './subjects/shared/study-name.pipe';
 import { SubjectStudyPipe } from './subjects/shared/subject-study.pipe';
 import { SubjectService } from './subjects/shared/subject.service';
@@ -189,7 +202,7 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { TimesPipe } from './utils/app.utils';
+import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
 
 
@@ -199,12 +212,10 @@ import { ServiceLocator } from './utils/locator.service';
         CommonModule,
         FormsModule,
         HttpClientModule,
-        MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
         routing,
         NgxJsonViewerModule,
-    	preclinicalRouting
     ],
     declarations: [
         AccountRequestComponent,
@@ -235,7 +246,6 @@ import { ServiceLocator } from './utils/locator.service';
         ManufacturerModelPipe,
         ModalComponent,
         MenuItemComponent,
-        NavbarComponent,
         StudyComponent,
         StudyListComponent,
         StudyTreeComponent,
@@ -263,9 +273,6 @@ import { ServiceLocator } from './utils/locator.service';
         CommonDatasetComponent,
         MsgBoxComponent,
         PapayaComponent,
-        DatasetTypeComponent,
-        ExploredEntityComponent,
-        ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
         EegSelectSeriesComponent,
         DicomUploadComponent,
@@ -281,16 +288,29 @@ import { ServiceLocator } from './utils/locator.service';
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        SelectOptionComponent,
         FinishImportComponent,
         FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
-        NotificationsComponent,
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent,
+        SideMenuComponent,
+        StudyCardComponent,
+        StudyCardListComponent,
+        StudyCardForRulesListComponent,
+        StudyCardRuleComponent,
+        StudyCardRulesComponent,
+        StudyCardConditionComponent,
+        StudyCardActionComponent,
+        GetValuesPipe,
+        DatasetAcquisitionListComponent,
+        DatasetAcquisitionComponent,
+        MrProtocolComponent,
+        PetProtocolComponent,
+        DicomTagPipe,
+        AutoAdjustInputComponent,
         SolrSearchComponent,
         CheckboxListComponent,
     	AnimalSubjectsListComponent,   
@@ -322,7 +342,6 @@ import { ServiceLocator } from './utils/locator.service';
     	PhysiologicalDataFormComponent,
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
-    	ImportBrukerComponent, 
     	BrukerUploadComponent,
         AnimalClinicalContextComponent, 
         BrukerSelectSeriesComponent, 
@@ -349,7 +368,6 @@ import { ServiceLocator } from './utils/locator.service';
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
-        MatDialog,
         ModalService,
         RoleService,
         StudyService,
@@ -386,7 +404,19 @@ import { ServiceLocator } from './utils/locator.service';
         NiftiConverterService,
         TaskService,
         StudyRightsService,
-        SolrService
+        StudyCardService,
+        AcquisitionEquipmentPipe,
+        DatasetAcquisitionService,
+        DatasetAcquisitionDTOService,
+        ExaminationDTOService,
+        StudyCardDTOService,
+        WindowService,
+        DicomService,
+        ManufacturerModelPipe,
+        SubjectExaminationPipe,
+        DatasetDTOService,
+        SolrService,
+        NotificationsService
     ],
     bootstrap: [AppComponent],
 })

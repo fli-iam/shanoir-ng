@@ -22,7 +22,7 @@ import { FooterState } from './footer-state.model';
 
 export class FormFooterComponent {
 
-    @Input() private state: FooterState;
+    @Input() state: FooterState;
 
     @Output() private save: EventEmitter<void> = new EventEmitter<void>();
     @Output() private create: EventEmitter<void> = new EventEmitter<void>();
@@ -31,36 +31,34 @@ export class FormFooterComponent {
     @Output() private cancel: EventEmitter<void> = new EventEmitter<void>();
     @Output() private back: EventEmitter<void> = new EventEmitter<void>();
     
-    private onCreate(): void {
+    onCreate(): void {
         this.save.emit();
         this.create.emit();
     }
 
-    private onUpdate(): void {
+    onUpdate(): void {
         this.save.emit();
         this.update.emit();
     }
 
 
-    private onEdit(): void {
+    onEdit(): void {
         this.edit.emit();
     }
 
-    private onCancelEdit(): void {
+    onCancelEdit(): void {
         this.edit.emit();
     }
 
-    private onBackToList(): void {
+    onBackToList(): void {
         this.back.emit();
     }
 
-    private onCancel(): void {
+    onCancel(): void {
         this.cancel.emit();
     }
 
-    private onBack(): void {
+    onBack(): void {
         this.back.emit();
     }
-
-    
 }

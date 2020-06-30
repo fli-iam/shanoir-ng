@@ -45,7 +45,7 @@ export class FinishEegImportComponent {
             private importDataService: ImportDataService) {
         
         // Initialize context    
-        if (!this.importDataService.inMemoryExtracted || !importDataService.eegImportJob) {
+        if (!importDataService.eegImportJob) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -100,8 +100,8 @@ export class FinishEegImportComponent {
         importJob.studyName = this.context.study.name;
         importJob.workFolder = this.importJob.workFolder;
         importJob.examinationId = this.context.examination.id;
-        importJob.frontStudyId = this.context.study.id;
-        importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
+        importJob.studyId = this.context.study.id;
+        importJob.acquisitionEquipmentId = this.context.acquisitionEquipment.id;
         return this.importService.startEegImportJob(importJob);
     }
 }
