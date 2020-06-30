@@ -42,7 +42,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
 
     protected mapEntityList = (entities: any[]): Promise<DatasetAcquisition[]> => {
         let result: DatasetAcquisition[] = [];
-        this.dsAcqDtoService.toDatasetAcquisitions(entities, result);
+        if (entities) this.dsAcqDtoService.toDatasetAcquisitions(entities, result);
         return Promise.resolve(result);
     }
 

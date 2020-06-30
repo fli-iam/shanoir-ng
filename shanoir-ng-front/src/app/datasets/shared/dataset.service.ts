@@ -114,7 +114,7 @@ export class DatasetService extends EntityService<Dataset> {
 
     protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
         let result: Dataset[] = [];
-        this.datasetDTOService.toEntityList(dtos, result);
+        if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }
 }
