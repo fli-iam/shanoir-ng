@@ -11,38 +11,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
-import { EquipmentDicom, PatientDicom } from '../../../import/shared/dicom-data.model';
-import { Study } from '../../../studies/shared/study.model';
-import { StudyService } from '../../../studies/shared/study.service';
-import { ExaminationService } from '../../../examinations/shared/examination.service';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
-import { SubjectExamination } from '../../../examinations/shared/subject-examination.model';
-import { IdName } from '../../../shared/models/id-name.model';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
-import { slideDown } from '../../../shared/animations/animations';
-import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
-import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
-import { Examination } from '../../../examinations/shared/examination.model';
-import { ImportDataService, ContextData } from '../../../import/shared/import.data-service';
+import { AcquisitionEquipment } from '../../../acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentPipe } from '../../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
-import { Entity } from '../../../shared/components/entity/entity.abstract';
-import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubject.model';
 import { Center } from '../../../centers/shared/center.model';
 import { CenterService } from '../../../centers/shared/center.service';
-import { AcquisitionEquipment } from '../../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Examination } from '../../../examinations/shared/examination.model';
+import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { SubjectExamination } from '../../../examinations/shared/subject-examination.model';
+import { SubjectExaminationPipe } from '../../../examinations/shared/subject-examination.pipe';
+import { EquipmentDicom, PatientDicom } from '../../../import/shared/dicom-data.model';
+import { ContextData, ImportDataService } from '../../../import/shared/import.data-service';
 import { NiftiConverter } from '../../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../../niftiConverters/nifti.converter.service';
-import { StudyCenter } from '../../../studies/shared/study-center.model';
-import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { slideDown } from '../../../shared/animations/animations';
+import { Entity } from '../../../shared/components/entity/entity.abstract';
+import { IdName } from '../../../shared/models/id-name.model';
 import { Option } from '../../../shared/select/select.component';
-import { AcquisitionEquipmentPipe } from '../../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { SubjectExaminationPipe } from '../../../examinations/shared/subject-examination.pipe';
-import { Subscription } from 'rxjs';
+import { StudyCenter } from '../../../studies/shared/study-center.model';
+import { Study } from '../../../studies/shared/study.model';
+import { StudyService } from '../../../studies/shared/study.service';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
+import { Subject } from '../../../subjects/shared/subject.model';
+import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
+import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
+import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubject.model';
+
 
 @Component({
     selector: 'animal-clinical-context',
@@ -318,16 +318,16 @@ export class AnimalClinicalContextComponent implements OnDestroy {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        let newPreclinicalSubject = new PreclinicalSubject();
         let newSubject = new Subject();
-        let newAnimalSubject = new AnimalSubject();
-        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.birthDate = this.patient.patientBirthDate;
-        newSubject.name = this.patient.patientName;
         if (this.patient.patientSex){
             newSubject.sex = this.patient.patientSex; 
         }
         newSubject.subjectStudyList = [subjectStudy];
+        let newPreclinicalSubject = new PreclinicalSubject();
+        let newAnimalSubject = new AnimalSubject();
+        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
+        newSubject.name = this.patient.patientName;
         newPreclinicalSubject.subject = newSubject;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         return newPreclinicalSubject;

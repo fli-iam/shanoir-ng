@@ -37,7 +37,7 @@ export class FinishImportComponent {
     private importing: boolean = false;
     private step: Step;
     private readonly ImagesUrlUtil = ImagesUrlUtil;
-    private importMode: "DICOM" | "PACS";
+    private importMode: "DICOM" | "PACS" | "BRUKER";
 
     constructor(
             private importService: ImportService,

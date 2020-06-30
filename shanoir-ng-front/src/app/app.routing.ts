@@ -58,6 +58,7 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { SolrSearchComponent } from './solr/solr.search.component';
+import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 
 let appRoutes: Routes = [
     {
@@ -88,6 +89,10 @@ let appRoutes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
+            }, {   
+                path: 'bruker',
+                component: BrukerUploadComponent,
+                data: {importMode: 'BRUKER'}
             }, {   
                 path: 'eeg',
                 component: EegUploadComponent,

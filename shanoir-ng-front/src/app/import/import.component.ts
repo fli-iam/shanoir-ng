@@ -36,7 +36,7 @@ export class ImportComponent implements OnInit {
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
     }
 
-    get importMode(): 'DICOM' | 'PACS' {
+    get importMode(): 'DICOM' | 'PACS' | 'BRUKER' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;

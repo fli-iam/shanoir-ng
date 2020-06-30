@@ -55,8 +55,12 @@ export class BrukerUploadComponent {
             private importDataService: ImportDataService, 
             private importBrukerService: ImportBrukerService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'BRUKER';
     }
     
     
