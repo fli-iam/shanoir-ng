@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{preclinicalSubject.subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" (change)="buildForm()" [options]="ImagedObjectCategory.all(true)">
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" (change)="buildForm()" [options]="ImagedObjectCategory.toOptions(true)">
 								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>

@@ -213,7 +213,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         let maxWidth: number = 0;
         if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
             this.displayableOptions.forEach(opt => {
-                if (!maxOption || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
+                if (!maxOption || !maxOption.label || !opt.label || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
                     this.hiddenOption.nativeElement.innerText = opt.label;
                     let width: number = this.hiddenOption.nativeElement.offsetWidth;
                     if (width > maxWidth) {
