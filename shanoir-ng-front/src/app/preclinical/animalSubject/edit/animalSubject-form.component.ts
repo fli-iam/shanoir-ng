@@ -11,42 +11,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component,  Input, ViewChild, OnChanges } from '@angular/core';
-import { DoCheck, KeyValueDiffers, KeyValueDiffer } from '@angular/core';
-import { FormGroup,  Validators, FormControl } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
-
-import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { AnimalSubject } from '../shared/animalSubject.model';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { Reference }   from '../../reference/shared/reference.model';
-import { ReferenceService } from '../../reference/shared/reference.service';
-import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
-import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';
-import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
-import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
-import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { ModesAware } from "../../shared/mode/mode.decorator";
-import { Study } from '../../../studies/shared/study.model';
-import { IdName } from '../../../shared/models/id-name.model';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
-import { StudyService } from '../../../studies/shared/study.service';
-import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
-import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
-import * as AppUtils from '../../../utils/app.utils';
+import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
-import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
+
+import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
+import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../../shared/components/table/table.component';
-import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
-import { TherapyType } from '../../shared/enum/therapyType';
-import { Frequency } from '../../shared/enum/frequency';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
-import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
+import { IdName } from '../../../shared/models/id-name.model';
+import { Option } from '../../../shared/select/select.component';
+import { Study } from '../../../studies/shared/study.model';
+import { StudyService } from '../../../studies/shared/study.service';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
+import { Subject } from '../../../subjects/shared/subject.model';
+import * as AppUtils from '../../../utils/app.utils';
+import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
+import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
+import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';
+import { Reference } from '../../reference/shared/reference.model';
+import { ReferenceService } from '../../reference/shared/reference.service';
+import { ModesAware } from '../../shared/mode/mode.decorator';
+import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/list/subjectTherapy-list.component';
+import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
+import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
+import * as PreclinicalUtils from '../../utils/preclinical.utils';
+import { AnimalSubject } from '../shared/animalSubject.model';
+import { AnimalSubjectService } from '../shared/animalSubject.service';
+import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
+
 
 @Component({
     selector: 'animalSubject-form',
@@ -81,9 +76,14 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     private pathologies: SubjectPathology[] = [];
     private selectedStudy : IdName;
     private hasNameUniqueError: boolean = false; 
-
     differ: KeyValueDiffer<string, any>;
 
+    catOptions: Option<ImagedObjectCategory>[] = [
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.LIVING_ANIMAL, 'Living animal'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.ANIMAL_CADAVER, 'Animal cadaver'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.ANATOMICAL_PIECE, 'Anatomical piece')
+    ];
 
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,
@@ -299,7 +299,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         formGroup.get('provider').updateValueAndValidity();
         formGroup.get('stabulation').updateValueAndValidity();
         this.reloadRequiredStyles();
-        this.buildForm();
     }
 
     //params should be category and then reftype
