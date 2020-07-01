@@ -36,11 +36,11 @@ targetCursor.execute(query)
 targetConn.commit()
 print("Delete coil: end")
 
-print("Delete acquisition_equipment: start")
-query = "DELETE FROM acquisition_equipment"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete acquisition_equipment: end")
+#print("Delete acquisition_equipment: start")
+#query = "DELETE FROM acquisition_equipment"
+#targetCursor.execute(query)
+#targetConn.commit()
+#print("Delete acquisition_equipment: end")
 
 print("Delete center: start")
 query = "DELETE FROM center"
