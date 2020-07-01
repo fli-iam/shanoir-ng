@@ -21,7 +21,7 @@ for query in """
     ALTER TABLE `users` MODIFY `creation_date` date DEFAULT NULL;
     ALTER TABLE `users` MODIFY `expiration_date` date DEFAULT NULL;
     ALTER TABLE `users` MODIFY `extension_date` date DEFAULT NULL;
-    ALTER TABLE `users` MODIFY `last_login` date DEFAULT NULL;
+    ALTER TABLE `users` MODIFY `last_login` date DEFAULT NULL
         """.split(";"):
     cursor.execute(query)
 conn.commit()
