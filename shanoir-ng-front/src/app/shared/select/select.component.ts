@@ -71,7 +71,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     private inputText: string;
-    private _searchText: string;
+    private _searchText: string = null;
     @Input() disabled: boolean = false;
     @HostBinding('class.read-only') @Input() readOnly: boolean = false;
     @Input() placeholder: string;
@@ -229,9 +229,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private set searchText(text: string) {
+        if (text == this._searchText) return;
         this.focusedOptionIndex = null;
         if (!text) {
-            if (this._searchText == null) return;
             this._searchText = null;
             this.filteredOptions = null;
         } else {
@@ -552,8 +552,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @HostListener('focusout', ['$event']) 
     private onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
-            this.close();
-            this.onTouchedCallback();
+            //this.close();
+            //this.onTouchedCallback();
         } 
     }
 
@@ -596,8 +596,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         else if (this.options) return this.options;
         else return null;
     }
-
-    
 }
 
 
