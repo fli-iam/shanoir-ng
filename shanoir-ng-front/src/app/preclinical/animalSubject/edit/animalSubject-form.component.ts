@@ -85,6 +85,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         new Option<ImagedObjectCategory>(ImagedObjectCategory.ANATOMICAL_PIECE, 'Anatomical piece')
     ];
 
+    genderOptions: Option<string>[] = [
+        new Option<string>('F', 'Female'),
+        new Option<string>('M', 'Male'),
+    ];
+
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,
             private studyService: StudyService, 

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.user.model.User;
 
 /**
@@ -101,5 +102,11 @@ public interface EmailService {
 	 *            new password.
 	 */
 	void notifyUserResetPassword(User user, String password);
+
+	/**
+	 *  This method notifies a study manager that some data was imported in the study.
+	 * @param event the Shanoir event transporting the information
+	 */
+	void notifyStudyManagerDataImported(ShanoirEvent event);
 
 }

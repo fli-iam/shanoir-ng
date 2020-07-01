@@ -41,8 +41,12 @@ export class BidsUploadComponent {
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'BIDS';
     }
 
     private uploadArchive(fileEvent: any): void {

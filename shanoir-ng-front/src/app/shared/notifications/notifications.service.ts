@@ -11,61 +11,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, ElementRef, OnInit } from '@angular/core';
-
-import { menuSlideDown } from '../animations/animations';
-import { ImagesUrlUtil } from '../utils/images-url.util';
-import { Task } from '../../async-tasks/task.model'
-import { TaskService } from '../../async-tasks/task.service'
-import * as AppUtils from '../../utils/app.utils'
-import { KeycloakService } from '../../shared/keycloak/keycloak.service'
-
+import { Injectable } from '@angular/core';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
-@Component({
-    selector: 'notifications',
-    templateUrl: 'notifications.component.html',
-    styleUrls: ['notifications.component.css'],
-    animations: [menuSlideDown]
-})
+import { Task } from '../../async-tasks/task.model';
+import { TaskService } from '../../async-tasks/task.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
+import * as AppUtils from '../../utils/app.utils';
 
-export class NotificationsComponent implements OnInit {
+@Injectable()
+export class NotificationsService {
   
-    protected animate: number = 0;
-    protected isOpen: boolean = false;
-    protected nbProcess: number = 0;
-    protected nbDone: number = 0;
-    protected newProcess: boolean = false;
-    protected newDones: boolean = true;
-    protected ImagesUrlUtil = ImagesUrlUtil;
+    public nbProcess: number = 0;
+    public nbDone: number = 0;
     protected tasks: Task[] = [];
     protected tasksDone: Task[] = [];
     protected tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
 
-    constructor(public elementRef: ElementRef, private taskService: TaskService, private keycloakService: KeycloakService) {
-        document.addEventListener('click', () => {
-            if (!elementRef.nativeElement.contains(event.target)) {
-                if (this.isOpen) this.close();
-            }
-        });
+    constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
     }
 
-    ngOnInit(): void {
-        this.refresh();
-        this.connect();
-    }
-
-    getEntities(): Promise<Task[]> {
-        return this.taskService.getTasks();
-    }
-
-    private refresh(items = []) {
+    refresh(items = []) {
         this.isLoading = true;
         if (items.length == 0) {
-           this.getEntities().then(itemsGot => {
+            this.taskService.getTasks().then(itemsGot => {
                 if (itemsGot && itemsGot.length > 0) {
                     this.refresh(itemsGot);
                 }
@@ -108,20 +79,10 @@ export class NotificationsComponent implements OnInit {
         })
     }
 
-    private toggle() {
-        if (this.isOpen) this.close();
-        else {
-             this.open();
-             this.refresh();
-        }
-    }
-
-    private close() {
-        this.isOpen = false;
-    }
-
-    private open() {
-        this.isOpen = true;
+    totalProgress(): number {
+        let total: number = 0;
+        this.tasksInProgress.forEach(task => total += task.progress);
+        return total/this.tasksInProgress.length;
     }
 
 }

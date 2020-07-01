@@ -98,10 +98,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${KEYCLOAK_USER}")
+	@Value("${SHANOIR_KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${KEYCLOAK_PASSWORD}")
+	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
 	@Value("${keycloak.realm}")

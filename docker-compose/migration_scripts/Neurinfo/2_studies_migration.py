@@ -36,11 +36,11 @@ targetCursor.execute(query)
 targetConn.commit()
 print("Delete coil: end")
 
-print("Delete acquisition_equipment: start")
-query = "DELETE FROM acquisition_equipment"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete acquisition_equipment: end")
+#print("Delete acquisition_equipment: start")
+#query = "DELETE FROM acquisition_equipment"
+#targetCursor.execute(query)
+#targetConn.commit()
+#print("Delete acquisition_equipment: end")
 
 print("Delete center: start")
 query = "DELETE FROM center"
@@ -201,12 +201,12 @@ targetConn.commit()
 print("Import group_of_subjects: end")
 
 
-#print("Import coil: start")    
-#sourceCursor.execute("SELECT COIL_ID, CENTER_ID, REF_COIL_TYPE_ID, MANUFACTURER_MODEL_ID, NAME, NUMBER_OF_CHANNELS, SERIAL_NUMBER FROM COIL")
-#query = "INSERT INTO coil (id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-#targetCursor.executemany(query, sourceCursor.fetchall())
-#targetConn.commit()
-#print("Import coil: end")
+print("Import coil: start")    
+sourceCursor.execute("SELECT COIL_ID, CENTER_ID, REF_COIL_TYPE_ID, MANUFACTURER_MODEL_ID, NAME, NUMBER_OF_CHANNELS, SERIAL_NUMBER FROM COIL")
+query = "INSERT INTO coil (id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import coil: end")
 
 
 print("Import timepoint: start")    

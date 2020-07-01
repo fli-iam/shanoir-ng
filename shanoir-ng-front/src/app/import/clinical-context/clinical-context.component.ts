@@ -241,7 +241,10 @@ export class ClinicalContextComponent implements OnDestroy {
                 });
             }
         }
-        this.centerOptions = this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
+        this.centerOptions = []; 
+        this.acquisitionEquipmentOptions = []; 
+        this.subjects = [];
+        this.examinations = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
                 let option = new Option<Center>(studyCenter.center, studyCenter.center.name);
@@ -267,11 +270,11 @@ export class ClinicalContextComponent implements OnDestroy {
                 else return false;
             })
             this.center = scFound ? scFound.center : null;
-            this.onSelectCenter();
+            this.acquisitionEquipment = this.studycard.acquisitionEquipment;
+            this.onSelectAcquisitonEquipment();
             this.niftiConverter = this.studycard.niftiConverter;
-            this.onSelectNifti();
+            
         }
-        this.importDataService.contextBackup.studyCard = this.studycard;
         this.onContextChange();
     }
 
@@ -289,7 +292,9 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
-        this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
+        this.acquisitionEquipmentOptions =  [];
+        this.subjects =  [];
+        this.examinations = [];
         if (this.center && this.center.acquisitionEquipments) {
             for (let acqEq of this.center.acquisitionEquipments) {
                 let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
@@ -308,7 +313,8 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private onSelectAcquisitonEquipment(): void {
         this.subject = this.examination = null;
-        this.subjects = this.examinations = [];
+        this.subjects =  [];
+        this.examinations = [];
         if (this.acquisitionEquipment) {
             if(this.importMode == 'BRUKER') {
                 this.studyService

@@ -69,12 +69,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									<ng-template ngSwitchDefault>{{preclinicalSubject?.subject?.sex}}</ng-template>
 								</div>
 							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select id="sex" required formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex">
-									<option [value]="'F'">Female</option>
-									<option [value]="'M'">Male</option>
-								</select>
-							</ng-template>
+                            <ng-template ngSwitchDefault>
+                                <select-box formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex" [options]="genderOptions">
+                                </select-box>
+                            </ng-template>
 						</span>
 					</li>
 					<li>

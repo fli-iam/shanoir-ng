@@ -79,14 +79,6 @@ VALUES
 	(3, 1, 'CTDataset1'),
     (4, 1, 'EEGDataset');
 
-INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id, subject_id) 
-VALUES 
-	(1, 1, 1, 1),
-	(2, 2, 2, 1),
-	(3, 3, 3, 1),
-	(4, NULL, 4, 1);
-
 INSERT INTO study
 	(id, name)
 VALUES
@@ -106,12 +98,12 @@ VALUES
 	(1, 1);
 
 INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id, updated_metadata_id, study_id, subject_id) 
+	(id, dataset_acquisition_id, origin_metadata_id, updated_metadata_id, subject_id) 
 VALUES 
-	(1, 1, 1, 1, 1, 1),
-	(2, 2, 2, 2, 1, 1),
-	(3, 3, 3, 3, 1, 1),
-	(4, NULL, 4, 4, 1, 1);
+	(1, 1, 1, 1, 1),
+	(2, 2, 2, 2, 1),
+	(3, 3, 3, 3, 1),
+	(4, NULL, 4, 4, 1);
 
 INSERT INTO mr_dataset
 	(id, mr_quality_procedure_type, origin_mr_metadata_id) 

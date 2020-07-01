@@ -11,17 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component } from '@angular/core';
 
-import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { ImportJob } from '../../../import/shared/dicom-data.model';
-import { DicomArchiveService } from '../../../import/shared/dicom-archive.service';
-import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { slideDown } from '../../../shared/animations/animations';
-import { ImportService } from '../../../import/shared/import.service';
-import { Router } from '../../../breadcrumbs/router';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../../breadcrumbs/router';
+import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImportDataService } from '../../../import/shared/import.data-service';
+import { slideDown } from '../../../shared/animations/animations';
+import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { ImportBrukerService } from '../importBruker.service';
+
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -33,7 +32,6 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class BrukerUploadComponent {
-
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
@@ -48,8 +46,6 @@ export class BrukerUploadComponent {
 
 
     constructor(
-            private importService: ImportService, 
-            private dicomArchiveService: DicomArchiveService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService, 
@@ -134,7 +130,7 @@ export class BrukerUploadComponent {
     }
 
     private next() {
-        this.router.navigate(['importsBruker/series']);
+        this.router.navigate(['imports/brukerseries']);
     }
 
 }

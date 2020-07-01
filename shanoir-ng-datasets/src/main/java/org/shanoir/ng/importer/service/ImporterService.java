@@ -132,7 +132,9 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Successfully created datasets for examination " + examination.getId());
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+			+": Successfully created datasets for subject " + importJob.getSubjectName()
+			+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
 			// Create BIDS folder
@@ -186,6 +188,11 @@ public class ImporterService {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
+			
+			// TODO: put studyCard in bruker import
+			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
+			}
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionRepository.save(datasetAcquisition);
 			long startTime = System.currentTimeMillis();
