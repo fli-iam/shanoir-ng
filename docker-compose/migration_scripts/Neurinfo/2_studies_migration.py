@@ -141,12 +141,12 @@ print("######## CLEANING OF TARGET DB MS STUDIES: FINISHED ###################")
 
 
 print("######## IMPORTING OF TARGET DB MS STUDIES: START ###################")
-print("Import centers: start")
-sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM CENTER")
-query = "INSERT INTO center (id, city, country, name, phone_number, postal_code, street, website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-targetCursor.executemany(query, sourceCursor.fetchall())
-targetConn.commit()
-print("Import centers: end")
+#print("Import centers: start")
+#sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM CENTER")
+#query = "INSERT INTO center (id, city, country, name, phone_number, postal_code, street, website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+#targetCursor.executemany(query, sourceCursor.fetchall())
+#targetConn.commit()
+#print("Import centers: end")
 
 
 print("Reimport studies: start")    
