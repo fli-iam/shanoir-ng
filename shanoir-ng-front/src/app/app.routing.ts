@@ -60,7 +60,6 @@ import { StudyCardForRulesListComponent } from './study-cards/study-card-list/st
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
 import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
@@ -152,9 +151,6 @@ let appRoutes: Routes = [
             }, {
                 path: 'brukerseries',
                 component: BrukerSelectSeriesComponent
-            }, {
-                path: 'brukercontext',
-                component: AnimalClinicalContextComponent
             }, {
                 path: 'brukerfinish',
                 component: BrukerFinishImportComponent

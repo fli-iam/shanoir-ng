@@ -244,17 +244,23 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
                 this.footerState.loading = false;
-                if (reason && reason.error && reason.error.code == 422) {
-                    this.saveError = new ShanoirError(reason);
-                    for (let managedField of this.onSubmitValidatedFields) {
-                        let fieldControl: AbstractControl = this.form.get(managedField);
-                        if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
-                        fieldControl.updateValueAndValidity({emitEvent : false});
-                        if (!fieldControl.valid) fieldControl.markAsTouched();
-                    }
-                    this.footerState.valid = this.form.status == 'VALID';
-                } else throw reason;
+                this.catchSavingErrors(reason);
             });
+    }
+
+    protected catchSavingErrors = (reason: any): Promise<any> => {
+        console.log('catch', reason, reason.error, reason.error.code == 422)
+        if (reason && reason.error && reason.error.code == 422) {
+            this.saveError = new ShanoirError(reason);
+            for (let managedField of this.onSubmitValidatedFields) {
+                let fieldControl: AbstractControl = this.form.get(managedField);
+                if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+                fieldControl.updateValueAndValidity({emitEvent : false});
+                if (!fieldControl.valid) fieldControl.markAsTouched();
+            }
+            this.footerState.valid = this.form.status == 'VALID';
+            return Promise.resolve(null);
+        } else throw reason;
     }
 
     /**
@@ -266,6 +272,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected registerOnSubmitValidator(constraintName: string, controlFieldName: string, errorFieldName?: string): (control: AbstractControl) => ValidationErrors | null {
         if (this.onSubmitValidatedFields.indexOf(controlFieldName) == -1) this.onSubmitValidatedFields.push(controlFieldName);        
         return (control: AbstractControl): ValidationErrors | null => {
+            console.log('this.saveError', this.saveError);
+            if (this.saveError) console.log('this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)', this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value))
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                     //&& this.form.get(controlFieldName).pristine
             ) {

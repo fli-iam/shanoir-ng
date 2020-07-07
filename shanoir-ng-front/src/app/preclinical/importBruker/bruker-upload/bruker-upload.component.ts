@@ -90,6 +90,7 @@ export class BrukerUploadComponent {
             		.subscribe((patientDicomList: ImportJob) => {
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                         this.importDataService.archiveUploaded = patientDicomList;
+                        this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
                 		this.uploadProgress = 5;
             		}, (err: String) => {

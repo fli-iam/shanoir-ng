@@ -109,7 +109,6 @@ import { ExtraDataService } from './preclinical/extraData/extraData/shared/extra
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { FileUploadComponent } from './preclinical/fileupload/fileupload.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
@@ -343,7 +342,6 @@ import { ServiceLocator } from './utils/locator.service';
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        AnimalClinicalContextComponent, 
         BrukerSelectSeriesComponent, 
         BrukerFinishImportComponent
     ],

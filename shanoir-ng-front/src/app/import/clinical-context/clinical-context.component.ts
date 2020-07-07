@@ -71,7 +71,7 @@ export class ClinicalContextComponent implements OnDestroy {
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
-    private importMode: "DICOM" | "PACS" | "BRUKER";
+    private importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -99,13 +99,7 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         breadcrumbsService.nameStep('3. Context'); 
 
-        if (this.importDataService.patientList.fromDicomZip) {
-            this.importMode = 'DICOM';
-        } else if (this.importDataService.patientList.fromPacs) {
-            this.importMode = 'PACS';
-        } else if (this.importDataService.patientList.fromBruker) {
-            this.importMode = 'BRUKER';
-        }
+        this.importMode = this.breadcrumbsService.findImportMode();
         
         this.setPatient(this.importDataService.patients[0]).then(() => {
             this.reloadSavedData();
@@ -271,7 +265,9 @@ export class ClinicalContextComponent implements OnDestroy {
             })
             this.center = scFound ? scFound.center : null;
             this.acquisitionEquipment = this.studycard.acquisitionEquipment;
+            console.log('caca', this.acquisitionEquipment)
             this.onSelectAcquisitonEquipment();
+            console.log('prout', this.acquisitionEquipment)
             this.niftiConverter = this.studycard.niftiConverter;
             
         }
@@ -572,7 +568,7 @@ export class ClinicalContextComponent implements OnDestroy {
         if (this.importMode != 'BRUKER') {
             this.router.navigate(['imports/finish']);
         } else {
-            this.router.navigate(['importsBruker/finish']);
+            this.router.navigate(['imports/brukerfinish']);
         }
     }
 
