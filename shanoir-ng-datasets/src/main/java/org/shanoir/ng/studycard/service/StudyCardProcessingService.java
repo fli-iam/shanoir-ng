@@ -18,11 +18,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.ElementDictionary;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.studycard.model.AssignmentField;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -155,7 +153,7 @@ public class StudyCardProcessingService {
 		try {
 			assignment.getField().update(acquisition, assignment.getValue());			
 		} catch (IllegalArgumentException e) {
-			LoggerFactory.getLogger(AssignmentField.class).error("Error in studycard processing : ", e);
+			LOG.error("Error in studycard processing : ", e);
 		}
 	}
 	
