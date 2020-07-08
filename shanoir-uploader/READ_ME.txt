@@ -2,6 +2,9 @@
 Getting Started
 ##############################################
 
+####### Before delivery to OFSEP #############
+Remove the 3 system path library dependencies as they do not be contained in the assembly.
+
 ####### Build latest version for delivery ####
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
