@@ -55,5 +55,12 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	
 	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
+	
+	/**
+	 * Returns all instances of the type.
+	 * 
+	 * @return all entities
+	 */
+	Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
 
 }

@@ -20,7 +20,9 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for relations between a study and an user.
@@ -35,4 +37,7 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
+	
+	@Query("select s.id from StudyUser su inner join su.study as s where su.userId = :userId and :right in elements(su.studyUserRights)")
+	List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") int right);
 }
