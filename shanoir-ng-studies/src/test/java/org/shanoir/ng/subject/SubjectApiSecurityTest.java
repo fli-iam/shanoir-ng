@@ -238,7 +238,7 @@ public class SubjectApiSecurityTest {
 		assertAccessAuthorized(api::findSubjects);
 		assertEquals(1, api.findSubjects().getBody().size());
 		assertAccessAuthorized(api::findSubjectsNames);
-		//assertEquals(1, api.findSubjectsNames().getBody().size());
+		assertEquals(1, api.findSubjectsNames().getBody().size());
 		subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
 		subjectStudyMock.setSubject(subjectMockRightRights);
