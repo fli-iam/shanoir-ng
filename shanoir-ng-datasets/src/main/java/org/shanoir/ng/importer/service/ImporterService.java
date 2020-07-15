@@ -132,7 +132,9 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Successfully created datasets for examination " + examination.getId());
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+			+": Successfully created datasets for subject " + importJob.getSubjectName()
+			+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
 			// Create BIDS folder

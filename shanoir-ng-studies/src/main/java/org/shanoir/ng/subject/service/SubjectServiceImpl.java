@@ -22,13 +22,16 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpException;
@@ -66,6 +69,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private StudyUserRepository studyUserRepository;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -85,6 +91,16 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		List<IdName> names = new ArrayList<>();
+		Iterable<Subject> subjects;
+		
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+			subjects = subjectRepository.findAll();
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
+		}
+		
 		for (Subject subject : subjectRepository.findAll()) {
 			IdName name = new IdName(subject.getId(), subject.getName());
 			names.add(name);

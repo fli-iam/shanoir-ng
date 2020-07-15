@@ -43,7 +43,7 @@ export class StudyCardService extends EntityService<StudyCard> {
 
     protected mapEntityList = (dtos: StudyCardDTO[]): Promise<StudyCard[]> => {
         let result: StudyCard[] = [];
-        this.studyCardDTOService.toEntityList(dtos, result);
+        if (dtos) this.studyCardDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }
 }

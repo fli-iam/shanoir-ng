@@ -49,7 +49,6 @@ public interface SubjectService {
 	 * @return a list of subjects.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
 	List<IdName> findNames();
 
 	

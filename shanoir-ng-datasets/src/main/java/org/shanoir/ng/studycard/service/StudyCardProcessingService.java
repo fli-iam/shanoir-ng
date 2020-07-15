@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.ElementDictionary;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -151,7 +150,11 @@ public class StudyCardProcessingService {
 
 
 	private void applyAssignment(DatasetAcquisition acquisition, StudyCardAssignment assignment) {
-		assignment.getField().update(acquisition, assignment.getValue());
+		try {
+			assignment.getField().update(acquisition, assignment.getValue());			
+		} catch (IllegalArgumentException e) {
+			LOG.error("Error in studycard processing : ", e);
+		}
 	}
 	
 }
