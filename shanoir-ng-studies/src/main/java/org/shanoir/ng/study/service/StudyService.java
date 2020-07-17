@@ -73,7 +73,7 @@ public interface StudyService {
 	 * @throws MicroServiceCommunicationException 
 	 * @throws ShanoirStudiesException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.studyUsersMatchStudy(#study)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
 	Study create(Study study) throws MicroServiceCommunicationException;
 
 	
@@ -87,7 +87,7 @@ public interface StudyService {
 	 * @throws MicroServiceCommunicationException 
 	 * @throws AccessDeniedException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
 
 }

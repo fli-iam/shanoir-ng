@@ -101,7 +101,6 @@ import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/co
 import { ContrastAgentService } from './preclinical/contrastAgent/shared/contrastAgent.service';
 import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
-import { AnimalExaminationService } from './preclinical/examination/shared/animal-examination.service';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ExtraDataFormComponent } from './preclinical/extraData/extraData/edit/extradata-form.component';
 import { ExtraDataListComponent } from './preclinical/extraData/extraData/list/extradata-list.component';
@@ -109,7 +108,6 @@ import { ExtraDataService } from './preclinical/extraData/extraData/shared/extra
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { FileUploadComponent } from './preclinical/fileupload/fileupload.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
-import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
@@ -343,7 +341,6 @@ import { ServiceLocator } from './utils/locator.service';
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        AnimalClinicalContextComponent, 
         BrukerSelectSeriesComponent, 
         BrukerFinishImportComponent
     ],
@@ -387,8 +384,7 @@ import { ServiceLocator } from './utils/locator.service';
     	AnestheticIngredientService,
     	ExaminationAnestheticService,
     	ContrastAgentService,
-    	ExtraDataService,
-        AnimalExaminationService,
+        ExtraDataService,
         AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
