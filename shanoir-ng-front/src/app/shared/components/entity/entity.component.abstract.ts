@@ -244,17 +244,21 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
                 this.footerState.loading = false;
-                if (reason && reason.error && reason.error.code == 422) {
-                    this.saveError = new ShanoirError(reason);
-                    for (let managedField of this.onSubmitValidatedFields) {
-                        let fieldControl: AbstractControl = this.form.get(managedField);
-                        if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
-                        fieldControl.updateValueAndValidity({emitEvent : false});
-                        if (!fieldControl.valid) fieldControl.markAsTouched();
-                    }
-                    this.footerState.valid = this.form.status == 'VALID';
-                } else throw reason;
+                return this.catchSavingErrors(reason);
             });
+    }
+
+    protected catchSavingErrors = (reason: any): Promise<any> => {
+        if (reason && reason.error && reason.error.code == 422) {
+            this.saveError = new ShanoirError(reason);
+            for (let managedField of this.onSubmitValidatedFields) {
+                let fieldControl: AbstractControl = this.form.get(managedField);
+                if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+                fieldControl.updateValueAndValidity({emitEvent : false});
+                if (!fieldControl.valid) fieldControl.markAsTouched();
+            }
+            this.footerState.valid = this.form.status == 'VALID';
+        } throw reason;
     }
 
     /**

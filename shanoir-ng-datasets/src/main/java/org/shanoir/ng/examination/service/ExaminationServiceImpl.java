@@ -81,9 +81,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private String dataDir;
 
 	@Override
-	public Page<Examination> findPage(final Pageable pageable) {
+	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAll(pageable);
+			return examinationRepository.findAllByPreclinical(pageable, preclinical);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
@@ -145,13 +145,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
 		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
-	}
-
-	@Override
-	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
-		// Get list of studies reachable by connected user
-		List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-		return examinationRepository.findByStudyIdInAndPreclinical(studyIds, isPreclinical, pageable);
 	}
 
 	@Override

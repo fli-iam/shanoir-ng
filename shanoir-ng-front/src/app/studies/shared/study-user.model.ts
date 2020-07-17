@@ -14,9 +14,10 @@
 
 import { User } from "../../users/shared/user.model";
 import { StudyUserRight} from "./study-user-right.enum";
+import { Study } from "./study.model";
 
 export class StudyUser {
-    studyId: number;
+    study: Study;
     userId: number;
     receiveAnonymizationReport: boolean;
     receiveNewImportReport: boolean;
