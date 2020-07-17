@@ -43,6 +43,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/preclinicalSubject.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
 
 
 
@@ -84,8 +85,9 @@ export class ClinicalContextComponent implements OnDestroy {
             private studyService: StudyService,
             private centerService: CenterService,
             private niftiConverterService: NiftiConverterService,
-            private animalSubjectService: AnimalSubjectService,
+            private subjectService: SubjectService,
             private examinationService: ExaminationService,
+            private animalSubjectService: AnimalSubjectService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
@@ -264,10 +266,9 @@ export class ClinicalContextComponent implements OnDestroy {
                 else return false;
             })
             this.center = scFound ? scFound.center : null;
+            this.onSelectCenter();
             this.acquisitionEquipment = this.studycard.acquisitionEquipment;
-            console.log('caca', this.acquisitionEquipment)
             this.onSelectAcquisitonEquipment();
-            console.log('prout', this.acquisitionEquipment)
             this.niftiConverter = this.studycard.niftiConverter;
             
         }
@@ -329,9 +330,11 @@ export class ClinicalContextComponent implements OnDestroy {
         this.examination = null;
         this.examinations = [];
         if (this.subject) {
+            if(this.importMode == 'BRUKER') {
             this.animalSubjectService
         		.findAnimalSubjectBySubjectId(this.subject.id)
         		.then(animalSubject => this.animalSubject = animalSubject);
+            }
             this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations);
@@ -414,7 +417,11 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                    if (this.importMode == 'BRUKER') {
+                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as Subject));
+                    } else {
+                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                    }
                 })
             );
         });

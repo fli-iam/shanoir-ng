@@ -41,6 +41,7 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
+import { SubjectService } from '../../../subjects/shared/subject.service';
 
 
 @Component({
@@ -92,6 +93,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,
+            private subjectService: SubjectService,
             private studyService: StudyService, 
             private referenceService: ReferenceService,
             private subjectPathologyService: SubjectPathologyService,
@@ -127,7 +129,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             this.preclinicalSubject.animalSubject = new AnimalSubject();
             this.preclinicalSubject.animalSubject.id = this.id;
             this.animalSubjectService.getAnimalSubject(this.id).then(animalSubject => {
-                this.animalSubjectService.getSubject(animalSubject.subjectId).then((subject) => {
+                this.subjectService.get(animalSubject.subjectId).then((subject) => {
                     this.preclinicalSubject.animalSubject = animalSubject;
                     this.preclinicalSubject.subject = subject;
                     // subjectStudy
@@ -165,7 +167,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 animalSubject.biotype = this.getReferenceById(animalSubject.biotype);
                 animalSubject.provider = this.getReferenceById(animalSubject.provider);
                 animalSubject.stabulation = this.getReferenceById(animalSubject.stabulation);
-                this.animalSubjectService.getSubject(animalSubject.subjectId).then((subject) => {
+                this.subjectService.get(animalSubject.subjectId).then((subject) => {
                     this.preclinicalSubject.animalSubject = animalSubject;
                     this.preclinicalSubject.subject = subject;
                     // subjectStudy
@@ -280,7 +282,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     onChangeImagedObjectCategory(formGroup: FormGroup){
-        console.log(this.animalSelected(), this.mode == 'create')
         if (this.animalSelected() && this.mode == 'create') {
             formGroup.get('specie').setValidators([Validators.required]);
             formGroup.get('strain').setValidators([Validators.required]);
@@ -326,17 +327,16 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     this.onSave.next(this.preclinicalSubject);
                     this.chooseRouteAfterSave(this.entity.animalSubject);
                     this.msgBoxService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
-                }).catch((error) => {
-                    console.log('!', error)
                 });
             }else{
                 this.addSubject().then(() => {
                     this.onSave.next(this.preclinicalSubject);
-                    console.log('???????', this.preclinicalSubject.animalSubject.id)
-                    this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
+                    if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
+                        this.chooseRouteAfterSave(this.preclinicalSubject.subject);
+                    } else {
+                        this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
+                    }
                     this.msgBoxService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
-                }).catch((error) => {
-                    console.log('!', error)
                 });
                 
             }
@@ -351,14 +351,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         
         this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
         this.preclinicalSubject.subject.preclinical = true;
-        return this.animalSubjectService.createSubject(this.preclinicalSubject.subject).then((subject) => {
-            console.log('subject', subject);
+        return this.subjectService.create(this.preclinicalSubject.subject).then((subject) => {
             this.preclinicalSubject.subject = subject;
             this.preclinicalSubject.animalSubject.subjectId = subject.id;
             return this.animalSubjectService.createAnimalSubject(this.preclinicalSubject.animalSubject).then((animalSubject) => {
                 this.preclinicalSubject.id = animalSubject.id;
                 this.preclinicalSubject.animalSubject = animalSubject;
-                console.log('############"', animalSubject.id)
                 //Then add pathologies
                 // Create therapies and pathologies from breadcrumb cache
                 if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
@@ -387,7 +385,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             if (this.preclinicalSubject && this.preclinicalSubject.subject){	
                 this.generateSubjectIdentifier();
                 this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
-                return this.animalSubjectService.updateSubject(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
+                return this.subjectService.update(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
                     .then(subject => {
                         if (this.preclinicalSubject.animalSubject){
                              this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);

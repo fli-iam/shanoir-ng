@@ -49,7 +49,7 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPage(Pageable pageable);
+	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
 
 	/**
 	 * Find examination by its id.
@@ -98,18 +98,6 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	Examination update(Examination examination) throws EntityNotFoundException;
-
-	/**
-	 * Get a paginated list of preclinical examinations reachable by connected user, for a given
-	 * preclinical value.
-	 * 
-	 * @param isPreclinical preclinical examination
-	 * @param pageable pagination data.
-	 * @return list of preclinical examinations.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPreclinicalPage(boolean isPreclinical, Pageable pageable);
 
 	/**
 	 * Add an extra data file to examination

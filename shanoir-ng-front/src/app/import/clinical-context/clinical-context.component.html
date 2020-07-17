@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li>
-            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
+            <label [class.required-label]="!useStudyCard">Select an acquisition equipment {{acquisitionEquipmentOptions.length}}</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
                         [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"

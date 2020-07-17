@@ -78,6 +78,7 @@ export class ExaminationDTOService {
         entity.comment = dto.comment;
         entity.note = dto.note;
         entity.subjectWeight = dto.subjectWeight;
+        entity.preclinical = dto.preclinical;
         if (dto.studyId) {
             entity.study = new Study();
             entity.study.id = dto.studyId;
@@ -103,6 +104,7 @@ export class ExaminationDTO {
     studyId: number;
     subjectId: number;
     subjectWeight: number;
+    preclinical: boolean;
 
     constructor(examination?: Examination) {
         if (examination) {
@@ -114,6 +116,7 @@ export class ExaminationDTO {
             this.studyId = examination.study ? examination.study.id : null;
             this.subjectId = examination.subject ? examination.subject.id : null;
             this.subjectWeight = examination.subjectWeight;
+            this.preclinical = examination.preclinical;
         }
     }
 }
