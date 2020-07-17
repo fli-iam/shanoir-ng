@@ -37,7 +37,7 @@ import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
@@ -87,7 +87,7 @@ public class ImporterService {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
 	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
 	private DicomPersisterService dicomPersisterService;
@@ -194,7 +194,7 @@ public class ImporterService {
 				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
 			}
 			// Persist Serie in Shanoir DB
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 			long startTime = System.currentTimeMillis();
 			// Persist Dicom images in Shanoir Pacs
 			dicomPersisterService.persistAllForSerie(serie);
@@ -345,7 +345,7 @@ public class ImporterService {
 			}
 
 			datasetAcquisition.setDatasets(datasets);
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");

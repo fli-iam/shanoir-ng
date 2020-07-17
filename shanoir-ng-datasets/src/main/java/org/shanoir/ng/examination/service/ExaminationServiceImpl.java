@@ -15,13 +15,16 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -54,21 +57,33 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private StudyUserRightsRepository rightsRepository;
 
 	@Autowired
-	private ExaminationMapper examinationMapper;
-	
+	private SolrService solrService;
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
+		Examination exam = examinationRepository.findOne(id);
+		List<Long> datasets = new ArrayList<>();
+
+		for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+			for (Dataset ds : acq.getDatasets()) {
+				datasets.add(ds.getId());
+			}
+		}
+		// Delete examination
 		examinationRepository.delete(id);
+		
+		for (Long dsId : datasets) {
+			solrService.deleteFromIndex(dsId);
+		}
 	}
 
 	@Value("${datasets-data}")
 	private String dataDir;
 
-
 	@Override
 	public Page<Examination> findPage(final Pageable pageable) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAll(pageable);			
+			return examinationRepository.findAll(pageable);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
@@ -80,7 +95,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public List<Examination> findBySubjectId(final Long subjectId) {
 		return examinationRepository.findBySubjectId(subjectId);
 	}
-
+	
+	@Override
+	public List<Examination> findByStudyId(Long studyId) {
+		return examinationRepository.findByStudyId(studyId);
+	}
+	
 	@Override
 	public Examination findById(final Long id) {
 		return examinationRepository.findOne(id);
@@ -160,6 +180,5 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public String getExtraDataFilePath(Long examinationId, String fileName) {
 		return dataDir + "/examination-" + examinationId + "/" + fileName;
 	}
-
 
 }

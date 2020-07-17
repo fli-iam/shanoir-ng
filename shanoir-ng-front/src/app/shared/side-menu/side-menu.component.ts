@@ -69,7 +69,7 @@ export class SideMenuComponent {
 
     indexToSolr() {
         this.solrService.indexAll().then(() => {
-            this.msgboxService.log('info', 'Indexation lanched !');
+            this.msgboxService.log('info', 'Indexation launched !');
         });
     }
 

@@ -16,9 +16,15 @@ package org.shanoir.ng.datasetacquisition.service;
 
 import java.util.List;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +36,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Autowired
 	private DatasetAcquisitionRepository repository;
 
+	@Autowired
+	private ShanoirEventService shanoirEventService;
+
+	@Autowired
+	private SolrService solrService;
+	
 	@Override
 	public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
 		return repository.findByStudyCardId(studyCardId);
@@ -59,6 +71,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Override
 	public DatasetAcquisition create(DatasetAcquisition entity) {
 		DatasetAcquisition savedEntity = repository.save(entity);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		
 		return savedEntity;
 	}
 
@@ -69,7 +83,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			throw new EntityNotFoundException(entity.getClass(), entity.getId());
 		}
 		updateValues(entity, entityDb);
-		return repository.save(entityDb);
+		DatasetAcquisition acq =  repository.save(entityDb);
+		
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+
+		return acq;
 	}
 
 	@Override
@@ -78,7 +96,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		if (entity == null) {
 			throw new EntityNotFoundException("Cannot find entity with id = " + id);
 		}
+		// Remove from solr index
+		for (Dataset ds : entity.getDatasets()) {
+			solrService.deleteFromIndex(ds.getId());
+		}
 		repository.delete(id);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
 
 }
