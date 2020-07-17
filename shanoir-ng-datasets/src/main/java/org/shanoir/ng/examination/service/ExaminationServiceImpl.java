@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.service;
 import java.io.File;
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -52,9 +51,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
-
-	@Autowired
-	private ExaminationMapper examinationMapper;
 	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -66,9 +62,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 
 	@Override
-	public Page<Examination> findPage(final Pageable pageable) {
+	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAll(pageable);			
+			return examinationRepository.findAllByPreclinical(pageable, preclinical);			
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
@@ -125,13 +121,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
 		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
-	}
-
-	@Override
-	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
-		// Get list of studies reachable by connected user
-		List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-		return examinationRepository.findByStudyIdInAndPreclinical(studyIds, isPreclinical, pageable);
 	}
 
 	@Override

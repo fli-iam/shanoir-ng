@@ -91,7 +91,7 @@ public class ExaminationServiceSecurityTest {
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findPage, new PageRequest(0, 10));
+		assertAccessDenied(service::findPage, new PageRequest(0, 10), false);
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam());
@@ -127,7 +127,7 @@ public class ExaminationServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findPage, new PageRequest(0, 10));
+		assertAccessAuthorized(service::findPage, new PageRequest(0, 10), false);
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam());
@@ -159,7 +159,7 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		
-		assertAccessDenied(service::findPage, pageable);
+		assertAccessDenied(service::findPage, pageable, false);
 		
 		List<Examination> exList2 = new ArrayList<>();
 		Examination ex11 = mockExam(1L); ex11.setStudyId(1L); exList2.add(ex11);
@@ -171,7 +171,7 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L, 2L)));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		
-		assertAccessAuthorized(service::findPage, pageable);
+		assertAccessAuthorized(service::findPage, pageable, false);
 	}
 	
 	private void testFindBySubjectId() throws ShanoirException {
