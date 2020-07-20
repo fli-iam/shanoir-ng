@@ -118,7 +118,7 @@ public class ExaminationApiControllerTest {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
-		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false)) ).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
 		exam.setId(Long.valueOf(123));
 		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
