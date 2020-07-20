@@ -56,6 +56,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +108,7 @@ public class ImporterService {
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
 			if (examination != null) {

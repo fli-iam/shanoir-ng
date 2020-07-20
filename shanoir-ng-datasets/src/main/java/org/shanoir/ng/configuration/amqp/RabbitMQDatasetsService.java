@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.StudyUserListener;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -111,7 +112,6 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveSubjectNameUpdate(final String subjectStr) {
-
 		ObjectMapper objectMapper = new ObjectMapper();
 		IdName receivedSubject = new IdName();
 		try {
@@ -142,6 +142,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void createDatasetAcquisition(final String studyStr) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
@@ -171,6 +172,7 @@ public class RabbitMQDatasetsService {
 	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
@@ -181,7 +183,7 @@ public class RabbitMQDatasetsService {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.delete(Long.valueOf(event.getObjectId()));
+				examRepository.delete(exam.getId());
 			}
 			// Delete subject from datasets database
 			subjectRepository.delete(Long.valueOf(event.getObjectId()));
@@ -205,6 +207,8 @@ public class RabbitMQDatasetsService {
 	public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
@@ -215,7 +219,7 @@ public class RabbitMQDatasetsService {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.delete(Long.valueOf(event.getObjectId()));
+				examRepository.delete(exam.getId());
 			}
 			// Delete study from datasets database
 			studyRepository.delete(Long.valueOf(event.getObjectId()));

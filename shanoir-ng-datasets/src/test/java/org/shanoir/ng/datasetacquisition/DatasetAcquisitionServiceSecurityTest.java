@@ -79,11 +79,11 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		//assertAccessDenied(service::findById, ENTITY_ID);
+		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findByStudyCard, 1L);
 		assertAccessDenied(service::findAll);
 		
-		//assertAccessDenied(service::create, mockDsAcq());
+		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
 		assertAccessDenied(service::deleteById, 1L);
 	}
@@ -93,7 +93,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 	public void testAsUser() throws ShanoirException {
 		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		//assertAccessDenied(service::findById, 3L);
+		assertAccessDenied(service::findById, 3L);
 		
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(service::findAll);
@@ -104,7 +104,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertEquals(2, service.findAll().size());
 		assertEquals(2, service.findByStudyCard(1L).size());
 		
-		//assertAccessDenied(service::create, mockDsAcq());
+		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
 		assertAccessDenied(service::deleteById, 1L);
 	}
@@ -114,7 +114,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 	public void testAsExpert() throws ShanoirException {
 		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		//assertAccessDenied(service::findById, 3L);
+		assertAccessDenied(service::findById, 3L);
 		
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(service::findAll);
@@ -129,7 +129,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		DatasetAcquisition dsAcq = mockDsAcq();
 		dsAcq.getExamination().setStudyId(3L);
-		//assertAccessDenied(service::create, dsAcq);
+		assertAccessDenied(service::create, dsAcq);
 		dsAcq.getExamination().setStudyId(1L);
 		DatasetAcquisition dsAcqDB = service.create(dsAcq);
 		
@@ -142,7 +142,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		dsAcqDB.getExamination().setStudyId(1L);
 		assertAccessAuthorized(service::update, dsAcqDB);
 		
-		//assertAccessDenied(service::deleteById, 3L);
+		assertAccessDenied(service::deleteById, 3L);
 		assertAccessAuthorized(service::deleteById, dsAcqDB.getId());
 	}
 

@@ -64,9 +64,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 		Examination exam = examinationRepository.findOne(id);
 		List<Long> datasets = new ArrayList<>();
 
-		for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-			for (Dataset ds : acq.getDatasets()) {
-				datasets.add(ds.getId());
+		if (exam.getDatasetAcquisitions() != null) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				for (Dataset ds : acq.getDatasets()) {
+					datasets.add(ds.getId());
+				}
 			}
 		}
 		// Delete examination

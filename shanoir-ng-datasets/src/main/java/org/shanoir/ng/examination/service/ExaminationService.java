@@ -38,6 +38,7 @@ public interface ExaminationService {
 	 * @param id examination id.
 	 * @throws EntityNotFoundException
 	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException;
 
 	/**
