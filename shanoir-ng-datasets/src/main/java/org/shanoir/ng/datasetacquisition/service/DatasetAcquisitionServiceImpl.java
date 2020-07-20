@@ -28,6 +28,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -91,14 +92,17 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	}
 
 	@Override
+	@Transactional
 	public void deleteById(Long id) throws EntityNotFoundException {
 		final DatasetAcquisition entity = repository.findOne(id);
 		if (entity == null) {
 			throw new EntityNotFoundException("Cannot find entity with id = " + id);
 		}
 		// Remove from solr index
-		for (Dataset ds : entity.getDatasets()) {
-			solrService.deleteFromIndex(ds.getId());
+		if (entity.getDatasets() != null) {
+			for (Dataset ds : entity.getDatasets()) {
+				solrService.deleteFromIndex(ds.getId());
+			}
 		}
 		repository.delete(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));

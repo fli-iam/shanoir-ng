@@ -35,7 +35,7 @@ public interface DatasetAcquisitionService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
 	List<DatasetAcquisition> findAll();
 
-	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(#entity.getExamination().getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#entity.getExamination().getStudyId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#entity, 'CAN_ADMINISTRATE')")
