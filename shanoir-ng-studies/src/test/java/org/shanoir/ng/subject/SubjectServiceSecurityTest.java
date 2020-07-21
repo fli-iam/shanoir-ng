@@ -250,6 +250,7 @@ public class SubjectServiceSecurityTest {
 		for (StudyUserRight right : rights) {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
+			studyUser.setUserName(LOGGED_USER_USERNAME);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);

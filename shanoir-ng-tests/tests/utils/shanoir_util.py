@@ -76,8 +76,9 @@ class Shanoir_util:
         time.sleep(1)
         assert self.check_if_shanoir_table_has_rows()
         
-    def add_entity(self, fields):
-        selenium_utility.wait_to_be_present_and_click("//span[contains(.,'New')]")
+    def add_entity(self, fields, clickOnNew = True):
+        if clickOnNew:
+            selenium_utility.wait_to_be_present_and_click("//span[contains(.,'New')]")
         for field in fields:
             print field
             time.sleep(1)
@@ -86,12 +87,15 @@ class Shanoir_util:
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']//select-option//div[contains(.,'"+field['value']+"')]")
             elif (field['type'] == 'text'):
                 input_xpath = "//input[@formcontrolname='"+field['name']+"']"
+                selenium_utility.clear_input(input_xpath)
                 selenium_utility.wait_and_send_keys(input_xpath, field['value'])
             elif (field['type'] == 'textarea'):
                 input_xpath = "//textarea[@formcontrolname='"+field['name']+"']"
+                selenium_utility.clear_input(input_xpath)
                 selenium_utility.wait_and_send_keys(input_xpath, field['value'])
             elif (field['type'] == 'date'):
                 input_xpath = "//datepicker[@formcontrolname='"+field['name']+"']//input"
+                selenium_utility.clear_input(input_xpath)
                 selenium_utility.wait_and_send_keys(input_xpath, field['value'])
         selenium_utility.wait_to_be_clickable_and_click("//button[contains(.,'Create')]")
     

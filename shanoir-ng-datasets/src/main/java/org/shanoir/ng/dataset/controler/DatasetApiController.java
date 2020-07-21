@@ -48,6 +48,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dataset.service.DatasetUtils; 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
@@ -263,10 +264,10 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			List<URL> pathURLs = new ArrayList<>();
 			if ("dcm".equals(format)) {
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
 			} else if ("nii".equals(format)) {
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} else if ("eeg".equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
@@ -518,7 +519,7 @@ public class DatasetApiController implements DatasetApi {
 			// Get nii and json files
 			try {
 				List<URL> pathURLs = new ArrayList<URL>();
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				DatasetUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 				copyFilesForBIDSExport(pathURLs, workFolder, subjectName, examinationList.get(0).getId().toString(), modalityLabel);
 			} catch (IOException e) {
 				throw new RestServiceException(

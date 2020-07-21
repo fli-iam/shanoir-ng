@@ -11,13 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Entity } from '../../shared/components/entity/entity.abstract';
+import { StudyCenter } from '../../studies/shared/study-center.model';
+import { ServiceLocator } from '../../utils/locator.service';
+import { CenterService } from './center.service';
 
-import { AcquisitionEquipment } from "../../acquisition-equipments/shared/acquisition-equipment.model";
-import { Entity } from "../../shared/components/entity/entity.abstract";
-import { CenterService } from "./center.service";
-import { ServiceLocator } from "../../utils/locator.service";
-import { StudyCenter } from "../../studies/shared/study-center.model";
-import { IdName } from "../../shared/models/id-name.model";
 
 export class Center extends Entity {
     acquisitionEquipments: AcquisitionEquipment[];
@@ -29,7 +28,6 @@ export class Center extends Entity {
     postalCode: string;
     street: string;
     website: string;
-    compatible: boolean = false;
     studyCenterList: StudyCenter[] = [];
 
     service: CenterService = ServiceLocator.injector.get(CenterService);

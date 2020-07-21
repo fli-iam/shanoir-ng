@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.shared.configuration;
 
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -45,6 +45,8 @@ public class RabbitMQConfiguration {
 
 	public static final String SHANOIR_EVENTS_QUEUE = "shanoir_events_queue";
 
+	public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir_events_queue_import";
+	
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
 	public static final String STUDY_USER_QUEUE = "study-user";
@@ -81,6 +83,14 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
+	public static final String STUDY_NAME_UPDATE = "study_name_update";
+
+	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
+	
+	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+	public static final String USER_ADMIN_STUDY_QUEUE = "user-admin-study-queue";
+
 	////////////////// EXCHANGES //////////////////
 
 	public static final String EVENTS_EXCHANGE = "events-exchange";
@@ -89,6 +99,9 @@ public class RabbitMQConfiguration {
 
 	public static final String SUBJECTS_EXCHANGE = "subjects-exchange";
 
+	public static final String STUDY_ADMIN_EXCHANGE = "study-admin-exchange";
+
+	public static final String DATASET_SUBJECT_EXCHANGE = "dataset-subjects-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -98,6 +111,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue getShanoirEventsQueue() {
     	return new Queue(SHANOIR_EVENTS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue getShanoirEventsQueueImport() {
+    	return new Queue(SHANOIR_EVENTS_QUEUE_IMPORT, true);
     }
 
 	@Bean
@@ -201,6 +219,11 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static Queue datasetSubjectQueue() {
+		return new Queue(DATASET_SUBJECT_QUEUE, true);
+	}
+	
+	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
@@ -216,7 +239,33 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public DirectExchange directExchange() {
+	    return new DirectExchange(DATASET_SUBJECT_EXCHANGE, true, false);
+	}
+
+
+	@Bean
 	public FanoutExchange fanoutSubjectExchange() {
 	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
+	}
+
+	@Bean
+	public FanoutExchange adminStudyExchange() {
+	    return new FanoutExchange(STUDY_ADMIN_EXCHANGE, true, false);
+	}
+
+	@Bean
+	public static Queue studyNameUpdateQueue() {
+		return new Queue(STUDY_NAME_UPDATE, true);
+	}
+	
+	@Bean
+	public static Queue subjectNameUpdateQueue() {
+		return new Queue(SUBJECT_NAME_UPDATE, true);
+	}
+
+	@Bean
+	public static Queue userAdminStudyQueue() {
+		return new Queue(USER_ADMIN_STUDY_QUEUE, true);
 	}
 }

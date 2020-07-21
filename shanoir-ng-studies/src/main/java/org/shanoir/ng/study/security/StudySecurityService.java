@@ -384,6 +384,32 @@ public class StudySecurityService {
     
     
     /**
+     * Verifies that study's studyUsers link to the correct study.
+     * @param study
+     * @return
+     */
+    public boolean studyUsersMatchStudy(Study study) {
+    	for (StudyUser su : study.getStudyUserList()) {
+    		if (su.getStudy() != null && su.getStudy().getId() != null && su.getStudy().getId() != study.getId()) return false;
+    	}
+    	return true;
+    }
+    
+    
+    /**
+     * Verifies that study's studyUsers link to no study.
+     * @param study
+     * @return
+     */
+    public boolean studyUsersStudyNull(Study study) {
+    	for (StudyUser su : study.getStudyUserList()) {
+    		if (!(su.getStudy() == null || su.getStudy().getId() == null)) return false;
+    	}
+    	return true;
+    }
+    
+    
+    /**
      * Check that the connected user has this right on this study.
      * 
      * @param study

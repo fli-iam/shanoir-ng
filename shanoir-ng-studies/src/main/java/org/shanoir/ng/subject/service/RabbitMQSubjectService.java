@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.subject.service;
 
 import java.io.File;
@@ -13,6 +27,7 @@ import java.util.stream.StreamSupport;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
@@ -78,6 +93,22 @@ public class RabbitMQSubjectService {
 
 	@Autowired
 	SubjectRepository subjectRepository;
+
+	@Autowired
+	SubjectService subjectService;
+	
+	/**
+	 * This methods returns a list of subjects for a given study ID
+	 * @param studyId the study ID
+	 * @return a list of subjects
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+	        value = @Queue(value = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, durable = "true"),
+	        exchange = @Exchange(value = RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, ignoreDeclarationExceptions = "true",
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.DIRECT)))
+	public List<SimpleSubjectDTO> getSubjectsForStudy(String studyId) {
+		return subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId));
+	}
 	
 	/**
 	 * This methods allows to get the particpants.tsv file from BIDS/SEF import and deserialize it into subjects

@@ -11,28 +11,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../../breadcrumbs/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { ShanoirError } from '../../models/error.model';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
-import { ShanoirError } from '../../models/error.model';
-import { Router } from '../../../breadcrumbs/router';
+
 
 export type Mode =  "view" | "edit" | "create";
-export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
-
-    protected id: number;
+export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
+    
     private _entity: T;
     @Input() mode: Mode;
+    @Input() id: number; // optional
     @Output() close: EventEmitter<any> = new EventEmitter();
     protected footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
@@ -58,7 +69,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     abstract buildForm(): FormGroup;
 
     constructor(
-            private activatedRoute: ActivatedRoute,
+            protected activatedRoute: ActivatedRoute,
             private readonly ROUTING_NAME: string) {
         
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
@@ -70,7 +81,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         
         this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.id = +this.activatedRoute.snapshot.params['id'];
         this.addBCStep();
     }
 
@@ -83,6 +93,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
+        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
         const choose = (): Promise<void> => {
             switch (this.mode) { 
                 case 'create' : return this.initCreate();
@@ -101,12 +112,21 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.manageFormSubscriptions();
         });
     }
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if ((changes['id'] && !changes['id'].isFirstChange())
+                || (changes['mode'] && !changes['mode'].isFirstChange())) 
+            this.ngOnInit();
+    }
 
     private manageFormSubscriptions() {
         this.form = this.buildForm();
         if (this.form) {
             this.subscribtions.push(
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create'))
+                this.form.statusChanges.subscribe(status => {
+                    this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
+                    this.footerState.dirty = this.form.dirty;
+                })
             );
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
@@ -178,7 +198,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && control.touched && !control.valid) {
+        if (control && (control.touched || this.mode != 'create') && !control.valid) {
             return control.errors;
         }
     }
@@ -224,17 +244,21 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
                 this.footerState.loading = false;
-                if (reason && reason.error && reason.error.code == 422) {
-                    this.saveError = new ShanoirError(reason);
-                    for (let managedField of this.onSubmitValidatedFields) {
-                        let fieldControl: AbstractControl = this.form.get(managedField);
-                        if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
-                        fieldControl.updateValueAndValidity({emitEvent : false});
-                        if (!fieldControl.valid) fieldControl.markAsTouched();
-                    }
-                    this.footerState.valid = this.form.status == 'VALID';
-                } else throw reason;
+                return this.catchSavingErrors(reason);
             });
+    }
+
+    protected catchSavingErrors = (reason: any): Promise<any> => {
+        if (reason && reason.error && reason.error.code == 422) {
+            this.saveError = new ShanoirError(reason);
+            for (let managedField of this.onSubmitValidatedFields) {
+                let fieldControl: AbstractControl = this.form.get(managedField);
+                if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+                fieldControl.updateValueAndValidity({emitEvent : false});
+                if (!fieldControl.valid) fieldControl.markAsTouched();
+            }
+            this.footerState.valid = this.form.status == 'VALID';
+        } throw reason;
     }
 
     /**

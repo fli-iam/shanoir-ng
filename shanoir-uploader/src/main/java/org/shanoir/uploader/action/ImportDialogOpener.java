@@ -153,13 +153,17 @@ public class ImportDialogOpener {
 									+ studyCardDTO.getAcqEquipmentManufacturerModel() + " "
 									+ studyCardDTO.getAcqEquipmentSerialNumber() + " - " + studyCardDTO.getCenterName()
 									+ ")";
-							if (studyCardDTO.getAcqEquipmentManufacturer().compareToIgnoreCase(manufacturer) == 0
-									&& studyCardDTO.getAcqEquipmentManufacturerModel()
-											.compareToIgnoreCase(manufacturerModelName) == 0
-									&& studyCardDTO.getAcqEquipmentSerialNumber()
-											.compareToIgnoreCase(deviceSerialNumber) == 0) {
-								studyCard.setCompatible(true);
-								compatibleStudyCard = true;
+							if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
+								if (studyCardDTO.getAcqEquipmentManufacturer().compareToIgnoreCase(manufacturer) == 0
+										&& studyCardDTO.getAcqEquipmentManufacturerModel()
+												.compareToIgnoreCase(manufacturerModelName) == 0
+										&& studyCardDTO.getAcqEquipmentSerialNumber()
+												.compareToIgnoreCase(deviceSerialNumber) == 0) {
+									studyCard.setCompatible(true);
+									compatibleStudyCard = true;
+								} else {
+									studyCard.setCompatible(false);
+								}
 							} else {
 								studyCard.setCompatible(false);
 							}

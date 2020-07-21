@@ -17,8 +17,6 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * @author atouboul
  * @author mkain
@@ -27,48 +25,37 @@ public class ImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
 
-	@JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
-    @JsonProperty("fromShanoirUploader")
     private boolean fromShanoirUploader;
 
-    @JsonProperty("fromPacs")
     private boolean fromPacs;
     
-	@JsonProperty("workFolder")
 	private String workFolder;
 
-	@JsonProperty("patients")
     private List<Patient> patients;
     
-    @JsonProperty("examinationId")
     private Long examinationId;
     
-    @JsonProperty("frontStudyId")
-    private Long frontStudyId;
+    private Long studyCardId;
     
-	@JsonProperty("studyCardName")
+    private Long converterId;
+    
+    private Long studyId;
+    
 	private String studyCardName;
 	
 	// todo: remove this later, when front end uses StudyCards
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 	
-	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
-    
-    @JsonProperty("frontConverterId")
-    private Long frontConverterId;
 
-    @JsonProperty("archive")
     private String archive;
 
-	@JsonProperty("subjectName")
 	private String subjectName;
 
-	@JsonProperty("studyName")
 	private String studyName;
+
     
 	public String getArchive() {
 		return archive;
@@ -118,12 +105,20 @@ public class ImportJob implements Serializable {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+    public String getWorkFolder() {
+		return workFolder;
 	}
 
-	public void setFrontStudyId(final Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setWorkFolder(String workFolder) {
+		this.workFolder = workFolder;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(final Long studyId) {
+		this.studyId = studyId;
 	}
 
 	public String getStudyCardName() {
@@ -134,20 +129,29 @@ public class ImportJob implements Serializable {
 		this.studyCardName = studyCardName;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(final Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
+
 	}
 
-	public Long getFrontConverterId() {
-		return frontConverterId;
+	public Long getStudyCardId() {
+		return studyCardId;
 	}
 
-	public void setFrontConverterId(final Long frontConverterId) {
-		this.frontConverterId = frontConverterId;
+	public void setStudyCardId(Long studyCardId) {
+		this.studyCardId = studyCardId;
+	}
+
+	public Long getConverterId() {
+		return converterId;
+	}
+
+	public void setConverterId(Long converterId) {
+		this.converterId = converterId;
 	}
 
     public String getAnonymisationProfileToUse() {
@@ -156,14 +160,6 @@ public class ImportJob implements Serializable {
 
 	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
 		this.anonymisationProfileToUse = anonymisationProfileToUse;
-	}
-
-	public String getWorkFolder() {
-		return workFolder;
-	}
-
-	public void setWorkFolder(final String workFolder) {
-		this.workFolder = workFolder;
 	}
 
 	public String getSubjectName() {

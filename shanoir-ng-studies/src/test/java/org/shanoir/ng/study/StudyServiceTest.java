@@ -1,5 +1,5 @@
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
+$ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -32,6 +32,7 @@ import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -130,13 +131,13 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void saveTest() {
+	public void saveTest() throws MicroServiceCommunicationException {
 		studyService.create(createStudy());
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 
 	@Test
-	public void updateTest() throws AccessDeniedException, EntityNotFoundException {
+	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
 		final Study updatedStudy = studyService.update(createStudy());
 		Assert.assertNotNull(updatedStudy);
 		Assert.assertTrue(UPDATED_STUDY_NAME.equals(updatedStudy.getName()));
@@ -145,7 +146,7 @@ public class StudyServiceTest {
 	}
 	
 	@Test
-	public void updateStudyUsersTest() throws EntityNotFoundException {
+	public void updateStudyUsersTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
 		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+. /bin/entrypoint_common
+
+(
+	require SHANOIR_X_FORWARDED
+	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
+		echo 'proxy_set_header 	X-Forwarded-For $remote_addr;'
+		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
+	fi
+
+	optional SHANOIR_PREFIX
+	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
+) >/etc/nginx/shanoir.conf
+
+require SHANOIR_URL_SCHEME
+require SHANOIR_URL_HOST
+src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
+dst="/etc/nginx/server.conf"
+sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
+
+
+# change theme colors
+override_colors()
+{
+	local spec
+	for spec in $SHANOIR_COLORS ; do
+		if [[ "$spec" =~ ^([A-Za-z0-9-]+):(#[0-9A-Fa-f]{3,6})$ ]] ; then
+			local name="${BASH_REMATCH[1]}"
+			local value="${BASH_REMATCH[2]}"
+
+			sed -i "s/^\( *--color-$name *:\).*/\1 $value;/" /etc/nginx/html/assets/css/common.css /etc/nginx/html/app.css
+		else
+			error "malformatted color spec in SHANOIR_COLORS: '$spec'  (expected: name:#xxxxxx)"
+		fi
+
+	done
+}
+
+optional SHANOIR_COLORS
+override_colors
+
+abort_if_error
+
+nginx -t
+exec "$@"

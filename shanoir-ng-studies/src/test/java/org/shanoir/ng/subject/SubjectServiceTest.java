@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -99,13 +100,13 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void saveTest() {
+	public void saveTest() throws MicroServiceCommunicationException {
 		subjectService.create(createSubjectTosave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
-	public void updateTest() throws EntityNotFoundException {
+	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
 		Assert.assertNotNull(updatedSubject);
 		Assert.assertTrue(UPDATED_SUBJECT_DATA.equals(updatedSubject.getName()));

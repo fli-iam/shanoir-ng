@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
@@ -181,9 +182,15 @@ public class StudyApiController implements StudyApi {
 
 		validate(study, result);
 
-		final Study createdStudy = studyService.create(study);
-		bidsService.createBidsFolder(createdStudy);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT, createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		Study createdStudy;
+		try {
+			createdStudy = studyService.create(study);
+			bidsService.createBidsFolder(createdStudy);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT, createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 	}
 
@@ -198,7 +205,10 @@ public class StudyApiController implements StudyApi {
 			studyService.update(study);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

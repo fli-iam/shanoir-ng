@@ -149,7 +149,7 @@ public enum DatasetProcessingType {
 	LOW_PASS_FILTERING(42),
 
 	// Mathematical mprphology filtering
-	MATHEMATICAL_MPRPHOLOGY_FILTERING(43),
+	MATHEMATICAL_MORPHOLOGY_FILTERING(43),
 
 	// Erosion
 	EROSION(44),

@@ -8,9 +8,7 @@
         <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
         <div *ngIf="!useBids">
         <p> Please select dataset type (only for DICOM / NIFTI datasets): </p>
-        <select-box [(ngModel)]="type">
-            <select-option selected value="nii">Nifti</select-option>
-            <select-option value="dcm">Dicom</select-option>
+        <select-box [(ngModel)]="type" [optionArr]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]">
         </select-box>
         </div>
     </div>

@@ -21,7 +21,6 @@ import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.s
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
-import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExtraData }    from '../../extraData/extraData/shared/extradata.model';
 import { BloodGasData }    from '../../extraData/bloodGasData/shared/bloodGasData.model';
 import { BloodGasDataFile }    from '../../extraData/bloodGasData/shared/bloodGasDataFile.model';
@@ -42,11 +41,12 @@ import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { ExaminationService } from '../../../examinations/shared/examination.service';
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
-    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, AnimalExaminationService],
+    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, ExaminationService],
     styleUrls: ['animal-examination.component.css']
 })
 @ModesAware
@@ -75,7 +75,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     constructor(
         private route: ActivatedRoute,
-        private animalExaminationService: AnimalExaminationService, 
+        private examinationService: ExaminationService, 
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
         private contrastAgentsService: ContrastAgentService,
@@ -94,7 +94,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     initView(): Promise<void> {
-        return this.animalExaminationService.get(this.id).then(examination => {
+        return this.examinationService.get(this.id).then(examination => {
             this.examination = examination; 
             this.updateExam();
             //this.loadExaminationAnesthetic();
@@ -112,7 +112,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.animalExaminationService.get(this.id).then(examination => {
+        return this.examinationService.get(this.id).then(examination => {
             this.examination = examination;
             this.updateExam();
             //this.loadExaminationAnesthetic(this.id);
@@ -159,17 +159,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             this.examination.subjectStudy.name = this.examination.subject.name;
         }
     }
-
-    private updateExamForSave(): void{
-        this.examination.centerId = this.examination.center.id;
-        this.examination.studyId = this.examination.study.id;
-        this.examination.subjectId = this.examination.subject.id;
-    }
     
     private getCenters(): void {
         this.centers = [];
         this.centerService
-            .getCentersNamesForExamination()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
             });
@@ -206,11 +200,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
 
     protected save(): Promise<void> {
-        this.updateExamForSave();
         return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
-                this.animalExaminationService.postFile(file, this.entity.id).subscribe(response => console.log('result:' + response));
+                this.examinationService.postFile(file, this.entity.id);
             }            
         });;
     }

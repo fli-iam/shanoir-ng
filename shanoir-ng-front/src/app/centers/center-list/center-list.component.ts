@@ -59,7 +59,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-podcast", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }
@@ -68,9 +68,11 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled('center', center);
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                center.acquisitionEquipments.push(entity as AcquisitionEquipment);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    center.acquisitionEquipments.push(entity as AcquisitionEquipment);
+                })
+            );
         });
     }
 

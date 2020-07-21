@@ -12,60 +12,72 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<fieldset [formGroup]="accountRequestInfoForm">
+<fieldset *ngIf="info && form" [formGroup]="form">
     <ol>
         <li>
-            <label i18n="Edit user|Institution label@@editUserInstitution" class="required-label">Institution</label> 
+            <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="institution" required formControlName="institution" [(ngModel)]="userAccountRequestInfo.institution" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="institution"/>
-                <label *ngIf="requestAccountMode && formErrors.institution.includes('required')" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="institution" [(ngModel)]="info.institution"/>
+                    <label *ngIf="hasError('institution', ['required'])" class="form-validation-alert" i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">Institution is required!</label>
+                    <label *ngIf="hasError('institution', ['length'])" class="form-validation-alert" i18n="Edit user|Institution length error@@editUserInstitutionLengthError">Institution length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.institution}}</span>
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Service label@@editUserService" class="required-label">Service</label> 
+            <label i18n="Edit user|Service label@@editUserService" [class.required-label]="editMode">Service</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="service" required formControlName="service" [(ngModel)]="userAccountRequestInfo.service" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="service"/>
-                <label *ngIf="requestAccountMode && formErrors.service.includes('required')" class="form-validation-alert" i18n="Edit user|Service required error@@editUserServiceRequiredError">Service is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Service length error@@editUserServiceLengthError">Service length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="service" [(ngModel)]="info.service"/>
+                    <label *ngIf="hasError('service', ['required'])" class="form-validation-alert" i18n="Edit user|Service required error@@editUserServiceRequiredError">Service is required!</label>
+                    <label *ngIf="hasError('service', ['length'])" class="form-validation-alert" i18n="Edit user|Service length error@@editUserServiceLengthError">Service length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.service}}</span>
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Function label@@editUserFunction" class="required-label">Function</label> 
+            <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Function</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="function" required formControlName="function" [(ngModel)]="userAccountRequestInfo.function" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="function"/>
-                <label *ngIf="requestAccountMode && formErrors.function.includes('required')" class="form-validation-alert" i18n="Edit user|Function required error@@editUserFunctionRequiredError">Function is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Function length error@@editUserFunctionLengthError">Function length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="function" [(ngModel)]="info.function"/>
+                    <label *ngIf="hasError('function', ['required'])" class="form-validation-alert" i18n="Edit user|Function required error@@editUserFunctionRequiredError">Function is required!</label>
+                    <label *ngIf="hasError('function', ['length'])" class="form-validation-alert" i18n="Edit user|Function length error@@editUserFunctionLengthError">Function length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.function}}</span>
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Study label@@editUserStudy" class="required-label">Concerned study</label> 
+            <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">Concerned study</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="study" required formControlName="study" [(ngModel)]="userAccountRequestInfo.study" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="study"/>
-                <label *ngIf="requestAccountMode && formErrors.study.includes('required')" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Study length error@@editUserStudyLengthError">Study length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="study" [(ngModel)]="info.study"/>
+                    <label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
+                    <label *ngIf="hasError('study', ['length'])" class="form-validation-alert" i18n="Edit user|Study length error@@editUserStudyLengthError">Study length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.study}}</span>
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Contact label@@editUserContact" class="required-label">My contact in Shanoir</label> 
+            <label i18n="Edit user|Contact label@@editUserContact" [class.required-label]="editMode">My contact in Shanoir</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="contact" required formControlName="contact" [(ngModel)]="userAccountRequestInfo.contact" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="contact"/>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('required')" class="form-validation-alert" i18n="Edit user|Contact required error@@editUserContactRequiredError">Contact is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Contact length error@@editUserContactLengthError">Contact length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="contact" [(ngModel)]="info.contact"/>
+                    <label *ngIf="hasError('contact', ['required'])" class="form-validation-alert" i18n="Edit user|Contact required error@@editUserContactRequiredError">Contact is required!</label>
+                    <label *ngIf="hasError('contact', ['length'])" class="form-validation-alert" i18n="Edit user|Contact length error@@editUserContactLengthError">Contact length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.contact}}</span>
             </span>
         </li>
         <li>
-            <label i18n="Edit user|Work label@@editUserWork" class="required-label">Role in the study</label> 
+            <label i18n="Edit user|Work label@@editUserWork" [class.required-label]="editMode">Role in the study</label> 
             <span class="right-col">
-                <input *ngIf="!requestAccountMode" type="text" id="work" required formControlName="work" [(ngModel)]="userAccountRequestInfo.work" readonly/>
-                <input *ngIf="requestAccountMode" type="text" required maxlength="200" formControlName="work"/>    
-                <label *ngIf="requestAccountMode && formErrors.work.includes('required')" class="form-validation-alert" i18n="Edit user|Work required error@@editUserWorkRequiredError">Work is required!</label>
-                <label *ngIf="requestAccountMode && formErrors.contact.includes('length')" class="form-validation-alert" i18n="Edit user|Work length error@@editUserWorkLengthError">Work length must be less than 200!</label>
+                <ng-container *ngIf="editMode">
+                    <input type="text" formControlName="work" [(ngModel)]="info.work"/>
+                    <label *ngIf="hasError('work', ['required'])" class="form-validation-alert" i18n="Edit user|Work required error@@editUserWorkRequiredError">Work is required!</label>
+                    <label *ngIf="hasError('work', ['length'])" class="form-validation-alert" i18n="Edit user|Work length error@@editUserWorkLengthError">Work length must be less than 200!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.work}}</span>
             </span>
         </li>
     </ol>

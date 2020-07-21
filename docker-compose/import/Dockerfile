@@ -99,7 +99,8 @@ RUN install -m 755 external/dcmtk/dcm2pnm/linux/dcm2pnm /usr/local/bin/
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 ADD shanoir-ng-import.jar shanoir-ng-import.jar
+COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and to active dev profile
-#ENTRYPOINT ["java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-import.jar"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-import.jar"]

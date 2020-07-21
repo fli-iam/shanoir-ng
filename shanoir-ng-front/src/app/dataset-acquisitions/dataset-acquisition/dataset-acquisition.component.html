@@ -1,0 +1,123 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component">
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<div class="layout">
+			<span [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<h2 class="header command-zone">Dataset acquisition details</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<h2 class="header command-zone">Edit dataset acquisition</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<h2 class="header command-zone">Create dataset acquisition</h2>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li *ngIf="mode != 'create'">
+						<label>Id</label>
+						<span class="right-col">
+							{{datasetAcquisition.id}}
+						</span>
+					</li>
+					<li>
+						<label>Type</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.type}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="type" [(ngModel)]="datasetAcquisition.type" [optionArr]="['Mr', 'Pet', 'Ct']">
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Study card</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.studyCard?.name}}
+							</ng-template> 
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="study-card" [(ngModel)]="datasetAcquisition.studyCard" [optionArr]="studyCards">
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Acquisition equipment</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
+							</ng-template> 
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Rank</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.rank}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" formControlName="rank" [(ngModel)]="datasetAcquisition.rank" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Software release</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.softwareRelease}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" formControlName="software-release" [(ngModel)]="datasetAcquisition.softwareRelease" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Sorting index</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{datasetAcquisition.sortingIndex}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" formControlName="sorting-index" [(ngModel)]="datasetAcquisition.sortingIndex" />
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+
+			<ng-container *ngIf="datasetAcquisition.protocol">
+				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></mr-protocol>
+				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
+			</ng-container>
+			
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			></form-footer>
+		</div>
+	</form>
+</div>

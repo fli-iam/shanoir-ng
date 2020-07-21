@@ -18,8 +18,15 @@ import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
 import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
 import { Dataset } from '../datasets/shared/dataset.model';
 
+// Base urls
+let url = window.location;
+const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
+export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
+
+
 // Users http api
-const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
+const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
@@ -27,7 +34,7 @@ export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountre
 export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USER_URL + '/extension';
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
 
-const BACKEND_API_STUDIES_MS_URL: string = process.env.BACKEND_API_STUDIES_MS_URL;
+const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
@@ -54,9 +61,16 @@ export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL 
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
 
 // Datasets http api
-const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
+const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 
+// Dataset acquisition http api
+export const BACKEND_API_DATASET_ACQUISITION_URL: string = BACKEND_API_DATASET_MS_URL + '/datasetacquisition';
+
+// Solr http api
+export const BACKEND_API_SOLR_URL: string = BACKEND_API_DATASET_MS_URL + '/solr';
+export const BACKEND_API_SOLR_INDEX_URL: string = BACKEND_API_SOLR_URL + '/index';
+export const BACKEND_API_SOLR_FULLTEXT_SEARCH_URL: string = BACKEND_API_SOLR_URL + '/search';
 // BIDS http api
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
@@ -78,19 +92,24 @@ export const BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL: string = BACKEND_API_MANU
 export const BACKEND_API_MANUF_URL: string = BACKEND_API_STUDIES_MS_URL + '/manufacturers';
 
 // Import http api
-const BACKEND_API_IMPORT_MS_URL: string = process.env.BACKEND_API_IMPORT_MS_URL;
+const BACKEND_API_IMPORT_MS_URL: string = BACKEND_API_URL + '/import';
 export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_dicom/';
 export const BACKEND_API_IMPORT_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_dicom/';
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
 export const BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_eeg_job/';
-export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet';
+export const BACKEND_API_GET_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/get_dicom/';
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
+export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/studycards';
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
 export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/importAsBids/';
 export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_eeg/';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';
+
+// Preclinical http api
+export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
+
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -134,6 +153,24 @@ export function pad(n, width, z?): string {
 }
 
 
+/**
+* Returns the index of the last element in the array where predicate is true, and -1
+* otherwise.
+* @param array The source array to search in
+* @param predicate find calls predicate once for each element of the array, in descending
+* order, until it finds one where predicate returns true. If such an element is found,
+* findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+*/
+export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    let l = array.length;
+    while (l--) {
+        if (predicate(array[l], l, array))
+            return l;
+    }
+    return -1;
+}
+
+
 @Pipe({name: 'times'})
 export class TimesPipe implements PipeTransform {
   transform(value: number): any {
@@ -148,11 +185,24 @@ export class TimesPipe implements PipeTransform {
   }
 }
 
+@Pipe({name: 'getValues'})
+export class GetValuesPipe implements PipeTransform {
+    transform(map: Map<any, any>): any[] {
+        let ret = [];
+        map.forEach((val, key) => {
+            ret.push({
+                key: key,
+                val: val
+            });
+        });
+        return ret;
+    }
+}
+
 export function allOfEnum<T>(enumClass): Array<T> {
     let list: Array<T> = [];
     for (let key in enumClass) {
-        if (key != 'all' && isNaN(Number(key)))
-        list.push(enumClass[key]);
+        if (!(enumClass[key] instanceof Function)) list.push(enumClass[key]);
     }
     return list;
 }
@@ -164,17 +214,26 @@ export function capitalizeFirstLetter(str: string) {
 
 export function capitalsAndUnderscoresToDisplayable(str: string) {
     if (!str) return;
-    return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
+    return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
+}
+
+export function isFunction(obj) {
+    return !!(obj && obj.constructor && obj.call && obj.apply);
+}
+
+export function getDatasetInstance(type: string) { 
+    if (type == 'Mr') return new MrDataset();
+    if (type == 'Eeg') return new EegDataset();
+    else return new MrDataset(); 
 }
 
 export function getEntityInstance(entity: Dataset) { 
-    if (entity.type == 'Mr') return new MrDataset();
-    if (entity.type == 'Eeg') return new EegDataset();
+    return getDatasetInstance(entity.type);
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    else return new MrDataset(); // fixes errors with our test dataset (which have no real types)
+    // fixes errors with our test dataset (which have no real types)
     // TODO : Throw en exception
 }

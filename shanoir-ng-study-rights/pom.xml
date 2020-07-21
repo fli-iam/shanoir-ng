@@ -42,5 +42,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<artifactId>shanoir-ng-ms-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency>
+    <dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate-java8</artifactId>
+    </dependency>
   </dependencies>
 </project>
