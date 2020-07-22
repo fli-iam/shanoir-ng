@@ -428,27 +428,38 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     sortReferences() {
     if (this.references){
+        let speciesToSet: Reference[] = [];
+        let biotypesToSet: Reference[] = [];
+        let strainsToSet: Reference[] = [];
+        let providersToSet: Reference[] = [];
+        let stabulationsToSet: Reference[] = [];
+
         for (let ref of this.references) {
             switch (ref.reftype) {
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_SPECIE:
-                    this.species.push(ref);
+                    speciesToSet.push(ref);
                     break;
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_BIOTYPE:
-                    this.biotypes.push(ref);
+                    biotypesToSet.push(ref);
                     break;
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_STRAIN:
-                    this.strains.push(ref);
+                    strainsToSet.push(ref);
                     break;
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_PROVIDER:
-                    this.providers.push(ref);
+                    providersToSet.push(ref);
                     break;
                 case PreclinicalUtils.PRECLINICAL_SUBJECT_STABULATION:
-                    this.stabulations.push(ref);
+                    stabulationsToSet.push(ref);
                     break;
                 default:
                     break;
             }
         }
+        this.species = speciesToSet;
+        this.biotypes = biotypesToSet;
+        this.strains = strainsToSet;
+        this.providers = providersToSet;
+        this.stabulations = stabulationsToSet;
         }
     }
 

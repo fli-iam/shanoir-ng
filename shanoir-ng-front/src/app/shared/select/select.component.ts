@@ -115,6 +115,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 else if (typeof(item) == 'string') label = item;
                 else if (item.label) label = item.label;
                 else if (item.name) label = item.name;
+                else if (item.value) label = item.value;
                 this.options.push(new Option<any>(item, label));
             });
             this.initSelectedOption();
