@@ -140,8 +140,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private initSelectedOption() {
-        if (this.inputValue) {
-            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+        if (this.selectedOption) {
+            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
             if (index == -1) {
                 this.selectedOptionIndex = null;
             } else {
