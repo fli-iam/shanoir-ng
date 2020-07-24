@@ -15,6 +15,7 @@
 package org.shanoir.ng.studycard.service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
@@ -43,6 +44,8 @@ public class StudyCardProcessingService {
 				applyStudyCardRule(acquisition, rule, dicomAttributes);
 			}
 		}
+		acquisition.setStudyCard(studyCard);
+		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
 	}
 
 	
