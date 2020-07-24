@@ -15,47 +15,32 @@
 package org.shanoir.ng.datasetacquisition;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * User security service test.
@@ -80,8 +65,10 @@ public class DatasetAcquisitionServiceSecurityTest {
 	StudyRightsService commService;
 	
 	@MockBean
-	private RestTemplate restTemplate;
+	private ShanoirEventService shanoirEventService;
 
+	@MockBean
+	private SolrService solrService;
 	
 	@Before
 	public void setup() {
@@ -170,7 +157,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByStudyCard, 1L);
-		assertAccessAuthorized(service::findAll);		
+		assertAccessAuthorized(service::findAll);
 		assertEquals(3, service.findAll().size());
 		assertAccessAuthorized(service::create, mockDsAcq());
 		assertAccessAuthorized(service::update, mockDsAcq(1L));

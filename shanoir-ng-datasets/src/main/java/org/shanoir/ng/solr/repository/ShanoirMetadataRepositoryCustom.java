@@ -34,4 +34,6 @@ public interface ShanoirMetadataRepositoryCustom {
 	 * @return list of ShanoirSolrDocument.
 	 */
 	List<ShanoirMetadata> findAllAsSolrDoc();
+
+	ShanoirMetadata findOneSolrDoc(Long datasetId);
 }

@@ -41,5 +41,7 @@ public interface SolrService {
 	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable);
-	
+
+	void indexDataset(Long datasetId);
+
 }
