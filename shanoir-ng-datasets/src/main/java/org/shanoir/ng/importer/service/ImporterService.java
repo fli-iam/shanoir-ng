@@ -356,12 +356,9 @@ public class ImporterService {
 			// Complete BIDS with data
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOG.error("Something went wrong creating the bids data: ", e);
 			}
-
-			//} catch (ShanoirException exc) {
-			//  Do something specific about ShanoirException when trhown
 		} catch (Exception e) {
 			LOG.error("Error while importing EEG: ", e);
 			event.setStatus(ShanoirEvent.ERROR);

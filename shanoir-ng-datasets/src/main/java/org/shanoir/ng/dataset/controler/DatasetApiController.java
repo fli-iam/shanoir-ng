@@ -610,21 +610,21 @@ public class DatasetApiController implements DatasetApi {
 	 */
 	public enum CoordinatesSystem {
 	    ACPC("mm"),
-	    Allen("mm"),
-	    Analyze("mm"),
-	    BTi_4D("m"),
+	    ALLEN("mm"),
+	    ANALYZE("mm"),
+	    BTI_4D("m"),
 	    CTF_MRI("mm"),
-	    CTF_gradiometer("cm"),
-	    CapTrak("mm"),
-	    Chieti("mm"),
+	    CTF_GRADIOMETER("cm"),
+	    CAPTRAK("mm"),
+	    CHIETI("mm"),
 	    DICOM("mm"),
-	    FreeSurfer("mm"),
+	    FREESURFER("mm"),
 	    MNI("mm"),
-	    NIfTI("mm"),
-	    Neuromag_Elekta("m"),
-	    Paxinos_Franklin("mm"),
-	    Talairach_Tournoux("mm"),
-	    Yokogawa("n/a");
+	    NIFTI("mm"),
+	    NEUROMAG_ELEKTA("m"),
+	    PAXINOS_FRANKLIN("mm"),
+	    TALAIRACH_TOURNOUX("mm"),
+	    YOKOGAWA("n/a");
 	    
 	    private String unit;
 	    
