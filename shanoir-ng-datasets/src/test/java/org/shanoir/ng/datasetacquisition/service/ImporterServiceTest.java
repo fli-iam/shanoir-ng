@@ -32,7 +32,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
@@ -77,8 +76,8 @@ public class ImporterServiceTest {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 	
 	@Mock
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+	private DatasetAcquisitionService datasetAcquisitionService;
+
 	@Mock
 	private DicomPersisterService dicomPersisterService;
 
@@ -141,7 +140,7 @@ public class ImporterServiceTest {
 		assertTrue(task.getStatus() == 1);
 
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcquisitionCapturer.capture());
+		verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
 		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 		
 		EegDataset ds = (EegDataset) hack.getDatasets().get(0);
@@ -218,7 +217,7 @@ public class ImporterServiceTest {
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcq);
+		verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 

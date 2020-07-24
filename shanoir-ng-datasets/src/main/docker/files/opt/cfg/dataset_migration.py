@@ -615,5 +615,31 @@ targetConn.commit()
 
 print("Import diffusion_gradient: end")
 
+print("Import dataset_study: start")
+
+sourceCursor.execute("""SELECT STUDY_ID, NAME FROM STUDY""")
+
+query = """INSERT INTO study
+    (id, name)
+    VALUES (%s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import study: end")
+
+print("Import dataset_subject: start")
+
+sourceCursor.execute("""SELECT SUBJECT_ID, NAME FROM SUBJECT""")
+
+query = """INSERT INTO subject
+    (id, name)
+    VALUES (%s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import subject: end")
+
 sourceConn.close()
 targetConn.close()

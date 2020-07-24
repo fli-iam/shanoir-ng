@@ -34,6 +34,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public class ImporterManagerService {
 	            		KeycloakUtil.getTokenUserId());
 	            return message;
 	        });
-			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
 		} catch (ShanoirException | FileNotFoundException | AmqpException | JsonProcessingException e) {
