@@ -54,6 +54,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
     getColumnDefs(): any[] {
         let colDef: any[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
+            { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id

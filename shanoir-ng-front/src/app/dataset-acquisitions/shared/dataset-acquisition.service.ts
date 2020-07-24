@@ -18,6 +18,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
+import { EegDatasetAcquisition } from '../modality/eeg/eeg-dataset-acquisition.model';
 import { DatasetAcquisitionDTOService, DatasetAcquisitionDTO } from './dataset-acquisition.dto';
 import { ServiceLocator } from '../../utils/locator.service';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
@@ -55,6 +56,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
             case 'Mr': return new MrDatasetAcquisition();
             case 'Pet': return new PetDatasetAcquisition();
             case 'Ct': return new CtDatasetAcquisition();
+            case 'Eeg': return new EegDatasetAcquisition();
             default: throw new Error('Received dataset acquisition has no valid "type" property');
         }
     }
