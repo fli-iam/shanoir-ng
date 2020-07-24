@@ -222,7 +222,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     refreshName(generatedName: string) {
-        console.log(this.anesthetic.anestheticType)
         if (this.anesthetic && this.anesthetic.anestheticType && generatedName.indexOf(AnestheticType[this.anesthetic.anestheticType]) < 0) {
             generatedName = AnestheticType[this.anesthetic.anestheticType].concat(' ').concat(generatedName);
         }
@@ -240,7 +239,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             }
         }
         this.anesthetic.name = generatedName;
-        console.log(this.anesthetic.anestheticType)
     }
 
     goToAddIngredient() {
