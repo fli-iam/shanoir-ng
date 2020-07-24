@@ -34,6 +34,7 @@ export class SideMenuComponent {
     private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     private username: string = "";
     private dataOpened: boolean = false;
+    private precOpened: boolean = false;
     private eqOpened: boolean = false;
     private uploadOpened: boolean = false;
     private adminOpened: boolean = false;
@@ -69,7 +70,7 @@ export class SideMenuComponent {
 
     indexToSolr() {
         this.solrService.indexAll().then(() => {
-            this.msgboxService.log('info', 'Indexation lanched !');
+            this.msgboxService.log('info', 'Indexation launched !');
         });
     }
 

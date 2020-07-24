@@ -42,5 +42,6 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "examinationComment_str",
 			"datasetType", "datasetNature"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
-	
+
+	public void deleteByDatasetId(Long datasetId);
 }

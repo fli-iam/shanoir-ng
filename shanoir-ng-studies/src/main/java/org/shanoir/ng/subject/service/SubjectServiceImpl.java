@@ -34,6 +34,8 @@ import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +74,8 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private StudyUserRepository studyUserRepository;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -131,6 +135,11 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 		}
 		Subject subjectDb = subjectRepository.save(subject);
+		try {
+			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+		}
 		return subjectDb;
 	}
 	
@@ -177,7 +186,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 
-		if (subject.getName() != subjectDb.getName()) {
+		if (!subject.getName().equals(subjectDb.getName())) {
 			updateSubjectName(new IdName(subject.getId(), subject.getName()));
 		}
 		subjectDb.setName(subject.getName());
