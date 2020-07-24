@@ -37,7 +37,7 @@ import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
@@ -56,6 +56,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class ImporterService {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
 	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
 	private DicomPersisterService dicomPersisterService;
@@ -107,6 +108,7 @@ public class ImporterService {
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
 			if (examination != null) {
@@ -194,7 +196,7 @@ public class ImporterService {
 				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
 			}
 			// Persist Serie in Shanoir DB
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 			long startTime = System.currentTimeMillis();
 			// Persist Dicom images in Shanoir Pacs
 			dicomPersisterService.persistAllForSerie(serie);
@@ -345,7 +347,7 @@ public class ImporterService {
 			}
 
 			datasetAcquisition.setDatasets(datasets);
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");

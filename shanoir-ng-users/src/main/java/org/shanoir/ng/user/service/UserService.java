@@ -178,7 +178,6 @@ public interface UserService {
 	 * @param username username.
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	void updateLastLogin(String username) throws EntityNotFoundException;
 
 	/**

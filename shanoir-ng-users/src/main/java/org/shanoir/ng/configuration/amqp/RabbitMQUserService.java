@@ -57,7 +57,7 @@ public class RabbitMQUserService {
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
-		LOG.error("receiving event: " + eventAsString);
+		LOG.error("Receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			eventsService.addEvent(event);
@@ -68,7 +68,7 @@ public class RabbitMQUserService {
 	}
 
 	/**
-	 * Receives an import end event as a json object, thus csend a mail to study Manager to notice him
+	 * Receives an import end event as a json object, thus send a mail to study Manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
@@ -80,7 +80,6 @@ public class RabbitMQUserService {
 	public void receiveImportEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
-		LOG.error("receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			// Do nothing if it's not a success
