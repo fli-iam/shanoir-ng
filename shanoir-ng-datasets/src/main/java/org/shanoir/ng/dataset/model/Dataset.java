@@ -254,9 +254,11 @@ public abstract class Dataset extends AbstractEntity {
 			if (creationDate != null) {
 				result.append(" ").append(creationDate.toString());
 			}
-			String modalityType = originMetadata.getDatasetModalityType().name();
-			if (updatedMetadata != null) {
+			String modalityType = "?";
+			if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
 				modalityType = updatedMetadata.getDatasetModalityType().name();
+			} else if (originMetadata != null && originMetadata.getDatasetModalityType() != null) {
+				modalityType = originMetadata.getDatasetModalityType().name();
 			}
 			result.append(" ").append(modalityType.split("_")[0]);
 			return result.toString();
