@@ -44,7 +44,5 @@ export enum CoordSystems {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<CoordSystems>[] {
-        return all().map(prop => new Option<CoordSystems>(prop, getLabel(prop)));
-    }
-}  
+    export var options: Option<CoordSystems>[] = all().map(prop => new Option<CoordSystems>(prop, getLabel(prop)));
+}

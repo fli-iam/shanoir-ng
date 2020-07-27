@@ -72,6 +72,8 @@ public class StudyCard extends HalEntity {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="study_card_id")
 	private List<StudyCardRule> rules;
+	
+	private Long lastEditTimestamp;
 
 	/**
 	 * Init HATEOAS links
@@ -127,6 +129,14 @@ public class StudyCard extends HalEntity {
 
 	public void setRules(List<StudyCardRule> rules) {
 		this.rules = rules;
+	}
+
+	public Long getLastEditTimestamp() {
+		return lastEditTimestamp;
+	}
+
+	public void setLastEditTimestamp(Long lastEditTimestamp) {
+		this.lastEditTimestamp = lastEditTimestamp;
 	}
 	
 }

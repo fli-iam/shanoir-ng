@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -32,8 +34,8 @@ public interface DatasetAcquisitionService {
 	List<DatasetAcquisition> findByStudyCard(Long id);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findAll();
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
+	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
 	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#entity.getExamination().getStudyId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);

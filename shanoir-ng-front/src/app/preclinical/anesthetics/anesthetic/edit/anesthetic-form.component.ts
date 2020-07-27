@@ -222,7 +222,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     refreshName(generatedName: string) {
-
         if (this.anesthetic && this.anesthetic.anestheticType && generatedName.indexOf(AnestheticType[this.anesthetic.anestheticType]) < 0) {
             generatedName = AnestheticType[this.anesthetic.anestheticType].concat(' ').concat(generatedName);
         }
@@ -240,12 +239,9 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             }
         }
         this.anesthetic.name = generatedName;
-
     }
 
-    
-
-    goToAddIngredient(){
+    goToAddIngredient() {
         this.ingredientSelected = new AnestheticIngredient();
         this.createAIMode = true;
         if(this.toggleFormAI==false){

@@ -92,4 +92,15 @@ export class Page<T> {
     public size: number;
     public totalElements: number;
     public totalPages: number;
+
+    static transType<U>(page: Page<any>, content: U[]): Page<U> {
+        let newPage: Page<U> = new Page<U>();
+        newPage.number = page.number;
+        newPage.numberOfElements = page.numberOfElements;
+        newPage.size = page.size;
+        newPage.totalElements = page.totalElements;
+        newPage.totalPages = page.totalPages;
+        newPage.content = content;
+        return newPage;
+    }
 }
