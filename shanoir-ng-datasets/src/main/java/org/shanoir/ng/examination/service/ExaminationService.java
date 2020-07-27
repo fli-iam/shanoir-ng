@@ -62,6 +62,7 @@ public interface ExaminationService {
 	Examination findById(Long id);
 
 	/**
+	 * Find examinations related to particular subject
 	 * @param subjectId
 	 * @return
 	 * @author yyao
@@ -69,6 +70,14 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
 	List<Examination> findBySubjectId(Long subjectId);
+
+	/**
+	 * Find examinations related to particular study
+	 * @param subjectId
+	 * @return
+	 * @author yyao
+	 */
+	List<Examination> findByStudyId(Long studyId);
 
 	/**
 	 * Find examinations related to particular subject and study

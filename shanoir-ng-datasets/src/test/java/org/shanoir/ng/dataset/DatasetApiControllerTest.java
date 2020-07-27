@@ -40,13 +40,18 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -106,11 +111,20 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private BIDSServiceImpl bidsService;
 
+	@MockBean
+	private SubjectRepository subjectRepository;
+	private Subject subject = new Subject(3L, "name");
+	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
+	private DatasetMetadata updatedMetadata = new DatasetMetadata();
+
 	@Before
 	public void setup() throws ShanoirException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+		dsAcq.setRank(2);
+		dsAcq.setSortingIndex(2);
+		updatedMetadata.setComment("comment");
 	}
 
 	@Test
@@ -165,6 +179,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -182,7 +201,7 @@ public class DatasetApiControllerTest {
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("test")));
+		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 		// THEN all datasets are exported
 	}
 
@@ -197,6 +216,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -214,7 +238,7 @@ public class DatasetApiControllerTest {
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("test")));
+		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 
 
 		// THEN all datasets are exported
@@ -248,6 +272,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();

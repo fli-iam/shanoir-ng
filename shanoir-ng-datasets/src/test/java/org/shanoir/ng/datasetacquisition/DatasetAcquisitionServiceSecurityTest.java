@@ -28,7 +28,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -40,7 +42,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * User security service test.
@@ -65,8 +66,10 @@ public class DatasetAcquisitionServiceSecurityTest {
 	StudyRightsService commService;
 	
 	@MockBean
-	private RestTemplate restTemplate;
+	private ShanoirEventService shanoirEventService;
 
+	@MockBean
+	private SolrService solrService;
 	
 	@Before
 	public void setup() {

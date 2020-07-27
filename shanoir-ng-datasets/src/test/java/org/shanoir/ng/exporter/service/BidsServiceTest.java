@@ -118,7 +118,7 @@ public class BidsServiceTest {
 		Subject[] subjects = {subject};
 		ObjectMapper mapper = new ObjectMapper();
 		String value = mapper.writeValueAsString(subjects);
-		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, exam.getStudyId())).willReturn(value);
+		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
@@ -144,7 +144,7 @@ public class BidsServiceTest {
 		Subject[] subjects = {subject};
 		ObjectMapper mapper = new ObjectMapper();
 		String value = mapper.writeValueAsString(subjects);
-		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, exam.getStudyId())).willReturn(value);
+		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
 
 		
 		// Mock on examination service to get the list of subject
