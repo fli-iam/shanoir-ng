@@ -24,10 +24,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,10 +43,8 @@ public class RabbitMQStudiesService {
 	 * @return a liost of ID of the users administrating the study
 	 * @throws JsonProcessingException
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-			value = @Queue(value = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_ADMIN_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))
+	@RabbitListener(queues = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE)
+	@RabbitHandler
 	@Transactional
 	public List<Long> manageAdminsStudy(String studyId) throws JsonProcessingException {
 		try {

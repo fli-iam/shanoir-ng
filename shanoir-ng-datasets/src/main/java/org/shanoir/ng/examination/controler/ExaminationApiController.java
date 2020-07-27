@@ -112,7 +112,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
-		Page<Examination> examinations = examinationService.findPage(pageable);
+		Page<Examination> examinations = examinationService.findPage(pageable, false);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -125,7 +125,7 @@ public class ExaminationApiController implements ExaminationApi {
 		Page<Examination> examinations;
 
 		// Get examinations reachable by connected user
-		examinations = examinationService.findPreclinicalPage(isPreclinical, pageable);
+		examinations = examinationService.findPage(pageable, isPreclinical);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

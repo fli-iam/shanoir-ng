@@ -153,7 +153,7 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::findByIds, Arrays.asList(USER_ID));
 		assertAccessDenied(userService::update, mockUser);
 		assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
-		assertAccessDenied(userService::updateLastLogin, USER_USERNAME);
+		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
 	}
 
 	@Test

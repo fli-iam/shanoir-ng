@@ -43,26 +43,87 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 	@Override
 	public List<ShanoirMetadata> findAllAsSolrDoc() {
 		List<ShanoirMetadata> result = new ArrayList<>();
-		Query mrQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, "
-				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
-				+ "d.study_id as studyId from dataset d LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, "
-				+ "dataset_acquisition da, examination e, mr_dataset md LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id "
-				+ "where d.updated_metadata_id = dm.id and da.id = d.dataset_acquisition_id and da.examination_id = e.id and md.id = d.id;", "SolrResult");
-		Query petQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, "
-				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
-				+ "d.study_id as studyId from dataset d LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, "
-				+ "dataset_metadata dm, dataset_acquisition da, examination e, pet_dataset pd where d.updated_metadata_id = dm.id "
-				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and pd.id = d.id;", "SolrResult");
-		Query ctQuery = em.createNativeQuery("select d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, "
-				+ "d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, "
-				+ "d.study_id as studyId from dataset d  LEFT JOIN study st ON st.id = d.study_id LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, "
-				+ "dataset_acquisition da, examination e, ct_dataset cd where d.updated_metadata_id = dm.id "
-				+ "and da.id = d.dataset_acquisition_id and da.examination_id = e.id and cd.id = d.id;", "SolrResult");
+		/**
+ SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId
+ FROM dataset d
+ LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id
+ LEFT JOIN examination e ON e.id = da.examination_id
+ LEFT JOIN study st ON st.id = e.study_id
+ LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md
+ LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id
+ WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id = 25;
+		 */
+		Query mrQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
+				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
+				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id;", "SolrResult");
+		Query petQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
+				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id;", "SolrResult");
+		Query ctQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
+				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id;", "SolrResult");
 				
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());
 		result.addAll(ctQuery.getResultList());
 		
 		return result;
+	}
+
+	@Override
+	public ShanoirMetadata findOneSolrDoc(Long datasetId) {
+		List<ShanoirMetadata> result = new ArrayList<>();
+
+		Query mrQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
+				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
+				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
+		Query petQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
+				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
+		Query ctQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, st.name as studyName, e.study_id as studyId\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
+				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
+		
+		result.addAll(mrQuery.getResultList());
+		result.addAll(petQuery.getResultList());
+		result.addAll(ctQuery.getResultList());
+		
+		if (result.size() != 1) {
+			return null;
+		}
+		
+		return result.get(0);
 	}
 }

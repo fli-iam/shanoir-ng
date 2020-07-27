@@ -22,12 +22,18 @@ import { ManufacturerModel } from './manufacturer-model.model';
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
     transform(acqEqpt: AcquisitionEquipment): string {
-        if (acqEqpt && acqEqpt.manufacturerModel) {
+        if (acqEqpt) {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
-            return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
-                + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;
-        }
-        return "";
+            if (manufModel && acqEqpt.center) {
+                return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
+                    + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;
+            } else if (acqEqpt.center && acqEqpt.center.name) {
+                return acqEqpt.serialNumber + " - " + acqEqpt.center.name;
+            } else if (acqEqpt.serialNumber) {
+                return acqEqpt.serialNumber
+            }
+        } 
+        return "?";
     }
 
 }

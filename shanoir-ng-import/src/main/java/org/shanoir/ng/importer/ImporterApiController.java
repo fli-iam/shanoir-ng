@@ -378,9 +378,9 @@ public class ImporterApiController implements ImporterApi {
 	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile,
 			final boolean fromDicom) throws IOException, RestServiceException {
 		File tempFile = saveTempFile(userImportDir, dicomZipFile);
+		boolean createDicomDir = false;
 		if (fromDicom && !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "DICOMDIR is missing in .zip file.", null));
+			createDicomDir = true;
 		}
 		String fileName = tempFile.getName();
 		int pos = fileName.lastIndexOf(FILE_POINT);
@@ -396,6 +396,14 @@ public class ImporterApiController implements ImporterApi {
 		}
 		ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 		tempFile.delete();
+		if (createDicomDir) {
+			LOG.info("DICOMDIR missing from zip file, generating one.");
+			final File dicomDir = new File(unzipFolderFile, DICOMDIR);
+			if (!dicomDir.exists()) {
+				dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, unzipFolderFile);
+				LOG.info("DICOMDIR generated at path: {}", dicomDir.getAbsolutePath());
+			}
+		}
 		return unzipFolderFile;
 	}
 
@@ -877,7 +885,7 @@ public class ImporterApiController implements ImporterApi {
 		module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
 		mapper.registerModule(module);
 		// Here we wait for the response => to be sure that the subjects are created
-		String participantString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_EXCHANGE, "", participantsFile.getAbsolutePath());
+		String participantString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, participantsFile.getAbsolutePath());
 		List<IdName> participants = Arrays.asList(mapper.readValue(participantString, IdName[].class));
 		// If we receive a unique subject with no ID => It's an error
 		if (participants.size() == 1 && participants.get(0).getId() == null) {

@@ -84,9 +84,7 @@ export enum MrDatasetNature {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<MrDatasetNature>[] {
-        return all().map(prop => new Option<MrDatasetNature>(prop, getLabel(prop)));
-    }
+    export var options: Option<MrDatasetNature>[] = all().map(prop => new Option<MrDatasetNature>(prop, getLabel(prop)));
 }
 
 export enum MrQualityProcedureType {
@@ -104,7 +102,5 @@ export enum MrQualityProcedureType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<MrQualityProcedureType>[] {
-        return all().map(prop => new Option<MrQualityProcedureType>(prop, getLabel(prop)));
-    }
+    export var options: Option<MrQualityProcedureType>[] = all().map(prop => new Option<MrQualityProcedureType>(prop, getLabel(prop)));
 }

@@ -17,11 +17,12 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -34,78 +35,37 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 	@Autowired
 	private DatasetAcquisitionMapper delegate;
 
+	
 	@Override
-	public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
+	public List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
 			final List<DatasetAcquisition> datasetAcquisitions) {
 		if (datasetAcquisitions == null) {
 			return null;
 		}
-		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
+		final List<DatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
 		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-			datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
+			datasetAcquisitionDTOs.add(datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition));
 		}
 		return datasetAcquisitionDTOs;
 	}
+	
+	@Override
+	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
+
+		Page<DatasetAcquisitionDTO> mappedPage = page.map(new Converter<DatasetAcquisition, DatasetAcquisitionDTO>() {
+			@Override
+			public DatasetAcquisitionDTO convert(DatasetAcquisition entity) {
+				return datasetAcquisitionToDatasetAcquisitionDTO(entity);
+			}
+		});
+		return new PageImpl<>(mappedPage);
+	}
 
 	@Override
-	public ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
+	public DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
 			final DatasetAcquisition datasetAcquisition) {
-		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate
-				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
-		datasetAcquisitionDTO.setName(getExaminationDatasetAcquisitionDTOName(datasetAcquisition));
-
+		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
+				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
 		return datasetAcquisitionDTO;
 	}
-
-	/**
-	 * Get dataset acquisition name. If all the datasets have the same name,
-	 * then return the name of the datasets. Else if all the datasets have the
-	 * same comment, then return the comment of the datasets.
-	 * 
-	 * @param datasetAcquisition dataset acquisition.
-	 * @return name.
-	 */
-	private String getExaminationDatasetAcquisitionDTOName(final DatasetAcquisition datasetAcquisition) {
-		final StringBuilder result = new StringBuilder();
-		final List<String> datasetNameSet = new ArrayList<>();
-		final List<String> datasetCommentSet = new ArrayList<>();
-		if (datasetAcquisition.getDatasets() != null) {
-			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
-				final String datasetName = dataset.getName();
-				if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
-					datasetNameSet.add(datasetName);
-				}
-				String datasetComment = null;
-				if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-					datasetComment = dataset.getUpdatedMetadata().getComment();
-				} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
-					datasetComment = dataset.getOriginMetadata().getComment();
-				}
-				if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
-					datasetCommentSet.add(datasetComment);
-				}
-			}
-		}
-
-		if (datasetNameSet.size() == 1) {
-			result.append(datasetNameSet.get(0));
-		} else if (datasetCommentSet.size() == 1) {
-			result.append(datasetCommentSet.get(0));
-		} else if (datasetNameSet.size() > 1) {
-			for (final String name : datasetNameSet) {
-				result.append(name).append(" ");
-			}
-			result.deleteCharAt(result.length() - 1);
-		} else {
-			result.append("id=").append(datasetAcquisition.getId());
-			if (datasetAcquisition.getRank() != null) {
-				result.append(" rank=").append(datasetAcquisition.getRank());
-			}
-		}
-		// TODO: retrieve dataset acquisition type
-		final String type = "";
-
-		return result.append(" (").append(type).append(")").toString();
-	}
-
 }

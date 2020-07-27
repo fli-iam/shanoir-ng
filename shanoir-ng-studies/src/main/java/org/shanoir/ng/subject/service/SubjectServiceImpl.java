@@ -22,15 +22,20 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +71,11 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private StudyUserRepository studyUserRepository;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -85,6 +95,16 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		List<IdName> names = new ArrayList<>();
+		Iterable<Subject> subjects;
+		
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+			subjects = subjectRepository.findAll();
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
+		}
+		
 		for (Subject subject : subjectRepository.findAll()) {
 			IdName name = new IdName(subject.getId(), subject.getName());
 			names.add(name);
@@ -115,6 +135,11 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 		}
 		Subject subjectDb = subjectRepository.save(subject);
+		try {
+			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+		}
 		return subjectDb;
 	}
 	
@@ -161,7 +186,7 @@ public class SubjectServiceImpl implements SubjectService {
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 
-		if (subject.getName() != subjectDb.getName()) {
+		if (!subject.getName().equals(subjectDb.getName())) {
 			updateSubjectName(new IdName(subject.getId(), subject.getName()));
 		}
 		subjectDb.setName(subject.getName());
