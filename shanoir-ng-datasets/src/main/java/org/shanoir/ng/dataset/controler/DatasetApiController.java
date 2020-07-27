@@ -60,6 +60,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -411,7 +412,13 @@ public class DatasetApiController implements DatasetApi {
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 			StringBuilder name = new StringBuilder("");
 			
-			name.append(subjectRepo.findOne(dataset.getSubjectId()).getName()).append("_")
+			Subject subject = subjectRepo.findOne(dataset.getSubjectId());
+			if (subject != null) {
+				name.append(subject.getName());
+			} else {
+				name.append("unknown");
+			}
+			name.append("_")
 			.append(dataset.getUpdatedMetadata().getComment()).append("_")
 			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_")
 			.append(dataset.getDatasetAcquisition().getRank()).append(".")

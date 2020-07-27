@@ -267,6 +267,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the originMetadata
 	 */
 	public DatasetMetadata getOriginMetadata() {
+		if (originMetadata == null) originMetadata = new DatasetMetadata();
 		return originMetadata;
 	}
 
@@ -342,6 +343,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the updatedMetadata
 	 */
 	public DatasetMetadata getUpdatedMetadata() {
+		if (updatedMetadata == null) updatedMetadata = new DatasetMetadata();
 		return updatedMetadata;
 	}
 
