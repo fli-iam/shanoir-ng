@@ -103,9 +103,11 @@ public class SubjectServiceImpl implements SubjectService {
 			subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
 		}
 		List<IdName> names = new ArrayList<IdName>();
-		for (Subject subject : subjects) {
-			IdName name = new IdName(subject.getId(), subject.getName());
-			names.add(name);
+		if (subjects != null) {
+			for (Subject subject : subjects) {
+				IdName name = new IdName(subject.getId(), subject.getName());
+				names.add(name);
+			}
 		}
 		return names;
 	}
