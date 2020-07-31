@@ -165,6 +165,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     onChangeAcqEq() {
+        if (!this.rulesComponent) return;
         this.rulesComponent.ruleElements.forEach(ruleComp => {
             ruleComp.assignmentChildren.forEach(assComp => {
                 if (assComp.assignment.field.toLowerCase().includes('coil')) {
