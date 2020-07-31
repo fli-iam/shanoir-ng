@@ -130,16 +130,13 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		Long examinationId = null;
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 			Examination examinationDTO = new Examination();
-			IdName studyIdName = new IdName(study.getId(), study.getName());
-			examinationDTO.setStudy(studyIdName);
-			IdName subjectIdName = new IdName(subject.getId(), subject.getName());
-			examinationDTO.setSubject(subjectIdName);
+			examinationDTO.setStudyId(study.getId());
+			examinationDTO.setSubjectId(subject.getId());
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
+			examinationDTO.setCenterId(center.getId());
 //			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			IdName centerIdName = new IdName(center.getId(), center.getName());
-			examinationDTO.setCenter(centerIdName);
 			examinationDTO.setExaminationDate(examinationDate);
 			examinationDTO.setComment(examinationComment);
 

@@ -124,6 +124,7 @@ public interface ExaminationApi {
 	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Saves a new examination", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
