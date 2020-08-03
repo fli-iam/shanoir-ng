@@ -43,22 +43,21 @@ public class ImportJob {
     @JsonProperty("examinationId")
     private Long examinationId;
     
-    @JsonProperty("frontStudyId")
-    private Long frontStudyId;
+    @JsonProperty("studyId")
+    private Long studyId;
+    
+    @JsonProperty("studyCardId")
+    private Long studyCardId;
     
 	@JsonProperty("studyCardName")
 	private String studyCardName;
 	
-	// todo: remove this later, when front end uses StudyCards
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
+    @JsonProperty("converterId")
+    private Long converterId;
 	
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
-    
-    @JsonProperty("frontConverterId")
-    private Long frontConverterId;
-    
+	
     public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
@@ -99,36 +98,12 @@ public class ImportJob {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
-	}
-
-	public void setFrontStudyId(Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
-	}
-
 	public String getStudyCardName() {
 		return studyCardName;
 	}
 
 	public void setStudyCardName(String studyCardName) {
 		this.studyCardName = studyCardName;
-	}
-
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
-	}
-
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
-	}
-
-	public Long getFrontConverterId() {
-		return frontConverterId;
-	}
-
-	public void setFrontConverterId(Long frontConverterId) {
-		this.frontConverterId = frontConverterId;
 	}
 
     public String getAnonymisationProfileToUse() {
@@ -145,6 +120,30 @@ public class ImportJob {
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public Long getStudyCardId() {
+		return studyCardId;
+	}
+
+	public Long getConverterId() {
+		return converterId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	public void setStudyCardId(Long studyCardId) {
+		this.studyCardId = studyCardId;
+	}
+
+	public void setConverterId(Long converterId) {
+		this.converterId = converterId;
 	}
 	
 }

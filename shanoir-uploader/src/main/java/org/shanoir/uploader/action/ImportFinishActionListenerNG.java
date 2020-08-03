@@ -186,9 +186,10 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		importJob.setFromShanoirUploader(true);
 		// handle study and study card, using ImportDialog
 		Study studyShanoir = (Study) importDialog.studyCB.getSelectedItem();
-		importJob.setFrontStudyId(studyShanoir.getId());
+		importJob.setStudyId(studyShanoir.getId());
 		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
 		importJob.setStudyCardName(studyCard.getName());
+		importJob.setConverterId(studyCard.getNiftiConverterId());
 		// handle patient and subject
 		Patient patient = new Patient();
 		patient.setPatientID(uploadJob.getSubjectIdentifier());
