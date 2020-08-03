@@ -1008,6 +1008,31 @@ targetCursor.executemany(query, study_user_rights_list)
 targetConn.commit()
 print("Import study_user_study_user_rights: end")
 
+print("Import dataset_study: start")
+
+sourceCursor.execute("""SELECT STUDY_ID, NAME FROM STUDY""")
+
+query = """INSERT INTO study
+    (id, name)
+    VALUES (%s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import study: end")
+
+print("Import dataset_subject: start")
+
+sourceCursor.execute("""SELECT SUBJECT_ID, NAME FROM SUBJECT""")
+
+query = """INSERT INTO subject
+    (id, name)
+    VALUES (%s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import subject: end")
 
 query = "SET FOREIGN_KEY_CHECKS=1"
 targetCursor.execute(query)
