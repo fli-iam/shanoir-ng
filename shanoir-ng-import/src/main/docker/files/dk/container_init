@@ -29,6 +29,10 @@ run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
+# Populate the database
+echo "Populate database"
+mysql -u root "$tbl" < /opt/cfg/shanoirng_import.sql
+
 echo "Stop mysql process"
 kill $pid
 wait
