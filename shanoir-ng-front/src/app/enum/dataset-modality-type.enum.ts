@@ -17,9 +17,12 @@ import { Option } from '../shared/select/select.component';
 
 export enum DatasetModalityType {
 
-    PET = 'PET',
-    MR = 'MR',
-    CT = 'CT'
+    PET_DATASET = 'PET',
+    MR_DATASET = 'MR',
+    CT_DATASET = 'CT',
+    MEG_DATASET = 'MG',
+    SPECT_DATASET = 'SPECT',
+    EEG_DATASET = 'EEG'
 
 } export namespace DatasetModalityType {
     
