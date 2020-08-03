@@ -78,7 +78,6 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/names", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.filterSubjectIdNamesDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdName>> findSubjectsNames();
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})

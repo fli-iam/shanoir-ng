@@ -83,10 +83,10 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/** Applied study card. */
 	@ManyToOne
 	@JoinColumn(name = "studycard_id")
-	StudyCard studyCard;
+	private StudyCard studyCard;
 	
 	/** Used to know if the study card that was applied matches the study card's last version or anterior */
-	Long studyCardTimestamp;
+	private Long studyCardTimestamp;
 
 	/** Rank of the session in the examination protocol. */
 	private Integer rank;
@@ -193,6 +193,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	public void setStudyCard(StudyCard studyCard) {
 		this.studyCard = studyCard;
+	}
+
+	public Long getStudyCardTimestamp() {
+		return studyCardTimestamp;
+	}
+
+	public void setStudyCardTimestamp(Long studyCardTimestamp) {
+		this.studyCardTimestamp = studyCardTimestamp;
 	}
 
 	/**

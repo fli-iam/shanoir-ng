@@ -23,10 +23,13 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	
 	@Autowired
 	private DatasetAcquisitionRepository repository;
+	
+
+	@Autowired
+	private StudyUserRightsRepository rightsRepository;
+
 
 	@Autowired
 	private ShanoirEventService shanoirEventService;
@@ -65,8 +73,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	}
 
 	@Override
-	public List<DatasetAcquisition> findAll() {
-		return Utils.toList(repository.findAll());
+	public Page<DatasetAcquisition> findPage(final Pageable pageable) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return repository.findAll(pageable);
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return repository.findByExaminationStudyIdIn(studyIds, pageable);
+		}
 	}
 
 	@Override

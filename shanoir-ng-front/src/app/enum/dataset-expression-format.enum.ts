@@ -46,7 +46,5 @@ export enum DatasetExpressionFormat {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<DatasetExpressionFormat>[] {
-        return all().map(prop => new Option<DatasetExpressionFormat>(prop, getLabel(prop)));
-    }
+    export var options: Option<DatasetExpressionFormat>[] = all().map(prop => new Option<DatasetExpressionFormat>(prop, getLabel(prop)));
 }

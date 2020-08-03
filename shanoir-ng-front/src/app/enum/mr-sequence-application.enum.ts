@@ -40,7 +40,5 @@ export enum MrSequenceApplication {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<MrSequenceApplication>[] {
-        return all().map(prop => new Option<MrSequenceApplication>(prop, getLabel(prop)));
-    }
+    export var options: Option<MrSequenceApplication>[] = all().map(prop => new Option<MrSequenceApplication>(prop, getLabel(prop)));
 }

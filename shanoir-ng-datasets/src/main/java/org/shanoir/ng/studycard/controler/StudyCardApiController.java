@@ -124,10 +124,10 @@ public class StudyCardApiController implements StudyCardApi {
 		return new ResponseEntity<>(createdStudyCard, HttpStatus.OK);
 	}
 
+	// Attention: used by ShanoirUploader!
 	@Override
 	public ResponseEntity<List<StudyCard>> searchStudyCards(
 			@ApiParam(value = "study ids", required = true) @RequestBody final IdList studyIds) {
-		
 		final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
 		if (studyCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

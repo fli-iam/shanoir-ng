@@ -24,6 +24,7 @@ import java.util.Set;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -420,6 +421,50 @@ public class DatasetSecurityService {
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	list.removeIf((DatasetAcquisition dsa) -> !checkedIds.contains(dsa.getExamination().getStudyId()));
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean checkDatasetAcquisitionDTOPage(Page<DatasetAcquisitionDTO> page, String rightStr) {
+    	if (page == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<>();
+    	page.forEach((DatasetAcquisitionDTO acquisition) -> studyIds.add(acquisition.getExamination().getStudyId()));
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	for (DatasetAcquisitionDTO acquisition : page) {
+    		if (!checkedIds.contains(acquisition.getExamination().getStudyId())) {
+				return false;
+			}
+    	}
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean checkDatasetAcquisitionPage(Page<DatasetAcquisition> page, String rightStr) {
+    	if (page == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<>();
+    	page.forEach((DatasetAcquisition acquisition) -> studyIds.add(acquisition.getExamination().getStudyId()));
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	for (DatasetAcquisition acquisition : page) {
+    		if (!checkedIds.contains(acquisition.getExamination().getStudyId())) {
+				return false;
+			}
+    	}
     	return true;
     }
     
