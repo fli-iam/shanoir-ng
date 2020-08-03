@@ -116,8 +116,13 @@ public class ImporterManagerService {
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
 				// convert instances to images, as already done after zip file upload
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
-			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
+			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
+				// convert instances to images, as already done after zip file upload
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			} else if (importJob.isFromDicomZip()) {
+				// images creation and analyze of dicom files has been done after upload already
+				importJobDir = new File(importJob.getWorkFolder());				
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
