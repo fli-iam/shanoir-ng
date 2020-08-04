@@ -421,7 +421,7 @@ export class ClinicalContextComponent implements OnDestroy {
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as Subject));
                     } else {
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
-		    }
+		            }
                 })
             );
         });
