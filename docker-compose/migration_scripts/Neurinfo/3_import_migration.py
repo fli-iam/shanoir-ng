@@ -21,13 +21,6 @@ sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
 
 
-print("Delete nifticonverter: start")
-query = "DELETE FROM nifticonverter"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete nifticonverter: end")
-
-
 print("Delete study_user_study_user_rights: start")
 query = "DELETE FROM study_user_study_user_rights"
 targetCursor.execute(query)
