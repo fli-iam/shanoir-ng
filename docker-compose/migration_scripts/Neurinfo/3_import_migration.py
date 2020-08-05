@@ -35,14 +35,6 @@ targetConn.commit()
 print("Delete study_user: end")
 
 
-print("Import nifticonverter: start")
-sourceCursor.execute("SELECT NIFTI_CONVERTER_ID, COMMENT, IS_ACTIVE, NAME, REF_NIFTI_CONVERTER_TYPE_ID FROM NIFTI_CONVERTER")
-query = "INSERT INTO nifticonverter (id, comment, is_active, name, nifti_converter_type) VALUES (%s, %s, %s, %s, %s)"
-targetCursor.executemany(query, sourceCursor.fetchall())
-targetConn.commit()
-print("Import nifticonverter: end")
-
-
 print("Import study_user: start")    
 sourceCursor.execute("""SELECT rsu.REL_STUDY_USER_ID, rsu.IS_RECEIVE_ANONYMIZATION_REPORT, rsu.IS_RECEIVE_NEW_IMPORT_REPORT, rsu.STUDY_ID, rsu.USER_ID, u.USERNAME 
 	FROM REL_STUDY_USER rsu JOIN USERS u ON rsu.USER_ID = u.USER_ID""")
