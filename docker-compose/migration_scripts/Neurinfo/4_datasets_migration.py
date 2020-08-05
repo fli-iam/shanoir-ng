@@ -299,6 +299,17 @@ targetCursor.execute(query)
 targetConn.commit()
 print("Delete mr_dataset_metadata: end")
 
+print("Delete study: start")
+query = "DELETE FROM study"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete study: end")
+
+print("Delete subject: start")
+query = "DELETE FROM subject"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete subject: end")
 
 print("Delete dataset_metadata: start")
 query = "DELETE FROM dataset_metadata"
