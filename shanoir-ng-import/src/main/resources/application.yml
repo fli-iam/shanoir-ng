@@ -139,9 +139,12 @@ shanoir:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9923
 spring:
   profiles: dev
   datasource:
+    url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     initialize: true
   jpa:
     hibernate:
@@ -149,7 +152,21 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-
+  rabbitmq:
+    host: localhost
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+keycloak:
+  auth-server-url: https://shanoir-ng-nginx/auth
+ms.url:
+  shanoir-ng-datasets: http://localhost:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
+  dicom2nifti: http://localhost:5000/dicom2nifti
+  shanoir-ng-studies-name: http://localhost:9902/studies/names
+  shanoir-ng-studies-subjects-names: http://localhost:9902/subjects/names
+  shanoir-ng-create-examination: http://localhost:9904/examinations
+  shanoir-ng-studies-commons: http://localhost:9902/common
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-import.log
@@ -159,8 +176,25 @@ logging:
     org.springframework.amqp: OFF
 shanoir:
   import:
-    upload:
-      folder: /tmp
+    directory: /tmp
+    # Import from PACS configuration
+    pacs:
+      query:
+        aet.calling:
+          name: SHANOIR-SCU
+          host: localhost
+          port: 11115
+        aet.called:
+          name: DCM4CHEE
+          host: localhost
+          port: 11112
+        maxPatients: 10
+      store:
+        aet.called:
+          name: SHANOIR-SCP
+          host: localhost
+          port: 44125
+        folder: /tmp/shanoir-dcmrcv
 
 ---
 
