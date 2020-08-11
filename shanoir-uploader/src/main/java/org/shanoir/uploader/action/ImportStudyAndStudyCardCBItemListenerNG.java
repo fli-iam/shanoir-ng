@@ -5,11 +5,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -24,10 +26,13 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 	private Subject subject;
 	
 	private SubjectStudy subjectStudy;
+	
+	private List<Examination> examinationsOfSubject;
 
-	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject) {
+	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
+		this.examinationsOfSubject = examinationDTOs;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -37,6 +42,7 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
 				updateSubjectStudy(study);
+				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
 			// the center for new created examinations
@@ -55,6 +61,36 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
 			}			
 		} // ignore otherwise
+	}
+
+	/**
+	 * Examinations in Shanoir are related to study.
+	 * @param study
+	 */
+	private void filterExistingExamsForSelectedStudy(Study study) {
+		mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
+		mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
+		// Exams exist, but maybe not for the study selected
+		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
+			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
+				.filter(e -> e.getStudyId() == study.getId())
+				.collect(Collectors.toList());
+			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
+				Examination examination = (Examination) iterator.next();
+				mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination); // I did not achieve to call this from within Lambda
+			}
+			// here we know, that for this study at least one exam exists or not
+			if (mainWindow.importDialog.mrExaminationExistingExamCB.getItemCount() > 0) {
+				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(true);
+				if (!mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
+					mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
+				}
+				return;
+			}
+		} 
+		// No exams exist already for this subject, so user has to create a new exam
+		mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
+		mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
 	}
 
 	private void updateStudyCards(Study study) {

@@ -126,20 +126,17 @@ public class ImportUtils {
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static boolean checkZipContainsFile(final String fileName, final File file) throws IOException {
-		boolean result = false;
-		ZipEntry entry;
-		ZipFile zipfile = new ZipFile(file);
-		final Enumeration<? extends ZipEntry> e = zipfile.entries();
-		boolean found = false;
-		while (e.hasMoreElements() && !found) {
-			entry = e.nextElement();
-			if (entry.getName().toUpperCase().endsWith(fileName.toUpperCase())) {
-				found = true;
-				result = true;
+		ZipFile zipFile = new ZipFile(file);
+		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+		while (entries.hasMoreElements()) {
+			ZipEntry entry = entries.nextElement();
+			if (entry.getName().toUpperCase().equals(fileName.toUpperCase())) {
+				zipFile.close();
+				return true;
 			}
 		}
-		zipfile.close();
-		return result;
+		zipFile.close();
+		return false;
 	}
 
 	/**

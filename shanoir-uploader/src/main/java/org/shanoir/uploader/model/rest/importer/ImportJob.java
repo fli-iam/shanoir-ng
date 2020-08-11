@@ -46,14 +46,23 @@ public class ImportJob {
     @JsonProperty("studyId")
     private Long studyId;
     
+    @JsonProperty("studyName")
+    private String studyName;
+    
     @JsonProperty("studyCardId")
     private Long studyCardId;
     
 	@JsonProperty("studyCardName")
 	private String studyCardName;
 	
+	@JsonProperty("subjectName")
+	private String subjectName;
+	
     @JsonProperty("converterId")
     private Long converterId;
+    
+    @JsonProperty("acquisitionEquipmentId")
+    private Long acquisitionEquipmentId;
 	
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
@@ -126,12 +135,28 @@ public class ImportJob {
 		return studyId;
 	}
 
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+
 	public Long getStudyCardId() {
 		return studyCardId;
 	}
 
 	public Long getConverterId() {
 		return converterId;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
 	}
 
 	public void setStudyId(Long studyId) {
@@ -144,6 +169,14 @@ public class ImportJob {
 
 	public void setConverterId(Long converterId) {
 		this.converterId = converterId;
+	}
+
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
+	}
+
+	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 	
 }

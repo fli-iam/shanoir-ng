@@ -105,6 +105,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@RequestBody Subject subject,
@@ -121,6 +122,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
