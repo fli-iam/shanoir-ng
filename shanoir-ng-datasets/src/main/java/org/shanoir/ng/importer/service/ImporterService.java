@@ -187,7 +187,7 @@ public class ImporterService {
 			datasetAcquisition.setExamination(examination);
 			// TODO: put studyCard in bruker import
 			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
-				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 			}
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionService.create(datasetAcquisition);

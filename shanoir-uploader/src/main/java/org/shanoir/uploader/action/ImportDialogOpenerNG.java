@@ -52,17 +52,20 @@ public class ImportDialogOpenerNG {
 
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
 		try {
+			// get items on server
 			Subject subject = getSubject(uploadJob);
-			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject);
+			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
+			List<Examination> examinationDTOs = getExaminations(subject);
+			// init components of GUI and listeners
+			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject, examinationDTOs);
 			ImportFinishActionListenerNG importFinishALNG = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBILNG);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBILNG, importFinishALNG);
+			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of dialog
-			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
-			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-			List<Examination> examinationDTOs = getExaminations(subject);
 			updateImportDialogForExaminations(examinationDTOs, uploadJob);
+			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
 			updateImportDialogForMRICenter(uploadJob);
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
 			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
@@ -286,22 +289,6 @@ public class ImportDialogOpenerNG {
 
 	private void updateImportDialogForExaminations(List<Examination> examinationDTOs, UploadJob uploadJob)
 			throws ParseException {
-		importDialog.mrExaminationExistingExamCB.removeAllItems();
-		/**
-		 * Existing examinations found
-		 */
-		if (examinationDTOs != null && !examinationDTOs.isEmpty()) {
-			for (Iterator iterator = examinationDTOs.iterator(); iterator.hasNext();) {
-				Examination examination = (Examination) iterator.next();
-				importDialog.mrExaminationExistingExamCB.addItem(examination);
-			}
-			importDialog.mrExaminationExistingExamCB.setEnabled(true);
-		/**
-		 * New examination to create and no existing examinations found
-		 */
-		} else {
-			importDialog.mrExaminationExistingExamCB.setEnabled(false);
-		}
 		importDialog.mrExaminationNewExamCB.setEnabled(true);
 		importDialog.mrExaminationNewExamCB.setSelected(true);
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());

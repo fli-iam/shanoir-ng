@@ -391,9 +391,8 @@ public class ShanoirUploaderServiceClientNG {
 			String json = ow.writeValueAsString(subject);
 			HttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
-				Subject subjectCreated = Util.getMappedObject(response, Subject.class);
-				return subjectCreated;
+			if (code == 204) {
+				return subject;
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
