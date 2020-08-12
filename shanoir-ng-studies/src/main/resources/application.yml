@@ -105,17 +105,32 @@ logging:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9922
 spring:
   profiles: dev
   datasource:
-    initialize: true
+    url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    initialize: false
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: validate
     # Show or not log for each sql query
     show-sql: true
-
+  rabbitmq:
+    host: localhost
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+keycloak:
+  auth-server-url: https://shanoir-ng-nginx/auth
+ms.url:
+  shanoir-ng-users: http://localhost:9901/users
+  shanoir-ng-import: http://localhost:9903/niftiConverter
+  shanoir-ng-studycards: http://localhost:9904/studycards
+  shanoir-ng-examinations: http://localhost:9904/examinations
+  shanoir-ng-bids: http://localhost:9904/bids
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
