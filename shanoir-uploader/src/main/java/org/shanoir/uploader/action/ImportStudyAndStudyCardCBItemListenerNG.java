@@ -3,6 +3,8 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,11 +30,14 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 	private SubjectStudy subjectStudy;
 	
 	private List<Examination> examinationsOfSubject;
+	
+	private Date studyDate;
 
-	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs) {
+	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.examinationsOfSubject = examinationDTOs;
+		this.studyDate = studyDate;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -66,10 +71,14 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 	/**
 	 * Examinations in Shanoir are related to study.
 	 * @param study
+	 * @throws ParseException 
 	 */
 	private void filterExistingExamsForSelectedStudy(Study study) {
+		// manage list of existing exams, and check if study date matches
 		mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
 		mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
+		mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(true);
+		mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
 		// Exams exist, but maybe not for the study selected
 		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
 			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
@@ -78,19 +87,23 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
 				Examination examination = (Examination) iterator.next();
 				mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination); // I did not achieve to call this from within Lambda
+				// Existing exam found with the same study date: preselect and do not propose new exam per default
+				if (examination.getExaminationDate().compareTo(studyDate) == 0) {
+					mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
+					mainWindow.importDialog.mrExaminationExistingExamCB.setSelectedItem(examination);
+					mainWindow.importDialog.mrExaminationNewExamCB.setSelected(false);
+				}
 			}
-			// here we know, that for this study at least one exam exists or not
+			// here we know, that for this study at least one exam exists (but not with the same study date)
 			if (mainWindow.importDialog.mrExaminationExistingExamCB.getItemCount() > 0) {
-				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(true);
 				if (!mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 					mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
 				}
-				return;
+			// No exams exist already for this subject, so user has to create a new exam
+			} else {
+				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
 			}
 		} 
-		// No exams exist already for this subject, so user has to create a new exam
-		mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
-		mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
 	}
 
 	private void updateStudyCards(Study study) {

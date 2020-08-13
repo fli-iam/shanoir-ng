@@ -52,19 +52,20 @@ public class ImportDialogOpenerNG {
 
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
 		try {
+			Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 			// get items on server
 			Subject subject = getSubject(uploadJob);
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
-			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject, examinationDTOs);
+			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject, examinationDTOs, studyDate);
 			ImportFinishActionListenerNG importFinishALNG = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBILNG);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 					importStudyAndStudyCardCBILNG, importFinishALNG);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of dialog
-			updateImportDialogForExaminations(examinationDTOs, uploadJob);
+			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
 			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
 			updateImportDialogForMRICenter(uploadJob);
 			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
@@ -287,13 +288,10 @@ public class ImportDialogOpenerNG {
 		return null;
 	}
 
-	private void updateImportDialogForExaminations(List<Examination> examinationDTOs, UploadJob uploadJob)
+	private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription)
 			throws ParseException {
-		importDialog.mrExaminationNewExamCB.setEnabled(true);
-		importDialog.mrExaminationNewExamCB.setSelected(true);
-		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);
-		importDialog.mrExaminationCommentTF.setText(uploadJob.getStudyDescription());
+		importDialog.mrExaminationCommentTF.setText(studyDescription);
 	}
 
 }
