@@ -53,15 +53,17 @@ public class SelectionActionListener implements TreeSelectionListener {
 	 * in a DicomTree.
 	 */
 	public void valueChanged(TreeSelectionEvent event) {
+		dicomData = null;
+
 		// clean up Edit Panel when value changed
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
 		mainWindow.birthDateTF.setText("");
+		mainWindow.newPatientIDTF.setText("");
 
 		mainWindow.isDicomObjectSelected = true;
 		selectedSeries = new LinkedHashSet<Serie>();
-		dicomData = null;
 
 		// check if multiple subject have been selected and show error
 		Patient patientAlreadySelected = null;
@@ -152,17 +154,18 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.lastNameTF.setText(dicomData.getLastName());
 				mainWindow.firstNameTF.setText(dicomData.getFirstName());
 				mainWindow.birthNameTF.setText(dicomData.getBirthName());
+				mainWindow.newPatientIDTF.setText(dicomData.getIPP());
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {
 					mainWindow.birthDateTF.setText(formatter.format(dicomData.getBirthDate()));
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {
-					mainWindow.msexR.setSelected(true);
+					mainWindow.mSexR.setSelected(true);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("F")) {
-					mainWindow.fsexR.setSelected(true);
+					mainWindow.fSexR.setSelected(true);
 				}
-			}			
+			}
 		}
 	}
 
