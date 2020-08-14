@@ -255,21 +255,18 @@ public class MainWindow extends JFrame {
 		 */
 		JTabbedPane tabbedPane = new JTabbedPane();
 
-		JSplitPane splitPaneQueryEditAndDicomTree = new JSplitPane();
-
-		dicomTreeJScrollPane = new JScrollPane();
-		splitPaneQueryEditAndDicomTree.setRightComponent(dicomTreeJScrollPane);
-		sAL = new SelectionActionListener(this, resourceBundle);
-
-		JPanel queryEditPanel = new JPanel(new BorderLayout());
-		splitPaneQueryEditAndDicomTree.setLeftComponent(queryEditPanel);
-
+		JSplitPane splitPaneQueryAndDicomTree = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		final JPanel queryPanel = new JPanel();
 		queryPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		splitPaneQueryAndDicomTree.setLeftComponent(queryPanel);
+		dicomTreeJScrollPane = new JScrollPane();
+		splitPaneQueryAndDicomTree.setRightComponent(dicomTreeJScrollPane);
+		sAL = new SelectionActionListener(this, resourceBundle);
+
+		JPanel editCurrentUploadsPanel = new JPanel(new BorderLayout());
 		editPanel = new JPanel();
 		editPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		queryEditPanel.add(queryPanel, BorderLayout.NORTH);
-		queryEditPanel.add(editPanel, BorderLayout.CENTER);
+		editCurrentUploadsPanel.add(editPanel, BorderLayout.NORTH);
 
 		GridBagLayout gBLPanel = new GridBagLayout();
 		gBLPanel.columnWidths = new int[] { 0, 0, 0 };
@@ -583,9 +580,11 @@ public class MainWindow extends JFrame {
 		anonymisedBG = new ButtonGroup();
 		noAnonR = new JRadioButton("No");
 		noAnonR.setSelected(true);
+		noAnonR.setEnabled(false);
 		anonymisedBG.add(noAnonR);
 		editPanel.add(noAnonR);
 		yesAnonR = new JRadioButton("Yes");
+		yesAnonR.setEnabled(false);
 		anonymisedBG.add(yesAnonR);
 		editPanel.add(yesAnonR);
 		// define gBC for noAnonR
@@ -625,8 +624,9 @@ public class MainWindow extends JFrame {
 		gBCLastNameTF.gridx = 1;
 		gBCLastNameTF.gridy = 2;
 		gBCLastNameTF.gridwidth = 2;
-		editPanel.add(lastNameTF, gBCLastNameTF);
 		lastNameTF.setColumns(15);
+		lastNameTF.setEnabled(false);
+		editPanel.add(lastNameTF, gBCLastNameTF);
 
 		lastNameTF.getDocument().addDocumentListener(new RSDocumentListener(this));
 
@@ -639,6 +639,7 @@ public class MainWindow extends JFrame {
 		gBCBithNameCopyButton.insets = new Insets(10, 10, 10, 10);
 		gBCBithNameCopyButton.gridx = 3;
 		gBCBithNameCopyButton.gridy = 2;
+		birthNameCopyButton.setEnabled(false);
 		editPanel.add(birthNameCopyButton, gBCBithNameCopyButton);
 
 		firstNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.firstNameLabel"));
@@ -657,8 +658,9 @@ public class MainWindow extends JFrame {
 		gBCFirstNameTF.gridx = 1;
 		gBCFirstNameTF.gridy = 3;
 		gBCFirstNameTF.gridwidth = 2;
-		editPanel.add(firstNameTF, gBCFirstNameTF);
 		firstNameTF.setColumns(15);
+		firstNameTF.setEnabled(false);
+		editPanel.add(firstNameTF, gBCFirstNameTF);
 
 		firstNameTF.getDocument().addDocumentListener(new RSDocumentListener(this));
 
@@ -678,8 +680,9 @@ public class MainWindow extends JFrame {
 		gBCBirthNameTF.gridx = 1;
 		gBCBirthNameTF.gridy = 4;
 		gBCBirthNameTF.gridwidth = 2;
-		editPanel.add(birthNameTF, gBCBirthNameTF);
 		birthNameTF.setColumns(15);
+		birthNameTF.setEnabled(false);
+		editPanel.add(birthNameTF, gBCBirthNameTF);
 
 		birthNameCopyButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -707,6 +710,7 @@ public class MainWindow extends JFrame {
 		gBCBirthDateTF.gridy = 5;
 		gBCBirthDateTF.gridwidth = 2;
 		editPanel.add(birthDateTF, gBCBirthDateTF);
+		birthDateTF.setEnabled(false);
 		birthDateTF.setColumns(15);
 		birthDateTF.getDocument().addDocumentListener(
 				new RSDocumentListener(this));
@@ -724,9 +728,11 @@ public class MainWindow extends JFrame {
 		editPanel.add(sexLabel, gBCSexLabel);
 		sexRG = new ButtonGroup();
 		mSexR = new JRadioButton("M");
+		mSexR.setEnabled(false);
 		sexRG.add(mSexR);
 		editPanel.add(mSexR);
 		fSexR = new JRadioButton("F");
+		fSexR.setEnabled(false);
 		sexRG.add(fSexR);
 		editPanel.add(fSexR);
 		GridBagConstraints gBCMSexR = new GridBagConstraints();
@@ -749,7 +755,8 @@ public class MainWindow extends JFrame {
 		/**
 		 * Last button for download or copy action:
 		 */
-		downloadOrCopyButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadOrCopyButton"));
+		ImageIcon downloadIcon = new ImageIcon(getClass().getClassLoader().getResource("images/download.png"));
+		downloadOrCopyButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadOrCopyButton"), downloadIcon);
 		GridBagConstraints gbc_btnRetrieve = new GridBagConstraints();
 		gbc_btnRetrieve.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRetrieve.gridwidth = 4;
@@ -786,9 +793,11 @@ public class MainWindow extends JFrame {
 		final JPanel notificationPanel = new JPanel();
 		// add Notification panel to display in the main window the upload state
 		notificationPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		final JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		mainSplitPane.setLeftComponent(splitPaneQueryEditAndDicomTree);
-		mainSplitPane.setRightComponent(notificationPanel);
+		editCurrentUploadsPanel.add(notificationPanel, BorderLayout.CENTER);
+
+		final JSplitPane mainSplitPane = new JSplitPane();
+		mainSplitPane.setLeftComponent(splitPaneQueryAndDicomTree);
+		mainSplitPane.setRightComponent(editCurrentUploadsPanel);
 		notificationPanel.setLayout(gBLPanel);
 
 		// Content of Notification Panel
@@ -852,12 +861,12 @@ public class MainWindow extends JFrame {
 		menuBar.add(Box.createRigidArea(new Dimension(8, 0)));
 		
 		// add main split pane here
-		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"),
-			null, mainSplitPane, resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
+		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"), null, mainSplitPane,
+				resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
 		JPanel currentUploadsPanel = new JPanel(false);
 		// and below the current uploads panel
-		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.currentUploadsTab"),
-			null, currentUploadsPanel,resourceBundle.getString("shanoir.uploader.currentUploadsTab.tooltip"));
+		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.currentUploadsTab"), null, currentUploadsPanel,
+				resourceBundle.getString("shanoir.uploader.currentUploadsTab.tooltip"));
 		scrollPaneUpload = new JScrollPane();
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
@@ -865,7 +874,7 @@ public class MainWindow extends JFrame {
 		if (ShUpOnloadConfig.isShanoirNg()) {
 			final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
 			tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
-								resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
+					resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
 		}
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}

@@ -55,7 +55,17 @@ public class SelectionActionListener implements TreeSelectionListener {
 	public void valueChanged(TreeSelectionEvent event) {
 		dicomData = null;
 
-		// clean up Edit Panel when value changed
+		// clean up editPanel when value changed
+		mainWindow.noAnonR.setEnabled(false);
+		mainWindow.yesAnonR.setEnabled(false);
+		mainWindow.lastNameTF.setEnabled(false);
+		mainWindow.birthNameCopyButton.setEnabled(false);
+		mainWindow.firstNameTF.setEnabled(false);
+		mainWindow.birthNameTF.setEnabled(false);
+		mainWindow.birthDateTF.setEnabled(false);
+		mainWindow.newPatientIDTF.setEnabled(false);
+		mainWindow.mSexR.setEnabled(false);
+		mainWindow.fSexR.setEnabled(false);
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
@@ -151,19 +161,29 @@ public class SelectionActionListener implements TreeSelectionListener {
 			}
 
 			if (dicomData != null) {
+				mainWindow.noAnonR.setEnabled(true);
+				mainWindow.yesAnonR.setEnabled(true);
 				mainWindow.lastNameTF.setText(dicomData.getLastName());
+				mainWindow.lastNameTF.setEnabled(true);
+				mainWindow.birthNameCopyButton.setEnabled(true);
 				mainWindow.firstNameTF.setText(dicomData.getFirstName());
+				mainWindow.firstNameTF.setEnabled(true);
 				mainWindow.birthNameTF.setText(dicomData.getBirthName());
+				mainWindow.birthNameTF.setEnabled(true);
 				mainWindow.newPatientIDTF.setText(dicomData.getIPP());
+				mainWindow.newPatientIDTF.setEnabled(true);
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {
 					mainWindow.birthDateTF.setText(formatter.format(dicomData.getBirthDate()));
+					mainWindow.birthDateTF.setEnabled(true);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {
 					mainWindow.mSexR.setSelected(true);
+					mainWindow.mSexR.setEnabled(true);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("F")) {
 					mainWindow.fSexR.setSelected(true);
+					mainWindow.mSexR.setEnabled(true);
 				}
 			}
 		}
