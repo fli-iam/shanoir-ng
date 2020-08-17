@@ -568,7 +568,7 @@ public class MainWindow extends JFrame {
 		/**
 		 * Radio buttons for anonymised: no or yes
 		 */
-		JLabel anonymisedLabel = new JLabel("Anonymised:");
+		JLabel anonymisedLabel = new JLabel(resourceBundle.getString("shanoir.uploader.editPanel.anonymisedLabel"));
 		anonymisedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gBCAnonymisedLabel = new GridBagConstraints();
 		gBCAnonymisedLabel.anchor = GridBagConstraints.EAST;

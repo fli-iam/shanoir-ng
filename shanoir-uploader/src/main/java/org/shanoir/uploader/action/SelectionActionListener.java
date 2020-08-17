@@ -170,7 +170,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.firstNameTF.setEnabled(true);
 				mainWindow.birthNameTF.setText(dicomData.getBirthName());
 				mainWindow.birthNameTF.setEnabled(true);
-				mainWindow.newPatientIDTF.setText(dicomData.getIPP());
+				mainWindow.newPatientIDTF.setText(dicomData.getLastName());
 				mainWindow.newPatientIDTF.setEnabled(true);
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {

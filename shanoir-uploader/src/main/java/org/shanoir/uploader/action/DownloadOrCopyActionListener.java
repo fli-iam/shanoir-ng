@@ -191,17 +191,19 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		String subjectIdentifier = null;
 		// mode: data are not yet anonymised: calculate identifier in real relation with patient
 		if (mainWindow.noAnonR.isSelected()) {
+			// OFSEP mode
 			if (ShUpConfig.isModePseudonymus()) {
 				dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
 				subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
+			// Neurinfo mode
 			} else {
 				subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
 			}
 			dicomData.setSubjectIdentifier(subjectIdentifier);
-		// if the data have already be anonymised
+		// if the data have already be anonymised: Neurinfo only today
 		} else {
-			// use id here: in case possible to be used on Shanoir server
-			dicomData.setSubjectIdentifier(dicomData.getNewPatientID());
+			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getNewPatientID(), dicomData.getBirthDate());
+			dicomData.setSubjectIdentifier(subjectIdentifier);
 		}
 		return dicomData;
 	}
