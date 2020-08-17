@@ -79,8 +79,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 			mainWindow.birthNameTF.setText("");
 			mainWindow.birthDateTF.setText("");
 			// mainWindow.sexTF.setText("");
-			mainWindow.msexR.setSelected(true);
-			mainWindow.fsexR.setSelected(false);
+			mainWindow.mSexR.setSelected(true);
+			mainWindow.fSexR.setSelected(false);
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File selectedRootDir = fileChooser.getSelectedFile();
@@ -126,9 +126,10 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				mainWindow.firstNameTF.setText("");
 				mainWindow.birthNameTF.setText("");
 				mainWindow.birthDateTF.setText("");
-				// mainWindow.sexTF.setText("");
-				mainWindow.msexR.setSelected(true);
-				mainWindow.fsexR.setSelected(false);
+				mainWindow.newPatientIDTF.setText("");
+				mainWindow.noAnonR.setSelected(true);
+				mainWindow.mSexR.setSelected(true);
+				mainWindow.fSexR.setSelected(false);
 
 				/*
 				 * Indexing Patient Name attribute research is not case
@@ -225,7 +226,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		for (int i = 0; i < mainWindow.dicomTree.getRowCount(); i++) {
 			mainWindow.dicomTree.expandRow(i);
 		}
-		mainWindow.scrollPane.setViewportView(mainWindow.dicomTree);
+		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
 		mainWindow.dicomTree.addTreeSelectionListener(mainWindow.getSAL());
 		mainWindow.getSAL().setDicomData(null);
 	}

@@ -3,18 +3,14 @@ package org.shanoir.uploader.action;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import org.apache.log4j.Logger;
 import org.shanoir.uploader.gui.MainWindow;
 
 public class FocusEventListener implements FocusListener {
-	
-	private static Logger logger = Logger.getLogger(FindDicomActionListener.class);
 
 	private MainWindow mainWindow;
 
 	public FocusEventListener(final MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
-
 	}
 
 	public void focusLost(FocusEvent event) {
