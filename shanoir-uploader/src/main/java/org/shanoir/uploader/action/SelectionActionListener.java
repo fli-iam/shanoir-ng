@@ -172,18 +172,18 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.birthNameTF.setEnabled(true);
 				mainWindow.newPatientIDTF.setText(dicomData.getLastName());
 				mainWindow.newPatientIDTF.setEnabled(true);
+				mainWindow.birthDateTF.setEnabled(true);
+				mainWindow.mSexR.setEnabled(true);
+				mainWindow.fSexR.setEnabled(true);
 				// add this exception here for damaged DICOMDIRs without birth date set
 				if (dicomData.getBirthDate() != null) {
 					mainWindow.birthDateTF.setText(formatter.format(dicomData.getBirthDate()));
-					mainWindow.birthDateTF.setEnabled(true);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("M")) {
 					mainWindow.mSexR.setSelected(true);
-					mainWindow.mSexR.setEnabled(true);
 				}
 				if (dicomData.getSex() != null && dicomData.getSex().equals("F")) {
 					mainWindow.fSexR.setSelected(true);
-					mainWindow.mSexR.setEnabled(true);
 				}
 			}
 		}
