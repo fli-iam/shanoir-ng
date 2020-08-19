@@ -40,8 +40,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -246,8 +244,8 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		JMenu profileSelected = new JMenu(resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected);
-		menuBar.add(Box.createHorizontalGlue());
+		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
+		menuBar.add(Box.createRigidArea(new Dimension(550,5)));
 		menuBar.add(profileSelected);
 
 		/**
