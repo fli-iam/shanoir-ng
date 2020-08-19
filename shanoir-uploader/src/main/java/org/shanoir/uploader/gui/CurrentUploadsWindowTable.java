@@ -106,7 +106,7 @@ public class CurrentUploadsWindowTable implements Observer {
 		model.removeRow(nbRow - 1);
 		model.addRow(new Object[] { absolutePath, newUploadJob.getPatientPseudonymusHash(),
 				newUploadJob.getPatientName(), newUploadJob.getIPP(), newUploadJob.getStudyDate(),
-				newUploadJob.getMriSerialNumber(), newUploadJob.getUploadPercentage(),
+				newUploadJob.getMriSerialNumber(), "READY",
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import") });
 		model.addRow(new Object[] { "", "", "", "", "", "", "",
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll") });
