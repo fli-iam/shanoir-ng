@@ -156,6 +156,9 @@ public class DownloadOrCopyActionListener implements ActionListener {
 			return null;
 		}
 		dicomData.setNewPatientID(mainWindow.newPatientIDTF.getText());
+		dicomData.setLastName(mainWindow.newPatientIDTF.getText());
+		dicomData.setFirstName("");
+		dicomData.setBirthName("");
 		return dicomData;
 	}
 
