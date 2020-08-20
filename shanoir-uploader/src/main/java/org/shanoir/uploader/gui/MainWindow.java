@@ -282,24 +282,25 @@ public class MainWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.queryBoxMessage"));
 		GridBagConstraints gbc_queryPanelLabel = new GridBagConstraints();
 		gbc_queryPanelLabel.anchor = GridBagConstraints.WEST;
-		gbc_queryPanelLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_queryPanelLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_queryPanelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryPanelLabel.gridwidth = 3;
 		gbc_queryPanelLabel.gridx = 0;
 		gbc_queryPanelLabel.gridy = 0;
-		gbc_queryPanelLabel.gridwidth = 2;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
 
 		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_patientNameLabel = new GridBagConstraints();
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
-		gbc_patientNameLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_patientNameLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameLabel.gridx = 0;
 		gbc_patientNameLabel.gridy = 1;
 		queryPanel.add(patientNameLabel, gbc_patientNameLabel);
 
 		patientNameTF = new JTextField();
 		GridBagConstraints gbc_patientNameTF = new GridBagConstraints();
-		gbc_patientNameTF.insets = new Insets(10, 10, 10, 10);
+		gbc_patientNameTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientNameTF.gridx = 1;
 		gbc_patientNameTF.gridy = 1;
@@ -313,8 +314,7 @@ public class MainWindow extends JFrame {
 		JButton helpButton;
 		helpButton = new JButton(resourceBundle.getString("shanoir.uploader.helpButton"));
 		GridBagConstraints gbc_HelpButton = new GridBagConstraints();
-		gbc_HelpButton.insets = new Insets(0, 0, 5, 0);
-		gbc_HelpButton.gridwidth = 3;
+		gbc_HelpButton.insets = new Insets(5, 2, 0, 2);
 		gbc_HelpButton.gridx = 2;
 		gbc_HelpButton.gridy = 1;
 		queryPanel.add(helpButton, gbc_HelpButton);
@@ -393,14 +393,14 @@ public class MainWindow extends JFrame {
 		PatientIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_PatientIDLabel = new GridBagConstraints();
 		gbc_PatientIDLabel.anchor = GridBagConstraints.EAST;
-		gbc_PatientIDLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_PatientIDLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_PatientIDLabel.gridx = 0;
 		gbc_PatientIDLabel.gridy = 2;
 		queryPanel.add(PatientIDLabel, gbc_PatientIDLabel);
 
 		patientIDTF = new JTextField();
 		GridBagConstraints gbc_patientIDTF = new GridBagConstraints();
-		gbc_patientIDTF.insets = new Insets(10, 10, 10, 10);
+		gbc_patientIDTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientIDTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientIDTF.gridx = 1;
 		gbc_patientIDTF.gridy = 2;
@@ -412,14 +412,14 @@ public class MainWindow extends JFrame {
 		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
 		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
 		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
-		gbc_studyDescriptionLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDescriptionLabel.gridx = 0;
 		gbc_studyDescriptionLabel.gridy = 3;
 		queryPanel.add(studyDescriptionLabel, gbc_studyDescriptionLabel);
 
 		studyDescriptionTF = new JTextField();
 		GridBagConstraints gbc_studyDescriptionTF = new GridBagConstraints();
-		gbc_studyDescriptionTF.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDescriptionTF.gridx = 1;
 		gbc_studyDescriptionTF.gridy = 3;
@@ -447,7 +447,7 @@ public class MainWindow extends JFrame {
 		JLabel birthDateReasearchLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientBirthDateLabel"));
 		GridBagConstraints gbc_birthDateReasearchLabel = new GridBagConstraints();
 		gbc_birthDateReasearchLabel.anchor = GridBagConstraints.EAST;
-		gbc_birthDateReasearchLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_birthDateReasearchLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateReasearchLabel.gridx = 0;
 		gbc_birthDateReasearchLabel.gridy = 4;
 		queryPanel.add(birthDateReasearchLabel, gbc_birthDateReasearchLabel);
@@ -464,7 +464,7 @@ public class MainWindow extends JFrame {
 
 		final JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, dLP);
 		GridBagConstraints gbc_birthDateReasearchTF = new GridBagConstraints();
-		gbc_birthDateReasearchTF.insets = new Insets(10, 10, 10, 10);
+		gbc_birthDateReasearchTF.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateReasearchTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_birthDateReasearchTF.gridx = 1;
 		gbc_birthDateReasearchTF.gridy = 4;
@@ -492,7 +492,7 @@ public class MainWindow extends JFrame {
 		JLabel studyDateLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDateLabel"));
 		GridBagConstraints gbc_studyDateLabel = new GridBagConstraints();
 		gbc_studyDateLabel.anchor = GridBagConstraints.EAST;
-		gbc_studyDateLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDateLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDateLabel.gridx = 0;
 		gbc_studyDateLabel.gridy = 5;
 		queryPanel.add(studyDateLabel, gbc_studyDateLabel);
@@ -509,7 +509,7 @@ public class MainWindow extends JFrame {
 				studyDatePanel, studyDLP);
 
 		GridBagConstraints gbc_studyDatePicker = new GridBagConstraints();
-		gbc_studyDatePicker.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDatePicker.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDatePicker.gridx = 1;
 		gbc_studyDatePicker.gridy = 5;
@@ -535,7 +535,7 @@ public class MainWindow extends JFrame {
 
 		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
-		gbc_queryButton.insets = new Insets(0, 0, 5, 0);
+		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
 		gbc_queryButton.gridwidth = 3;
 		gbc_queryButton.gridx = 0;
 		gbc_queryButton.gridy = 6;
@@ -557,6 +557,7 @@ public class MainWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.sendBoxMessage"));
 		GridBagConstraints gbc_editPanelLabel = new GridBagConstraints();
 		gbc_editPanelLabel.anchor = GridBagConstraints.WEST;
+		gbc_editPanelLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_editPanelLabel.insets = new Insets(10, 10, 10, 10);
 		gbc_editPanelLabel.gridx = 0;
 		gbc_editPanelLabel.gridy = 0;
