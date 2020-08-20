@@ -34,6 +34,7 @@ shanoir-uploader/src/main/resources/pseudonymus
 shanoir-ng-tests/tests/geckodriver.log
 shanoir-ng-users/shanoir-events-log.log
 shanoir-ng-preclinical/nullbruker/
+shanoir-ng-front/node/
 *.class
 *.jar
 *.project
@@ -45,3 +46,7 @@ shanoir-ng-preclinical/nullbruker/
 /docker-compose/*/entrypoint_common
 /docker-compose/*/oneshot
 /tmp
+shanoir-ng-tests/tests/.Python
+shanoir-ng-tests/tests/include/
+shanoir-ng-tests/tests/lib/
+shanoir-ng-tests/tests/pip-selfcheck.json
