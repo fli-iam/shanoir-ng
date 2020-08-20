@@ -112,6 +112,19 @@ public final class KeycloakUtil {
 	}
 
 	/**
+	 * Get current ID from keycloak with a default fallback value
+	 * @param defaultId the default value to set
+	 * @return The keycloak current user ID, the default ID otherwise.
+	 */
+	public static Long getTokenUserId(Long defaultId) {
+		try {
+			return getTokenUserId();
+		} catch (Exception e) {
+			return defaultId;
+		}
+	}
+
+	/**
 	 * Get headers with current Keycloak token.
 	 * 
 	 * @return HTTP headers.

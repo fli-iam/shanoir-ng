@@ -29,7 +29,7 @@ export class MrDatasetComponent implements OnInit{
     private natureOptions: Option<MrDatasetNature>[];
     
     constructor() {
-        this.natureOptions = MrDatasetNature.toOptions();
+        this.natureOptions = MrDatasetNature.options;
     }
     
     ngOnInit() {

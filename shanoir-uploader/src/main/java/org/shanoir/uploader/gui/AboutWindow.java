@@ -64,7 +64,7 @@ public class AboutWindow extends JFrame {
 				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION);
+		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + "b");
 		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
 
 		JLabel copyrightLabel = new JLabel(

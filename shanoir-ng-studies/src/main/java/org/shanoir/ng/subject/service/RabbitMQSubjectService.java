@@ -27,7 +27,6 @@ import java.util.stream.StreamSupport;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
@@ -35,10 +34,8 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,12 +99,16 @@ public class RabbitMQSubjectService {
 	 * @param studyId the study ID
 	 * @return a list of subjects
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-	        value = @Queue(value = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, durable = "true"),
-	        exchange = @Exchange(value = RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.DIRECT)))
-	public List<SimpleSubjectDTO> getSubjectsForStudy(String studyId) {
-		return subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId));
+	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE)
+	@RabbitHandler
+	public String getSubjectsForStudy(String studyId) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
+		} catch (Exception e) {
+			LOG.error("Error while serializing subjects for participants.tsv file.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
 	}
 	
 	/**
@@ -119,10 +120,8 @@ public class RabbitMQSubjectService {
 	 * If an error occurs, a list of a single subject with no ID and only a name is sent back
 	 * @throws JsonProcessingException
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-	        value = @Queue(value = RabbitMQConfiguration.SUBJECTS_QUEUE, durable = "true"),
-	        exchange = @Exchange(value = RabbitMQConfiguration.SUBJECTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
+	@RabbitHandler
 	public String manageParticpants(String participantsFilePath) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		try {

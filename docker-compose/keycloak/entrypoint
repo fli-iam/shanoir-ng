@@ -67,11 +67,54 @@ never)
 	;;
 
 import)
-	error "TODO: import"
+	# Import the shanoir-ng users
+	#
+	# The exported users shall be provided in /import/shanoir-ng-users-*.json
+	#
+	# The realm file /import/shanoir-ng-realm.json is ignored (we use the
+	# /tmp/import/shanoir-ng-realm.json generated above)
+	#
+	# Fails if the users file is not present.
+
+	IMPORT_DIR="/import"
+	if [ ! -d "$IMPORT_DIR" ] ; then
+		error "import dir '$IMPORT_DIR' is not present"
+	elif ! (shopt -s failglob ; ln -s "$IMPORT_DIR"/shanoir-ng-users-*.json /tmp/import/)
+	then
+		error "import dir '$IMPORT_DIR' does not contain any users file"
+	else
+		extra+=("-Dkeycloak.migration.action=import"
+			"-Dkeycloak.migration.provider=dir"
+			"-Dkeycloak.migration.dir='/tmp/import'"
+			"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+		)
+		oneshot=1
+	fi
 	;;
 
 export)
-	error "TODO: export"
+	# Export the shanoir-ng realm
+	#
+	# The realm is exported as:
+	#	/export/shanoir-ng-realm.json
+	#	/export/shanoir-ng-users-0.json
+	#
+	# Fails if the /export dir is not present or not empty
+
+	EXPORT_DIR="/export"
+	if [ ! -d "$EXPORT_DIR" ] ; then
+		error "export dir '$EXPORT_DIR' is not present"
+	elif [ -n "`ls -A "$EXPORT_DIR"`" ] ; then
+		error "export dir '$EXPORT_DIR' is not empty"
+	else
+		extra+=("-Dkeycloak.migration.action=export"
+			"-Dkeycloak.migration.realmName=shanoir-ng"
+			"-Dkeycloak.migration.provider=dir"
+			"-Dkeycloak.migration.usersExportStrategy=SAME_FILE"
+			"-Dkeycloak.migration.dir='$EXPORT_DIR'"
+		)
+		oneshot=1
+	fi
 	;;
 esac
 unset SHANOIR_KEYCLOAK_USER SHANOIR_KEYCLOAK_PASSWORD

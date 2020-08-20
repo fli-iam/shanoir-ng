@@ -137,7 +137,7 @@ export class DatasetAcquisitionDTO {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    type: 'Mr' | 'Pet' | 'Ct';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {

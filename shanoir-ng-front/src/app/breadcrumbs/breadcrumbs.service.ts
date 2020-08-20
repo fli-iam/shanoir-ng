@@ -141,6 +141,15 @@ export class BreadcrumbsService {
         return false;
     }
 
+
+    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+        console.log(this.steps)
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return this.steps[i].importMode;
+        }
+        return null;
+    }
+
 }
 
 export class Step {

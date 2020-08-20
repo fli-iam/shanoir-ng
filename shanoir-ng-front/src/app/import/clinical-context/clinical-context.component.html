@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">3. Set the clinical context</div>
+<div class="header command-zone">3. Set the clinical context {{importMode}}</div>
 <fieldset class="step" @preventInitialChildAnimations>
 
     <ol>
@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li>
-            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
+            <label [class.required-label]="!useStudyCard">Select an acquisition equipment {{acquisitionEquipmentOptions.length}}</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
                         [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"
@@ -127,7 +127,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <th class="label-col">Common name</th>
                             <th class="input-col">Subject identifier for this study</th>
                             <th class="chkbx-col" title="Physically Involved">PI</th>
-                            <th class="dropdown-col">Subject Type</th>
+                            <th *ngIf="importMode != 'BRUKER'" class="dropdown-col">Subject Type</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,7 +142,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <td class="chkbx-col">
                                 <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                             </td>
-                            <td class="dropdown-col">
+                            <td *ngIf="importMode != 'BRUKER'" class="dropdown-col">
                                 <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
                                 </select-box>
                             </td>

@@ -31,7 +31,7 @@ export abstract class DatasetAcquisition extends Entity {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    type: 'Mr' | 'Pet' | 'Ct'; // TODO : other types
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg'; // TODO : other types
     protocol: any;
 
     service: DatasetAcquisitionService = ServiceLocator.injector.get(DatasetAcquisitionService);

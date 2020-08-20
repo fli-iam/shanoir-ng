@@ -14,11 +14,16 @@
 
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -42,13 +47,18 @@ public abstract class SecurityContextUtil {
 	 * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
 	 */
 	public static void initAuthenticationContext(String role) {
+		List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+
+		GrantedAuthority auth = new SimpleGrantedAuthority("ROLE_ADMIN");
+		grantedAuthorities.add(auth );
 		Access realmAccess = new Access();
 		realmAccess.addRole(role);
 		AccessToken accessToken = new AccessToken();
+		accessToken.getOtherClaims().put(KeycloakUtil.USER_ID_TOKEN_ATT, 1);
 		accessToken.setRealmAccess(realmAccess);
 		KeycloakSecurityContext context = new KeycloakSecurityContext(null, accessToken, null, null);
-		KeycloakPrincipal<KeycloakSecurityContext> principal = new KeycloakPrincipal<>("user", context);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
+		KeycloakPrincipal<KeycloakSecurityContext> principal = new KeycloakPrincipal<>("rabbitMQ", context);
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, "password", grantedAuthorities));
 	}
 
 }

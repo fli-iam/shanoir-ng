@@ -32,7 +32,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
@@ -41,6 +40,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
+import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -77,8 +77,8 @@ public class ImporterServiceTest {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 	
 	@Mock
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+	private DatasetAcquisitionService datasetAcquisitionService;
+
 	@Mock
 	private DicomPersisterService dicomPersisterService;
 
@@ -141,7 +141,7 @@ public class ImporterServiceTest {
 		assertTrue(task.getStatus() == 1);
 
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcquisitionCapturer.capture());
+		verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
 		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 		
 		EegDataset ds = (EegDataset) hack.getDatasets().get(0);
@@ -178,8 +178,12 @@ public class ImporterServiceTest {
 		Dataset dataset = new Dataset();
 		List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
 		ExpressionFormat expressionFormat = new ExpressionFormat();
+		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
+		DatasetFile datasetFile = new DatasetFile();
 		
-		expressionFormats.add(expressionFormat );
+		datasetFiles.add(datasetFile);
+		expressionFormat.setDatasetFiles(datasetFiles);
+		expressionFormats.add(expressionFormat);
 		dataset.setExpressionFormats(expressionFormats);
 		datasets.add(dataset );
 		serie.setDatasets(datasets );
@@ -218,7 +222,7 @@ public class ImporterServiceTest {
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcq);
+		verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 

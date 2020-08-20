@@ -71,7 +71,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     private inputText: string;
-    private _searchText: string;
+    private _searchText: string = null;
     @Input() disabled: boolean = false;
     @HostBinding('class.read-only') @Input() readOnly: boolean = false;
     @Input() placeholder: string;
@@ -115,6 +115,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 else if (typeof(item) == 'string') label = item;
                 else if (item.label) label = item.label;
                 else if (item.name) label = item.name;
+                else if (item.value) label = item.value;
                 this.options.push(new Option<any>(item, label));
             });
             this.initSelectedOption();
@@ -140,8 +141,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private initSelectedOption() {
-        if (this.inputValue) {
-            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+        if (this.inputValue || this.selectedOption) {
+            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue ? this.inputValue : this.selectedOption.value));
             if (index == -1) {
                 this.selectedOptionIndex = null;
             } else {
@@ -213,7 +214,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         let maxWidth: number = 0;
         if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
             this.displayableOptions.forEach(opt => {
-                if (!maxOption || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
+                if (!maxOption || !maxOption.label || !opt.label || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
                     this.hiddenOption.nativeElement.innerText = opt.label;
                     let width: number = this.hiddenOption.nativeElement.offsetWidth;
                     if (width > maxWidth) {
@@ -229,9 +230,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private set searchText(text: string) {
+        if (text == this._searchText) return;
         this.focusedOptionIndex = null;
         if (!text) {
-            if (this._searchText == null) return;
             this._searchText = null;
             this.filteredOptions = null;
         } else {
@@ -596,8 +597,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         else if (this.options) return this.options;
         else return null;
     }
-
-    
 }
 
 

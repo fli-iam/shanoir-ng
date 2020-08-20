@@ -57,7 +57,5 @@ export enum MrSequencePhysics {
 			.replace('epi', 'EPI');
     }
 
-    export function toOptions(): Option<MrSequencePhysics>[] {
-        return all().map(prop => new Option<MrSequencePhysics>(prop, getLabel(prop)));
-    }
+    export var options: Option<MrSequencePhysics>[] = all().map(prop => new Option<MrSequencePhysics>(prop, getLabel(prop)));
 }

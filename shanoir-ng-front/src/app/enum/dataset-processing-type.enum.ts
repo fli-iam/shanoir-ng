@@ -111,8 +111,6 @@ export enum DatasetProcessingType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<DatasetProcessingType>[] {
-        return all().map(prop => new Option<DatasetProcessingType>(prop, getLabel(prop)));
-    }
+    export var options: Option<DatasetProcessingType>[] = all().map(prop => new Option<DatasetProcessingType>(prop, getLabel(prop)));
 }
 

@@ -49,7 +49,6 @@ public interface SubjectService {
 	 * @return a list of subjects.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
 	List<IdName> findNames();
 
 	
@@ -150,7 +149,7 @@ public interface SubjectService {
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	Subject update(Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException;
 
 	/**

@@ -31,7 +31,5 @@ export enum TherapyType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<TherapyType>[] {
-        return all().map(prop => new Option<TherapyType>(prop, getLabel(prop)));
-    }
+    export var options: Option<TherapyType>[] = all().map(prop => new Option<TherapyType>(prop, getLabel(prop)));
 }

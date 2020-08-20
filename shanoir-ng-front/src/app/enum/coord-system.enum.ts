@@ -20,18 +20,18 @@ export enum CoordSystems {
     ACPC = "ACPC",
     ALLEN= "ALLEN",     
     ANALYZE= "ANALYZE",  
-    BTI_4D= "BTI/4D",
+    BTI_4D= "BTI_4D",
     CTF_MRI= "CTF MRI", 
-    CTF_GRADIOMETER = "CTF GRADIOMETER",
+    CTF_GRADIOMETER = "CTF_GRADIOMETER",
     CAPTRAK= "CAPTRAK",
     CHIETI= "CHIETI",
     DICOM= "DICOM",
     FREESURFER= "FREESURFER",  
     MNI= "MNI",
     NIFTI= "NIFTI",
-    NEUROMAG_ELEKTA= "Neuromag/Elekta",
-    PAXINOS_FRANKLIN= "Paxinos-Franklin",
-    TALAIRACH_TOURNOUX= "Talairach-Tournoux", 
+    NEUROMAG_ELEKTA= "NEUROMAG_ELEKTA",
+    PAXINOS_FRANKLIN= "PAXINOS_FRANKLIN",
+    TALAIRACH_TOURNOUX= "TALAIRACH_TOURNOUX", 
     YOKOGAWA= "YOKOGAWA"
 
 } export namespace CoordSystems {
@@ -41,13 +41,8 @@ export enum CoordSystems {
     }
 
     export function getLabel(type: CoordSystems): string {
-        if (CoordSystems.NEUROMAG_ELEKTA == type) return 'Neuromag/Elekta';
-        else if (CoordSystems.PAXINOS_FRANKLIN == type) return 'Paxinos-Franklin';
-        else if (CoordSystems.TALAIRACH_TOURNOUX == type) return 'Talairach-Tournoux';
-        else return capitalsAndUnderscoresToDisplayable(type);
+        return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<CoordSystems>[] {
-        return all().map(prop => new Option<CoordSystems>(prop, getLabel(prop)));
-    }
+    export var options: Option<CoordSystems>[] = all().map(prop => new Option<CoordSystems>(prop, getLabel(prop)));
 }

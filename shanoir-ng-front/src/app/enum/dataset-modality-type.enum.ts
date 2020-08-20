@@ -17,9 +17,12 @@ import { Option } from '../shared/select/select.component';
 
 export enum DatasetModalityType {
 
-    PET = 'PET',
-    MR = 'MR',
-    CT = 'CT'
+    PET_DATASET = 'PET',
+    MR_DATASET = 'MR',
+    CT_DATASET = 'CT',
+    MEG_DATASET = 'MG',
+    SPECT_DATASET = 'SPECT',
+    EEG_DATASET = 'EEG'
 
 } export namespace DatasetModalityType {
     
@@ -31,7 +34,5 @@ export enum DatasetModalityType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<DatasetModalityType>[] {
-        return all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
-    }
+    export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
 }

@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -48,7 +48,7 @@ public class DatasetAcquisitionMapperTest {
 	private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " ()";
 
 	@Autowired
-	private DatasetAcquisitionMapper datasetAcquisitionMapper;
+	private ExaminationDatasetAcquisitionMapper datasetAcquisitionMapper;
 
 	@Test
 	public void datasetAcquisitionsToExaminationDatasetAcquisitionDTOsTest() {
