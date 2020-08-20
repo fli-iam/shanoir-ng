@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM mysql/mysql-server:5.7
+FROM mysql/mysql-server:8.0.20
 
 ADD 1_add_users.sql /docker-entrypoint-initdb.d/
 
