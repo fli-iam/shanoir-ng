@@ -419,7 +419,7 @@ targetConn.commit()
 print("Import study card assignments: end")
 
 
-print("Import scientelific_article: start")
+print("Import scientific_article: start")
 
 sourceCursor.execute("SELECT SCIENTIFIC_ARTICLE_ID, SCIENTIFIC_ARTICLE_REFERENCE, REF_SCIENTIFIC_ARTICLE_TYPE_ID FROM SCIENTIFIC_ARTICLE")
 
