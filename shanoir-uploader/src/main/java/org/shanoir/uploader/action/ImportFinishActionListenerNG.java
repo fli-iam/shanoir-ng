@@ -110,6 +110,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
+			addSubjectStudy(study, subject);
+			// create subject with subject-study filled to avoid access denied exception because of rights check
 			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
 			if (subject == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -119,27 +121,35 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
-				handleSubjectStudy(study, subject);
 				logger.info("Auto-Import: subject created on server with ID: " + subject.getId());
 			}
 		} else {
-			handleSubjectStudy(study, subject);
+			// if rel-subject-study does not exist for existing subject, create one
+			if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
+				addSubjectStudy(study, subject);
+				if (shanoirUploaderServiceClientNG.createSubjectStudy(subject) == null) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
+							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
+							"Error", JOptionPane.ERROR_MESSAGE);
+					mainWindow.setCursor(null); // turn off the wait cursor
+					((JButton) event.getSource()).setEnabled(true);
+					return;
+				}
+				
+			}
 			logger.info("Auto-Import: subject used on server with ID: " + subject.getId());
 		}
 		
 		Long examinationId = null;
 		if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
 			Examination examinationDTO = new Examination();
-			IdName studyIdName = new IdName(study.getId(), study.getName());
-			examinationDTO.setStudy(studyIdName);
-			IdName subjectIdName = new IdName(subject.getId(), subject.getName());
-			examinationDTO.setSubject(subjectIdName);
+			examinationDTO.setStudyId(study.getId());
+			examinationDTO.setSubjectId(subject.getId());
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
+			examinationDTO.setCenterId(center.getId());
 //			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-			IdName centerIdName = new IdName(center.getId(), center.getName());
-			examinationDTO.setCenter(centerIdName);
 			examinationDTO.setExaminationDate(examinationDate);
 			examinationDTO.setComment(examinationComment);
 
@@ -189,15 +199,21 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		importJob.setFromShanoirUploader(true);
 		// handle study and study card, using ImportDialog
 		Study studyShanoir = (Study) importDialog.studyCB.getSelectedItem();
-		importJob.setFrontStudyId(studyShanoir.getId());
+		importJob.setStudyId(studyShanoir.getId());
+		importJob.setStudyName(studyShanoir.getName());
 		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
+		// MS Datasets does only return StudyCard DTOs without IDs, as name is unique
+		// see: /shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
 		importJob.setStudyCardName(studyCard.getName());
+		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		importJob.setConverterId(studyCard.getNiftiConverterId());
 		// handle patient and subject
 		Patient patient = new Patient();
 		patient.setPatientID(uploadJob.getSubjectIdentifier());
 		Subject subject = new Subject();
 		subject.setId(subjectId);
 		subject.setName(subjectName);
+		importJob.setSubjectName(subjectName);
 		patient.setSubject(subject);
 		List<Patient> patients = new ArrayList<Patient>();
 		patients.add(patient);
@@ -233,18 +249,16 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		return importJob;
 	}
 
-	private void handleSubjectStudy(final Study study, final Subject subject) {
-		if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
-			SubjectStudy subjectStudy = new SubjectStudy();
-			subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
-			subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
+	private void addSubjectStudy(final Study study, final Subject subject) {
+		SubjectStudy subjectStudy = new SubjectStudy();
+		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
+		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
+		if (! mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()) {
 			subjectStudy.setSubjectStudyIdentifier(mainWindow.importDialog.subjectStudyIdentifierTF.getText());
-			subjectStudy.setSubjectType((SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
-			subjectStudy.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
-			subject.getSubjectStudyList().add(subjectStudy);
-			shanoirUploaderServiceClientNG.createSubjectStudy(subject);
-			logger.info("Auto-import: RelSubjectStudy created with id: " + subjectStudy.getId() + " for subject: " + subject.getName() + " in study: " + study.getName());
 		}
+		subjectStudy.setSubjectType((SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
+		subjectStudy.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
+		subject.getSubjectStudyList().add(subjectStudy);
 	}
 
 	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
@@ -282,6 +296,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		} else if (HemisphericDominance.Right.getName().compareTo(manualHemDom) == 0) {
 			subjectDTO.setManualHemisphericDominance(HemisphericDominance.Right);
 		}
+		subjectDTO.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		return subjectDTO;
 	}
 

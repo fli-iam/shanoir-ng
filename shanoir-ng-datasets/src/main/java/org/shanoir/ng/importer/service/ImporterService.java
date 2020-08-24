@@ -181,19 +181,13 @@ public class ImporterService {
 		}
 	}
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
-		// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-		if (serie.getModality() != null
-				&& serie.getDatasets() != null
-				&& !serie.getDatasets().isEmpty()
-				&& serie.getDatasets().get(0).getExpressionFormats() != null
-				&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()) {
+		if (checkSerieForDicomImages(serie)) {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
-			
 			// TODO: put studyCard in bruker import
 			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
-				datasetAcquisition.setAcquisitionEquipmentId(importJob.getacquisitionEquipmentId());
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 			}
 			// Persist Serie in Shanoir DB
 			datasetAcquisitionService.create(datasetAcquisition);
@@ -205,7 +199,25 @@ public class ImporterService {
 			LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
 					+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
 					+ "(" + serie.getSeriesDescription() + ")");
+		} else {
+			LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");
 		}
+	}
+	
+	/**
+	 * Added Temporary check on serie in order not to generate dataset acquisition for series without images.
+	 * 
+	 * @param serie
+	 * @return
+	 */
+	private boolean checkSerieForDicomImages(Serie serie) {
+		return serie.getModality() != null
+			&& serie.getDatasets() != null
+			&& !serie.getDatasets().isEmpty()
+			&& serie.getDatasets().get(0).getExpressionFormats() != null
+			&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
+			&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
+			&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
 	}
 
 

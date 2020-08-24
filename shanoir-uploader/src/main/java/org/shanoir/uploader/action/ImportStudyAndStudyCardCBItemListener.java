@@ -82,6 +82,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	private void updateSubjectStudy(Study study) {
+		this.subjectStudyDTO = null;
 		if (subjectDTO != null) {
 			// Check if RelSubjectStudy exists for selected study
 			List<SubjectStudyDTO> subjectStudyList = subjectDTO.getSubjectStudyList();
@@ -104,7 +105,7 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				}
 			}
 		}
-		// subject is not in study, enable editing and display defaults
+		// subject is not in study or does not yet exist, enable editing and display defaults
 		if (ShUpConfig.isModeSubjectStudyIdentifier()) {
 			mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(true);
 			mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(true);
@@ -115,7 +116,6 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
 		mainWindow.importDialog.subjectTypeCB.setSelectedItem(ImportDialogOpener.subjectTypeValues[1]);
-		this.subjectStudyDTO = null;
 	}
 
 	public SubjectStudyDTO getSubjectStudyDTO() {

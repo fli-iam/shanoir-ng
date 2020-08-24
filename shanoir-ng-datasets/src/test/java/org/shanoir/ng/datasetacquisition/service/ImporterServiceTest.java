@@ -40,6 +40,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
+import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -177,8 +178,12 @@ public class ImporterServiceTest {
 		Dataset dataset = new Dataset();
 		List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
 		ExpressionFormat expressionFormat = new ExpressionFormat();
+		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
+		DatasetFile datasetFile = new DatasetFile();
 		
-		expressionFormats.add(expressionFormat );
+		datasetFiles.add(datasetFile);
+		expressionFormat.setDatasetFiles(datasetFiles);
+		expressionFormats.add(expressionFormat);
 		dataset.setExpressionFormats(expressionFormats);
 		datasets.add(dataset );
 		serie.setDatasets(datasets );
