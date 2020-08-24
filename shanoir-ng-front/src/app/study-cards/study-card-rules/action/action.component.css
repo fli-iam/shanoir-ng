@@ -13,3 +13,7 @@ input { box-sizing: border-box; width: auto; padding: 0 1px; }
 
 .error { color: white !important; background-color: var(--color-error) !important; border-radius: 4px !important; }
 .error::ng-deep ::placeholder { color: white !important; }
+
+.error-msg { color: var(--color-error); font-weight: bold; }
+.error-msg svg { margin-right: 7px; }
+.hint { color: var(--dark-grey); font-weight: normal; }

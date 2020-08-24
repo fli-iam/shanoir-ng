@@ -426,7 +426,7 @@ export class StudyComponent extends EntityComponent<Study> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).subscribe(response => console.log('result:' + response));
+                this.studyService.uploadFile(this.protocolFile, this.entity.id);
             }
         });
         return prom;

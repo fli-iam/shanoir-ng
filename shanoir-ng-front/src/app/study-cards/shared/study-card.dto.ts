@@ -72,7 +72,7 @@ export class StudyCardDTOService {
                 if (rule.assignments) {
                     for (let assigment of rule.assignments) {
                         if (StudyCardDTOService.isCoil(assigment.field)) {
-                            assigment.value = coils.find(coil => coil.id == (assigment.value as Coil).id);
+                            if (assigment.value instanceof Coil) assigment.value = coils.find(coil => coil.id == (assigment.value as Coil).id);
                         }
                     }
                 }
@@ -152,7 +152,7 @@ export class StudyCardDTOService {
                     for (let assigmentDTO of ruleDTO.assignments) {
                         let assigment: StudyCardAssignment = new StudyCardAssignment();
                         assigment.field = assigmentDTO.field;
-                        if (this.isCoil(assigment.field)) {
+                        if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
                             assigment.value = new Coil();
                             assigment.value.id = +assigmentDTO.value;
                         } else {

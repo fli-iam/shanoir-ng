@@ -112,8 +112,8 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
     			this.openDeletePathologyModelConfirmDialog(entity);
     		}
     	}).catch((error) => {
-    		console.log(error);
-    		this.openDeletePathologyModelConfirmDialog(entity);
+            this.openDeletePathologyModelConfirmDialog(entity);
+            throw error;
     	});     
     }   
     

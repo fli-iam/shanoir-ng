@@ -348,6 +348,7 @@ for row in sourceCursor.fetchall():
 	study_card_rule = list(row)
 	if 'refDatasetModalityType' == study_card_rule[1]:
 		study_card_rule[1] = 1
+		study_card_rule[2] = study_card_rule[2].partition(' ')[0]
 		study_card_assignment_list.append(study_card_rule)
 	elif 'protocolName' == study_card_rule[1]:
 		study_card_rule[1] = 2
@@ -360,14 +361,20 @@ for row in sourceCursor.fetchall():
 		study_card_assignment_list.append(study_card_rule)
 	elif 'refExploredEntity' == study_card_rule[1]:
 		study_card_rule[1] = 6
+		study_card_rule[2] = study_card_rule[2].replace(' ', '_').upper()
 		study_card_assignment_list.append(study_card_rule)
 	elif 'refAcquisitionContrast' == study_card_rule[1]:
 		study_card_rule[1] = 7
 		study_card_assignment_list.append(study_card_rule)
 	elif 'refMrSequenceApplication' == study_card_rule[1]:
 		study_card_rule[1] = 8
+		study_card_rule[2] = study_card_rule[2].upper()
 		study_card_assignment_list.append(study_card_rule)
 	elif 'refMrSequencePhysics' == study_card_rule[1]:
+		if study_card_rule[2] == 'Inversion recovery spin-echo sequence':
+			study_card_rule[2] = 'INVERSION_RECOVERY_SINGLE_ECHO_SPIN_ECHO_SEQUENCE'
+		else:
+			study_card_rule[2] = study_card_rule[2].upper().replace(' ', '_').replace('-', '_')
 		study_card_rule[1] = 9
 		study_card_assignment_list.append(study_card_rule)
 	elif 'name' == study_card_rule[1]:
@@ -381,6 +388,41 @@ for row in sourceCursor.fetchall():
 		study_card_assignment_list.append(study_card_rule)
 	elif 'refContrastAgentUsed' == study_card_rule[1]:
 		study_card_rule[1] = 13
+		study_card_assignment_list.append(study_card_rule)
+	elif 'refMrDatasetNature' == study_card_rule[1]:
+		study_card_rule[1] = 14
+		if 'T1WeightedMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T1_WEIGHTED_MR_DATASET'
+		elif 'T2WeightedMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T2_WEIGHTED_MR_DATASET'
+		elif 'T2StarWeightedMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T2_STAR_WEIGHTED_MR_DATASET'
+		elif 'ProtonDensityWeightedMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'PROTON_DENSITY_WEIGHTED_MR_DATASET'
+		elif 'DiffusionWeightedMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'DIFFUSION_WEIGHTED_MR_DATASET'
+		elif 'VelocityEncodedAngioMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'VELOCITY_ENCODED_ANGIO_MR_DATASET'
+		elif 'TimeOfFlightMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'TIME_OF_FLIGHT_MR_DATASET'
+		elif 'ContrastAgentUsedAngioMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'CONTRAST_AGENT_USED_ANGIO_MR_DATASET'
+		elif 'SpinTaggingPerfusionMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'SPIN_TAGGING_PERFUSION_MR_DATASET'
+		elif 'T1WeightedDCEMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T1_WEIGHTED_DCE_MR_DATASET'
+		elif 'T2WeightedDCEMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T2_WEIGHTED_DCE_MR_DATASET'
+		elif 'T2StarWeightedDCEMRDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'T2_STAR_WEIGHTED_DCE_MR_DATASET'
+		elif 'FieldMapDatasetShortEchoTime'  == study_card_rule[2]:
+			study_card_rule[2] = 'FIELD_MAP_DATASET_SHORT_ECHO_TIME'
+		elif 'FieldMapDatasetLongEchoTime'  == study_card_rule[2]:
+			study_card_rule[2] = 'FIELD_MAP_DATASET_LONG_ECHO_TIME'
+		elif 'H1SinglevoxelSpectroscopyDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET'
+		elif 'H1SpectroscopicImagingDataset'  == study_card_rule[2]:
+			study_card_rule[2] = 'H1_SPECTROSCOPIC_IMAGING_DATASET'
 		study_card_assignment_list.append(study_card_rule)
 query = "INSERT INTO study_card_assignment (id, field, value, rule_id) VALUES (%s, %s, %s, %s)"
 targetCursor.executemany(query, study_card_assignment_list)

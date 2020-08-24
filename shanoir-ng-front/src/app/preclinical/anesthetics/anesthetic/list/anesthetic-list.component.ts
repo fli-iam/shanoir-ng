@@ -96,8 +96,8 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
     			this.openDeleteAnestheticConfirmDialog(entity);
     		}
     	}).catch((error) => {
-    		console.log(error);
-    		this.openDeleteAnestheticConfirmDialog(entity);
+            this.openDeleteAnestheticConfirmDialog(entity);
+            throw error;
     	});    
     }   
 

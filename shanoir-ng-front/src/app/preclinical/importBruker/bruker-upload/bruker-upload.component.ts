@@ -94,7 +94,6 @@ export class BrukerUploadComponent {
                         this.setArchiveStatus('uploaded');
                 		this.uploadProgress = 5;
             		}, (err: String) => {
-            			console.log("error in dicom import"+JSON.stringify(err));
                         this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
                         this.uploadProgress = 4;
                         this.setArchiveStatus('error');
@@ -102,8 +101,6 @@ export class BrukerUploadComponent {
             
                 }, 
                 (err: String) => {
-                	console.log('error in posting File ');
-                	console.log(JSON.stringify(err));
                     this.archive = '';
                     this.uploadProgress = 2;
                 	this.setArchiveStatus('error');
