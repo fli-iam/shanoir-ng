@@ -72,11 +72,13 @@ public class InitialStartupState implements State {
 	}
 
 	private void doMigration() throws IOException {
+		// as properties, that exist already are not replaced/changed, start with the last version before,
+		// as considered as more important
+		// overwrite with properties from ShanoirUploader v6.0.4 or v6.0.3, if existing
+		migrateFromVersion(SU_V6_0_4);
+		migrateFromVersion(SU_V6_0_3);
 		// migrate properties from ShanoirUploader v5.2
 		migrateFromVersion(ShUpConfig.SU);
-		// and after overwrite with properties from ShanoirUploader v6.0.3 or v6.0.4, if existing
-		migrateFromVersion(SU_V6_0_3);
-		migrateFromVersion(SU_V6_0_4);
 	}
 
 	private void migrateFromVersion(String version) throws IOException {
