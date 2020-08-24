@@ -476,6 +476,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterStudyCardList(List<StudyCard> list, String rightStr) {
+    	if (list == null) return true;
     	Set<Long> studyIds = new HashSet<Long>();
     	list.forEach((StudyCard sc) -> {
     		studyIds.add(sc.getStudyId());
@@ -493,6 +494,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOPage(Page<ExaminationDTO> page, String rightStr) {
+    	if (page == null) return true;
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((ExaminationDTO exam) -> {
     		if (exam.getStudyId() != null) studyIds.add(exam.getStudyId());

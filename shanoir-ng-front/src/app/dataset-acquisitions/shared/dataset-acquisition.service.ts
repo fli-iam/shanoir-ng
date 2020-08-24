@@ -65,6 +65,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return this.http.get<Page<DatasetAcquisitionDTO>>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL, { 'params': pageable.toParams() })
             .toPromise()
             .then((page: Page<DatasetAcquisitionDTO>) => {
+                if (!page) return null;
                 let immediateResult: DatasetAcquisition[] = [];
                 this.dsAcqDtoService.toDatasetAcquisitions(page.content, immediateResult);
                 return Page.transType<DatasetAcquisition>(page, immediateResult);
