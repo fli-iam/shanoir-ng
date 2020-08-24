@@ -48,11 +48,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             *ngIf="assigmentOptions" 
             class="value auto-width"
             [class.error]="valueError"
-            [(ngModel)]="assignment.value" 
+            [(ngModel)]="assignment.value"
             [options]="assigmentOptions" 
             (change)="onChangeValue()" 
-            placeholder="select value"
+            [placeholder]="assignment.value"
             (focusout)="valueTouched = true">
     </select-box>
 </ng-container>
-<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>	
+<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
+<div class="error-msg" *ngIf="badValueRef"><i class="fas fa-exclamation-triangle"></i>Bad reference for this action, please update the value field. <br/>Given value : "
+    <span class="hint" *ngIf="this.assignment && this.assignment.value && this.assignment.value['id']">Object with id = {{this.assignment.value['id']}} </span>
+    <span class="hint" *ngIf="this.assignment && this.assignment.value && this.assignment.value['name']">and name = {{this.assignment.value['name']}} </span>
+    <span class="hint" *ngIf="this.assignment && this.assignment.value && !this.assignment.value['id']">{{assignment.value}}</span>
+"</div>

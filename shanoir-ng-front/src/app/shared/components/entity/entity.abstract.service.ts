@@ -26,10 +26,10 @@ export abstract class EntityService<T extends Entity> {
 
     protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
-    getAll(): Promise<T[]> {
+    getAll(quickResult?: T[]): Promise<T[]> {
         return this.http.get<any[]>(this.API_URL)
             .toPromise()
-            .then(this.mapEntityList);
+            .then((all) => this.mapEntityList(all, quickResult));
     }
 
     delete(id: number): Promise<void> {
@@ -54,11 +54,11 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    protected mapEntity = (entity: any): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: any[]): Promise<T[]> => {
+    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
         return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
     }
 

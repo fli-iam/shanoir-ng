@@ -152,7 +152,6 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
    
     addIngredient(): Promise<void> {
         if (!this.ingredient) { 
-            console.log('nothing to create');
             return; 
         }
         if(this.anesthetic.ingredients === undefined){

@@ -251,8 +251,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
                     	.subscribe(res => {
                     		this.examinationExtradatas.push(physioData);
-                    	}, (err: String) => {
-                    		console.log('error in posting File ' + err);
                     	});
                     }
                     //Add extra data to array
@@ -265,8 +263,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
                     	.subscribe(res => {
                     		this.examinationExtradatas.push(physioData);
-                    	}, (err: String) => {
-                    		console.log('error in posting File ' + err);
                     	});
                     }
                     //Add extra data to array
@@ -284,8 +280,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
                     		.subscribe(res => {
                     			this.examinationExtradatas.push(bloodGasData);
-                    		}, (err: String) => {
-                    			console.log('error in posting File ' + err);
                     		});
                     }
                     this.examinationExtradatas.push(bloodGasData);
@@ -297,8 +291,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
                     		.subscribe(res => {
                     			this.examinationExtradatas.push(bloodGasData);
-                    		}, (err: String) => {
-                    			console.log('error in posting File ' + err);
                     		});
                     }
                     this.examinationExtradatas.push(bloodGasData);

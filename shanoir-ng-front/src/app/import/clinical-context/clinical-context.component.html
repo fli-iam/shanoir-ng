@@ -50,6 +50,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
+        <li class="info" *ngIf="scHasCoilToUpdate">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>That study card contains coil references that need to be precised.</strong>
+            <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank. 
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard.name}}.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+            </ng-container>
+        </li>
         <li>
             <label [class.required-label]="!useStudyCard">Select a center</label> 
             <span class="right-col">
@@ -75,7 +86,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li>
-            <label [class.required-label]="!useStudyCard">Select an acquisition equipment {{acquisitionEquipmentOptions.length}}</label> 
+            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
                         [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"
@@ -91,6 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
+            <strong>selected : {{acquisitionEquipment.serialNumber}}</strong>
             <br/>Your archive contains this data : 
             <code>
                 {{patient?.studies[0]?.series[0]?.equipment?.manufacturer}} - 
