@@ -428,20 +428,20 @@ public class MainWindow extends JFrame {
 		studyDescriptionTF.setText("");
 		studyDescriptionTF.addCaretListener(caretQueryPACSfields);
 
-//		JLabel seriesDescriptionLabel = new JLabel("Series description:");
-//		GridBagConstraints gbc_seriesDescriptionLabel = new GridBagConstraints();
-//		gbc_seriesDescriptionLabel.anchor = GridBagConstraints.EAST;
-//		gbc_seriesDescriptionLabel.insets = new Insets(10, 10, 10, 10);
-//		gbc_seriesDescriptionLabel.gridx = 0;
-//		gbc_seriesDescriptionLabel.gridy = 4;
-//
-//		seriesDescriptionTF = new JTextField();
-//		GridBagConstraints gbc_seriesDescriptionTF = new GridBagConstraints();
-//		gbc_seriesDescriptionTF.insets = new Insets(10, 10, 10, 10);
-//		gbc_seriesDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
-//		gbc_seriesDescriptionTF.gridx = 1;
-//		gbc_seriesDescriptionTF.gridy = 4;
-//		seriesDescriptionTF.setColumns(15);
+		JLabel seriesDescriptionLabel = new JLabel("Series description:");
+		GridBagConstraints gbc_seriesDescriptionLabel = new GridBagConstraints();
+		gbc_seriesDescriptionLabel.anchor = GridBagConstraints.EAST;
+		gbc_seriesDescriptionLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_seriesDescriptionLabel.gridx = 0;
+		gbc_seriesDescriptionLabel.gridy = 4;
+
+		seriesDescriptionTF = new JTextField();
+		GridBagConstraints gbc_seriesDescriptionTF = new GridBagConstraints();
+		gbc_seriesDescriptionTF.insets = new Insets(10, 10, 10, 10);
+		gbc_seriesDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
+		gbc_seriesDescriptionTF.gridx = 1;
+		gbc_seriesDescriptionTF.gridy = 4;
+		seriesDescriptionTF.setColumns(15);
 
 		// Add Birth Date field
 		JLabel birthDateReasearchLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientBirthDateLabel"));
