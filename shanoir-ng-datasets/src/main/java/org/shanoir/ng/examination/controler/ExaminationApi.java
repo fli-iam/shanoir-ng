@@ -70,7 +70,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudy().getId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
