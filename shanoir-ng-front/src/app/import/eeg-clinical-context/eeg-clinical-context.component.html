@@ -118,7 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a coordinate system</label> 
             <span class="right-col">
-                <select-box [(ngModel)]="coordsystem" (change)="onSelectCoord(); onContextChange();" [options]="CoordSystems.toOptions()">
+                <select-box 
+                    [(ngModel)]="coordsystem"
+                    (change)="onSelectCoord(); onContextChange();"
+                    [ngModelOptions]="{standalone: true}" 
+                    [options]="coordSystemOptions">
                 </select-box>
             </span>
         </li>

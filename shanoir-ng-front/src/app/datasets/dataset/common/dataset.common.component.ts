@@ -50,9 +50,9 @@ export class CommonDatasetComponent implements OnChanges {
             private subjectService: SubjectService,
             private formBuilder: FormBuilder) {
 
-        this.exploredEntityOptions = ExploredEntity.toOptions();
-        this.datasetModalityTypes = DatasetModalityType.toOptions();
-        this.processedDatasetTypeOptions = ProcessedDatasetType.toOptions();
+        this.exploredEntityOptions = ExploredEntity.options;
+        this.datasetModalityTypes = DatasetModalityType.options;
+        this.processedDatasetTypeOptions = ProcessedDatasetType.options;
     }
 
     completeForm() {

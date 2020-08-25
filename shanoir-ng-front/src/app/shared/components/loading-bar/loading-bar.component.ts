@@ -31,7 +31,6 @@ export class LoadingBarComponent {
     }
 
     onResized(event) {
-        console.log(event);
     }
 
 } 

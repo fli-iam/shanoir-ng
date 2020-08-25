@@ -64,7 +64,7 @@ export class EegClinicalContextComponent implements OnInit {
     protected columnDefs: any[];
     protected hasPosition: boolean;
     
-    protected CoordSystems = CoordSystems;
+    protected coordSystemOptions: Option<CoordSystems>[];
     protected coordsystem : string;
 
     private browserPaging: BrowserPaging<EventContext>;
@@ -85,6 +85,8 @@ export class EegClinicalContextComponent implements OnInit {
             private importDataService: ImportDataService,
             public acqEqPipe: AcquisitionEquipmentPipe,
             public subjectExaminationPipe: SubjectExaminationPipe) {
+
+        this.coordSystemOptions = CoordSystems.options;
 
         // No channels => no import
         if (!this.importDataService.eegImportJob.datasets ) {

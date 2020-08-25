@@ -30,8 +30,8 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { GlobalService } from '../services/global.service';
 import { findLastIndex } from '../../utils/app.utils';
+import { GlobalService } from '../services/global.service';
 
 
 @Component({
@@ -141,8 +141,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private initSelectedOption() {
-        if (this.inputValue) {
-            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+        if (this.selectedOption || this.inputValue) {
+            let index: number;
+            if (this.selectedOption) {
+                index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+            } else {
+                index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+                this.inputValue = null;
+            }
             if (index == -1) {
                 this.selectedOptionIndex = null;
             } else {
@@ -162,15 +168,16 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.selectedOptionIndex = index;
                 return;
             }
+        } else {
+            this.selectedOptionIndex = null;
         }
-        this.selectedOptionIndex = null;
     }
 
     private get selectedOption(): Option<any> {
         return this.options 
             && this.selectedOptionIndex != null 
             && this.selectedOptionIndex != undefined
-            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : null;
+            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : new Option(this.inputValue, this.inputValue);
     }
 
     private get selectedOptionIndex(): number {
@@ -184,12 +191,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                this.onChangeCallback(this.selectedOption.value)
-                this.selectOption.emit(this.selectedOption);
+                //this.onChangeCallback(this.selectedOption.value);
+                //this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                this.onChangeCallback(null);
-                this.selectOption.emit(null);
+                //this.onChangeCallback(null);
+                //this.selectOption.emit(null);
             }
             if (previousOption) {
                 this.deSelectOption.emit(previousOption);
@@ -207,6 +214,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
         this.firstScrollOptionIndex = 0;
         this.focusedOptionIndex = null;
+        this.inputValue = null;
     }
 
     private computeMinWidth() {
@@ -268,13 +276,15 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
     }
-
+    
     private onUserSelectedOptionIndex(index: number) {
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;
         this.close();
-        this.change.emit(this.selectedOption.value);
+        this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
+        this.change.emit(this.selectedOption ? this.selectedOption.value : null);
+        this.selectOption.emit(this.selectedOption);
     }
 
     private isOptionSelected(option: Option<any>) {

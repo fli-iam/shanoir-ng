@@ -254,9 +254,11 @@ public abstract class Dataset extends AbstractEntity {
 			if (creationDate != null) {
 				result.append(" ").append(creationDate.toString());
 			}
-			String modalityType = originMetadata.getDatasetModalityType().name();
-			if (updatedMetadata != null) {
+			String modalityType = "?";
+			if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
 				modalityType = updatedMetadata.getDatasetModalityType().name();
+			} else if (originMetadata != null && originMetadata.getDatasetModalityType() != null) {
+				modalityType = originMetadata.getDatasetModalityType().name();
 			}
 			result.append(" ").append(modalityType.split("_")[0]);
 			return result.toString();
@@ -267,6 +269,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the originMetadata
 	 */
 	public DatasetMetadata getOriginMetadata() {
+		if (originMetadata == null) originMetadata = new DatasetMetadata();
 		return originMetadata;
 	}
 
@@ -342,6 +345,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the updatedMetadata
 	 */
 	public DatasetMetadata getUpdatedMetadata() {
+		if (updatedMetadata == null) updatedMetadata = new DatasetMetadata();
 		return updatedMetadata;
 	}
 

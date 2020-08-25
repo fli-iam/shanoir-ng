@@ -336,7 +336,7 @@ export class TableComponent implements OnInit {
     }
 
     computeSelectAll() {
-        if (this.page) {
+        if (this.page && this.page.content) {
             let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
             if (selectedOnCurrentPage.length == this.page.content.length) {
                 this.selectAll = true;
@@ -383,7 +383,7 @@ export class TableComponent implements OnInit {
     }
 
     private cellEditable(item, col) {
-        let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
+        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 

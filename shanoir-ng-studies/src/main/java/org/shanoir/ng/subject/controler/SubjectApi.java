@@ -78,7 +78,6 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/names", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.filterSubjectIdNamesDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdName>> findSubjectsNames();
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
@@ -93,6 +92,7 @@ public interface SubjectApi {
 	ResponseEntity<SubjectDTO> findSubjectById(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Saves a new subject", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
@@ -107,6 +107,7 @@ public interface SubjectApi {
 			@ApiParam(value = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException;
 	
+	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -115,7 +116,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@PutMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,

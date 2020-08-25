@@ -21,6 +21,7 @@ import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
 import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
 
 @Injectable()
 export class DatasetDTOService {
@@ -95,6 +96,9 @@ export class DatasetDTOService {
         if (entity.type == 'Mr') {
             this.mapSyncFieldsMr(dto as MrDatasetDTO, entity as MrDataset);
         }
+        if (entity.type == 'Eeg') {
+            this.mapSyncFieldsEeg(dto as EegDatasetDTO, entity as EegDataset);
+        }
         return entity;
     }
 
@@ -109,6 +113,17 @@ export class DatasetDTOService {
         entity.updatedMrMetadata = dto.updatedMrMetadata;
         entity.firstImageAcquisitionTime = dto.firstImageAcquisitionTime;
         entity.lastImageAcquisitionTime = dto.lastImageAcquisitionTime;
+        return entity
+    }
+
+    static mapSyncFieldsEeg(dto: EegDatasetDTO, entity: EegDataset): EegDataset {
+        entity.samplingFrequency = dto.samplingFrequency;
+        entity.channelCount = dto.channelCount;
+        entity.name = dto.name;
+        entity.files = dto.files;
+        entity.channels = dto.channels;
+        entity.events = dto.events;
+        entity.coordinatesSystem = dto.coordinatesSystem;
         return entity
     }
 }
@@ -153,6 +168,17 @@ export class MrDatasetDTO extends DatasetDTO {
 	firstImageAcquisitionTime: string;
 	lastImageAcquisitionTime: string;
 }
+
+export class EegDatasetDTO extends DatasetDTO {
+    samplingFrequency: number;
+    channelCount: number;
+    name: string;
+    files: string[];
+    channels: Channel[];
+    events: Event[];
+    coordinatesSystem: string;
+}
+
 
 export class MrDatasetMetadataDTO {
     mrDatasetNature: MrDatasetNature;

@@ -102,7 +102,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		// erase information in the GUI result part
 		mainWindow.dicomTree.getSelectionModel().clearSelection();
 		mainWindow.dicomTree = new DicomTree(null);
-		mainWindow.scrollPane.setViewportView(mainWindow.dicomTree);
+		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
 		// Data reset
 		mainWindow.isDicomObjectSelected = false;
 		mainWindow.getSAL().setDicomData(null);
@@ -130,52 +130,81 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	 */
 	private DicomDataTransferObject completeDicomDataWithGUIValues(final DicomDataTransferObject dicomData) {
 		try {
-			if (mainWindow.firstNameTF.getText().isEmpty()) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-					    resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
-					    resourceBundle.getString("shanoir.uploader.select.error.title"),
-					    JOptionPane.ERROR_MESSAGE);
-				return null;
-			}
-			dicomData.setFirstName(mainWindow.firstNameTF.getText());
-			if (mainWindow.lastNameTF.getText().isEmpty()) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-					    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
-					    resourceBundle.getString("shanoir.uploader.select.error.title"),
-					    JOptionPane.ERROR_MESSAGE);
-				return null;
-			}
-			dicomData.setLastName(mainWindow.lastNameTF.getText());
-			if (mainWindow.birthNameTF.getText().isEmpty()) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-					    resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
-					    resourceBundle.getString("shanoir.uploader.select.error.title"),
-					    JOptionPane.ERROR_MESSAGE);
-				return null;
-			}
-			dicomData.setBirthName(mainWindow.birthNameTF.getText());
 			Date birthDate = ShUpConfig.formatter.parse(mainWindow.birthDateTF.getText());
 			dicomData.setBirthDate(birthDate);
-			if (mainWindow.msexR.isSelected())
+			if (mainWindow.mSexR.isSelected())
 				dicomData.setSex("M");
-			if (mainWindow.fsexR.isSelected())
-				dicomData.setSex("F");		
+			if (mainWindow.fSexR.isSelected())
+				dicomData.setSex("F");
+			if (mainWindow.noAnonR.isSelected()) {
+				return completeDicomDataForNoAnon(dicomData);					
+			} else {
+				return completeDicomDataForYesAnon(dicomData);
+			}
 		} catch (ParseException e) {
 			logger.error("Unable to convert BirthDate using formatter", e);
 			return null;
 		}
+	}
+
+	private DicomDataTransferObject completeDicomDataForYesAnon(DicomDataTransferObject dicomData) {
+		if (mainWindow.newPatientIDTF.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.import.start.patient.id.empty"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		dicomData.setNewPatientID(mainWindow.newPatientIDTF.getText());
+		return dicomData;
+	}
+
+	private DicomDataTransferObject completeDicomDataForNoAnon(final DicomDataTransferObject dicomData) throws ParseException {
+		if (mainWindow.lastNameTF.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		dicomData.setLastName(mainWindow.lastNameTF.getText());
+		if (mainWindow.firstNameTF.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		dicomData.setFirstName(mainWindow.firstNameTF.getText());
+		if (mainWindow.birthNameTF.getText().isEmpty()) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+				    resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
+				    resourceBundle.getString("shanoir.uploader.select.error.title"),
+				    JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		dicomData.setBirthName(mainWindow.birthNameTF.getText());
 		return dicomData;
 	}
 
 	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		String subjectIdentifier = null;
-		if (ShUpConfig.isModePseudonymus()) {
-			dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
-			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
+		// mode: data are not yet anonymised: calculate identifier in real relation with patient
+		if (mainWindow.noAnonR.isSelected()) {
+			// OFSEP mode
+			if (ShUpConfig.isModePseudonymus()) {
+				dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
+				subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
+			// Neurinfo mode
+			} else {
+				subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			}
+			dicomData.setSubjectIdentifier(subjectIdentifier);
+		// if the data have already be anonymised: Neurinfo only today
 		} else {
-			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getNewPatientID(), dicomData.getBirthDate());
+			dicomData.setSubjectIdentifier(subjectIdentifier);
 		}
-		dicomData.setSubjectIdentifier(subjectIdentifier);
 		return dicomData;
 	}
 

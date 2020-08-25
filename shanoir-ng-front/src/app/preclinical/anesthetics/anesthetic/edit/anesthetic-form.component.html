@@ -46,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{AnestheticType.getLabel(anesthetic.anestheticType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()" [options]="AnestheticType.toOptions()">
+                                    <select-box formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()" [options]="AnestheticType.options">
                                     </select-box>
 									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
 								</ng-template>

@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{TherapyType.getLabel(therapy.therapyType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="therapyType" [(ngModel)]="therapy.therapyType" [options]="TherapyType.toOptions()">
+                                    <select-box formControlName="therapyType" [(ngModel)]="therapy.therapyType" [options]="TherapyType.options">
                                     </select-box>
 									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
 								</ng-template>

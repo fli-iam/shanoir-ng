@@ -140,7 +140,7 @@ public class ImportDialog extends JDialog {
 		this.mainWindow.importDialog = this;
 
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		this.setSize(700, 900);
+		this.setSize(925, 900);
 		this.setLocationRelativeTo(mainWindow);
 
 		JPanel container = new JPanel();
@@ -475,7 +475,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectPersonalCommentLabel, importDialogGBC);
 
-		subjectPersonalCommentTextArea = new JTextArea(5, 60);
+		subjectPersonalCommentTextArea = new JTextArea(1, 60);
 		subjectPersonalCommentTextArea.setMargin(new Insets(5, 5, 5, 5));
 		subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;

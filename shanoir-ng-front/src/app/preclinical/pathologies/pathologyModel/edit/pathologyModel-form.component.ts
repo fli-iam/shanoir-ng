@@ -93,9 +93,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.onSave.subscribe(response => {
                 if (this.fileToUpload){
                     //Then upload specifications file
-                    this.modelService.postFile(this.fileToUpload, response.id)
-                    	.subscribe(res => {console.log(res)}, 
-                    				(err: String) => {console.log('error in posting File ' + err);});
+                    this.modelService.postFile(this.fileToUpload, response.id);
                 }
             })
         );

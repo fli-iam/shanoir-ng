@@ -19,6 +19,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
@@ -39,6 +41,8 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -66,6 +70,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private DatasetAcquisitionMapper dsAcqMapper;
 	
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
@@ -115,14 +122,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 	
 	@Override
-	public ResponseEntity<List<DatasetAcquisition>> findByStudyCard(
+	public ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
 		if (daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(daList, HttpStatus.OK);
+			return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(daList), HttpStatus.OK);
 		}
 	}
 	
@@ -141,34 +148,34 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetAcquisition> findDatasetAcquisitionById(
+	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
 		
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(datasetAcquisition, HttpStatus.OK);
+		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition), HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetAcquisition>> findDatasetAcquisitions() {
-		final List<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findAll();
-		if (datasetAcquisitions.isEmpty()) {
+	public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
+		Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
+		if (datasetAcquisitions.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(datasetAcquisitions, HttpStatus.OK);
+		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisition datasetAcquisition,
+			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
 		try {
-			datasetAcquisitionService.update(datasetAcquisition);
+			datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		
 		} catch (EntityNotFoundException e) {

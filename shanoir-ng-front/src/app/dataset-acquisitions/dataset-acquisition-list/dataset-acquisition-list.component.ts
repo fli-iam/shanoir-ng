@@ -20,13 +20,15 @@ import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from '../../shared/components/table/pageable.model';
 
 @Component({
     selector: 'dataset-acquisition-list',
     templateUrl: 'dataset-acquisition-list.component.html',
     styleUrls: ['dataset-acquisition-list.component.css'],
 })
-export class DatasetAcquisitionListComponent extends BrowserPaginEntityListComponent<DatasetAcquisition> {
+export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {
     
     @ViewChild('table') table: TableComponent;
 
@@ -45,22 +47,23 @@ export class DatasetAcquisitionListComponent extends BrowserPaginEntityListCompo
         };
     }
 
-    getEntities(): Promise<DatasetAcquisition[]> {
-        return this.datasetAcquisitionService.getAll();
+    getPage(pageable: Pageable): Promise<Page<DatasetAcquisition>> {
+        return this.datasetAcquisitionService.getPage(pageable);
     }
 
     getColumnDefs(): any[] {
         let colDef: any[] = [
-            {headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
-            { headerName: "Acquisition Equipment", field: "acquisitionEquipment", 
+            { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
+            { headerName: 'Type', field: 'type', width: '22px'},
+            { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id
             },
-            { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id' },
-            { headerName: "Examination date", type: 'date', cellRenderer: (params: any) => {
-                return this.dateRenderer(params.data.startDate);
+            { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'] },
+            { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
+                return this.dateRenderer(params.data.examination.examinationDate);
             }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name"},
+            { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true},
             { headerName: "StudyCard", field: "studyCard.name",
                 route: (dsAcq: DatasetAcquisition) => dsAcq.studyCard ? '/study-card/details/' + dsAcq.studyCard.id : null
             }

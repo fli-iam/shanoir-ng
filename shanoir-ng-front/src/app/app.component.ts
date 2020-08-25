@@ -47,7 +47,6 @@ export class AppComponent {
 
         // let storedBCStr = sessionStorage.getItem('breadcrumbs');
         // if (storedBCStr) {
-        //     console.log('storedBCStr', storedBCStr)
         //     let storedBC = JSON.parse(storedBCStr);
         //     this.breadcrumbsService.steps = storedBC.steps.map(step => Step.parse(JSON.stringify(step)));
         //     this.breadcrumbsService.steps.map(step => {
