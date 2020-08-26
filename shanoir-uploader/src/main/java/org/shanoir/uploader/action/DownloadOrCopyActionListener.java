@@ -111,6 +111,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		mainWindow.patientNameTF.setText("");
 		mainWindow.patientIDTF.setText("");
 		mainWindow.studyDescriptionTF.setText("");
+		mainWindow.studyDate = "";
 		mainWindow.model.setValue(null);
 		mainWindow.studyModel.setValue(null);
 		
