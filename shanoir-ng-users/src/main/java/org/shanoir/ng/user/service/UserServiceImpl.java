@@ -80,12 +80,11 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id {} not found", user.getId());
 			throw new EntityNotFoundException(User.class, user.getId());
 		}
-		if ((userDb.isAccountRequestDemand() == null || !userDb.isAccountRequestDemand())
-				&& (userDb.isExtensionRequestDemand() == null || !userDb.isExtensionRequestDemand())) {
+		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequestDemand()) {
 			throw new AccountNotOnDemandException(user.getId());
 		}
 		// Confirm and update user
-		if (userDb.isExtensionRequestDemand() != null && userDb.isExtensionRequestDemand()) {
+		if (userDb.isExtensionRequestDemand()) {
 			// Date extension
 			userDb.setExtensionRequestInfo(null);
 			userDb.setExtensionRequestDemand(false);
@@ -122,11 +121,10 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}
-		if ((user.isAccountRequestDemand() == null || !user.isAccountRequestDemand())
-				&& (user.isExtensionRequestDemand() == null || !user.isExtensionRequestDemand())) {
+		if (!user.isAccountRequestDemand() && !user.isExtensionRequestDemand()) {
 			throw new AccountNotOnDemandException(userId);
 		}
-		if (user.isAccountRequestDemand() != null && user.isAccountRequestDemand()) {
+		if (user.isAccountRequestDemand()) {
 			// Remove user
 			userRepository.delete(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
@@ -294,7 +292,7 @@ public class UserServiceImpl implements UserService {
 	 * @return database user with new values.
 	 */
 	private User updateUserValues(final User userDb, final User user) {
-		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation() != null && user.isCanAccessToDicomAssociation());
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
 		userDb.setEmail(user.getEmail());
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());

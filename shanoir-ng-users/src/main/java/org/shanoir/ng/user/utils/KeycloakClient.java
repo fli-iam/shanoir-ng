@@ -189,7 +189,7 @@ public class KeycloakClient {
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
 		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
+		userRepresentation.setEnabled(user.isEnabled() && !user.isAccountRequestDemand());
 		userRepresentation.setFirstName(user.getFirstName());
 		userRepresentation.setLastName(user.getLastName());
 		userRepresentation.setUsername(user.getUsername());
