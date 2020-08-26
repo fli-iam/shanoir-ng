@@ -86,8 +86,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
         this.fields = [
             new AssignmentField('Dataset modality type', 'MODALITY_TYPE', [
-                new Option<string>('Mr', 'Mr'), 
-                new Option<string>('Pet', 'Pet')
+                new Option<string>('MR', 'Mr'), 
+                new Option<string>('PET', 'Pet')
             ]),
             new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
             new AssignmentField('Protocol comment', 'PROTOCOL_COMMENT'),
