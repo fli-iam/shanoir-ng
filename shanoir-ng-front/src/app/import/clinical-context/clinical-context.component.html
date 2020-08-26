@@ -55,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <strong>That study card contains coil references that need to be precised.</strong>
             <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank. 
             <ng-container *ngIf="!isAdminOfStudy[study.id]">
-                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard.name}}.
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
             </ng-container>
             <ng-container *ngIf="isAdminOfStudy[study.id]">
                 <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
