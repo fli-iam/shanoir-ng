@@ -58,14 +58,14 @@ public class User extends HalEntity implements UserDetails {
 	private static final long serialVersionUID = -5277815428510293236L;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private boolean accountRequestDemand;
+	private Boolean accountRequestDemand;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@OneToOne(orphanRemoval = true)
 	private AccountRequestInfo accountRequestInfo;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private boolean canAccessToDicomAssociation;
+	private Boolean canAccessToDicomAssociation;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@LocalDateAnnotations
@@ -87,10 +87,10 @@ public class User extends HalEntity implements UserDetails {
 	private ExtensionRequestInfo extensionRequestInfo;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private boolean extensionRequestDemand;
+	private Boolean extensionRequestDemand;
 	
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private boolean firstExpirationNotificationSent;
+	private Boolean firstExpirationNotificationSent;
 	
 	@NotBlank
 	private String firstName;
@@ -110,7 +110,7 @@ public class User extends HalEntity implements UserDetails {
 	private Role role;
 	
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private boolean secondExpirationNotificationSent;
+	private Boolean secondExpirationNotificationSent;
 
 	@NotBlank
 	@Column(unique = true)
@@ -130,7 +130,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the accountRequestDemand
 	 */
-	public boolean isAccountRequestDemand() {
+	public Boolean isAccountRequestDemand() {
 		return accountRequestDemand;
 	}
 
@@ -138,7 +138,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param accountRequestDemand
 	 *            the accountRequestDemand to set
 	 */
-	public void setAccountRequestDemand(final boolean accountRequestDemand) {
+	public void setAccountRequestDemand(final Boolean accountRequestDemand) {
 		this.accountRequestDemand = accountRequestDemand;
 	}
 
@@ -160,7 +160,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the canAccessToDicomAssociation
 	 */
-	public boolean isCanAccessToDicomAssociation() {
+	public Boolean isCanAccessToDicomAssociation() {
 		return canAccessToDicomAssociation;
 	}
 
@@ -168,7 +168,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param canAccessToDicomAssociation
 	 *            the canAccessToDicomAssociation to set
 	 */
-	public void setCanAccessToDicomAssociation(final boolean canAccessToDicomAssociation) {
+	public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
 		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
 	}
 
@@ -234,7 +234,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the extensionRequestDemand
 	 */
-	public boolean isExtensionRequestDemand() {
+	public Boolean isExtensionRequestDemand() {
 		return extensionRequestDemand;
 	}
 	
@@ -242,14 +242,14 @@ public class User extends HalEntity implements UserDetails {
 	 * @param extensionRequestDemand
 	 *            the extensionRequestDemand to set
 	 */
-	public void setExtensionRequestDemand(boolean extensionRequestDemand) {
+	public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
 		this.extensionRequestDemand = extensionRequestDemand;
 	}
 	
 	/**
 	 * @return the firstExpirationNotificationSent
 	 */
-	public boolean isFirstExpirationNotificationSent() {
+	public Boolean isFirstExpirationNotificationSent() {
 		return firstExpirationNotificationSent;
 	}
 
@@ -257,7 +257,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param firstExpirationNotificationSent
 	 *            the firstExpirationNotificationSent to set
 	 */
-	public void setFirstExpirationNotificationSent(final boolean firstExpirationNotificationSent) {
+	public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
 		this.firstExpirationNotificationSent = firstExpirationNotificationSent;
 	}
 
@@ -340,7 +340,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the secondExpirationNotificationSent
 	 */
-	public boolean isSecondExpirationNotificationSent() {
+	public Boolean isSecondExpirationNotificationSent() {
 		return secondExpirationNotificationSent;
 	}
 
@@ -348,7 +348,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param secondExpirationNotificationSent
 	 *            the secondExpirationNotificationSent to set
 	 */
-	public void setSecondExpirationNotificationSent(final boolean secondExpirationNotificationSent) {
+	public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
 		this.secondExpirationNotificationSent = secondExpirationNotificationSent;
 	}
 
@@ -370,7 +370,6 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the username
 	 */
-	@Override
 	public String getUsername() {
 		return username;
 	}
