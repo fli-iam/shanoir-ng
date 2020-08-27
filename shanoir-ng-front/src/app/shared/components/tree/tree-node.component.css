@@ -5,10 +5,12 @@
 .node > span { display: inline-block; }
 .arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: top; }
     .arrow svg { vertical-align: 0; font-size: 12px; height: 18px; }
-.picto { height: 14px; width: 15px; text-align: center; }
+.picto { height: 14px; width: 15px; text-align: center; color: var(--color-b);}
 checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px; }
     input[type="text"] { color: var(--very-dark-grey); width: 160px; }
     input[type="checkbox"] { vertical-align: middle; }
 .clickable { cursor: pointer; }
-
 svg { vertical-align: -1; }
+.button-picto { color: var(--greyer); margin-left: 7px; }
+.button-picto:hover { color: blue; }
+tool-tip { color: var(--greyer); vertical-align: initial; }
