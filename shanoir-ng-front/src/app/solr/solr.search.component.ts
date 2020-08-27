@@ -142,7 +142,7 @@ export class SolrSearchComponent{
             let savedStates = [];
 
             for (let key of Object.keys(this.solrRequest)) {
-                if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
+                if (key && this.solrRequest[key] && !(this.solrRequest[key] instanceof Date)) savedStates.push(this.solrRequest[key]);
             }
             return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 
