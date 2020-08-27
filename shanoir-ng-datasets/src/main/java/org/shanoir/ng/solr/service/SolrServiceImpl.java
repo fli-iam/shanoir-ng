@@ -19,6 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -116,6 +117,9 @@ public class SolrServiceImpl implements SolrService {
 			result = solrRepository.findAllDocsAndFacets(pageable);
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			if (studyIds.isEmpty()) {
+				return new SolrResultPage<ShanoirSolrDocument>(Collections.emptyList());
+			}
 			result = solrRepository.findByStudyIdIn(studyIds, pageable);
 		}
 		return result;
