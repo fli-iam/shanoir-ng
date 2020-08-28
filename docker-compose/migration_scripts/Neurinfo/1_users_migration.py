@@ -21,6 +21,11 @@ for query in """
     ALTER TABLE `users` MODIFY `creation_date` date DEFAULT NULL;
     ALTER TABLE `users` MODIFY `expiration_date` date DEFAULT NULL;
     ALTER TABLE `users` MODIFY `extension_date` date DEFAULT NULL;
+    ALTER TABLE `users` MODIFY `account_request_demand` bit(1);
+    ALTER TABLE `users` MODIFY `can_access_to_dicom_association` bit(1);
+    ALTER TABLE `users` MODIFY `extension_request_demand` bit(1);
+    ALTER TABLE `users` MODIFY `first_expiration_notification_sent` bit(1);
+    ALTER TABLE `users` MODIFY `second_expiration_notification_sent` bit(1);
     ALTER TABLE `users` MODIFY `last_login` date DEFAULT NULL
         """.split(";"):
     cursor.execute(query)

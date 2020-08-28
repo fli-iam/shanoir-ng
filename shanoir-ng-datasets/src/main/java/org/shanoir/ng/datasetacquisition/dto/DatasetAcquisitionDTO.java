@@ -37,6 +37,8 @@ public class DatasetAcquisitionDTO {
 	
 	private String type;
 
+	private Object protocol;
+
 	
 	public Long getId() {
 		return id;
@@ -108,5 +110,13 @@ public class DatasetAcquisitionDTO {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Object getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(Object protocol) {
+		this.protocol = protocol;
 	}
 }
