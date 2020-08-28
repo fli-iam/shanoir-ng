@@ -48,7 +48,11 @@ export class DownloadTasksComponent extends BrowserPaginEntityListComponent<Task
     }
 
     getEntities(): Promise<Task[]> {
-        return this.taskService.getTaskOfTypes(["downloadDatasets.event"]);
+        return this.taskService.getTaskOfTypes(["downloadDatasets.event"]).then(entitiesGot => {
+            if (!entitiesGot) {
+                return [];
+            }
+        });
     }
 
     // Grid columns definition

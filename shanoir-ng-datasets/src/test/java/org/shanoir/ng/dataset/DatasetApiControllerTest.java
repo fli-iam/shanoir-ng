@@ -121,10 +121,12 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
+	@MockBean
+	private SubjectRepository subjectRepository;
+
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
     
-	private SubjectRepository subjectRepository;
 	private Subject subject = new Subject(3L, "name");
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
@@ -362,6 +364,11 @@ public class DatasetApiControllerTest {
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
+		
+		DatasetAcquisition dsa = new MrDatasetAcquisition();
+		dsa.setRank(Integer.valueOf(1));
+		dsa.setSortingIndex(Integer.valueOf(1));
+		dataset.setDatasetAcquisition(dsa);
 
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));

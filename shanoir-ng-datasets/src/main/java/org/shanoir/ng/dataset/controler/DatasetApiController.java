@@ -354,7 +354,7 @@ public class DatasetApiController implements DatasetApi {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		String tmpFilePath = tmpDir + File.separator + "Datasets[";
 		for (Dataset dataset : datasets) {
-			tmpFilePath += dataset.getId() + ",";
+			tmpFilePath += dataset.getId() + "_";
 		}
 		// Remove last comma and close brackets
 	    tmpFilePath = tmpFilePath.substring(0, tmpFilePath.length() - 1);
@@ -369,7 +369,7 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			for (Dataset dataset : datasets) {
 				LOG.info("treating dataset: " + dataset.getName());
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getName());
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getName() + "_" + dataset.getId());
 				datasetFile.mkdirs();
 				List<URL> pathURLs = new ArrayList<>();
 				if (DCM.equals(format)) {
