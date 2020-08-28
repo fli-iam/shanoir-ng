@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Observable;
 
 import org.apache.log4j.Logger;
+import org.shanoir.dicom.importer.UploadState;
 
 /**
  * This class contains a hash key of nominative data extracted from the
@@ -38,10 +39,7 @@ public class CurrentNominativeDataModel extends Observable {
 
 	public void addUpload(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
 		getCurrentUploads().put(absolutePath, nominativeDataUploadJob);
-		if (nominativeDataUploadJob.getUploadPercentage() == null
-				|| nominativeDataUploadJob.getUploadPercentage().equals("")) {
-			nominativeDataUploadJob.setUploadPercentage("0 %");
-		} else if (nominativeDataUploadJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
+		if (nominativeDataUploadJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
 			nominativeDataUploadJob.setUploadPercentage("FINISHED");
 		}
 		String[] msg = { "add", absolutePath };

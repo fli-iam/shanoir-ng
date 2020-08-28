@@ -22,15 +22,19 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,7 +86,7 @@ public interface DatasetAcquisitionApi {
 	@RequestMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<DatasetAcquisition>> findByStudyCard(
+	ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 	
 	@ApiOperation(value = "", notes = "Deletes a datasetAcquisition", response = Void.class, tags = {})
@@ -106,20 +110,19 @@ public interface DatasetAcquisitionApi {
 	@RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getExamination().getStudyId(), 'CAN_SEE_ALL')")
-	ResponseEntity<DatasetAcquisition> findDatasetAcquisitionById(
+	ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
-
-	@ApiOperation(value = "", notes = "Returns all the datasetAcquisitions", response = DatasetAcquisition.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found datasetAcquisitions", response = DatasetAcquisition.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no datasetAcquisition found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+	
+	@ApiOperation(value = "", notes = "Returns a dataset acquisitions page", response = Page.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset acquisitions", response = Page.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/datasetacquisition", produces = { "application/json" }, method = RequestMethod.GET)
+	@GetMapping(value = "/datasetacquisition", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<DatasetAcquisition>> findDatasetAcquisitions();
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(Pageable pageable) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a datasetAcquisition", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "datasetAcquisition updated", response = Void.class),
@@ -132,7 +135,7 @@ public interface DatasetAcquisitionApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#datasetAcquisition, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateDatasetAcquisition(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisition datasetAcquisition, BindingResult result)
+			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
 			throws RestServiceException;
 
 }

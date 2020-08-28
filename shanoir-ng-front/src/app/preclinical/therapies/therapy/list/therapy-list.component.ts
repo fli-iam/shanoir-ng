@@ -85,8 +85,8 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
     			this.openDeleteTherapyConfirmDialog(entity);
     		}
     	}).catch((error) => {
-    		console.log(error);
-    		this.openDeleteTherapyConfirmDialog(entity);
+            this.openDeleteTherapyConfirmDialog(entity);
+            throw error;
     	});    
     }   
 

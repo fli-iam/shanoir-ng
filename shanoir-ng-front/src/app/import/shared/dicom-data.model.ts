@@ -19,6 +19,7 @@ export class ImportJob {
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;
     fromPacs: boolean;
+    fromBruker: boolean;
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;

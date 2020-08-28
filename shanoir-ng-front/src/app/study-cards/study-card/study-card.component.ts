@@ -89,7 +89,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
-            'rules': [this.studyCard.rules, [Validators.required, StudyCardRulesComponent.validator]]
+            'rules': [this.studyCard.rules, [StudyCardRulesComponent.validator]]
         });
         this.subscribtions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
@@ -165,6 +165,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     onChangeAcqEq() {
+        if (!this.rulesComponent) return;
         this.rulesComponent.ruleElements.forEach(ruleComp => {
             ruleComp.assignmentChildren.forEach(assComp => {
                 if (assComp.assignment.field.toLowerCase().includes('coil')) {

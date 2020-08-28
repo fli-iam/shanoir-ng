@@ -13,7 +13,6 @@
  */
 package org.shanoir.ng.shared.configuration;
 
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -35,20 +34,52 @@ public class RabbitMQConfiguration {
 
 	////////////////// QUEUES //////////////////
 
-	private static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
+	/** Queue used to import datasets IMPORT => DATASET. */
+	public static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
 
-	public static final String DELETE_USER_QUEUE = "delete-user-queue";
-
-	public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
-
+	/** User delete event to notify to studies.  To be overriden by an event ?*/
 	public static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 
-	public static final String SHANOIR_EVENTS_QUEUE = "shanoir_events_queue";
+	/** Queue for all shanoir events. */
+	public static final String SHANOIR_EVENTS_QUEUE = "shanoir-events-queue";
 
+	/** Specific queue for import dataset events. */
+	public static final String SHANOIR_EVENTS_QUEUE_IMPORT = "shanoir-events-queue-import";
+	
+	/** Update / create a study user to dataset MS. */
+	public static final String STUDY_USER_QUEUE_DATASET = "study-user-queue-dataset";
+
+	/** Update / create a study user to import MS. */
 	public static final String STUDY_USER_QUEUE_IMPORT = "study-user-queue-import";
 
+	/** Queue to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_QUEUE = "study-user";
 
+	/** BIDS purpose => Get a list of subjects to create bids participants file. */
+	public static final String SUBJECTS_QUEUE = "subjects-queue";
+
+	/** Study name updated => notify dataset MS to change database. */
+	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
+
+	/** Subject name updated => notify dataset MS to change database. */
+	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
+	
+	/** Get the list of subjects for a given study. */
+	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+	/** Get the list of administrator for a given study */
+	public static final String USER_ADMIN_STUDY_QUEUE = "user-admin-study-queue";
+
+	/** Delete subject => Delete associated examination / datasets. */
+	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
+
+	/** Study deleted => Delete associated datasets. */
+	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
+	
+	/** Create DS acquisition => Index datasets in solr. */
+	public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
+
+	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
@@ -77,26 +108,13 @@ public class RabbitMQConfiguration {
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 
-	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
-
-	public static final String SUBJECTS_QUEUE = "subjects-queue";
-
-	public static final String STUDY_NAME_UPDATE = "study_name_update";
-
-	public static final String SUBJECT_NAME_UPDATE = "subject_name_update";
-	
-	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
-
-
 	////////////////// EXCHANGES //////////////////
 
+	/** Exchange used to publish / treat all sort of shanoir events. */
 	public static final String EVENTS_EXCHANGE = "events-exchange";
 
+	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
-
-	public static final String SUBJECTS_EXCHANGE = "subjects-exchange";
-
-	public static final String DATASET_SUBJECT_EXCHANGE = "dataset-subjects-exchange";
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -106,6 +124,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue getShanoirEventsQueue() {
     	return new Queue(SHANOIR_EVENTS_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue getShanoirEventsQueueImport() {
+    	return new Queue(SHANOIR_EVENTS_QUEUE_IMPORT, true);
     }
 
 	@Bean
@@ -118,11 +141,6 @@ public class RabbitMQConfiguration {
 		return new Queue(STUDY_USER_QUEUE_DATASET, true);
 	}
 
-	@Bean
-	public static Queue deleteUserQueue() {
-		return new Queue(DELETE_USER_QUEUE, true);
-	}
-	
 	@Bean
 	public static Queue acqEqptQueueOut() {
 		return new Queue(ACQ_EQPT_QUEUE_NAME_OUT, true);
@@ -194,11 +212,6 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue studycardQueue() {
-		return new Queue(STUDYCARD_QUEUE_TO_STUDY, true);
-	}
-	
-	@Bean
 	public static Queue studyUserQueue() {
 		return new Queue(STUDY_USER_QUEUE, true);
 	}
@@ -229,23 +242,29 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public DirectExchange directExchange() {
-	    return new DirectExchange(DATASET_SUBJECT_EXCHANGE, true, false);
-	}
-
-
-	@Bean
 	public FanoutExchange fanoutSubjectExchange() {
 	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
 
+
 	@Bean
 	public static Queue studyNameUpdateQueue() {
-		return new Queue(STUDY_NAME_UPDATE, true);
+		return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
 	}
 	
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
-		return new Queue(SUBJECT_NAME_UPDATE, true);
+		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue userAdminStudyQueue() {
+		return new Queue(USER_ADMIN_STUDY_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue createDatasetAcquisitionQueue() {
+		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
+	}
+
 }

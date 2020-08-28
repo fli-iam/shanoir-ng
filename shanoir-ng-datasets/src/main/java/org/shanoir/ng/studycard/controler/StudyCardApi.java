@@ -72,7 +72,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
@@ -96,7 +96,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCards();
 
 	@ApiOperation(value = "", notes = "Saves a new study card", response = StudyCard.class, tags = {})
@@ -112,6 +112,7 @@ public interface StudyCardApi {
 			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
 
+	// Attention: used by ShanoirUploader!
 	@ApiOperation(value = "", notes = "If exists, returns searched study cards", response = StudyCard.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found study cards", response = StudyCard.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = StudyCard.class),
@@ -121,7 +122,7 @@ public interface StudyCardApi {
 	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL') )")
+	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
 	ResponseEntity<List<StudyCard>> searchStudyCards(
 			@ApiParam(value = "study ids", required = true) @RequestBody IdList studyIds);
 	

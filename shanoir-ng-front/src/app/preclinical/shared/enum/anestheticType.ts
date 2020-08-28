@@ -28,8 +28,6 @@ export enum AnestheticType {
     export function getLabel(type: AnestheticType): string {
         return capitalsAndUnderscoresToDisplayable(type);
     }
-
-    export function toOptions(): Option<AnestheticType>[] {
-        return all().map(prop => new Option<AnestheticType>(prop, getLabel(prop)));
-    }
+    
+    export var options: Option<AnestheticType>[] = all().map(prop => new Option<AnestheticType>(prop, getLabel(prop)));
 }

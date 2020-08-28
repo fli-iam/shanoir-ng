@@ -23,7 +23,7 @@ import org.dcm4che2.data.Tag;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.model.DicomTreeNode;
 import org.shanoir.dicom.reader.ShanoirDicomDirReader;
-import org.shanoir.exception.NotDicomDirException;
+import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.Patient;
@@ -41,6 +41,8 @@ import org.shanoir.uploader.utils.Util;
  */
 public class FindDicomActionListener extends JPanel implements ActionListener {
 
+	private static final String DICOMDIR = "DICOMDIR";
+
 	private static Logger logger = Logger
 			.getLogger(FindDicomActionListener.class);
 
@@ -51,6 +53,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private IDicomServerClient dicomServerClient;
 
 	private String filePathDicomDir;
+	
+	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
@@ -65,47 +69,49 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	 * from CD/DVD menu or the query button is clicked.
 	 */
 	public void actionPerformed(ActionEvent event) {
-
 		mainWindow.isDicomObjectSelected = false;
+		// clean up editPanel when new file chosen
+		mainWindow.lastNameTF.setText("");
+		mainWindow.firstNameTF.setText("");
+		mainWindow.birthNameTF.setText("");
+		mainWindow.newPatientIDTF.setText("");
+		mainWindow.birthDateTF.setText("");
+		mainWindow.mSexR.setSelected(true);
+		mainWindow.fSexR.setSelected(false);
 
 		Media media = new Media();
 		// when the open file from CD/DVD menu is clicked
 		if (event.getSource().getClass() == JMenuItem.class) {
 			logger.info("Opening Dicom files from CD/DVD...");
 			this.mainWindow.isFromPACS = false;
-			// clean up Edit Panel when new file choosen
-			mainWindow.lastNameTF.setText("");
-			mainWindow.firstNameTF.setText("");
-			mainWindow.birthNameTF.setText("");
-			mainWindow.birthDateTF.setText("");
-			// mainWindow.sexTF.setText("");
-			mainWindow.msexR.setSelected(true);
-			mainWindow.fsexR.setSelected(false);
+
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File selectedRootDir = fileChooser.getSelectedFile();
 				if (selectedRootDir.isDirectory()) {
-					File dicomDirFile = new File(selectedRootDir, "DICOMDIR");
-					if (!dicomDirFile.exists()) {
-						JOptionPane.showMessageDialog(mainWindow.frame,
-								"No DICOMDIR found in the CD/DVD.",
-								"Data error", JOptionPane.ERROR_MESSAGE);
-						throw new NotDicomDirException(
-								"No DICOMDIR found in the CD/DVD.");
-					} else {
-						try {
-							// Create the Media Dicom tree
-							final ShanoirDicomDirReader dicomDir = new ShanoirDicomDirReader(dicomDirFile);
-							fillMediaFromCD(media, selectedRootDir, dicomDir);
-							dicomDir.close();
-							logger.debug("populate : Media populated : " + media);
-							logger.debug("populate : End");
-						} catch (Exception e) {
-							logger.error(e.getMessage());
+					try {
+						boolean dicomDirGenerated = false;
+						File dicomDirFile = new File(selectedRootDir, DICOMDIR);
+						if (!dicomDirFile.exists()) {
+							logger.info("No DICOMDIR found: generating one.");
+							dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
+							dicomDirGenerated = true;
+							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
 						}
+						final ShanoirDicomDirReader dicomDir = new ShanoirDicomDirReader(dicomDirFile);
+						fillMediaFromCD(media, selectedRootDir, dicomDir);
+						dicomDir.close();
+						// clean up in case of dicomdir generated
+						if (dicomDirGenerated) {
+							dicomDirFile.delete();
+						}
+						logger.debug("populate : Media populated : " + media);
+						logger.debug("populate : End");
+					} catch (Exception e) {
+						logger.error(e.getMessage());
 					}
 				} else {
-					logger.error("Please choose a standard CD/DVD to import Dicom file.");
+					logger.error("Please choose a directory.");
 				}
 			}
 		// when the query button is clicked
@@ -114,21 +120,13 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientNameTF.getText() + " "
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.seriesDescriptionTF.getText() +" "
+					+ mainWindow.seriesDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString()) ;
 			this.mainWindow.isFromPACS = true;
 
 			this.mainWindow.setCursor(Cursor
 					.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			try {
-				// clean up Edit Panel when new query
-				mainWindow.lastNameTF.setText(""); 
-				mainWindow.firstNameTF.setText("");
-				mainWindow.birthNameTF.setText("");
-				mainWindow.birthDateTF.setText("");
-				// mainWindow.sexTF.setText("");
-				mainWindow.msexR.setSelected(true);
-				mainWindow.fsexR.setSelected(false);
 
 				/*
 				 * Indexing Patient Name attribute research is not case
@@ -203,16 +201,19 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							mainWindow.studyDescriptionTF.getText(),
 							mainWindow.seriesDescriptionTF.getText(),
 							mainWindow.dateRS, mainWindow.studyDate);
-				} else
+				} else {
 					media = null;
+				}
 				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 			} catch (ConnectException cE) {
 				logger.error(cE.getMessage(), cE);
+				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						"Connection to DICOM server could not be established.",
 						"Connection error", JOptionPane.ERROR_MESSAGE);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
+				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						"Connection to DICOM server could not be established.",
 						"Connection error", JOptionPane.ERROR_MESSAGE);
@@ -225,7 +226,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		for (int i = 0; i < mainWindow.dicomTree.getRowCount(); i++) {
 			mainWindow.dicomTree.expandRow(i);
 		}
-		mainWindow.scrollPane.setViewportView(mainWindow.dicomTree);
+		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
 		mainWindow.dicomTree.addTreeSelectionListener(mainWindow.getSAL());
 		mainWindow.getSAL().setDicomData(null);
 	}

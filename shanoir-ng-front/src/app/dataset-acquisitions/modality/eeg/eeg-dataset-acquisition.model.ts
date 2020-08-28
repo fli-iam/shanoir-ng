@@ -9,19 +9,12 @@
  * (at your option) any later version.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { DatasetAcquisition } from '../../shared/dataset-acquisition.model';
 
-@Component({
-    selector: 'importBruker-modality',
-    templateUrl: 'importBruker.component.html',
-    styleUrls: ['../../import/import.component.css']
-})
-export class ImportBrukerComponent {
 
-    constructor() {
-    }
+export class EegDatasetAcquisition extends DatasetAcquisition {
 
 }

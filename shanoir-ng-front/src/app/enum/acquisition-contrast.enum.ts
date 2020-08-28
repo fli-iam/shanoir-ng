@@ -32,7 +32,5 @@ export enum AcquisitionContrast {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function toOptions(): Option<AcquisitionContrast>[] {
-        return all().map(prop => new Option<AcquisitionContrast>(prop, getLabel(prop)));
-    }
+    export var options: Option<AcquisitionContrast>[] = all().map(prop => new Option<AcquisitionContrast>(prop, getLabel(prop)));
 }

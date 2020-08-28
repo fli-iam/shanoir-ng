@@ -35,15 +35,13 @@ export class StudyCardService extends EntityService<StudyCard> {
             .then(this.mapEntityList);
     }
 
-    protected mapEntity = (dto: StudyCardDTO): Promise<StudyCard> => {
-        let result: StudyCard = this.getEntityInstance();
-        this.studyCardDTOService.toEntity(dto, result);
-        return Promise.resolve(result);
+    protected mapEntity = (dto: StudyCardDTO, result?: StudyCard): Promise<StudyCard> => {
+        if (result == undefined) result = this.getEntityInstance();
+        return this.studyCardDTOService.toEntity(dto, result);
     }
 
-    protected mapEntityList = (dtos: StudyCardDTO[]): Promise<StudyCard[]> => {
-        let result: StudyCard[] = [];
-        this.studyCardDTOService.toEntityList(dtos, result);
-        return Promise.resolve(result);
+    protected mapEntityList = (dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.studyCardDTOService.toEntityList(dtos, result);
     }
 }

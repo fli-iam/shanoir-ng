@@ -20,26 +20,35 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { Coil } from '../../coils/shared/coil.model';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
+import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
+import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
+import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/preclinicalSubject.model';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyCenter } from '../../studies/shared/study-center.model';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
-import { slideDown, preventInitialChildAnimations } from '../../shared/animations/animations';
+
 
 
 @Component({
@@ -66,7 +75,8 @@ export class ClinicalContextComponent implements OnDestroy {
     private subject: SubjectWithSubjectStudy;
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
-    private importMode: "DICOM" | "PACS";
+    private animalSubject: AnimalSubject = new AnimalSubject();
+    private importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -74,18 +84,24 @@ export class ClinicalContextComponent implements OnDestroy {
         new Option<string>('PHANTOM', 'Phantom')
     ];
     public useStudyCard: boolean = true;
+    protected scHasCoilToUpdate: boolean;
+    protected isAdminOfStudy: boolean[] = [];
     
     constructor(
             private studyService: StudyService,
             private centerService: CenterService,
             private niftiConverterService: NiftiConverterService,
+            private subjectService: SubjectService,
             private examinationService: ExaminationService,
+            private animalSubjectService: AnimalSubjectService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
             private acqEqPipe: AcquisitionEquipmentPipe,
-            private studycardService: StudyCardService) {
+            private studycardService: StudyCardService,
+            private studyRightsService: StudyRightsService,
+            private keycloakService: KeycloakService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -93,11 +109,7 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         breadcrumbsService.nameStep('3. Context'); 
 
-        if (this.importDataService.patientList.fromDicomZip) {
-            this.importMode = 'DICOM';
-        } else if (this.importDataService.patientList.fromPacs) {
-            this.importMode = 'PACS';
-        }
+        this.importMode = this.breadcrumbsService.findImportMode();
         
         this.setPatient(this.importDataService.patients[0]).then(() => {
             this.reloadSavedData();
@@ -173,7 +185,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.allCenters = allCenters;
                 for (let study of allStudies) {
                     let studyOption: Option<Study> = new Option(study, study.name);
-                    studyOption.compatible = false;
+                    if (this.importMode == 'DICOM') studyOption.compatible = false;
                     if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
                             let center: Center = allCenters.find(center => center.id === studyCenter.center.id)
@@ -221,19 +233,22 @@ export class ClinicalContextComponent implements OnDestroy {
                         let opt = new Option(sc, sc.name);
                         if (sc.acquisitionEquipment) {
                             let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
-                            opt.compatible = this.acqEqCompatible(scEq);
+                            if (this.importMode == 'DICOM') opt.compatible = this.acqEqCompatible(scEq);
                             if (!this.studycard && opt.compatible) {
                                 this.studycard = sc;
                                 this.onSelectStudyCard();
                             }
-                        } else opt.compatible = false;
+                        } else if (this.importMode == 'DICOM') opt.compatible = false;
                         return opt;
                     });
                     //if (!this.studycard) this.useStudyCard = false;
                 });
             }
         }
-        this.centerOptions = this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
+        this.centerOptions = []; 
+        this.acquisitionEquipmentOptions = []; 
+        this.subjects = [];
+        this.examinations = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
                 let option = new Option<Center>(studyCenter.center, studyCenter.center.name);
@@ -247,7 +262,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.centerOptions.push(option);
             }
         }
-        return end;
+        return end.then(() => this.onContextChange());
     }
 
     private onSelectStudyCard(): void {
@@ -260,9 +275,16 @@ export class ClinicalContextComponent implements OnDestroy {
             })
             this.center = scFound ? scFound.center : null;
             this.onSelectCenter();
+            this.acquisitionEquipment = this.studycard.acquisitionEquipment;
+            this.onSelectAcquisitonEquipment();
             this.niftiConverter = this.studycard.niftiConverter;
-            this.onSelectNifti();
+            
         }
+        this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
+        if (this.scHasCoilToUpdate && this.isAdminOfStudy[this.study.id] == undefined) {
+            this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
+        }
+        this.onContextChange();
     }
 
     onToggleUseStudyCard() {
@@ -279,7 +301,9 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
-        this.acquisitionEquipmentOptions = this.subjects = this.examinations = [];
+        this.acquisitionEquipmentOptions =  [];
+        this.subjects =  [];
+        this.examinations = [];
         if (this.center && this.center.acquisitionEquipments) {
             for (let acqEq of this.center.acquisitionEquipments) {
                 let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
@@ -293,32 +317,49 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.acquisitionEquipmentOptions.push(option);
             }
         }
+        this.onContextChange();
     }
 
     private onSelectAcquisitonEquipment(): void {
         this.subject = this.examination = null;
-        this.subjects = this.examinations = [];
+        this.subjects =  [];
+        this.examinations = [];
         if (this.acquisitionEquipment) {
-            this.studyService
-                .findSubjectsByStudyId(this.study.id)
+            if(this.importMode == 'BRUKER') {
+                this.studyService
+                .findSubjectsByStudyIdPreclinical(this.study.id, true)
                 .then(subjects => this.subjects = subjects);
+            } else {
+                this.studyService
+                    .findSubjectsByStudyId(this.study.id)
+                    .then(subjects => this.subjects = subjects);
+            }
         }
+        this.onContextChange();
     }
 
     private onSelectSubject(): void {
         this.examination = null;
         this.examinations = [];
         if (this.subject) {
+            if(this.importMode == 'BRUKER') {
+            this.animalSubjectService
+        		.findAnimalSubjectBySubjectId(this.subject.id)
+        		.then(animalSubject => this.animalSubject = animalSubject);
+            }
             this.examinationService
-            .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
-            .then(examinations => this.examinations = examinations);
+                .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
+                .then(examinations => this.examinations = examinations);
         }
+        this.onContextChange();
     }
 
     private onSelectExam(): void {
+        this.onContextChange();
     }
 
     private onSelectNifti(): void {
+        this.onContextChange();
     }
 
     private onContextChange() {
@@ -381,28 +422,45 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/subject/create']).then(success => {
+        let createSubjectRoute: string = this.importMode == 'BRUKER' ? '/preclinical-subject/create' : '/subject/create';
+        this.router.navigate([createSubjectRoute]).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             this.breadcrumbsService.currentStep.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                    if (this.importMode == 'BRUKER') {
+                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as Subject));
+                    } else {
+                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                    }
                 })
             );
         });
     }
 
-    private getPrefilledSubject(): Subject {
+    private getPrefilledSubject(): Subject | PreclinicalSubject {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
-        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.birthDate = this.patient.patientBirthDate;
-        newSubject.sex = this.patient.patientSex; 
+        if (this.patient.patientSex){
+            newSubject.sex = this.patient.patientSex; 
+        }
         newSubject.subjectStudyList = [subjectStudy];
-        return newSubject;
+        if (this.importMode != 'BRUKER') {
+            newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+            return newSubject;
+        } else {
+            let newPreclinicalSubject = new PreclinicalSubject();
+            let newAnimalSubject = new AnimalSubject();
+            newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
+            newSubject.name = this.patient.patientName;
+            newPreclinicalSubject.subject = newSubject;
+            newPreclinicalSubject.animalSubject = newAnimalSubject;
+            return newPreclinicalSubject;
+        }
     }
 
     /**
@@ -433,7 +491,8 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/examination/create']).then(success => {
+        let createExamRoute: string = this.importMode == 'BRUKER' ? '/preclinical-examination/create' : '/examination/create';
+        this.router.navigate([createExamRoute]).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
@@ -445,6 +504,10 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
+        if (this.importMode == 'BRUKER') {
+            newExam.preclinical = true;
+            newExam.hasStudyCenterData = true;
+        }
         newExam.study = new IdName(this.study.id, this.study.name);
         newExam.center = new IdName(this.center.id, this.center.name);
         newExam.subjectStudy = this.subject;
@@ -492,11 +555,19 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
+        if (this.animalSubject.id){
+        	window.open('preclinical-subject/details/' + this.animalSubject.id , '_blank');
+        }else{
+            window.open('subject/details/' + this.subject.id, '_blank');
+        }
     }
 
     private showExaminationDetails() {
-        window.open('examination/details/' + this.examination.id, '_blank');
+        if (this.importMode == 'BRUKER') {
+            window.open('preclinical-examination/details/' + this.examination.id , '_blank');
+        } else {
+            window.open('examination/details/' + this.examination.id, '_blank');
+        }
     }
 
     get valid(): boolean {
@@ -513,7 +584,43 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private next() {
-        this.router.navigate(['imports/finish']);
+        if (this.importMode != 'BRUKER') {
+            this.router.navigate(['imports/finish']);
+        } else {
+            this.router.navigate(['imports/brukerfinish']);
+        }
+    }
+
+    private hasCoilToUpdate(studycard: StudyCard): boolean {
+        if (!studycard) return false;
+        for (let rule of studycard.rules) {
+            for (let ass of rule.assignments) {
+                if (ass.field.endsWith('_COIL') && !(ass.value instanceof Coil)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected hasAdminRightOn(study: Study): Promise<boolean> {
+        if (!study) return Promise.resolve(false);
+        else if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
+        else if (!this.keycloakService.isUserExpert()) return Promise.resolve(false);
+        else return this.studyRightsService.getMyRightsForStudy(study.id).then(rights => {
+            return rights && rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+        });
+    }
+
+    protected editStudyCard(studycard: StudyCard) {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
+                    this.importDataService.contextBackup.studyCard = entity as StudyCard;
+                })
+            );
+        });
     }
 
     ngOnDestroy() {

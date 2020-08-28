@@ -207,8 +207,9 @@ public class CurrentNominativeDataController {
 				final UploadState uploadState = uploadJob.getUploadState();
 				nominativeDataUploadJob.setUploadState(uploadState);
 				String uploadPercentage = nominativeDataUploadJob.getUploadPercentage();
-				if (uploadPercentage == null || uploadPercentage.equals(""))
+				if (uploadPercentage == null || uploadPercentage.equals("")) {
 					uploadPercentage = "0 %";
+				}
 				if (uploadState.toString().equals("FINISHED_UPLOAD")) {
 					nominativeDataUploadJob.setUploadPercentage("FINISHED");
 				} else if (uploadState.toString().equals("START")

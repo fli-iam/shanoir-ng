@@ -11,10 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { BreadcrumbsService, Step } from '../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { findLastIndex } from '../utils/app.utils';
 
@@ -24,7 +24,7 @@ import { findLastIndex } from '../utils/app.utils';
     templateUrl: 'import.component.html',
     styleUrls: ['import.component.css']
 })
-export class ImportComponent implements OnInit {
+export class ImportComponent {
 
     private hasOneStudy: boolean = true;
 
@@ -36,14 +36,10 @@ export class ImportComponent implements OnInit {
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
     }
 
-    get importMode(): 'DICOM' | 'PACS' {
+    get importMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;
         }
-    }
-        
-    ngOnInit() {
-        this.breadcrumbsService.currentStep.importStart = true;
     }
 }

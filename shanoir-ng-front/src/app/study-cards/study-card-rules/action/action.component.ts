@@ -36,6 +36,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     fieldLabel: string;
     valueLabel: string;
     valueIsString: boolean;
+    badValueRef: boolean;
 
     @Input() showErrors: boolean;
     fieldTouched: boolean = false;
@@ -52,7 +53,6 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-
         if (changes.fields && this.fields) {
             this.computeAssignmentOptions();
         }
@@ -67,11 +67,17 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.fieldLabel = assignmentField.label;
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
-                        if (opts) {
-                            let valueOption: Option<any> = opts.find(opt => opt.value == this.assignment.value);
+                        if (opts && opts.length > 0) {
+                            let valueOption: Option<any> = opts.find(opt => {
+                                return opt.value == this.assignment.value 
+                                    || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
+                            });
                             if (valueOption) {
                                 this.valueIsString = false;
                                 this.valueLabel = valueOption.label;
+                                this.badValueRef = false;
+                            } else {
+                                this.badValueRef = true;
                             }
                         }
                     });
@@ -82,10 +88,16 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
-                        if (opts) {
-                            let valueOption: Option<any> = opts.find(opt => opt.value == this.assignment.value);
+                        if (opts && opts.length > 0) {
+                            let valueOption: Option<any> = opts.find(opt => {
+                                return opt.value == this.assignment.value 
+                                    || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
+                            });
                             if (valueOption) {
                                 this.assignment.value = valueOption.value;
+                                this.badValueRef = false;
+                            } else {
+                                this.badValueRef = true;
                             }
                         }
                     });
@@ -121,6 +133,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 
     onChangeValue() {
+        this.badValueRef = false;
         this.actionChange.emit(this.assignment);
     }
 

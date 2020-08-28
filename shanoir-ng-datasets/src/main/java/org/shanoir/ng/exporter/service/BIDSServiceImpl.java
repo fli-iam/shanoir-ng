@@ -263,7 +263,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
 
 		/// Get the list of subjects
-		String response = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_EXCHANGE, studyId);
+		String response = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, studyId);
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		List<Subject> myObjects = objectMapper.readValue(response, new TypeReference<List<Subject>>(){});

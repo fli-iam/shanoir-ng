@@ -141,6 +141,14 @@ export class BreadcrumbsService {
         return false;
     }
 
+
+    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return this.steps[i].importMode;
+        }
+        return null;
+    }
+
 }
 
 export class Step {
@@ -163,7 +171,6 @@ export class Step {
     // }
 
     // stringify(): string {
-    //     console.log('stringify')
     //     let ignoreList: string[] = ['onSaveSubject'];
     //     let replacer = (key, value) => {
     //         if (ignoreList.indexOf(key) > -1) return undefined;
@@ -184,7 +191,7 @@ export class Step {
     public entity: any;
     public data: any = {};
     public importStart: boolean = false;
-    public importMode: 'DICOM' | 'PACS';
+    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
 
     private onSave(): Subject<any> {
         this.subscribers++;

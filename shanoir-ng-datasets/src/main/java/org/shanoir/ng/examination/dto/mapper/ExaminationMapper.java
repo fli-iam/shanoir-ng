@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
@@ -31,7 +31,7 @@ import org.springframework.data.domain.Page;
  * @author yyao
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetAcquisitionMapper.class })
+@Mapper(componentModel = "spring", uses = { ExaminationDatasetAcquisitionMapper.class })
 @DecoratedWith(ExaminationDecorator.class)
 public interface ExaminationMapper {
 

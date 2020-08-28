@@ -30,8 +30,8 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { GlobalService } from '../services/global.service';
 import { findLastIndex } from '../../utils/app.utils';
+import { GlobalService } from '../services/global.service';
 
 
 @Component({
@@ -71,7 +71,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     private inputText: string;
-    private _searchText: string;
+    private _searchText: string = null;
     @Input() disabled: boolean = false;
     @HostBinding('class.read-only') @Input() readOnly: boolean = false;
     @Input() placeholder: string;
@@ -115,6 +115,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 else if (typeof(item) == 'string') label = item;
                 else if (item.label) label = item.label;
                 else if (item.name) label = item.name;
+                else if (item.value) label = item.value;
                 this.options.push(new Option<any>(item, label));
             });
             this.initSelectedOption();
@@ -140,8 +141,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private initSelectedOption() {
-        if (this.inputValue) {
-            let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+        if (this.selectedOption || this.inputValue) {
+            let index: number;
+            if (this.selectedOption) {
+                index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.selectedOption.value));
+            } else {
+                index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, this.inputValue));
+                this.inputValue = null;
+            }
             if (index == -1) {
                 this.selectedOptionIndex = null;
             } else {
@@ -161,15 +168,16 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.selectedOptionIndex = index;
                 return;
             }
+        } else {
+            this.selectedOptionIndex = null;
         }
-        this.selectedOptionIndex = null;
     }
 
     private get selectedOption(): Option<any> {
         return this.options 
             && this.selectedOptionIndex != null 
             && this.selectedOptionIndex != undefined
-            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : null;
+            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : new Option(this.inputValue, this.inputValue);
     }
 
     private get selectedOptionIndex(): number {
@@ -183,12 +191,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                this.onChangeCallback(this.selectedOption.value)
-                this.selectOption.emit(this.selectedOption);
+                //this.onChangeCallback(this.selectedOption.value);
+                //this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                this.onChangeCallback(null);
-                this.selectOption.emit(null);
+                //this.onChangeCallback(null);
+                //this.selectOption.emit(null);
             }
             if (previousOption) {
                 this.deSelectOption.emit(previousOption);
@@ -206,6 +214,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
         this.firstScrollOptionIndex = 0;
         this.focusedOptionIndex = null;
+        this.inputValue = null;
     }
 
     private computeMinWidth() {
@@ -213,7 +222,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         let maxWidth: number = 0;
         if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
             this.displayableOptions.forEach(opt => {
-                if (!maxOption || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
+                if (!maxOption || !maxOption.label || !opt.label || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
                     this.hiddenOption.nativeElement.innerText = opt.label;
                     let width: number = this.hiddenOption.nativeElement.offsetWidth;
                     if (width > maxWidth) {
@@ -229,9 +238,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private set searchText(text: string) {
+        if (text == this._searchText) return;
         this.focusedOptionIndex = null;
         if (!text) {
-            if (this._searchText == null) return;
             this._searchText = null;
             this.filteredOptions = null;
         } else {
@@ -267,13 +276,15 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
     }
-
+    
     private onUserSelectedOptionIndex(index: number) {
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;
         this.close();
-        this.change.emit(this.selectedOption.value);
+        this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
+        this.change.emit(this.selectedOption ? this.selectedOption.value : null);
+        this.selectOption.emit(this.selectedOption);
     }
 
     private isOptionSelected(option: Option<any>) {
@@ -596,8 +607,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         else if (this.options) return this.options;
         else return null;
     }
-
-    
 }
 
 

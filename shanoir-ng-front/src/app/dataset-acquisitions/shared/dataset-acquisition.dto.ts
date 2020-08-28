@@ -93,15 +93,15 @@ export class DatasetAcquisitionDTOService {
         ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
         switch(entity.type) {
             case 'Mr': {
-                (entity as MrDatasetAcquisition).protocol = Object.assign(new MrProtocol(), (dto as MrDatasetAcquisitionDTO).mrProtocol);
+                (entity as MrDatasetAcquisition).protocol = Object.assign(new MrProtocol(), (dto as MrDatasetAcquisitionDTO).protocol);
                 break;
             }
             case 'Pet': {
-                (entity as PetDatasetAcquisition).protocol = Object.assign(new PetProtocol(), (dto as PetDatasetAcquisitionDTO).petProtocol);
+                (entity as PetDatasetAcquisition).protocol = Object.assign(new PetProtocol(), (dto as PetDatasetAcquisitionDTO).protocol);
                 break;
             }
             case 'Ct': {
-                (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).ctProtocol);
+                (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).protocol);
                 break;
             }
         }
@@ -137,17 +137,17 @@ export class DatasetAcquisitionDTO {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    type: 'Mr' | 'Pet' | 'Ct';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
-    mrProtocol: any;
+    protocol: any;
 }
 
 export class PetDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
-    petProtocol: any;
+    protocol: any;
 }
 
 export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
-    ctProtocol: any;
+    protocol: any;
 }

@@ -58,6 +58,27 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { SolrSearchComponent } from './solr/solr.search.component';
+import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
+import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
+import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
+import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
+import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
+import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
+import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
+import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
+import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
+import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
+import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
+import { PathologiesListComponent } from './preclinical/pathologies/pathology/list/pathology-list.component';
+import { PathologyModelFormComponent } from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
+import { AnestheticIngredientFormComponent } from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
+import { PathologyModelsListComponent } from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
+import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
+import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
+import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
+import { AnestheticFormComponent } from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
+import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animalSubject-form.component';
 
 let appRoutes: Routes = [
     {
@@ -88,6 +109,10 @@ let appRoutes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
+            }, {   
+                path: 'bruker',
+                component: BrukerUploadComponent,
+                data: {importMode: 'BRUKER'}
             }, {   
                 path: 'eeg',
                 component: EegUploadComponent,
@@ -120,6 +145,16 @@ let appRoutes: Routes = [
                 path: 'eegfinish',
                 component: FinishEegImportComponent
             }
+            , {
+                path: 'bruker',
+                component: BrukerUploadComponent
+            }, {
+                path: 'brukerseries',
+                component: BrukerSelectSeriesComponent
+            }, {
+                path: 'brukerfinish',
+                component: BrukerFinishImportComponent
+            }
         ]
     }, {
         path: 'task',
@@ -136,7 +171,14 @@ let appRoutes: Routes = [
                 data: { mode: 'view', select: true }
             }
         ]
-    }
+    },
+        { 
+        path: 'preclinical-contrastagents', 
+        component: ContrastAgentsListComponent
+    },{ 
+        path: 'preclinical-contrastagent', 
+        component: ContrastAgentFormComponent
+    },
 ];
 
 appRoutes = appRoutes.concat(
@@ -153,6 +195,14 @@ appRoutes = appRoutes.concat(
     getRoutesFor('study-card', StudyCardComponent, StudyCardListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('dataset-acquisition', DatasetAcquisitionComponent, DatasetAcquisitionListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('instrument', InstrumentAssessmentComponent, null, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
+    getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-pathology', PathologyFormComponent, PathologiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
+    getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent, PathologyModelsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent, AnestheticIngredientsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-anesthetic', AnestheticFormComponent, AnestheticsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-subject', AnimalSubjectFormComponent, AnimalSubjectsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
 );
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 

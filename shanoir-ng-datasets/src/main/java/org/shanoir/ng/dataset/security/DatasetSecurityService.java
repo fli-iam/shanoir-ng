@@ -24,6 +24,7 @@ import java.util.Set;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -424,6 +425,50 @@ public class DatasetSecurityService {
     }
     
     /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean checkDatasetAcquisitionDTOPage(Page<DatasetAcquisitionDTO> page, String rightStr) {
+    	if (page == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<>();
+    	page.forEach((DatasetAcquisitionDTO acquisition) -> studyIds.add(acquisition.getExamination().getStudyId()));
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	for (DatasetAcquisitionDTO acquisition : page) {
+    		if (!checkedIds.contains(acquisition.getExamination().getStudyId())) {
+				return false;
+			}
+    	}
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean checkDatasetAcquisitionPage(Page<DatasetAcquisition> page, String rightStr) {
+    	if (page == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<>();
+    	page.forEach((DatasetAcquisition acquisition) -> studyIds.add(acquisition.getExamination().getStudyId()));
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	for (DatasetAcquisition acquisition : page) {
+    		if (!checkedIds.contains(acquisition.getExamination().getStudyId())) {
+				return false;
+			}
+    	}
+    	return true;
+    }
+    
+    /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
      * 
      * @param page the page
@@ -431,6 +476,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterStudyCardList(List<StudyCard> list, String rightStr) {
+    	if (list == null) return true;
     	Set<Long> studyIds = new HashSet<Long>();
     	list.forEach((StudyCard sc) -> {
     		studyIds.add(sc.getStudyId());
@@ -448,6 +494,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOPage(Page<ExaminationDTO> page, String rightStr) {
+    	if (page == null) return true;
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((ExaminationDTO exam) -> {
     		if (exam.getStudyId() != null) studyIds.add(exam.getStudyId());

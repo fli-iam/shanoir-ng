@@ -87,6 +87,8 @@ public class ImporterApiControllerTest {
 
 	private static final String IMPORT_AS_BIDS = "/importer/importAsBids/";
 
+	private static final String GET_DICOM = "/importer/get_dicom/";
+
 	private Gson gson;
 	
 	@Autowired
@@ -248,7 +250,7 @@ public class ImporterApiControllerTest {
 		// GIVEN a bids folder to import
 		MockMultipartFile file = createFile(true, false, false, false);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"erreur: fail during parsing\"}]");
 
 		// WHEN we import the folder
@@ -265,7 +267,7 @@ public class ImporterApiControllerTest {
 		// BUT study description file does not exist
 		MockMultipartFile file = createFile(true, false, false, false);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		// WHEN we import the folder
@@ -282,7 +284,7 @@ public class ImporterApiControllerTest {
 		// BUT study description file does not exist
 		MockMultipartFile file = createFile(true, true, false, false);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		// WHEN we import the folder
@@ -299,7 +301,7 @@ public class ImporterApiControllerTest {
 		// BUT shanoir-import.json file does not exist
 		MockMultipartFile file = createFile(true, true, true, false);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		// WHEN we import the folder
@@ -317,7 +319,7 @@ public class ImporterApiControllerTest {
 		// BUT selected center does not exists
 		MockMultipartFile file = createFile(true, true, true, true);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		CommonIdNamesDTO body = new CommonIdNamesDTO();
@@ -341,7 +343,7 @@ public class ImporterApiControllerTest {
 		// BUT selected study does not exists
 		MockMultipartFile file = createFile(true, true, true, true);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		CommonIdNamesDTO body = new CommonIdNamesDTO();
@@ -366,7 +368,7 @@ public class ImporterApiControllerTest {
 		// BUT selected subject does not exists
 		MockMultipartFile file = createFile(true, true, true, true);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"OTHERANEME\", \"id\":1}]");
 
 		CommonIdNamesDTO body = new CommonIdNamesDTO();
@@ -392,7 +394,7 @@ public class ImporterApiControllerTest {
 		// BUT the import fails
 		MockMultipartFile file = createFile(true, true, true, true);
 
-		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_EXCHANGE), eq(""), Mockito.anyString()))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
 		CommonIdNamesDTO body = new CommonIdNamesDTO();
@@ -420,7 +422,16 @@ public class ImporterApiControllerTest {
 		
 		// THEN all the datas are correctly imported
 	}
-	
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testGetDicomImageNoPath() throws Exception {
+		
+		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
+				.param("path", ""))
+		.andExpect(status().is(200));
+	}
+
 	@After
 	public void tearDown() throws IOException {
 	    File importDir = new File("/tmp/test-import-as-bids");

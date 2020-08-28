@@ -33,7 +33,6 @@ export class BrukerSelectSeriesComponent {
 
     private patients: PatientDicom[];
     private workFolder: string;
-    private dataFiles: any;
     private detailedPatient: Object;
     private detailedSerie: Object;
     private papayaParams: object[];
@@ -49,7 +48,6 @@ export class BrukerSelectSeriesComponent {
             return;
         }
         breadcrumbsService.nameStep('2. Series');
-        this.dataFiles = this.importDataService.inMemoryExtracted;
         this.patients = this.importDataService.archiveUploaded.patients;
         this.workFolder = this.importDataService.archiveUploaded.workFolder;
     }
@@ -79,17 +77,9 @@ export class BrukerSelectSeriesComponent {
 
     private initPapaya(serie: SerieDicom): void {
         if (!serie) return;
-        let listOfPromises;
-        if (this.dataFiles) {
-            listOfPromises = serie.images.map((image) => {
-                return this.dataFiles.files[image.path].async("arraybuffer");
-            });
-        } else {
-            listOfPromises = serie.images.map((image) => {
-                let url = AppUtils.BACKEND_API_IMAGE_VIEWER_URL + this.workFolder + '/' + image.path;
-                return this.importService.downloadImage(url);
-            });
-         }
+        let listOfPromises = serie.images.map((image) => {
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+        });
         let promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then((values) => {
             let params: object[] = [];
@@ -111,6 +101,6 @@ export class BrukerSelectSeriesComponent {
     }
 
     private next() {
-        this.router.navigate(['importsBruker/context']);
+        this.router.navigate(['imports/context']);
     }
 }

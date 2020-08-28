@@ -19,7 +19,7 @@ export enum ImagedObjectCategory {
     PHANTOM = 'PHANTOM',
     LIVING_HUMAN_BEING = 'LIVING_HUMAN_BEING',
     HUMAN_CADAVER = 'HUMAN_CADAVER',
-    ANATOMICAL_PIECE = 'ANATOMICAL_PIECE', 
+    ANATOMICAL_PIECE = 'ANATOMICAL_PIECE',
     LIVING_ANIMAL = 'LIVING_ANIMAL',
     ANIMAL_CADAVER = 'ANIMAL_CADAVER'
 }  export namespace ImagedObjectCategory {
@@ -33,13 +33,13 @@ export enum ImagedObjectCategory {
     }
 
     export function all(preclinical: boolean = false): Array<ImagedObjectCategory> {
-    	let allPreclinicalImagedObjectCategory: Array<ImagedObjectCategory> = new Array();
+    	let allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
         if (preclinical){
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_ANIMAL);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANIMAL_CADAVER);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.PHANTOM);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANATOMICAL_PIECE);
-        } else{
+        } else {
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_HUMAN_BEING);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.HUMAN_CADAVER);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.PHANTOM);

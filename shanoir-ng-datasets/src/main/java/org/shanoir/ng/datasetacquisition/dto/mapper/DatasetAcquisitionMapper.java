@@ -18,42 +18,43 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.mapstruct.MapperConfig;
+import org.mapstruct.MappingInheritanceStrategy;
+import org.mapstruct.ObjectFactory;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.springframework.data.domain.Page;
 
-/**
- * Mapper for dataset acquisitions.
- * 
- * @author msimon
- *
- */
-@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
+@Mapper(componentModel = "spring", uses = { ExaminationMapper.class })
 @DecoratedWith(DatasetAcquisitionDecorator.class)
+@MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
 public interface DatasetAcquisitionMapper {
 
-	/**
-	 * Map list of @DatasetAcquisition to list
-	 * of @ExaminationDatasetAcquisitionDTO.
-	 * 
-	 * @param datasetAcquisitions
-	 *            list of dataset acquisitions.
-	 * @return list of dataset acquisitions DTO.
-	 */
-	List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
-			List<DatasetAcquisition> datasetAcquisitions);
+	
+	List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
+			List<DatasetAcquisition> datasetAcquisitions); 
+	
+	
+	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
 
-	/**
-	 * Map a @DatasetAcquisition to a @ExaminationDatasetAcquisitionDTO.
-	 * 
-	 * @param datasetAcquisition
-	 *            dataset acquisition to map.
-	 * @return dataset acquisition DTO.
-	 */
-	@Mappings({ @Mapping(target = "name", ignore = true) })
-	ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
+	
+	DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
 			DatasetAcquisition datasetAcquisition);
+
+	
+	DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+	
+	@ObjectFactory
+	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
+        if (dto.getType().equals("Mr")) return new MrDatasetAcquisition(); 
+        else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition(); 
+        else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition(); 
+        else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
+    }
 
 }

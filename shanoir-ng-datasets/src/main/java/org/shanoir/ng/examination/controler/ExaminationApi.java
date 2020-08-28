@@ -70,7 +70,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudy().getId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
@@ -124,6 +124,7 @@ public interface ExaminationApi {
 	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Saves a new examination", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

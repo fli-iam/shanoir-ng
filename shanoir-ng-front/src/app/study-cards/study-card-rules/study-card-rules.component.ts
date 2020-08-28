@@ -86,22 +86,22 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
         this.fields = [
             new AssignmentField('Dataset modality type', 'MODALITY_TYPE', [
-                new Option<string>('Mr', 'Mr'), 
-                new Option<string>('Pet', 'Pet')
+                new Option<string>('MR', 'Mr'), 
+                new Option<string>('PET', 'Pet')
             ]),
             new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
             new AssignmentField('Protocol comment', 'PROTOCOL_COMMENT'),
             new AssignmentField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),
             new AssignmentField('Receiving coil', 'RECEIVING_COIL', this.coilOptions),
-            new AssignmentField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.toOptions()),
-            new AssignmentField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.toOptions()),
-            new AssignmentField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.toOptions()),
-            new AssignmentField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.toOptions()),
+            new AssignmentField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.options),
+            new AssignmentField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.options),
+            new AssignmentField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.options),
+            new AssignmentField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.options),
             new AssignmentField('New name for the dataset', 'NAME'),
             new AssignmentField('Dataset comment', 'COMMENT'),
             new AssignmentField('MR sequence name', 'MR_SEQUENCE_NAME'),
-            new AssignmentField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.toOptions()),
-            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.toOptions())
+            new AssignmentField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.options),
+            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options)
         ];
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 

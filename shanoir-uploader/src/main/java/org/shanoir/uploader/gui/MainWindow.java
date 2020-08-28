@@ -51,6 +51,7 @@ import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.FindDicomActionListener;
 import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.ImportDialogOpenerNG;
+import org.shanoir.uploader.action.NoOrYesAnonRChangeListener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -75,22 +76,29 @@ public class MainWindow extends JFrame {
 
 	public DicomTree dicomTree;
 	public JPanel contentPane;
-	public JScrollPane scrollPane;
+	public JScrollPane dicomTreeJScrollPane;
 	public JTextField patientNameTF;
 	public JTextField patientIDTF;
 	public JTextField studyDescriptionTF;
 	public JTextField seriesDescriptionTF;
-	public JButton downloadOrCopyButton;
+	
+	public JPanel editPanel;
+	public ButtonGroup anonymisedBG;
+	public JRadioButton noAnonR, yesAnonR;
+	public JLabel newPatientIDLabel;
 	public JTextField newPatientIDTF;
+	public JLabel dummyLabelAsLayoutBuffer;
+	public JLabel lastNameLabel;
 	public JTextField lastNameTF;
+	public JButton birthNameCopyButton;
+	public JLabel firstNameLabel;
 	public JTextField firstNameTF;
+	public JLabel birthNameLabel;
 	public JTextField birthNameTF;
 	public JTextField birthDateTF;
-	// public JTextField sexTF;
 	public ButtonGroup sexRG;
-	public JRadioButton msexR, fsexR;
-	public JTextField birthDateReasearchTF;
-	public JTextField examinationDateReasearchTF;
+	public JRadioButton mSexR, fSexR;
+	public JButton downloadOrCopyButton;
 	
 	public JButton queryButton;
 
@@ -165,6 +173,10 @@ public class MainWindow extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
+		/**
+		 * Handle menu bar here:
+		 */
+		
 		JMenuBar menuBar = new JMenuBar();
 		contentPane.add(menuBar, BorderLayout.NORTH);
 
@@ -174,7 +186,8 @@ public class MainWindow extends JFrame {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		JMenuItem mntmOpenDicomFromCD = new JMenuItem(resourceBundle.getString("shanoir.uploader.fileMenu.openCD"));
+		ImageIcon searchIcon = new ImageIcon(getClass().getClassLoader().getResource("images/search.png"));
+		JMenuItem mntmOpenDicomFromCD = new JMenuItem(resourceBundle.getString("shanoir.uploader.fileMenu.openCD"), searchIcon);
 		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient);
 		mntmOpenDicomFromCD.addActionListener(fAL);
 		mnFile.add(mntmOpenDicomFromCD);
@@ -205,24 +218,24 @@ public class MainWindow extends JFrame {
 
 		mntmShanoirServerConfiguration.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ShanoirServerConfigurationWindow sscw = new ShanoirServerConfigurationWindow(
-						shanoirUploaderFolder, ServiceConfiguration.getInstance(),resourceBundle);
+				ShanoirServerConfigurationWindow sscw = new ShanoirServerConfigurationWindow(shanoirUploaderFolder,
+						ServiceConfiguration.getInstance(), resourceBundle);
 			}
 		});
-		
+
 		// Language Configuration Menu
-		JMenuItem mntmLanguage = new JMenuItem(
-				resourceBundle.getString("shanoir.uploader.configurationMenu.language"));
+		JMenuItem mntmLanguage = new JMenuItem(resourceBundle.getString("shanoir.uploader.configurationMenu.language"));
 		mnConfiguration.add(mntmLanguage);
 		mntmLanguage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-			LanguageConfigurationWindow sscw = new LanguageConfigurationWindow(shanoirUploaderFolder, resourceBundle);
+				LanguageConfigurationWindow sscw = new LanguageConfigurationWindow(shanoirUploaderFolder,
+						resourceBundle);
 			}
 		});
 
 		JMenu mnHelp = new JMenu(resourceBundle.getString("shanoir.uploader.helpMenu"));
 		menuBar.add(mnHelp);
-		
+
 		JMenuItem mntmAboutShUp = new JMenuItem(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp"));
 		mnHelp.add(mntmAboutShUp);
 		mntmAboutShUp.addActionListener(new ActionListener() {
@@ -231,29 +244,27 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		JMenu profileSelected = new JMenu(resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected);
-		menuBar.add(Box.createHorizontalGlue());
+		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
+		menuBar.add(Box.createRigidArea(new Dimension(550,5)));
 		menuBar.add(profileSelected);
 
-		/*** add TabbedPane to display the upload jobs in progress ***/
-		JTabbedPane tabbedPane;
-		tabbedPane = new JTabbedPane();
+		/**
+		 * Handle inside content here:
+		 */
+		JTabbedPane tabbedPane = new JTabbedPane();
 
-		JSplitPane splitPane = new JSplitPane();
-
-		scrollPane = new JScrollPane();
-		splitPane.setRightComponent(scrollPane);
-		sAL = new SelectionActionListener(this, resourceBundle);
-
-		JPanel masterPanel = new JPanel(new BorderLayout());
-		splitPane.setLeftComponent(masterPanel);
-
+		JSplitPane splitPaneQueryAndDicomTree = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		final JPanel queryPanel = new JPanel();
 		queryPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		JPanel editPanel = new JPanel();
+		splitPaneQueryAndDicomTree.setLeftComponent(queryPanel);
+		dicomTreeJScrollPane = new JScrollPane();
+		splitPaneQueryAndDicomTree.setRightComponent(dicomTreeJScrollPane);
+		sAL = new SelectionActionListener(this, resourceBundle);
+
+		JPanel editCurrentUploadsPanel = new JPanel(new BorderLayout());
+		editPanel = new JPanel();
 		editPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-		masterPanel.add(queryPanel, BorderLayout.NORTH);
-		masterPanel.add(editPanel, BorderLayout.SOUTH);
+		editCurrentUploadsPanel.add(editPanel, BorderLayout.NORTH);
 
 		GridBagLayout gBLPanel = new GridBagLayout();
 		gBLPanel.columnWidths = new int[] { 0, 0, 0 };
@@ -271,24 +282,25 @@ public class MainWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.queryBoxMessage"));
 		GridBagConstraints gbc_queryPanelLabel = new GridBagConstraints();
 		gbc_queryPanelLabel.anchor = GridBagConstraints.WEST;
-		gbc_queryPanelLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_queryPanelLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_queryPanelLabel.insets = new Insets(5, 5, 0, 0);
+		gbc_queryPanelLabel.gridwidth = 3;
 		gbc_queryPanelLabel.gridx = 0;
 		gbc_queryPanelLabel.gridy = 0;
-		gbc_queryPanelLabel.gridwidth = 2;
 		queryPanel.add(queryPanelLabel, gbc_queryPanelLabel);
 
 		JLabel patientNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientNameLabel"));
 		patientNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_patientNameLabel = new GridBagConstraints();
 		gbc_patientNameLabel.anchor = GridBagConstraints.EAST;
-		gbc_patientNameLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_patientNameLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameLabel.gridx = 0;
 		gbc_patientNameLabel.gridy = 1;
 		queryPanel.add(patientNameLabel, gbc_patientNameLabel);
 
 		patientNameTF = new JTextField();
 		GridBagConstraints gbc_patientNameTF = new GridBagConstraints();
-		gbc_patientNameTF.insets = new Insets(10, 10, 10, 10);
+		gbc_patientNameTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientNameTF.gridx = 1;
 		gbc_patientNameTF.gridy = 1;
@@ -302,8 +314,7 @@ public class MainWindow extends JFrame {
 		JButton helpButton;
 		helpButton = new JButton(resourceBundle.getString("shanoir.uploader.helpButton"));
 		GridBagConstraints gbc_HelpButton = new GridBagConstraints();
-		gbc_HelpButton.insets = new Insets(0, 0, 5, 0);
-		gbc_HelpButton.gridwidth = 3;
+		gbc_HelpButton.insets = new Insets(5, 2, 0, 2);
 		gbc_HelpButton.gridx = 2;
 		gbc_HelpButton.gridy = 1;
 		queryPanel.add(helpButton, gbc_HelpButton);
@@ -382,14 +393,14 @@ public class MainWindow extends JFrame {
 		PatientIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gbc_PatientIDLabel = new GridBagConstraints();
 		gbc_PatientIDLabel.anchor = GridBagConstraints.EAST;
-		gbc_PatientIDLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_PatientIDLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_PatientIDLabel.gridx = 0;
 		gbc_PatientIDLabel.gridy = 2;
 		queryPanel.add(PatientIDLabel, gbc_PatientIDLabel);
 
 		patientIDTF = new JTextField();
 		GridBagConstraints gbc_patientIDTF = new GridBagConstraints();
-		gbc_patientIDTF.insets = new Insets(10, 10, 10, 10);
+		gbc_patientIDTF.insets = new Insets(5, 5, 0, 0);
 		gbc_patientIDTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_patientIDTF.gridx = 1;
 		gbc_patientIDTF.gridy = 2;
@@ -401,14 +412,14 @@ public class MainWindow extends JFrame {
 		JLabel studyDescriptionLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDescriptionLabel"));
 		GridBagConstraints gbc_studyDescriptionLabel = new GridBagConstraints();
 		gbc_studyDescriptionLabel.anchor = GridBagConstraints.EAST;
-		gbc_studyDescriptionLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDescriptionLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDescriptionLabel.gridx = 0;
 		gbc_studyDescriptionLabel.gridy = 3;
 		queryPanel.add(studyDescriptionLabel, gbc_studyDescriptionLabel);
 
 		studyDescriptionTF = new JTextField();
 		GridBagConstraints gbc_studyDescriptionTF = new GridBagConstraints();
-		gbc_studyDescriptionTF.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDescriptionTF.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDescriptionTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDescriptionTF.gridx = 1;
 		gbc_studyDescriptionTF.gridy = 3;
@@ -436,7 +447,7 @@ public class MainWindow extends JFrame {
 		JLabel birthDateReasearchLabel = new JLabel(resourceBundle.getString("shanoir.uploader.patientBirthDateLabel"));
 		GridBagConstraints gbc_birthDateReasearchLabel = new GridBagConstraints();
 		gbc_birthDateReasearchLabel.anchor = GridBagConstraints.EAST;
-		gbc_birthDateReasearchLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_birthDateReasearchLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateReasearchLabel.gridx = 0;
 		gbc_birthDateReasearchLabel.gridy = 4;
 		queryPanel.add(birthDateReasearchLabel, gbc_birthDateReasearchLabel);
@@ -453,7 +464,7 @@ public class MainWindow extends JFrame {
 
 		final JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, dLP);
 		GridBagConstraints gbc_birthDateReasearchTF = new GridBagConstraints();
-		gbc_birthDateReasearchTF.insets = new Insets(10, 10, 10, 10);
+		gbc_birthDateReasearchTF.insets = new Insets(5, 5, 0, 0);
 		gbc_birthDateReasearchTF.fill = GridBagConstraints.HORIZONTAL;
 		gbc_birthDateReasearchTF.gridx = 1;
 		gbc_birthDateReasearchTF.gridy = 4;
@@ -481,7 +492,7 @@ public class MainWindow extends JFrame {
 		JLabel studyDateLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyDateLabel"));
 		GridBagConstraints gbc_studyDateLabel = new GridBagConstraints();
 		gbc_studyDateLabel.anchor = GridBagConstraints.EAST;
-		gbc_studyDateLabel.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDateLabel.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDateLabel.gridx = 0;
 		gbc_studyDateLabel.gridy = 5;
 		queryPanel.add(studyDateLabel, gbc_studyDateLabel);
@@ -498,7 +509,7 @@ public class MainWindow extends JFrame {
 				studyDatePanel, studyDLP);
 
 		GridBagConstraints gbc_studyDatePicker = new GridBagConstraints();
-		gbc_studyDatePicker.insets = new Insets(10, 10, 10, 10);
+		gbc_studyDatePicker.insets = new Insets(5, 5, 0, 0);
 		gbc_studyDatePicker.fill = GridBagConstraints.HORIZONTAL;
 		gbc_studyDatePicker.gridx = 1;
 		gbc_studyDatePicker.gridy = 5;
@@ -522,9 +533,9 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"));
+		queryButton = new JButton(resourceBundle.getString("shanoir.uploader.queryButton"), searchIcon);
 		GridBagConstraints gbc_queryButton = new GridBagConstraints();
-		gbc_queryButton.insets = new Insets(0, 0, 5, 0);
+		gbc_queryButton.insets = new Insets(5, 5, 5, 0);
 		gbc_queryButton.gridwidth = 3;
 		gbc_queryButton.gridx = 0;
 		gbc_queryButton.gridy = 6;
@@ -546,36 +557,63 @@ public class MainWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.sendBoxMessage"));
 		GridBagConstraints gbc_editPanelLabel = new GridBagConstraints();
 		gbc_editPanelLabel.anchor = GridBagConstraints.WEST;
+		gbc_editPanelLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_editPanelLabel.insets = new Insets(10, 10, 10, 10);
 		gbc_editPanelLabel.gridx = 0;
 		gbc_editPanelLabel.gridy = 0;
-		gbc_editPanelLabel.gridwidth = 2;
+		gbc_editPanelLabel.gridwidth = 4;
 		editPanel.add(editPanelLabel, gbc_editPanelLabel);
 
-		// this is uncommented for OFSEP only, implement this later for Neurinfo
-		JLabel newPatientIDLabel = new JLabel("New Patient ID:");
-		newPatientIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_newPatientIDLabel = new GridBagConstraints();
-		gbc_newPatientIDLabel.anchor = GridBagConstraints.EAST;
-		gbc_newPatientIDLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_newPatientIDLabel.gridx = 0;
-		gbc_newPatientIDLabel.gridy = 0;
-
+		/**
+		 * Radio buttons for anonymised: no or yes
+		 */
+		JLabel anonymisedLabel = new JLabel(resourceBundle.getString("shanoir.uploader.editPanel.anonymisedLabel"));
+		anonymisedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		GridBagConstraints gBCAnonymisedLabel = new GridBagConstraints();
+		gBCAnonymisedLabel.anchor = GridBagConstraints.EAST;
+		gBCAnonymisedLabel.insets = new Insets(10, 10, 10, 10);
+		gBCAnonymisedLabel.gridx = 0;
+		gBCAnonymisedLabel.gridy = 1;
+		editPanel.add(anonymisedLabel, gBCAnonymisedLabel);
+		// create buttons and fill into group
+		anonymisedBG = new ButtonGroup();
+		noAnonR = new JRadioButton("No");
+		noAnonR.setSelected(true);
+		noAnonR.setEnabled(false);
+		anonymisedBG.add(noAnonR);
+		editPanel.add(noAnonR);
+		yesAnonR = new JRadioButton("Yes");
+		yesAnonR.setEnabled(false);
+		anonymisedBG.add(yesAnonR);
+		editPanel.add(yesAnonR);
+		// define gBC for noAnonR
+		GridBagConstraints gBCNoAnonR = new GridBagConstraints();
+		gBCNoAnonR.insets = new Insets(10, 10, 10, 10);
+		gBCNoAnonR.fill = GridBagConstraints.HORIZONTAL;
+		gBCNoAnonR.gridx = 1;
+		gBCNoAnonR.gridy = 1;
+		editPanel.add(noAnonR, gBCNoAnonR);
+		// define gBC for yesAnonR
+		GridBagConstraints gBCYesAnonR = new GridBagConstraints();
+		gBCYesAnonR.insets = new Insets(10, 10, 10, 10);
+		gBCYesAnonR.fill = GridBagConstraints.HORIZONTAL;
+		gBCYesAnonR.gridx = 2;
+		gBCYesAnonR.gridy = 1;
+		editPanel.add(yesAnonR, gBCYesAnonR);
+		
+		newPatientIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.newPatientIDLabel"));
 		newPatientIDTF = new JTextField();
-		GridBagConstraints gbc_newPatientIDTF = new GridBagConstraints();
-		gbc_newPatientIDTF.insets = new Insets(10, 10, 10, 10);
-		gbc_newPatientIDTF.fill = GridBagConstraints.HORIZONTAL;
-		gbc_newPatientIDTF.gridx = 1;
-		gbc_newPatientIDTF.gridy = 0;
-		newPatientIDTF.setColumns(15);
+		newPatientIDTF.getDocument().addDocumentListener(new RSDocumentListener(this));
+		dummyLabelAsLayoutBuffer = new JLabel("           "); // used to correct layout for button copyToBirthName
+		dummyLabelAsLayoutBuffer.setHorizontalAlignment(SwingConstants.RIGHT);
 
-		JLabel lastNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.lastNameLabel"));
+		lastNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.lastNameLabel"));
 		lastNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gBCLastNameLabel = new GridBagConstraints();
 		gBCLastNameLabel.anchor = GridBagConstraints.EAST;
 		gBCLastNameLabel.insets = new Insets(10, 10, 10, 10);
 		gBCLastNameLabel.gridx = 0;
-		gBCLastNameLabel.gridy = 1;
+		gBCLastNameLabel.gridy = 2;
 		editPanel.add(lastNameLabel, gBCLastNameLabel);
 
 		lastNameTF = new JTextField();
@@ -583,32 +621,33 @@ public class MainWindow extends JFrame {
 		gBCLastNameTF.insets = new Insets(10, 10, 10, 10);
 		gBCLastNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gBCLastNameTF.gridx = 1;
-		gBCLastNameTF.gridy = 1;
+		gBCLastNameTF.gridy = 2;
 		gBCLastNameTF.gridwidth = 2;
-		editPanel.add(lastNameTF, gBCLastNameTF);
 		lastNameTF.setColumns(15);
+		lastNameTF.setEnabled(false);
+		editPanel.add(lastNameTF, gBCLastNameTF);
 
-		lastNameTF.getDocument().addDocumentListener(
-				new RSDocumentListener(this));
+		lastNameTF.getDocument().addDocumentListener(new RSDocumentListener(this));
 
 		// add a button to copy the last name to the birth name
 		ImageIcon copyIcon = new ImageIcon(getClass().getClassLoader()
 				.getResource("images/copyLastNameToBirthName.16x16.png"));
-		JButton birthNameCopyButton = new JButton(copyIcon);
+		birthNameCopyButton = new JButton(copyIcon);
 		GridBagConstraints gBCBithNameCopyButton = new GridBagConstraints();
 		gBCBithNameCopyButton.anchor = GridBagConstraints.EAST;
 		gBCBithNameCopyButton.insets = new Insets(10, 10, 10, 10);
 		gBCBithNameCopyButton.gridx = 3;
-		gBCBithNameCopyButton.gridy = 1;
+		gBCBithNameCopyButton.gridy = 2;
+		birthNameCopyButton.setEnabled(false);
 		editPanel.add(birthNameCopyButton, gBCBithNameCopyButton);
 
-		JLabel firstNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.firstNameLabel"));
+		firstNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.firstNameLabel"));
 		firstNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gBCFirstNameLabel = new GridBagConstraints();
 		gBCFirstNameLabel.anchor = GridBagConstraints.EAST;
 		gBCFirstNameLabel.insets = new Insets(10, 10, 10, 10);
 		gBCFirstNameLabel.gridx = 0;
-		gBCFirstNameLabel.gridy = 2;
+		gBCFirstNameLabel.gridy = 3;
 		editPanel.add(firstNameLabel, gBCFirstNameLabel);
 
 		firstNameTF = new JTextField();
@@ -616,21 +655,21 @@ public class MainWindow extends JFrame {
 		gBCFirstNameTF.insets = new Insets(10, 10, 10, 10);
 		gBCFirstNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gBCFirstNameTF.gridx = 1;
-		gBCFirstNameTF.gridy = 2;
+		gBCFirstNameTF.gridy = 3;
 		gBCFirstNameTF.gridwidth = 2;
-		editPanel.add(firstNameTF, gBCFirstNameTF);
 		firstNameTF.setColumns(15);
+		firstNameTF.setEnabled(false);
+		editPanel.add(firstNameTF, gBCFirstNameTF);
 
-		firstNameTF.getDocument().addDocumentListener(
-				new RSDocumentListener(this));
+		firstNameTF.getDocument().addDocumentListener(new RSDocumentListener(this));
 
-		JLabel birthNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.BirthNameLabel"));
+		birthNameLabel = new JLabel(resourceBundle.getString("shanoir.uploader.BirthNameLabel"));
 		birthNameLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gBCBirthNameLabel = new GridBagConstraints();
 		gBCBirthNameLabel.anchor = GridBagConstraints.EAST;
 		gBCBirthNameLabel.insets = new Insets(10, 10, 10, 10);
 		gBCBirthNameLabel.gridx = 0;
-		gBCBirthNameLabel.gridy = 3;
+		gBCBirthNameLabel.gridy = 4;
 		editPanel.add(birthNameLabel, gBCBirthNameLabel);
 
 		birthNameTF = new JTextField();
@@ -638,10 +677,11 @@ public class MainWindow extends JFrame {
 		gBCBirthNameTF.insets = new Insets(10, 10, 10, 10);
 		gBCBirthNameTF.fill = GridBagConstraints.HORIZONTAL;
 		gBCBirthNameTF.gridx = 1;
-		gBCBirthNameTF.gridy = 3;
+		gBCBirthNameTF.gridy = 4;
 		gBCBirthNameTF.gridwidth = 2;
-		editPanel.add(birthNameTF, gBCBirthNameTF);
 		birthNameTF.setColumns(15);
+		birthNameTF.setEnabled(false);
+		editPanel.add(birthNameTF, gBCBirthNameTF);
 
 		birthNameCopyButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -658,7 +698,7 @@ public class MainWindow extends JFrame {
 		gBCBirthDateLabel.anchor = GridBagConstraints.EAST;
 		gBCBirthDateLabel.insets = new Insets(10, 10, 10, 10);
 		gBCBirthDateLabel.gridx = 0;
-		gBCBirthDateLabel.gridy = 4;
+		gBCBirthDateLabel.gridy = 5;
 		editPanel.add(birthDateLabel, gBCBirthDateLabel);
 
 		birthDateTF = new JTextField();
@@ -666,52 +706,61 @@ public class MainWindow extends JFrame {
 		gBCBirthDateTF.insets = new Insets(10, 10, 10, 10);
 		gBCBirthDateTF.fill = GridBagConstraints.HORIZONTAL;
 		gBCBirthDateTF.gridx = 1;
-		gBCBirthDateTF.gridy = 4;
+		gBCBirthDateTF.gridy = 5;
 		gBCBirthDateTF.gridwidth = 2;
 		editPanel.add(birthDateTF, gBCBirthDateTF);
+		birthDateTF.setEnabled(false);
 		birthDateTF.setColumns(15);
 		birthDateTF.getDocument().addDocumentListener(
 				new RSDocumentListener(this));
 
+		/**
+		 * Radio buttons for sex: M or F
+		 */
 		JLabel sexLabel = new JLabel(resourceBundle.getString("shanoir.uploader.sexLabel"));
 		sexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		GridBagConstraints gBCSexLabel = new GridBagConstraints();
 		gBCSexLabel.anchor = GridBagConstraints.EAST;
 		gBCSexLabel.insets = new Insets(10, 10, 10, 10);
 		gBCSexLabel.gridx = 0;
-		gBCSexLabel.gridy = 5;
+		gBCSexLabel.gridy = 6;
 		editPanel.add(sexLabel, gBCSexLabel);
-
 		sexRG = new ButtonGroup();
+		mSexR = new JRadioButton("M");
+		mSexR.setEnabled(false);
+		sexRG.add(mSexR);
+		editPanel.add(mSexR);
+		fSexR = new JRadioButton("F");
+		fSexR.setEnabled(false);
+		sexRG.add(fSexR);
+		editPanel.add(fSexR);
+		GridBagConstraints gBCMSexR = new GridBagConstraints();
+		gBCMSexR.insets = new Insets(10, 10, 10, 10);
+		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCMSexR.gridx = 1;
+		gBCMSexR.gridy = 6;
+		editPanel.add(mSexR, gBCMSexR);
+		GridBagConstraints gBCFSexR = new GridBagConstraints();
+		gBCFSexR.insets = new Insets(10, 10, 10, 10);
+		gBCMSexR.fill = GridBagConstraints.HORIZONTAL;
+		gBCFSexR.gridx = 2;
+		gBCFSexR.gridy = 6;
+		editPanel.add(fSexR, gBCFSexR);
 
-		msexR = new JRadioButton("M");
-		sexRG.add(msexR);
-		editPanel.add(msexR);
-
-		fsexR = new JRadioButton("F");
-		sexRG.add(fsexR);
-		editPanel.add(fsexR);
-
-		GridBagConstraints gBCSexTF = new GridBagConstraints();
-		gBCSexTF.insets = new Insets(10, 10, 10, 10);
-		gBCSexTF.fill = GridBagConstraints.HORIZONTAL;
-		gBCSexTF.gridx = 1;
-		gBCSexTF.gridy = 5;
-		editPanel.add(msexR, gBCSexTF);
-
-		GridBagConstraints gBCSexTF2 = new GridBagConstraints();
-		gBCSexTF2.insets = new Insets(10, 10, 10, 10);
-		gBCSexTF.fill = GridBagConstraints.HORIZONTAL;
-		gBCSexTF2.gridx = 2;
-		gBCSexTF2.gridy = 5;
-		editPanel.add(fsexR, gBCSexTF2);
-
-		downloadOrCopyButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadOrCopyButton"));
+		NoOrYesAnonRChangeListener changeListener = new NoOrYesAnonRChangeListener(this);
+		noAnonR.addChangeListener(changeListener);
+		yesAnonR.addChangeListener(changeListener);
+		
+		/**
+		 * Last button for download or copy action:
+		 */
+		ImageIcon downloadIcon = new ImageIcon(getClass().getClassLoader().getResource("images/download.png"));
+		downloadOrCopyButton = new JButton(resourceBundle.getString("shanoir.uploader.downloadOrCopyButton"), downloadIcon);
 		GridBagConstraints gbc_btnRetrieve = new GridBagConstraints();
 		gbc_btnRetrieve.insets = new Insets(0, 0, 5, 0);
-		gbc_btnRetrieve.gridwidth = 3;
+		gbc_btnRetrieve.gridwidth = 4;
 		gbc_btnRetrieve.gridx = 0;
-		gbc_btnRetrieve.gridy = 6;
+		gbc_btnRetrieve.gridy = 7;
 		editPanel.add(downloadOrCopyButton, gbc_btnRetrieve);
 		
 		menuBar.add(Box.createHorizontalGlue());
@@ -742,12 +791,12 @@ public class MainWindow extends JFrame {
 		// (scrollPaneUpload) to TabbedPane
 		final JPanel notificationPanel = new JPanel();
 		// add Notification panel to display in the main window the upload state
-		notificationPanel
-				.setBorder(BorderFactory.createLineBorder(Color.black));
-		final JSplitPane mainSplitPane = new JSplitPane(
-				JSplitPane.VERTICAL_SPLIT);
-		mainSplitPane.setLeftComponent(splitPane);
-		mainSplitPane.setRightComponent(notificationPanel);
+		notificationPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		editCurrentUploadsPanel.add(notificationPanel, BorderLayout.CENTER);
+
+		final JSplitPane mainSplitPane = new JSplitPane();
+		mainSplitPane.setLeftComponent(splitPaneQueryAndDicomTree);
+		mainSplitPane.setRightComponent(editCurrentUploadsPanel);
 		notificationPanel.setLayout(gBLPanel);
 
 		// Content of Notification Panel
@@ -810,24 +859,22 @@ public class MainWindow extends JFrame {
 		
 		menuBar.add(Box.createRigidArea(new Dimension(8, 0)));
 		
-		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"),
-			null, mainSplitPane, resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
-		JPanel currentUploadsPanel;
-		currentUploadsPanel = new JPanel(false);
+		// add main split pane here
+		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.mainWindowTab"), null, mainSplitPane,
+				resourceBundle.getString("shanoir.uploader.mainWindowTab.tooltip"));
+		JPanel currentUploadsPanel = new JPanel(false);
+		// and below the current uploads panel
 		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.currentUploadsTab"), null, currentUploadsPanel,
 				resourceBundle.getString("shanoir.uploader.currentUploadsTab.tooltip"));
 		scrollPaneUpload = new JScrollPane();
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
 		currentUploadsPanel.add(scrollPaneUpload);
-		
 		if (ShUpOnloadConfig.isShanoirNg()) {
 			final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
-
 			tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
-								resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
+					resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
 		}
-
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
