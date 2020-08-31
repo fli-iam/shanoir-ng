@@ -14,13 +14,14 @@
 
 package org.shanoir.ng.importer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author atouboul
  *
  */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject {
 
     @JsonProperty("id")
