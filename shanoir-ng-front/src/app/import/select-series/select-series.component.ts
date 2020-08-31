@@ -37,6 +37,7 @@ export class SelectSeriesComponent {
     private detailedSerie: Object;
     private detailedStudy: Object;
     private papayaParams: object[];
+    public papayaError: boolean = false;
 
     constructor(
             private importService: ImportService,
@@ -92,14 +93,19 @@ export class SelectSeriesComponent {
     }
 
     private initPapaya(serie: SerieDicom): void {
+        this.papayaError = false;
         let listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
         let promiseOfList = Promise.all(listOfPromises);
+        promiseOfList = Promise.reject(null);
         promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
             this.papayaParams = params;
+        }).catch(reason => {
+            this.papayaError = true;
+            console.error(reason);
         });
     }
 
