@@ -8,3 +8,4 @@ fieldset { min-width: auto; }
     .data-preview h3 { margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
 
 papaya { margin: auto 20px 15px; }
+.warning svg { margin-right: 7px; color: var(--color-a); }
