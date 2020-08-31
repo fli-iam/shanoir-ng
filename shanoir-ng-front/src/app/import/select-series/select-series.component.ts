@@ -61,7 +61,9 @@ export class SelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = nodeParams;
-            if (serie && serie.images) this.initPapaya(serie); 
+            setTimeout(() => { // so the details display has no delay
+                if (serie && serie.images) this.initPapaya(serie); 
+            });
         }
     }
 
