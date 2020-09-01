@@ -98,7 +98,6 @@ export class SelectSeriesComponent {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
         let promiseOfList = Promise.all(listOfPromises);
-        promiseOfList = Promise.reject(null);
         promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
