@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p>Please select a DICOM zip archive to import.</p>
     <p>This archive may contain a DICOMDIR file at its root :</p>
     <ul>
-        <li>If a DICOMDIR is present, it wil lbe used to import the data. </li>
+        <li>If a DICOMDIR is present, it will be used to import the data. </li>
         <li>If not, one will be automatically generated from DICOM images <strong>at the root of the archive.</strong></li>
     </ul>
     <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
