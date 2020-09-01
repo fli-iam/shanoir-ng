@@ -49,8 +49,6 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
-import org.shanoir.ng.importer.dto.CommonIdNamesDTO;
-import org.shanoir.ng.importer.dto.CommonIdsDTO;
 import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
 import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
@@ -60,6 +58,7 @@ import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.Event;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.dto.StudyCardDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -97,6 +96,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.annotations.ApiParam;
 
 /**
@@ -245,7 +245,7 @@ public class ImporterApiController implements ImporterApi {
 			// Work folder is always relative to general import directory
 			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
-			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+			return new ResponseEntity<>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
@@ -857,7 +857,6 @@ public class ImporterApiController implements ImporterApi {
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile)
 			throws RestServiceException, ShanoirException, IOException {
 		// Check that the file is not null and well zipped
-		try {
 		if (bidsFile == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
@@ -925,23 +924,24 @@ public class ImporterApiController implements ImporterApi {
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
-			CommonIdsDTO idsDTO = new CommonIdsDTO(null, sid.getStudyId(), null,
-					sid.getAcquisitionEquipmentId());
-			final HttpEntity<CommonIdsDTO> requestBody = new HttpEntity<>(idsDTO, KeycloakUtil.getKeycloakHeader());
-			// Post to dataset MS to finish import and create associated datasets
-			ResponseEntity<CommonIdNamesDTO> response = restTemplate.exchange(studiesCommonMsUrl, HttpMethod.POST,
-					requestBody, CommonIdNamesDTO.class);
-			// Check that equipement exists
-			// Check that study exists
-			// All in one with studies MS CommonsApi
-			// This is not necessary if we further use the studyCard
-			if (response.getBody().getEquipement() == null) {
+
+			String studyCardAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, sid.getStudyCardId());
+
+			if (studyCardAsString == null) {
 				throw new ShanoirException(
-						"Equipement with ID " + sid.getAcquisitionEquipmentId() + " does not exists.");
+						"StudyCard with ID " + sid.getStudyCardId() + " does not exists.");
 			}
-			if (response.getBody().getStudy() == null) {
+
+			StudyCardDTO studyCard = objectMapper.readValue(studyCardAsString, StudyCardDTO.class);
+
+
+			if (studyCard.getStudyId() != sid.getStudyId()) {
 				throw new ShanoirException("Study with ID " + sid.getStudyId() + " does not exists.");
 			}
+			if (studyCard.isDisabled()) {
+				throw new ShanoirException("StudyCard with ID " + sid.getStudyCardId() + " is currently disabled, please select another one.");
+			}
+			
 			// Subject based on folder name
 			Long subjectId = getSubjectIdByName(subjectName, participants);
 			if (subjectId == null) {
@@ -956,6 +956,7 @@ public class ImporterApiController implements ImporterApi {
 						subjFile.getAbsolutePath() + "/DICOM");
 				creator.start();
 			}
+
 			// Zip data folders to be able to call ImporterAPIController.uploadDicomZipFile
 			FileOutputStream fos = new FileOutputStream(subjFile.getAbsolutePath() + ".zip");
 			ZipOutputStream zipOut = new ZipOutputStream(fos);
@@ -974,12 +975,14 @@ public class ImporterApiController implements ImporterApi {
 			job = entity.getBody();
 
 			// Construire l'arborescence
-			job.setAcquisitionEquipmentId(sid.getAcquisitionEquipmentId());
+			job.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 			job.setStudyId(sid.getStudyId());
 
 			job.setFromPacs(false);
 			job.setFromShanoirUploader(false);
 			job.setFromDicomZip(true);
+			job.setConverterId(studyCard.getNiftiConverterId());
+
 			for (Patient pat : job.getPatients()) {
 				pat.setPatientName(subjectName);
 				Subject subject = new Subject();
@@ -998,27 +1001,35 @@ public class ImporterApiController implements ImporterApi {
 			// Create a new examination if not existing
 			if (sid.getExaminationId() == null || sid.getExaminationId().equals(Long.valueOf(0l))) {
 				// Create examination => We actually need its ID so do a direct API call
+				
+				// Get center ID
+				String centerAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE, studyCard.getAcquisitionEquipmentId());
+				IdName center = objectMapper.readValue(centerAsString, IdName.class);
+
 				ExaminationDTO examDTO = new ExaminationDTO();
 				// Construct DTO
-				examDTO.setCenter(new IdName(Long.valueOf(1), null));
+				// get center from study card => equipment => center
+				examDTO.setCenter(new IdName(center.getId(), center.getName()));
 				examDTO.setPreclinical(false); // Pour le moment on fait que du DICOM
-				examDTO.setStudy(new IdName(sid.getStudyId(), response.getBody().getStudy().getName()));
+				examDTO.setStudy(new IdName(sid.getStudyId(), sid.getStudyName()));
 				examDTO.setSubject(new IdName(subjectId, subjectName));
 				examDTO.setExaminationDate(job.getPatients().get(0).getStudies().get(0).getStudyDate());
 				examDTO.setComment(job.getPatients().get(0).getStudies().get(0).getStudyDescription());
+				
+				mapper.registerModule(new JavaTimeModule());
+				String examAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, mapper.writeValueAsString(examDTO));
 
-				final HttpEntity<ExaminationDTO> requestBodyExam = new HttpEntity<>(examDTO,
-						KeycloakUtil.getKeycloakHeader());
-				ResponseEntity<ExaminationDTO> examResponse = restTemplate.exchange(createExaminationMsUrl,
-						HttpMethod.POST, requestBodyExam, ExaminationDTO.class);
-				job.setExaminationId(examResponse.getBody().getId());
+				examDTO = mapper.readValue(examAsString, ExaminationDTO.class);
+				job.setExaminationId(examDTO.getId());
 			}
+
 			// Next API call => StartImportJob
 			ResponseEntity<Void> result = this.startImportJob(job);
 			if (!result.getStatusCode().equals(HttpStatus.OK)) {
 				throw new ShanoirException("Error while importing subject: " + subjectName);
 			}
 		}
+
 		// TODO ONE DAY: Copy "other" files to the bids folder
 		// Copy non datasets elements
 		// Don't copy "data" folder
@@ -1026,11 +1037,6 @@ public class ImporterApiController implements ImporterApi {
 		// copy /sourceData??, /code and / files (readme, changes, participants.tsv,
 		// participants.json, etc..)
 		return new ResponseEntity<>(job, HttpStatus.OK);
-
-		} catch (Exception e) {
-			System.err.println("Coucou" + e + e.getMessage() + e.getStackTrace());
-			throw e;
-		}
 	}
 
 	/**

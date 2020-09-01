@@ -22,12 +22,15 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Examination DTO with necessary information for front
  * 
  * @author ifakhfak
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExaminationDTO {
 
 	private Long id;
@@ -178,5 +181,39 @@ public class ExaminationDTO {
 	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
 		this.extraDataFilePathList = extraDataFilePathList;
 	}
+
+	/**
+	 * Center ID getter.
+	 * @return the center id
+	 */
+	public Long getCenterId() {
+		if (this.center != null) {
+			return center.getId();
+		}
+		return null;
+	}
+
+	/**
+	 * Study ID getter.
+	 * @return the study id
+	 */
+	public Long getStudyId() {
+		if (study != null) {
+			return study.getId();
+		}
+		return null;
+	}
+
+	/**
+	 * Study ID getter.
+	 * @return the study id
+	 */
+	public Long getSubjectId() {
+		if (subject != null) {
+			return subject.getId();
+		}
+		return null;
+	}
+
 
 }

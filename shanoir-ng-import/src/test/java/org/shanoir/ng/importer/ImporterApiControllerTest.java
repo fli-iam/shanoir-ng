@@ -143,7 +143,7 @@ public class ImporterApiControllerTest {
 	    	if (importJson) {
 		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
 		    	importJsonFile.createNewFile();
-		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"acquisitionEquipmentId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
+		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"studyCardId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
 	    	}
 	    }
 	    File importZip = new File("/tmp/test-import-as-bids.zip");
@@ -316,22 +316,44 @@ public class ImporterApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testImportAsBidsMissingEquipement() throws Exception {
 		// GIVEN a bids folder to import
-		// BUT selected center does not exists
+		// BUT selected study card does not exists
 		MockMultipartFile file = createFile(true, true, true, true);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
-		CommonIdNamesDTO body = new CommonIdNamesDTO();
-		ResponseEntity<CommonIdNamesDTO> resp = new ResponseEntity<>(body, HttpStatus.OK);
+		String  resp = null;
 		
-		Mockito.when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(CommonIdNamesDTO.class)))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, Long.valueOf(1)))
 		.thenReturn(resp);
 
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
 		.andExpect(status().is5xxServerError())
-		.andExpect(jsonPath("$.message").value("Equipement with ID " + 1 + " does not exists."));
+		.andExpect(jsonPath("$.message").value("StudyCard with ID " + 1 + " does not exists."));
+		
+		// THEN the import fails with an appropriate error message
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testImportAsBidsStudyCardDisabled() throws Exception {
+		// GIVEN a bids folder to import
+		// BUT selected study card is disabled
+		MockMultipartFile file = createFile(true, true, true, true);
+
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
+		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
+	
+		String resp = "{\"name\":\"name\", \"id\":1, \"studyId\":1, \"disabled\":true}";
+		
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, Long.valueOf(1)))
+		.thenReturn(resp);
+
+		// WHEN we import the folder
+		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
+		.andExpect(status().is5xxServerError())
+		.andExpect(jsonPath("$.message").value("StudyCard with ID " + 1 + " is currently disabled, please select another one."));
 		
 		// THEN the import fails with an appropriate error message
 	}
@@ -340,17 +362,15 @@ public class ImporterApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testImportAsBidsMissingStudy() throws Exception {
 		// GIVEN a bids folder to import
-		// BUT selected study does not exists
+		// BUT selected study does not corresponds
 		MockMultipartFile file = createFile(true, true, true, true);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
 
-		CommonIdNamesDTO body = new CommonIdNamesDTO();
-		body.setEquipement(new IdName(1l, "equip"));
-		ResponseEntity<CommonIdNamesDTO> resp = new ResponseEntity<>(body, HttpStatus.OK);
+		String  resp = "{\"name\":\"name\", \"id\":1, \"studyId\":5}";
 		
-		Mockito.when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(CommonIdNamesDTO.class)))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, Long.valueOf(1)))
 		.thenReturn(resp);
 
 		// WHEN we import the folder
@@ -371,12 +391,9 @@ public class ImporterApiControllerTest {
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"OTHERANEME\", \"id\":1}]");
 
-		CommonIdNamesDTO body = new CommonIdNamesDTO();
-		body.setEquipement(new IdName(1l, "equip"));
-		body.setStudy(new IdName(1l, "study"));
-		ResponseEntity<CommonIdNamesDTO> resp = new ResponseEntity<>(body, HttpStatus.OK);
+		String resp = "{\"name\":\"name\", \"id\":1, \"studyId\":1}";
 		
-		Mockito.when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(CommonIdNamesDTO.class)))
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, Long.valueOf(1)))
 		.thenReturn(resp);
 
 		// WHEN we import the folder
