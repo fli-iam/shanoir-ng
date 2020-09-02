@@ -43,6 +43,7 @@ import { AssignmentField } from './action/action.component';
 import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 
 @Component({
@@ -85,10 +86,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         this.allCoilsPromise = this.coilService.getAll();
 
         this.fields = [
-            new AssignmentField('Dataset modality type', 'MODALITY_TYPE', [
-                new Option<string>('MR', 'Mr'), 
-                new Option<string>('PET', 'Pet')
-            ]),
+            new AssignmentField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
             new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
             new AssignmentField('Protocol comment', 'PROTOCOL_COMMENT'),
             new AssignmentField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),

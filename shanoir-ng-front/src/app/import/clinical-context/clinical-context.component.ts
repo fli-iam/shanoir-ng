@@ -48,6 +48,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 
 
@@ -86,6 +87,8 @@ export class ClinicalContextComponent implements OnDestroy {
     public useStudyCard: boolean = true;
     protected scHasCoilToUpdate: boolean;
     protected isAdminOfStudy: boolean[] = [];
+    protected scHasDifferentModality: string;
+    private modality: string;
     
     constructor(
             private studyService: StudyService,
@@ -166,6 +169,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
+        this.modality = this.patient.studies[0].series[0].modality.toString();
         return this.completeStudiesCompatibilities(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
@@ -281,7 +285,8 @@ export class ClinicalContextComponent implements OnDestroy {
             
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
-        if (this.scHasCoilToUpdate && this.isAdminOfStudy[this.study.id] == undefined) {
+        this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
+        if (this.isAdminOfStudy[this.study.id] == undefined) {
             this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
         }
         this.onContextChange();
@@ -597,6 +602,20 @@ export class ClinicalContextComponent implements OnDestroy {
             for (let ass of rule.assignments) {
                 if (ass.field.endsWith('_COIL') && !(ass.value instanceof Coil)) {
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private hasDifferentModality(studycard: StudyCard): any {
+        if (!studycard) return false;
+        for (let rule of studycard.rules) {
+            for (let ass of rule.assignments) {
+                if (ass.field == 'MODALITY_TYPE' 
+                        && this.modality && typeof ass.value == 'string' && ass.value
+                        && (ass.value as string).split('_')[0] != this.modality.toUpperCase()) {
+                    return (ass.value as string).split('_')[0];
                 }
             }
         }

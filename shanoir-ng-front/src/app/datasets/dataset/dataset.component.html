@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 			<!-- TODO : other types -->
 
-			<fieldset *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'">
+			<fieldset *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'Ct'">
 				<legend>Preview</legend>
 				<papaya [params]="papayaParams"></papaya>
 			</fieldset>

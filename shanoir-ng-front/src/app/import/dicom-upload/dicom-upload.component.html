@@ -33,6 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         The modality of the dataset(s) that you are importing is
         <span *ngIf="modality=='MR'">MRI</span>
         <span *ngIf="modality=='PET'">PET</span>
+        <span *ngIf="modality=='CT'">CT</span>
     </p>
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

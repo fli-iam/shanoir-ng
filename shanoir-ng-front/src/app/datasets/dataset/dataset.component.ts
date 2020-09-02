@@ -103,8 +103,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                             this.dicomArchiveService.extractFileDirectoryStructure()
                             .then(response => {
                                 this.initPapaya(response);
-                            })
-                    })
+                            });
+                    });
         });
     }
 
