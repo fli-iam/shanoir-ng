@@ -66,6 +66,15 @@ export class StudyService extends EntityService<Study> {
         });
     }
 
+    findStudiesIcanAdminIdName(): Promise<IdName[]> {
+        return this.getAll().then(studies => {
+            const myId: number = KeycloakService.auth.userId;
+            return studies.filter(study => {
+                return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
+            }).map(study => new IdName(study.id, study.name));
+        });
+    }
+
     uploadFile(fileToUpload: File, studyId: number): Observable<any> {
         const endpoint = this.API_URL + '/protocol-file-upload/' + studyId;
         const formData: FormData = new FormData();

@@ -164,4 +164,8 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         return null;
     }
 
+    public hasDeleteRight(): boolean {
+        return false;
+    }
+
 }
