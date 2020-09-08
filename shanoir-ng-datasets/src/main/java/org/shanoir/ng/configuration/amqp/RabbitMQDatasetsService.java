@@ -16,8 +16,6 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 
-import javax.transaction.Transactional;
-
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -45,6 +43,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -140,7 +141,7 @@ public class RabbitMQDatasetsService {
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
-	@Transactional
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void createDatasetAcquisition(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		ObjectMapper objectMapper = new ObjectMapper();
