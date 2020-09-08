@@ -49,7 +49,8 @@ export class Subject extends Entity {
     
     // Override
     public stringify() {
-        return JSON.stringify(new SubjectDTO(this), this.replacer);
+        let res = JSON.stringify(new SubjectDTO(this), this.replacer);
+        return res;
     }
 }
 

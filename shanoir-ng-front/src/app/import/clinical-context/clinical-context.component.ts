@@ -127,7 +127,7 @@ export class ClinicalContextComponent implements OnDestroy {
         if (this.importDataService.contextBackup) {
             let study = this.importDataService.contextBackup.study;
             let studyCard = this.importDataService.contextBackup.studyCard;
-            let useStudyCard = true; //this.importDataService.contextBackup.useStudyCard;
+            let useStudyCard = this.importDataService.contextBackup.useStudyCard;
             let center = this.importDataService.contextBackup.center;
             let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
@@ -135,9 +135,13 @@ export class ClinicalContextComponent implements OnDestroy {
             let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
                 this.study = study;
+                let studyOption = this.studyOptions.find(s => s.value.id == study.id);
+                if (studyOption) {
+                    this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
+                }
                 this.onSelectStudy().then(() => {
                     if (this.useStudyCard != useStudyCard) { 
-                        //this.useStudyCard = useStudyCard;
+                        this.useStudyCard = useStudyCard;
                         this.onToggleUseStudyCard();
                     } else if (useStudyCard && studyCard){
                         this.studycard = studyCard;
@@ -145,6 +149,10 @@ export class ClinicalContextComponent implements OnDestroy {
                     }
                     if (center) {
                         this.center = center;
+                        let centerOption = this.centerOptions.find(c => c.value.id == center.id);
+                        if (centerOption) {
+                            this.center = centerOption.value;  // in case it has been modified by an on-the-fly equipment creation
+                        }
                         this.onSelectCenter();
                     }
                     if (acquisitionEquipment) {
@@ -170,6 +178,7 @@ export class ClinicalContextComponent implements OnDestroy {
     setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
         this.modality = this.patient.studies[0].series[0].modality.toString();
+        this.useStudyCard = this.modality.toUpperCase() != 'CT';
         return this.completeStudiesCompatibilities(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
@@ -192,7 +201,7 @@ export class ClinicalContextComponent implements OnDestroy {
                     if (this.importMode == 'DICOM') studyOption.compatible = false;
                     if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
-                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id)
+                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
                                 if (this.importMode == 'DICOM' && this.centerCompatible(center)) {
                                     studyOption.compatible = true;
@@ -201,6 +210,10 @@ export class ClinicalContextComponent implements OnDestroy {
                             } 
                         }
                         this.studyOptions.push(studyOption);
+                        // update the selected study as well
+                        if (this.study && this.study.id == study.id) {
+                            this.study.studyCenterList = study.studyCenterList; 
+                        }
                     }
                 }
             });
@@ -253,17 +266,19 @@ export class ClinicalContextComponent implements OnDestroy {
         this.acquisitionEquipmentOptions = []; 
         this.subjects = [];
         this.examinations = [];
+        let foundCompatibleCenter: boolean = false;
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
-                let option = new Option<Center>(studyCenter.center, studyCenter.center.name);
+                let centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
                 if (!this.useStudyCard && this.importMode == 'DICOM') {
-                    option.compatible = studyCenter.center && this.centerCompatible(studyCenter.center);
-                    if (option.compatible) {
-                        this.center = option.value;
+                    centerOption.compatible = studyCenter.center && this.centerCompatible(studyCenter.center);
+                    if (!foundCompatibleCenter && centerOption.compatible) {
+                        foundCompatibleCenter = true;
+                        this.center = centerOption.value;
                         this.onSelectCenter();
                     }
                 }
-                this.centerOptions.push(option);
+                this.centerOptions.push(centerOption);
             }
         }
         return end.then(() => this.onContextChange());
@@ -301,6 +316,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.onSelectStudyCard();
             }
         }
+        this.importDataService.contextBackup.useStudyCard = this.useStudyCard;;
         
     }
 
@@ -402,7 +418,7 @@ export class ClinicalContextComponent implements OnDestroy {
     private updateStudyCenter(center: Center): Center {
         if (!center) return;
         let studyCenter: StudyCenter = center.studyCenterList[0];
-        this.study.studyCenterList.push(studyCenter);
+        if (studyCenter) this.study.studyCenterList.push(studyCenter);
         return center;
     }
 
