@@ -51,8 +51,13 @@ export class EegUploadComponent {
     }
 
     private uploadArchive(fileEvent: any): void {
-        this.setArchiveStatus('uploading');
-        this.uploadToServer(fileEvent.target.files);
+        if (fileEvent.target.files.length > 0) {
+            this.setArchiveStatus('uploading');
+            this.uploadToServer(fileEvent.target.files);
+        } else {
+            this.setArchiveStatus('none');
+            this.modality = null;
+        }
     }
 
     private uploadToServer(file: any) {
