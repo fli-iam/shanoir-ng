@@ -101,7 +101,7 @@ export const BACKEND_API_GET_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/i
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
 export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/studycards';
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
-export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/importAsBids/';
+export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/bidsImporter/';
 export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_eeg/';
 
 // Nifti Converter http api
