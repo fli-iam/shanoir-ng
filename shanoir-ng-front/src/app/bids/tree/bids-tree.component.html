@@ -24,6 +24,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [deploy]="false"
     [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
     (labelClick)="getContent(item)"
+    [buttonPicto]="'fas fa-save'"
+    (buttonClick)="download(item)"
     (openClick)="getDetail($event)">
       <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements }"></ng-container>
     </node>
