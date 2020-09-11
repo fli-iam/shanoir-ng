@@ -180,7 +180,7 @@ public interface DatasetApi {
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "/massiveDownloadByStudy", produces = { "application/zip" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
     		@ApiParam(value = "id of the study", required=true) @Valid
     		@RequestParam(value = "studyId", required = true) Long studyId,
