@@ -354,22 +354,27 @@ public class DatasetApiController implements DatasetApi {
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
+				// Create a new folder for every dataset
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
+				datasetFile.mkdir();
+ 
 				List<URL> pathURLs = new ArrayList<>();
 				if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				}  else if (EEG.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
 				}
 			}
 		} catch (IOException | MessagingException e) {
+			e.printStackTrace();
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
 		}
