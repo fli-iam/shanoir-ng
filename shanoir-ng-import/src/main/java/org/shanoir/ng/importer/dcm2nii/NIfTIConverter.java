@@ -163,4 +163,8 @@ public class NIfTIConverter extends HalEntity {
 		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOM2NIFTI);
 	}
 
+	public boolean isDicomifier() {
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOMIFIER);
+	}
+
 }

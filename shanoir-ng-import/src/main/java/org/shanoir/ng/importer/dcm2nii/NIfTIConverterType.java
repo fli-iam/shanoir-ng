@@ -28,7 +28,9 @@ public enum NIfTIConverterType {
 
 	CLIDCM(3),
 	
-	DICOM2NIFTI(4);
+	DICOM2NIFTI(4),
+
+	DICOMIFIER(5);
 	
 	private int id;
 
