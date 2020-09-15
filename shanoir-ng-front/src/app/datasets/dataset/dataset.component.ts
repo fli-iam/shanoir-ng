@@ -109,6 +109,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     private initPapaya(dataFiles: any): void {
+        console.log(dataFiles)
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
             if(key.indexOf(".nii") != -1) {

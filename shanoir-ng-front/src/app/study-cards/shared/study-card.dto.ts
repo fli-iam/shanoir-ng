@@ -59,7 +59,7 @@ export class StudyCardDTOService {
             for (let rule of result.rules) {
                 if (rule.conditions) {
                     for (let condition of rule.conditions) {
-                        condition.dicomTag = tags.find(tag => tag.code == condition.dicomTag.code);
+                        condition.dicomTag = tags.find(tag => !!condition.dicomTag && tag.code == condition.dicomTag.code);
                     }
                 }
             }
