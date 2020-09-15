@@ -80,7 +80,7 @@ export class FinishImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'The data has been successfully imported')
+                            that.msgService.log('info', 'the import successfully started.')
                         }, 0);
                         // go back to the first step of import
                         if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);

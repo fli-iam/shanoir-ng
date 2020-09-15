@@ -23,7 +23,6 @@ import org.dcm4che2.data.Tag;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.model.DicomTreeNode;
 import org.shanoir.dicom.reader.ShanoirDicomDirReader;
-import org.shanoir.exception.NotDicomDirException;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
@@ -121,7 +120,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					+ mainWindow.patientNameTF.getText() + " "
 					+ mainWindow.patientIDTF.getText() + " "
 					+ mainWindow.studyDescriptionTF.getText() + " "
-					+ mainWindow.seriesDescriptionTF.getText() +" "
+					+ mainWindow.seriesDescriptionTF.getText() + " "
 					+ mainWindow.studyDate.toString()) ;
 			this.mainWindow.isFromPACS = true;
 
@@ -202,16 +201,19 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							mainWindow.studyDescriptionTF.getText(),
 							mainWindow.seriesDescriptionTF.getText(),
 							mainWindow.dateRS, mainWindow.studyDate);
-				} else
+				} else {
 					media = null;
+				}
 				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 			} catch (ConnectException cE) {
 				logger.error(cE.getMessage(), cE);
+				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						"Connection to DICOM server could not be established.",
 						"Connection error", JOptionPane.ERROR_MESSAGE);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
+				this.mainWindow.setCursor(Cursor.getDefaultCursor());
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						"Connection to DICOM server could not be established.",
 						"Connection error", JOptionPane.ERROR_MESSAGE);

@@ -63,6 +63,7 @@ export abstract class EntityService<T extends Entity> {
     }
 
     protected mapPage = (page: Page<T>): Promise<Page<T>> => {
+        if (!page) return null;
         return this.mapEntityList(page.content).then(entities => {
             page.content = entities;
             return page;

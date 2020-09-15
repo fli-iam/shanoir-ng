@@ -1,11 +1,17 @@
 ##############################################
-Getting Started
+Hints on working with ShanoirUploader
 ##############################################
 
-####### Before delivery to OFSEP #############
-Remove the 3 system path library dependencies as they do not be contained in the assembly.
+####### Version update #############
+For a new version, e.g. from v6.0.4 to v7.0.0:
+Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences with 7.0.0.
+This is important, that all scripts .sh or .bat find the correct version to start and create
+the correct folder.
 
-####### Build latest version for delivery ####
+####### Delivery of new Executable Jar #############
+1) Remove the 3 system path libraries lines from the pom.xml dependencies
+as they do not be contained in the assembly.
+2) Build latest version for delivery using the below mvn command:
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
 ####### Complete your Maven repository #######

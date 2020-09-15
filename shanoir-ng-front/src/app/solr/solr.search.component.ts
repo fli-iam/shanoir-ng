@@ -56,7 +56,7 @@ export class SolrSearchComponent{
     }
     
     buildForm(): FormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9_\W]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'keywords': [this.keyword, Validators.pattern(searchBarRegex)],
             'studyName': [this.solrRequest.studyName],
@@ -142,7 +142,7 @@ export class SolrSearchComponent{
             let savedStates = [];
 
             for (let key of Object.keys(this.solrRequest)) {
-                if (key && this.solrRequest[key]) savedStates.push(this.solrRequest[key]);
+                if (key && this.solrRequest[key] && !(this.solrRequest[key] instanceof Date)) savedStates.push(this.solrRequest[key]);
             }
             return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 

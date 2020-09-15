@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
@@ -41,6 +42,10 @@ public class InitialStartupState implements State {
 	private static Logger logger = Logger.getLogger(InitialStartupState.class);
 	
 	private static final String LOG4J_PROPERTIES = "/log4j.properties";
+
+	private static final String SU_V6_0_3 = ".su_v6.0.3";
+
+	private static final String SU_V6_0_4 = ".su_v6.0.4";
 	
 	public void load(StartupStateContext context) throws Exception {
 		initShanoirUploaderFolder();
@@ -50,6 +55,9 @@ public class InitialStartupState implements State {
 		logger.info(System.getProperty("java.vendor"));
 		logger.info(System.getProperty("java.vendor.url"));
 		logger.info(System.getProperty("java.version"));
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        logger.info("IP Address:- " + inetAddress.getHostAddress());
+        logger.info("Host Name:- " + inetAddress.getHostName());
 		 // Disable http request to check for quartz upload
 		System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 		System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
@@ -64,17 +72,26 @@ public class InitialStartupState implements State {
 	}
 
 	private void doMigration() throws IOException {
+		// as properties, that exist already are not replaced/changed, start with the last version before,
+		// as considered as more important
+		// overwrite with properties from ShanoirUploader v6.0.4 or v6.0.3, if existing
+		migrateFromVersion(SU_V6_0_4);
+		migrateFromVersion(SU_V6_0_3);
 		// migrate properties from ShanoirUploader v5.2
+		migrateFromVersion(ShUpConfig.SU);
+	}
+
+	private void migrateFromVersion(String version) throws IOException {
 		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
-		final String shanoirUploaderFolderPathV5_2 = userHomeFolderPath + File.separator + ShUpConfig.SU;
-		final File shanoirUploaderFolderV5_2 = new File(shanoirUploaderFolderPathV5_2);
-		boolean shanoirUploaderFolderExistsV5_2 = shanoirUploaderFolderV5_2.exists();
-		if (shanoirUploaderFolderExistsV5_2) {
-			logger.info("Start migrating properties from version v5.2 of ShUp.");
-			copyPropertiesFile(shanoirUploaderFolderV5_2, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
-			copyPropertiesFile(shanoirUploaderFolderV5_2, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
-			copyPropertiesFile(shanoirUploaderFolderV5_2, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
-			logger.info("Finished migrating properties from version v5.2 of ShUp: language, proxy, dicom_server.");
+		final String shanoirUploaderFolderPathForVersion = userHomeFolderPath + File.separator + version;
+		final File shanoirUploaderFolderForVersion = new File(shanoirUploaderFolderPathForVersion);
+		boolean shanoirUploaderFolderExistsForVersion = shanoirUploaderFolderForVersion.exists();
+		if (shanoirUploaderFolderExistsForVersion) {
+			logger.info("Start migrating properties from version " + version + " (.su == v5.2) of ShUp.");
+			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
+			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
+			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
+			logger.info("Finished migrating properties from version " + version + " (.su == v5.2) of ShUp: language, proxy, dicom_server.");
 		}
 	}
 
@@ -83,6 +100,7 @@ public class InitialStartupState implements State {
 		final File propertiesDest = new File(destDir, fileName);
 		if (propertiesDest.exists()) {
 			// do nothing in case of existing
+			logger.info("Start migrating properties: property not copied, because of existing already.");
 		} else {
 			Util.copyFileUsingStream(propertiesSrc, propertiesDest);			
 		}

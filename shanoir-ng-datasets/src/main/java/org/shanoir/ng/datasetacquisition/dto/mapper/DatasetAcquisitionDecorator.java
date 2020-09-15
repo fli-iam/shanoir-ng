@@ -19,6 +19,9 @@ import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -66,6 +69,14 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 			final DatasetAcquisition datasetAcquisition) {
 		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
 				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
+        if (datasetAcquisition.getType().equals("Mr")) {
+        	datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());
+        } else if (datasetAcquisition.getType().equals("Pet")) {
+        	datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition)datasetAcquisition).getPetProtocol());
+        } else if (datasetAcquisition.getType().equals("Ct")) {
+        	datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition)datasetAcquisition).getCtProtocol());
+        }
+
 		return datasetAcquisitionDTO;
 	}
 }

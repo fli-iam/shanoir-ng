@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li class="info" *ngIf="scHasCoilToUpdate && study">
+        <li class="info" *ngIf="study && scHasCoilToUpdate">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>That study card contains coil references that need to be precised.</strong>
             <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank. 
