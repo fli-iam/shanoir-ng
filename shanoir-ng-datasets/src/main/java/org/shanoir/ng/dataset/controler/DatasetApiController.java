@@ -323,7 +323,7 @@ public class DatasetApiController implements DatasetApi {
 		
 		if (datasetIds.size() > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can download less than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 		
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
@@ -379,13 +379,13 @@ public class DatasetApiController implements DatasetApi {
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				} else {
 					throw new RestServiceException(
-							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
+							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
 				}
 			}
 		} catch (IOException | MessagingException e) {
-			e.printStackTrace();
+			LOG.error("Error while copying files: ", e);
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files. Please contact an administrator.", e));
 		}
 		// Zip it
 		File zipFile = new File(tmpFilePath + ZIP);

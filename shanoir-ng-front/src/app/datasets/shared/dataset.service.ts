@@ -54,15 +54,15 @@ export class DatasetService extends EntityService<Dataset> {
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
         return this.http.post(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {observe: 'response', responseType: 'blob'})
-            .map((result:HttpResponse<Blob>) => {
+                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
+                    observe: 'response',
+                    responseType: 'blob'
+                })
+            .map((result: HttpResponse < Blob > ) => {
                 this.downloadIntoBrowser(result);
-          }
-        )
-        .toPromise()
-        .catch((error: HttpErrorResponse) => {
-            this.errorService.handleError(error);
-        });
+            })
+            .toPromise()
+            .catch(error => this.errorService.handleError(error));
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string) {
@@ -71,12 +71,12 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
             { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        ).catch((error: HttpErrorResponse) => {
-            this.errorService.handleError(error);
-        });
+                response => {
+                    this.downloadIntoBrowser(response);
+                }
+            ).catch((error: HttpErrorResponse) => {
+                this.errorService.handleError(error);
+            });
     }
 
     download(dataset: Dataset, format: string): Promise<void> {
