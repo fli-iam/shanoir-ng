@@ -9,3 +9,4 @@ fieldset { min-width: auto; }
 
 papaya { margin: auto 20px 15px; }
 .warning svg { margin-right: 7px; color: var(--color-a); }
+.error { padding-left: 20px; color: var(--color-error); }

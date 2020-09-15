@@ -999,7 +999,9 @@ print("Import dataset_expression: end")
 
 print("Import dataset_file: start")
 sourceCursor.execute("""
-        SELECT DATASET_FILE_ID, (PACS_DATASET_FILE.DATASET_FILE_ID IS NOT NULL), PATH, DATASET_EXPRESSION_ID
+        SELECT DATASET_FILE_ID, (PACS_DATASET_FILE.DATASET_FILE_ID IS NOT NULL),
+            REPLACE(PATH, "file:/vol/rw/shanoir-nifti", "file:/var/datasets-data/old") as PATH,
+            DATASET_EXPRESSION_ID
             FROM DATASET_FILE LEFT JOIN PACS_DATASET_FILE USING (DATASET_FILE_ID)""")
 bulk_insert(targetCursor, "dataset_file", "id, pacs, path, dataset_expression_id", sourceCursor)
 targetConn.commit()

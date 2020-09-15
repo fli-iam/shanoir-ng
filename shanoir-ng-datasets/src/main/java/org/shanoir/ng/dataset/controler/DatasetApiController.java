@@ -135,6 +135,9 @@ public class DatasetApiController implements DatasetApi {
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
+	/** Number of downloadable datasets. */
+	private static final int DATASET_LIMIT = 50;
+
 	@org.springframework.beans.factory.annotation.Autowired
 	public DatasetApiController(final HttpServletRequest request) {
 		this.request = request;
@@ -306,6 +309,12 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
+		
+		if (datasetIds.size() > DATASET_LIMIT) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can download less than " + DATASET_LIMIT + " datasets."));
+		}
+		
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 

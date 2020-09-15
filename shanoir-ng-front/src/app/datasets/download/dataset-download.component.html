@@ -1,4 +1,4 @@
-<button (click)="prepareDownload()"> Download datasets </button> <img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
+<button (click)="prepareDownload()" [disabled]="loading"> Download datasets </button> <img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
 <app-modal #downloadDialog >
     <div class="main">
     <div class="header">Massive download</div>
