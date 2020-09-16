@@ -7,19 +7,20 @@
     "url": "https://github.com/fli-iam/shanoir-ng.git"
   },
   "scripts": {
-  	"build": "npm run build:aot && rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
-    "build:dev": "rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
+    "build": "npm run build:aot && rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail && node src/version.ts",
+    "build:dev": "rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail && node src/version.ts",
     "build:aot": "rimraf aot && ngc -p tsconfig-aot.json",
     "i18n": "ng-xi18n --i18nFormat=xlf2",
     "ngc": "ngc --i18nFile=./messages.xlf --locale=en --i18nFormat=xlf2",
     "ngc:fr": "ngc --i18nFile=./src/locale/messages.fr.xlf --locale=fr --i18nFormat=xlf2",
     "start": "webpack-dev-server --config config/webpack.dev.js --progress --profile --watch --content-base src/",
-    "test": "karma start"
+    "test": "karma start",
+    "postbuild": "node version.js"
   },
   "licenses": [
     {
-      "type": "MIT",
-      "url": "https://github.com/angular/angular.io/blob/master/LICENSE"
+      "type": "GPL",
+      "url": "https://github.com/fli-iam/shanoir-ng/blob/master/LICENSE"
     }
   ],
   "dependencies": {
@@ -40,11 +41,12 @@
     "@angular/upgrade": "5.1.1",
     "@types/node": "8.5.1",
     "angular-in-memory-web-api": "0.5.2",
-    "ngx-json-viewer": "2.4.0",
     "angular-sha": "^0.3.3",
     "core-js": "2.5.3",
+    "git-describe": "^4.0.4",
     "js-sha1": "^0.6.0",
     "mydatepicker": "2.6.1",
+    "ngx-json-viewer": "2.4.0",
     "reflect-metadata": "0.1.10",
     "rxjs": "5.5.5",
     "systemjs": "0.20.19",
