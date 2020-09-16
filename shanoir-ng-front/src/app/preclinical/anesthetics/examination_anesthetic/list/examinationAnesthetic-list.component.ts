@@ -18,6 +18,7 @@ import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'examination-anesthetics-list',
@@ -29,10 +30,13 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
   @ViewChild('examinationAnestheticTable') table: TableComponent; 
     
     
-     constructor(
-        private examAnestheticsService: ExaminationAnestheticService) {
-            super('preclinical-examination-anesthetics');
-     }
+    constructor(private examAnestheticsService: ExaminationAnestheticService) {
+        super('preclinical-examination-anesthetics');
+    }
+
+    getService(): EntityService<ExaminationAnesthetic> {
+        return this.examAnestheticsService;
+    }
     
     getEntities(): Promise<ExaminationAnesthetic[]> {
         return this.examAnestheticsService.getAll();

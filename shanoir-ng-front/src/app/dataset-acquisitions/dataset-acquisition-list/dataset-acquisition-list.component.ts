@@ -30,7 +30,7 @@ import { Pageable, Page } from '../../shared/components/table/pageable.model';
 })
 export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private datasetAcquisitionService: DatasetAcquisitionService) {

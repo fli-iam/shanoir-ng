@@ -31,11 +31,11 @@ import { ImportService } from '../../../import/shared/import.service';
 })
 export class BrukerSelectSeriesComponent {
 
-    private patients: PatientDicom[];
+    public patients: PatientDicom[];
     private workFolder: string;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private papayaParams: object[];
+    public detailedPatient: any;
+    public detailedSerie: any;
+    public papayaParams: object[];
 
     constructor(
             private importService: ImportService,

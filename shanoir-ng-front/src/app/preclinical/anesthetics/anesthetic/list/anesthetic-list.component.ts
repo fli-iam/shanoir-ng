@@ -18,6 +18,8 @@ import {
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
 import { Anesthetic } from '../shared/anesthetic.model';
@@ -32,7 +34,7 @@ import { AnestheticService } from '../shared/anesthetic.service';
 })
 export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<Anesthetic>{
     
-    @ViewChild('anestheticsTable') table: TableComponent;
+    @ViewChild('anestheticsTable', { static: false }) table: TableComponent;
     
     constructor(
         private anestheticsService: AnestheticService, 
@@ -40,6 +42,10 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
     ) 
     {
         super('preclinical-anesthetic');
+    }
+    
+    getService(): EntityService<Anesthetic> {
+        return this.anestheticsService;
     }
     
     getOptions() {
@@ -108,7 +114,7 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
                 'Delete', 'Are you sure you want to delete preclinical-anesthetic n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-anesthetic sucessfully deleted');

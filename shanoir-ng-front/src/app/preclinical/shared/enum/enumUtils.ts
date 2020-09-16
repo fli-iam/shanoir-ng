@@ -24,11 +24,11 @@ import { Frequency } from "./frequency";
 @Injectable()
 export class EnumUtils {
     
-    protected static enumUtils : EnumUtils;
+   //  protected static enumUtils : EnumUtils;
   
     getEnumArrayFor(enumName:string): Enum[] {
         let enumArray:Enum[] = [];
-        var enumIs; 
+        var enumIs = null;
         switch(enumName) { 
            case 'AnestheticType': {
               enumIs = AnestheticType;
@@ -71,7 +71,7 @@ export class EnumUtils {
         return enumArray;        
     }
     
-    getEnumValue(enumArray:Enum[],key:string): string{
+    getEnumValue(enumArray:Enum[],key:any): string{
         for(let current of enumArray){
             if(current.key == key) return current.value;
         }

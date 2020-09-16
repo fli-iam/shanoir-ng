@@ -57,8 +57,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
     @Input() pipe: PipeTransform;
     private displayedOptions: Option<any>[] = [];
-    @ViewChild('input') textInput: ElementRef;
-    @ViewChild('hiddenOption') hiddenOption: ElementRef;
+    @ViewChild('input', { static: false }) textInput: ElementRef;
+    @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
     private inputValue: any;
     private _selectedOptionIndex: number;
     private focusedOptionIndex: number;
@@ -298,7 +298,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         else return JSON.stringify(value1) === JSON.stringify(value2);
     }
 
-    private open() {
+    public open() {
         if (this.isOpen()) return;
         if (this.options) {
             this.subscribeToGlobalClick();
@@ -374,7 +374,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
       }
 
     @HostListener('keydown', ['$event']) 
-    private onKeyPress(event: any) {
+    public onKeyPress(event: any) {
         if (this.readOnly) return;
         if ('ArrowDown' == event.key) {
             this.scrollDownByOne();
@@ -561,7 +561,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostListener('focusout', ['$event']) 
-    private onFocusOut(event: FocusEvent) {
+    onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.close();
             this.onTouchedCallback();
@@ -569,19 +569,19 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostBinding('attr.tabindex')
-    private get tabindex(): number {
+    get tabindex(): number {
         return this.disabled ? undefined : 0;
     } 
 
-    private clickView(): void {
+    clickView(): void {
         if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
     }
 
-    private clickNew(): void {
+    clickNew(): void {
         if(!this.newDisabled) this.onNewClick.emit();
     }
 
-    private clickAdd(): void {
+    clickAdd(): void {
         if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
     }
 

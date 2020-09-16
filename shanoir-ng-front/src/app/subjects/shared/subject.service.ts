@@ -19,11 +19,16 @@ import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
 import { SubjectStudy } from './subject-study.model';
 import { Subject } from './subject.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
 
     API_URL = AppUtils.BACKEND_API_SUBJECT_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new Subject(); }
 

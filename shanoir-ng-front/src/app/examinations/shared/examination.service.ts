@@ -20,6 +20,7 @@ import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
+import { HttpClient } from '@angular/common/http';
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { ServiceLocator } from '../../utils/locator.service';
 
@@ -29,6 +30,9 @@ export class ExaminationService extends EntityService<Examination> {
 
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
     protected examinationDtoService: ExaminationDTOService = ServiceLocator.injector.get(ExaminationDTOService);
 
     getEntityInstance() { return new Examination(); }

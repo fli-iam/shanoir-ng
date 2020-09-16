@@ -16,7 +16,6 @@ import { allOfEnum, capitalsAndUnderscoresToDisplayable } from '../../../utils/a
 import { Dataset } from '../../shared/dataset.model';
 import { DiffusionGradient } from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
 
-
 export class MrDataset extends Dataset {
     diffusionGradients: DiffusionGradient[];
     echoTime: EchoTime[];

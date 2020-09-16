@@ -1,0 +1,95 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+######################################
+# Default profile is production      #
+######################################
+server:
+  port: 9906
+  error:
+    whitelabel:
+      enabled: false
+spring:
+##### Database #####
+  datasource:
+     url: jdbc:mysql://database:3306/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+     username: boutiques
+     password: password
+     # The SQL dialect makes Hibernate generate better SQL for the chosen database
+     driver-class-name: com.mysql.jdbc.Driver
+#      initialize: false
+     data: classpath:/scripts/import.sql
+##### Others #####
+  jackson:
+    mapper:
+      use-getters-as-setters: false
+  session:
+    store-type: none
+  http:
+    multipart:
+      maxFileSize: 500Mb
+      maxRequestSize: 500Mb
+  main.allow-bean-definition-overriding: true
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+##### Keycloak #####
+keycloak:
+  # attention: this config for the token issuer needs to match the domain of the frontend
+  # used for token creation AND the server url needs to be known from inside the docker network:
+  auth-server-url: https://shanoir-ng-nginx/auth
+  cors: true
+  realm: shanoir-ng
+  resource: shanoir-ng-boutiques
+  ssl-required: external
+  credentials.secret: 8ae814b6-da45-41aa-9ac7-9bb4952fcbfb
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: boutiques secured api
+      - patterns:
+        - /*
+##### Keycloak admin client, that ms users can directly communicate with keycloak #####
+kc.admin.client:
+  server.url: https://keycloak:8080/auth
+  realm: master
+  client.id: admin-cli
+# microservices url
+ms.url:
+  shanoir-ng-datasets: http://datasets:9904/datasetacquisition
+# logging configuration
+logging:
+  file: /var/log/shanoir-ng-logs/shanoir-ng-boutiques.log
+  level:
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+    org.shanoir: DEBUG
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: dev
+
+# logging configuration
+logging:
+  file: /var/log/shanoir-ng-logs/shanoir-ng-boutiques.log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR
+    org.springframework.amqp: OFF

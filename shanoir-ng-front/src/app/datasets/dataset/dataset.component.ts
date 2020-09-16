@@ -21,6 +21,7 @@ import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -31,10 +32,10 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
-    private papayaParams: any;
+    papayaParams: any;
     private blob: Blob;
     private filename: string;
-    private hasDownloadRight: boolean = false;
+    hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
     protected downloading: boolean = false;
     
@@ -50,6 +51,10 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
     
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
+    }
+
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
             if (this.keycloakService.isUserAdmin()) {
@@ -92,7 +97,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         }
     }
     
-    private download(format: string) {
+    download(format: string) {
         this.downloading = true;
         this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
     }

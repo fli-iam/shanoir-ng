@@ -22,6 +22,7 @@ import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -30,7 +31,7 @@ import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
   styleUrls: ['pathologyModel-list.component.css'], 
   providers: [PathologyModelService]
 })
-export class PathologyModelsListComponent   extends BrowserPaginEntityListComponent<PathologyModel> {
+export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {
   @ViewChild('modelsTable') table: TableComponent;
     
   constructor(
@@ -40,6 +41,10 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
         super('preclinical-pathology-model');
     }
 
+    getService(): EntityService<PathologyModel> {
+        return this.modelService;
+    }
+    
     getEntities(): Promise<PathologyModel[]> {
         return this.modelService.getAll();
     }
@@ -125,7 +130,7 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
                 'Delete', 'Are you sure you want to delete preclinical-pathology-model n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-pathology-model sucessfully deleted');

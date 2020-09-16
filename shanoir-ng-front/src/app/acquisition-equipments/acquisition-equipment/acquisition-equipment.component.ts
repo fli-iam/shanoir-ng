@@ -26,6 +26,7 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 @Component({
@@ -35,14 +36,14 @@ import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    private manufModels: ManufacturerModel[];
-    private centers: IdName[];
-    private datasetModalityTypeEnumValue: string;
+    manufModels: ManufacturerModel[];
+    centers: IdName[];
+    datasetModalityTypeEnumValue: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
-    private get acqEquip(): AcquisitionEquipment { return this.entity; }
-    private set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
+    get acqEquip(): AcquisitionEquipment { return this.entity; }
+    set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
     
     constructor(
             private route: ActivatedRoute, 
@@ -52,6 +53,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
+    }
+
+    getService(): EntityService<AcquisitionEquipment> {
+        return this.acqEquipService;
     }
 
     async initView(): Promise<void> {
@@ -114,7 +119,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             this.subscribtions.push(
@@ -156,7 +161,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return super.save();
     }
 
-    private viewCenter(center: Center) {
+    viewCenter(center: Center) {
         this.router.navigate(['center/details/' + center.id]);
     }
 }

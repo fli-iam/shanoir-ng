@@ -17,11 +17,16 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
 
-    API_URL = AppUtils.BACKEND_API_ACQ_EQUIP_URL ;
+    API_URL = AppUtils.BACKEND_API_ACQ_EQUIP_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new AcquisitionEquipment(); }
 

@@ -13,10 +13,12 @@
  */
 
 import { HttpClient } from '@angular/common/http';
+import {Injector} from '@angular/core';
 
 import { ServiceLocator } from '../../../utils/locator.service';
 import { Entity } from './entity.abstract';
 import { Page } from '../table/pageable.model';
+import { map } from 'rxjs/operators';
 
 export abstract class EntityService<T extends Entity> {
     
@@ -24,12 +26,21 @@ export abstract class EntityService<T extends Entity> {
 
     abstract getEntityInstance(entity?: T): T;
 
-    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
+    constructor(protected http: HttpClient) {}
+
+<<<<<<< HEAD
+    getAll(): Promise<T[]> {
+        return this.http.get<T[]>(this.API_URL)
+            .pipe(map(this.mapEntityList))
+            .toPromise();
+=======
     getAll(quickResult?: T[]): Promise<T[]> {
         return this.http.get<any[]>(this.API_URL)
             .toPromise()
             .then((all) => this.mapEntityList(all, quickResult));
+>>>>>>> develop
     }
 
     delete(id: number): Promise<void> {
@@ -38,15 +49,26 @@ export abstract class EntityService<T extends Entity> {
     }
 
     get(id: number): Promise<T> {
+<<<<<<< HEAD
+        return this.http.get<T>(this.API_URL + '/' + id)
+            .pipe(map(this.mapEntity))
+            .toPromise();
+=======
         return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
             .then(this.mapEntity);
+>>>>>>> develop
     }
 
     create(entity: T): Promise<T> {
         return this.http.post<any>(this.API_URL, entity.stringify())
+<<<<<<< HEAD
+            .pipe(map(this.mapEntity))
+            .toPromise();
+=======
             .toPromise()
             .then(this.mapEntity);
+>>>>>>> develop
     }
 
     update(id: number, entity: T): Promise<void> {

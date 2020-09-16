@@ -14,11 +14,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <span class="clickable"
     [class.disabled]="currentPage == 1"
-    (click)="currentPage > 1 ? goToPage(currentPage - 1) : void"
+    (click)="currentPage > 1 ? goToPage(currentPage - 1) : null"
     >&#9664;</span><span class="wrapper"
     *ngFor="let p of pagerList; let i = index"
 ><span *ngIf="p==null">...</span><span *ngIf="p!=null" class="clickable" (click)="goToPage(p)" [class.active]="p == currentPage">{{p}}</span></span><span 
     class="clickable"
     [class.disabled]="!nbPages || currentPage == nbPages"
-    (click)="currentPage < nbPages ? goToPage(currentPage + 1) : void"
+    (click)="currentPage < nbPages ? goToPage(currentPage + 1) : null"
     >&#9654;</span>

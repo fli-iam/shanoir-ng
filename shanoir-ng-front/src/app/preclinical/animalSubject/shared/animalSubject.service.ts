@@ -20,12 +20,17 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
 import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { PreclinicalSubject } from './preclinicalSubject.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
 
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new PreclinicalSubject(); }
 
              

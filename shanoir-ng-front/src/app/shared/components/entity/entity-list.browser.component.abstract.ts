@@ -16,8 +16,9 @@ import { EntityListComponent } from "./entity-list.component.abstract";
 import { Entity } from "./entity.abstract";
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
-import { OnInit } from "@angular/core";
+import { OnInit, Directive } from "@angular/core";
 
+@Directive()
 export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
     private entitiesPromise: Promise<void>;
@@ -32,7 +33,7 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.entitiesPromise = this.getEntities().then((entities) => {
             this.entities = entities;
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
-        });
+        }).catch((error)=> console.log(error));
         this.manageAfterDelete();
         this.manageAfterAdd();
     }

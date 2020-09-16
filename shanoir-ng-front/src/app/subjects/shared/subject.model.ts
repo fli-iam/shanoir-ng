@@ -15,10 +15,8 @@
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Id } from '../../shared/models/id.model';
-import { ServiceLocator } from '../../utils/locator.service';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
-import { SubjectService } from './subject.service';
 import { Sex } from './subject.types';
 
 export class Subject extends Entity {
@@ -44,8 +42,6 @@ export class Subject extends Entity {
         subject.subjectStudyList = [subjectStudy];
         return subject;
     }
-
-    service = ServiceLocator.injector.get(SubjectService);
     
     // Override
     public stringify() {

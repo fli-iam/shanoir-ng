@@ -175,8 +175,56 @@ services:
       - "rabbitmq"
       - "users"
   #
+  # Boutiques microservice
+  #
+  # boutiques:
+  #   container_name: boutiques
+  #   build: ./docker-compose/boutiques
+  #   environment:
+  #     - keycloak.auth-server-url
+  #     - front.server.url
+  #     - front.server.address
+  #   volumes:
+  #     - "logs:/var/log/shanoir-ng-logs"
+  #     - certificate-share-data:/etc/ssl/certs/java:ro
+  #   networks:
+  #     - shanoir_ng_network
+  #   ports:
+  #    - "9906:9906"
+  #    - "9916:9916"
+  #   depends_on:
+  #     - "datasets"
   # Preclinical microservice
   #
+
+  boutiques:
+    container_name: boutiques
+    build: ./docker-compose/boutiques
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+      - BOUTIQUES_INPUT_PATH=/tmp/boutiques/input
+      - BOUTIQUES_OUTPUT_PATH=/tmp/boutiques/output
+      - BOUTIQUES_TMP_PATH_ON_HOST=/tmp
+      # - BOUTIQUES_INPUT_PATH=/boutiques/input
+      # - BOUTIQUES_OUTPUT_PATH=/boutiques/output
+      # - BOUTIQUES_TMP_PATH_ON_HOST=/var/lib/docker/volumes/shanoir-ng_tmp/_data
+      # - BOUTIQUES_PATH_ON_HOST=/boutiques
+    volumes:
+      - logs:/var/log/shanoir-ng-logs
+      - certificate-share-data:/etc/ssl/certs/java:ro
+      - tmp:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock     # enable to redirect docker command in the container to the docker server on the host
+      # - boutiques:/boutiques
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9906:9906"
+     - "9916:9916"
+    depends_on:
+      - "datasets"
+
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build: ./docker-compose/preclinical
@@ -304,8 +352,9 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "./shanoir-ng-front/dist:/etc/nginx/html"
     networks:
-      - shanoir_ng_network    
+      - shanoir_ng_network
     ports:
      - "443:443"
     depends_on:
@@ -316,6 +365,19 @@ services:
       - "datasets"
       - "dcm4chee-arc"
       - "rabbitmq"
+      - "front-dev"
+
+  front-dev:
+    container_name: front-dev
+    build: ./docker-compose/front-dev
+    volumes:
+      - "./shanoir-ng-front:/app/"
+    command: ng serve --host 0.0.0.0 --disableHostCheck
+    ports:
+     - "4200:4200"
+    tty: true
+    networks:
+      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:
@@ -329,7 +391,18 @@ volumes:
   dcm4chee-arc-storage-data:
   solr-data:
   certificate-share-data:
-  tmp:
+  tmp:                      # see shanoir-ng-boutiques/README.md to know why the tmp volumes must be bound to tmp/ on the host
+    # driver: local
+    # driver_opts:
+    #   o: bind
+    #   type: none
+    #   device: /tmp
+  # boutiques:
+  #   driver: local
+  #   driver_opts:
+  #     o: bind
+  #     type: none
+  #     device: /boutiques
   logs:
 
 networks:

@@ -28,6 +28,7 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'physiological-data-upload-form',
@@ -56,6 +57,11 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
 
     get physioData(): PhysiologicalData { return this.entity; }
     set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+
+    // Note: should be getService(): EntityService<PhysiologicalData> {
+    getService(): EntityService<any> {
+        return this.extradatasService;
+    }
 
     initView(): Promise<void> {
         this.entity = new PhysiologicalData();
@@ -96,7 +102,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         });
     }
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).subscribe((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
             this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);

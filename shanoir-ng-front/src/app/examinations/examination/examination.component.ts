@@ -27,6 +27,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination',
@@ -38,13 +39,13 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
 
-    private centers: IdName[];
+    public centers: IdName[];
     public studies: IdName[];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private files: File[] = [];
-    private inImport: boolean; 
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    public inImport: boolean; 
+    public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
 
     constructor(
@@ -58,14 +59,18 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
     }
-    
-    private setFile() {
+
+    public setFile() {
         this.fileInput.nativeElement.click();
     }
     
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
     
+    getService(): EntityService<Examination> {
+        return this.examinationService;
+    }
+
     set entity(exam: Examination) {
         super.entity = exam;
         this.getSubjects();
@@ -131,29 +136,29 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
-    private onStudyChange() {
+    onStudyChange() {
         this.getSubjects();
     }
 
-    private instAssessment() {
+    instAssessment() {
     }
 
     public hasEditRight(): boolean {
         return false;
     }
 
-    protected deleteFile(file: any) {
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
     }
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {

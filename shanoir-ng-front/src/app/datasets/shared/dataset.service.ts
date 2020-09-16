@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse, HttpParams } from '@angular/common/http';
+import { HttpResponse, HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -22,12 +22,21 @@ import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
+import 'rxjs/add/operator/map'
 
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    
+    httpOptions = {
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    };
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
 
@@ -94,6 +103,20 @@ export class DatasetService extends EntityService<Dataset> {
             + '/subjectName/' + subjectName + '/studyName/' + studyName, 
             { observe: 'response', responseType: 'blob' }
         ).subscribe(response => {this.downloadIntoBrowser(response);});
+    }
+
+    getUrls(id: number): Observable<HttpResponse<any>> {
+        if (!id) throw Error('Cannot get the urls of a dataset without an id');
+        return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
+    }
+
+    prepareUrl(id: number, url: string, format: string): Observable<any> {
+        if (!id) throw Error('Cannot get the urls of a dataset without an id');
+        // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
+
+        let httpOptions: any = Object.assign( { responseType: 'text' }, this.httpOptions);
+        
+        return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
     private getFilename(response: HttpResponse<any>): string {

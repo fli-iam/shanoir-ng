@@ -26,6 +26,7 @@ import { FilterablePageable, Page } from '../../../../shared/components/table/pa
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'pathology-list',
@@ -39,8 +40,12 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
     constructor(
         private pathologyService: PathologyService) {
             super('preclinical-pathology');
-     }
+    }
     
+    getService(): EntityService<Pathology> {
+        return this.pathologyService;
+    }
+
     getOptions() {
         return {
             new: true,

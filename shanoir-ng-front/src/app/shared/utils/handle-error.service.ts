@@ -13,7 +13,7 @@
  */
 
 import { ErrorHandler, Injectable } from '@angular/core';
-import { Response } from '@angular/http';
+import { HttpResponse } from '@angular/common/http';
 
 import { MsgBoxService } from '../msg-box/msg-box.service';
 

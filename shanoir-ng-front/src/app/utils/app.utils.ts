@@ -17,6 +17,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
 import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
 import { Dataset } from '../datasets/shared/dataset.model';
+import { process } from '../process';
+
 
 // Base urls
 let url = window.location;
@@ -103,6 +105,10 @@ export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
 export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/bidsImporter/';
 export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_eeg/';
+
+// Boutiques http api
+const BACKEND_API_BOUTIQUES_MS_URL: string = process.env.BACKEND_API_BOUTIQUES_MS_URL;
+export const BACKEND_API_BOUTIQUES_TOOL_URL: string = BACKEND_API_BOUTIQUES_MS_URL + '/tool';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';

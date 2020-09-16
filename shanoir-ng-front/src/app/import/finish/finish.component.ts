@@ -34,9 +34,9 @@ export class FinishImportComponent {
     private importJob: ImportJob;
     private selectedPatients: PatientDicom[];
     private context: ContextData;
-    private importing: boolean = false;
+    importing: boolean = false;
     private step: Step;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    readonly ImagesUrlUtil = ImagesUrlUtil;
     private importMode: "DICOM" | "PACS" | "BRUKER";
 
     constructor(
@@ -69,7 +69,7 @@ export class FinishImportComponent {
         return this.selectedPatients[0];
     }
     
-    private startImportJob(): void {
+    startImportJob(importJob?: any): void {
         this.subjectService
             .updateSubjectStudyValues(this.context.subject.subjectStudy)
             .then(() => {

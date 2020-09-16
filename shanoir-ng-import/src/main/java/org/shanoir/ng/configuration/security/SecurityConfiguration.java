@@ -102,5 +102,4 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;
 	}
-
 }

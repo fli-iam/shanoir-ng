@@ -13,6 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { process } from '../../process';
 
 import * as AppUtils from '../../utils/app.utils';
 
@@ -22,16 +23,22 @@ declare var Keycloak: any;
 @Injectable()
 export class KeycloakService {
     static auth: any = {};
+    // static auth: any = { loggedIn: true };
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
     static init(): Promise<any> {
+
+        if (window.location.href.endsWith('/account-request')) {
+            return Promise.resolve();
+        }
+
         const keycloakAuth: any = Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
             clientId: 'shanoir-ng-front',
         });
-        KeycloakService.auth.loggedIn = false;
+        KeycloakService.auth.loggedIn = true; // false;
 
         return new Promise((resolve, reject) => {
             keycloakAuth.init({ onLoad: 'login-required' })

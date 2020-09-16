@@ -25,6 +25,7 @@ import { ServiceLocator } from '../../../utils/locator.service';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { resolve } from 'url';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 
 
@@ -36,7 +37,7 @@ import { SubjectService } from '../../../subjects/shared/subject.service';
 })
 export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
 
-    @ViewChild('preclinicalSubjectsTable') table: TableComponent;
+    @ViewChild('preclinicalSubjectsTable', { static: false }) table: TableComponent;
 
     public preclinicalSubjects: PreclinicalSubject[];
     public animalSubjects: AnimalSubject[];
@@ -46,6 +47,10 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         private animalSubjectService: AnimalSubjectService,
         private subjectService: SubjectService) {
             super('preclinical-subject');
+    }
+    
+    getService(): EntityService<PreclinicalSubject> {
+        return this.animalSubjectService;
     }
 
     getEntities(): Promise<PreclinicalSubject[]> {

@@ -29,6 +29,7 @@ import { ControlValueAccessor } from '@angular/forms';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Mode } from '../../../../shared/components/entity/entity.component.abstract';
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -49,6 +50,10 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
     constructor(
         private subjectTherapyService: SubjectTherapyService) {
             super('preclinical-subject-therapy');
+    }
+
+    getService(): EntityService<SubjectTherapy> {
+        return this.subjectTherapyService;
     }
     
     public getEntityName() {

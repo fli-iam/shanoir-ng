@@ -28,53 +28,54 @@ import{ Channel }from '../eeg/dataset.eeg.model';
 export class EegDatasetComponent implements OnInit  {
 
     @Input() protected mode: Mode;
-    @Input() protected dataset: EegDataset;
+    @Input() public dataset: EegDataset;
     @ViewChild('channelsTable') table: TableComponent;
-    
-    protected columnDefs: any[];
+
+    public columnDefs: any[];
 
     private browserPaging: BrowserPaging<Channel>;
     private channelPromise: Promise<any>;
 
     ngOnInit(): void {
+
         function checkNullValue(value: any) {
             if (value) {
                 return value;
             }
             return '';
         };
-        
+
         this.columnDefs = [
-           {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
+           {headerName: 'Name', field: 'name', type: 'string', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.name);
             }},
-            {headerName: "Resolution", field: "resolution", type: "string", cellRenderer: function (params: any) {
+            {headerName: 'Resolution', field: 'resolution', type: 'string', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.resolution);
             }},
-            {headerName: "Units", field: "referenceUnits", type: "string", cellRenderer: function (params: any) {
+            {headerName: 'Units', field: 'referenceUnits', type: 'string', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.referenceUnits);
             }},
-            {headerName: "Type", field: "referenceType", type: "string", cellRenderer: function (params: any) {
+            {headerName: 'Type', field: 'referenceType', type: 'string', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.referenceType);
             }},
-            {headerName: "Position", field: "position", type: "string", cellRenderer: function (params: any) {
+            {headerName: 'Position', field: 'position', type: 'string', cellRenderer: (params: any) => {
                     if (params.data.x == null && params.data.z == null && params.data.y == null) {
                         return 'N/A'
                     } else {
                         return params.data.x + ' ' + params.data.y + ' ' + params.data.z;
                     }
             }},
-            {headerName: "low cutoff", field: "lowCutoff", type: "number", cellRenderer: function (params: any) {
+            {headerName: 'low cutoff', field: 'lowCutoff', type: 'number', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.lowCutoff);
             }},
-            {headerName: "High cutoff", field: "highCutoff", type: "number", cellRenderer: function (params: any) {
+            {headerName: 'High cutoff', field: 'highCutoff', type: 'number', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.highCutoff);
             }},
-            {headerName: "Notch", field: "notch", type: "number", cellRenderer: function (params: any) {
+            {headerName: 'Notch', field: 'notch', type: 'number', cellRenderer: (params: any) => {
                     return checkNullValue(params.data.notch);
             }}
-        ]
-        
+        ];
+
         this.channelPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
             this.browserPaging.setItems(this.dataset.channels);

@@ -31,9 +31,9 @@ import { BidsElement } from '../model/bidsElement.model'
 export class BidsTreeComponent  {
 
     @Input() list: BidsElement[];
-    protected json: JSON;
-    protected tsv: string;
-    protected title: string;
+    public json: JSON;
+    public tsv: string;
+    public title: string;
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();

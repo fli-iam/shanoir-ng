@@ -23,6 +23,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 
@@ -40,6 +41,10 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
         private subjectTherapyService: SubjectTherapyService) {
             super('preclinical-therapy');
         }
+
+    getService(): EntityService<Therapy> {
+        return this.therapyService;
+    }
 
     getOptions() {
         return {
@@ -97,7 +102,7 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
                 'Delete', 'Are you sure you want to delete preclinical-therapy n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-therapy sucessfully deleted');

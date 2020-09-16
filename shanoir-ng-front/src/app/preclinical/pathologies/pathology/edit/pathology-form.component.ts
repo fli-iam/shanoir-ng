@@ -20,6 +20,7 @@ import { ModesAware } from '../../../shared/mode/mode.decorator';
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'pathology-form',
@@ -28,6 +29,9 @@ import { PathologyService } from '../shared/pathology.service';
 })
 @ModesAware
 export class PathologyFormComponent extends EntityComponent<Pathology>{
+
+    public isPathologyUnique = true;
+    public isModelUnique = true;
 
     constructor(
         private route: ActivatedRoute,
@@ -38,6 +42,10 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
 
     get pathology(): Pathology { return this.entity; }
     set pathology(pathology: Pathology) { this.entity = pathology; }
+
+    getService(): EntityService<Pathology> {
+        return this.pathologyService;
+    }
 
     initView(): Promise<void> {
         return this.pathologyService.get(this.id).then(pathology => {

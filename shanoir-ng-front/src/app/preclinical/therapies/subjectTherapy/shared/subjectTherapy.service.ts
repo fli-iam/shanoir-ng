@@ -18,11 +18,16 @@ import { SubjectTherapy } from './subjectTherapy.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new SubjectTherapy(); }
 
     getSubjectTherapies(preclinicalSubject: PreclinicalSubject): Promise<SubjectTherapy[]> {

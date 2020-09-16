@@ -27,9 +27,12 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 export class AnestheticIngredientService extends EntityService<AnestheticIngredient> {
     API_URL = PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL;
 
-    getEntityInstance() { return new AnestheticIngredient(); }    
-       
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
+    getEntityInstance() { return new AnestheticIngredient(); }    
+    
     getIngredients(anesthetic:Anesthetic): Promise<AnestheticIngredient[]>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<AnestheticIngredient[]>(url)

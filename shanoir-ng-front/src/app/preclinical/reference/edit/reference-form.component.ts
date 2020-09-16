@@ -22,6 +22,7 @@ import { ReferenceService } from '../shared/reference.service';
 import { slideDown } from '../../../shared/animations/animations';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'reference-form',
@@ -35,10 +36,10 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
 
     categories: string[];
     reftypes: string[];
-    private isFreeCategory: boolean = false;
-    private isFreeRefType: boolean = false;
-    private isEditableCategory: boolean = true;
-    private isEditableRefType: boolean = true;
+    public isFreeCategory: boolean = false;
+    public isFreeRefType: boolean = false;
+    public isEditableCategory: boolean = true;
+    public isEditableRefType: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -49,6 +50,10 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
 
     get reference(): Reference { return this.entity; }
     set reference(reference: Reference) { this.entity = reference; }
+
+    getService(): EntityService<Reference> {
+        return this.referenceService;
+    }
 
     initView(): Promise<void> {
         return this.referenceService.get(this.id).then(reference => {

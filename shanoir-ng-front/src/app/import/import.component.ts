@@ -26,7 +26,7 @@ import { findLastIndex } from '../utils/app.utils';
 })
 export class ImportComponent {
 
-    private hasOneStudy: boolean = true;
+    hasOneStudy: boolean = true;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 

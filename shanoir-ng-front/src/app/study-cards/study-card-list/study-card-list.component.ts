@@ -31,7 +31,7 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private studyCardService: StudyCardService,

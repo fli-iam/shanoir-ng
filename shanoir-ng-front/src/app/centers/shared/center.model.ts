@@ -14,9 +14,6 @@
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyCenter } from '../../studies/shared/study-center.model';
-import { ServiceLocator } from '../../utils/locator.service';
-import { CenterService } from './center.service';
-
 
 export class Center extends Entity {
     acquisitionEquipments: AcquisitionEquipment[];
@@ -29,6 +26,4 @@ export class Center extends Entity {
     street: string;
     website: string;
     studyCenterList: StudyCenter[] = [];
-
-    service: CenterService = ServiceLocator.injector.get(CenterService);
 }

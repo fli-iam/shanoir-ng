@@ -25,8 +25,8 @@ export class NotificationsService {
     public nbProcess: number = 0;
     public nbDone: number = 0;
     protected tasks: Task[] = [];
-    protected tasksDone: Task[] = [];
-    protected tasksInProgress: Task[] = [];
+    public tasksDone: Task[] = [];
+    public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
 

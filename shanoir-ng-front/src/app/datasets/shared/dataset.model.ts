@@ -15,6 +15,7 @@ import { CardinalityOfRelatedSubjects } from '../../enum/cardinality-of-related-
 import { ExploredEntity } from '../../enum/explored-entity.enum';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { DatasetProcessing } from './dataset-processing.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { getDatasetInstance } from '../../utils/app.utils';

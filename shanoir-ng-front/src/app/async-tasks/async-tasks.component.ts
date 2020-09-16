@@ -17,6 +17,7 @@ import { BrowserPaginEntityListComponent } from '../shared/components/entity/ent
 import { TableComponent } from '../shared/components/table/table.component';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
+import { EntityService } from '../shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -26,15 +27,19 @@ import { TaskService } from './task.service';
 })
 
 export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
-    
-    @ViewChild('table') table: TableComponent;
-    
+
+    @ViewChild('table', { static: false }) table: TableComponent;
+
     private tasks: Task[];
     constructor(
-        private taskService: TaskService) {       
+        private taskService: TaskService) {
         super('task');
     }
     
+    getService(): EntityService<Task> {
+        return this.taskService;
+    }
+
     ngOnInit() {
         super.ngOnInit();
         this.getEntities().then(entities => { this.tasks = entities});

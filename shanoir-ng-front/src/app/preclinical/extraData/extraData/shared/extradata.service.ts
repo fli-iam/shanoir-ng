@@ -18,15 +18,20 @@ import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { ExtraData } from './extradata.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class ExtraDataService extends EntityService<ExtraData>{
         
     API_URL = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new ExtraData(); }         
     
-   getExtraDatas(examId:number): Promise<ExtraData[]>{
+    getExtraDatas(examId:number): Promise<ExtraData[]>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<ExtraData[]>(url)
             .map(entities => entities.map((entity) => this.toRealObject(entity)))
