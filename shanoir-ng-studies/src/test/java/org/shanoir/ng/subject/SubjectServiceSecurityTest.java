@@ -131,16 +131,18 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testEditAsExpert() throws ShanoirException {
-		assertAccessAuthorized(service::update, mockExisting);
-		
 		Subject subjectMock1 = buildSubjectMock(ENTITY_ID);
-		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_SEE_ALL);
-		given(repository.findOne(ENTITY_ID)).willReturn(subjectMock1);
-		assertAccessDenied(service::deleteById, ENTITY_ID);
+		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_IMPORT);
+		assertAccessAuthorized(service::update, subjectMock1);
 		
 		Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
-		addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_ADMINISTRATE);
+		addStudyToMock(subjectMock2, 1L, StudyUserRight.CAN_SEE_ALL);
 		given(repository.findOne(ENTITY_ID)).willReturn(subjectMock2);
+		assertAccessDenied(service::deleteById, ENTITY_ID);
+		
+		Subject subjectMock3 = buildSubjectMock(ENTITY_ID);
+		addStudyToMock(subjectMock3, 1L, StudyUserRight.CAN_ADMINISTRATE);
+		given(repository.findOne(ENTITY_ID)).willReturn(subjectMock3);
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
 	}
 	
@@ -250,6 +252,7 @@ public class SubjectServiceSecurityTest {
 		for (StudyUserRight right : rights) {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
+			studyUser.setUserName(LOGGED_USER_USERNAME);
 			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);

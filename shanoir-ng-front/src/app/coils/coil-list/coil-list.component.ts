@@ -27,7 +27,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private coilService: CoilService) {
@@ -56,12 +56,12 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             
-            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/manufacturer-model/details/' + coil.manufacturerModel.id])
+            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name",
+            route: (coil: Coil) => '/manufacturer-model/details/' + coil.manufacturerModel.id
             },
            
-            { headerName: "Center", field: "center.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/center/details/' + coil.center.id])
+            { headerName: "Center", field: "center.name",
+            route: (coil: Coil) => '/center/details/' + coil.center.id
             },
 
             { headerName: "Coil Type", field: "coilType" },

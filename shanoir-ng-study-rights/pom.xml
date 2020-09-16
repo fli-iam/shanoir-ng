@@ -31,9 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
   <description>Shanoir study rights management</description>
 
   <properties>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
-  	<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
+  	<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
 	<spring.active.profile></spring.active.profile>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -44,5 +42,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<artifactId>shanoir-ng-ms-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency>
+    <dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate-java8</artifactId>
+    </dependency>
   </dependencies>
 </project>

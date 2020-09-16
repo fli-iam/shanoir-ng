@@ -24,6 +24,8 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Option } from '../../shared/select/select.component';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -33,6 +35,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
 
     manufs: Manufacturer[];
+    datasetModalityTypes: Option<DatasetModalityType>[];
 
     constructor(
             private route: ActivatedRoute,
@@ -40,6 +43,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             private manufService: ManufacturerService) {
 
         super(route, 'manufacturer-model');
+        this.datasetModalityTypes = DatasetModalityType.options;
     }
 
     get manufModel(): ManufacturerModel { return this.entity; }
@@ -125,9 +129,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
+                })
+            );
         });
     }
 }

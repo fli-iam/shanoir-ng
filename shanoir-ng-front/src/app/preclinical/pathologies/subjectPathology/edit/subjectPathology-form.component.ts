@@ -249,7 +249,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
 
     addPathology(): Promise<void> {
         if (!this.subjectPathology) { 
-            console.log('nothing to create');
             return; 
         }
         if(this.preclinicalSubject.pathologies === undefined){
@@ -263,8 +262,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
     
     updatePathology(): void {
-        if (!this.subjectPathology) { 
-            console.log('nothing to update');
+        if (!this.subjectPathology) {
             return; 
         }
         if (this.onEvent.observers.length > 0) {

@@ -30,10 +30,17 @@ export abstract class EntityService<T extends Entity> {
 
     constructor(protected http: HttpClient) {}
 
+<<<<<<< HEAD
     getAll(): Promise<T[]> {
         return this.http.get<T[]>(this.API_URL)
             .pipe(map(this.mapEntityList))
             .toPromise();
+=======
+    getAll(quickResult?: T[]): Promise<T[]> {
+        return this.http.get<any[]>(this.API_URL)
+            .toPromise()
+            .then((all) => this.mapEntityList(all, quickResult));
+>>>>>>> develop
     }
 
     delete(id: number): Promise<void> {
@@ -42,15 +49,26 @@ export abstract class EntityService<T extends Entity> {
     }
 
     get(id: number): Promise<T> {
+<<<<<<< HEAD
         return this.http.get<T>(this.API_URL + '/' + id)
             .pipe(map(this.mapEntity))
             .toPromise();
+=======
+        return this.http.get<any>(this.API_URL + '/' + id)
+            .toPromise()
+            .then(this.mapEntity);
+>>>>>>> develop
     }
 
     create(entity: T): Promise<T> {
         return this.http.post<any>(this.API_URL, entity.stringify())
+<<<<<<< HEAD
             .pipe(map(this.mapEntity))
             .toPromise();
+=======
+            .toPromise()
+            .then(this.mapEntity);
+>>>>>>> develop
     }
 
     update(id: number, entity: T): Promise<void> {
@@ -58,20 +76,23 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    protected mapEntity = (entity: T): T => {
-        return this.toRealObject(entity);
+    protected mapEntity = (entity: any, quickResult?: T): Promise<T> => {
+        return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: T[]): T[] => {
-        return entities ? entities.map(this.mapEntity) : [];
+    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
+        return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
     }
 
-    protected mapPage = (page: Page<T>): Page<T> => {
-            page.content = page.content.map(this.mapEntity);
+    protected mapPage = (page: Page<T>): Promise<Page<T>> => {
+        if (!page) return null;
+        return this.mapEntityList(page.content).then(entities => {
+            page.content = entities;
             return page;
+        });            
     }
 
-    protected toRealObject(entity: T) {
+    protected toRealObject(entity: T): T {
         let trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
             let value = entity[key];

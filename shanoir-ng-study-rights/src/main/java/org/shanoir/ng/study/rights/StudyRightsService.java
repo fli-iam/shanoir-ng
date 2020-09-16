@@ -46,6 +46,25 @@ public class StudyRightsService {
 				founded.getStudyUserRights() != null
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
     }
+    
+    /**
+	 * Check that the connected user has one of the given rights for the given study.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasOneRightOnStudy(Long studyId, String... rightStrs) {
+		Long userId = KeycloakUtil.getTokenUserId();
+		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+		if (founded.getStudyUserRights() != null) {
+			for (String rightStr : rightStrs) {
+				if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) return true;
+			}
+		}
+		return false;
+    }
 
     /**
      * Check that the connected user has the given right for the given studies.

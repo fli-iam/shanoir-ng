@@ -13,7 +13,6 @@
  */
 import {Component, Input, ViewChild, ViewContainerRef, OnChanges} from '@angular/core'
 
-import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
@@ -26,18 +25,19 @@ import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from '../../../examinations/shared/examination.service';
 
 
 @Component({
     selector: 'animal-examination-list',
     templateUrl: 'animal-examination-list.component.html', 
-    providers: [AnimalExaminationService]
+    providers: [ExaminationService]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
-    @ViewChild('examTable') table: TableComponent;
+    @ViewChild('examTable', { static: false }) table: TableComponent;
     
     constructor(
-        private animalExaminationService: AnimalExaminationService, 
+        private examinationService:ExaminationService, 
         private examAnestheticsService: ExaminationAnestheticService,
     	private extradataService: ExtraDataService)
     	
@@ -47,15 +47,11 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     getService(): EntityService<Examination> {
-        return this.animalExaminationService;
-    }
-    
-    getEntities(): Promise<Examination[]> {
-        return this.animalExaminationService.getAll();
+        return this.examinationService;
     }
     
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.animalExaminationService.getPage(pageable);
+        return this.examinationService.getPage(pageable, true);
     }
 
     getColumnDefs(): any[] {
@@ -97,9 +93,8 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         this.getSelectedExamination(entity.id).then(selectedExamination => {
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?'
+            ).then(res => {
                 if (res) {
                     this.getService().delete(selectedExamination.id).then(() => {
                         this.onDelete.next(selectedExamination);
@@ -118,7 +113,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     private getSelectedExamination(id : number): Promise<Examination>{
-        return this.animalExaminationService.get(id).then(examination => {
+        return this.examinationService.get(id).then(examination => {
             return examination;
         }
         );

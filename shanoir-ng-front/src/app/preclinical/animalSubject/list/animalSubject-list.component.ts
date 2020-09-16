@@ -26,6 +26,7 @@ import { ShanoirError } from '../../../shared/models/error.model';
 import { resolve } from 'url';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { SubjectService } from '../../../subjects/shared/subject.service';
 
 
 @Component({
@@ -36,14 +37,15 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 })
 export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
 
-    @ViewChild('preclinicalSubjectsTable') table: TableComponent;
+    @ViewChild('preclinicalSubjectsTable', { static: false }) table: TableComponent;
 
     public preclinicalSubjects: PreclinicalSubject[];
     public animalSubjects: AnimalSubject[];
     public subjects: Subject[];
 
     constructor(
-        private animalSubjectService: AnimalSubjectService) {
+        private animalSubjectService: AnimalSubjectService,
+        private subjectService: SubjectService) {
             super('preclinical-subject');
     }
     
@@ -57,7 +59,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             this.animalSubjects = [];
             this.subjects = [];
             Promise.all([
-                this.animalSubjectService.getSubjects(),
+                this.subjectService.getAll(),
                 this.animalSubjectService.getAnimalSubjects()
             ]).then(([subjects, animalSubjects]) => {
                 this.subjects = subjects;
@@ -109,6 +111,16 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         return [];
     }
 
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+
     getSubjectWithId(subjectId: number): Subject {
     	if (this.subjects){
     		for (let s of this.subjects){
@@ -123,12 +135,11 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?'
+            ).then(res => {
                 if (res) {
                     this.animalSubjectService.delete(entity.animalSubject.id).then((res) => {
-                        this.animalSubjectService.deleteSubject(entity.subject.id).then((res2) => {
+                        this.subjectService.delete(entity.subject.id).then((res2) => {
                             const index: number = this.preclinicalSubjects.indexOf(entity);
                             if (index !== -1) {
                                 this.preclinicalSubjects.splice(index);

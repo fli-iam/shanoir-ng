@@ -13,41 +13,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="ExtensionRequestComponent">
-    <form [formGroup]="extensionRequestForm" class="EditUserContent max-content" novalidate>
+    <form *ngIf="extensionRequestInfo" [formGroup]="extensionRequestForm" class="EditUserContent max-content" novalidate>
 		<table class="layout">
-			<tr><td colspan="1">
-				<h2 class="header command-zone"i18n="Extension request|Title@@ExtensionRequestTitle">Extension request</h2>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-						<ol>
-							<li class="required">
-								<label i18n="Extension request|Expiration date label@@ExtensionRequestExpirationDate" class="required-label">New expiration Date</label> 
-								<span class="right-col">
-									<my-date-picker id="extensionDate" [options]="myDatePickerOptions" formControlName="extensionDate" [(ngModel)]="extensionRequestInfo.extensionDate" 
-										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
-									</my-date-picker>
-								</span>
-							</li>
-							<li class="required">
-								<label i18n="Extension request|Motivation label@@ExtensionRequestMotivation" class="required-label">Why do you want to extend your account?</label> 
-								<span class="right-col">
-									<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="extensionRequestInfo.extensionMotivation"></textarea>
-								</span>
-							</li>
-						</ol>
-					</fieldset>
-				</td>
-			</tr>
-			
-			<tr>
-				<td colspan="2">
-					<div class="footer command-zone">
-						<button type="submit" i18n="Extension request|Request button label@@ExtensionRequestButton" (click)="extensionRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request an extension</button>
-					</div>
-				</td>
-			</tr>
+				<tr><td colspan="1">
+						<h2 class="header command-zone"i18n="Extension request|Title@@ExtensionRequestTitle">Extension request</h2>
+				</td></tr>
+				<tr>
+						<td>
+								<fieldset>
+										<ol>
+												<li class="required">
+														<label i18n="Extension request|Expiration date label@@ExtensionRequestExpirationDate" class="required-label">New expiration Date</label> 
+														<span class="right-col">
+																<my-date-picker [options]="myDatePickerOptions" formControlName="extensionDate" [(ngModel)]="extensionRequestInfo.extensionDate" 
+																	(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+																</my-date-picker>
+														</span>
+												</li>
+												<li class="required">
+														<label i18n="Extension request|Motivation label@@ExtensionRequestMotivation" class="required-label">Why do you want to extend your account?</label> 
+														<span class="right-col">
+																<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="extensionRequestInfo.extensionMotivation"></textarea>
+														</span>
+												</li>
+										</ol>
+								</fieldset>
+						</td>
+				</tr>
+				
+				<tr>
+						<td colspan="2">
+								<div class="footer command-zone">
+										<button type="submit" i18n="Extension request|Request button label@@ExtensionRequestButton" (click)="extensionRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request an extension</button>
+								</div>
+						</td>
+				</tr>
 		</table>
     </form>
 </div>

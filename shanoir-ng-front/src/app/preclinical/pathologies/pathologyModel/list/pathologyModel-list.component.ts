@@ -95,9 +95,8 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     
     openInformationDialog = (model:PathologyModel) => {
         this.confirmDialogService
-            .confirm('Download Specifications', 'No specifications have been found for '+model.name,
-            ServiceLocator.rootViewContainerRef)
-            .subscribe(res => {
+            .confirm('Download Specifications', 'No specifications have been found for '+model.name)
+            .then(res => {
                 
             })
     }
@@ -110,8 +109,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     			hasSubjects = subjectPathologies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
-                		.confirm('Delete pathology model', 'This pathology model is linked to subjects, it can not be deleted', 
-                        ServiceLocator.rootViewContainerRef)
+                		.confirm('Delete pathology model', 'This pathology model is linked to subjects, it can not be deleted');
     			}else{
     				this.openDeletePathologyModelConfirmDialog(entity);
     			}
@@ -119,8 +117,8 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     			this.openDeletePathologyModelConfirmDialog(entity);
     		}
     	}).catch((error) => {
-    		console.log(error);
-    		this.openDeletePathologyModelConfirmDialog(entity);
+            this.openDeletePathologyModelConfirmDialog(entity);
+            throw error;
     	});     
     }   
     
@@ -129,9 +127,8 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-pathology-model n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-pathology-model n° ' + entity.id + ' ?'
+            ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);

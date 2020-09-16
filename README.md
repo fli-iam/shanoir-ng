@@ -41,80 +41,183 @@ Depending on your server domain, below an example for the dev environment, just 
 * MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
 * MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
 
+# Requirements
+
+To build and deploy Shanoir, you will need:
+* docker (https://docs.docker.com/install/)
+* docker-compose 3 (https://docs.docker.com/compose/install/)
+* jdk 8
+* maven 3
+* at least 6GB of available RAM
+
 # Installation of Shanoir NG
 
-The installation of Shanoir NG has two steps :
-* BUILD (COMPILE): with Maven 3
-* DEPLOY: with docker-compose, version 3
+The installation of Shanoir NG happens in three steps :
+* BUILD
+* CONFIGURE 
+* DEPLOY
 
-## BUILD (COMPILE)
-* Install Maven 3 on your machine/on the server
-* Download or git clone the shanoir-ng code. The `master` branch should be the most stable while `develop` will contain the newests functionalities if you are interested in testing thoses.
+The TL;DR section gives the minimal for bootstrapping a development environment.
+The following sections give detailed informations about each step.
+
+### TL;DR
+
+The default docker-compose configuration is well-suited for a development
+environment. Each microservice is hosted in a separate container and the
+application data are stored in named volumes.
+
+Before deploying, some configuration is required:
+
+* add the following line in your **/etc/hosts** (so that
+  https://shanoir-ng-nginx/ is reachable from your web browser):
+  ```
+  127.0.0.1  shanoir-ng-nginx
+  ```
+* if docker is not running natively and thus you are using docker-machine
+  (windows/macos users), you will need to tune the virtualbox machine:
+    * increase the amount of allocated RAM
+    * set up tcp port redirections (at least for 8080 and 443)
+
+The **bootstrap.sh** script automates the build and the deployment of shanoir.
+
+**WARNING: this script is destructive** (as it will wipe out the external
+volumes configured in the docker-compose.yml). It is not recommended to use on a
+production host.
+
+To deploy shanoir from scratch on a development machine you can just launch the
+following command and have a coffee.
+```
+./bootstrap.sh --clean
+```
+
+Once the bootstrap is complete, go on to the [FIRST RUN](#first-run) section to
+create the initial users.
+
+## BUILD
+
+The build consists of two stages: build the microservices and build the docker
+images.
+
+In the source tree, each microservice is located in a separate `shanoir-ng-*/`
+directory containing a maven project. `shanoir-ng-parent` is a meta-project that
+includes all the other projects. The contextes of the docker images are located
+in the `docker-compose/*/` directories.
+
+Procedure:
+
+* Download or git clone the shanoir-ng code. The `master` branch should be the
+  most stable while `develop` will contain the newests functionalities if you
+  are interested in testing thoses.
 * Execute the Maven build on the parent project with the following commands:
-    * cd shanoir-ng-parent/
-    * mvn install
-* The build creates all .jar and .js executable files and copies them
-into the folder /docker-compose to be used from there by docker-compose
+  ```
+  cd shanoir-ng-parent/ && mvn install
+  ```
 
-## DEPLOY
-* Install docker and docker-compose:
-    * https://docs.docker.com/install/
-    * https://docs.docker.com/compose/install/
-* Make sur docker has enough memory to run Shanoir (6Gb should be enough)
-* If you are on your **developer/local machine**:
-    * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
-	* 127.0.0.1       shanoir-ng-nginx
-    * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
-* If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
-    * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
-    * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently)
-        1. Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
-	    2. Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	    3. Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr. This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
-	    4. Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
-    * **Attention:** you will have to re-compile your code after these changes with Maven!!!
-* Just in case you have some old stuff of Shanoir-NG in your docker environment:
-    * **docker system prune -a**
-    * **docker volume prune**
-    * **Attention:** this will clean your entire docker system!
-* Go to the root folder (/shanoir-ng) and execute **docker-compose up --build**
-    * **Attention:** the file .env in the root folder is used to set environment variables
-and will not be found if you run docker-compose elsewhere; results in errors after
-* Access to shanoir-ng: https://shanoir-ng-nginx
+  The build creates all .jar and .js executable files and stores a copy into the
+  docker-compose/ folder to be used for building the docker images
 
-If you want to login, please configure a user in Keycloak :
+
+* Build the docker images:
+  ```
+  docker-compose build
+  ```
 
 ## CONFIGURE
 
-### Configure a user in Keycloak
+Shanoir is configured with environment variables. It is mostly handled with a a
+set of *facade* variables named `SHANOIR_*` (which cover the most typical
+setups).
 
-* Access to Keycloak admin interface: http://localhost:8080/auth/admin/
-* The account and password is defined in .env and has to be changed for production scenarios
+Name                  | Value             | Description                             |
+--------------------- | ----------------- | --------------------------------------- | 
+`SHANOIR_URL_HOST`    | *hostname*        | hostname where shanoir is reachable     |
+`SHANOIR_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
+`SHANOIR_SMTP_HOST`   | *hostname*        | SMTP relay for outgoing e-mails         |
+`SHANOIR_ADMIN_EMAIL` | *e-mail address*  | contact address of the administrator (for outgoing e-mails) |
+`SHANOIR_ADMIN_NAME`  | *name*            | name of the administrator (for outgoing e-mails) |
+`SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host) |
+`SHANOIR_X_FORWARDED` | `generate\|trust`  | configures whether the nginx container generates the `X-Forwarded-*` HTTP headers (if running stand-alone) or trusts the existing headers (if located behind another reverse-proxy) |
+`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate |
+`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below). |
+`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts |
 
-By default, new user accounts have been created in Keycloak by ms users with temporary passwords.
-Please access to Keycloak admin interface below to reset the password, when you want to login (Manage users - Edit your desired user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured properly, emails with a temporary password will have been sent to each user (not the case in dev environment).
+**Notes**
+* You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
+  clients using shanoir (the users) and from each microservice (running in the
+  containers)
+  * in development this is achieved by:
+    * adding the following line to your **/etc/hosts**
+      ```
+      127.0.0.1  shanoir-ng-nginx
+      ```
+    * ensuring that the nginx container name is equals to the value of
+      `SHANOIR_URL_HOST` (in the default setup, they both use:
+      `shanoir-ng-nginx`)
+  * in production, you should have a the relevant A/AAAA configured in your DNS
+    zone
+* If docker is not running natively and thus you are using docker-machine
+  (windows/macos users), you will need to tune the virtualbox machine:
+    * increase the amount of allocated RAM
+    * set up tcp port redirections (at least for 8080 and 443)
+* The TLS configuration provided by the nginx container is permissive and not
+  guaranteed to be up-to-date. You should not rely on it for facing the public
+  internet. In production you should rather have a separate HTTP reverse-proxy,
+  properly administrated according to your security policies.
+* Upon config changes, for most cases you will just need to re-create the
+  affected containers (run: `docker-compose up -d`). However if the changes also
+  affect the *keycloak* container, then you will also need to re-deploy the
+  shanoir-ng realm (see below).
+  
 
-Please use the flag **syncAllUsersToKeycloak** in the file **/docker-compose/users/Dockerfile** of ms users,
-to configure in production environment the behaviour of user account creation within Keycloak. E.g. if you want
-to start with an empty users database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
-If set to true: ms users will synchronise the users in his mysql db into Keycloak during startup (dev env scenario).
+## DEPLOY
 
-### Configure a mail server
+0. ensure all containers are stopped and all volumes are destroyed (**CAUTION:
+   this destroys all external volumes defined in docker-compose.yml**) 
+   ```
+   fig down -v
+   ```
 
-Users and admin may receive mails from Shanoir when they request an account or when they have forgotten their password. To make those functions work, there are two places where you need to set your mail server config.
+1. deploy the database containers and wait until they are ready to accept
+   incoming connections
+   ```
+   docker-compose up -d database keycloak-database
+   ```
 
-#### In keycloak
+2. initialise the keycloak container, then start it
+   ```
+   docker-compose run --rm -e SHANOIR_MIGRATION=init keycloak
+   docker-compose up -d keycloak
+   ```
 
-In keycloak, with Shanoir-ng realm selected, go to "Realm Settings", then tab "Email" and simply set your config.
+3. initialise each microservice
+   ```
+   for ms in users studies datasets import preclinical ; do
+       docker-compose run --rm -e SHANOIR_MIGRATION=init "$ms"
+   done
+   ```
 
-#### In .env
+4. start the remaining containers
+   ```
+   docker-compose up -d
+   ```
 
-Edit the .env file at the root of the Shanoir source directory. At the line 
-```
-spring.mail.host=SMTP_HOST
-```
-simply replace SMTP_HOST by your mail server url.
-**Attention:** After that you will have to restart the application (docker-compose down && docker-compose up --build) 
+## FIRST RUN
+
+New user accounts need to be validated by a shanoir admin. However, on the first
+run, there is not admin account so you will need to create it on the keycloak
+server directly:
+
+1. go to Keycloak admin interface: http://localhost:8080/auth/admin/
+2. sign in with the credentials configured in
+   `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
+3. go to the **shanoir-ng** realm
+4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
+   default, new user accounts are created in Keycloak by the users microservice
+   with temporary passwords, you may reset the password in keycloak's admin
+   interface and receive the new password is by e-mail. In development, if you
+   do hot have a configured SMTP relay, then you may choose to overide the
+   password manually and set `Temporary password: No` to make it persistent.
+
 
 ### PACS dcm4chee
 
@@ -124,3 +227,10 @@ Access to the backup PACS dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-a
 
 This installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
+
+
+
+## Migrations
+
+TODO
+

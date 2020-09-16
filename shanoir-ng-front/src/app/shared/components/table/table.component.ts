@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -23,7 +23,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
     styleUrls: ['table.component.css'],
 })
 export class TableComponent implements OnInit {
-    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
     selection: Map<number, any> = new Map();
@@ -35,16 +35,21 @@ export class TableComponent implements OnInit {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() maxResults: number = 20;
 
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
-    private maxResults: number = 20;
     lastSortedCol: Object = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
-    private filter: Filter;
     loaderImageUrl: string = "assets/images/loader.gif";
+    
+    private isError: boolean = false;
+    
+    private filter: Filter = new Filter(null, null);
+    private firstLoading: boolean = true;
+    
 
     constructor(
             private applicationRef: ApplicationRef,
@@ -61,10 +66,12 @@ export class TableComponent implements OnInit {
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+                .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1);
+            this.goToPage(1)
+                .then(() => this.firstLoading = false);
         }
     }
 
@@ -92,7 +99,7 @@ export class TableComponent implements OnInit {
 
 
     onRowClick(item: Object) {
-        this.rowClick.emit(item);
+        if (!this.rowDisabled(item)) this.rowClick.emit(item);
     }
 
 
@@ -101,15 +108,20 @@ export class TableComponent implements OnInit {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
-        } else if (col.field == undefined) {
+        } else if (!col.field) {
             return null;
         } else {
-            return this.getFieldRawValue(item, col["field"]);
+            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) return fieldValue;
+            else if (col.defaultField) 
+                return this.getFieldRawValue(item, col["defaultField"]);
+            else
+                return;
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        if (path == undefined || path == null) return;
+        if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -219,21 +231,31 @@ export class TableComponent implements OnInit {
         return type != null ? "cell-" + type : "";
     }
 
-    goToPage(p: number): void {
+    goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
-        this.getPage(this.getPageable()).then(page => {
+        return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
+            this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
-            setTimeout(() => this.isLoading = false, 200);
-        }).catch((reason)=>console.log(reason));
+            setTimeout(() => {
+                this.isError = false;
+                this.isLoading = false;
+            }, 200);
+        }).catch(reason => {
+            setTimeout(() => {
+                this.isError = true;
+                this.isLoading = false;
+                throw reason;
+            }, 200);
+        });
     }
 
     /**
      * Call to refresh from outsilde
      */
     public refresh() {
-        this.goToPage(this.currentPage);
+        this.goToPage(this.currentPage, true);
     }
 
     private getPageable(): Pageable {
@@ -323,13 +345,15 @@ export class TableComponent implements OnInit {
     }
 
     computeSelectAll() {
-        let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
-        if (selectedOnCurrentPage.length == this.page.content.length) {
-            this.selectAll = true;
-        } else if (selectedOnCurrentPage.length == 0) {
-            this.selectAll = false;
-        } else {
-            this.selectAll = 'indeterminate';
+        if (this.page && this.page.content) {
+            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+            if (selectedOnCurrentPage.length == this.page.content.length) {
+                this.selectAll = true;
+            } else if (selectedOnCurrentPage.length == 0) {
+                this.selectAll = false;
+            } else {
+                this.selectAll = 'indeterminate';
+            }
         }
     }
 
@@ -368,11 +392,17 @@ export class TableComponent implements OnInit {
     }
 
     cellEditable(item, col) {
-        let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
+        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 
     rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('table items', this.items);
+        }
     }
 }

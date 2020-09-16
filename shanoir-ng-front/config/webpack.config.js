@@ -25,32 +25,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'production';
 
-const SHANOIR_NG_URL_SCHEME = 'https://';
-const SHANOIR_NG_URL_HOST = 'shanoir-ng-nginx';
-
-const SHANOIR_NG_URL_BACKEND_API =
-	SHANOIR_NG_URL_SCHEME
-	+ SHANOIR_NG_URL_HOST
-	+ '/shanoir-ng';
-	
-const SHANOIR_NG_URL_KEYCLOAK =
-	SHANOIR_NG_URL_SCHEME
-	+ SHANOIR_NG_URL_HOST
-	+ '/auth';
-
-const SHANOIR_NG_URL_LOGOUT =
-	SHANOIR_NG_URL_SCHEME
-	+ SHANOIR_NG_URL_HOST
-	+ '/shanoir-ng/index.html';
-
 const METADATA = webpackMerge(commonConfig.metadata, {
-    BACKEND_API_USERS_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/users',
-    BACKEND_API_STUDIES_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/studies',
-	BACKEND_API_DATASET_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/datasets',
-	BACKEND_API_IMPORT_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/import',
-	BACKEND_API_PRECLINICAL_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/preclinical',
-    KEYCLOAK_BASE_URL: SHANOIR_NG_URL_KEYCLOAK,
-    LOGOUT_REDIRECT_URL: SHANOIR_NG_URL_LOGOUT,
     ENV: ENV,
 });
 
@@ -104,23 +79,9 @@ module.exports = webpackMerge(commonConfig, {
          */
         new webpack.DefinePlugin({
             'ENV': JSON.stringify(METADATA.ENV),
-            'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
-            'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
-            'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
-            'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
-            'BACKEND_API_PRECLINICAL_MS_URL': JSON.stringify(METADATA.BACKEND_API_PRECLINICAL_MS_URL),
-            'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
-            'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
             'process.env': {
                 'ENV': JSON.stringify(METADATA.ENV),
                 'NODE_ENV': JSON.stringify(METADATA.ENV),
-                'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
-                'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
-                'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
-                'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
-                'BACKEND_API_PRECLINICAL_MS_URL': JSON.stringify(METADATA.BACKEND_API_PRECLINICAL_MS_URL),
-                'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
-                'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             }
         })
     ]

@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="dataset" class="max-content" [formGroup]="form">
+	<form *ngIf="dataset" class="max-content" [formGroup]="form" [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -43,9 +43,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(cancel)="goToView()"
 					(back)="goBack()"
 					(save)="save()">
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
-			    <button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+			    <button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
             </form-footer>
 
 		</div>

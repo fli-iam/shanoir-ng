@@ -23,8 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select-box [(ngModel)]="study" (change)="onSelectStudy(); onContextChange();" (onViewClick)="showStudyDetails()" [viewDisabled]="!study">
-                    <select-option *ngFor="let study of studies" [value]="study">{{study?.name}}</select-option>
+                <select-box [(ngModel)]="study" (change)="onSelectStudy(); onContextChange();" (onViewClick)="showStudyDetails()" [viewDisabled]="!study" [optionArr]="studies">
                 </select-box>
             </span>
         </li>
@@ -32,8 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a center</label> 
             <span class="right-col">
                 <select-box [disabled]="!study || !centers" [(ngModel)]="center" (change)="onSelectCenter(); onContextChange();" 
-                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center">
-                    <select-option *ngFor="let center of centers" [value]="center">{{center?.name}}</select-option>
+                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center" [optionArr]="centers">
                 </select-box>
             </span>
         </li>
@@ -42,8 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (change)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
-                        (onNewClick)="openCreateAcqEqt()">
-                    <select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment">{{acquisitionEquipment | acqEqptLabel}}</select-option>
+                        (onNewClick)="openCreateAcqEqt()" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
                 </select-box>
             </span>
         </li>
@@ -58,8 +55,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (change)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment">
-                    <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment" 
+                        [optionArr]="subjects">
                 </select-box>
             </span>
         </li>
@@ -87,10 +84,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                             </td>
                             <td class="dropdown-col">
-                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-                                    <select-option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</select-option>
-                                    <select-option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</select-option>
-                                    <select-option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</select-option>
+                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
                                 </select-box>
                             </td>
                         </tr>
@@ -110,8 +104,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (change)="onSelectExam(); onContextChange();"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject">
-                    <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>
+                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject"
+                        [optionArr]="examinations" [pipe]="subjectExaminationPipe">
                 </select-box>  
             </span>
         </li>
@@ -124,8 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a coordinate system</label> 
             <span class="right-col">
-                <select-box [(ngModel)]="coordsystem" (change)="onSelectCoord(); onContextChange();">
-                    <select-option *ngFor="let system of systemCoordKeys" [value]="system">{{CoordSystems[system]}}</select-option>
+                <select-box 
+                    [(ngModel)]="coordsystem"
+                    (change)="onSelectCoord(); onContextChange();"
+                    [ngModelOptions]="{standalone: true}" 
+                    [options]="coordSystemOptions">
                 </select-box>
             </span>
         </li>

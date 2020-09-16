@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<springfox-version>2.5.0</springfox-version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
+		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
 		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/preclinical</docker.image.name>
 		<supervisor.file.name>ms.preclinical.sv.dev.conf</supervisor.file.name>
@@ -290,6 +290,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
 									tofile="${basedir}/../docker-compose/preclinical/${project.artifactId}.jar" />
+								<copy file="../utils/entrypoint_common"
+									tofile="${basedir}/../docker-compose/preclinical/entrypoint_common" />
+								<copy file="../utils/oneshot"
+									tofile="${basedir}/../docker-compose/preclinical/oneshot" />
+								<chmod perm="+x" file="${basedir}/../docker-compose/preclinical/oneshot" />
 							</target>
 						</configuration>
 						<goals>

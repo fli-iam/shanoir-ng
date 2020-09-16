@@ -15,24 +15,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="header command-zone">2. Select datasets</div>
 <fieldset class="step"> 
     <p>Please select only the datasets useful for your study</p>
-    <p>Please select the series of <strong class="warning">one</strong> patient at the time.</p>
-    <p>Only <strong class="warning">one</strong> examination will be created for all selected.</p>
+    <ul>
+        <li>Please select the series of <strong class="warning">one</strong> patient at the time.</li>
+        <li>Only <strong class="warning">one</strong> examination will be created for all selected.</li>
+    </ul>
     <div class="tree">
         <node #selectAll
-         [deploy]="true"
-         [hasBox]="true"
-         [nodeParams]=""
-         (chkbxChange)="changeDatasets()">
+        label="EEG dataset list"
+        [deploy]="true"
+        [hasBox]="true"
+        [nodeParams]=""
+        (chkbxChange)="changeDatasets($event);">
             <node 
                 *ngFor="let dataset of datasets" 
                 [label]="dataset.name" 
-                pictoUrl="/assets/images/icons/eeg.png" 
+                awesome="fa fa-hat-wizard" 
                 (labelClick)="showDatasetDetail(dataset)"
                 [nodeParams]="dataset"
                 [class.selected]="datasetDetail == dataset"
                 [deploy]="false"
                 [hasBox]="true"
-                (chkbxChange)="changeDataset(dataset)">
+                (chkbxChange)="changeDataset(dataset)"
+                buttonPicto="fa fa-eye"
+                (buttonClick)="showDatasetDetail($event)">
             </node>
         </node>
     </div>

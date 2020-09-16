@@ -22,9 +22,9 @@ describe('ToolService', () => {
 
     // Inject the http, test controller, and service-under-test
     // as they will be referenced by each test.
-    httpClient = TestBed.get(HttpClient);
-    httpTestingController = TestBed.get(HttpTestingController);
-    service = TestBed.get(ToolService);
+    httpClient = TestBed.inject(HttpClient);
+    httpTestingController = TestBed.inject(HttpTestingController);
+    service = TestBed.inject(ToolService);
   });
 
   afterEach(() => {
@@ -36,7 +36,7 @@ describe('ToolService', () => {
     let expectedTools: ToolInfo[];
 
     beforeEach(() => {
-      service = TestBed.get(ToolService);
+      service = TestBed.inject(ToolService);
       expectedTools = [
         { id: 1, name: 'A' },
         { id: 2, name: 'B' },
@@ -100,7 +100,7 @@ describe('ToolService', () => {
     let toolId = '' + Math.random();
 
     beforeEach(() => {
-      service = TestBed.get(ToolService);
+      service = TestBed.inject(ToolService);
     });
 
     it('should return expected tool descriptor', fakeAsync(() => {
@@ -142,7 +142,7 @@ describe('ToolService', () => {
     let toolId = '' + Math.random();
 
     beforeEach(() => {
-      service = TestBed.get(ToolService);
+      service = TestBed.inject(ToolService);
     });
 
     it('should return expected tool invocation', fakeAsync(() => {
@@ -185,7 +185,7 @@ describe('ToolService', () => {
     let toolId = '' + Math.random();
 
     beforeEach(() => {
-      service = TestBed.get(ToolService);
+      service = TestBed.inject(ToolService);
     });
 
     it('should return expected generated command', fakeAsync( () => {
@@ -228,7 +228,7 @@ describe('ToolService', () => {
     let toolId = '' + Math.random();
 
     beforeEach(() => {
-      service = TestBed.get(ToolService);
+      service = TestBed.inject(ToolService);
     });
 
     it('should return expected resulting output', fakeAsync( () => {

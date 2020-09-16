@@ -61,6 +61,4 @@ export class FormFooterComponent {
     onBack(): void {
         this.back.emit();
     }
-
-    
 }

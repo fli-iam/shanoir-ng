@@ -34,6 +34,7 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Option } from '../../../../shared/select/select.component';
 
 @Component({
     selector: 'anesthetic-form',
@@ -45,12 +46,12 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    @ViewChild('ingredientsTable') table: TableComponent; 
+    @ViewChild('ingredientsTable', { static: false }) table: TableComponent; 
 
-    public anestheticTypes: Enum[] = [];
+    AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    public isAnestheticUnique: Boolean = true;
+    isAnestheticUnique: Boolean = true;
     names: Reference[];
     units: Reference[];
 
@@ -86,7 +87,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -110,7 +110,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -137,7 +136,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.createColumnDefs();
@@ -194,12 +192,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }
     }
 
-    
-
-    getEnum(): void {
-        this.anestheticTypes = this.enumUtils.getEnumArrayFor('AnestheticType');
-    }
-
     loadUnits(){
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
      }
@@ -234,7 +226,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     refreshName(generatedName: string) {
-
         if (this.anesthetic && this.anesthetic.anestheticType && generatedName.indexOf(AnestheticType[this.anesthetic.anestheticType]) < 0) {
             generatedName = AnestheticType[this.anesthetic.anestheticType].concat(' ').concat(generatedName);
         }
@@ -252,12 +243,9 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             }
         }
         this.anesthetic.name = generatedName;
-
     }
 
-    
-
-    goToAddIngredient(){
+    goToAddIngredient() {
         this.ingredientSelected = new AnestheticIngredient();
         this.createAIMode = true;
         if(this.toggleFormAI==false){

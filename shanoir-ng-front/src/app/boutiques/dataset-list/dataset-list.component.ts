@@ -35,7 +35,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private datasetService: DatasetService,

@@ -28,7 +28,7 @@ import { EntityService } from '../shared/components/entity/entity.abstract.servi
 
 export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     private tasks: Task[];
     constructor(

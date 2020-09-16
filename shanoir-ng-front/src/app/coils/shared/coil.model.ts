@@ -26,7 +26,7 @@ export class Coil extends Entity {
     serialNumber: string;
     center: Center;
     manufacturerModel: ManufacturerModel;
-    coilType:CoilType;
+    coilType: CoilType;
 
     // Override
     public stringify() {

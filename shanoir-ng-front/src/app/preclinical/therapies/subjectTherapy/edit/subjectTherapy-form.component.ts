@@ -220,8 +220,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
    
     addTherapy(): Promise<void> {
-        if (!this.subjectTherapy) { 
-            console.log('nothing to create');
+        if (!this.subjectTherapy) {
             return; 
         }
         if(this.preclinicalSubject.therapies === undefined){
@@ -235,8 +234,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
     
     updateTherapy(): void {
-        if (!this.subjectTherapy) { 
-            console.log('nothing to update');
+        if (!this.subjectTherapy) {
             return; 
         }
         if (this.onEvent.observers.length > 0) {

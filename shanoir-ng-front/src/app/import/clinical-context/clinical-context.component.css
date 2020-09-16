@@ -6,5 +6,4 @@ li.info { width: 532px; }
 li.info strong { color: var(--color-a); }
 li.info svg { color: var(--color-a); font-size: 16px; vertical-align: -1; }
 li.info code { color: var(--color-a); }
-.compatible { color: var(--color-c); }
-.not-compatible { color: var(--color-error); }
+li.info a { text-decoration: underline; color: var(--color-a); }

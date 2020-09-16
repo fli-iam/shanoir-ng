@@ -11,14 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
+import { Option } from '../../select/select.component';
+
 
 @Component({
   selector: 'subject-study-list',
@@ -33,28 +34,41 @@ import { AbstractInput } from '../../form/input.abstract';
 ]
 })
 
-export class SubjectStudyListComponent extends AbstractInput {
+export class SubjectStudyListComponent extends AbstractInput implements OnChanges {
     
     @Input() subject: Subject;
     @Input() study: Study;
     @Input() selectableList: Subject[] | Study[];
-    selected: any;
+    public selected: Subject | Study;
+    public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
     }
-
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.selectableList) {
+            this.optionList = [];
+            if (this.selectableList) {
+                for (let item of this.selectableList) {
+                    let option: Option<Subject | Study> = new Option(item, item.name);
+                    this.optionList.push(option);
+                }
+            }
+        }
+    }
+    
     writeValue(obj: any): void {
         super.writeValue(obj);
         if (this.model && this.selectableList) {
             if (this.compMode == 'study') {
-                for (let selectableItem of this.selectableList) {
-                    if(this.model.filter(subStu => subStu.subject.id == selectableItem.id)[0]) selectableItem.selected = true; 
+                for (let option of this.optionList) {
+                    if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true; 
                 }
             } else if (this.compMode == 'subject') {
-                for (let selectableItem of this.selectableList) {
-                    if(this.model.filter(subStu => subStu.study.id == selectableItem.id)[0]) selectableItem.selected = true;
+                for (let option of this.optionList) {
+                    if(this.model.find(subStu => subStu.study.id == option.value.id)) option.disabled = true; 
                 }
             }
         }
@@ -70,20 +84,23 @@ export class SubjectStudyListComponent extends AbstractInput {
 
     onAdd() {
         if (!this.selected) return;
-        this.selected.selected = true;
+        if (this.optionList) {
+            let foundOption = this.optionList.find(option => option.value.id == this.selected.id);
+            if (foundOption) foundOption.disabled = true;
+        }
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
         if (this.compMode == "study") {
             let studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
             newSubjectStudy.study = studyCopy;
-            newSubjectStudy.subject = this.selected;
+            newSubjectStudy.subject = this.selected as Subject;
         }
         else if (this.compMode == "subject") {
             let subjectCopy: Subject = new Subject();
             subjectCopy.id = this.subject.id;
             newSubjectStudy.subject = subjectCopy;
-            newSubjectStudy.study = this.selected;
+            newSubjectStudy.study = this.selected as Study;
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
@@ -96,17 +113,11 @@ export class SubjectStudyListComponent extends AbstractInput {
             this.model.splice(index, 1);
             this.propagateChange(this.model);
             if (this.compMode == 'study') {
-                for (let selectableItem of this.selectableList) {
-                    if (selectableItem.id == subjectStudy.subject.id) {
-                        selectableItem.selected = false;
-                    }
-                }
+                let option: Option<Subject> = this.optionList.find(opt => opt.value.id == subjectStudy.subject.id) as Option<Subject>;
+                if (option) option.disabled = false;
             } else if (this.compMode == 'subject') {
-                for (let selectableItem of this.selectableList) {
-                    if (selectableItem.id == subjectStudy.study.id) {
-                        selectableItem.selected = false;
-                    }
-                }
+                let option: Option<Study> = this.optionList.find(opt => opt.value.id == subjectStudy.study.id) as Option<Study>;
+                if (option) option.disabled = false;
             }
         }
     }

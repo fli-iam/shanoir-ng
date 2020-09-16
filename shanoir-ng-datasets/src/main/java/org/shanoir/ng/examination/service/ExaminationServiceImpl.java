@@ -18,13 +18,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -57,37 +52,57 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-
-	@Autowired
-	private MicroserviceRequestsService microservicesRequestsService;
-
-
-	@Autowired
-	private RestTemplate restTemplate;
 	
 	@Autowired
-	private ExaminationMapper examinationMapper;
-	
+	private StudyUserRightsRepository rightsRepository;
+
+	@Autowired
+	private SolrService solrService;
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
+		Examination exam = examinationRepository.findOne(id);
+		List<Long> datasets = new ArrayList<>();
+
+		if (exam.getDatasetAcquisitions() != null) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				for (Dataset ds : acq.getDatasets()) {
+					datasets.add(ds.getId());
+				}
+			}
+		}
+		// Delete examination
 		examinationRepository.delete(id);
+		
+		for (Long dsId : datasets) {
+			solrService.deleteFromIndex(dsId);
+		}
 	}
 
 	@Value("${datasets-data}")
 	private String dataDir;
 
-
 	@Override
-	public Page<Examination> findPage(final Pageable pageable) {
-		// Get list of studies reachable by connected user
-		return examinationRepository.findByStudyIdIn(getStudiesForUser(), pageable);
+	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return examinationRepository.findAllByPreclinical(pageable, preclinical);
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return examinationRepository.findByStudyIdIn(studyIds, pageable);
+		}
 	}
 
 	@Override
 	public List<Examination> findBySubjectId(final Long subjectId) {
 		return examinationRepository.findBySubjectId(subjectId);
 	}
-
+	
+	@Override
+	public List<Examination> findByStudyId(Long studyId) {
+		return examinationRepository.findByStudyId(studyId);
+	}
+	
 	@Override
 	public Examination findById(final Long id) {
 		return examinationRepository.findOne(id);
@@ -101,11 +116,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 	
 	@Override
-	public Examination save(final ExaminationDTO examinationDTO) {
-		return save(examinationMapper.examinationDTOToExamination(examinationDTO));
-	}
-
-	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
 		if (examinationDb == null) {
@@ -115,45 +125,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationRepository.save(examinationDb);
 		return examinationDb;
 	}
-
-	/**
-	 * Get list of studies reachable by connected user.
-	 * 
-	 * @return list of study ids.
-	 */
-	private List<Long> getStudiesForUser() {
-		HttpEntity<Object> entity = null;
-		entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
-
-		// Request to study MS to get list of studies reachable by connected user
-		ResponseEntity<IdName[]> response = null;
-		try {
-			response = restTemplate.exchange(
-					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
-					entity, IdName[].class);
-		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - {}", e.getMessage());
-		}
-
-		final List<Long> studyIds = new ArrayList<>();
-		if (response != null) {
-			IdName[] studies = null;
-			if (HttpStatus.OK.equals(response.getStatusCode())
-					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-				studies = response.getBody();
-			} else {
-				LOG.error("Error on study microservice response - status code: {}",response.getStatusCode());
-			}
-
-			if (studies != null) {
-				for (IdName idNameDTO : studies) {
-					studyIds.add(idNameDTO.getId());
-				}
-			}
-		}
-		return studyIds;
-	}
-	
 
 	/**
 	 * Update some values of examination to save them in database.
@@ -176,12 +147,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
 		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
-	}
-
-	@Override
-	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
-		// Get list of studies reachable by connected user
-		return examinationRepository.findByStudyIdInAndPreclinical(getStudiesForUser(), isPreclinical, pageable);
 	}
 
 	@Override
@@ -210,6 +175,5 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public String getExtraDataFilePath(Long examinationId, String fileName) {
 		return dataDir + "/examination-" + examinationId + "/" + fileName;
 	}
-
 
 }

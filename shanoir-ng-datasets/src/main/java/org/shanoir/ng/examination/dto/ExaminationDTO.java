@@ -33,7 +33,7 @@ public class ExaminationDTO {
 
 	private Long id;
 
-	private IdName center;
+	private Long centerId;
 
 	private String comment;
 
@@ -42,9 +42,9 @@ public class ExaminationDTO {
 
 	private String note;
 
-	private IdName study;
+	private Long studyId;
 
-	private IdName subject;
+	private Long subjectId;
 
 	private Double subjectWeight;
 	
@@ -114,37 +114,6 @@ public class ExaminationDTO {
 		this.note = note;
 	}
 
-	public IdName getCenter() {
-		return center;
-	}
-
-	public void setCenter(final IdName center) {
-		this.center = center;
-	}
-
-	public IdName getStudy() {
-		return study;
-	}
-
-	public void setStudy(final IdName study) {
-		this.study = study;
-	}
-
-	/**
-	 * @return the subject
-	 */
-	public IdName getSubject() {
-		return subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(final IdName subject) {
-		this.subject = subject;
-	}
-
 	/**
 	 * @return the subjectWeight
 	 */
@@ -168,6 +137,30 @@ public class ExaminationDTO {
 		this.preclinical = preclinical;
 	}
 
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
+	}
+	
 	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
 		return instrumentBasedAssessmentList;
 	}

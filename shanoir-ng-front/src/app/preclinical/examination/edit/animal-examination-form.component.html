@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
+<div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<fieldset>
 			<ol>
 				<li>
-					<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
+					<label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/study/details/', examination.study?.id]">
@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.study?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="study" required formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects()" [compareWith]="compareEntities">
+									<select id="study" formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects($event)" [compareWith]="compareEntities">
 										<option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
 									</select>
 									<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</label>
+					<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/preclinical-subject/details/', animalSubjectId]">
@@ -66,8 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.subject?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select-box formControlName="subject" [(ngModel)]="examination.subject">
-										<select-option *ngFor="let subject of subjects" [value]="subject">{{subject.name}}</select-option>
+									<select-box formControlName="subject" [(ngModel)]="examination.subject" [optionArr]="subjects">
 									</select-box>
 									<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
 								</ng-template>
@@ -76,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
+					<label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/center/details/', examination.center?.id]">
@@ -89,7 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.center?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="center" required formControlName="center" [(ngModel)]="examination.center" [compareWith]="compareEntities">
+									<select id="center" formControlName="center" [(ngModel)]="examination.center" [compareWith]="compareEntities">
 										<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 									</select>
 									<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
@@ -112,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
+					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{examination.examinationDate | date: 'dd/MM/yyyy'}}

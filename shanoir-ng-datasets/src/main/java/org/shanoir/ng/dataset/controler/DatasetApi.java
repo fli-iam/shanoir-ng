@@ -95,7 +95,7 @@ public interface DatasetApi {
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns a datasets page", response = Page.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns a datasets page", response = Page.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
 			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
@@ -195,7 +195,7 @@ public interface DatasetApi {
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "/massiveDownload", produces = { "application/zip" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
     		@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
@@ -210,7 +210,7 @@ public interface DatasetApi {
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "/massiveDownloadByStudy", produces = { "application/zip" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
     		@ApiParam(value = "id of the study", required=true) @Valid
     		@RequestParam(value = "studyId", required = true) Long studyId,

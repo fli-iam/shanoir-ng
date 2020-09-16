@@ -12,9 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Option } from "../../../shared/select/select.component";
+import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../../utils/app.utils";
+
 export enum TherapyType {
-    DRUG = <any> "Drug",
-    RADIATION = <any> "Radiation",
-    SURGERY = <any> "Surgery",
-    ULTRASOUND = <any> "Ultrasound"
+    DRUG = "DRUG",
+    RADIATION = "RADIATION",
+    SURGERY = "SURGERY",
+    ULTRASOUND = "ULTRASOUND"
+
+} export namespace TherapyType {
+    
+    export function all(): Array<TherapyType> {
+        return allOfEnum<TherapyType>(TherapyType);
+    }
+
+    export function getLabel(type: TherapyType): string {
+        return capitalsAndUnderscoresToDisplayable(type);
+    }
+
+    export var options: Option<TherapyType>[] = all().map(prop => new Option<TherapyType>(prop, getLabel(prop)));
 }

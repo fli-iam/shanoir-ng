@@ -37,6 +37,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private filename: string;
     hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
+    protected downloading: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
@@ -63,7 +64,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                 this.dataset = dataset;
                 return;
             } else {
-                return this.studyRightsService.getMyRightsForStudy(dataset.studyId).then(rights => {
+                return this.studyRightsService.getMyRightsForStudy(dataset.study.id).then(rights => {
                     this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                     this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                     if (this.hasDownloadRight) this.loadDicomInMemory();
@@ -97,19 +98,20 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
     
     download(format: string) {
-        this.datasetService.download(this.dataset, format);
+        this.downloading = true;
+        this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
     }
 
     private loadDicomInMemory() {
         this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
-            this.dicomArchiveService.importFromZip(blobReponse.body)
-                .subscribe(response => {
-                    this.dicomArchiveService.extractFileDirectoryStructure()
-                    .subscribe(response => {
-                        this.initPapaya(response);
-                    });
-                });
+                this.dicomArchiveService.importFromZip(blobReponse.body)
+                    .then(response => {
+                            this.dicomArchiveService.extractFileDirectoryStructure()
+                            .then(response => {
+                                this.initPapaya(response);
+                            })
+                    })
         });
     }
 

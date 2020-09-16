@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../shanoir-ng-parent</relativePath>
+	</parent>
+
+	<artifactId>shanoir-ng-front</artifactId>
+	<packaging>pom</packaging>
+
+	<name>shanoir-ng-front</name>
+	<description>Front project for Shanoir-ng</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		<docker.image.prefix>shanoir-ng</docker.image.prefix>
+		<npm.executable>npm</npm.executable>
+		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
+		<nginx.webapp.directory.docker.compose>${basedir}/../docker-compose/nginx/webapp</nginx.webapp.directory.docker.compose>
+		<nginx.directory.docker.compose>${basedir}/../docker-compose/nginx</nginx.directory.docker.compose>
+		<sonar.skip>true</sonar.skip>
+		<npm.build.task>build:dev</npm.build.task>
+	</properties>
+
+	<build>
+		<plugins>
+	        <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+				    <execution>
+						<id>clean-webapp-directory</id>
+				        <phase>clean</phase>
+				        <goals>
+                    		<goal>run</goal>
+                		</goals>
+				        <configuration>
+				            <target>
+				                <delete dir="${nginx.webapp.directory}" />
+				            </target>
+				        </configuration>
+				    </execution>
+				</executions>
+			</plugin>
+			<plugin>
+	            <groupId>com.github.eirslett</groupId>
+	            <artifactId>frontend-maven-plugin</artifactId>
+	            <version>1.6</version>
+	
+	            <executions>
+	
+	                <execution>
+	                    <!-- optional: you don't really need execution ids,
+	                    but it looks nice in your build log. -->
+	                    <id>install node and npm</id>
+	                    <goals>
+	                        <goal>install-node-and-npm</goal>
+	                    </goals>
+	                    <configuration>
+	                        <nodeVersion>v6.2.2</nodeVersion>
+	                        <npmVersion>3.9.5</npmVersion>
+	                    </configuration>                        
+	                </execution>
+	
+	                <execution>
+	                    <id>npm install</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+	                    <!-- optional: default phase is "generate-resources" -->
+	                    <phase>generate-resources</phase>
+	                    <configuration>
+	                        <!-- optional: The default argument is actually
+	                        "install", so unless you need to run some other npm command,
+	                        you can remove this whole <configuration> section.
+	                        -->
+	                        <arguments>install</arguments>
+	                    </configuration>
+	                </execution>
+	
+	                <execution>
+	                    <id>npm run build</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+	                    <phase>generate-resources</phase>
+	                    <configuration>
+	                        <arguments>run ${npm.build.task}</arguments>
+	                    </configuration>
+	                </execution>
+	
+	            </executions>
+	        </plugin>
+            <plugin>
+	        	<artifactId>maven-resources-plugin</artifactId>
+	        	<executions>
+	          		<execution>
+	            		<id>copy-resources</id>
+	            		<phase>process-resources</phase>
+	            		<goals>
+	              			<goal>copy-resources</goal>
+	            		</goals>
+	            		<configuration>
+	              			<outputDirectory>${nginx.webapp.directory}</outputDirectory>
+	              			<resources>
+	                			<resource>
+	                  				<directory>${project.basedir}/dist</directory>
+	                  				<filtering>true</filtering>
+	                			</resource>
+	              			</resources>
+	            		</configuration>
+	          		</execution>
+	          		<execution>
+	            		<id>copy-resources-docker-compose</id>
+	            		<phase>process-resources</phase>
+	            		<goals>
+	              			<goal>copy-resources</goal>
+	            		</goals>
+	            		<configuration>
+	              			<outputDirectory>${nginx.webapp.directory.docker.compose}</outputDirectory>
+	              			<resources>
+	                			<resource>
+	                  				<directory>${project.basedir}/dist</directory>
+	                  				<filtering>true</filtering>
+	                			</resource>
+	              			</resources>
+	            		</configuration>
+	          		</execution>
+	          	</executions>
+	      	</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>1.7</version>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<configuration>
+						<target>
+							<copy file="../utils/entrypoint_common"
+								tofile="${nginx.directory.docker.compose}/entrypoint_common" />
+						</target>
+					</configuration>
+					<goals>
+						<goal>run</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+	    <profile>
+	        <id>platform-windows</id>
+	        <activation>
+	            <os>
+	                <family>windows</family>
+	            </os>
+	        </activation>
+	        <properties>
+	            <!-- Override the executable names for Windows -->
+	            <npm.executable>npm.cmd</npm.executable>
+	            <grunt.executable>grunt.cmd</grunt.executable>
+	            <bower.executable>bower.cmd</bower.executable>
+	        </properties>
+	    </profile>
+		<profile>
+			<id>qualif</id>
+			<properties>
+				<npm.build.task>build:qualif</npm.build.task>
+			</properties>
+		</profile>
+	</profiles>
+	
+</project>

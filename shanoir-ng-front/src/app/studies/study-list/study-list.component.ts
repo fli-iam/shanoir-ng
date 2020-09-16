@@ -30,7 +30,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
         private studyService: StudyService) {
@@ -47,27 +47,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getColumnDefs(): any[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
             {
-                headerName: "Start date", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.startDate);
+                headerName: "Start date", field: "startDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.startDate);
                 }
             },
             {
-                headerName: "End date", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.endDate);
+                headerName: "End date", field: "endDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.endDate);
                 }
             },
             {

@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.subject.service;
 
 import java.io.File;
@@ -20,10 +34,8 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,6 +90,26 @@ public class RabbitMQSubjectService {
 
 	@Autowired
 	SubjectRepository subjectRepository;
+
+	@Autowired
+	SubjectService subjectService;
+	
+	/**
+	 * This methods returns a list of subjects for a given study ID
+	 * @param studyId the study ID
+	 * @return a list of subjects
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE)
+	@RabbitHandler
+	public String getSubjectsForStudy(String studyId) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
+		} catch (Exception e) {
+			LOG.error("Error while serializing subjects for participants.tsv file.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
 	
 	/**
 	 * This methods allows to get the particpants.tsv file from BIDS/SEF import and deserialize it into subjects
@@ -88,10 +120,8 @@ public class RabbitMQSubjectService {
 	 * If an error occurs, a list of a single subject with no ID and only a name is sent back
 	 * @throws JsonProcessingException
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-	        value = @Queue(value = RabbitMQConfiguration.SUBJECTS_QUEUE, durable = "true"),
-	        exchange = @Exchange(value = RabbitMQConfiguration.SUBJECTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
+	@RabbitHandler
 	public String manageParticpants(String participantsFilePath) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		try {

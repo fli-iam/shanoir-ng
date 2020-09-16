@@ -15,6 +15,8 @@
 import { Center } from '../../centers/shared/center.model';
 import { ManufacturerModel } from './manufacturer-model.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { AcquisitionEquipmentService } from './acquisition-equipment.service';
+import { ServiceLocator } from '../../utils/locator.service';
 
 export class AcquisitionEquipment extends Entity {
     id: number;
@@ -22,4 +24,6 @@ export class AcquisitionEquipment extends Entity {
     center: Center;
     manufacturerModel: ManufacturerModel;
     compatible: boolean = false;
+
+    service: AcquisitionEquipmentService = ServiceLocator.injector.get(AcquisitionEquipmentService);
 }

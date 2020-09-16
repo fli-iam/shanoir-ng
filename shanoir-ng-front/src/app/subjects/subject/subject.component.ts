@@ -25,6 +25,7 @@ import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Option } from '../../shared/select/select.component';
 
 @Component({
     selector: 'subject-detail',
@@ -42,6 +43,18 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     firstName: string = "";
     lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+
+    catOptions: Option<ImagedObjectCategory>[] = [
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.LIVING_HUMAN_BEING, 'Living human being'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.HUMAN_CADAVER, 'Human cadaver'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.ANATOMICAL_PIECE, 'Anatomical piece')
+    ];
+
+    genderOptions: Option<string>[] = [
+        new Option<string>('F', 'Female'),
+        new Option<string>('M', 'Male'),
+    ];
 
     constructor(private route: ActivatedRoute,
             private subjectService: SubjectService,

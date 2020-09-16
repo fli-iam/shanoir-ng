@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
@@ -302,13 +307,16 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 *
 	 */
 	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D) {
+		if (converter == null) {
+			return;
+		}
 		String converterPath = convertersPath + converter.getName();
 		// Mcverter
-		if (converter != null && converter.isMcverter()) {
+		if (converter.isMcverter()) {
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
 			// Clidcm
-		} else if (converter != null && converter.isClidcm()) {
+		} else if (converter.isClidcm()) {
 			try {
 				conversionLogs += shanoirExec.clidcmExec(inputFolder, converterPath, outputFolder);
 			} catch (Exception e) {
@@ -321,9 +329,11 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			 */
 			createBvecAndBval(outputFolder);
 			// Dicom2Nifti
-		} else if (converter != null && converter.isDicom2Nifti()) {
+		} else if (converter.isDicom2Nifti()) {
 			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
 			// dcm2nii
+		} else if (converter.isDicomifier()) {
+			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
 		} else {
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
@@ -552,37 +562,37 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	/**
 	 * adapt to generated folders by dicom2nifti converter
 	 * 
-	 * @param converter
-	 * @param niiFiles
-	 * @param directory
+	 * @param existingFiles the currently existing files in the directory
+	 * @param directory the import directory
+	 * @param dataset the dataset we are importing
 	 * @return
 	 */
-	private List<File> niftiFileSortingDicom2Nifti(NIfTIConverter converter, List<File> niiFiles, File directory) {
+	private List<File> niftiFileSortingDicom2Nifti(List<File> existingFiles, File directory, Dataset dataset) {
 		// Have to adapt to generated folders by dicom2nifti converter
-		if (converter.isDicom2Nifti()) {
-			List<File> existingFiles = Arrays.asList(directory.listFiles());
-			// copy all files into the directory
-			for (File niiFile : niiFiles) {
-				ImportUtils.copyAllFiles(niiFile, directory);
-			}
-			// delete folder hierarchy created by dicomifier
-			for (File niiFile : niiFiles) {
-				try {
-					if (niiFile.isDirectory()) {
-						FileUtils.deleteDirectory(niiFile);
-					} else {
-						niiFile.delete();
-					}
-				} catch (Exception e) {
-					LOG.error("Error while deleting dicom2nifti generated folder {}", e.getMessage());
-				}
-			}
-			// nii files are the diff
-			niiFiles = diff(existingFiles, directory.getPath());
-		}
-		return niiFiles;
-	}
+		List<File> niiFiles = new ArrayList<>(FileUtils.listFiles(
+					directory,
+					new RegexFileFilter("^(.*?)\\.(nii|json)"),
+					DirectoryFileFilter.DIRECTORY
+				));
 
+		// Get subject folder to delete it after
+		File subjectFolder = diff(existingFiles, directory.getPath()).get(0);
+
+		for (File file : niiFiles) {
+			try {
+				// Copy all nifti files
+				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				LOG.error("Error while copying files", e);
+			}
+		}
+		// Delete non used subject folder
+		if (!FileUtils.deleteQuietly(subjectFolder)) {
+			LOG.error("could not delete" + subjectFolder.getAbsolutePath());
+		}
+		
+		return diff(existingFiles, directory.getPath()).stream().filter(file -> file.isFile()).collect(Collectors.toList());
+	}
 
 	/**
 	 * This method generates the nifti files of serie  in proper datasets for an entire serie.
@@ -623,7 +633,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						} catch (SecurityException e) {
 							LOG.error(e.getMessage());
 						}
-						List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles, directory, serieIDFolderFile);
+						List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, directory, dataset) : niftiFileSorting(existingFiles, directory, serieIDFolderFile);
 						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
 
@@ -641,7 +651,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					} catch (SecurityException e) {
 						LOG.error(e.getMessage());
 					}
-					List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles, serieIDFolderFile, serieIDFolderFile);
+					List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, serieIDFolderFile, dataset) : niftiFileSorting(existingFiles, serieIDFolderFile, serieIDFolderFile);
+
 					constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 				}
 			}

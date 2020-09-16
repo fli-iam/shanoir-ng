@@ -13,26 +13,28 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { Option } from '../../shared/select/select.component';
 
 @Component({
     selector: 'upload-extra-data',
     templateUrl: 'upload-extra-data.component.html'
 })
 
-export class UploadExtraDataComponent implements OnInit {
+export class UploadExtraDataComponent implements OnInit, OnChanges {
 
     public uploadExtraDataForm: FormGroup;
     public mode: "view" | "edit" | "create";
     fileToUpload: File = null;
     @Input() examination: Examination;
     @Input() studies:  IdName[];
+    public studyOptions: Option<number>[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
     examinationStudyId = null;
@@ -50,6 +52,18 @@ export class UploadExtraDataComponent implements OnInit {
         this.buildForm();
         if (this.keycloakService.isUserAdminOrExpert) {
             this.canModify = true;
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.studies) {
+            this.studyOptions = [];
+            if (this.studies) {
+                this.studies.forEach(study => {
+                    let option: Option<number> = new Option<number>(study.id, study.name);
+                    this.studyOptions.push(option);
+                })
+            }
         }
     }
 

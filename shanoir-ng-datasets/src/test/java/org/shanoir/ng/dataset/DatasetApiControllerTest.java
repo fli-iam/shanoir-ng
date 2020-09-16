@@ -40,13 +40,18 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,8 +64,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for dataset controller.
@@ -76,8 +80,6 @@ public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -96,7 +98,7 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private WADODownloaderService downloader;
-
+	
 	@MockBean
 	private DatasetSecurityService datasetSecurityService;
 	
@@ -109,13 +111,20 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private BIDSServiceImpl bidsService;
 
+	@MockBean
+	private SubjectRepository subjectRepository;
+	private Subject subject = new Subject(3L, "name");
+	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
+	private DatasetMetadata updatedMetadata = new DatasetMetadata();
+
 	@Before
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+		dsAcq.setRank(2);
+		dsAcq.setSortingIndex(2);
+		updatedMetadata.setComment("comment");
 	}
 
 	@Test
@@ -140,9 +149,10 @@ public class DatasetApiControllerTest {
 	@Test
 	@WithMockUser
 	public void updateDatasetTest() throws Exception {
-		String json = gson.toJson(ModelsUtil.createMrDataset());
-		// Cheat to add dataset type into json
-		json = json.substring(0, json.length() - 1) + ",\"type\":\"Mr\"}";
+		ObjectMapper mapper = new ObjectMapper();
+		Dataset ds = ModelsUtil.createMrDataset();
+		ds.setId(1L);
+		String json = mapper.writeValueAsString(ds);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
 	}
@@ -175,6 +185,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -192,7 +207,7 @@ public class DatasetApiControllerTest {
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("test")));
+		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 		// THEN all datasets are exported
 	}
 
@@ -207,6 +222,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -224,7 +244,7 @@ public class DatasetApiControllerTest {
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("test")));
+		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 
 
 		// THEN all datasets are exported
@@ -248,6 +268,30 @@ public class DatasetApiControllerTest {
 		// THEN we expect an error
 	}
 
+
+	@Test
+	public void testMassiveDownloadByDatasetsIdToMuchIds() {
+		// GIVEN a list of datasets to export
+		StringBuilder strb = new StringBuilder();
+		for (int i = 0; i < 55 ; i++) {
+			strb.append(i).append(",");
+		}
+		String ids = strb.substring(0, strb.length() -1);
+
+		// WHEN we export all the datasets with no datasets ID
+		try {
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+					.param("format", "nii")
+					.param("datasetIds", ids))
+			.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can download less than 50 datasets.\",\"details\":null}");
+		}
+
+
+		// THEN we expect an error
+	}
+
 	@Test
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
@@ -258,6 +302,11 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();

@@ -19,8 +19,11 @@ import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import 'rxjs/add/operator/map'
+
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -35,8 +38,10 @@ export class DatasetService extends EntityService<Dataset> {
         super(http)
     }
 
+    private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+
     getEntityInstance(entity: Dataset) { 
-        return AppUtils.getEntityInstance(entity);
+        return AppUtils.getDatasetInstance(entity.type);
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
@@ -47,8 +52,8 @@ export class DatasetService extends EntityService<Dataset> {
                 }
                 return page;
             })
-            .map(this.mapPage)
-            .toPromise();
+            .toPromise()
+            .then(this.mapPage);
     }
 
     public downloadDatasets(ids: number[], format: string) {
@@ -75,9 +80,9 @@ export class DatasetService extends EntityService<Dataset> {
         )
     }
 
-    download(dataset: Dataset, format: string): void {
+    download(dataset: Dataset, format: string): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        this.downloadToBlob(dataset.id, format).subscribe(
+        return this.downloadToBlob(dataset.id, format).toPromise().then(
             response => {
                 this.downloadIntoBrowser(response);
             }
@@ -105,11 +110,12 @@ export class DatasetService extends EntityService<Dataset> {
         return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
     }
 
-    prepareUrl(id: number, url: string, format: string): Observable<string> {
+    prepareUrl(id: number, url: string, format: string): Observable<any> {
         if (!id) throw Error('Cannot get the urls of a dataset without an id');
         // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
 
-        let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
+        let httpOptions: any = Object.assign( { responseType: 'text' }, this.httpOptions);
+        
         return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
@@ -121,5 +127,17 @@ export class DatasetService extends EntityService<Dataset> {
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    protected mapEntity = (dto: DatasetDTO): Promise<Dataset> => {
+        let result: Dataset = AppUtils.getDatasetInstance(dto.type);
+        this.datasetDTOService.toEntity(dto, result);
+        return Promise.resolve(result);
+    }
+
+    protected mapEntityList = (dtos: DatasetDTO[]): Promise<Dataset[]> => {
+        let result: Dataset[] = [];
+        if (dtos) this.datasetDTOService.toEntityList(dtos, result);
+        return Promise.resolve(result);
     }
 }

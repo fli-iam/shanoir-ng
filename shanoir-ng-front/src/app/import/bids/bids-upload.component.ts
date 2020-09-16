@@ -17,7 +17,6 @@ import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportJob } from '../shared/dicom-data.model';
-import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { StudyService } from '../../studies/shared/study.service';
 
@@ -40,11 +39,14 @@ export class BidsUploadComponent {
             private importService: ImportService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService,
             private studyService: StudyService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+        });
+        breadcrumbsService.currentStep.importStart = true;
+        breadcrumbsService.currentStep.importMode = 'BIDS';
     }
 
     public uploadArchive(fileEvent: any): void {
@@ -78,6 +80,6 @@ export class BidsUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    data = {'frontStudyId': 10,'studyCardId': 68,'frontAcquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
+    data = {'studyId': 10,'studyCardId': 68,'acquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
 }
     

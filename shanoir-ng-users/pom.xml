@@ -138,6 +138,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
 									tofile="${basedir}/../docker-compose/users/${project.artifactId}.jar" />
+								<copy file="../utils/entrypoint_common"
+									tofile="${basedir}/../docker-compose/users/entrypoint_common" />
+								<copy file="../utils/oneshot"
+									tofile="${basedir}/../docker-compose/users/oneshot" />
+								<chmod perm="+x" file="${basedir}/../docker-compose/users/oneshot" />
 							</target>
 						</configuration>
 						<goals>

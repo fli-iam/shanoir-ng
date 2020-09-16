@@ -82,7 +82,6 @@ public class StudyCardServiceTest {
 	public void findByIdTest() {
 		final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
 		Assert.assertNotNull(studyCard);
-		Assert.assertTrue(ModelsUtil.STUDY_CARD_NAME.equals(studyCard.getName()));
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 	}

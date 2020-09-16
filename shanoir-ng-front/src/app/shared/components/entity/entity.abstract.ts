@@ -17,6 +17,20 @@ import { EntityService } from "./entity.abstract.service";
 export abstract class Entity {
 
     abstract id: number;
+    
+    abstract service: EntityService<Entity>;
+
+    create(): Promise<Entity> {
+        return this.service.create(this);
+    }
+
+    update(): Promise<void> {
+        return this.service.update(this.id, this);
+    }
+
+    delete(): Promise<void> {
+        return this.service.delete(this.id);
+    }
 
     protected getIgnoreList() { return ['service', '_links']; }
 

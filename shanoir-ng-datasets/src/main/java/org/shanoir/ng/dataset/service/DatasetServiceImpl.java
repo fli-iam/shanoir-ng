@@ -19,8 +19,12 @@ import java.util.List;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -45,6 +49,12 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
 
+	@Autowired
+	private ShanoirEventService shanoirEventService;
+
+	@Autowired
+	private SolrService solrService;
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Dataset datasetDb = repository.findOne(id);
@@ -52,6 +62,8 @@ public class DatasetServiceImpl implements DatasetService {
 			throw new EntityNotFoundException(Dataset.class, id);
 		}
 		repository.delete(id);
+		solrService.deleteFromIndex(id);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
 
 	@Override
@@ -66,7 +78,10 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset create(final Dataset dataset) {
-		return repository.save(dataset);
+		Dataset ds = repository.save(dataset);
+		solrService.indexDataset(ds.getId());
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		return ds;
 	}
 
 	@Override
@@ -76,7 +91,9 @@ public class DatasetServiceImpl implements DatasetService {
 			throw new EntityNotFoundException(Dataset.class, dataset.getId());
 		}
 		updateDatasetValues(datasetDb, dataset);
-		return repository.save(datasetDb);
+		Dataset ds = repository.save(datasetDb);
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		return ds;
 	}
 
 	
@@ -90,7 +107,11 @@ public class DatasetServiceImpl implements DatasetService {
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
-		datasetDb.setStudyId(dataset.getStudyId());
+		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
+		//datasetDb.setProcessings(dataset.getProcessings());
+		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
+		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
+		//datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		if (dataset instanceof MrDataset) {
@@ -113,13 +134,13 @@ public class DatasetServiceImpl implements DatasetService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
-			return repository.findByStudyIdIn(studyIds, pageable);
+			return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
 		}
 	}
 
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
-		return Utils.toList(repository.findByStudyId(studyId));
+		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
 	}
 
 }

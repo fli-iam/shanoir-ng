@@ -37,16 +37,6 @@ export class SubjectService extends EntityService<Subject> {
         .toPromise();
     }
 
-    getCentersNames(): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
-    }
-
-    getCentersNamesForExamination(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
-    }
-
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
         return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
             .toPromise();

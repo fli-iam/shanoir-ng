@@ -132,7 +132,10 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "referencedDatasetForSuperimposition", cascade = CascadeType.ALL)
 	private List<Dataset> referencedDatasetForSuperimpositionChildrenList;
 
-	/** The study for which this dataset is a result. */
+	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
+	private Long importedStudyId;
+	
+	/** Subject. */
 	private Long studyId;
 
 	/** Subject. */
@@ -251,9 +254,11 @@ public abstract class Dataset extends AbstractEntity {
 			if (creationDate != null) {
 				result.append(" ").append(creationDate.toString());
 			}
-			String modalityType = originMetadata.getDatasetModalityType().name();
-			if (updatedMetadata != null) {
+			String modalityType = "?";
+			if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
 				modalityType = updatedMetadata.getDatasetModalityType().name();
+			} else if (originMetadata != null && originMetadata.getDatasetModalityType() != null) {
+				modalityType = originMetadata.getDatasetModalityType().name();
 			}
 			result.append(" ").append(modalityType.split("_")[0]);
 			return result.toString();
@@ -264,6 +269,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the originMetadata
 	 */
 	public DatasetMetadata getOriginMetadata() {
+		if (originMetadata == null) originMetadata = new DatasetMetadata();
 		return originMetadata;
 	}
 
@@ -309,17 +315,12 @@ public abstract class Dataset extends AbstractEntity {
 	/**
 	 * @return the studyId
 	 */
+	@Transient
 	public Long getStudyId() {
-		return studyId;
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return null;
+		return getDatasetAcquisition().getExamination().getStudyId();
 	}
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
 
 	/**
 	 * @return the subjectId
@@ -336,10 +337,15 @@ public abstract class Dataset extends AbstractEntity {
 		this.subjectId = subjectId;
 	}
 
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
 	/**
 	 * @return the updatedMetadata
 	 */
 	public DatasetMetadata getUpdatedMetadata() {
+		if (updatedMetadata == null) updatedMetadata = new DatasetMetadata();
 		return updatedMetadata;
 	}
 
@@ -358,5 +364,23 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@Transient
 	public abstract String getType();
+
+	/**
+	 * You probably want to use getStudyId() instead.
+	 * @return
+	 */
+	@Deprecated
+	public Long getImportedStudyId() {
+		return importedStudyId;
+	}
+
+	/**
+	 * If you want to move the dataset to another study, change its examination.
+	 * @param importedStudyId
+	 */
+	@Deprecated
+	public void setImportedStudyId(Long importedStudyId) {
+		this.importedStudyId = importedStudyId;
+	}
 
 }

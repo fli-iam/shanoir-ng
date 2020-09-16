@@ -363,23 +363,49 @@ public class StudySecurityService {
      * @param rightStr the right
      * @return true or false
      */
-    public boolean checkRightOnEverySubjectStudyList(Iterable<SubjectStudy> subjectStudyList, String rightStr) {
-    	if (subjectStudyList == null) {
+	public boolean checkRightOnEverySubjectStudyList(Iterable<SubjectStudy> subjectStudyList, String rightStr) {
+		if (subjectStudyList == null) {
 			return false;
 		}
-    	StudyUserRight right = StudyUserRight.valueOf(rightStr);
-    	List<Long> ids = new ArrayList<>();
-    	for (SubjectStudy subjectStudy : subjectStudyList) {
-    		ids.add(subjectStudy.getStudy().getId());
-    	}
-    	int nbStudies = 0;
-    	for (Study study : studyRepository.findAll(ids)) {
-    		nbStudies ++;
-    		if (!hasPrivilege(study, right)) {
+		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		List<Long> ids = new ArrayList<>();
+		for (SubjectStudy subjectStudy : subjectStudyList) {
+			ids.add(subjectStudy.getStudy().getId());
+		}
+		int nbStudies = 0;
+		for (Study study : studyRepository.findAll(ids)) {
+			nbStudies++;
+			if (!hasPrivilege(study, right)) {
 				return false;
 			}
+		}
+		return nbStudies == ids.size();
+	}
+    
+    
+    /**
+     * Verifies that study's studyUsers link to the correct study.
+     * @param study
+     * @return
+     */
+    public boolean studyUsersMatchStudy(Study study) {
+    	for (StudyUser su : study.getStudyUserList()) {
+    		if (su.getStudy() != null && su.getStudy().getId() != null && su.getStudy().getId() != study.getId()) return false;
     	}
-    	return nbStudies == ids.size();
+    	return true;
+    }
+    
+    
+    /**
+     * Verifies that study's studyUsers link to no study.
+     * @param study
+     * @return
+     */
+    public boolean studyUsersStudyNull(Study study) {
+    	for (StudyUser su : study.getStudyUserList()) {
+    		if (!(su.getStudy() == null || su.getStudy().getId() == null)) return false;
+    	}
+    	return true;
     }
     
     
@@ -390,12 +416,12 @@ public class StudySecurityService {
      * @param neededRight
      * @return true or false
      */
-    private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
-    	if (study == null) {
+	private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
+		if (study == null) {
 			throw new IllegalArgumentException("study cannot be null");
 		}
-    	return hasPrivilege(study.getStudyUserList(), neededRight);
-    }
+		return hasPrivilege(study.getStudyUserList(), neededRight);
+	}
     
     /**
      * Check that the connected user has this right on this study.
@@ -404,20 +430,19 @@ public class StudySecurityService {
      * @param neededRight
      * @return true or false
      */
-    private boolean hasPrivilege(List<StudyUser> studyUserList, StudyUserRight neededRight) {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+	private boolean hasPrivilege(List<StudyUser> studyUserList, StudyUserRight neededRight) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
 		Long userId = KeycloakUtil.getTokenUserId();
 		if (studyUserList == null) {
 			return false;
 		}
-		StudyUser studyUser = studyUserList.stream()
-			.filter(su -> userId.equals(su.getUserId()))
-			.findAny().orElse(null);
+		StudyUser studyUser = studyUserList.stream().filter(su -> userId.equals(su.getUserId())).findAny().orElse(null);
 		if (studyUser == null) {
 			return false;
 		}
 		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight);
-    }
+	}
+
 }

@@ -37,7 +37,7 @@ import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
@@ -56,6 +56,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ public class ImporterService {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
 	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
 	private DicomPersisterService dicomPersisterService;
@@ -107,6 +108,7 @@ public class ImporterService {
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
 			if (examination != null) {
@@ -129,9 +131,12 @@ public class ImporterService {
 			} else {
 				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
+
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Successfully created datasets for examination " + examination.getId());
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+			+": Successfully created datasets for subject " + importJob.getSubjectName()
+			+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
 			// Create BIDS folder
@@ -176,17 +181,16 @@ public class ImporterService {
 		}
 	}
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
-		// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-		if (serie.getModality() != null
-				&& serie.getDatasets() != null
-				&& !serie.getDatasets().isEmpty()
-				&& serie.getDatasets().get(0).getExpressionFormats() != null
-				&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()) {
+		if (checkSerieForDicomImages(serie)) {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
+			// TODO: put studyCard in bruker import
+			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
+				datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+			}
 			// Persist Serie in Shanoir DB
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 			long startTime = System.currentTimeMillis();
 			// Persist Dicom images in Shanoir Pacs
 			dicomPersisterService.persistAllForSerie(serie);
@@ -195,7 +199,25 @@ public class ImporterService {
 			LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
 					+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
 					+ "(" + serie.getSeriesDescription() + ")");
+		} else {
+			LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");
 		}
+	}
+	
+	/**
+	 * Added Temporary check on serie in order not to generate dataset acquisition for series without images.
+	 * 
+	 * @param serie
+	 * @return
+	 */
+	private boolean checkSerieForDicomImages(Serie serie) {
+		return serie.getModality() != null
+			&& serie.getDatasets() != null
+			&& !serie.getDatasets().isEmpty()
+			&& serie.getDatasets().get(0).getExpressionFormats() != null
+			&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
+			&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
+			&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
 	}
 
 
@@ -241,7 +263,7 @@ public class ImporterService {
 			Examination examination = examinationService.findById(importJob.getExaminationId());
 
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -328,7 +350,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				datasetToCreate.setStudyId(importJob.getFrontStudyId());
+				//datasetToCreate.setStudyId(importJob.getStudyId());
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
@@ -337,7 +359,7 @@ public class ImporterService {
 			}
 
 			datasetAcquisition.setDatasets(datasets);
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			datasetAcquisitionService.create(datasetAcquisition);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");
@@ -346,12 +368,9 @@ public class ImporterService {
 			// Complete BIDS with data
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				LOG.error("Something went wrong creating the bids data: ", e);
 			}
-
-			//} catch (ShanoirException exc) {
-			//  Do something specific about ShanoirException when trhown
 		} catch (Exception e) {
 			LOG.error("Error while importing EEG: ", e);
 			event.setStatus(ShanoirEvent.ERROR);

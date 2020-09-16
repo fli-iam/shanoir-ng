@@ -14,8 +14,14 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
@@ -25,6 +31,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -47,9 +54,6 @@ public class StudyCard extends HalEntity {
 	/** The acquisition equipment. */
 	private Long acquisitionEquipmentId;
 
-	/** The center of the study card. */
-	private Long centerId;
-
 	/** A studycard might be disabled */
 	private boolean disabled;
 
@@ -64,6 +68,12 @@ public class StudyCard extends HalEntity {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name="study_card_id")
+	private List<StudyCardRule> rules;
+	
+	private Long lastEditTimestamp;
 
 	/**
 	 * Init HATEOAS links
@@ -73,94 +83,60 @@ public class StudyCard extends HalEntity {
 		this.addLink(Links.REL_SELF, "studycard/" + getId());
 	}
 
-	/**
-	 * @return the acquisitionEquipmentId
-	 */
 	public Long getAcquisitionEquipmentId() {
 		return acquisitionEquipmentId;
 	}
 
-	/**
-	 * @param acquisitionEquipmentId
-	 *            the acquisitionEquipmentId to set
-	 */
 	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 
-	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
-
-	/**
-	 * @param centerId
-	 *            the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
-
-	/**
-	 * @return the disabled
-	 */
 	public boolean isDisabled() {
 		return disabled;
 	}
 
-	/**
-	 * @param disabled
-	 *            the disabled to set
-	 */
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
 
-	/**
-	 * @return the name
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * @return the niftiConverterId
-	 */
 	public Long getNiftiConverterId() {
 		return niftiConverterId;
 	}
 
-	/**
-	 * @param niftiConverterId
-	 *            the niftiConverterId to set
-	 */
 	public void setNiftiConverterId(Long niftiConverterId) {
 		this.niftiConverterId = niftiConverterId;
 	}
 
-	/**
-	 * @return the studyId
-	 */
 	public Long getStudyId() {
 		return studyId;
 	}
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
 
+	public List<StudyCardRule> getRules() {
+		return rules;
+	}
+
+	public void setRules(List<StudyCardRule> rules) {
+		this.rules = rules;
+	}
+
+	public Long getLastEditTimestamp() {
+		return lastEditTimestamp;
+	}
+
+	public void setLastEditTimestamp(Long lastEditTimestamp) {
+		this.lastEditTimestamp = lastEditTimestamp;
+	}
+	
 }

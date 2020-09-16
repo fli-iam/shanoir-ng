@@ -16,15 +16,20 @@ import { EntityListComponent } from "./entity-list.component.abstract";
 import { Entity } from "./entity.abstract";
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
-import { OnInit } from "@angular/core";
+import { OnInit, Directive } from "@angular/core";
 
-export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit{
+@Directive()
+export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
     private entitiesPromise: Promise<void>;
     private browserPaging: BrowserPaging<T>;
-    private entities: T[];
+    protected entities: T[];
 
     ngOnInit() {
+        this.loadEntities();
+    }
+    
+    private loadEntities() {
         this.entitiesPromise = this.getEntities().then((entities) => {
             this.entities = entities;
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
@@ -33,16 +38,16 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.manageAfterAdd();
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<T>> {
+    getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
         return new Promise((resolve, reject) => {
             this.entitiesPromise.then(() => {
-                if(this.browserPaging == null) {
-                    reject('Error while loading table data');
-                    return
+                if (forceRefresh) {
+                    this.loadEntities();
                 }
-                this.browserPaging.setItems(this.entities);
                 resolve(this.browserPaging.getPage(pageable));
-            }).catch(reject);
+            }).catch(reason => {
+                reject(reason);
+            });
         });
     }
 

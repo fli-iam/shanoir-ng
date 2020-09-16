@@ -5,10 +5,10 @@
   "resetPasswordAllowed" : true,
   "passwordPolicy" : "hashIterations and length and specialChars and digits and upperCase and lowerCase",
   "smtpServer" : {
-    "host" : "SMTP_HOST",
+    "host" : "SHANOIR_SMTP_HOST",
     "from" : "SHANOIR_ADMIN_EMAIL",
     "fromDisplayName" : "SHANOIR_ADMIN_NAME",
-    "port" : "SMTP_PORT"
+    "port" : "25"
   },
 
   "roles": {
@@ -39,10 +39,10 @@
     {
       "clientId": "shanoir-ng-front",
       "redirectUris": [
-        "https://shanoir-ng-nginx/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [
-        "https://shanoir-ng-nginx"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
       ],
       "directAccessGrantsEnabled": true,
       "publicClient": true,

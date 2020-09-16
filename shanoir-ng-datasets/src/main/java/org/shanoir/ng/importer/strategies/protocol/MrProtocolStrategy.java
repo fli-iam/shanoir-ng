@@ -210,7 +210,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		mrProtocol.setPatientPosition(patientPosition);
 
 		Field[] fieldArrayMrProtocol = mrProtocol.getClass().getDeclaredFields();
-		Field[] fieldArrayMrProtocolMetadata = mrProtocol.getOriginMetadata().getClass().getDeclaredFields();
+		Field[] fieldArrayMrProtocolMetadata = new MrProtocolMetadata().getClass().getDeclaredFields();
 		
 	    SortedSet<Field> fields = new TreeSet<>(new FieldComparator());
 	    fields.addAll(Arrays.asList(concat(fieldArrayMrProtocol, fieldArrayMrProtocolMetadata)));

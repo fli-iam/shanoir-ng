@@ -19,11 +19,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <node 
             *ngFor="let patient of patients" 
             [label]="patient.patientName" 
-            pictoUrl="/assets/images/icons/user.png" 
+            awesome="fas fa-user"
             (labelClick)="showPatientDetails($event)"
             [nodeParams]="patient"
             [class.selected]="detailedPatient == patient"
-            deploy=true>
+            deploy=true
+            buttonPicto="fa fa-eye"
+            (buttonClick)="showPatientDetails($event)">
                 <node 
                     *ngFor="let study of patient.studies" 
                     [(label)]="study.studyDescription"
@@ -31,20 +33,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [nodeParams]="study"
                     (chkbxChange)="onPatientUpdate()"
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
-                    pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
+                    awesome="fa fa-procedures" 
                     hasBox="true"
                     deploy=true>
                         <node 
                             *ngFor="let serie of study.series" 
                             [label]="serie.seriesDescription" 
-                            pictoUrl="/assets/images/icons/medical/brain.png" 
+                            awesome="fa fa-brain" 
                             hasBox="true" 
                             [(ngModel)]="serie.selected"  
                             [nodeParams]="serie"
                             (chkbxChange)="onPatientUpdate()"
-                            (labelClick)="showSerieDetails($event); initPapaya(serie);"
+                            (labelClick)="showSerieDetails($event, serie);"
                             [class.selected]="detailedSerie == serie"
-                            [ngModelOptions]="{standalone: true}">
+                            [ngModelOptions]="{standalone: true}"
+                            buttonPicto="fa fa-eye"
+                            (buttonClick)="showSerieDetails($event)">
                         </node>
                 </node>
         </node>
@@ -74,6 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
+        <papaya [params]="papayaParams"></papaya>
         <table>
             <tr class="item">
                 <td class="label">Id</td>
@@ -108,7 +113,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
             </tr>
         </table>
-        <papaya [params]="papayaParams"></papaya>
     </div>     
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

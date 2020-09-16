@@ -1,4 +1,4 @@
-import 'hammerjs';
+
 
 // import 'buffer';
 

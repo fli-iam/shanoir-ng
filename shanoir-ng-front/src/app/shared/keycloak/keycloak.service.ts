@@ -15,6 +15,9 @@
 import { Injectable } from '@angular/core';
 import { process } from '../../process';
 
+import * as AppUtils from '../../utils/app.utils';
+
+
 declare var Keycloak: any;
 
 @Injectable()
@@ -31,7 +34,7 @@ export class KeycloakService {
         }
 
         const keycloakAuth: any = Keycloak({
-            url: process.env.KEYCLOAK_BASE_URL,
+            url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
             clientId: 'shanoir-ng-front',
         });
@@ -45,7 +48,7 @@ export class KeycloakService {
                     // Connected user id
                     KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
                     KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
-                        + process.env.LOGOUT_REDIRECT_URL;
+                        + AppUtils.LOGOUT_REDIRECT_URL;
                     resolve();
                 })
                 .error(() => {

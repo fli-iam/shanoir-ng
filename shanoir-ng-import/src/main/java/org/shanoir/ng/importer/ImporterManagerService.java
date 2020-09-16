@@ -34,6 +34,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -94,9 +95,6 @@ public class ImporterManagerService {
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
-	@Value("${ms.url.shanoir-ng-datasets}")
-	private String datasetsMsUrl;
-	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
 		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
@@ -118,8 +116,13 @@ public class ImporterManagerService {
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
 				// convert instances to images, as already done after zip file upload
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
-			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
+			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
+				// convert instances to images, as already done after zip file upload
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			} else if (importJob.isFromDicomZip()) {
+				// images creation and analyze of dicom files has been done after upload already
+				importJobDir = new File(importJob.getWorkFolder());				
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
@@ -136,7 +139,7 @@ public class ImporterManagerService {
 						throw new ShanoirException("Error during anonymization.");
 					}
 				}
-				Long converterId = importJob.getFrontConverterId();
+				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
 	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
@@ -144,7 +147,7 @@ public class ImporterManagerService {
 	            		KeycloakUtil.getTokenUserId());
 	            return message;
 	        });
-			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
 		} catch (ShanoirException | FileNotFoundException | AmqpException | JsonProcessingException e) {

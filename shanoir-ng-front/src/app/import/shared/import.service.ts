@@ -65,7 +65,7 @@ export class ImportService {
     downloadImage(url: string, path: string): Promise<ArrayBuffer> {
         if (!url) throw Error('Cannot download a image without an url');
         return this.http.get(url,
-            { observe: 'response', params: { path: path }, responseType: 'arraybuffer' }
+            { observe: 'response', params: { path: encodeURIComponent(path) }, responseType: 'arraybuffer' }
             ).map(response => response.body).toPromise();
     }
 

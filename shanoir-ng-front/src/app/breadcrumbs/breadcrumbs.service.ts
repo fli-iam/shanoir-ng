@@ -17,7 +17,6 @@ import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Event, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { Entity } from '../shared/components/entity/entity.abstract';
 
 @Injectable()
 export class BreadcrumbsService {
@@ -96,6 +95,14 @@ export class BreadcrumbsService {
         this.nextMilestone = true;
         // this.saveSession();
     }
+
+    public resetMilestone() {
+        this.nextMilestone = false;
+    }
+
+    public currentStepAsMilestone() {
+        this.processMilestone();
+    }
     
     private processMilestone() {
         this.currentStep.milestone = true;
@@ -116,8 +123,10 @@ export class BreadcrumbsService {
         }
     }
 
-    public goBack() {
-        history.go(-1);
+    public goBack(nb?: number) {
+        if (nb == undefined) nb = 1;
+        else if (nb == null || nb <= 0) return;
+        history.go(-1 * nb);
     }
 
     public get currentStep(): Step {
@@ -174,6 +183,14 @@ export class BreadcrumbsService {
     //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
     //     this.ignoreNavigationEnd = true;
     // }
+
+    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return this.steps[i].importMode;
+        }
+        return null;
+    }
+
 }
 
 export class Step {
@@ -196,7 +213,6 @@ export class Step {
     // }
 
     // stringify(): string {
-    //     console.log('stringify')
     //     let ignoreList: string[] = ['onSaveSubject'];
     //     let replacer = (key, value) => {
     //         if (ignoreList.indexOf(key) > -1) return undefined;
@@ -212,18 +228,19 @@ export class Step {
     public displayWaitStatus: boolean = true;
     public prefilled: any[] = [];
     public waitStep: Step;
-    private onSaveSubject: Subject<Entity> = new Subject<Entity>();
+    private onSaveSubject: Subject<any> = new Subject<any>();
     public milestone: boolean = false;
-    public entity: Entity;
+    public entity: any;
     public data: any = {};
     public importStart: boolean = false;
+    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
 
-    private onSave(): Subject<Entity> {
+    private onSave(): Subject<any> {
         this.subscribers++;
         return this.onSaveSubject;
     }
 
-    public notifySave(entity: Entity) {
+    public notifySave(entity: any) {
         this.onSaveSubject.next(entity);
         this.subscribers = 0;
     }
@@ -236,7 +253,7 @@ export class Step {
         return this.waitStep && step.route == this.waitStep.route;
     }
 
-    public waitFor(step: Step, displayWaitStatus: boolean = true): Subject<Entity> {
+    public waitFor(step: Step, displayWaitStatus: boolean = true): Subject<any> {
         if (displayWaitStatus != undefined) this.displayWaitStatus = displayWaitStatus;
         this.waitStep = step;
         return step.onSave();

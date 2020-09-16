@@ -198,8 +198,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				if (intgggg % 2 == 1) {
 					String action = anonymizationMap.get(PRIVATE_TAGS);
 					String value = datasetAttributes.getString(tagInt);
-					if (value != null && !value.isEmpty()) {
-						checkForPHI(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value);
+					// only act below in case of K: keep, if X: delete for private tags, no need
+					if (value != null && !value.isEmpty() && action.equals("K")) {
+						action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value, action);
 						action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
 					}
 					anonymizeTag(tagInt, action, datasetAttributes);
@@ -286,28 +287,35 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @param value
 	 * @throws Exception
 	 */
-	private void checkForPHI(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
-			String patientBirthDateAttr, int tagInt, String value) throws Exception {
+	private String checkForPHIInPrivateTags(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
+			String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
 		// check for patient name elements
 		for (int i = 0; i < patientNameArrayAttr.length; i++) {
 			String patientNamePart = patientNameArrayAttr[i];
-			checkContains(tagInt, value, patientNamePart);
+			if(checkTagContainsValuePHI(tagInt, value, patientNamePart)) {
+				return "X";
+			}
 		}
-		checkContains(tagInt, value, patientIDAttr);
-		checkContains(tagInt, value, patientBirthNameAttr);
-		checkContains(tagInt, value, patientBirthDateAttr);
+		if (checkTagContainsValuePHI(tagInt, value, patientIDAttr)
+			|| checkTagContainsValuePHI(tagInt, value, patientBirthNameAttr)
+			|| checkTagContainsValuePHI(tagInt, value, patientBirthDateAttr)) {
+			return "X";
+		}
+		return action;
 	}
 
 	/**
 	 * @param tagInt
 	 * @param value
-	 * @param patientNamePart
+	 * @param compareValuePHI
 	 * @throws Exception
 	 */
-	private void checkContains(int tagInt, String value, String patientNamePart) throws Exception {
-		if (patientNamePart != null && !patientNamePart.isEmpty() && patientNamePart.length() > 2 && value.contains(patientNamePart)) {
-			throw new Exception("Potential PHI found in private tag: " + tagInt + ": " + value);
+	private boolean checkTagContainsValuePHI(int tagInt, String value, String compareValuePHI) throws Exception {
+		if (compareValuePHI != null && !compareValuePHI.isEmpty() && compareValuePHI.length() > 2 && value.contains(compareValuePHI)) {
+			LOG.warn("Potential PHI found in private tag (--> remove/delete): " + tagInt + ": " + value);
+			return true;
 		}
+		return false;
 	}
 
 	/**

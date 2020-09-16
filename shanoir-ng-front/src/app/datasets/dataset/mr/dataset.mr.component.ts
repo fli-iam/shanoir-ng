@@ -15,6 +15,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
+import { Option } from '../../../shared/select/select.component';
 
 @Component({
     selector: 'mr-dataset-details',
@@ -25,13 +26,18 @@ export class MrDatasetComponent implements OnInit{
 
     @Input() mode: Mode;
     @Input() dataset: MrDataset;
-    allMrDatasetNatures: any[];
+    // allMrDatasetNatures: any[];
+    private natureOptions: Option<MrDatasetNature>[];
     
     constructor() {
-        this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();
+        this.natureOptions = MrDatasetNature.options;
     }
     
     ngOnInit() {
         if (!this.dataset.updatedMrMetadata) this.dataset.updatedMrMetadata = new MrDatasetMetadata();
+    }
+
+    get natureLabel(): string {
+        return this.dataset.updatedMrMetadata ? MrDatasetNature.getLabel(this.dataset.updatedMrMetadata.mrDatasetNature) : null;
     }
 }

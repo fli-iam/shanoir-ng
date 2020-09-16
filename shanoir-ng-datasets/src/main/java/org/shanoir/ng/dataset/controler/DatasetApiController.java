@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -60,6 +61,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +88,12 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
+
+	private static final String EEG = "eeg";
+
+	private static final String NII = "nii";
+
+	private static final String DCM = "dcm";
 
 	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
 
@@ -139,7 +148,13 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
+	@Autowired
+	private SubjectRepository subjectRepo;
+
 	private static final SecureRandom RANDOM = new SecureRandom();
+
+	/** Number of downloadable datasets. */
+	private static final int DATASET_LIMIT = 50;
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public DatasetApiController(final HttpServletRequest request) {
@@ -243,8 +258,8 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = "dcm")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") final String format)
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM)
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format)
 					throws RestServiceException, IOException {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -268,15 +283,15 @@ public class DatasetApiController implements DatasetApi {
 
 		try {
 			List<URL> pathURLs = new ArrayList<>();
-			if ("dcm".equals(format)) {
+			if (DCM.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
-			} else if ("nii".equals(format)) {
+			} else if (NII.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-				copyNiftiFilesForURLs(pathURLs, workFolder);
-			} else if ("eeg".equals(format)) {
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset);
+			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				copyNiftiFilesForURLs(pathURLs, workFolder);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset);
 			} else {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -304,13 +319,19 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@RequestParam(value = "format", required = false, defaultValue=DCM) String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
+		
+		if (datasetIds.size() > DATASET_LIMIT) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can download less than " + DATASET_LIMIT + " datasets."));
+		}
+		
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
@@ -321,8 +342,8 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
 			@ApiParam(value = "id of the study", required=true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-			@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException {
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@RequestParam(value = "format", required = false, defaultValue=DCM) String format) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
 			throw new RestServiceException(
@@ -340,7 +361,14 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		String tmpFilePath = tmpDir + File.separator + "dataset-list";
+		String tmpFilePath = tmpDir + File.separator + "Datasets[";
+		for (Dataset dataset : datasets) {
+			tmpFilePath += dataset.getId() + ",";
+		}
+		// Remove last comma and close brackets
+	    tmpFilePath = tmpFilePath.substring(0, tmpFilePath.length() - 1);
+	    tmpFilePath += "]";
+
 		File tmpFile = new File(tmpFilePath);
 		tmpFile.mkdirs();
 
@@ -348,12 +376,15 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			for (Dataset dataset : datasets) {
 				List<URL> pathURLs = new ArrayList<>();
-				if ("dcm".equals(format)) {
+				if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile);
-				} else if ("nii".equals(format)) {
+				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, tmpFile);
+					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
+				}  else if (EEG.equals(format)) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
@@ -473,11 +504,27 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder) throws IOException {
+	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset) throws IOException {
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
 			File srcFile = new File(url.getPath());
-			File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+
+			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+			StringBuilder name = new StringBuilder("");
+			
+			Subject subject = subjectRepo.findOne(dataset.getSubjectId());
+			if (subject != null) {
+				name.append(subject.getName());
+			} else {
+				name.append("unknown");
+			}
+			name.append("_")
+			.append(dataset.getUpdatedMetadata().getComment()).append("_")
+			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_")
+			.append(dataset.getDatasetAcquisition().getRank()).append(".")
+			.append(FilenameUtils.getExtension(srcFile.getName()));
+
+			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath());
 		}
 	}
@@ -670,21 +717,21 @@ public class DatasetApiController implements DatasetApi {
 	 */
 	public enum CoordinatesSystem {
 	    ACPC("mm"),
-	    Allen("mm"),
-	    Analyze("mm"),
-	    BTi_4D("m"),
+	    ALLEN("mm"),
+	    ANALYZE("mm"),
+	    BTI_4D("m"),
 	    CTF_MRI("mm"),
-	    CTF_gradiometer("cm"),
-	    CapTrak("mm"),
-	    Chieti("mm"),
+	    CTF_GRADIOMETER("cm"),
+	    CAPTRAK("mm"),
+	    CHIETI("mm"),
 	    DICOM("mm"),
-	    FreeSurfer("mm"),
+	    FREESURFER("mm"),
 	    MNI("mm"),
-	    NIfTI("mm"),
-	    Neuromag_Elekta("m"),
-	    Paxinos_Franklin("mm"),
-	    Talairach_Tournoux("mm"),
-	    Yokogawa("n/a");
+	    NIFTI("mm"),
+	    NEUROMAG_ELEKTA("m"),
+	    PAXINOS_FRANKLIN("mm"),
+	    TALAIRACH_TOURNOUX("mm"),
+	    YOKOGAWA("n/a");
 	    
 	    private String unit;
 	    

@@ -15,19 +15,25 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 import { AcquisitionEquipment } from "./acquisition-equipment.model";
-import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
+import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
 import { ManufacturerModel } from './manufacturer-model.model';
 
 @Pipe({ name: "acqEqptLabel" })
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
-    transform(acqEqpt: AcquisitionEquipment) {
-        if (acqEqpt && acqEqpt.manufacturerModel) {
+    transform(acqEqpt: AcquisitionEquipment): string {
+        if (acqEqpt) {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
-            return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
-                + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;
-        }
-        return "";
+            if (manufModel && acqEqpt.center) {
+                return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
+                    + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;
+            } else if (acqEqpt.center && acqEqpt.center.name) {
+                return acqEqpt.serialNumber + " - " + acqEqpt.center.name;
+            } else if (acqEqpt.serialNumber) {
+                return acqEqpt.serialNumber
+            }
+        } 
+        return "?";
     }
 
 }

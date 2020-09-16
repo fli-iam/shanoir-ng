@@ -12,28 +12,34 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener } from '@angular/core';
 
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
+import { slideRight, parent, slideMarginLeft } from './shared/animations/animations';
+import { WindowService } from './shared/services/window.service';
 
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  // styleUrls: ['./app.component.css']
+    selector: 'shanoir-ng-app',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.css'],
+    animations: [ slideRight, slideMarginLeft, parent ]
 })
 
 export class AppComponent {
+
+    @HostBinding('@parent') private menuOpen: boolean = true; 
 
     constructor(
             public viewContainerRef: ViewContainerRef,
             private modalService: ModalService,
             private breadcrumbsService: BreadcrumbsService,
             private globalService: GlobalService,
+            private windowService: WindowService,
             private element: ElementRef) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
@@ -41,7 +47,6 @@ export class AppComponent {
 
         // let storedBCStr = sessionStorage.getItem('breadcrumbs');
         // if (storedBCStr) {
-        //     console.log('storedBCStr', storedBCStr)
         //     let storedBC = JSON.parse(storedBCStr);
         //     this.breadcrumbsService.steps = storedBC.steps.map(step => Step.parse(JSON.stringify(step)));
         //     this.breadcrumbsService.steps.map(step => {
@@ -54,6 +59,16 @@ export class AppComponent {
 
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
+        this.windowService.width = window.innerWidth;
+    }
+
+    @HostListener('window:resize', ['$event'])
+    onResize(event) {
+        this.windowService.width = event.target.innerWidth;
+    }
+
+    toggleMenu(open: boolean) {
+        this.menuOpen = open;
     }
 
     isAuthenticated(): boolean {
