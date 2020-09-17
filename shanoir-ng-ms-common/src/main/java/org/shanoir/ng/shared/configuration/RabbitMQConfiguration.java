@@ -79,6 +79,16 @@ public class RabbitMQConfiguration {
 	/** Create DS acquisition => Index datasets in solr. */
 	public static final String CREATE_DATASET_ACQUISITION_QUEUE = "create-dataset-acquisition-queue";
 
+	/** Queue to retrieve informations about studyc cards. */
+	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
+
+	/** Queue to retrieve the center ID from an acquisition equipement ID. */
+	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
+	
+	/** Queue to create exam for import bids. */
+	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
+
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 
@@ -107,6 +117,7 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
+	
 
 	////////////////// EXCHANGES //////////////////
 
@@ -267,4 +278,19 @@ public class RabbitMQConfiguration {
 		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue findStudyCardQueue() {
+		return new Queue(FIND_STUDY_CARD_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue acquisitionEquipementCenterQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue examinationCreationQueue() {
+		return new Queue(EXAMINATION_CREATION_QUEUE, true);
+	}
+	
 }

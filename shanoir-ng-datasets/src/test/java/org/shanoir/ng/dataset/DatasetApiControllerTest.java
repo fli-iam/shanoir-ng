@@ -262,6 +262,30 @@ public class DatasetApiControllerTest {
 		// THEN we expect an error
 	}
 
+
+	@Test
+	public void testMassiveDownloadByDatasetsIdToMuchIds() {
+		// GIVEN a list of datasets to export
+		StringBuilder strb = new StringBuilder();
+		for (int i = 0; i < 55 ; i++) {
+			strb.append(i).append(",");
+		}
+		String ids = strb.substring(0, strb.length() -1);
+
+		// WHEN we export all the datasets with no datasets ID
+		try {
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+					.param("format", "nii")
+					.param("datasetIds", ids))
+			.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can download less than 50 datasets.\",\"details\":null}");
+		}
+
+
+		// THEN we expect an error
+	}
+
 	@Test
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text

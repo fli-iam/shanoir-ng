@@ -75,12 +75,15 @@ public class DownloadOrCopyRunnable implements Runnable {
 			Serie serie = (Serie) iterator.next();
 			Util.processSerieMriInfo(uploadFolder, serie);
 		}
-		
+			
 		/**
 		 * 3. Write the UploadJob and schedule upload
 		 */
 		UploadJob uploadJob = new UploadJob();
 		initUploadJob(selectedSeries, dicomData, uploadJob);
+		if (allFileNames == null) {
+			uploadJob.setUploadState(UploadState.ERROR);
+		}
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
 		uploadJobManager.writeUploadJob(uploadJob);
 
@@ -89,6 +92,9 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 */
 		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
 		initDataUploadJob(selectedSeries, dicomData, dataJob);
+		if (allFileNames == null) {
+			dataJob.setUploadState(UploadState.ERROR);
+		}
 		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
 				uploadFolder.getAbsolutePath());
 		uploadDataJobManager.writeUploadDataJob(dataJob);
@@ -127,8 +133,11 @@ public class DownloadOrCopyRunnable implements Runnable {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
 			allFileNames = dicomServerClient.retrieveDicomFiles(selectedSeries, uploadFolder);
-			if(allFileNames != null) {
+			if(allFileNames != null && !allFileNames.isEmpty()) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files downloaded from PACS.");
+			} else {
+				logger.info(uploadFolder.getName() + ": error with download from PACS.");
+				return null;
 			}
 		} else {
 			allFileNames = copyFilesToUploadFolder(selectedSeries, uploadFolder);
@@ -239,6 +248,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		dataUploadJob.setMriSerialNumber(firstSerie.getMriInformation().getManufacturer()
 				+ "(" + firstSerie.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
+		dataUploadJob.setUploadState(UploadState.READY);
 	}
 	
 	/**
