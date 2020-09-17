@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 
- * MR Dataset Acquisition Strategy used to create new Mr Dataset Acquisition.
+ * CT Dataset Acquisition Strategy used to create new CT Dataset Acquisition.
  * Called by the ImportService. Requires an importJob
  * 
  * Refer to Interface for more information
@@ -78,7 +78,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		Attributes dicomAttributes = null;
 		try {
 			// TODO ATO : should always be a dicom: add check
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhancedMR());
+			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), false);
 		} catch (IOException e) {
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
 		}

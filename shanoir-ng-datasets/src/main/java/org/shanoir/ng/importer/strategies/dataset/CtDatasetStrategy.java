@@ -57,10 +57,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 			datasetIndex = -1;
 		}
 
-		// TODO ATO : implement MrDAtasetAcquisitionHome.createMrDataset (issue by
-		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset anyDataset : serie.getDatasets()) {
-			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			CtDataset dataset = new CtDataset();
 			dataset = generateSingleDataset(dicomAttributes, serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
@@ -71,9 +68,6 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.shanoir.ng.dataset.modality.DatasetStrategy#generateSingleMrDataset(org.dcm4che3.data.Attributes, org.shanoir.ng.importer.dto.Serie, org.shanoir.ng.importer.dto.Dataset, int, org.shanoir.ng.importer.dto.ImportJob)
-	 */
 	@Override
 	public CtDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) throws Exception {
@@ -95,11 +89,9 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		// Set the study and the subject
 		ctDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
 
-		//mrDataset.setStudyId(importJob.getStudyId());
-
 		// Set the modality from dicom fields
 		// TODO  :VERIFY NOT NEEDED ANY MORE ?
-		ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
+		ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.CT_DATASET);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (ctDataset.getSubjectId() != null) {
@@ -116,7 +108,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		 *  The part below will generate automatically the datasetExpression according to :
 		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
 		 * 
-		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current mrDataset
+		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
 		 * 
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
@@ -126,7 +118,6 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 			ctDataset.getDatasetExpressions().add(datasetExpression);
 		}
 		
-		// TODO by studycard: set updatedMetadata and updatedMrMetadata
 		DatasetMetadata originalDM = ctDataset.getOriginMetadata();
 		ctDataset.setUpdatedMetadata(originalDM);
 		
