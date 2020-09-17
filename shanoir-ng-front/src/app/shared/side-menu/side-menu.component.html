@@ -12,8 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="isAuthenticated()" class="logo"><a [routerLink]="['/home']"><img [src]="shanoirLogoUrl" /></a></div>
-<div *ngIf="!isAuthenticated()" class="logo"><img [src]="shanoirLogoUrl" /></div>
+<div class="logo">
+    <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
+        <img [src]="shanoirLogoUrl" />
+    </a>
+    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" />
+</div>
 
 <div *ngIf="isAuthenticated()" class="user">
     <div class="user-logo">
@@ -90,5 +94,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
     </div>
-
 </ul>
+
+<div class="bottom-info">
+    <div>{{VERSION.raw}}</div>
+    <div>Copyright (C) 2009-2019 Inria</div>
+    <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
+</div>
