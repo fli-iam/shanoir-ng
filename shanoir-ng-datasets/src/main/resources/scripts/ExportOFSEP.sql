@@ -2,23 +2,23 @@ select
 sb.id as patient_id, 
 sb.name as shanoir_name, 
 sb.identifier as double_hash, 
-pseud.birth_name_hash1 as birthname1,
-pseud.birth_name_hash2 as birthname2,
-pseud.birth_name_hash3 as birthname3,
-pseud.last_name_hash1 as lastname1,
-pseud.last_name_hash2 as lastname2,
-pseud.last_name_hash3 as lastname3,
-pseud.first_name_hash1 as firstname1,
-pseud.first_name_hash2 as firstname2,
-pseud.first_name_hash3 as firstname3,
-pseud.birth_date_hash as birthdate1,
+-- pseud.birth_name_hash1 as birthname1,
+-- pseud.birth_name_hash2 as birthname2,
+-- pseud.birth_name_hash3 as birthname3,
+-- pseud.last_name_hash1 as lastname1,
+-- pseud.last_name_hash2 as lastname2,
+-- pseud.last_name_hash3 as lastname3,
+-- pseud.first_name_hash1 as firstname1,
+-- pseud.first_name_hash2 as firstname2,
+-- pseud.first_name_hash3 as firstname3,
+-- pseud.birth_date_hash as birthdate1,
 (case sb.sex when 1 then 'M' else 'F' end) as sex,
 year(sb.birth_date) as birth_year,
 st.id as study_id,
 st.name as study_name,
 dt.id as sequence_id,
-dt_md.name as norm_sequence_name, 
-dt_md.comment as sequence_name,
+-- dt_md.name as norm_sequence_name, 
+-- dt_md.comment as sequence_name,
 cnt.id as center_id, 
 cnt.name as center,
 man.name as device_manufacturer,
@@ -40,7 +40,7 @@ inner join datasets.mr_protocol as pr
 inner join datasets.mr_protocol_metadata as pr_md
 inner join datasets.examination as ex
 inner join datasets.dataset as dt
-inner join datasets.dataset_metadata as dt_md
+-- inner join datasets.dataset_metadata as dt_md
 inner join studies.subject_study as rel_sb_st
 inner join datasets.dataset_acquisition as dt_acq
 inner join datasets.mr_dataset_acquisition as mr_acq
@@ -52,11 +52,12 @@ and sb.id = ex.subject_id
 and ex.center_id = cnt.id
 and sb.id = dt.subject_id
 and dt.dataset_acquisition_id = dt_acq.id
-and dt_md.id = dt.updated_metadata_id
+-- and dt_md.id = dt.updated_metadata_id
 and dt_acq.acquisition_equipment_id = ac_eq.id
 and ac_eq.manufacturer_model_id = man_mod.id
 and man_mod.manufacturer_id = man.id
 and dt_acq.id = mr_acq.id
 and mr_acq.mr_protocol_id = pr.id
 and pr_md.id = pr.id
-and ex.id = dt_acq.examination_id;
+and ex.id = dt_acq.examination_id
+;

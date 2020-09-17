@@ -187,4 +187,15 @@ public interface DatasetApi {
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException;
 
+	@ApiOperation(value = "", nickname = "downloadStatistics", notes = "Download statistics from the entire database", response = Resource.class, tags={  })
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "exported statistics", response = Resource.class),
+		@ApiResponse(code = 401, message = "unauthorized"),
+		@ApiResponse(code = 403, message = "forbidden"),
+		@ApiResponse(code = 404, message = "no dataset found"),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/downloadStatistics", produces = { "application/zip" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadStatistics() throws RestServiceException, IOException;
+		
 }

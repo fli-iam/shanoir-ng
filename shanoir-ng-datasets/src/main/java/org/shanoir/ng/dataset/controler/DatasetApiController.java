@@ -652,4 +652,35 @@ public class DatasetApiController implements DatasetApi {
 	    }
 	}
 	
+	@Override
+	public ResponseEntity<ByteArrayResource> downloadStatistics() throws RestServiceException, IOException {
+		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+		String tmpFilePath = tmpDir + File.separator + "statistics.gpg";
+		File tmpFile = new File(tmpFilePath);
+		tmpFile.mkdirs();
+
+		// Get the data
+		try {
+
+		} catch (IOException | MessagingException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
+		}
+		// Zip it
+		File zipFile = new File(tmpFilePath + ZIP);
+		zipFile.createNewFile();
+
+		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+
+		byte[] data = Files.readAllBytes(zipFile.toPath());
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		FileUtils.deleteDirectory(tmpFile);
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				.contentType(MediaType.MULTIPART_FORM_DATA)
+				.contentLength(data.length)
+				.body(resource);
+	}
 }
