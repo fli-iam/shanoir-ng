@@ -58,8 +58,7 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		}
 
 		for (Dataset anyDataset : serie.getDatasets()) {
-			CtDataset dataset = new CtDataset();
-			dataset = generateSingleDataset(dicomAttributes, serie, anyDataset, datasetIndex, importJob);
+			CtDataset dataset = generateSingleDataset(dicomAttributes, serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}
