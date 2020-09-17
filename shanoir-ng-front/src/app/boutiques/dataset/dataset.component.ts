@@ -191,7 +191,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 

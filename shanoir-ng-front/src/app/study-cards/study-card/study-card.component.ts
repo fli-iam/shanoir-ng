@@ -102,7 +102,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return form;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return !this.selectMode && this.keycloakService.isUserAdminOrExpert();
     }
     

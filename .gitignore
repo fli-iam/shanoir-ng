@@ -24,9 +24,6 @@ target
 bin/
 docker-compose/database/3_init_preclinical.sql
 docker-compose/boutiques/boutiques
-shanoir-ng-front/node/
-shanoir-ng-front/html/
-shanoir-ng-front/node_modules_old/
 shanoir-ng-preclinical/null*
 shanoir-uploader/src/main/resources/key
 shanoir-uploader/src/main/resources/profile.OFSEP/key

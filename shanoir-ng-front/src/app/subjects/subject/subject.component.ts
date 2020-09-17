@@ -188,7 +188,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         this.subject.birthDate = newDate;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 }

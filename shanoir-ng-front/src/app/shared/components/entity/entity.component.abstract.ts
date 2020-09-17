@@ -338,10 +338,19 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Default is true and this method should be overriden when rights control is needed.
      * It is called after initialization so the entity value can be used inside.
      */
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return true;
     }
 
+    /**
+     * Says if current user has the right to display the delete button.
+     * Default is true and this method should be overriden when rights control is needed.
+     * It is called after initialization so the entity value can be used inside.
+     */
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+    
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('form', this.form);

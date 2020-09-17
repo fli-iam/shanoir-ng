@@ -87,7 +87,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
     }
 }

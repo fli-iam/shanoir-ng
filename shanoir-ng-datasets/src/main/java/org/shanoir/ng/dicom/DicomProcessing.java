@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DicomProcessing {
 	
-	public Attributes getDicomObjectAttributes(DatasetFile image,boolean isEnhancedMR) throws IOException {
+	public Attributes getDicomObjectAttributes(DatasetFile image, boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes datasetAttributes;

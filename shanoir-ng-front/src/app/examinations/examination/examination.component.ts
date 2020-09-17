@@ -143,7 +143,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     instAssessment() {
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return false;
     }
 

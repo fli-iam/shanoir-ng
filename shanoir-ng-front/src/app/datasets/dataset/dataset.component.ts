@@ -130,7 +130,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

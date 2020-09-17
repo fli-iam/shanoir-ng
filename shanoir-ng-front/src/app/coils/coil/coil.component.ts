@@ -128,7 +128,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         }
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

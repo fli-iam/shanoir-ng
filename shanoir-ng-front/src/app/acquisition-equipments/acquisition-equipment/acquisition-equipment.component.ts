@@ -38,7 +38,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     manufModels: ManufacturerModel[];
     centers: IdName[];
-    datasetModalityTypeEnumValue: string;
+    datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
@@ -96,7 +96,9 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+        DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): FormGroup {
@@ -115,7 +117,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             .then(manufModels => this.manufModels = manufModels);
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

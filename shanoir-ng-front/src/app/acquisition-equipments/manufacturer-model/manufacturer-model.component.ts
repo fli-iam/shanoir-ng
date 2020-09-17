@@ -122,7 +122,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return null;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

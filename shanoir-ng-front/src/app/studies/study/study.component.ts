@@ -177,7 +177,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
