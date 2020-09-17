@@ -19,6 +19,7 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 import { MsgBoxService } from '../msg-box/msg-box.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { VERSION } from '../../../environments/version';
 
 
 
@@ -39,6 +40,7 @@ export class SideMenuComponent {
     public uploadOpened: boolean = false;
     public adminOpened: boolean = false;
     public tasksOpened: boolean = false;
+    public VERSION = VERSION;
 
     constructor(
             public keycloakService: KeycloakService, 
