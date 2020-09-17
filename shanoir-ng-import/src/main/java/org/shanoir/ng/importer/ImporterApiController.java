@@ -33,7 +33,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FilenameUtils;
 // import org.jboss.resteasy.util.Base64.InputStream;
-import org.shanoir.ng.importer.dicom.DicomDirCreator;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.exchange.model.ExExamination;
 import org.shanoir.ng.exchange.model.ExStudy;
@@ -81,10 +80,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.net.HttpHeaders;
 
 import io.swagger.annotations.ApiParam;
 
@@ -703,51 +698,6 @@ public class ImporterApiController implements ImporterApi {
 			throws RestServiceException, IOException {
 
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
-		String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
-		URL url = new URL("file:///" + pathInfo);
-		final URLConnection uCon = url.openConnection();
-		final InputStream is = uCon.getInputStream();
-
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		int nRead;
-		byte[] data = new byte[BUFFER_SIZE];
-		while ((nRead = is.read(data, 0, data.length)) != -1) {
-			buffer.write(data, 0, nRead);
-		}
-	 
-		buffer.flush();
-		byte[] byteArray = buffer.toByteArray();
-		
-		ByteArrayResource resource = new ByteArrayResource(byteArray);
-
-		return ResponseEntity.ok()
-				.contentType(MediaType.parseMediaType("application/dicom"))
-				.contentLength(uCon.getContentLength())
-				.body(resource);
-	}
-
-	/** The Constant KB. */
-	private static final int KB = 1024;
-
-	/** The Constant BUFFER_SIZE. */
-	private static final int BUFFER_SIZE = 10 * KB;
-
-	/**
-	 * This methods returns a dicom file
-	 * 
-	 * @param path
-	 *            the dicom file path
-	 * @throws ShanoirException
-	 *             when something gets wrong during the import
-	 * @throws IOException
-	 *             when IO fails
-	 * @throws RestServiceException
-	 */
-	@Override
-	public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
-			throws RestServiceException, IOException {
-
-		final File userImportDir = getUserImportDir();
 		String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
 		URL url = new URL("file:///" + pathInfo);
 		final URLConnection uCon = url.openConnection();

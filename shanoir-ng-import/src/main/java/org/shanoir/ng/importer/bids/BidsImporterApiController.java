@@ -119,7 +119,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 		SimpleModule module = new SimpleModule();
 		module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
 		mapper.registerModule(module);
-
 		// Here we wait for the response => to be sure that the subjects are created
 		String participantString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, participantsFile.getAbsolutePath());
 		List<IdName> participants = Arrays.asList(mapper.readValue(participantString, IdName[].class));
@@ -171,7 +170,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 			StudyCardDTO studyCard = objectMapper.readValue(studyCardAsString, StudyCardDTO.class);
 
-			if (!studyCard.getStudyId().equals(sid.getStudyId())) {
+
+			if (studyCard.getStudyId() != sid.getStudyId()) {
 				throw new ShanoirException("Study with ID " + sid.getStudyId() + " does not exists.");
 			}
 			if (studyCard.isDisabled()) {
@@ -183,14 +183,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 			if (subjectId == null) {
 				throw new ShanoirException(
 						"Subject " + subjectName + " could not be created. Please check participants.tsv file.");
-			}
-			
-			// Create subjectStudy
-			IdName participantsInfo = new IdName(subjectId, studyCard.getStudyId().toString());
-			String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
-
-			if (studyName == null) {
-				throw new ShanoirException("An error occured while linking subject to study. Please contact an administrator");
 			}
 
 			// If there is no DICOMDIR: create it
@@ -221,9 +213,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 			// Construire l'arborescence
 			job.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 			job.setStudyId(sid.getStudyId());
-			job.setStudyCardId(sid.getStudyCardId());
-			job.setSubjectName(subjectName);
-			job.setStudyName(studyName);
 
 			job.setFromPacs(false);
 			job.setFromShanoirUploader(false);
