@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.matchers.JUnitMatchers.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -284,6 +285,27 @@ public class DatasetApiControllerTest {
 
 
 		// THEN we expect an error
+	}
+
+	@Test
+	public void testMassiveDownloadByStudyIdTooMuchDatasets() throws Exception {
+		// GIVEN a study with more then 50 datasets to export
+
+		List<Dataset> hugeList = new ArrayList<Dataset>();
+		for (int i = 0; i < 51 ; i++) {
+			hugeList.add(new MrDataset());
+		}
+		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
+
+		try {
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+				.param("format", "nii")
+				.param("studyId", "1"))
+		.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
+		}
 	}
 
 	@Test
