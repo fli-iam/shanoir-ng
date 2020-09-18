@@ -42,6 +42,7 @@ import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
+import { CenterDTOService } from './centers/shared/center.dto';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { CoilService } from './coils/shared/coil.service';
@@ -412,7 +413,8 @@ import { ServiceLocator } from './utils/locator.service';
         SubjectExaminationPipe,
         DatasetDTOService,
         SolrService,
-        NotificationsService
+        NotificationsService,
+        CenterDTOService
     ],
     bootstrap: [AppComponent],
 })

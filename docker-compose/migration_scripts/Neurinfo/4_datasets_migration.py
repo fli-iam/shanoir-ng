@@ -348,7 +348,7 @@ for row in sourceCursor.fetchall():
 	study_card_rule = list(row)
 	if 'refDatasetModalityType' == study_card_rule[1]:
 		study_card_rule[1] = 1
-		study_card_rule[2] = study_card_rule[2].partition(' ')[0]
+		study_card_rule[2] = study_card_rule[2].replace(' ', '_').upper()
 		study_card_assignment_list.append(study_card_rule)
 	elif 'protocolName' == study_card_rule[1]:
 		study_card_rule[1] = 2

@@ -444,6 +444,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 */
 	private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
 		VR vr = attributes.getVR(tag);
+		if (vr == null) return;		
 		// VR.AT = Attribute Tag
 		// VR.SL = Signed Long || VR.UL = Unsigned Long
 		// VR.SS = Signed Short || VR.US = Unsigned Short

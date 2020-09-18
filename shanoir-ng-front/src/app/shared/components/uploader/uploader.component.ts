@@ -36,7 +36,9 @@ export class UploaderComponent {
 
     private changeFile(file: any) {
         this.filename = undefined;
-        if (file && file.target && file.target.files && file.target.files[0]) this.filename = file.target.files[0].name;
+        if (file && file.target && file.target.files && file.target.files[0]) 
+            this.filename = file.target.files[0].name;
+        else this.filename = null;
         this.fileChange.emit(file);
     }
 

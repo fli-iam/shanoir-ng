@@ -49,7 +49,7 @@ public class MrProtocolStrategyTest {
 	public void testGenerateMrProtocolForSerieNotEnhancedMR() throws IOException {
 		Attributes attributes = getAttributesFromFile("/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
 		Serie serie = generateSerie(attributes);
-		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(attributes, serie);
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
 		Assert.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
 		Assert.assertTrue(mrProtocol.getFilters().equals("77"));
 	}	

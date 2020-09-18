@@ -119,5 +119,10 @@ public class ErrorModel {
 	public void setDetails(Object details) {
 		this.details = details;
 	}
+	
+	@Override
+	public String toString() {
+		return "code : " + this.code + "\nmessage : " + this.message + "\ndetails : " + this.details;
+	}
 
 }

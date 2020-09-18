@@ -17,7 +17,7 @@ package org.shanoir.ng.datasetacquisition.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -58,7 +58,7 @@ public class DatasetsModalityTypeCheckValidator
 				}
 			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
 				for (Dataset dataset : datasetAcquisition.getDatasets()) {
-					if (!(dataset instanceof CalibrationDataset)) {
+					if (!(dataset instanceof CtDataset)) {
 						return false;
 					}
 				}
