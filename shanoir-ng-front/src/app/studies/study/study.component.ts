@@ -446,14 +446,28 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
+       this.studyService.getBidsStructure(id).then(element => {
+            this.sort(element);
+            this.bidsStructure = [element];
+        });
     }
 
-    // removeTimepoint(timepoint: Timepoint): void {
-    //     const index: number = this.study.timepoints.indexOf(timepoint);
-    //     if (index !== -1) {
-    //         this.study.timepoints.splice(index, 1);
-    //     }
-    // }
+    sort(element: BidsElement) {
+        if (element.elements) {
+            element.elements.sort(function(elem1, elem2) {
+                if (elem1.file && !elem2.file) {
+                    return 1
+                } else if (!elem1.file && elem2.file) {
+                    return -1;
+                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
+                    return elem1.path < elem2.path ? -1 : 1;
+                }
+            });
+            // Then sort all sub elements folders
+            for (let elem of element.elements) {
+                this.sort(elem);
+            }
+        }
+    }
 
 }
