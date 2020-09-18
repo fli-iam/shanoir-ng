@@ -39,7 +39,7 @@ public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRep
 	@Override
 	public List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz) {
 		final StringBuilder sqlQuery = new StringBuilder();
-		sqlQuery.append("SELECT e FROM " + clazz.getSimpleName() + " e WHERE e.").append(fieldName).append(" LIKE :value");
+		sqlQuery.append("SELECT e FROM " + clazz.getSimpleName() + " e WHERE TRIM(e.").append(fieldName).append(") LIKE :value");
 		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 

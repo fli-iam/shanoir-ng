@@ -41,6 +41,7 @@ public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> imp
 	protected FindByRepository<T> repository;
 
 
+
 	/**
 	 * Validates what can't be done by Spring/Hibernate validation, in particular unique constraints
 	 * Calls database !!!
@@ -60,6 +61,7 @@ public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> imp
 					try {
 						Method getter = entity.getClass().getMethod(getterName);
 						Object value = getter.invoke(entity);
+						if (value instanceof String) value = ((String) value).trim();
 						List<T> foundedList = repository.findBy(field.getName(), value, entity.getClass());
 						// If found entities and it is not the same current entity
 						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {

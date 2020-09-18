@@ -16,6 +16,7 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { CenterService } from './center.service';
+import { CenterDTO } from './center.dto';
 
 
 export class Center extends Entity {
@@ -31,4 +32,8 @@ export class Center extends Entity {
     studyCenterList: StudyCenter[] = [];
 
     service: CenterService = ServiceLocator.injector.get(CenterService);
+
+    public stringify() {
+        return JSON.stringify(new CenterDTO(this), this.replacer);
+    }
 }

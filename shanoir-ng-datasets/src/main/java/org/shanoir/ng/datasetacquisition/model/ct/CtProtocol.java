@@ -36,7 +36,6 @@ public class CtProtocol extends AbstractEntity {
 	 */
 	private static final long serialVersionUID = 5062475142212117502L;
 
-	/** The MR Dataset acquisition. */
 	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
 	private CtDatasetAcquisition ctDatasetAcquisition;
