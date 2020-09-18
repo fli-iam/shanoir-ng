@@ -128,4 +128,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public hasEditRight(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
+    
+    public hasDeleteRight(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
 }

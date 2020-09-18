@@ -218,6 +218,8 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic);
     }
 
-
+    public hasDeleteRight(): boolean {
+        return false;
+    }
 
 }

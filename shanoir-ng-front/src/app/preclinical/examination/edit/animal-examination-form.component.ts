@@ -356,6 +356,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return false;
     }
     
+    public hasDeleteRight(): boolean {
+        return false;
+    }
+    
     // Extra data file management
     
     private setFile() {
