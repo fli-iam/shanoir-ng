@@ -50,9 +50,14 @@ export class DicomUploadComponent {
         breadcrumbsService.currentStep.importMode = 'DICOM';
     }
     
-    uploadArchive(fileEvent: any): void {
-        this.setArchiveStatus('uploading');
-        this.uploadToServer(fileEvent.target.files);
+    public uploadArchive(fileEvent: any): void {
+        if (fileEvent.target.files.length > 0) {
+            this.setArchiveStatus('uploading');
+            this.uploadToServer(fileEvent.target.files);
+        } else {
+            this.setArchiveStatus('none');
+            this.modality = null;
+        }
     }
 
     private uploadToServer(file: any) {

@@ -120,8 +120,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                 if (res) {
                     entity.delete().then(() => {
                         this.onDelete.next(entity);
-                        this.table.refresh();
-                        this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        this.table.refresh().then(() => {
+                            this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        });
                     }).catch(reason => {
                         if (reason && reason.error) {
                             this.onDelete.next(new ShanoirError(reason));

@@ -16,6 +16,8 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { CenterDTO, CenterDTOService } from './center.dto';
 import { Center } from './center.model';
 import { HttpClient } from '@angular/common/http';
 
@@ -27,6 +29,7 @@ export class CenterService extends EntityService<Center> {
     constructor(protected http: HttpClient) {
         super(http)
     }
+    private centerDTOService: CenterDTOService = ServiceLocator.injector.get(CenterDTOService);
 
     getEntityInstance() { return new Center(); }
 
@@ -38,5 +41,15 @@ export class CenterService extends EntityService<Center> {
     getCentersNamesByStudyId(studyId: number): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL + "/" + studyId)
             .toPromise();
+    }
+
+    protected mapEntity = (dto: CenterDTO, result?: Center): Promise<Center> => {
+        if (result == undefined) result = this.getEntityInstance();
+        return this.centerDTOService.toEntity(dto, result);
+    }
+
+    protected mapEntityList = (dtos: CenterDTO[], result?: Center[]): Promise<Center[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.centerDTOService.toEntityList(dtos, result);
     }
 }

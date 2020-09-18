@@ -59,6 +59,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
 
     getColumnDefs() {
         let columnDefs: any[] = [
+            { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },
             { headerName: "Country", field: "country" }

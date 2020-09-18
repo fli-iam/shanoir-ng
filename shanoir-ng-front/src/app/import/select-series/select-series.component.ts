@@ -38,6 +38,7 @@ export class SelectSeriesComponent {
     papayaParams: object[];
     private dataFiles: any;
     public papayaError: boolean = false;
+    public modality: string;
 
     constructor(
             private importService: ImportService,
@@ -51,6 +52,7 @@ export class SelectSeriesComponent {
         }
         breadcrumbsService.nameStep('2. Series');
         this.patients = this.importDataService.patientList.patients;
+        this.modality = this.patients[0].studies[0].series[0].modality.toString()
         this.workFolder = this.importDataService.patientList.workFolder;
     }
 

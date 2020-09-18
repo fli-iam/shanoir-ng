@@ -95,8 +95,8 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         }
     }
     
-    get isMR(): boolean { 
-        return this.manufModel && this.manufModel.datasetModalityType == 'MR_DATASET'; 
+    public get isMR(): boolean { 
+        return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR; 
     }
 
     private getManufacturerModel(): Promise<void> {
