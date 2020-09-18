@@ -140,4 +140,8 @@ export class UserComponent extends EntityComponent<User> {
         return null;
     }
 
+    public hasDeleteRight(): boolean {
+        return false;
+    }
+
 }

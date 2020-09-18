@@ -146,5 +146,10 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         physioDataFile.has_temperature = this.physioData.has_temperature;
         this.emitEvent(physioDataFile);
     }
+
+    public hasDeleteRight(): boolean {
+        return false;
+    }
+
     
 }

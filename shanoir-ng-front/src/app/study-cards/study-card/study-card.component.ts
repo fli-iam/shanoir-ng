@@ -29,6 +29,8 @@ import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'study-card',
@@ -44,6 +46,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     showRulesErrors: boolean = false;
     selectMode: boolean;
     selectedRules: StudyCardRule[] = [];
+    hasAdministrateRight: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
 
     constructor(
@@ -53,11 +56,18 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService,
+            private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
+        if (this.mode == 'view') {
+           this.studyRightsService.getMyRightsForStudy(this.studyCard.study.id).then(rights => {
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+           });
+        }
+
     }
 
     getService(): EntityService<StudyCard> {
@@ -102,12 +112,16 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return form;
     }
 
-    public async hasEditRight(): Promise<boolean> {
-        return !this.selectMode && this.keycloakService.isUserAdminOrExpert();
+    public hasEditRight(): boolean {
+        return this.hasAdministrateRight && !this.selectMode && this.keycloakService.isUserAdminOrExpert();
+    }
+
+    public hasDeleteRight(): boolean {
+        return this.hasAdministrateRight && !this.selectMode && this.keycloakService.isUserAdminOrExpert();
     }
     
     private fetchStudies() {
-        this.studyService.getStudiesNames()
+        this.studyService.findStudiesIcanAdminIdName()
             .then(studies => this.studies = studies);
     }
 

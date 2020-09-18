@@ -106,4 +106,9 @@ export class ExtraDataFormComponent extends EntityComponent<ExtraData>{
         window.open(this.extradataService.getDownloadUrl(extradata));
     }
 
+    public hasDeleteRight(): boolean {
+        return false;
+    }
+
+
 }
