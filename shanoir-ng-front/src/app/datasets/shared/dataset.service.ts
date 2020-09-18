@@ -12,10 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse, HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpResponse, HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, ErrorHandler } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
@@ -23,6 +22,7 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import 'rxjs/add/operator/map'
+import { HandleErrorService } from '../../shared/utils/handle-error.service'
 
 
 @Injectable()
@@ -39,6 +39,8 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
+
+    private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
 
     getEntityInstance(entity: Dataset) { 
         return AppUtils.getDatasetInstance(entity.type);
@@ -57,15 +59,19 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     public downloadDatasets(ids: number[], format: string) {
-        let params = new HttpParams().set("datasetIds", ids.join(',')).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload',
-            { observe: 'response', responseType: 'blob', params: params})
-            .toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        )
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', ids.join(","));
+        formData.set("format", format);
+        return this.http.post(
+                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
+                    observe: 'response',
+                    responseType: 'blob'
+                })
+            .map((result: HttpResponse < Blob > ) => {
+                this.downloadIntoBrowser(result);
+            })
+            .toPromise()
+            .catch(error => this.errorService.handleError(error));
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string) {
@@ -74,10 +80,12 @@ export class DatasetService extends EntityService<Dataset> {
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
             { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        )
+                response => {
+                    this.downloadIntoBrowser(response);
+                }
+            ).catch((error: HttpErrorResponse) => {
+                this.errorService.handleError(error);
+            });
     }
 
     download(dataset: Dataset, format: string): Promise<void> {

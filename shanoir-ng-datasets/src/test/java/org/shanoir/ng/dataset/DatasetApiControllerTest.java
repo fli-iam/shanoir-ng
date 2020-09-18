@@ -240,7 +240,7 @@ public class DatasetApiControllerTest {
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
 
 		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
@@ -257,7 +257,7 @@ public class DatasetApiControllerTest {
 
 		// WHEN we export all the datasets with no datasets ID
 		try {
-			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 					.param("format", "nii")
 					.param("datasetIds", ""))
 			.andExpect(status().isForbidden());
@@ -281,12 +281,12 @@ public class DatasetApiControllerTest {
 
 		// WHEN we export all the datasets with no datasets ID
 		try {
-			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 					.param("format", "nii")
 					.param("datasetIds", ids))
 			.andExpect(status().isForbidden());
 		} catch (Exception e) {
-			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can download less than 50 datasets.\",\"details\":null}");
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can't download more than 50 datasets.\",\"details\":null}");
 		}
 
 
@@ -345,9 +345,9 @@ public class DatasetApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
 				.param("format", "otherWRONG")
 				.param("studyId", "1"))
-		.andExpect(status().isForbidden());
+		.andExpect(status().isUnprocessableEntity());
 	} catch (Exception e) {
-		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Bad arguments.\",\"details\":null}", e.getMessage());
+		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
 	}
 
 		// THEN we expect a failure
