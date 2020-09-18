@@ -174,20 +174,6 @@ public interface DatasetApi {
 			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
 			throws RestServiceException, IOException;
 	
-    @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(
-    		@ApiParam(value = "id of the subject", required=true) @PathVariable("subjectId") Long subjectId,
-    		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
-  
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),

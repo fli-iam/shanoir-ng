@@ -21,6 +21,12 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { BidsElement } from '../model/bidsElement.model'
+import * as AppUtils from '../../utils/app.utils';
+import { HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { ServiceLocator } from '../../utils/locator.service';
+import { HttpParams } from '@angular/common/http';
+
 
 @Component({
     selector: 'bids-tree',
@@ -28,12 +34,16 @@ import { BidsElement } from '../model/bidsElement.model'
     styleUrls: ['bids-tree.component.css'],
 })
 
-export class BidsTreeComponent  {
+export class BidsTreeComponent {
+
+    API_URL = AppUtils.BACKEND_API_BIDS_URL;
+    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     @Input() list: BidsElement[];
     public json: JSON;
     public tsv: string;
     public title: string;
+    @Input() studyId: number;
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
@@ -62,5 +72,27 @@ export class BidsTreeComponent  {
         this.tsv = null;
         this.json = null;
     }
+
+    protected download(item: BidsElement): void {
+        const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
+        let params = new HttpParams().set("filePath", item.path);
+        
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).subscribe(response => {
+            if (response.status == 200) {
+                this.downloadIntoBrowser(response);
+            }
+        });
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
 
 }
