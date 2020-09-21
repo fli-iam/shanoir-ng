@@ -809,7 +809,6 @@ print("Import echo_time: start")
 sourceCursor.execute("""SELECT et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID
 	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID""")
 do_bulk_insert = lambda rows: bulk_insert(targetCursor, "echo_time", "echo_number, echo_time_value, mr_dataset_id", rows)
-do_bulk_insert(sourceCursor)
 targetConn.commit()
 print("Import echo_time: end")
 
