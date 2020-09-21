@@ -24,7 +24,7 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-acquisition',
@@ -44,6 +44,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private acqEqService: AcquisitionEquipmentService,
             private acqEqPipe: AcquisitionEquipmentPipe) {
         super(route, 'dataset-acquisition');
+    }
+
+    getService(): EntityService<DatasetAcquisition> {
+        return this.datasetAcquisitionService;
     }
     
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }

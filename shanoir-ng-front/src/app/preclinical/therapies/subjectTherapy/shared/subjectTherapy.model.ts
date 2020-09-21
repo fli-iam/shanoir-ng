@@ -16,6 +16,8 @@ import { Reference } from '../../../reference/shared/reference.model';
 import { Therapy } from '../../therapy/shared/therapy.model';
 import { Frequency } from "../../../shared/enum/frequency";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SubjectTherapyService } from "./subjectTherapy.service";
 
 export class SubjectTherapy  extends Entity{
   id: number;
@@ -26,5 +28,7 @@ export class SubjectTherapy  extends Entity{
   molecule: string;
   startDate: Date;
   endDate : Date;
+
+  service: SubjectTherapyService = ServiceLocator.injector.get(SubjectTherapyService);
 }
 

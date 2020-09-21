@@ -235,8 +235,8 @@ export class AnimalClinicalContextComponent  {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter, null);
+        return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
+                this.subject, this.examination, this.niftiConverter, null);
     }
 
     private getPrefilledCenter(): Center {

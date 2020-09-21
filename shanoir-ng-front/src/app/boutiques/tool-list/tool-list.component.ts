@@ -27,7 +27,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo> {
   
   @Output() toolSelected = new EventEmitter<ToolInfo>();
-  @ViewChild('table', { static: false }, { static: true }) table: TableComponent;
+  @ViewChild('table', { static: true }) table: TableComponent;
 
   constructor(private toolService: ToolService) {
     super('boutiques');

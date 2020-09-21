@@ -12,13 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+ import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Reference } from '../../../reference/shared/reference.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { AnestheticIngredientService } from './anestheticIngredient.service';
 
 export class AnestheticIngredient extends Entity {
   id: number;
   name: Reference;
   concentration: number;
   concentration_unit: Reference;
+
+  service: AnestheticIngredientService = ServiceLocator.injector.get(AnestheticIngredientService);
 }
 

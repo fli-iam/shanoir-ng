@@ -1,0 +1,35 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+<form [formGroup]="form" novalidate>
+    <div class="header command-zone">Download statistics</div>
+    <fieldset class="step">
+        <ol>
+            <legend>
+                Please enter the name of the studies you would like to download.
+            </legend>
+            <p>The studies will be filtered by name according to the given regular expression. For example, "Main Cohort*|Multiple Sclerosis" will return data from all studies which have a name beginning with "Main Cohort" </p>
+            <li>
+                <label>Study name regular expression</label> 
+                <span class="right-col">
+                    <input type="text" id="studyNameRegExp" formControlName="studyNameRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('studyNameRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the exact value, case sensitive, the wildcard character is not allowed. Ex: TITI^TOTO won't match titi'toto</tool-tip>
+            </li>
+        </ol>
+    </fieldset>
+    <button class="next" [disabled]="!form.valid" (click)="downloadStatistics()">Download statistics</button>
+</form>

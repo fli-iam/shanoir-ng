@@ -43,6 +43,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { AnimalExaminationService } from '../shared/animal-examination.service';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -77,6 +78,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     constructor(
         private route: ActivatedRoute,
         private examinationService: ExaminationService, 
+        private animalExaminationService: AnimalExaminationService, 
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
         private contrastAgentsService: ContrastAgentService,

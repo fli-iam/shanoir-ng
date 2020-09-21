@@ -18,6 +18,8 @@ import { Id } from '../../shared/models/id.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
 import { Sex } from './subject.types';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SubjectService } from "./subject.service";
 
 export class Subject extends Entity {
 
@@ -33,6 +35,8 @@ export class Subject extends Entity {
     sex: Sex;
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
+
+    service: SubjectService = ServiceLocator.injector.get(SubjectService);
 
     public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();

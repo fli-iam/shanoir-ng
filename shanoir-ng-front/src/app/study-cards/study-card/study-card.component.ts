@@ -14,6 +14,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -57,6 +58,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
+    }
+
+    getService(): EntityService<StudyCard> {
+        return this.studyCardService;
     }
 
     get studyCard(): StudyCard { return this.entity; }

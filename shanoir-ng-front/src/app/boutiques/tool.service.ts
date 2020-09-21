@@ -63,19 +63,19 @@ export class ToolService extends EntityService<ToolInfo> {
   }
 
   generateCommand(toolId: string, invocation: any): Promise<string> {
-    let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions).toPromise();
+    let httpOptions = Object.assign( { responseType: 'text' as const }, this.httpOptions);
+    return this.httpClient.post(`${this.API_URL}/${encodeURIComponent(toolId)}/generate-command/`, invocation, httpOptions).toPromise();
   }
 
   execute(toolId: string, invocation: any): Promise<string> {
     this.saveSession({ isProcessing: true });
-    let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-    return this.httpClient.post<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/${encodeURIComponent(this.data.sessionId)}`, invocation, httpOptions).toPromise();
+    let httpOptions = Object.assign( { responseType: 'text' as const }, this.httpOptions);
+    return this.httpClient.post(`${this.API_URL}/${encodeURIComponent(toolId)}/execute/${encodeURIComponent(this.data.sessionId)}`, invocation, httpOptions).toPromise();
   }
 
   cancelExecution(toolId: string): Promise<string> {
-    let httpOptions = Object.assign( { responseType: 'text' }, this.httpOptions);
-    return this.httpClient.get<string>(`${this.API_URL}/${encodeURIComponent(toolId)}/cancel-execution/${encodeURIComponent(this.data.sessionId)}`, httpOptions).toPromise();
+    let httpOptions = Object.assign( { responseType: 'text' as const }, this.httpOptions);
+    return this.httpClient.get(`${this.API_URL}/${encodeURIComponent(toolId)}/cancel-execution/${encodeURIComponent(this.data.sessionId)}`, httpOptions).toPromise();
   }
 
   getExecutionOutput(toolId: string): Promise<any> {
@@ -84,8 +84,8 @@ export class ToolService extends EntityService<ToolInfo> {
 
   downloadOutput(toolId: string): void {
     if (!toolId) throw Error('Cannot download a dataset without an id');
-    let httpOptions = Object.assign( { observe: 'response', responseType: 'blob' }, this.httpOptions);
-    this.httpClient.get<HttpResponse<Blob>>(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/${encodeURIComponent(this.data.sessionId)}`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));
+    let httpOptions = Object.assign( { observe: 'response' as const, responseType: 'blob' as const }, this.httpOptions);
+    this.httpClient.get(`${this.API_URL}/${encodeURIComponent(toolId)}/download-output/${encodeURIComponent(this.data.sessionId)}`, httpOptions).subscribe(response => this.downloadIntoBrowser(response));
   }
 
   private getFilename(response: HttpResponse<any>): string {

@@ -22,9 +22,12 @@ import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { StudyService } from "./study.service";
 
 export class Study extends Entity {
     clinical: boolean;
+    compatible: boolean = false;
     downloadableByDefault: boolean;
     endDate: Date;
     experimentalGroupsOfSubjects: IdName[];
@@ -45,6 +48,8 @@ export class Study extends Entity {
     withExamination: boolean;
     studyCardList: StudyCard[];
     
+    service: StudyService = ServiceLocator.injector.get(StudyService);
+
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
     }

@@ -32,7 +32,6 @@ import { AnimalExaminationFormComponent }      from './examination/edit/animal-e
 import { AnimalExaminationListComponent }      from './examination/list/animal-examination-list.component';
 import { ExaminationAnestheticsListComponent } from './anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
 import { ExaminationAnestheticFormComponent } from './anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
-import { ImportBrukerComponent } from './importBruker/importBruker.component';
 import { AuthAdminOrExpertGuard } from '../shared/roles/auth-admin-or-expert-guard';
 
 import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
@@ -55,7 +54,7 @@ let routes : Routes = [
     },
   	{
         path: 'importsBruker',
-        component: ImportBrukerComponent,
+        // component: ImportBrukerComponent,
         children: [
             {
                 path: '',

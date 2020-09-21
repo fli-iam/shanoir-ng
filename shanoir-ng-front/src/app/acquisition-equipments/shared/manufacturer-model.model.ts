@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -12,8 +13,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Manufacturer } from './manufacturer.model';
+import { ManufacturerService } from './manufacturer.service';
 
 export class ManufacturerModel extends Entity {
     id: number;
@@ -21,4 +24,5 @@ export class ManufacturerModel extends Entity {
     manufacturer: Manufacturer;
     magneticField: number;
     datasetModalityType: string;
+    service: ManufacturerService = ServiceLocator.injector.get(ManufacturerService);
 }

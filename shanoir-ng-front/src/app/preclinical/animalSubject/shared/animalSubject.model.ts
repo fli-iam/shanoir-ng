@@ -12,8 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Reference } from '../../reference/shared/reference.model';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
+import { AnimalSubjectService } from "./animalSubject.service";
 
 export class AnimalSubject extends Entity {
   id: number;
@@ -23,4 +25,6 @@ export class AnimalSubject extends Entity {
   biotype: Reference;
   provider : Reference;
   stabulation: Reference;
+
+  service: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
 }

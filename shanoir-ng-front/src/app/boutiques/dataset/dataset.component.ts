@@ -81,7 +81,7 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
                 this.getFileUrls(dataset.id);
                 return;
             } else {
-                return this.studyRightsService.getMyRightsForStudy(dataset.studyId).then(rights => {
+                return this.studyRightsService.getMyRightsForStudy(dataset.study.id).then(rights => {
                     this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                     this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                     if (this.hasDownloadRight) {
@@ -169,9 +169,9 @@ export class BoutiquesDatasetComponent extends EntityComponent<Dataset> {
         this.datasetService.downloadToBlob(this.id, 'dcm').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             this.dicomArchiveService.importFromZip(blobReponse.body)
-                .subscribe(response => {
+                .then(response => {
                     this.dicomArchiveService.extractFileDirectoryStructure()
-                    .subscribe(response => {
+                    .then(response => {
                         this.initPapaya(response);
                     });
                 });

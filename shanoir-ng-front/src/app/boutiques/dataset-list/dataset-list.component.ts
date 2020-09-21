@@ -43,7 +43,7 @@ export class BoutiquesDatasetListComponent extends EntityListComponent<Dataset>{
             private subjectService: SubjectService,
             ) {
                 
-        super('dataset', false);
+        super('dataset');
         this.fetchStudies();
         this.fetchSubjects();
     }
