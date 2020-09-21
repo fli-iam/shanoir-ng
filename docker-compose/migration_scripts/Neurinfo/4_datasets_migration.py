@@ -15,8 +15,8 @@ sourceConn = pymysql.connect(
         charset     = os.environ.get("SRC_CHARSET")     or "utf8")
 targetConn = pymysql.connect(
         host        = os.environ.get("TGT_HOST")        or "localhost",
-        user        = os.environ.get("TGT_USER")        or "root",
-        password    = os.environ.get("TGT_PASSWORD")    or "",
+        user        = os.environ.get("TGT_USER")        or "datasets",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
         database    = os.environ.get("TGT_DATABASE")    or "datasets",
         charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
@@ -792,12 +792,11 @@ targetConn.commit()
 print("Import mesh_dataset: end")
 
 print("Import mr_dataset_metadata: start")
-
 sourceCursor.execute("SELECT DATASET_ID, REF_MR_DATASET_NATURE_ID FROM MR_DATASET")
 bulk_insert(targetCursor, "mr_dataset_metadata", "id, mr_dataset_nature", sourceCursor)
 targetConn.commit()
-
 print("Import mr_dataset_metadata: end")
+
 
 print("Import mr_dataset: start")
 sourceCursor.execute("SELECT DATASET_ID, REF_MR_QUALITY_PROCEDURE_TYPE_ID, DATASET_ID FROM MR_DATASET")
@@ -807,125 +806,36 @@ print("Import mr_dataset: end")
 
 
 print("Import echo_time: start")
-# Echo times linked to only one dataset
-sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, COUNT(md.DATASET_ID) as countids 
-	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
-	GROUP BY et.ECHO_TIME_ID HAVING countids = 1""")
-do_bulk_insert = lambda rows: bulk_insert(targetCursor, "echo_time", "id, echo_number, echo_time_value, mr_dataset_id", rows)
-do_bulk_insert(sourceCursor)
-targetConn.commit()
-# Get last echo time id
-sourceCursor.execute("SELECT MAX(ECHO_TIME_ID) FROM ECHO_TIME")
-et_next_id = sourceCursor.fetchone()[0] + 1
-# Echo times linked to many dataset
-sourceCursor.execute("SELECT et.ECHO_TIME_ID FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID GROUP BY et.ECHO_TIME_ID HAVING count(md.DATASET_ID) > 1")
-echo_times = tuple(itertools.chain(*sourceCursor.fetchall()))
-sourceCursor.execute("""SELECT et.ECHO_TIME_ID, et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID 
-        FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID 
-        WHERE et.ECHO_TIME_ID IN %s""", [echo_times])
-echo_times = []
-et_ids = []
-for row in sourceCursor.fetchall():
-	echo_time = list(row);
-	if echo_time[0] in et_ids:
-		echo_time[0] = et_next_id
-		et_next_id+=1
-	echo_times.append(echo_time)
-	et_ids.append(echo_time[0])
-do_bulk_insert(echo_times)
+sourceCursor.execute("""SELECT et.ECHO_NUMBER, et.ECHO_TIME_VALUE, md.DATASET_ID
+	FROM ECHO_TIME et JOIN MR_DATASET md on et.ECHO_TIME_ID = md.ECHO_TIME_ID""")
+do_bulk_insert = lambda rows: bulk_insert(targetCursor, "echo_time", "echo_number, echo_time_value, mr_dataset_id", rows)
 targetConn.commit()
 print("Import echo_time: end")
 
 
 print("Import flip_angle: start")
-# Flip angles linked to only one dataset
-sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
-	GROUP BY fa.FLIP_ANGLE_ID HAVING countids = 1""")
-do_bulk_insert = lambda rows: bulk_insert(targetCursor, "flip_angle", "id, flip_angle_value, mr_dataset_id", rows)
+sourceCursor.execute("""SELECT fa.FLIP_ANGLE_VALUE, md.DATASET_ID
+	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID""")
+do_bulk_insert = lambda rows: bulk_insert(targetCursor, "flip_angle", "flip_angle_value, mr_dataset_id", rows)
 do_bulk_insert(sourceCursor)
-targetConn.commit()
-# Get last flip angle id
-sourceCursor.execute("SELECT MAX(FLIP_ANGLE_ID) FROM FLIP_ANGLE")
-fa_next_id = sourceCursor.fetchone()[0] + 1
-# Flip angles linked to many dataset
-sourceCursor.execute("SELECT fa.FLIP_ANGLE_ID FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID GROUP BY fa.FLIP_ANGLE_ID HAVING count(md.DATASET_ID) > 1")
-flip_angles = tuple(itertools.chain(*sourceCursor.fetchall()))
-sourceCursor.execute("""SELECT fa.FLIP_ANGLE_ID, fa.FLIP_ANGLE_VALUE, md.DATASET_ID 
-	FROM FLIP_ANGLE fa JOIN MR_DATASET md on fa.FLIP_ANGLE_ID = md.FLIP_ANGLE_ID 
-	WHERE fa.FLIP_ANGLE_ID IN %s""", [flip_angles])
-flip_angles = []
-fa_ids = []
-for row in sourceCursor.fetchall():
-	flip_angle = list(row);
-	if flip_angle[0] in fa_ids:
-		flip_angle[0] = fa_next_id
-		fa_next_id+=1
-	flip_angles.append(flip_angle)
-	fa_ids.append(flip_angle[0])
-do_bulk_insert(flip_angles)
 targetConn.commit()
 print("Import flip_angle: end")
 
 
 print("Import inversion_time: start")
-# Inversion times linked to only one dataset
-sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
-	GROUP BY it.INVERSION_TIME_ID HAVING countids = 1""")
-query = "INSERT INTO inversion_time (id, inversion_time_value, mr_dataset_id) VALUES (%s, %s, %s)"
-targetCursor.executemany(query, sourceCursor.fetchall())
-targetConn.commit()
-# Get last inversion time id
-sourceCursor.execute("SELECT MAX(INVERSION_TIME_ID) FROM INVERSION_TIME")
-it_next_id = sourceCursor.fetchone()[0] + 1
-# Inversion times linked to many dataset
-sourceCursor.execute("SELECT it.INVERSION_TIME_ID FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID GROUP BY it.INVERSION_TIME_ID HAVING count(md.DATASET_ID) > 1")
-inversion_times = tuple(itertools.chain(*sourceCursor.fetchall()))
-sourceCursor.execute("""SELECT it.INVERSION_TIME_ID, it.INVERSION_TIME_VALUE, md.DATASET_ID 
-	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID 
-	WHERE it.INVERSION_TIME_ID IN %s""", [inversion_times])
-inversion_times = []
-it_ids = []
-for row in sourceCursor.fetchall():
-	inversion_time = list(row);
-	if inversion_time[0] in it_ids:
-		inversion_time[0] = it_next_id
-		it_next_id+=1
-	inversion_times.append(inversion_time)
-	it_ids.append(inversion_time[0])
-targetCursor.executemany(query, inversion_times)
+sourceCursor.execute("""SELECT it.INVERSION_TIME_VALUE, md.DATASET_ID
+	FROM INVERSION_TIME it JOIN MR_DATASET md on it.INVERSION_TIME_ID = md.INVERSION_TIME_ID""")
+do_bulk_insert = lambda rows: bulk_insert(targetCursor, "inversion_time", "inversion_time_value, mr_dataset_id", rows)
+do_bulk_insert(sourceCursor)
 targetConn.commit()
 print("Import inversion_time: end")
 
 
 print("Import repetition_time: start")
-# Repetition times linked to only one dataset
-sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, COUNT(md.DATASET_ID) as countids
-	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
-	GROUP BY rt.REPETITION_TIME_ID HAVING countids = 1""")
-do_bulk_insert = lambda rows: bulk_insert(targetCursor, "repetition_time", "id, repetition_time_value, mr_dataset_id", rows)
+sourceCursor.execute("""SELECT rt.REPETITION_TIME_VALUE, md.DATASET_ID
+	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID""")
+do_bulk_insert = lambda rows: bulk_insert(targetCursor, "repetition_time", "repetition_time_value, mr_dataset_id", rows)
 do_bulk_insert(sourceCursor)
-targetConn.commit()
-# Get last repetition time id
-sourceCursor.execute("SELECT MAX(REPETITION_TIME_ID) FROM REPETITION_TIME")
-rt_next_id = sourceCursor.fetchone()[0] + 1
-# Repetition times linked to many dataset
-sourceCursor.execute("SELECT rt.REPETITION_TIME_ID FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.INVERSION_TIME_ID GROUP BY rt.REPETITION_TIME_ID HAVING count(md.DATASET_ID) > 1")
-repetition_times = tuple(itertools.chain(*sourceCursor.fetchall()))
-sourceCursor.execute("""SELECT rt.REPETITION_TIME_ID, rt.REPETITION_TIME_VALUE, md.DATASET_ID 
-	FROM REPETITION_TIME rt JOIN MR_DATASET md on rt.REPETITION_TIME_ID = md.REPETITION_TIME_ID 
-	WHERE rt.REPETITION_TIME_ID IN %s""", [repetition_times])
-repetition_times = []
-rt_ids = []
-for row in sourceCursor.fetchall():
-	repetition_time = list(row);
-	if repetition_time[0] in rt_ids:
-		repetition_time[0] = rt_next_id
-		rt_next_id+=1
-	inversion_times.append(repetition_time)
-	rt_ids.append(repetition_time[0])
-do_bulk_insert(repetition_times)
 targetConn.commit()
 print("Import repetition_time: end")
 
