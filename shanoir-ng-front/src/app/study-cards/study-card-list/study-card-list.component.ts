@@ -50,9 +50,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     }
 
     getEntities(): Promise<StudyCard[]> {
-        let all: StudyCard[] = [];
-        this.studyCardService.getAll(all);
-        return Promise.resolve(all);
+        return this.studyCardService.getAllAdvanced().quick;
     }
 
     getColumnDefs(): any[] {

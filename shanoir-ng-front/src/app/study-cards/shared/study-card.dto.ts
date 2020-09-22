@@ -91,12 +91,10 @@ export class StudyCardDTOService {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            if (dtos) {
-                for (let dto of dtos) {
-                    let entity = new StudyCard();
-                    StudyCardDTOService.mapSyncFields(dto, entity);
-                    result.push(entity);
-                }
+            for (let dto of dtos) {
+                let entity = new StudyCard();
+                StudyCardDTOService.mapSyncFields(dto, entity);
+                result.push(entity);
             }
         }
         return Promise.all([
@@ -143,8 +141,8 @@ export class StudyCardDTOService {
             entity.niftiConverter = new NiftiConverter();
             entity.niftiConverter.id = dto.niftiConverterId;
         }
+        entity.rules = [];
         if (dto.rules) {
-            entity.rules = [];
             for (let ruleDTO of dto.rules) {
                 let rule: StudyCardRule = new StudyCardRule();
                 if (ruleDTO.assignments) {
