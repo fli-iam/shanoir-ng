@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{agent?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="name" formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange($event)">
+									<select id="name" formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange()">
 										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
 									</select>
 									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">

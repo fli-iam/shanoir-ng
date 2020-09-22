@@ -39,6 +39,7 @@ export class DownloadStatisticsComponent{
 
     downloadStatistics(): void {
         const control = this.form.get('studyNameRegExp');
+        console.log('downloadStatistics')
         this.datasetService.downloadStatistics(control.value);
     }
 

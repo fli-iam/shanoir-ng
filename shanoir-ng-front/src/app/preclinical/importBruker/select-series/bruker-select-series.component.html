@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}"
                             buttonPicto="fa fa-eye"
-                            (buttonClick)="showSerieDetails($event)">
+                            (buttonClick)="showSerieDetails($event, serie)">
                         </node>
                 </node>
         </node>

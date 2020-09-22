@@ -31,17 +31,17 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
 
 export class SideMenuComponent {
 
-    private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
-    private username: string = "";
-    private dataOpened: boolean = false;
-    private precOpened: boolean = false;
-    private eqOpened: boolean = false;
-    private uploadOpened: boolean = false;
-    private adminOpened: boolean = false;
-    private tasksOpened: boolean = false;
+    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
+    public username: string = "";
+    public dataOpened: boolean = false;
+    public precOpened: boolean = false;
+    public eqOpened: boolean = false;
+    public uploadOpened: boolean = false;
+    public adminOpened: boolean = false;
+    public tasksOpened: boolean = false;
 
     constructor(
-            private keycloakService: KeycloakService, 
+            public keycloakService: KeycloakService, 
             private solrService: SolrService,
             private msgboxService: MsgBoxService,
             public notificationsService: NotificationsService) {

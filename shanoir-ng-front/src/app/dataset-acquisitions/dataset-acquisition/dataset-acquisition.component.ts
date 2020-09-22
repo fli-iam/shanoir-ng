@@ -33,8 +33,8 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
-    private studyCards: StudyCard[];
-    private acquisitionEquipments: AcquisitionEquipment[];
+    public studyCards: StudyCard[];
+    public acquisitionEquipments: AcquisitionEquipment[];
     
     
     constructor(
@@ -42,7 +42,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private datasetAcquisitionService: DatasetAcquisitionService,
             private studyCardService: StudyCardService,
             private acqEqService: AcquisitionEquipmentService,
-            private acqEqPipe: AcquisitionEquipmentPipe) {
+            public acqEqPipe: AcquisitionEquipmentPipe) {
         super(route, 'dataset-acquisition');
     }
 

@@ -50,7 +50,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private acqEquipService: AcquisitionEquipmentService, 
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
-            private manufacturerModelPipe: ManufacturerModelPipe) {
+            public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
     }

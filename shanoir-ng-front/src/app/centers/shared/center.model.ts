@@ -28,6 +28,6 @@ export class Center extends Entity {
     street: string;
     website: string;
     studyCenterList: StudyCenter[] = [];
-    compatible: boolean = false;
+    // compatible: boolean = false;
     service: CenterService = ServiceLocator.injector.get(CenterService);
 }

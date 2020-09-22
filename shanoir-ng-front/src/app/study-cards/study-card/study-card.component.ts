@@ -38,9 +38,9 @@ import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.co
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     private centers: IdName[] = [];
-    private studies: IdName[] = [];
-    private acquisitionEquipments: Option<AcquisitionEquipment>[];
-    private niftiConverters: IdName[] = [];
+    public studies: IdName[] = [];
+    public acquisitionEquipments: Option<AcquisitionEquipment>[];
+    public niftiConverters: IdName[] = [];
     showRulesErrors: boolean = false;
     selectMode: boolean;
     selectedRules: StudyCardRule[] = [];

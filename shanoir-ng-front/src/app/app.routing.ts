@@ -79,6 +79,7 @@ import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/l
 import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnestheticFormComponent } from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
 import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animalSubject-form.component';
+import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 
 let appRoutes: Routes = [
     {
@@ -171,13 +172,15 @@ let appRoutes: Routes = [
                 data: { mode: 'view', select: true }
             }
         ]
-    },
-        { 
+    },{ 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent
     },{ 
         path: 'preclinical-contrastagent', 
         component: ContrastAgentFormComponent
+    },{ 
+        path: 'download-statistics', 
+        component: DownloadStatisticsComponent
     },
 ];
 

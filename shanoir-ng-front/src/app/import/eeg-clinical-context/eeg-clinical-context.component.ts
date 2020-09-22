@@ -64,8 +64,8 @@ export class EegClinicalContextComponent implements OnInit {
     public columnDefs: any[];
     public hasPosition: boolean;
     
-    protected coordSystemOptions: Option<CoordSystems>[];
-    protected coordsystem : string;
+    public coordSystemOptions: Option<CoordSystems>[];
+    public coordsystem : string;
 
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;

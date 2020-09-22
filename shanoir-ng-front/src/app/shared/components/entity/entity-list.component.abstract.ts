@@ -40,7 +40,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private entityRoutes: EntityRoutes;
     protected msgBoxService: MsgBoxService;
     protected breadcrumbsService: BreadcrumbsService;
-    protected windowService: WindowService;
+    public windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];

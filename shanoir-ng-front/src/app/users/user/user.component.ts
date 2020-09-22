@@ -33,9 +33,9 @@ import * as AppUtils from '../../utils/app.utils';
 
 export class UserComponent extends EntityComponent<User> {
 
-    private roles: Role[];
-    private denyLoading: boolean = false;
-    private acceptLoading: boolean = false;
+    public roles: Role[];
+    public denyLoading: boolean = false;
+    public acceptLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute,

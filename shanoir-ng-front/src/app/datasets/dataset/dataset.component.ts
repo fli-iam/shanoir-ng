@@ -37,7 +37,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private filename: string;
     hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
-    protected downloading: boolean = false;
+    public downloading: boolean = false;
     
     constructor(
             private datasetService: DatasetService,

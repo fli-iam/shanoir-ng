@@ -59,7 +59,7 @@ export class BrukerUploadComponent {
     }
     
     
-    private uploadArchive(fileEvent: any): void {
+    public uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.uploadBruker(fileEvent);   
     }
@@ -107,7 +107,7 @@ export class BrukerUploadComponent {
             );
     }
 
-    protected storeArchiveChanged(event: boolean) {
+    public storeArchiveChanged(event: boolean) {
         // Get the name of the file to get
         if (event) {
             let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
@@ -126,7 +126,7 @@ export class BrukerUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/brukerseries']);
     }
 

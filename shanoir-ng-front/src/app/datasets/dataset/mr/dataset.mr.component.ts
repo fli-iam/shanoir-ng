@@ -27,7 +27,7 @@ export class MrDatasetComponent implements OnInit{
     @Input() mode: Mode;
     @Input() dataset: MrDataset;
     // allMrDatasetNatures: any[];
-    private natureOptions: Option<MrDatasetNature>[];
+    public natureOptions: Option<MrDatasetNature>[];
     
     constructor() {
         this.natureOptions = MrDatasetNature.options;

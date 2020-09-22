@@ -33,7 +33,6 @@ import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum'
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html'
 })
-
 export class CommonDatasetComponent implements OnChanges {
 
     @Input() mode: Mode;

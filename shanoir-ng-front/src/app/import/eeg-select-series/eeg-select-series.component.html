@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [deploy]="true"
         [hasBox]="true"
         [nodeParams]=""
-        (chkbxChange)="changeDatasets($event);">
+        (chkbxChange)="changeDatasets();">
             <node 
                 *ngFor="let dataset of datasets" 
                 [label]="dataset.name" 

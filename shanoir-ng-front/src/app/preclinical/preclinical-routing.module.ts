@@ -36,7 +36,6 @@ import { AuthAdminOrExpertGuard } from '../shared/roles/auth-admin-or-expert-gua
 
 import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './importBruker/select-series/bruker-select-series.component';
-import { AnimalClinicalContextComponent } from './importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerFinishImportComponent } from './importBruker/finish/bruker-finish.component';
 import { SubjectTherapyFormComponent } from './therapies/subjectTherapy/edit/subjectTherapy-form.component';
 import { SubjectTherapiesListComponent } from './therapies/subjectTherapy/list/subjectTherapy-list.component';
@@ -66,9 +65,6 @@ let routes : Routes = [
             }, {
                 path: 'series',
                 component: BrukerSelectSeriesComponent
-            }, {
-                path: 'context',
-                component: AnimalClinicalContextComponent
             }, {
                 path: 'finish',
                 component: BrukerFinishImportComponent

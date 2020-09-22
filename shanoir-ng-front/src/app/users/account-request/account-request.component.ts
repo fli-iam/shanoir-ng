@@ -28,16 +28,16 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 export class AccountRequestComponent {
     
-    private user: User;
-    private form: FormGroup;
+    public user: User;
+    public form: FormGroup;
 
-    private requestSent: boolean = false;
-    private errorOnRequest: boolean = false;
+    public requestSent: boolean = false;
+    public errorOnRequest: boolean = false;
 
     
     constructor(
             private fb: FormBuilder, 
-            private userService: UserService,
+            public userService: UserService,
             private location: Location) {}
 
     ngOnInit(): void {

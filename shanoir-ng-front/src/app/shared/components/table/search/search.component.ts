@@ -45,7 +45,7 @@ export class TableSearchComponent implements OnChanges {
         this.searchableColumns = cols;
     }
 
-    private search() {
+    public search() {
         this.filterChange.emit(this.filter);
     }
 

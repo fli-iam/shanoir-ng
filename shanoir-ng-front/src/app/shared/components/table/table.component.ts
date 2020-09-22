@@ -45,10 +45,10 @@ export class TableComponent implements OnInit {
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
     
-    private isError: boolean = false;
+    public isError: boolean = false;
     
-    private filter: Filter = new Filter(null, null);
-    private firstLoading: boolean = true;
+    public filter: Filter = new Filter(null, null);
+    public firstLoading: boolean = true;
     
 
     constructor(

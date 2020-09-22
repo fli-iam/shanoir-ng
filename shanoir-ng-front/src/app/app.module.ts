@@ -25,7 +25,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'ng-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
-// import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -243,7 +243,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         HttpClientModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        // NgxJsonViewerModule,
+        NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
         RouterModule
