@@ -219,7 +219,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic);
     }
 
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
 

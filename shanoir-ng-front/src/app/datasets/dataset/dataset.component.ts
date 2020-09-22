@@ -134,7 +134,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
     
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

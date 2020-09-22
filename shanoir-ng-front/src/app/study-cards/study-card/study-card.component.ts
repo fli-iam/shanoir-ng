@@ -20,17 +20,16 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { CenterService } from '../../centers/shared/center.service';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { StudyRightsService } from '../../studies/shared/study-rights.service';
-import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'study-card',
@@ -46,13 +45,12 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     showRulesErrors: boolean = false;
     selectMode: boolean;
     selectedRules: StudyCardRule[] = [];
-    hasAdministrateRight: boolean = false;
+    hasAdministrateRightPromise: Promise<boolean>;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
 
     constructor(
             private route: ActivatedRoute,
             private studyCardService: StudyCardService, 
-            private centerService: CenterService,
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService,
@@ -62,13 +60,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        if (this.mode == 'view') {
-           this.studyRightsService.getMyRightsForStudy(this.studyCard.study.id).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-           });
-        }
-
-    }
+     }
 
     getService(): EntityService<StudyCard> {
         return this.studyCardService;
@@ -78,12 +70,15 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     set studyCard(coil: StudyCard) { this.entity = coil; }
 
     initView(): Promise<void> {
-        return this.studyCardService.get(this.id).then(sc => {
+        let scFetchPromise: Promise<void> = this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
-        });
+        });   
+        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy());
+        return scFetchPromise;
     }
     
     initEdit(): Promise<void> {
+        this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
         this.fetchNiftiConverters();
         return this.studyCardService.get(this.id).then(sc => {
@@ -92,6 +87,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     initCreate(): Promise<void> {
+        this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
         this.fetchNiftiConverters();
         this.studyCard = new StudyCard();
@@ -112,12 +108,22 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return form;
     }
 
-    public hasEditRight(): boolean {
-        return this.hasAdministrateRight && !this.selectMode && this.keycloakService.isUserAdminOrExpert();
+    public async hasEditRight(): Promise<boolean> {
+        return this.hasAdministrateRightPromise.then(hasRight => hasRight && !this.selectMode && this.keycloakService.isUserAdminOrExpert());
     }
 
-    public hasDeleteRight(): boolean {
-        return this.hasAdministrateRight && !this.selectMode && this.keycloakService.isUserAdminOrExpert();
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.hasEditRight();
+    }
+
+    private hasAdminRightsOnStudy(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) {
+            return Promise.resolve(true);
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.studyCard.study.id).then(rights => {
+                return rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+            });
+        }
     }
     
     private fetchStudies() {

@@ -368,7 +368,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return false;
     }
     
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
     
