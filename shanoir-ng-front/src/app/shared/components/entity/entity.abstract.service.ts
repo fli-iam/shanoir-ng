@@ -49,7 +49,6 @@ export abstract class EntityService<T extends Entity> {
                     return quickRes;                   
                 }).catch(reason => reject(reason));
         });
-        console.log('res', res)
         return res;
     }
 
