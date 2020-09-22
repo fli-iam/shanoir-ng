@@ -79,7 +79,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
-                        + " (" + DatasetModalityType.getLabel(acqEquip.manufacturerModel.datasetModalityType) + ")" 
+                        + " (" + DatasetModalityType.getLabel(acqEquip.manufacturerModel.datasetModalityType) + ")"
                         + " " + acqEquip.serialNumber + " - " + acqEquip.center.name;
                 }
             },

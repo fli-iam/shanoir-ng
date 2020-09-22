@@ -96,7 +96,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
         let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }

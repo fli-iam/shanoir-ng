@@ -26,7 +26,8 @@ export class AcquisitionEquipmentPipe implements PipeTransform {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             if (manufModel && acqEqpt.center) {
                 return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
-                + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;             } else if (acqEqpt.center && acqEqpt.center.name) {
+                    + " (???" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;
+            } else if (acqEqpt.center && acqEqpt.center.name) {
                 return acqEqpt.serialNumber + " - " + acqEqpt.center.name;
             } else if (acqEqpt.serialNumber) {
                 return acqEqpt.serialNumber

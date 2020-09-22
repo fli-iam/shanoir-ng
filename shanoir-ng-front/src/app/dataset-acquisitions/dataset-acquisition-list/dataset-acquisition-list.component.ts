@@ -81,7 +81,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
         else {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
-                + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber 
+                + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber
         }
     }
 }
