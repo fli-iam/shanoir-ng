@@ -141,7 +141,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 		boolean isRawData = rawData.exists();
 
 		// 2) List subject files
-		File[] subjectFiles = rawData.listFiles(new FilenameFilter() {
+		File[] subjectFiles = (isSourceDataDicom? dicomSourceData : rawData).listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.startsWith("sub-");
