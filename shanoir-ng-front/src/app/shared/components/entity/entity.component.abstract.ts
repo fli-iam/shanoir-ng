@@ -106,8 +106,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         choose().then(() => {
             this.footerState = new FooterState(this.mode);
-            this.footerState.canEdit = this.hasEditRight();
-            this.footerState.canDelete = this.hasDeleteRight();
+            this.hasEditRight().then(right => this.footerState.canEdit = right);
+            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
                 this.entity = this.breadcrumbsService.currentStep.entity as T;
             }
@@ -375,7 +375,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Default is true and this method should be overriden when rights control is needed.
      * It is called after initialization so the entity value can be used inside.
      */
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return true;
     }
 
@@ -384,7 +384,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Default is true and this method should be overriden when rights control is needed.
      * It is called after initialization so the entity value can be used inside.
      */
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

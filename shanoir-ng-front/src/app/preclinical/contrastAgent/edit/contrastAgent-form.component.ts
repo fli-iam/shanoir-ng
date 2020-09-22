@@ -164,7 +164,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         return null;
     }
 
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
 

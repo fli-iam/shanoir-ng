@@ -110,7 +110,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             .then(manufModels => this.manufModels = manufModels);
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
