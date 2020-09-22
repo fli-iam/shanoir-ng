@@ -12,6 +12,8 @@
 
 FROM debian:stretch
 
+ENV HOME="/tmp/"
+
 RUN set -ex && \
     echo 'deb http://deb.debian.org/debian stretch-backports main' \
       > /etc/apt/sources.list.d/stretch-backports.list && \
@@ -68,9 +70,6 @@ RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii
 
 RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
 RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-RUN mkdir dcm2nii_2008-03-31
-RUN mkdir dcm2nii_2014-08-04
 
 # install dicom tool clidcm
 RUN mkdir -p /opt/clidcm/libx64
