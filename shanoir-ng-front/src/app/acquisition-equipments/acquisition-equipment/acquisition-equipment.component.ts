@@ -37,7 +37,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     private manufModels: ManufacturerModel[];
     private centers: IdName[];
-    private datasetModalityTypeEnumValue: string;
+    private datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
@@ -91,7 +91,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): FormGroup {
