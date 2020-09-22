@@ -141,7 +141,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         this.emitEvent(physioDataFile);
     }
 
-    public hasDeleteRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
 

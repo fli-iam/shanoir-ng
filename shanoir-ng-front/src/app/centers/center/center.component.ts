@@ -76,7 +76,7 @@ export class CenterComponent extends EntityComponent<Center> {
         this.router.navigate(['/acquisition-equipment/details/' + acqE.id]);
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

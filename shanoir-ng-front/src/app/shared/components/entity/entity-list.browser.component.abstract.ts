@@ -31,24 +31,20 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
     }
     
     private loadEntities(): Promise<void> {
-        return this.entitiesPromise = this.getEntities().then((entities) => {
+        this.entitiesPromise = this.getEntities().then((entities) => {
             this.entities = entities;
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
         });
+        return this.entitiesPromise;
     }
 
     getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
-        return new Promise((resolve, reject) => {
-            this.entitiesPromise.then(() => {
-                if (forceRefresh) {
-                    return resolve(this.loadEntities().then(() => this.browserPaging.getPage(pageable)));
-                }
-                else {
-                    resolve(this.browserPaging.getPage(pageable));
-                }
-            }).catch(reason => {
-                reject(reason);
-            });
+        return this.entitiesPromise.then(() => {
+            if (forceRefresh) {
+                return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
+            } else {
+                return this.browserPaging.getPage(pageable);
+            }
         });
     }
 
