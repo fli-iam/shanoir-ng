@@ -32,7 +32,7 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
     - Type of download
     - Use bids format
     - nii.gz or .zip */
-export class DatasetDownaloadComponent {
+export class DatasetDownloadComponent {
 
     constructor(private datasetService: DatasetService, private studyService: StudyService) {
     }

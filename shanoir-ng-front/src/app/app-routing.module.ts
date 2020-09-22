@@ -57,7 +57,32 @@ import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
-
+import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
+import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
+import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
+import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
+import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
+import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
+import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
+import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
+import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
+import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
+import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
+import { PathologiesListComponent } from './preclinical/pathologies/pathology/list/pathology-list.component';
+import { PathologyModelFormComponent } from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
+import { AnestheticIngredientFormComponent } from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
+import { PathologyModelsListComponent } from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
+import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
+import { AnestheticsListComponent } from './preclinical/anesthetics/anesthetic/list/anesthetic-list.component';
+import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
+import { AnestheticFormComponent } from './preclinical/anesthetics/anesthetic/edit/anesthetic-form.component';
+import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animalSubject-form.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
+import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
+import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 
 let routes: Routes = [
     {
@@ -116,6 +141,16 @@ let routes: Routes = [
             }, {
                 path: 'eegfinish',
                 component: FinishEegImportComponent
+            }, {   
+                path: 'bruker',
+                component: BrukerUploadComponent,
+                data: {importMode: 'BRUKER'}
+            }, {
+                path: 'brukerseries',
+                component: BrukerSelectSeriesComponent
+            }, {
+                path: 'brukerfinish',
+                component: BrukerFinishImportComponent
             }
         ]
     }, {
@@ -127,6 +162,12 @@ let routes: Routes = [
     }, {
         path: 'boutiques/:toolId',
         component: InvocationExecutionComponent
+    }, { 
+        path: 'preclinical-contrastagents', 
+        component: ContrastAgentsListComponent
+    }, { 
+        path: 'preclinical-contrastagent', 
+        component: ContrastAgentFormComponent
     },
 
 
@@ -175,7 +216,7 @@ let routes: Routes = [
         path: 'subject/edit/:id',
         component: SubjectComponent,
         data: { mode: 'edit' },
-        canActivate: [AuthAdminGuard],
+        canActivate: [AuthAdminOrExpertGuard],
     },
     {
         path: 'subject/create',
@@ -413,7 +454,262 @@ let routes: Routes = [
 		component: InstrumentAssessmentComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
+	},{ 
+        path: 'download-statistics', 
+        component: DownloadStatisticsComponent
+    },
+
+
+    {
+		path: 'study-card',
+		redirectTo: 'study-card/list',
 	},
+	{
+		path: 'study-card/list',
+		component: StudyCardListComponent,
+	},
+	{
+		path: 'study-card/details/:id',
+		component: StudyCardComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'study-card/edit/:id',
+		component: StudyCardComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'study-card/create',
+		component: StudyCardComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'dataset-acquisition',
+		redirectTo: 'dataset-acquisition/list',
+	},
+	{
+		path: 'dataset-acquisition/list',
+		component: DatasetAcquisitionListComponent,
+	},
+	{
+		path: 'dataset-acquisition/details/:id',
+		component: DatasetAcquisitionComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'dataset-acquisition/edit/:id',
+		component: DatasetAcquisitionComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'dataset-acquisition/create',
+		component: DatasetAcquisitionComponent,
+		data: { mode: 'create' },
+	},
+	{
+		path: 'preclinical-reference',
+		redirectTo: 'preclinical-reference/list',
+	},
+	{
+		path: 'preclinical-reference/list',
+		component: ReferencesListComponent,
+	},
+	{
+		path: 'preclinical-reference/details/:id',
+		component: ReferenceFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-reference/edit/:id',
+		component: ReferenceFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-reference/create',
+		component: ReferenceFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-examination',
+		redirectTo: 'preclinical-examination/list',
+	},
+	{
+		path: 'preclinical-examination/list',
+		component: AnimalExaminationListComponent,
+	},
+	{
+		path: 'preclinical-examination/details/:id',
+		component: AnimalExaminationFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-examination/edit/:id',
+		component: AnimalExaminationFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-examination/create',
+		component: AnimalExaminationFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-therapy',
+		redirectTo: 'preclinical-therapy/list',
+	},
+	{
+		path: 'preclinical-therapy/list',
+		component: TherapiesListComponent,
+	},
+	{
+		path: 'preclinical-therapy/details/:id',
+		component: TherapyFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-therapy/edit/:id',
+		component: TherapyFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-therapy/create',
+		component: TherapyFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-pathology',
+		redirectTo: 'preclinical-pathology/list',
+	},
+	{
+		path: 'preclinical-pathology/list',
+		component: PathologiesListComponent,
+	},
+	{
+		path: 'preclinical-pathology/details/:id',
+		component: PathologyFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-pathology/edit/:id',
+		component: PathologyFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-pathology/create',
+		component: PathologyFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-pathology-model',
+		redirectTo: 'preclinical-pathology-model/list',
+	},
+	{
+		path: 'preclinical-pathology-model/list',
+		component: PathologyModelsListComponent,
+	},
+	{
+		path: 'preclinical-pathology-model/details/:id',
+		component: PathologyModelFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-pathology-model/edit/:id',
+		component: PathologyModelFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-pathology-model/create',
+		component: PathologyModelFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-anesthetic-ingredient',
+		redirectTo: 'preclinical-anesthetic-ingredient/list',
+	},
+	{
+		path: 'preclinical-anesthetic-ingredient/list',
+		component: AnestheticIngredientsListComponent,
+	},
+	{
+		path: 'preclinical-anesthetic-ingredient/details/:id',
+		component: AnestheticIngredientFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-anesthetic-ingredient/edit/:id',
+		component: AnestheticIngredientFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-anesthetic-ingredient/create',
+		component: AnestheticIngredientFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-anesthetic',
+		redirectTo: 'preclinical-anesthetic/list',
+	},
+	{
+		path: 'preclinical-anesthetic/list',
+		component: AnestheticsListComponent,
+	},
+	{
+		path: 'preclinical-anesthetic/details/:id',
+		component: AnestheticFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-anesthetic/edit/:id',
+		component: AnestheticFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-anesthetic/create',
+		component: AnestheticFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-subject',
+		redirectTo: 'preclinical-subject/list',
+	},
+	{
+		path: 'preclinical-subject/list',
+		component: AnimalSubjectsListComponent,
+	},
+	{
+		path: 'preclinical-subject/details/:id',
+		component: AnimalSubjectFormComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'preclinical-subject/edit/:id',
+		component: AnimalSubjectFormComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'preclinical-subject/create',
+		component: AnimalSubjectFormComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+
 
 ];
 
@@ -432,37 +728,6 @@ let routes: Routes = [
 //     getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
 // );
 
-// function getRoutesFor(entityName: string, entityComponent, listComponent, 
-//        // auth): Routes {
-//         auth: {read?: any, create?: any, update?: any} ): Routes {
-
-//     return [
-//         {
-//             path: entityName,
-//             redirectTo: entityName + '/list',
-//             pathMatch: 'full',
-//         }, {
-//             path: entityName + '/list',
-//             component: listComponent,
-//             canActivate: auth.read ? [auth.read] : undefined,
-//         }, {
-//             path: entityName+'/details/:id',
-//             component: entityComponent,
-//             data: { mode: 'view' },
-//             canActivate: auth.read ? [auth.read] : undefined,
-//         }, {
-//             path: entityName+'/edit/:id',
-//             component: entityComponent,
-//             data: { mode: 'edit' },
-//             canActivate: auth.update ? [auth.update] : undefined,
-//         }, {
-//             path: entityName+'/create',
-//             component: entityComponent,
-//             data: { mode: 'create' },
-//             canActivate: auth.create ? [auth.create] : undefined,
-//         }
-//     ];
-// };
 
 // function getRoutesFor(entityName: string, entityComponent:any, listComponent:any, 
 //         auth: {read?: any, create?: any, update?: any} ): any {

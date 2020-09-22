@@ -89,8 +89,11 @@ export class DatasetService extends EntityService<Dataset> {
         );
     }
 
-    downloadStatistics(studyNameRegExp: string) {
-        let params = new HttpParams().set("studyNameRegExp", '' + studyNameRegExp);
+    downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
+        let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
+                                        .set("studyNameOutRegExp", studyNameOutRegExp)
+                                        .set("subjectNameInRegExp", subjectNameInRegExp)
+                                        .set("subjectNameOutRegExp", subjectNameOutRegExp);
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(

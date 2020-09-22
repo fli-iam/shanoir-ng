@@ -24,7 +24,7 @@ import { DatasetService } from '../shared/dataset.service';
 
 export class DownloadStatisticsComponent{
 
-    private form: FormGroup;
+    public form: FormGroup;
 
     constructor(private datasetService: DatasetService,
             private breadcrumbsService: BreadcrumbsService, 
@@ -38,14 +38,18 @@ export class DownloadStatisticsComponent{
     }
 
     downloadStatistics(): void {
-        const control = this.form.get('studyNameRegExp');
-        console.log('downloadStatistics')
-        this.datasetService.downloadStatistics(control.value);
+        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp'), 
+                                                this.form.get('studyNameOutRegExp'), 
+                                                this.form.get('subjectNameInRegExp'), 
+                                                this.form.get('subjectNameOutRegExp'));
     }
 
     buildForm(): void {
         this.form = this.formBuilder.group({
-            'studyNameRegExp': ['', [Validators.maxLength(255)]]
+            'studyNameInRegExp': ['', [Validators.maxLength(255)]],
+            'studyNameOutRegExp': ['', [Validators.maxLength(255)]],
+            'subjectNameInRegExp': ['', [Validators.maxLength(255)]],
+            'subjectNameOutRegExp': ['', [Validators.maxLength(255)]],
         });
     }
 

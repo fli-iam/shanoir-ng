@@ -102,4 +102,12 @@ public interface DatasetService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
 	public List<Dataset> findByStudyId(Long studyId);
 
+	/**
+	 * Get database statistics
+	 * 
+	 * @return statistics
+	 */
+	@PreAuthorize("hasRole('ADMIN')")
+	Object queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp);
+
 }

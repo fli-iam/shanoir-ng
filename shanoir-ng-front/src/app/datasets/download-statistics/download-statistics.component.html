@@ -18,16 +18,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <fieldset class="step">
         <ol>
             <legend>
-                Please enter the name of the studies you would like to download.
+                Please enter the filters corresponding to the data you would like to download.
             </legend>
-            <p>The studies will be filtered by name according to the given regular expression. For example, "Main Cohort.*|Multiple Sclerosis" will return data from all studies which have a name beginning with "Main Cohort" </p>
+            <p>The studies will be filtered by name according to the given regular expression. 
+                For example, "Main Cohort.*|Multiple Sclerosis" in the field "Regular expression filtering the studies to include" will return data from all studies which have a name beginning with "Main Cohort" or "Multiple Sclerosis".
+                "Test.*|FakeSubject" in the field "Regular expression filtering the subjects to exclude" will skip data whose subject name begins with "Test" or is "FakeSubject".</p>
             <li>
-                <label>Study name regular expression</label> 
+                <label>Regular expression filtering the studies to include</label> 
                 <span class="right-col">
-                    <input type="text" id="studyNameRegExp" formControlName="studyNameRegExp" maxlength="255"/>
-                    <label *ngIf="hasError('studyNameRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                    <input type="text" id="studyNameInRegExp" formControlName="studyNameInRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('studyNameInRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameInRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
                 </span>
-                <tool-tip>Enter the regular expression to filter the study by name.</tool-tip>
+                <tool-tip>Enter the regular expression to select the studies to include by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the studies to exclude</label> 
+                <span class="right-col">
+                    <input type="text" id="studyNameOutRegExp" formControlName="studyNameOutRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('studyNameOutRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameOutRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the studies to exclude by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the subjects to include</label> 
+                <span class="right-col">
+                    <input type="text" id="subjectNameInRegExp" formControlName="subjectNameInRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('subjectNameInRegExp', ['maxlength'])" [@slideDown]="hasError('subjectNameInRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the subjects to include by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the subjects to exclude</label> 
+                <span class="right-col">
+                    <input type="text" id="subjectNameOutRegExp" formControlName="subjectNameOutRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('subjectNameOutRegExp', ['maxlength'])" [@slideDown]="hasError('subjectNameOutRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the subjects to exclude by name.</tool-tip>
             </li>
         </ol>
     </fieldset>
