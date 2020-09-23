@@ -135,4 +135,8 @@ export class UserComponent extends EntityComponent<User> {
         return null;
     }
 
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
+    }
+
 }

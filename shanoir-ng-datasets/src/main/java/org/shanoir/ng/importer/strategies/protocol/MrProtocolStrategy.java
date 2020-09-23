@@ -42,13 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MrProtocolStrategy implements ProtocolStrategy {
+public class MrProtocolStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	@Override
-	public MrProtocol generateMrProtocolForSerie(Attributes attributes, Serie serie) {
+	public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {
 		if (Boolean.TRUE.equals(serie.getIsEnhancedMR())) {
 			// MultiFrameExtractor is only used in case of EnhancedMR MRI.
 			MultiframeExtractor emf = new MultiframeExtractor();

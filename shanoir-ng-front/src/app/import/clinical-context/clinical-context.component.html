@@ -61,11 +61,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
             </ng-container>
         </li>
+        <li class="info" *ngIf="scHasDifferentModality && study">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>That study card would set a different modality than detected in your data.</strong>
+            <br/>Your data says <strong>{{modality}}</strong> while the study card would set <strong>{{scHasDifferentModality}}</strong> in the imported metadata.
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+            </ng-container>
+        </li>
         <li>
             <label [class.required-label]="!useStudyCard">Select a center</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || center"
-                        [disabled]="!useStudyCard && (!study || !centerOptions || centerOptions.length == 0)"
+                        [disabled]="!useStudyCard && (!study || !centerOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
                         (change)="onSelectCenter(); onContextChange();" 
@@ -89,7 +100,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
-                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"
+                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
                         (change)="onSelectAcquisitonEquipment(); onContextChange();"

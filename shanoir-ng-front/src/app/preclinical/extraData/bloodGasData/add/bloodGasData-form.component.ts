@@ -112,5 +112,10 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     	 }
       	this.bloodGasData = new BloodGasData();
     }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
+    }
+
     
 }
