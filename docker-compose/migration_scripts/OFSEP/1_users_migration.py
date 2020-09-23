@@ -8,7 +8,7 @@ sourceConn = pymysql.connect(
         host        = os.environ.get("SRC_HOST")        or "localhost",
         user        = os.environ.get("SRC_USER")        or "root",
         password    = os.environ.get("SRC_PASSWORD")    or "",
-        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        database    = os.environ.get("SRC_DATABASE")    or "ofsep",
         charset     = os.environ.get("SRC_CHARSET")     or "utf8")
 targetConn = pymysql.connect(
         host        = os.environ.get("TGT_HOST")        or "localhost",
@@ -20,7 +20,23 @@ targetConn = pymysql.connect(
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
 
+print("######## CLEANING OF TARGET DB MS USERS: START ###################")
+print("Delete users: start")
+query = "DELETE FROM users"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete users: end")
 
+
+print("Delete role: start")
+query = "DELETE FROM role"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete role: end")
+print("######## CLEANING OF TARGET DB MS USERS: STOP ###################")
+
+
+print("######## IMPORTING INTO TARGET DB MS USERS: START ###################")
 print("Import roles: start")    
 sourceCursor.execute("SELECT ROLE_ID, DISPLAY_NAME, NAME FROM ROLE")
 
@@ -51,13 +67,6 @@ targetConn.commit()
 print("Import roles: end")
 
 
-print("Update roles: start")
-query = "DELETE FROM role WHERE id=2"
-cursor.execute(query)
-conn.commit()
-print("Update roles: end")
-
-
 print("Import users: start")    
 sourceCursor.execute("""SELECT USER_ID, CAN_ACCESS_TO_DICOM_ASSOCIATION, CREATED_ON, EMAIL, FIRST_NAME, LAST_LOGIN_ON, LAST_NAME, USERNAME, ROLE_ID,
     EXPIRATION_DATE, IS_FIRST_EXPIRATION_NOTIFICATION_SENT, IS_SECOND_EXPIRATION_NOTIFICATION_SENT FROM USERS""")
@@ -67,7 +76,7 @@ for row in sourceCursor.fetchall():
     user = list(row);
     if medicalRoleId == user[8] or guestRoleId == user[8]:
         user[8] = userRoleId
-    if row[3] not in emails:
+    if row[3] not in emails: #clean up here on using email addresses only once
         emails.append(row[3])
         users.append(user)
 query = """INSERT INTO users
@@ -81,3 +90,4 @@ print("Import users: end")
 
 sourceConn.close()
 targetConn.close()
+print("######## IMPORTING INTO TARGET DB MS USERS: FINISHED ###################")
