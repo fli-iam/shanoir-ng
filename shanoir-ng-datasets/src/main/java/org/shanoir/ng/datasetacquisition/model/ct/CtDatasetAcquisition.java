@@ -37,7 +37,6 @@ public class CtDatasetAcquisition extends DatasetAcquisition {
 	 */
 	private static final long serialVersionUID = -8511002756058790037L;
 
-	/** MR protocol. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private CtProtocol ctProtocol;
 

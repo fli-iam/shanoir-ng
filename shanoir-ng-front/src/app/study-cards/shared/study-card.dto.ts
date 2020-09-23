@@ -59,7 +59,7 @@ export class StudyCardDTOService {
             for (let rule of result.rules) {
                 if (rule.conditions) {
                     for (let condition of rule.conditions) {
-                        condition.dicomTag = tags.find(tag => tag.code == condition.dicomTag.code);
+                        condition.dicomTag = tags.find(tag => !!condition.dicomTag && tag.code == condition.dicomTag.code);
                     }
                 }
             }
@@ -91,12 +91,10 @@ export class StudyCardDTOService {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            if (dtos) {
-                for (let dto of dtos) {
-                    let entity = new StudyCard();
-                    StudyCardDTOService.mapSyncFields(dto, entity);
-                    result.push(entity);
-                }
+            for (let dto of dtos) {
+                let entity = new StudyCard();
+                StudyCardDTOService.mapSyncFields(dto, entity);
+                result.push(entity);
             }
         }
         return Promise.all([
@@ -143,8 +141,8 @@ export class StudyCardDTOService {
             entity.niftiConverter = new NiftiConverter();
             entity.niftiConverter.id = dto.niftiConverterId;
         }
+        entity.rules = [];
         if (dto.rules) {
-            entity.rules = [];
             for (let ruleDTO of dto.rules) {
                 let rule: StudyCardRule = new StudyCardRule();
                 if (ruleDTO.assignments) {
@@ -192,7 +190,7 @@ export class StudyCardDTO {
         if (studyCard) {
             this.id = studyCard.id;
             this.name = studyCard.name;
-            this.studyId = studyCard.study.id;
+            this.studyId = studyCard.study ? studyCard.study.id : null;
             this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
             this.niftiConverterId = studyCard.niftiConverter.id;
             this.rules = studyCard.rules.map(rule => {

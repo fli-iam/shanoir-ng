@@ -17,12 +17,12 @@ import { Option } from '../shared/select/select.component';
 
 export enum DatasetModalityType {
 
-    PET_DATASET = 'PET',
-    MR_DATASET = 'MR',
-    CT_DATASET = 'CT',
-    MEG_DATASET = 'MG',
-    SPECT_DATASET = 'SPECT',
-    EEG_DATASET = 'EEG'
+    PET = 'PET_DATASET',
+    MR = 'MR_DATASET',
+    CT = 'CT_DATASET',
+    // MEG = 'MG',
+    // SPECT = 'SPECT',
+    EEG = 'EEG_DATASET'
 
 } export namespace DatasetModalityType {
     
@@ -31,7 +31,7 @@ export enum DatasetModalityType {
     }
 
     export function getLabel(type: DatasetModalityType): string {
-        return capitalsAndUnderscoresToDisplayable(type);
+        return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
     }
 
     export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));

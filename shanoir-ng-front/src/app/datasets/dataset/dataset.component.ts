@@ -105,8 +105,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                             this.dicomArchiveService.extractFileDirectoryStructure()
                             .then(response => {
                                 this.initPapaya(response);
-                            })
-                    })
+                            });
+                    });
         });
     }
 
@@ -125,7 +125,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+    
+    public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }
