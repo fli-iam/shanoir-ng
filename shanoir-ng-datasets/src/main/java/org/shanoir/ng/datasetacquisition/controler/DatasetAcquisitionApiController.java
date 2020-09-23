@@ -23,6 +23,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.importer.dto.BidsImportJob;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
@@ -103,6 +104,25 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, userId);
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		} finally {
+			// if the json could not be parsed, no way to know workFolder
+			// so better to throw the exception, as no possibility to clean
+			importerService.cleanTempFiles(importJob.getWorkFolder());
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET)
+	@RabbitHandler
+	@Transactional
+	public void createNewBidsDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
+		BidsImportJob importJob = objectMapper.readValue(importJobStr.getBody(), BidsImportJob.class);
+		Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
+
+		try {
+			this.importerService.createAllBidsDatasetAcquisition(importJob, userId);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);

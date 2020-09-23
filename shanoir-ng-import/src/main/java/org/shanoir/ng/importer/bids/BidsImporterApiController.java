@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dicom.DicomDirCreator;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.dto.StudyCardDTO;
+import org.shanoir.ng.importer.model.BidsImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -40,6 +42,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +68,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
-	@Autowired ObjectMapper mapper;
+	@Autowired
+	ObjectMapper mapper;
 
 	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
@@ -190,8 +194,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 	 * @param participants the list of participants
 	 * @param subjectName the subject name
 	 * @return the import job created
+	 * @throws ShanoirException
 	 */
-	private ResponseEntity<ImportJob> importFromRawData(File workDir, List<IdName> participants, String subjectName) throws ShanoirException, IOException, RestServiceException {
+	private ResponseEntity<ImportJob> importFromRawData(File workDir, List<IdName> participants, String subjectName) throws IOException, RestServiceException, ShanoirException {
 
 		// Here should be defined the data type.
 		// + bruker ?
@@ -213,8 +218,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 				// import as EEG
 				importEegFromBids();
 			}
-			else if (type.getName().equals("func|anat|dwi")) {
+			else if ("func|anat|dwi".indexOf(type.getName()) != -1) {
 				// Import direct nifti
+				this.importNiftiFromBids(type, subjectName, type.getName(), participants);
 			}
 			else {
 				// Not treated yet => Display a warning message ?
@@ -223,33 +229,58 @@ public class BidsImporterApiController implements BidsImporterApi {
 			}
 		}
 
+		return new ResponseEntity<>(null, HttpStatus.OK);
+	}
+
+	private void importEegFromBids() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Imports nifti data from folder.
+	 * @param workFolder
+	 * @param subjectName
+	 * @param modality
+	 * @param participants
+	 * @throws IOException
+	 * @throws RestServiceException
+	 * @throws ShanoirException
+	 */
+	protected void importNiftiFromBids(File workFolder, String subjectName, String modality, List<IdName> participants) throws IOException, RestServiceException, ShanoirException  {
 		// Read shanoirImportFile => Add configuration for examination ?
-		File shanoirImportFile = new File(workDir.getAbsolutePath() + "/shanoir-import.json");
+		File shanoirImportFile = new File(workFolder.getAbsolutePath() + "/shanoir-import.json");
 
 		if (!shanoirImportFile.exists()) {
-			throw new ShanoirException("shanoir-import.json file is mandatory in subject / session folder");
+			throw new ShanoirException("shanoir-import.json file is mandatory in subject / session / {anat/func/dwi} folder");
 		}
+		
+		BidsImportJob job = mapper.readValue(shanoirImportFile, BidsImportJob.class);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
+		Long subjectId = getSubjectIdByName(subjectName, participants);
 
-		ImportJob job = new ImportJob();
+		// Create subjectStudy
+		IdName participantsInfo = new IdName(subjectId, job.getStudyId().toString());
+		String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
+
+		job.setSubjectName(subjectName);
+		job.setWorkFolder(workFolder.getAbsolutePath());
+		job.setModality(modality);
+		job.setStudyName(studyName);
 
 		// Create a new examination if not existing
-		if (sid.getExaminationId() == null || sid.getExaminationId().equals(Long.valueOf(0l))) {
+		if (job.getExaminationId() == null || job.getExaminationId().equals(Long.valueOf(0l))) {
 			// Create examination => We actually need its ID so do a direct API call
 
 			// Get center ID
 
-			Long subjectId = getSubjectIdByName(subjectName, participants);
-
 			ExaminationDTO examDTO = new ExaminationDTO();
 			// Construct DTO
 			// get center from study card => equipment => center
-			// examDTO.setCenter(new IdName(center.getId(), center.getName()));
-			// TODO, import bruker too
+			examDTO.setCenter(new IdName(1L, "Fake center"));
 			examDTO.setPreclinical(false);
-			examDTO.setStudy(new IdName(sid.getStudyId(), sid.getStudyName()));
+			examDTO.setExaminationDate(LocalDate.now());
+			examDTO.setStudy(new IdName(job.getStudyId(), job.getStudyName()));
 			examDTO.setSubject(new IdName(subjectId, subjectName));
 
 			mapper.registerModule(new JavaTimeModule());
@@ -258,25 +289,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 			examDTO = mapper.readValue(examAsString, ExaminationDTO.class);
 			job.setExaminationId(examDTO.getId());
 		}
-
-		// Next API call => StartImportJob
-		ResponseEntity<Void> result = importer.startImportJob(job);
-		if (!result.getStatusCode().equals(HttpStatus.OK)) {
-			throw new ShanoirException("Error while importing subject: " + subjectName);
-		}
-
-		// TODO ONE DAY: Copy "other" files to the bids folder
-		// Copy non datasets elements
-		// Don't copy "data" folder
-		// Don't copy examination_description.json
-		// copy /sourceData??, /code and / files (readme, changes, participants.tsv,
-		// participants.json, etc..)
-		return new ResponseEntity<>(job, HttpStatus.OK);
-	}
-
-	private void importEegFromBids() {
-		// TODO Auto-generated method stub
-		
+        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+            message.getMessageProperties().setHeader("x-user-id",
+            		KeycloakUtil.getTokenUserId());
+            return message;
+        });
+		this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET, mapper.writeValueAsString(job));
 	}
 
 	/**

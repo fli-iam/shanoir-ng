@@ -37,6 +37,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to import datasets IMPORT => DATASET. */
 	public static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
 
+	/** Queue used to import datasets IMPORT => BIDS_DATASET. */
+	public static final String IMPORTER_QUEUE_BIDS_DATASET = "importer-queue-bids-dataset";
+
 	/** User delete event to notify to studies.  To be overriden by an event ?*/
 	public static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 
@@ -248,6 +251,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
+	}
+
+	@Bean
+	public static Queue importerBidsQueue() {
+		return new Queue(IMPORTER_QUEUE_BIDS_DATASET, true);
 	}
 
 	@Bean

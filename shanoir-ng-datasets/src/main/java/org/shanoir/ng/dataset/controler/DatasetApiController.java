@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -280,8 +281,9 @@ public class DatasetApiController implements DatasetApi {
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
 		} catch (IOException | MessagingException e) {
+			e.printStackTrace();
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", e));
 		}
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
@@ -407,6 +409,12 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(url.getPath());
 
+			if(dataset instanceof BidsDataset) {
+				// If bids dataset, keep the full name
+				File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+				Files.copy(srcFile.toPath(), destFile.toPath());
+				continue;
+			}
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 			StringBuilder name = new StringBuilder("");
 			

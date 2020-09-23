@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -397,6 +398,9 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof MrDataset) {
 			// Do something specific about MR dataset
 			dataFolder = createDataFolder("anat", workDir);
+		} else if (dataset instanceof BidsDataset) {
+			// Do something specific about MR dataset
+			dataFolder = createDataFolder(((BidsDataset)dataset).getModality(), workDir);
 		} else {
 			dataFolder = workDir;
 		}
