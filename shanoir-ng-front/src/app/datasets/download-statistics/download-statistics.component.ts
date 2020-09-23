@@ -38,10 +38,10 @@ export class DownloadStatisticsComponent{
     }
 
     downloadStatistics(): void {
-        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp'), 
-                                                this.form.get('studyNameOutRegExp'), 
-                                                this.form.get('subjectNameInRegExp'), 
-                                                this.form.get('subjectNameOutRegExp'));
+        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp').value, 
+                                                this.form.get('studyNameOutRegExp').value, 
+                                                this.form.get('subjectNameInRegExp').value, 
+                                                this.form.get('subjectNameOutRegExp').value);
     }
 
     buildForm(): void {
