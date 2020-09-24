@@ -150,8 +150,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     private instAssessment() {
     }
 
-    public hasEditRight(): boolean {
-	return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    public async hasEditRight(): Promise<boolean> {
+	   return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
     protected deleteFile(file: any) {

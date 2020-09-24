@@ -28,6 +28,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angu
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../../breadcrumbs/router';
 import { ServiceLocator } from '../../../utils/locator.service';
@@ -54,6 +55,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @ViewChild('formContainer') formContainerElement: ElementRef;
 
     /* services */
+    protected confirmDialogService: ConfirmDialogService;
     private entityRoutes: EntityRoutes;
     protected router: Router;
     private location: Location;
@@ -71,7 +73,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     constructor(
             protected activatedRoute: ActivatedRoute,
             private readonly ROUTING_NAME: string) {
-        
+        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.location = ServiceLocator.injector.get(Location);
@@ -104,7 +106,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         choose().then(() => {
             this.footerState = new FooterState(this.mode);
-            this.footerState.canEdit = this.hasEditRight();
+            this.hasEditRight().then(right => this.footerState.canEdit = right);
+            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
                 this.entity = this.breadcrumbsService.currentStep.entity as T;
             }
@@ -292,7 +295,33 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     delete(): void {
-        this.entity.delete();
+        this.openDeleteConfirmDialog(this.entity)
+    }
+
+    protected openDeleteConfirmDialog = (entity: T) => {
+        this.confirmDialogService
+            .confirm(
+                'Delete ' + this.ROUTING_NAME, 
+                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+            ).then(res => {
+                if (res) {
+                    entity.delete().then(() => {
+                        this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        this.goToList();
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            if (reason.error.code != 422) {
+                               throw Error(reason); 
+                            } else {
+                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else {
+                            console.error(reason);
+                        }
+                    });                    
+                }
+            })
     }
 
     goToView(id?: number): void {
@@ -346,8 +375,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Default is true and this method should be overriden when rights control is needed.
      * It is called after initialization so the entity value can be used inside.
      */
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return true;
+    }
+
+    /**
+     * Says if current user has the right to display the delete button.
+     * Default is true and this method should be overriden when rights control is needed.
+     * It is called after initialization so the entity value can be used inside.
+     */
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
