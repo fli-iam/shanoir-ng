@@ -16,6 +16,11 @@ package org.shanoir.ng.dataset.service;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.PersistenceContext;
+import javax.persistence.StoredProcedureQuery;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -42,6 +47,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetServiceImpl implements DatasetService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
 	
 	@Autowired
 	private DatasetRepository repository;
@@ -141,6 +148,31 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
 		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
+	}
+
+	@Override
+	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
+
+        //"login" this is the name of your procedure
+		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics"); 
+
+        //Declare the parameters in the same order
+        query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+
+        //Pass the parameter values
+        query.setParameter(1, studyNameInRegExp);
+        query.setParameter(2, studyNameOutRegExp);
+        query.setParameter(3, subjectNameInRegExp);
+        query.setParameter(4, subjectNameOutRegExp);
+
+        //Execute query
+        query.execute();
+
+		List<Object[]> results = query.getResultList();
+        return results;
 	}
 
 }

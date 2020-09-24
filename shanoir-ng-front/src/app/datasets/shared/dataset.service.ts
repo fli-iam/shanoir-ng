@@ -79,6 +79,20 @@ export class DatasetService extends EntityService<Dataset> {
             });
     }
 
+    downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
+        let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
+                                        .set("studyNameOutRegExp", studyNameOutRegExp)
+                                        .set("subjectNameInRegExp", subjectNameInRegExp)
+                                        .set("subjectNameOutRegExp", subjectNameOutRegExp);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        )
+    }
+
     download(dataset: Dataset, format: string): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         return this.downloadToBlob(dataset.id, format).toPromise().then(
