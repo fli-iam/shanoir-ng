@@ -151,10 +151,10 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Object queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) {
+	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 
         //"login" this is the name of your procedure
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics"); 
+		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics"); 
 
         //Declare the parameters in the same order
         query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
@@ -171,8 +171,7 @@ public class DatasetServiceImpl implements DatasetService {
         //Execute query
         query.execute();
 
-		//Get output parameters
-		Object results = query.getSingleResult();
+		List<Object[]> results = query.getResultList();
         return results;
 	}
 

@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.controler;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -26,8 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -581,6 +585,43 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 
+	/**
+	 * Zip a single file
+	 * 
+	 * @param sourceFile
+	 * @param zipFile
+	 * @throws IOException
+	 */
+	private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
+		
+		byte[] buffer = new byte[1024];
+		FileOutputStream fos = new FileOutputStream(zipFile);
+		ZipOutputStream zos = new ZipOutputStream(fos);
+		FileInputStream fis = new FileInputStream(sourceFile);
+
+		// begin writing a new ZIP entry, positions the stream to the start of the entry data
+		zos.putNextEntry(new ZipEntry(sourceFile.getName()));
+			
+		int length;
+
+		while ((length = fis.read(buffer)) > 0) {
+			zos.write(buffer, 0, length);
+		}
+
+		zos.closeEntry();
+		fis.close();
+		zos.close();
+	}
+
+	private File recreateFile(final String fileName) throws IOException {
+		File file = new File(fileName);
+		if(file.exists()) {
+			file.delete();
+		}
+		file.createNewFile();
+		return file;
+	}
+
 	@Override
 	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
@@ -758,42 +799,36 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 	) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		String tmpFilePath = tmpDir + File.separator + "statistics.zip";
-		File tmpFile = new File(tmpFilePath);
-		tmpFile.mkdirs();
+		File statisticsFile = recreateFile(tmpDir + File.separator + "shanoirExportStatistics.txt");
+		File zipFile = recreateFile(tmpDir + File.separator + "shanoirExportStatistics" + ZIP);
 
 		// Get the data
 		try {
 
-			String results = (String) datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 
-			FileOutputStream fos = new FileOutputStream(tmpFile);
+			List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+			
+			FileOutputStream fos = new FileOutputStream(statisticsFile);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-			bw.write(results);
 
-			// // FileWriter fw = new FileWriter("out.txt");
- 
-			// for (String r : results) {
-			// 	bw.write(r);
-			// 	bw.newLine();
-			// }
+			for (Object[] or : results) {
+				List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+				bw.write(String.join("\t", strings));
+				bw.newLine();
+			}
 		 
 			bw.close();
 			
-		} catch (IOException e) {
+		} catch (javax.persistence.NoResultException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
+		} catch (Exception e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
-		// Zip it
-		File zipFile = new File(tmpFilePath + ZIP);
-		zipFile.createNewFile();
-
-		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+		zipSingleFile(statisticsFile, zipFile);
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
-
-		FileUtils.deleteDirectory(tmpFile);
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())

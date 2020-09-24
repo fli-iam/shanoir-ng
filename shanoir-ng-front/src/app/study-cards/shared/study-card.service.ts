@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -26,6 +27,10 @@ export class StudyCardService extends EntityService<StudyCard> {
     API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
 
     private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
+    
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new StudyCard(); }
 

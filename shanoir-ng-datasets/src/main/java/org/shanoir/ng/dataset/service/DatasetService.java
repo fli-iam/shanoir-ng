@@ -108,6 +108,6 @@ public interface DatasetService {
 	 * @return statistics
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
-	Object queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp);
+	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 
 }

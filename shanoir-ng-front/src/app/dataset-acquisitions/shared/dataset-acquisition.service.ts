@@ -24,6 +24,7 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
+import { HttpClient } from '@angular/common/http';
 
 
 @Injectable()
@@ -34,6 +35,10 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     protected bcService: BreadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
 
     API_URL = AppUtils.BACKEND_API_DATASET_ACQUISITION_URL;
+    
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance(entity): DatasetAcquisition {
         return DatasetAcquisitionService.getNewDAInstance(entity.type);
