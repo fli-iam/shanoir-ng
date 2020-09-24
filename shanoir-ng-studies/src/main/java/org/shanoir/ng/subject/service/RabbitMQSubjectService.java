@@ -27,11 +27,16 @@ import java.util.stream.StreamSupport;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -39,6 +44,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -93,6 +99,15 @@ public class RabbitMQSubjectService {
 
 	@Autowired
 	SubjectService subjectService;
+
+	@Autowired
+	StudyRepository studyRepository;
+
+	@Autowired
+	SubjectStudyRepository subjectStudyRepository;
+	
+	@Autowired
+	ObjectMapper mapper;
 	
 	/**
 	 * This methods returns a list of subjects for a given study ID
@@ -102,7 +117,6 @@ public class RabbitMQSubjectService {
 	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE)
 	@RabbitHandler
 	public String getSubjectsForStudy(String studyId) {
-		ObjectMapper mapper = new ObjectMapper();
 		try {
 			return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
 		} catch (Exception e) {
@@ -110,7 +124,44 @@ public class RabbitMQSubjectService {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
-	
+
+	/**
+	 * This methods allows to update a subject with a subjectStudy if not existing.
+	 * @param message the IDName we are receiving containing 1) The subject id in the id 2) The study id in the name
+	 * @return the study name
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public String updateSubjectStudy(String message) {
+		IdName idNameMessage;
+		try {
+			idNameMessage = mapper.readValue(message, IdName.class);
+			Long subjectId = idNameMessage.getId();
+			Long studyId = Long.valueOf(idNameMessage.getName());
+			Subject subject = subjectRepository.findOne(subjectId);
+			for (SubjectStudy subStud : subject.getSubjectStudyList()) {
+				if (subStud.getStudy().getId().equals(studyId)) {
+					// subject study already exists, don't create a new one.
+					return subStud.getStudy().getName();
+				}
+			}
+			SubjectStudy subStud = new SubjectStudy();
+			subStud.setSubject(subject);
+			Study study = studyRepository.findOne(studyId);
+
+			// TODO: ask
+			subStud.setSubjectType(SubjectType.PATIENT);
+			subStud.setPhysicallyInvolved(true);
+			subStud.setStudy(study);
+			subjectStudyRepository.save(subStud);
+			return study.getName();
+		} catch (Exception e) {
+			LOG.error("Error while creating subjectStudy", e);
+			return null;
+		}
+	}
+
 	/**
 	 * This methods allows to get the particpants.tsv file from BIDS/SEF import and deserialize it into subjects
 	 * Then the non existing ones are created
@@ -122,8 +173,7 @@ public class RabbitMQSubjectService {
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
-	public String manageParticpants(String participantsFilePath) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
+	public String manageParticipants(String participantsFilePath) throws JsonProcessingException {
 		try {
 			File participantsFile = new File(participantsFilePath);
 			if (!participantsFile.exists()) {

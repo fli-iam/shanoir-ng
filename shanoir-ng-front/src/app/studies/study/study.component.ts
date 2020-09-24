@@ -172,13 +172,22 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
 
     private newStudy(): Study {
         let study: Study = new Study();
@@ -437,14 +446,28 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
+       this.studyService.getBidsStructure(id).then(element => {
+            this.sort(element);
+            this.bidsStructure = [element];
+        });
     }
 
-    // removeTimepoint(timepoint: Timepoint): void {
-    //     const index: number = this.study.timepoints.indexOf(timepoint);
-    //     if (index !== -1) {
-    //         this.study.timepoints.splice(index, 1);
-    //     }
-    // }
+    sort(element: BidsElement) {
+        if (element.elements) {
+            element.elements.sort(function(elem1, elem2) {
+                if (elem1.file && !elem2.file) {
+                    return 1
+                } else if (!elem1.file && elem2.file) {
+                    return -1;
+                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
+                    return elem1.path < elem2.path ? -1 : 1;
+                }
+            });
+            // Then sort all sub elements folders
+            for (let elem of element.elements) {
+                this.sort(elem);
+            }
+        }
+    }
 
 }

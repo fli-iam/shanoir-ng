@@ -352,7 +352,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.instAssessmentModal.hide();
     }
     
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
+        return false;
+    }
+    
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
     
