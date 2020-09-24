@@ -167,6 +167,9 @@ import { ServiceLocator } from './utils/locator.service';
 // import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { StudyRightsService } from './studies/shared/study-rights.service';
 import { RouterModule } from '@angular/router';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { LoaderService } from './shared/loader/loader.service';
+import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
 
 // Boutiques
 // import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
@@ -392,7 +395,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
         BrukerFinishImportComponent,
-        InvocationExecutionComponent
+        InvocationExecutionComponent,
+        LoaderComponent
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [
@@ -444,11 +448,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: KeycloakHttpInterceptor,
-            multi: true
-        },
+        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         Router,
         GlobalService,
@@ -479,7 +479,9 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatasetDTOService,
         SolrService,
         NotificationsService,
-        CenterDTOService
+        CenterDTOService,
+        LoaderService,
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
 })
