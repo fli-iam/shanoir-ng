@@ -274,7 +274,7 @@ public class DatasetApiControllerTest {
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
 
 		// WHEN we export all the datasets => name is kept
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
