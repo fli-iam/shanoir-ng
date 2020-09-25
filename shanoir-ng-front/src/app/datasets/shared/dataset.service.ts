@@ -49,7 +49,7 @@ export class DatasetService extends EntityService<Dataset> {
             .then(this.mapPage);
     }
 
-    public downloadDatasets(ids: number[], format: string) {
+    public downloadDatasets(ids: number[], format: string): Promise<void> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
