@@ -144,13 +144,17 @@ public class BidsImporterApiController implements BidsImporterApi {
 		boolean isSourceDataDicom = sourceData.exists() && dicomSourceData.exists();
 		boolean isRawData = rawData.exists();
 
-		// 2) List subject files
+		// 2) List subject files either from /sourceData or rawData
 		File[] subjectFiles = (isSourceDataDicom? dicomSourceData : rawData).listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.startsWith("sub-");
 			}
 		});
+		
+		if (subjectFiles == null || subjectFiles.length == 0) {
+			throw new ShanoirException("No subject folder found.");
+		}
 
 		for (File subjFile : subjectFiles) {
 			// Get subjectName
@@ -173,128 +177,38 @@ public class BidsImporterApiController implements BidsImporterApi {
 			}
 
 			for (File workDir : workDirs) {
-				if (isSourceDataDicom) {
-					// We have sourceData, we import data from it. (DICOM for MR)
-					importFromSourceDataDicom(workDir, participants, subjectName);
-				} else if (isRawData) {
-					// We only have rawData, we import into BidsDatasets
-					importFromRawData(workDir, participants, subjectName);
-				} else {
-					// At least rawData or sourceData folder should be present
-					throw new ShanoirException("At least /sourcedata(/DICOM) or /rawData folder should be present.");
+				// List modalities directories
+				File[] typeFile  = workDir.listFiles(new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						return dir.isDirectory() && "func|anat|dwi|eeg".indexOf(name) != -1;
+					}
+				});
+
+				// What if multiple types ?
+				// => Treat them one by one ?
+				for (File type : typeFile) {
+					if (type.getName().equals("eeg")) {
+						// import as EEG
+						// importEegFromBids();
+					}
+					else if ("func|anat|dwi".indexOf(type.getName()) != -1) {
+						if (isSourceDataDicom) {
+							// We have sourceData, we import data from it. (DICOM for MR)
+							// Consider modality here too ?
+							importFromSourceDataDicom(type, participants, subjectName);
+						} else if (isRawData) {
+							// We only have rawData, we import into BidsDatasets
+							importNiftiFromBids(type, subjectName, type.getName(), participants);
+						} else {
+							// At least rawData or sourceData folder should be present
+							throw new ShanoirException("At least /sourcedata(/DICOM) or /rawData folder should be present.");
+						}
+					}
 				}
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * This method allows to import data from rawData folder in BIDS strucutre
-	 * @param rawData the file where shanoir-import.json file is
-	 * @param participants the list of participants
-	 * @param subjectName the subject name
-	 * @return the import job created
-	 * @throws ShanoirException
-	 */
-	private ResponseEntity<ImportJob> importFromRawData(File workDir, List<IdName> participants, String subjectName) throws IOException, RestServiceException, ShanoirException {
-
-		// Here should be defined the data type.
-		// + bruker ?
-		// anat / func / dwi / eeg [...]
-		// Then import following the modality (specific code for eeg)
-		
-		// List directories
-		File[] typeFile  = workDir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return dir.isDirectory();
-			}
-		});
-
-		// What if multiple types ?
-		// => Treat them one by one ?
-		for (File type : typeFile) {
-			if (type.getName().equals("eeg")) {
-				// import as EEG
-				importEegFromBids();
-			}
-			else if ("func|anat|dwi".indexOf(type.getName()) != -1) {
-				// Import direct nifti
-				this.importNiftiFromBids(type, subjectName, type.getName(), participants);
-			}
-			else {
-				// Not treated yet => Display a warning message ?
-				// For this, use a BIDSImportJob ?
-				break;
-			}
-		}
-
-		return new ResponseEntity<>(null, HttpStatus.OK);
-	}
-
-	private void importEegFromBids() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * Imports nifti data from folder.
-	 * @param workFolder
-	 * @param subjectName
-	 * @param modality
-	 * @param participants
-	 * @throws IOException
-	 * @throws RestServiceException
-	 * @throws ShanoirException
-	 */
-	protected void importNiftiFromBids(File workFolder, String subjectName, String modality, List<IdName> participants) throws IOException, RestServiceException, ShanoirException  {
-		// Read shanoirImportFile => Add configuration for examination ?
-		File shanoirImportFile = new File(workFolder.getAbsolutePath() + "/shanoir-import.json");
-
-		if (!shanoirImportFile.exists()) {
-			throw new ShanoirException("shanoir-import.json file is mandatory in subject / session / {anat/func/dwi} folder");
-		}
-		
-		BidsImportJob job = mapper.readValue(shanoirImportFile, BidsImportJob.class);
-
-		Long subjectId = getSubjectIdByName(subjectName, participants);
-
-		// Create subjectStudy
-		IdName participantsInfo = new IdName(subjectId, job.getStudyId().toString());
-		String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
-
-		job.setSubjectName(subjectName);
-		job.setWorkFolder(workFolder.getAbsolutePath());
-		job.setModality(modality);
-		job.setStudyName(studyName);
-
-		// Create a new examination if not existing
-		if (job.getExaminationId() == null || job.getExaminationId().equals(Long.valueOf(0l))) {
-			// Create examination => We actually need its ID so do a direct API call
-
-			// Get center ID
-
-			ExaminationDTO examDTO = new ExaminationDTO();
-			// Construct DTO
-			// get center from study card => equipment => center
-			examDTO.setCenter(new IdName(1L, "Fake center"));
-			examDTO.setPreclinical(false);
-			examDTO.setExaminationDate(LocalDate.now());
-			examDTO.setStudy(new IdName(job.getStudyId(), job.getStudyName()));
-			examDTO.setSubject(new IdName(subjectId, subjectName));
-
-			mapper.registerModule(new JavaTimeModule());
-			String examAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, mapper.writeValueAsString(examDTO));
-
-			examDTO = mapper.readValue(examAsString, ExaminationDTO.class);
-			job.setExaminationId(examDTO.getId());
-		}
-        rabbitTemplate.setBeforePublishPostProcessors(message -> {
-            message.getMessageProperties().setHeader("x-user-id",
-            		KeycloakUtil.getTokenUserId());
-            return message;
-        });
-		this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET, mapper.writeValueAsString(job));
 	}
 
 	/**
@@ -307,67 +221,37 @@ public class BidsImporterApiController implements BidsImporterApi {
 	 * @throws IOException
 	 * @throws RestServiceException
 	 */
-	private ResponseEntity<ImportJob> importFromSourceDataDicom(File workDir, List<IdName> participants, String subjectName) throws ShanoirException, IOException, RestServiceException {
+	private ResponseEntity<ImportJob> importFromSourceDataDicom(File workFolder, List<IdName> participants, String subjectName) throws ShanoirException, IOException, RestServiceException {
 
-		File shanoirImportFile = new File(workDir.getAbsolutePath() + "/shanoir-import.json");
+		// Read shanoirImportFile => Add configuration for examination ?
+		File shanoirImportFile = new File(workFolder.getParentFile().getAbsolutePath() + "/shanoir-import.json");
 
 		if (!shanoirImportFile.exists()) {
 			throw new ShanoirException("shanoir-import.json file is mandatory in subject / session folder");
 		}
+		
+		ImportJob sid = mapper.readValue(shanoirImportFile, ImportJob.class);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
-
-		// StudyCard only for DICOM
-		String studyCardAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, sid.getStudyCardId());
-
-		if (studyCardAsString == null) {
-			throw new ShanoirException(
-					"StudyCard with ID " + sid.getStudyCardId() + " does not exists.");
-		}
-
-		StudyCardDTO studyCard = objectMapper.readValue(studyCardAsString, StudyCardDTO.class);
-
-		if (!studyCard.getStudyId().equals(sid.getStudyId())) {
-			throw new ShanoirException("Study with ID " + sid.getStudyId() + " does not exists.");
-		}
-		if (studyCard.isDisabled()) {
-			throw new ShanoirException("StudyCard with ID " + sid.getStudyCardId() + " is currently disabled, please select another one.");
-		}
-
-		// Subject based on folder name
-		Long subjectId = getSubjectIdByName(subjectName, participants);
-		if (subjectId == null) {
-			throw new ShanoirException(
-					"Subject " + subjectName + " could not be created. Please check participants.tsv file.");
-		}
-
-		// Create subjectStudy
-		IdName participantsInfo = new IdName(subjectId, studyCard.getStudyId().toString());
-		String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
-
-		if (studyName == null) {
-			throw new ShanoirException("An error occured while linking subject to study. Please contact an administrator");
-		}
+		Long subjectId = manageStudyCard(participants, subjectName, sid);
 
 		// If there is no DICOMDIR: create it
-		File dicomDir = new File(workDir.getAbsolutePath() + "/DICOM/DICOMDIR");
+		File dicomDir = new File(workFolder.getAbsolutePath() + "/DICOM/DICOMDIR");
 		if (!dicomDir.exists()) {
-			DicomDirCreator creator = new DicomDirCreator(workDir.getAbsolutePath() + "/DICOMDIR",
-					workDir.getAbsolutePath() + "/DICOM");
+			DicomDirCreator creator = new DicomDirCreator(workFolder.getAbsolutePath() + "/DICOMDIR",
+					workFolder.getAbsolutePath() + "/DICOM");
 			creator.start();
 		}
 
 		// Zip data folders to be able to call ImporterAPIController.uploadDicomZipFile
-		FileOutputStream fos = new FileOutputStream(workDir.getAbsolutePath() + ".zip");
+		FileOutputStream fos = new FileOutputStream(workFolder.getAbsolutePath() + ".zip");
 		ZipOutputStream zipOut = new ZipOutputStream(fos);
 
-		ImportUtils.zipFile(workDir, workDir.getName(), zipOut, true);
+		ImportUtils.zipFile(workFolder, workFolder.getName(), zipOut, true);
 
 		zipOut.close();
 		fos.close();
-		MockMultipartFile multiPartFile = new MockMultipartFile(workDir.getName(), workDir.getName() + ".zip",
-				APPLICATION_ZIP, new FileInputStream(workDir.getAbsolutePath() + ".zip"));
+		MockMultipartFile multiPartFile = new MockMultipartFile(workFolder.getName(), workFolder.getName() + ".zip",
+				APPLICATION_ZIP, new FileInputStream(workFolder.getAbsolutePath() + ".zip"));
 
 		// Send data folder to import API and get import job
 		ResponseEntity<ImportJob> entity = importer.uploadDicomZipFile(multiPartFile);
@@ -376,16 +260,13 @@ public class BidsImporterApiController implements BidsImporterApi {
 		ImportJob job = entity.getBody();
 
 		// Construire l'arborescence
-		job.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		job.setStudyId(sid.getStudyId());
 		job.setStudyCardId(sid.getStudyCardId());
 		job.setSubjectName(subjectName);
-		job.setStudyName(studyName);
 
 		job.setFromPacs(false);
 		job.setFromShanoirUploader(false);
 		job.setFromDicomZip(true);
-		job.setConverterId(studyCard.getNiftiConverterId());
 
 		for (Patient pat : job.getPatients()) {
 			pat.setPatientName(subjectName);
@@ -407,8 +288,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 			// Create examination => We actually need its ID so do a direct API call
 
 			// Get center ID
-			String centerAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE, studyCard.getAcquisitionEquipmentId());
-			IdName center = objectMapper.readValue(centerAsString, IdName.class);
+			String centerAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE, sid.getAcquisitionEquipmentId());
+			IdName center = mapper.readValue(centerAsString, IdName.class);
 
 			ExaminationDTO examDTO = new ExaminationDTO();
 			// Construct DTO
@@ -434,6 +315,103 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 
 		return new ResponseEntity<>(job, HttpStatus.OK);
+	}
+
+	/**
+	 * Imports nifti data from folder.
+	 * @param workFolder
+	 * @param subjectName
+	 * @param modality
+	 * @param participants
+	 * @throws IOException
+	 * @throws RestServiceException
+	 * @throws ShanoirException
+	 */
+	protected void importNiftiFromBids(File workFolder, String subjectName, String modality, List<IdName> participants) throws IOException, RestServiceException, ShanoirException  {
+		// Read shanoirImportFile => Add configuration for examination ?
+		File shanoirImportFile = new File(workFolder.getParentFile().getAbsolutePath() + "/shanoir-import.json");
+
+		if (!shanoirImportFile.exists()) {
+			throw new ShanoirException("shanoir-import.json file is mandatory in subject / session folder");
+		}
+		
+		BidsImportJob job = mapper.readValue(shanoirImportFile, BidsImportJob.class);
+
+		Long subjectId = manageStudyCard(participants, subjectName, job);
+
+		job.setSubjectName(subjectName);
+		job.setWorkFolder(workFolder.getAbsolutePath());
+		job.setModality(modality);
+
+		// Create a new examination if not existing
+		if (job.getExaminationId() == null || job.getExaminationId().equals(Long.valueOf(0l))) {
+			// Create examination => We actually need its ID so do a direct API call
+
+			// Get center ID
+			String centerAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE, job.getAcquisitionEquipmentId());
+			IdName center = mapper.readValue(centerAsString, IdName.class);
+
+			ExaminationDTO examDTO = new ExaminationDTO();
+			// Construct DTO
+			// get center from study card => equipment => center
+			examDTO.setCenter(center);
+			examDTO.setPreclinical(false);
+			examDTO.setExaminationDate(LocalDate.now());
+			examDTO.setStudy(new IdName(job.getStudyId(), job.getStudyName()));
+			examDTO.setSubject(new IdName(subjectId, subjectName));
+
+			mapper.registerModule(new JavaTimeModule());
+			String examAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, mapper.writeValueAsString(examDTO));
+
+			examDTO = mapper.readValue(examAsString, ExaminationDTO.class);
+			job.setExaminationId(examDTO.getId());
+		}
+        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+            message.getMessageProperties().setHeader("x-user-id",
+            		KeycloakUtil.getTokenUserId());
+            return message;
+        });
+		this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET, mapper.writeValueAsString(job));
+	}
+
+	private Long manageStudyCard(List<IdName> participants, String subjectName, ImportJob job) throws ShanoirException, IOException {
+		// Check that subject was well created
+		Long subjectId = getSubjectIdByName(subjectName, participants);
+		if (subjectId == null) {
+			throw new ShanoirException(
+					"Subject " + subjectName + " could not be created. Please check participants.tsv file.");
+		}
+
+		// Analyze study card elements
+		String studyCardAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, job.getStudyCardId());
+
+		if (studyCardAsString == null) {
+			throw new ShanoirException(
+					"StudyCard with ID " + job.getStudyCardId() + " does not exists.");
+		}
+
+		StudyCardDTO studyCard = mapper.readValue(studyCardAsString, StudyCardDTO.class);
+
+		if (!studyCard.getStudyId().equals(job.getStudyId())) {
+			throw new ShanoirException("Study with ID " + job.getStudyId() + " does not exists.");
+		}
+		if (studyCard.isDisabled()) {
+			throw new ShanoirException("StudyCard with ID " + job.getStudyCardId() + " is currently disabled, please select another one.");
+		}
+
+		// Create subjectStudy
+		IdName participantsInfo = new IdName(subjectId, job.getStudyId().toString());
+		String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
+
+		if (studyName == null) {
+			throw new ShanoirException("An error occured while linking subject to study. Please contact an administrator");
+		}
+
+		job.setStudyName(studyName);
+		job.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		job.setConverterId(studyCard.getNiftiConverterId());
+
+		return subjectId;
 	}
 
 	/**

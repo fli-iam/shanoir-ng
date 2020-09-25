@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.bids;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.ImporterApiController;
@@ -39,6 +41,7 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.dto.CommonIdNamesDTO;
+import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -110,7 +113,7 @@ public class BidsImporterApiControllerTest {
 	}
 
 	public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
-			boolean sourceData, boolean importJson) throws IOException {
+			boolean sourceData, boolean importJson, boolean rawData) throws IOException {
 	    File importDir = new File("/tmp/test-import-as-bids");
 	    importDir.mkdirs();
 	    if (withParticipants) {
@@ -123,9 +126,26 @@ public class BidsImporterApiControllerTest {
 	    }
 	    if (sourceData) {
 	    	File sourceDataFile = new File(importDir.getAbsolutePath() + "/" + "sourcedata");
-	    	File subjectFile = new File(sourceDataFile.getAbsolutePath() + "/sub-name");
+	    	File dicomFile = new File(sourceDataFile.getAbsolutePath() + "/" + "DICOM");
+	    	File subjectFile = new File(dicomFile.getAbsolutePath() + "/sub-name");
+	    	File modalityFile = new File(subjectFile.getAbsolutePath() + "/anat");
 	    	sourceDataFile.mkdir();
+	    	dicomFile.mkdir();
 	    	subjectFile.mkdir();
+	    	modalityFile.mkdir();
+	    	if (importJson) {
+		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
+		    	importJsonFile.createNewFile();
+		    	FileUtils.write(importJsonFile, "{\"studyId\": 1,\"studyCardId\": \"1\",\"patients\": [{\"patientID\":\"BidsCreated\",\"studies\" : [ {\"series\": [{\"images\": [{\"path\":\"pathToDicomImage\"}]}]}]}]}", StandardCharsets.UTF_8);
+	    	}
+	    }
+	    if (rawData) {
+	    	File rawDataFile = new File(importDir.getAbsolutePath() + "/" + "rawData");
+	    	File subjectFile = new File(rawDataFile.getAbsolutePath() + "/sub-name");
+	    	File modalityFile = new File(subjectFile.getAbsolutePath() + "/anat");
+	    	rawDataFile.mkdir();
+	    	subjectFile.mkdir();
+	    	modalityFile.mkdir();
 	    	if (importJson) {
 		    	File importJsonFile = new File(subjectFile.getAbsolutePath() + "/shanoir-import.json");
 		    	importJsonFile.createNewFile();
@@ -160,7 +180,7 @@ public class BidsImporterApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testImportAsBidsMissingParticipants() throws Exception {
 		// GIVEN a bids folder to import with no participants.tsv file
-		MockMultipartFile file = createFile(false, false, false, false);
+		MockMultipartFile file = createFile(false, false, false, false, false);
 
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
@@ -174,7 +194,7 @@ public class BidsImporterApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testImportAsBidsParticipantsDeserializerFails() throws Exception {
 		// GIVEN a bids folder to import
-		MockMultipartFile file = createFile(true, false, false, false);
+		MockMultipartFile file = createFile(true, false, false, false, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"erreur: fail during parsing\"}]");
@@ -191,7 +211,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingStudyDescriptionFile() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT study description file does not exist
-		MockMultipartFile file = createFile(true, false, false, false);
+		MockMultipartFile file = createFile(true, false, false, false, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -208,7 +228,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingSourcedataFolder() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT study description file does not exist
-		MockMultipartFile file = createFile(true, true, false, false);
+		MockMultipartFile file = createFile(true, true, false, false, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -216,7 +236,7 @@ public class BidsImporterApiControllerTest {
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
 		.andExpect(status().is5xxServerError())
-		.andExpect(jsonPath("$.message").value("sourcedata folder is mandatory"));
+		.andExpect(jsonPath("$.message").value("No subject folder found."));
 		// THEN the import fails with an appropriate error message
 	}
 
@@ -225,7 +245,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingShanoirImportJson() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT shanoir-import.json file does not exist
-		MockMultipartFile file = createFile(true, true, true, false);
+		MockMultipartFile file = createFile(true, true, true, false, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -233,7 +253,7 @@ public class BidsImporterApiControllerTest {
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
 		.andExpect(status().is5xxServerError())
-		.andExpect(jsonPath("$.message").value("shanoir-import.json file is mandatory in subject folder"));
+		.andExpect(jsonPath("$.message").value("shanoir-import.json file is mandatory in subject / session folder"));
 		
 		// THEN the import fails with an appropriate error message
 	}
@@ -243,7 +263,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingEquipement() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT selected study card does not exists
-		MockMultipartFile file = createFile(true, true, true, true);
+		MockMultipartFile file = createFile(true, true, true, true, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -266,7 +286,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsStudyCardDisabled() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT selected study card is disabled
-		MockMultipartFile file = createFile(true, true, true, true);
+		MockMultipartFile file = createFile(true, true, true, true, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -289,7 +309,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingStudy() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT selected study does not corresponds
-		MockMultipartFile file = createFile(true, true, true, true);
+		MockMultipartFile file = createFile(true, true, true, true, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -312,7 +332,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsMissingSubject() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT selected subject does not exists
-		MockMultipartFile file = createFile(true, true, true, true);
+		MockMultipartFile file = createFile(true, true, true, true, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"OTHERANEME\", \"id\":1}]");
@@ -335,7 +355,7 @@ public class BidsImporterApiControllerTest {
 	public void testImportAsBidsImportFails() throws Exception {
 		// GIVEN a bids folder to import
 		// BUT the import fails
-		MockMultipartFile file = createFile(true, true, true, true);
+		MockMultipartFile file = createFile(true, true, true, true, false);
 
 		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
 		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
@@ -353,6 +373,62 @@ public class BidsImporterApiControllerTest {
 		.andExpect(status().is(500));
 		
 		// THEN the import fails with an appropriate error message
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testImportAsBidsNiftiMissingShanoirImportJson() throws Exception {
+		// GIVEN a bids folder to import from NIFTI
+		// BUT shanoir-import.json file does not exist
+		MockMultipartFile file = createFile(true, true, false, false, true);
+
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
+		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
+
+		// WHEN we import the folder
+		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
+		.andExpect(status().is5xxServerError())
+		.andExpect(jsonPath("$.message").value("shanoir-import.json file is mandatory in subject / session folder"));
+		
+		// THEN the import fails with an appropriate error message
+	}
+
+	//@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testImportAsBidsNiftiCreateExam() throws Exception {
+		// GIVEN a bids folder to import from NIFTI
+		// BUT shanoir-import.json file does not exist
+		MockMultipartFile file = createFile(true, true, false, true, true);
+
+		Mockito.when(rabbitTemplate.convertSendAndReceive(eq(RabbitMQConfiguration.SUBJECTS_QUEUE), Mockito.anyString()))
+		.thenReturn("[{\"name\":\"name\", \"id\":1}]");
+		
+		Mockito.when(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE)
+				, Mockito.anyLong()))
+		.thenReturn("{\"name\":\"name\", \"id\":1}");
+
+		String resp = "{\"name\":\"name\", \"id\":1, \"studyId\":1}";
+		
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, Long.valueOf(1)))
+		.thenReturn(resp);
+		
+		Mockito.when(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE),
+				Mockito.anyString())).thenReturn("name");
+
+		// WHEN we import the folder
+		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
+		.andExpect(status().isOk());
+		
+		ArgumentCaptor<ExaminationDTO> examCaptor = ArgumentCaptor.forClass(ExaminationDTO.class);
+		ExaminationDTO exam = examCaptor.getValue();
+		assertTrue(exam.getCenterId().equals(1L));
+		
+		// TODO: check problem here
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examCaptor.capture())).thenReturn("{\"id\":1}");
+		
+		Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET), Mockito.anyString());
+
+		// THEN the import is sucessfull and a DTO is created
 	}
 
 	@After

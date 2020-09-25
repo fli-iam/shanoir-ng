@@ -15,16 +15,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="header command-zone">1. Select Bids archive</div>
 <fieldset>
     <p>Please select a BIDS/.sef archive to import.</p>
-    <p>The files should be organized like this:</p>
+    <p>See BIDS specifications: https://bids-specification.readthedocs.io/en/latest/</p>
+    <p><b>MR data import</b></p>
+    <p>You can either import from DICOM data in <b>sourceData (1)</b> folder or directly from nifti in <b>rawData (2)</b>. <p>
+    <p>Genaral archive organisation: </p> 
     <p>import.zip <br/>
      - dataset_description.json <br/>
      - README <br/>
      - participants.tsv <br/>
      - sourcedata <br/>
+     - - DICOM <br/>
+     - - - sub-subject_name <br/>
+     - - - - [ses-session-index]            <= Not mandatory
+     - - - - - shanoir-import.json <br/>
+     - - - - - modality[anat/func/dwi]
+     - - - - - - [list of images as .DCM] <br/>
+     - rawData <br/>
      - - sub-subject_name <br/>
-     - - - shanoir-import.json <br/>
-     - - - DICOM <br/>
-     - - - - [list of images] <br/>
+     - - - [ses-session-index]              <= Not mandatory
+     - - - - shanoir-import.json <br/>
+     - - - - modality[anat/func/dwi]
+     - - - - - [list of images as 'name.nii' and possibly 'name.json'] <br/>
+    </p>
+
+    <p>(1) If sourceData/DICOM folders are found, rawData is ignored and data will be imported from DICOM.</p>
+     
+    <p>(2) Otherwise, data will be imported from niftis in rawData.</p>
+    <p> Please notice that in both cases a specific file shanoir-import.json is mandatory to import data. (see further description) </p>
 
     <p> dataset_description.json: https://bids-specification.readthedocs.io/en/latest/03-modality-agnostic-files.html#dataset-description </p>    
     
@@ -39,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <p> Non existing subjects will be created based on their name </p>
 
-    <p> shanoir-import.json is a json constructed following the further example:</p>
+    <p> shanoir-import.json is a json constructed to specify the studyID in which we import the data, the examination and the selected studycard.</p>
     <p>
     {{'{'}} <br/>
     &nbsp;&nbsp;&nbsp;"studyId" : 10,  <i> => Study ID</i><br/>
@@ -50,6 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p>
     If examinationId is set, it must be already existing in Shanoir<br/>
     If not, it will be created dynamically
+    Associated studycard must be existing too, and linked to studyId
     </p>
 </fieldset>
 
