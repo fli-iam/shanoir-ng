@@ -51,6 +51,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             return null;
         };
         let colDef: any[] = [
+            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : '';

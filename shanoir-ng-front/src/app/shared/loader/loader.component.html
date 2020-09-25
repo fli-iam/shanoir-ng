@@ -12,12 +12,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 i18n="Manage datasets|Title@@datasetListTitle">Manage datasets</h2>
-
-<shanoir-table #table
-        [getPage]="getPage.bind(this)" 
-        [columnDefs]="columnDefs" 
-        [customActionDefs]="customActionDefs" 
-        (rowClick)="onRowClick($event)"
-        [browserSearch]="false">
-</shanoir-table>
+<div class="loader" *ngIf="loaderService.isLoading()">
+    <i class="fa fa-cog fa-spin"></i>
+</div>

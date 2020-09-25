@@ -36,5 +36,5 @@ a:hover, a:active { color: white; }
 
 progress-bar { width: 100px; }
 
-.bottom-info { font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
+.bottom-info { min-width: 300px; font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
 .bottom-info a { color: inherit; }
