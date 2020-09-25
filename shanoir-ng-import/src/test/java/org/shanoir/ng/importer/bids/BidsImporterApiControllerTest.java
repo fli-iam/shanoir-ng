@@ -41,7 +41,6 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.dto.CommonIdNamesDTO;
-import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -62,6 +61,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -106,6 +106,9 @@ public class BidsImporterApiControllerTest {
 
 	@MockBean
 	private ImporterApiController importer;
+
+	@Autowired
+	ObjectMapper mapper;
 
 	@Before
 	public void setup() throws ShanoirException, IOException {
@@ -393,7 +396,7 @@ public class BidsImporterApiControllerTest {
 		// THEN the import fails with an appropriate error message
 	}
 
-	//@Test
+	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testImportAsBidsNiftiCreateExam() throws Exception {
 		// GIVEN a bids folder to import from NIFTI
@@ -415,17 +418,43 @@ public class BidsImporterApiControllerTest {
 		Mockito.when(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE),
 				Mockito.anyString())).thenReturn("name");
 
+		ArgumentCaptor<String> examCaptor = ArgumentCaptor.forClass(String.class);
+
+		Mockito.when(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE), examCaptor.capture())).thenReturn("{\"id\":1}");
+
 		// WHEN we import the folder
 		mvc.perform(MockMvcRequestBuilders.fileUpload(IMPORT_AS_BIDS).file(file))
 		.andExpect(status().isOk());
 		
-		ArgumentCaptor<ExaminationDTO> examCaptor = ArgumentCaptor.forClass(ExaminationDTO.class);
-		ExaminationDTO exam = examCaptor.getValue();
-		assertTrue(exam.getCenterId().equals(1L));
-		
-		// TODO: check problem here
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examCaptor.capture())).thenReturn("{\"id\":1}");
-		
+		String exam = examCaptor.getValue();
+		assertTrue(exam.contains("\"id\":null"));
+		assertTrue(exam.contains("\"center\":{\"id\":1,\"name\":\"name\"}"));
+		assertTrue(exam.contains("\"comment\":null"));
+		assertTrue(exam.contains("\"examinationDate\":[2020,9,25]"));
+		assertTrue(exam.contains("\"note\":null"));
+		assertTrue(exam.contains("\"study\":{\"id\":1,\"name\":\"name\"}"));
+		assertTrue(exam.contains("\"subject\":{\"id\":1,\"name\":\"name\"}"));
+		assertTrue(exam.contains("\"subjectWeight\":null"));
+		assertTrue(exam.contains("\"preclinical\":false"));
+		assertTrue(exam.contains("\"extraDataFilePathList\":null"));
+		assertTrue(exam.contains("\"studyId\":1"));
+		assertTrue(exam.contains("\"subjectId\":1"));
+		assertTrue(exam.contains("\"centerId\":1"));
+/*
+ * {"id":null,
+ * "center":{"id":1,"name":"name"},
+ * "comment":null,
+ * "examinationDate":[2020,9,25],
+ * "note":null,
+ * "study":{"id":1,"name":"name"},
+ * "subject":{"id":1,"name":"name"},
+ * "subjectWeight":null,
+ * "preclinical":false,
+ * "extraDataFilePathList":null,
+ * "studyId":1,
+ * "subjectId":1,
+ * "centerId":1}
+ */
 		Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.IMPORTER_QUEUE_BIDS_DATASET), Mockito.anyString());
 
 		// THEN the import is sucessfull and a DTO is created
