@@ -22,6 +22,7 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 import { LoaderService } from "../shared/loader/loader.service";
+import 'rxjs/add/operator/finally';
 
 @Injectable()
 export class ShanoirHttpInterceptor implements HttpInterceptor {

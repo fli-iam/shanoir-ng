@@ -85,14 +85,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-<<<<<<< HEAD
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-
-=======
->>>>>>> 0917b9bc... Merge pull request #485 from jcomedouteau/bids-import
 import io.swagger.annotations.ApiParam;
 
 @Controller

@@ -85,8 +85,8 @@ export class ClinicalContextComponent implements OnDestroy {
     public useStudyCard: boolean = true;
     public scHasCoilToUpdate: boolean;
     public isAdminOfStudy: boolean[] = [];
-    protected scHasDifferentModality: string;
-    private modality: string;
+    public scHasDifferentModality: string;
+    public modality: string;
     
     constructor(
             public studyService: StudyService,

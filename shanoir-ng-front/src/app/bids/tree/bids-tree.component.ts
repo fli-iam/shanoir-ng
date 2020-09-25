@@ -73,7 +73,7 @@ export class BidsTreeComponent {
         this.json = null;
     }
 
-    protected download(item: BidsElement): void {
+    public download(item: BidsElement): void {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
         
