@@ -49,6 +49,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private view: boolean = true;
     private delete: boolean = false;
     private new: boolean = false;
+    private showId: boolean = true;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
@@ -76,6 +77,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (options.view != undefined) this.view = options.view;
         if (options.delete != undefined) this.delete = options.delete;
         if (options.new != undefined) this.new = options.new;
+        if (options.id != undefined) this.showId = options.id;
     }
 
     private completeColDefs(): void {
@@ -88,7 +90,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (this.delete) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
-        if (this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
+        if (this.showId && this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
             this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});
         }
     }
@@ -119,8 +121,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                 if (res) {
                     entity.delete().then(() => {
                         this.onDelete.next(entity);
-                        this.table.refresh();
-                        this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        this.table.refresh().then(() => {
+                            this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        });
                     }).catch(reason => {
                         if (reason && reason.error) {
                             this.onDelete.next(new ShanoirError(reason));

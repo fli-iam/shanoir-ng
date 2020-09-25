@@ -14,6 +14,9 @@
 
 import { ErrorHandler, Injectable } from '@angular/core';
 import { Response } from '@angular/http';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+
 
 import { MsgBoxService } from '../msg-box/msg-box.service';
 
@@ -29,8 +32,15 @@ export class HandleErrorService implements ErrorHandler {
     
             if (error instanceof Response) {
                 techMsg = this.getMsgFromBackendValidation(error);
-            } 
-    
+            }
+            
+            if (error instanceof HttpErrorResponse) {
+	        if (error.headers.get('Content-Type').indexOf('application/json') != -1) {
+	            this.handleJsonErrors(error);
+              	    return;
+                }
+            }
+
             if (error.guiMsg) {
                 userMsg = error.guiMsg;
             }
@@ -60,5 +70,13 @@ export class HandleErrorService implements ErrorHandler {
             }
         }
         return techMsg;
+    }
+
+    private handleJsonErrors(error: HttpErrorResponse) {
+            const reader = new FileReader();
+            reader.addEventListener('loadend', (e) => {
+                this.msgb.log('error', JSON.parse(e.srcElement['result']).message)
+            });
+            reader.readAsText(error.error);
     }
 }  

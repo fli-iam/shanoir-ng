@@ -42,6 +42,7 @@ import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
+import { CenterDTOService } from './centers/shared/center.dto';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { CoilService } from './coils/shared/coil.service';
@@ -202,6 +203,9 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { LoaderService } from './shared/loader/loader.service';
+import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
 
 
 @NgModule({
@@ -342,7 +346,8 @@ import { ServiceLocator } from './utils/locator.service';
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent
+        BrukerFinishImportComponent,
+        LoaderComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -388,11 +393,7 @@ import { ServiceLocator } from './utils/locator.service';
         AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: KeycloakHttpInterceptor,
-            multi: true
-        },
+        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         Router,
         GlobalService,
@@ -412,7 +413,10 @@ import { ServiceLocator } from './utils/locator.service';
         SubjectExaminationPipe,
         DatasetDTOService,
         SolrService,
-        NotificationsService
+        NotificationsService,
+        CenterDTOService,
+        LoaderService,
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent],
 })

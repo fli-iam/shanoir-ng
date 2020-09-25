@@ -64,7 +64,9 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
 
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
+
+
 }

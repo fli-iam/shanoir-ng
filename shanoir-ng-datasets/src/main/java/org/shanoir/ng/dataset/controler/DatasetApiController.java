@@ -21,6 +21,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -281,9 +282,8 @@ public class DatasetApiController implements DatasetApi {
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
 		} catch (IOException | MessagingException e) {
-			e.printStackTrace();
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", e));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", e.getLocalizedMessage()));
 		}
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
@@ -314,7 +314,7 @@ public class DatasetApiController implements DatasetApi {
 		
 		if (datasetIds.size() > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can download less than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 		
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
@@ -337,6 +337,11 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByStudyId(studyId);
 
+		if (datasets.size() > DATASET_LIMIT) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has more than " + DATASET_LIMIT + " datasets, that is the limit. Please download them from solr search." ));
+		}
+
 		return massiveDownload(format, datasets);
 	}
 
@@ -346,13 +351,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		String tmpFilePath = tmpDir + File.separator + "Datasets[";
-		for (Dataset dataset : datasets) {
-			tmpFilePath += dataset.getId() + ",";
-		}
-		// Remove last comma and close brackets
-	    tmpFilePath = tmpFilePath.substring(0, tmpFilePath.length() - 1);
-	    tmpFilePath += "]";
+		String tmpFilePath = tmpDir + File.separator + "Datasets";
 
 		File tmpFile = new File(tmpFilePath);
 		tmpFile.mkdirs();
@@ -360,24 +359,29 @@ public class DatasetApiController implements DatasetApi {
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
+				// Create a new folder for every dataset
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
+				datasetFile.mkdir();
+ 
 				List<URL> pathURLs = new ArrayList<>();
 				if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				}  else if (EEG.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, tmpFile, dataset);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				} else {
 					throw new RestServiceException(
-							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments.", null));
+							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
 				}
 			}
 		} catch (IOException | MessagingException e) {
+			LOG.error("Error while copying files: ", e);
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while copying files.", e));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files. Please contact an administrator.", e));
 		}
 		// Zip it
 		File zipFile = new File(tmpFilePath + ZIP);
@@ -431,7 +435,7 @@ public class DatasetApiController implements DatasetApi {
 			.append(FilenameUtils.getExtension(srcFile.getName()));
 
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
-			Files.copy(srcFile.toPath(), destFile.toPath());
+			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

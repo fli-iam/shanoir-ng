@@ -26,27 +26,25 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
 
     ngOnInit() {
         this.loadEntities();
+        this.manageAfterDelete();
+        this.manageAfterAdd();
     }
     
-    private loadEntities() {
+    private loadEntities(): Promise<void> {
         this.entitiesPromise = this.getEntities().then((entities) => {
             this.entities = entities;
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
         });
-        this.manageAfterDelete();
-        this.manageAfterAdd();
+        return this.entitiesPromise;
     }
 
     getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
-        return new Promise((resolve, reject) => {
-            this.entitiesPromise.then(() => {
-                if (forceRefresh) {
-                    this.loadEntities();
-                }
-                resolve(this.browserPaging.getPage(pageable));
-            }).catch(reason => {
-                reject(reason);
-            });
+        return this.entitiesPromise.then(() => {
+            if (forceRefresh) {
+                return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
+            } else {
+                return this.browserPaging.getPage(pageable);
+            }
         });
     }
 

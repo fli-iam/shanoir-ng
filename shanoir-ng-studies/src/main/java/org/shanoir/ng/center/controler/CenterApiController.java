@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,7 +125,8 @@ public class CenterApiController implements CenterApi {
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
+		
+		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 
 		/* Save center in db. */
@@ -138,7 +140,8 @@ public class CenterApiController implements CenterApi {
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
 			@ApiParam(value = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
+		
+		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 
 		try {
@@ -160,6 +163,14 @@ public class CenterApiController implements CenterApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
+		}
+	}
+	
+	private void forceCentersOfStudyCenterList(Center center) {
+		if (center.getStudyCenterList() != null) {
+			for (StudyCenter sc : center.getStudyCenterList()) {
+				sc.setCenter(center);
+			}
 		}
 	}
 }

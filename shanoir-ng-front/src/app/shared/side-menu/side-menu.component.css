@@ -1,7 +1,7 @@
 :host() { height: 100vh; background-color: var(--color-a); color: white; }
 :host()::-webkit-scrollbar { width: 0 !important }
 
-.logo { overflow: hidden; margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; }
+.logo { overflow: hidden; margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }
 
 .logo img { height: 78px; opacity: 0.2; margin-top: 4px;
     -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
@@ -35,3 +35,6 @@ a:hover, a:active { color: white; }
 .user, .logo, .menu-list { float: right; }
 
 progress-bar { width: 100px; }
+
+.bottom-info { min-width: 300px; font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
+.bottom-info a { color: inherit; }
