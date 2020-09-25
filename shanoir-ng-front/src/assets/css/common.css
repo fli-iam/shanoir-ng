@@ -186,4 +186,4 @@ form { color: var(--dark-grey); position: relative; }
 .cat { width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 
-.mat-dialog-container { background: var(--color-overlay); position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: none !important; }
+node node { margin-left: 18px; } 
