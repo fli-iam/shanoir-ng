@@ -184,6 +184,10 @@ public class BidsImporterApiController implements BidsImporterApi {
 						return dir.isDirectory() && "func|anat|dwi|eeg".indexOf(name) != -1;
 					}
 				});
+				
+				if (typeFile == null || typeFile.length == 0) {
+					throw new ShanoirException("modality folder (anat/func/dwi/eeg) is mandatory in subject/session folder.");
+				}
 
 				// What if multiple types ?
 				// => Treat them one by one ?
@@ -235,10 +239,10 @@ public class BidsImporterApiController implements BidsImporterApi {
 		Long subjectId = manageStudyCard(participants, subjectName, sid);
 
 		// If there is no DICOMDIR: create it
-		File dicomDir = new File(workFolder.getAbsolutePath() + "/DICOM/DICOMDIR");
+		File dicomDir = new File(workFolder.getAbsolutePath() + "/DICOMDIR");
 		if (!dicomDir.exists()) {
 			DicomDirCreator creator = new DicomDirCreator(workFolder.getAbsolutePath() + "/DICOMDIR",
-					workFolder.getAbsolutePath() + "/DICOM");
+					workFolder.getAbsolutePath());
 			creator.start();
 		}
 
@@ -260,8 +264,11 @@ public class BidsImporterApiController implements BidsImporterApi {
 		ImportJob job = entity.getBody();
 
 		// Construire l'arborescence
+		job.setAcquisitionEquipmentId(sid.getAcquisitionEquipmentId());
 		job.setStudyId(sid.getStudyId());
+		job.setStudyName(sid.getStudyName());
 		job.setStudyCardId(sid.getStudyCardId());
+		job.setConverterId(sid.getConverterId());
 		job.setSubjectName(subjectName);
 
 		job.setFromPacs(false);
