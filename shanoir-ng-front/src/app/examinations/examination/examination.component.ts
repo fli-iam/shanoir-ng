@@ -157,12 +157,16 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     protected deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+	this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     private attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
+	this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     protected save(): Promise<void> {
