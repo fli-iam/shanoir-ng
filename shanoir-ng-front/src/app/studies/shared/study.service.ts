@@ -30,7 +30,7 @@ export class StudyService extends EntityService<Study> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
         super(http)
     }
 
@@ -62,22 +62,25 @@ export class StudyService extends EntityService<Study> {
             .toPromise();
     }
 
-    findStudiesIcanAdmin(): Promise<number[]> {
-        return this.getAll().then(studies => {
-            const myId: number = KeycloakService.auth.userId;
-            return studies.filter(study => {
-                return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
-            }).map(study => study.id);
-        });
+    private findStudiesIcanAdmin(): Promise<Study[]> {
+        if (this.keycloakService.isUserAdmin()) {
+            return this.getAll();
+        } else {
+            return this.getAll().then(studies => {
+                const myId: number = KeycloakService.auth.userId;
+                return studies.filter(study => {
+                    return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
+                });
+            });
+        }
     }
 
-    findStudiesIcanAdminIdName(): Promise<IdName[]> {
-        return this.getAll().then(studies => {
-            const myId: number = KeycloakService.auth.userId;
-            return studies.filter(study => {
-                return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
-            }).map(study => new IdName(study.id, study.name));
-        });
+    findStudyIdsIcanAdmin(): Promise<number[]> {
+        return this.findStudiesIcanAdmin().then(studies => studies.map(study => study.id));
+    }
+
+    findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
+        return this.findStudiesIcanAdmin().then(studies => studies.map(study => new IdName(study.id, study.name)));
     }
 
     uploadFile(fileToUpload: File, studyId: number): Observable<any> {

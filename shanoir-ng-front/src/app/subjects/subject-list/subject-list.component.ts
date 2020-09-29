@@ -41,7 +41,7 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
             private studyService: StudyService) {       
                 
         super('subject');
-        this.studyService.findStudiesIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
     
     getService(): EntityService<Subject> {
