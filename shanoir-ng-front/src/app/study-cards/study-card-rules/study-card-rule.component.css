@@ -18,22 +18,23 @@ condition, action { position: relative; display: inline-block; }
 condition.edit:hover, action.edit:hover { border-color: var(--color-b); }
 
 .add { text-align: left; color: var(--color-b); border-style: dashed; cursor: pointer; display: inline-block; padding: 1px 8px; }
-.add i { margin-right: 7px; color: var(--color-c); }
+.add svg { margin-right: 7px; vertical-align: -1px; color: var(--color-c); }
 .add:hover { background-color: var(--color-b); color: white; }
 
 .always { text-align: left; color: var(--color-a); display: inline-block; padding: 1px 8px; }
-.always i { margin-right: 7px; color: var(--color-a); }
+.always svg { margin-right: 7px; vertical-align: -1px; color: var(--color-a); }
 
-.rule-controls i { margin: 0 5px; color: var(--grey); width: 12px; }
-.rule-controls i:hover { cursor: pointer; }
-.rule-controls i:hover { color: var(--color-a); }
-.rule-delete i:hover { color: var(--color-error); } 
+.rule-controls svg { margin: 0 5px; color: var(--grey); width: 12px; vertical-align: -2px; }
+.rule-controls svg:hover { cursor: pointer; }
+.rule-controls svg:hover { color: var(--color-a); }
+.rule-delete svg:hover { color: var(--color-error); } 
 
 .rule-controls { opacity: 0; position: absolute; left: 0; right: 0; transition: opacity 0.3s; }
 .rule-controls.top { bottom: 14px; padding: 10px 10px 0; }
 .rule-controls.bottom { top: 14px; padding: 0 10px 10px; }
 .separator:hover .rule-controls { opacity: 1; }
 .sep-symbol { padding: 20px; }
+.sep-symbol svg { vertical-align: -2px; }
 
 .error { background-color: var(--color-error); color: white; }
-.error i { color: white; }
+.error svg { color: white; }

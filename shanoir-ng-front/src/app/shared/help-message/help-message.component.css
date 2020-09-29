@@ -6,5 +6,5 @@
     border-radius: 2px;
 }
 strong { color: var(--color-a); }
-i { color: var(--color-b); font-size: 16px; margin-right: 7px; }
-code { color: var(--color-a); margin: 5px 0 0 0; display: block; }
+svg { color: var(--color-b); font-size: 16px; vertical-align: -2; margin-right: 7px; }
+code { color: var(--color-a); margin: 5px 0 0 0; display: block;}

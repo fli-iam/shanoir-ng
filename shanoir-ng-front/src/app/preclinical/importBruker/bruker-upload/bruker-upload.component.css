@@ -5,8 +5,9 @@ input[type="file"] { padding: 0; }
 .loader { height: 14px; vertical-align: sub; }
 .progress { color: var(--color-a); margin-left: 20px; }
     .progress li { margin: 3px 0; }
-    .progress i { margin: 0 7px; }
-.done i { color: green; }
+    .progress svg { margin: 0 7px; }
+.done svg { color: green; }
 .done.error { color: var(--color-error); }
+li svg { vertical-align: -1; }
 checkbox { vertical-align: bottom; margin-right: 7px; }
 .next { margin-top: 25px !important; }

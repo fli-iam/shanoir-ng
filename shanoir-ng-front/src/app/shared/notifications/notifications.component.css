@@ -1,0 +1,22 @@
+:host() { color: var(--very-light-grey); position: relative; }
+
+.icons { text-align: center; display: inline-block; width: 100%; line-height: 32px; }
+
+.notif { display: inline-block; padding: 0 8px; }
+:host():hover .notif { cursor: pointer; /*background-color: var(--color-a); color: var(--very-light-grey);*/ }
+.notif svg { vertical-align: -2; font-size: 14px; }
+.number { padding: 0px 5px; }
+.number.highlight {  border-radius: 10px; background-color: var(--very-light-grey); color: var(--color-a); }
+/*:host():hover .number.highlight { background-color: var(--very-light-grey); cursor: pointer;  color: var(--color-a); }*/
+button { background-color: transparent; color: var(--very-light-grey); }
+
+.dropdown { color: var(--very-light-grey); overflow: hidden; background-color: var(--color-a-light); margin: 0px -10px; width: calc(100% + 25px); }
+.dropdown .subtitle, .dropdown li { font-size: 12px; padding-left: 30; }
+.dropdown li { }
+progress-bar { display: block; }
+
+.subtitle { color: var(--very-light-grey); text-align: left; }
+.subtitle svg { vertical-align: -1; margin-right: 4px; }
+
+.horizontal-bar { color: var(--light-grey); list-style-type: none; }
+    .horizontal-bar hr { bottom: 5px; height: 10px; margin: 0 5px !important; position: relative; }

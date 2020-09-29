@@ -1,2 +1,2 @@
 .link:hover { cursor: pointer; text-decoration: underline; }
-.link i { margin-right: 7px; }
+.link svg { margin-right: 7px; }
