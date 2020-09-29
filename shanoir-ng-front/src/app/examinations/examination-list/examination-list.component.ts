@@ -34,7 +34,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             private studyService: StudyService) {
         
         super('examination');
-        this.studyService.findStudiesIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
