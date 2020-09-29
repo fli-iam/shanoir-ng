@@ -27,6 +27,8 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
@@ -47,6 +49,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     public inImport: boolean; 
     public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
+    private hasAdministrateRight: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -54,6 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private centerService: CenterService,
             private studyService: StudyService,
             private datasetService: DatasetService,
+            private studyRightsService: StudyRightsService,
             protected breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
@@ -82,7 +86,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination
+            this.examination = examination;
+            if (this.keycloakService.isUserAdmin()) {
+                this.hasAdministrateRight = true;
+                return;
+            } else {
+                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                });
+            }
         });
     }
 
@@ -144,7 +156,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-        return false;
+	   return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
     public deleteFile(file: any) {
