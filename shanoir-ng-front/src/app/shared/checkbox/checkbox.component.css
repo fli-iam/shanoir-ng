@@ -5,7 +5,6 @@
     height: 17px;
     border-radius: 2px;
     border: 1px solid var(--grey);
-    font-size: 15px;
 }
 
 :host().disabled {
@@ -31,4 +30,9 @@ div {
     bottom: 1px;
     left: 1px;
     right: 1px;
+}
+
+div svg {
+    height: 100%;
+    width: 100%;
 }

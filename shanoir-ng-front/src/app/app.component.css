@@ -7,8 +7,8 @@ side-menu { width: 300px; position: fixed; display: flex; flex-flow: column; top
 
 .open-button { border-radius: 0 2px 2px 0; background-color: var(--color-a); }
 
-.close-button i, 
-.open-button i { vertical-align: -5px; padding: 6px 2px; }
+.close-button svg, 
+.open-button svg { vertical-align: -5px; padding: 6px 2px; }
 
-.close-button:hover i, 
-.open-button:hover i { color: var(--color-b); }
+.close-button:hover svg, 
+.open-button:hover svg { color: var(--color-b); }
