@@ -122,7 +122,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
     
     private fetchStudies() {
-        this.studyService.findStudiesIcanAdminIdName()
+        this.studyService.findStudyIdNamesIcanAdmin()
             .then(studies => this.studies = studies);
     }
 

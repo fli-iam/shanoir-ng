@@ -105,7 +105,7 @@ public interface ExaminationService {
 	 * @return updated examination.
 	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException;
 
 	/**
@@ -116,5 +116,6 @@ public interface ExaminationService {
 	 */
 	String addExtraData(Long examinationId, MultipartFile file);
 
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_DOWNLOAD'))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
 }

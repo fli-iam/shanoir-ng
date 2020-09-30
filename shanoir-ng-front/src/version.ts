@@ -4,8 +4,8 @@ const { resolve, relative } = require('path');
 const { writeFileSync } = require('fs-extra');
 
 const gitInfo = gitDescribeSync({
-    dirtyMark: false,
-    dirtySemver: false
+    match: 'NG_v[0-9]*',
+    longSemver: true
 });
 
 gitInfo.version = version;

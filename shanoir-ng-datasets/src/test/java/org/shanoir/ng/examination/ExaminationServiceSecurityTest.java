@@ -107,7 +107,8 @@ public class ExaminationServiceSecurityTest {
 		testFindBySubjectId();
 		testFindBySubjectIdStudyId();
 		testCreate();
-		testUpdateDenied();
+		testUpdate(true);
+		testUpdate(false);
 		testDeleteDenied();
 	}
 	
@@ -119,7 +120,8 @@ public class ExaminationServiceSecurityTest {
 		testFindBySubjectId();
 		testFindBySubjectIdStudyId();
 		testCreate();
-		testUpdateDenied();
+		testUpdate(true);
+		testUpdate(false);
 		testDeleteByExpert();
 	}
 
@@ -141,7 +143,7 @@ public class ExaminationServiceSecurityTest {
 		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));	
+		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -151,7 +153,7 @@ public class ExaminationServiceSecurityTest {
 		Examination ex1 = mockExam(1L); ex1.setStudyId(1L); exList.add(ex1);
 		Examination ex2 = mockExam(2L); ex2.setStudyId(1L); exList.add(ex2);
 		Examination ex3 = mockExam(3L); ex3.setStudyId(1L); exList.add(ex3);
-		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);		
+		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);
 		Pageable pageable = new PageRequest(0, 10);
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
@@ -165,7 +167,7 @@ public class ExaminationServiceSecurityTest {
 		Examination ex11 = mockExam(1L); ex11.setStudyId(1L); exList2.add(ex11);
 		Examination ex12 = mockExam(2L); ex12.setStudyId(1L); exList2.add(ex12);
 		Examination ex13 = mockExam(3L); ex13.setStudyId(1L); exList2.add(ex13);
-		Examination ex14 = mockExam(4L); ex14.setStudyId(2L); exList2.add(ex14);	
+		Examination ex14 = mockExam(4L); ex14.setStudyId(2L); exList2.add(ex14);
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList2));
 		given(examinationRepository.findByStudyIdIn(Arrays.asList(1L, 2L), pageable)).willReturn(new PageImpl<>(exList2));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L, 2L)));
@@ -234,12 +236,16 @@ public class ExaminationServiceSecurityTest {
 		assertAccessDenied(service::deleteById, 1L);
 	}
 
-	private void testUpdateDenied() throws ShanoirException {
-		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+	private void testUpdate(boolean right) throws ShanoirException {
+		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(right);
 		Examination mrDs = mockExam(1L);
 		mrDs.setStudyId(10L);
 		given(examinationRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
-		assertAccessDenied(service::update, mrDs);
+		if (right) {
+			assertAccessAuthorized(service::update, mrDs);
+		} else {
+			assertAccessDenied(service::update, mrDs);
+		}
 	}
 	
 	private void testDeleteByExpert() throws ShanoirException {
