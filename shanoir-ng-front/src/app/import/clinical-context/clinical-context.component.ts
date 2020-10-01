@@ -48,7 +48,6 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 @Component({
     selector: 'clinical-context',
@@ -357,6 +356,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectSubject(): void {
+        if (!this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
         if (this.subject) {
@@ -445,6 +445,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             this.breadcrumbsService.currentStep.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
+            this.breadcrumbsService.currentStep.data.disableStudy = true;
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {

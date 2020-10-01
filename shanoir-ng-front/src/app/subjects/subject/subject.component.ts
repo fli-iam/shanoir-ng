@@ -43,6 +43,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     firstName: string = "";
     lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    disableStudy: boolean = false;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -75,6 +76,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
+            this.disableStudy = this.breadcrumbsService.currentStep.data.disableStudy;
         }
     }
 
