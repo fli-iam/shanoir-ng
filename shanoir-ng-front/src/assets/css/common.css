@@ -92,6 +92,7 @@ form { color: var(--dark-grey); position: relative; }
   form button { margin: 10px 0; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
+  form fieldset.disabled { color: var(--grey); }
   form fieldset ~ fieldset { margin-right: 20px; } 
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }

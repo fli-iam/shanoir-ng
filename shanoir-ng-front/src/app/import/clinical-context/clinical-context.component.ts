@@ -88,6 +88,7 @@ export class ClinicalContextComponent implements OnDestroy {
     protected isAdminOfStudy: boolean[] = [];
     protected scHasDifferentModality: string;
     private modality: string;
+    openSubjectStudy: boolean = false;
     
     constructor(
             private studyService: StudyService,
@@ -236,6 +237,7 @@ export class ClinicalContextComponent implements OnDestroy {
         let end: Promise<void> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+            this.openSubjectStudy = false;
             if (this.study) {
                 let studyEquipments: AcquisitionEquipment[] = [];
                 this.study.studyCenterList.forEach(sc => {
@@ -321,6 +323,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
+        this.openSubjectStudy = false;
         this.acquisitionEquipmentOptions =  [];
         this.subjects =  [];
         this.examinations = [];
@@ -342,6 +345,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private onSelectAcquisitonEquipment(): void {
         this.subject = this.examination = null;
+        this.openSubjectStudy = false;
         this.subjects =  [];
         this.examinations = [];
         if (this.acquisitionEquipment) {
@@ -359,7 +363,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private onSelectSubject(): void {
-        if (!this.subject.subjectStudy) this.subject = null;
+        if (this.subject && !this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
         if (this.subject) {
@@ -371,6 +375,8 @@ export class ClinicalContextComponent implements OnDestroy {
             this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations);
+        } else {
+            this.openSubjectStudy = false;
         }
         this.onContextChange();
     }
@@ -448,7 +454,8 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             this.breadcrumbsService.currentStep.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
-            this.breadcrumbsService.currentStep.data.disableStudy = true;
+            this.breadcrumbsService.currentStep.data.patientName = this.patient.patientName;
+            this.breadcrumbsService.currentStep.data.forceStudy = this.study;
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {

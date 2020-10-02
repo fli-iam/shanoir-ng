@@ -48,9 +48,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li *ngIf="mode == 'create' && humanSelected()">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="true" [checked]="isAlreadyAnonymized == true"
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="isAlreadyAnonymized == true"
 								/>Yes
-								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
 								/>No
 							</span>
 						</li>
@@ -153,8 +153,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && !disableStudy">
+			<fieldset *ngIf="mode !== 'view' && !forceStudy">
 				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+			</fieldset>
+			<fieldset *ngIf="mode !== 'view' && forceStudy">
+				<ol>
+					<li>
+						<label>Study</label>
+						<span class="right-col">{{forceStudy.name}}</span>
+					</li>
+				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
