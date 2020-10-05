@@ -385,7 +385,7 @@ public class DatasetSecurityService {
      * @param rightStr the right
      * @return true or false
      */
-    public boolean checkDatasetPage(Page<Dataset> page, String rightStr) {
+    public boolean checkDatasetPage(Iterable<Dataset> page, String rightStr) {
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((Dataset dataset) -> studyIds.add(dataset.getStudyId()));
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
