@@ -12,36 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.datasetacquisition.dto;
+package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
-import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
-/**
- * Simple dataset acquisition DTO with information for examination.
- * 
- * @author msimon
- *
- */
-public class ExaminationDatasetAcquisitionDTO extends IdName {
 
-	private List<DatasetAndProcessingsDTO> datasets;
+public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements DatasetAndProcessingsDTOInterface {
 
-	/**
-	 * @return the datasets
-	 */
-	public List<DatasetAndProcessingsDTO> getDatasets() {
-		return datasets;
+	private List<DatasetProcessingDTO> processings;
+
+	@Override
+	public List<DatasetProcessingDTO> getProcessings() {
+		return processings;
 	}
 
-	/**
-	 * @param datasets
-	 *            the datasets to set
-	 */
-	public void setDatasets(List<DatasetAndProcessingsDTO> datasets) {
-		this.datasets = datasets;
+	@Override
+	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings) {
+		this.processings = datasetProcessings;
 	}
-
+    
 }

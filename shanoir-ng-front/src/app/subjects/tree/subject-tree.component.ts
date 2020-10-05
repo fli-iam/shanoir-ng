@@ -53,7 +53,7 @@ export class SubjectTreeComponent {
                     component.hasChildren = true;
                 }
                 component.open();
-            })
+            });
     }
 
     showExaminationDetails(examinationId: number) {

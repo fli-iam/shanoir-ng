@@ -12,17 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
-import { Dataset } from "./dataset.model";
+package org.shanoir.ng.dataset.dto.mapper;
 
-export class DatasetProcessing {
+import org.mapstruct.Mapper;
+import org.shanoir.ng.processing.DatasetProcessing;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
-    id: number;
-    comment: string;
-    type: DatasetProcessingType;
-    inputDatasets: Dataset[];
-    outputDatasets: Dataset[];
-	processingDate: Date;
-    studyId: number;
-    
+@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
+public interface DatasetProcessingMapper {
+
+	/**
+	 * Map a @DatasetMetadata to a @DatasetMetadataDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
+
+
 }

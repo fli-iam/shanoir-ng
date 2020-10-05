@@ -12,17 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
-import { Dataset } from "./dataset.model";
+package org.shanoir.ng.dataset.dto;
 
-export class DatasetProcessing {
+import java.util.List;
 
-    id: number;
-    comment: string;
-    type: DatasetProcessingType;
-    inputDatasets: Dataset[];
-    outputDatasets: Dataset[];
-	processingDate: Date;
-    studyId: number;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+
+
+public interface DatasetAndProcessingsDTOInterface {
+
+	public List<DatasetProcessingDTO> getProcessings();
+
+	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings);
     
 }

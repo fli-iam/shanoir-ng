@@ -19,6 +19,7 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { getDatasetInstance } from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
 import { DatasetDTO } from './dataset.dto';
 import { DatasetService } from './dataset.service';
@@ -40,6 +41,7 @@ export abstract class Dataset extends Entity {
     subject : Subject;
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
+    processings: DatasetProcessing[];
 
     service: DatasetService = ServiceLocator.injector.get(DatasetService);
 
