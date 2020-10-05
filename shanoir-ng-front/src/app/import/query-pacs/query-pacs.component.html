@@ -18,9 +18,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <fieldset class="step">
         <ol>
             <legend>
-                Please fill <strong class="warning">at least one </strong>of the five fields below to query the PACS. Blank is not allowed.
+                Please fill <strong class="warning">at least one</strong> of the five fields below to query the PACS. Blank is not allowed.<br/>
+                If Patient Name, Patient ID or Patient Birth Date is filled, a PatientRoot query is send to the PACS.<br/>
+                You can fill Study Description and Study Date in combination with the three patient values above to affine your search.<br/>
+                If only Study Description or/and Study Date is filled a StudyRoot query is send to the PACS.
             </legend>
-            <p>The maximum number of patients returned being configured as limited, please optimize your query to find relevant results.</p>
+            <p>The maximum number of patients returned is limited to 10, please optimize your query to find relevant results.</p>
             <li>
                 <label>Patient Name</label> 
                 <span class="right-col">
