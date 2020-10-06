@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <node [label]="examination | subjectExaminationLabel" awesome="fas fa-diagnoses" (labelClick)="showExaminationDetails(examination.id)" class="examination-node">
                 <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" awesome="fas fa-laptop-medical" class="acquisition-node">
                     <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" awesome="fas fa-brain" (labelClick)="showDatasetDetails(dataset.id)" class="dataset-node">
-                        <node *ngFor="let processing of dataset.processings" [label]="dataset.name" awesome="fas fa-cog">
+                        <node *ngFor="let processing of dataset.processings" [label]="processing.type" awesome="fas fa-cog">
                             <node *ngFor="let dataset of processing.outputDatasets" [label]="dataset.name" awesome="fas fa-brain" (labelClick)="showDatasetDetails(dataset.id)" class="dataset-node">
 
                             </node>
