@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, forwardRef, Input, OnChanges, SimpleChanges, ChangeDetectorRef, OnInit } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FacetResultPage } from "../../solr/solr.document.model";
 
@@ -28,25 +28,49 @@ import { FacetResultPage } from "../../solr/solr.document.model";
         }]   
 })
 
-export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
+export class CheckboxListComponent implements ControlValueAccessor, OnChanges, OnInit {
     onChange = (_: any) => {};
+    searchBarContent: string;
     onTouched = () => {};
     @Input() items: FacetResultPage;
+    initialItems: FacetResultPage;
+    displayedItems: FacetResultPage;
     selectedItems: any[] = [];
     selectAll: boolean = true;
     currentPage: number = 0;
     itemsPersPage: number = 10;
     totalPages: number =  0;
-    
+   
+   constructor(
+      private cdr: ChangeDetectorRef,
+    ) {
+    }
+
+    ngOnInit() {
+        this.initialItems = JSON.parse(JSON.stringify(this.items))
+    }
+
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.items && this.items !== undefined) {
-            this.totalPages = Math.ceil(this.items.totalElements / this.itemsPersPage);
+        if (changes.items && this.displayedItems !== undefined) {
+            this.searchBarContent = "";
+            this.search();
+            this.totalPages = Math.ceil(this.displayedItems.totalElements / this.itemsPersPage);
             // this.selectUnselectAll(false); // checked all by default
         }
     }
 
+    search() {
+        this.displayedItems = this.initialItems
+        if (this.searchBarContent && this.displayedItems) {
+            this.displayedItems.content = this.displayedItems.content.filter(element => element.value.indexOf(this.searchBarContent) == 0)
+        }
+        this.cdr.detectChanges();
+    }
+
     selectUnselectAll (isChecked: boolean) {
-        this.items.content.map(item => { item.checked = isChecked; return item; })
+        this.searchBarContent = "";
+        this.search();
+        this.displayedItems.content.map(item => { item.checked = isChecked; return item; })
         this.onToggle();
     }
     
@@ -63,7 +87,9 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     }
 
     onToggle() {
-        this.selectedItems = this.items.content.filter(item => item.checked).map(item => item.value);
+        this.searchBarContent = "";
+        this.search();
+        this.selectedItems = this.displayedItems.content.filter(item => item.checked).map(item => item.value);
         this.onChange(this.selectedItems);
     }
 
