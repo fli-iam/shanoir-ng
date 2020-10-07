@@ -75,13 +75,14 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		http
 			.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				.and()
+			.and()
 			.csrf()
 				.disable()
 			.authorizeRequests()
 				.antMatchers("/accountrequest").permitAll()
 				.antMatchers("/last_login_date").permitAll()
 				.anyRequest().authenticated();
+		// the swagger API of is not exposed here for security reasons (MK)
 	}
 
 	@Bean
