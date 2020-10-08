@@ -89,7 +89,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
 		}
 	}
 
