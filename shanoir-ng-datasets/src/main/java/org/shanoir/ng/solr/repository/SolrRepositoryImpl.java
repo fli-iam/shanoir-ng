@@ -145,7 +145,8 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 						.addFacetOnField("datasetName_str")
 						.addFacetOnField("examinationComment_str")
 						.addFacetOnField(DATASET_TYPE)
-						.addFacetOnField(DATASET_NATURE).setFacetLimit(200));
+						.addFacetOnField(DATASET_NATURE)
+						.setFacetLimit(-1));
 
 		SolrResultPage<ShanoirSolrDocument> result = (SolrResultPage<ShanoirSolrDocument>) solrTemplate.queryForPage(query, ShanoirSolrDocument.class);
 		FacetPage<ShanoirSolrDocument> result2 = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
