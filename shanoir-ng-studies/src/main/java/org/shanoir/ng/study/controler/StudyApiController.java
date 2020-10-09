@@ -25,6 +25,9 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -51,6 +54,20 @@ import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import io.swagger.annotations.ApiParam;
 
 @Controller
 public class StudyApiController implements StudyApi {
