@@ -12,10 +12,20 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<li #container
-        [class.opened]="init && opened"
-        [class.animate]="overflow">
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideDown]="opened" [hidden]="!init"> 
-        <div class="sub-sub-content"><ng-content></ng-content></div>
-    </ul>
-</li>
+<node
+        *ngIf="node"
+        [label]="node.label" 
+        awesome="fas fa-diagnoses" 
+        [(opened)]="node.open"
+        (labelClick)="null"
+        [hasChildren]="hasChildren()">
+
+    <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != 'UNLOADED'"> 
+            <dataset-acquisition-node
+                    node
+                    *ngFor="let datasetAcq of node.datasetAcquisitions"
+                    [input]="datasetAcq">
+            </dataset-acquisition-node>
+
+    </ng-container>
+</node>

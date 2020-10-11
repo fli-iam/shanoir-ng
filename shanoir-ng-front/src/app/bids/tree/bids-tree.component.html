@@ -17,10 +17,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <h1>Bids</h1>
 
 <ng-template #recursiveList let-datas>
-    <node *ngFor="let item of datas" 
+    <node  *ngFor="let item of datas" 
     [label]="getFileName(item.path)" 
-    [dataRequest]="(item.elements && item.elements.length > 0) ? true : false" 
-    [nodeParams]="item" 
     [deploy]="false"
     [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
     (labelClick)="getContent(item)"
@@ -31,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="Bids" awesome="far fa-folder" [deploy]="true" >
+<node  label="Bids" awesome="far fa-folder" [deploy]="true" >
   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
 </node>
 

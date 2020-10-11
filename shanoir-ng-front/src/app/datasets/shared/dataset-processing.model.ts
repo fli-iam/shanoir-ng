@@ -19,7 +19,7 @@ export class DatasetProcessing {
 
     id: number;
     comment: string;
-    type: DatasetProcessingType;
+    datasetProcessingType: DatasetProcessingType;
     inputDatasets: Dataset[];
     outputDatasets: Dataset[];
 	processingDate: Date;

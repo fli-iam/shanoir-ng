@@ -49,7 +49,7 @@ export class StudyTreeComponent {
         private centerService: CenterService) {
     }
 
-    getSubjectDetails(component: TreeNodeComponent) {
+    getSubjectDetails(component) {
         component.dataLoading = true;
         let subjectStudy: SubjectStudy = component.nodeParams;
         this.examinationService.findExaminationsBySubjectAndStudy(subjectStudy.subject.id, this.study.id)
@@ -62,7 +62,7 @@ export class StudyTreeComponent {
             })
     }
 
-    getAcqEptForCenter(component: TreeNodeComponent) {
+    getAcqEptForCenter(component) {
         component.dataLoading = true;
         let studyCenter: StudyCenter = component.nodeParams;
         this.centerService.get(studyCenter.center.id).then(

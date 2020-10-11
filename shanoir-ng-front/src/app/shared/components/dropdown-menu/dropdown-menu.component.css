@@ -1,25 +1,16 @@
-:host() { display: inline-block; position: static; vertical-align: middle; margin: 0; padding: 0; color: var(--dark-grey); background-color: var(--light-grey); }
-li { display: inline-block; }
-li.active, li.opened { color: var(--very-light-grey); background-color: var(--color-a); }
-    li .label { cursor: pointer; display: flex; margin: 0; text-decoration: none; padding: 5px 8px; }
-    li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
+:host() { color: var(--dark-grey); position: absolute; top: 0; z-index: 10; margin-left: -5px; }
+:host().opened { z-index: 20; }
+li { display: inline-block; padding: 0; }
+li .label { cursor: pointer; display: flex; margin: 0; text-decoration: none; padding: 0px 5px; }
+li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
 
-.sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; z-index: -1; }
-    .sub-sub-content { height: 100%; }
-        .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
-            .animate .sub-sub-content { overflow: hidden; }
+.sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; z-index: -1; margin: 0; top: 1px; }
+.sub-sub-content { height: 100%; left: 0px; top: 11px; border: 1px solid var(--grey); }
+/* .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 5px 0px var(--shadow-color); } */
+.animate .sub-sub-content { overflow: hidden; }
 
-.menu-arrow { margin: 0 0 0 4px; float: right; }
 .hidden { display: none !important; }
 
 .sub-content-parent { overflow: hidden; }
 
-:host(.tree-mode) { z-index: 10000; position: absolute; background-color: transparent; right: -12px; top: 16px; }
-    :host(.tree-mode) li:hover, 
-    :host(.tree-mode) li.active, 
-    :host(.tree-mode) li.opened { cursor: pointer; color: var(--color-c); background-color: transparent !important; text-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
-    :host(.tree-mode) .plus { padding: 0 5px; text-align: center; font-size: 16px; }
-    :host(.tree-mode) .sub-content { left: 0px; top: 11px; }
-    :host(.tree-mode) .sub-sub-content:before { box-shadow: 0 0 5px 0 var(--shadow-color); }
-
-i { font-size: 14px; }
+.plus { padding: 0 5px; text-align: center; font-size: 10px; cursor: pointer; color: var(--color-b-light2); }

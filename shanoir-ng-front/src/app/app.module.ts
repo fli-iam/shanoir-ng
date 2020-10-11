@@ -206,6 +206,12 @@ import { ServiceLocator } from './utils/locator.service';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader/loader.service';
 import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
+import { SubjectNodeComponent } from './subjects/tree/subject-node.component';
+import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
+import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
+import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
+import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
+import { StudyNodeComponent } from './studies/tree/study-node.component';
 
 
 @NgModule({
@@ -347,7 +353,13 @@ import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
         BrukerFinishImportComponent,
-        LoaderComponent
+        LoaderComponent,
+        SubjectNodeComponent,
+        ExaminationNodeComponent,
+        DatasetAcquisitionNodeComponent,
+        DatasetNodeComponent,
+        ProcessingNodeComponent,
+        StudyNodeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -411,11 +423,13 @@ import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
         DicomService,
         ManufacturerModelPipe,
         SubjectExaminationPipe,
+        ExaminationPipe,
         DatasetDTOService,
         SolrService,
         NotificationsService,
         CenterDTOService,
         LoaderService,
+        SubjectStudyPipe,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent],

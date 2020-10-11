@@ -1,0 +1,54 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<node
+        *ngIf="node"
+        [label]="node.label" 
+        awesome="fas fa-folder-open"
+        [(opened)]="node.open"
+        (labelClick)="null"
+        [hasChildren]="true">
+
+    <node
+            label="Subjects" 
+            awesome="far fa-folder"
+            [(opened)]="node.subjectsOpen"
+            [hasChildren]="hasSubjects()">    
+       
+        <ng-container *ngIf="node.subjectsOpen && node.subjects && node.subjects != 'UNLOADED'"> 
+            <subject-node
+                    node
+                    *ngFor="let subject of node.subjects"
+                    [input]="subject"
+                    [studyId]="node.id">
+            </subject-node>
+        </ng-container>
+
+    </node>   
+
+    <node
+            label="Centers" 
+            awesome="far fa-folder">    
+
+        <ng-container *ngIf="node.subjects && node.subjects != 'UNLOADED'"> 
+            <!-- <center-node
+                    node
+                    *ngFor="let subject of node.subjects"
+                    [input]="subject"
+                    [studyId]="node.id">
+            </center-node> -->
+        </ng-container>
+
+    </node>   
+</node>

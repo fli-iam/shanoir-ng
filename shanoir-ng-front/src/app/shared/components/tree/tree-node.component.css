@@ -1,7 +1,8 @@
 :host() { position: relative; padding: 0 4px; cursor: default; margin-top: 1px; margin-bottom: 1px; display: block; }
-:host(.selected) > .node .label { color: blue; }
-.clickable-node:hover > .label { color: blue; }
-.node { height: 20px; line-height: 20px; display: inline-block; }
+:host(.selected) > .node .label { background-color: var(--grey); border: 1px solid var(--grey); }
+:host(:not(.selected)).clickable-node:hover > .label { color: blue; }
+.label { padding: 0 3px; border: 1px solid transparent; }
+.node { height: 20px; line-height: 20px; display: inline-block; padding-left: 3px; border-radius: 2px; }
 .node > span { display: inline-block; }
 .arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: top; }
     .arrow i { vertical-align: 0; font-size: 12px; height: 18px; }
@@ -11,5 +12,4 @@ checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px;
     input[type="checkbox"] { vertical-align: middle; }
 .clickable { cursor: pointer; }
 .button-picto { color: var(--greyer); margin-left: 7px; }
-.button-picto:hover { color: blue; }
 tool-tip { color: var(--greyer); vertical-align: initial; }
