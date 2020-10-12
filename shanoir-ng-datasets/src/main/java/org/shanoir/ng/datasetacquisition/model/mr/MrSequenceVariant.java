@@ -20,7 +20,6 @@ package org.shanoir.ng.datasetacquisition.model.mr;
  * @author atouboul
  *
  */
-
 public enum MrSequenceVariant {
 
 	// segmented k-space
@@ -46,6 +45,8 @@ public enum MrSequenceVariant {
 	
 	// no sequence variant
 	NONE(8);
+	
+	private static final String TOF = "TOF";
 	
 	private int id;
 
@@ -87,6 +88,9 @@ public enum MrSequenceVariant {
 	public static MrSequenceVariant getIdByType(final String type) {
 		if (type == null) {
 			return null;
+		}
+		if (TOF.equals(type)) { // see GitHub issue #561
+			return MrSequenceVariant.SS;
 		}
 		return MrSequenceVariant.valueOf(type);
 	}
