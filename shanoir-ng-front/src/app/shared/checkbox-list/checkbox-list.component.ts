@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ChangeDetectorRef, Component, forwardRef, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, forwardRef, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FacetResultPage } from "../../solr/solr.document.model";
 
