@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- List of checkboxes -->
 <div class="items" *ngIf="items && items.content">
     <input type="text" [(ngModel)]=searchBarContent (input)="search()">
-    <label *ngFor="let item of displayedItems?displayedItems.content:items.content | slice: itemsPersPage*currentPage : itemsPersPage*(currentPage+1)">
+    <label *ngFor="let item of items.content | slice: itemsPersPage*currentPage : itemsPersPage*(currentPage+1)">
         <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" [disabled]="!item.valueCount"/>
             {{item.value}} - {{item.valueCount}}
     </label>
