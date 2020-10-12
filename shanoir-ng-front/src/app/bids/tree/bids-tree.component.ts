@@ -26,6 +26,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpClient } from '@angular/common/http';
 import { ServiceLocator } from '../../utils/locator.service';
 import { HttpParams } from '@angular/common/http';
+import { StudyService } from '../../studies/shared/study.service';
 
 
 @Component({
@@ -36,6 +37,11 @@ import { HttpParams } from '@angular/common/http';
 
 export class BidsTreeComponent {
 
+    constructor(
+        private studyService: StudyService, 
+    ) {
+        
+    }
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
@@ -44,6 +50,36 @@ export class BidsTreeComponent {
     public tsv: string;
     public title: string;
     @Input() studyId: number;
+    protected load: string;
+
+    getBidsStructure() {
+       if (!this.load) {
+        this.load="loading"
+            this.studyService.getBidsStructure(this.studyId).then(element => {
+                this.sort(element);
+                this.list = [element];
+                this.load = "loaded";
+            });
+        }
+    }
+
+    sort(element: BidsElement) {
+        if (element.elements) {
+            element.elements.sort(function(elem1, elem2) {
+                if (elem1.file && !elem2.file) {
+                    return 1
+                } else if (!elem1.file && elem2.file) {
+                    return -1;
+                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
+                    return elem1.path < elem2.path ? -1 : 1;
+                }
+            });
+            // Then sort all sub elements folders
+            for (let elem of element.elements) {
+                this.sort(elem);
+            }
+        }
+    }
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
