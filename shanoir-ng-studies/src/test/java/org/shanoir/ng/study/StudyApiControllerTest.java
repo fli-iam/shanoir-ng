@@ -124,7 +124,7 @@ public class StudyApiControllerTest {
 	public static void beforeClass() {
 		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
 
-	    System.setProperty("study-data", tempFolderPath);
+	    System.setProperty("studies-data", tempFolderPath);
 	}
 	
 	@Before

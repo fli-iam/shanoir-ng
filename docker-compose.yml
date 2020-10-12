@@ -112,6 +112,7 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -322,6 +323,7 @@ volumes:
   rabbitmq-data:
   database-data:
   datasets-data:
+  studies-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:
