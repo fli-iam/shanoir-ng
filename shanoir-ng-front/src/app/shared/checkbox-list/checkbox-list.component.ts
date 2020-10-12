@@ -40,7 +40,8 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     totalPages: number =  0;
    
    constructor(
-      private cdr: ChangeDetectorRef) {
+      private cdr: ChangeDetectorRef,
+    ) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
