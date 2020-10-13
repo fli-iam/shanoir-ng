@@ -25,7 +25,7 @@
         position: relative;
     }
     :host().auto-width .commands > .button { min-width: 0; font-size: 6px; height: 22px; }
-        .button svg { margin: 0px 2px; height: 100%;}
+        .button i { margin: 4px 2px; height: 100%; }
     .commands > .button.disabled { opacity: 0.7; }
     .commands > .button:hover:not(.disabled),
     .commands > .button:focus:not(.disabled) { cursor: pointer; color: var(--color-a); outline: none; }
@@ -81,7 +81,7 @@ input:focus:hover { cursor: initial; }
 .not-compatible { color: var(--color-error); }
 
 .commands > .clear { color: var(--grey); display: none; }
-.clear svg { vertical-align: 2px; }
+.clear i { vertical-align: 2px; }
 .frame:hover .commands > .clear { display: inline-block; } 
 :host().auto-width .clear { display: none !important; }
 
@@ -89,6 +89,6 @@ input:focus:hover { cursor: initial; }
 
 toggle-switch { margin: 0 10px; }
 
-.new-file .fa-plus { position: absolute; font-size: 6px; left: 7px; top: 1px; }
+.new-file .fa-plus { position: absolute; font-size: 6px; left: 7px; top: 4px; }
 
 :host().read-only { border: none !important; }
