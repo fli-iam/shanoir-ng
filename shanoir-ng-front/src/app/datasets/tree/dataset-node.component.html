@@ -22,6 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [dataLoading]="loading"
         [hasBox]="true"
         [(ngModel)]="node.selected"
+        (chkbxChange)="selectedChange.emit()"
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened">
@@ -35,7 +36,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <processing-node
                 node
                 *ngFor="let processing of node.processings"
-                [input]="processing">
+                [input]="processing"
+                (selectedChange)="selectedChange.emit()">
         </processing-node>
 
     </ng-container>

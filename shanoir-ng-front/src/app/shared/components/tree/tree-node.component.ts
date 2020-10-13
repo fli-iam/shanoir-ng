@@ -11,16 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import {
-    Component, Input, Output, ContentChildren, forwardRef, QueryList, ChangeDetectorRef,
-    EventEmitter, ViewChild, ElementRef, HostListener, Directive, OnInit, ViewContainerRef, HostBinding, OnChanges, SimpleChanges
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    forwardRef,
+    Input,
+    OnChanges,
+    Output,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
-import { TreeNode } from '@angular/router/src/utils/tree';
+
 
 const noop = () => {
 };

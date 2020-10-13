@@ -11,8 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, HostBinding, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
@@ -22,7 +21,6 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import {
     DatasetAcquisitionNode,
     DatasetNode,
@@ -34,7 +32,6 @@ import {
 import { Subject } from '../shared/subject.model';
 
 
-
 @Component({
     selector: 'subject-node',
     templateUrl: 'subject-node.component.html'
@@ -44,8 +41,10 @@ export class SubjectNodeComponent implements OnChanges {
 
     @Input() input: Subject | SubjectNode;
     @Input() studyId: number;
+    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: SubjectNode;
     loading: boolean = false;
+    menuOpened: boolean = false;
 
     constructor(
         private examinationService: ExaminationService,
@@ -123,5 +122,13 @@ export class SubjectNodeComponent implements OnChanges {
         if (!this.node.examinations) return false;
         else if (this.node.examinations == 'UNLOADED') return 'unknown';
         else return this.node.examinations.length > 0;
+    }
+
+    showSubjectDetails() {
+        this.router.navigate(['/subject/details/' + this.node.id]);
+    }
+
+    collapseAll() {
+        console.log('collapse');
     }
 }

@@ -1,11 +1,11 @@
 :host() { color: var(--dark-grey); position: absolute; top: 0; z-index: 10; margin-left: -5px; }
 :host().opened { z-index: 20; }
-li { display: inline-block; padding: 0; }
+li { display: inline-block; padding: 0; height: 20px; }
 li .label { cursor: pointer; display: flex; margin: 0; text-decoration: none; padding: 0px 5px; }
 li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
 
-.sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; z-index: -1; margin: 0; top: 1px; }
-.sub-sub-content { height: 100%; left: 0px; top: 11px; border: 1px solid var(--grey); }
+.sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; z-index: -1; margin: 0; top: 0; }
+.sub-sub-content { height: 100%; left: 0px; top: 10px; border: 1px solid var(--grey); }
 /* .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 5px 0px var(--shadow-color); } */
 .animate .sub-sub-content { overflow: hidden; }
 

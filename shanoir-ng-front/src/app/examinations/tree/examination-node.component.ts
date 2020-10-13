@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ExaminationNode, UNLOADED } from '../../tree/tree.model';
@@ -28,8 +28,10 @@ import { Examination } from '../shared/examination.model';
 export class ExaminationNodeComponent implements OnChanges {
 
     @Input() input: ExaminationNode | Examination;
+    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: ExaminationNode;
     loading: boolean = false;
+    menuOpened: boolean = false;
 
     constructor(
         private router: Router) {
@@ -49,5 +51,9 @@ export class ExaminationNodeComponent implements OnChanges {
         if (!this.node.datasetAcquisitions) return false;
         else if (this.node.datasetAcquisitions == 'UNLOADED') return 'unknown';
         else return this.node.datasetAcquisitions.length > 0;
+    }
+
+    showExaminationDetails() {
+        this.router.navigate(['/examination/details/' + this.node.id]);
     }
 }

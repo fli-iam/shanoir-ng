@@ -1,4 +1,4 @@
-.menu-item { padding: 0; min-height: 0; display: block; margin: 0; color: var(--dark-grey); background-color: var(--light-grey); position: relative; text-align: right; white-space: nowrap; }
+.menu-item { padding: 0; min-height: 0; display: block; margin: 0; color: var(--dark-grey); background-color: var(--light-grey); position: relative; text-align: right; white-space: nowrap; height: 20px; }
 
 .menu-item.disabled::after { content: " "; top: 0;bottom: 0; left: 0;  right: 0;  position: absolute; background-color: var(--light-grey); opacity: 0.8; }
 
@@ -6,14 +6,14 @@
 /* .menu-item.opened { color: var(--very-light-grey); background-color: var(--color-a); } */
 .menu-item:not(.disabled):hover, .menu-item.opened { cursor: pointer; background-color: var(--grey); }
 .sub-content { display: inline-block; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; position: absolute; top: 0px; margin: 0; }
-.sub-sub-content { height: 100%; left: 0px; top: 11px; border: 1px solid var(--grey); }
+.sub-sub-content { height: 100%; left: 0px; top: 10px; border: 1px solid var(--grey); }
 
 .animate .sub-sub-content { overflow: hidden;  }
 
-.label { text-align: left; display: block; padding: 0.5px 5px; }
+.label { text-align: left; display: block; padding: 0px 5px; }
 .hidden { display: none !important; }
 
 /* .menu-item .sub-sub-content::before { box-shadow: 0 0 5px 0 var(--shadow-color); } */
-.menu-item .label {padding: 0.5px 5px; }
+.menu-item .label { padding: 0px 5px; }
 
 i { margin-right: 7px; color: var(--greyer); }

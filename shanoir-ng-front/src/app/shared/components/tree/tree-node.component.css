@@ -4,7 +4,7 @@
 .label { padding: 0 3px; border: 1px solid transparent; }
 .node { height: 20px; line-height: 20px; display: inline-block; padding-left: 3px; border-radius: 2px; }
 .node > span { display: inline-block; }
-.arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: top; }
+.arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: 1; }
     .arrow i { vertical-align: 0; font-size: 12px; height: 18px; }
 .picto { height: 14px; width: 15px; text-align: center; color: var(--color-b);}
 checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px; }

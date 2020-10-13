@@ -14,18 +14,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
+        [class.selected]="this.menuOpened"
         [label]="node.label" 
         awesome="fas fa-procedures" 
         [(opened)]="node.open"
-        (labelClick)="null"
+        (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="hasChildren()">
+
+    <dropdown-menu [(openInput)]="menuOpened">
+        <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
+    </dropdown-menu>   
 
     <ng-container *ngIf="node.open && node.datasets && node.datasets != 'UNLOADED'"> 
 
             <dataset-node 
                 node
                 *ngFor="let dsNode of node.datasets" 
-                [input]="dsNode">
+                [input]="dsNode"
+                (selectedChange)="selectedChange.emit()">
             </dataset-node>
 
     </ng-container>

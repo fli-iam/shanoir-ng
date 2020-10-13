@@ -14,32 +14,30 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { AcquisitionEquipmentNode, UNLOADED } from '../../tree/tree.model';
+import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 
 
 @Component({
-    selector: 'dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    selector: 'equipment-node',
+    templateUrl: 'equipment-node.component.html'
 })
 
-export class DatasetNodeComponent implements OnChanges {
+export class EquipmentNodeComponent implements OnChanges {
 
-    @Input() input: DatasetNode | Dataset;
+    @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
+    node: AcquisitionEquipmentNode;
     loading: boolean = false;
     menuOpened: boolean = false;
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService) {
+        private router: Router) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof DatasetNode) {
+            if (this.input instanceof AcquisitionEquipmentNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
@@ -47,22 +45,7 @@ export class DatasetNodeComponent implements OnChanges {
         }
     }
 
-    toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+    showDetails() {
+        this.router.navigate(['/acquisition-equipment/details/' + this.node.id]);
     }
-
-    download(format: string) {
-        this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
-    }
-
-    showDatasetDetails() {
-        this.router.navigate(['/dataset/details/' + this.node.id])
-    }
-
-    hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
-    } 
 }

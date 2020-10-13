@@ -14,32 +14,30 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { StudyCardNode } from '../../tree/tree.model';
+import { StudyCard } from '../shared/study-card.model';
 
 
 @Component({
-    selector: 'dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    selector: 'studycard-node',
+    templateUrl: 'study-card-node.component.html'
 })
 
-export class DatasetNodeComponent implements OnChanges {
+export class StudyCardNodeComponent implements OnChanges {
 
-    @Input() input: DatasetNode | Dataset;
+    @Input() input: StudyCardNode | StudyCard;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
+    node: StudyCardNode;
     loading: boolean = false;
     menuOpened: boolean = false;
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService) {
+        private router: Router) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof DatasetNode) {
+            if (this.input instanceof StudyCardNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
@@ -47,22 +45,7 @@ export class DatasetNodeComponent implements OnChanges {
         }
     }
 
-    toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+    showDetails() {
+        this.router.navigate(['/study-cards/details/' + this.node.id]);
     }
-
-    download(format: string) {
-        this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
-    }
-
-    showDatasetDetails() {
-        this.router.navigate(['/dataset/details/' + this.node.id])
-    }
-
-    hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
-    } 
 }

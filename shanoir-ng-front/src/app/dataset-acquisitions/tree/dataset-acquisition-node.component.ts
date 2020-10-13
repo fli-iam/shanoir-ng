@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { DatasetAcquisitionNode, UNLOADED } from '../../tree/tree.model';
@@ -28,13 +28,15 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 export class DatasetAcquisitionNodeComponent implements OnChanges {
 
     @Input() input: DatasetAcquisitionNode | DatasetAcquisition;
+    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetAcquisitionNode;
     loading: boolean = false;
+    menuOpened: boolean = false;
 
     constructor(
         private router: Router) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof DatasetAcquisitionNode) {
@@ -49,5 +51,9 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         if (!this.node.datasets) return false;
         else if (this.node.datasets == 'UNLOADED') return 'unknown';
         else return this.node.datasets.length > 0;
+    }
+
+    showDetails() {
+        this.router.navigate(['/dataset-acquisition/details/' + this.node.id]);
     }
 }

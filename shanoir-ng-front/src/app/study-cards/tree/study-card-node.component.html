@@ -16,25 +16,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened"
         [label]="node.label" 
-        awesome="fas fa-user-injured"
-        (firstOpen)="loadExaminations()"
+        awesome="fab fa-accusoft"
         [(opened)]="node.open"
-        [hasChildren]="hasChildren()"
         (labelClick)="menuOpened = !menuOpened"
-        [dataLoading]="loading"
-        title="subject">
+        [hasChildren]="false">
 
     <dropdown-menu [(openInput)]="menuOpened">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showSubjectDetails()"></menu-item>
-        <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
-    </dropdown-menu>    
-
-    <ng-container *ngIf="node.open && node.examinations && node.examinations != 'UNLOADED'">        
-        <examination-node
-                node
-                *ngFor="let examinationNode of node.examinations"
-                [input]="examinationNode"
-                (selectedChange)="selectedChange.emit()">
-        </examination-node>
-    </ng-container>
+        <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
+    </dropdown-menu>
 </node>

@@ -1,86 +1,76 @@
-// /**
-//  * Shanoir NG - Import, manage and share neuroimaging data
-//  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
-//  * Contact us on https://project.inria.fr/shanoir/
-//  * 
-//  * This program is free software: you can redistribute it and/or modify
-//  * it under the terms of the GNU General Public License as published by
-//  * the Free Software Foundation, either version 3 of the License, or
-//  * (at your option) any later version.
-//  * 
-//  * You should have received a copy of the GNU General Public License
-//  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
-//  */
-// import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-// import { Router } from '@angular/router';
-// import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
-// import { CenterNode, MemberNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
-// import { StudyUserRight } from '../shared/study-user-right.enum';
-// import { Study } from '../shared/study.model';
+import { AcquisitionEquipmentNode, CenterNode, UNLOADED } from '../../tree/tree.model';
+import { Center } from '../shared/center.model';
+import { CenterService } from '../shared/center.service';
 
-// @Component({
-//     selector: 'study-node',
-//     templateUrl: 'study-node.component.html'
-// })
 
-// export class StudyNodeComponent implements OnChanges {
+@Component({
+    selector: 'center-node',
+    templateUrl: 'center-node.component.html'
+})
 
-//     @Input() input: StudyNode | Study;
-//     node: StudyNode;
-//     loading: boolean = false;
+export class CenterNodeComponent implements OnChanges {
 
-//     constructor(
-//         private router: Router,
-//         private subjectStudyPipe: SubjectStudyPipe) {
-//     }
+    @Input() input: CenterNode | Center;
+    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    node: CenterNode;
+    loading: boolean = false;
+    menuOpened: boolean = false;
+
+    constructor(
+        private router: Router,
+        private centerService: CenterService,
+        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe) {
+    }
     
-//     ngOnChanges(changes: SimpleChanges): void {
-//         if (changes['input']) {
-//             if (this.input instanceof StudyNode) {
-//                 this.node = this.input;
-//             } else {
-//                 let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-//                     return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), UNLOADED);
-//                 });
-//                 let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
-//                     return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);
-//                 });
-//                 let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
-//                     let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight)));
-//                     return new MemberNode(studyUser.userId, studyUser.userName, rights);
-//                 });
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['input']) {
+            if (this.input instanceof CenterNode) {
+                this.node = this.input;
+            } else {
+                throw new Error('not implemented yet');
+            }
+        }
+    }
 
-//                 this.node = new StudyNode(
-//                     this.input.id,
-//                     this.input.name,
-//                     subjects,
-//                     centers,
-//                     UNLOADED,
-//                     members);  // members
-//             }
-//         }
-//     }
-   
-//     open() {
-//         if (this.node.open) return;
-//         if (this.node.subjects == UNLOADED) {
-//             throw new Error('not implemented yet');
-//         }
-//         if (this.node.centers == UNLOADED) {
-//             throw new Error('not implemented yet');
-//         }
-//         if (this.node.studyCards == UNLOADED) {
-//             console.log('not implemented yet');
-//         }
-//         if (this.node.members == UNLOADED) {
-//             throw new Error('not implemented yet');
-//         }
+    hasChildren(): boolean | 'unknown' {
+        if (!this.node.acquisitionEquipments) return false;
+        else if (this.node.acquisitionEquipments == 'UNLOADED') return 'unknown';
+        else return this.node.acquisitionEquipments.length > 0;
+    }
 
-//         this.node.open = true;
-//     }
+    showDetails() {
+        this.router.navigate(['/center/details/' + this.node.id]);
+    }
 
-//     close() {
-//         this.node.open = false;
-//     }
-// }
+    loadEquipments() {
+        this.loading = true;
+        this.centerService.get(this.node.id).then(
+            center =>  {
+                if (center) {
+                    this.node.acquisitionEquipments = center.acquisitionEquipments.map(
+                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED'));
+                }
+                this.loading = false;
+                this.node.open = true;
+            }).catch(() => {
+                this.loading = false;
+            });
+    }
+}

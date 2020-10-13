@@ -212,6 +212,10 @@ import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dat
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
+import { CenterNodeComponent } from './centers/tree/center-node.component';
+import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
+import { MemberNodeComponent } from './users/tree/member-node.component';
+import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.component';
 
 
 @NgModule({
@@ -359,7 +363,11 @@ import { StudyNodeComponent } from './studies/tree/study-node.component';
         DatasetAcquisitionNodeComponent,
         DatasetNodeComponent,
         ProcessingNodeComponent,
-        StudyNodeComponent
+        StudyNodeComponent,
+        CenterNodeComponent,
+        EquipmentNodeComponent,
+        MemberNodeComponent,
+        StudyCardNodeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

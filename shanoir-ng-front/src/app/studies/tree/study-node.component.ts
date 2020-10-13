@@ -11,11 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
-import { CenterNode, MemberNode, RightNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
+import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
+import { CenterNode, MemberNode, RightNode, StudyCardNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 
@@ -27,12 +28,17 @@ import { Study } from '../shared/study.model';
 export class StudyNodeComponent implements OnChanges {
 
     @Input() input: StudyNode | Study;
+    @Output() nodeInit: EventEmitter<StudyNode> = new EventEmitter();
+    @Output() selectedChange: EventEmitter<StudyNode> = new EventEmitter();
     node: StudyNode;
     loading: boolean = false;
+    menuOpened: boolean = false;
+    studyCardsLoading = false;
 
     constructor(
         private router: Router,
-        private subjectStudyPipe: SubjectStudyPipe) {
+        private subjectStudyPipe: SubjectStudyPipe,
+        private studyCardService: StudyCardService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -52,19 +58,37 @@ export class StudyNodeComponent implements OnChanges {
                 });
 
                 this.node = new StudyNode(
-                    this.input.id,
-                    this.input.name,
-                    subjects,
-                    centers,
-                    UNLOADED,
-                    members);  // members
+                        this.input.id,
+                        this.input.name,
+                        subjects,
+                        centers,
+                        UNLOADED,
+                        members);  // members    
             }
+            this.nodeInit.emit(this.node);
         }
     }
 
-    hasSubjects(): boolean | 'unknown' {
-        if (!this.node.subjects) return false;
-        else if (this.node.subjects == 'UNLOADED') return 'unknown';
-        else return this.node.subjects.length > 0;
+    showStudyDetails() {
+        this.router.navigate(['/study/details/' + this.node.id]);
+    }
+
+    private hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
+        if (!dependencyArr) return false;
+        else if (dependencyArr == UNLOADED) return 'unknown';
+        else return dependencyArr.length > 0;
+    }
+
+    loadStudyCards() {
+        if (this.node.studyCards == UNLOADED) {
+            this.studyCardsLoading = true;
+            this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
+                if (studyCards) {
+                   this.node.studyCards = studyCards.map(studyCard => new StudyCardNode(studyCard.id, studyCard.name));
+                } else this.node.studyCards = [];
+                this.studyCardsLoading = false;
+                this.node.studycardsOpen = true;
+            }).catch(() => this.studyCardsLoading = false);
+        }
     }
 }

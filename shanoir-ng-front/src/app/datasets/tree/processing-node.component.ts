@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ProcessingNode, UNLOADED } from '../../tree/tree.model';
@@ -26,6 +26,7 @@ import { DatasetProcessing } from '../shared/dataset-processing.model';
 export class ProcessingNodeComponent implements OnChanges {
 
     @Input() input: ProcessingNode | DatasetProcessing;
+    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: ProcessingNode;
     loading: boolean = false;
 

@@ -14,23 +14,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="isAdmin && this.menuOpened"
         [label]="node.label" 
-        awesome="fas fa-hospital"
-        (firstOpen)="loadEquipments()"
+        awesome="far fa-user"
         [(opened)]="node.open"
-        (labelClick)="menuOpened = !menuOpened"
+        (labelClick)="menuOpened = isAdmin && !menuOpened"
         [hasChildren]="hasChildren()">
 
-    <dropdown-menu [(openInput)]="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != 'UNLOADED'"> 
-            <equipment-node
-                    node
-                    *ngFor="let acquisitionEquipment of node.acquisitionEquipments"
-                    [input]="acquisitionEquipment">
-            </equipment-node>
+    <ng-container *ngIf="node.open && node.rights && node.rights != 'UNLOADED'"> 
+            <node
+                    *ngFor="let right of node.rights"
+                    [label]="right.label" 
+                    awesome="fas fa-medal"
+                    [hasChildren]="false">
+            </node>
     </ng-container>
 </node>

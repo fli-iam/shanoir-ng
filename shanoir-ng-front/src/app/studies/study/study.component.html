@@ -226,20 +226,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
-				<study-tree [study]="study"></study-tree>
+				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
+						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)"></study-node>
 			</fieldset>
             <fieldset *ngIf="mode == 'view'">
                 <bids-tree [(list)]="bidsStructure" [studyId]="id"></bids-tree>
             </fieldset>
 			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+				<dataset-download [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+			</form-footer>
 		</form>
-        <dataset-download [studyId]="id" > </dataset-download>
 	</div>
 </div>

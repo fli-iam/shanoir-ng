@@ -13,33 +13,35 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { MemberNode } from '../../tree/tree.model';
+import { User } from '../shared/user.model';
 
 
 @Component({
-    selector: 'dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    selector: 'member-node',
+    templateUrl: 'member-node.component.html'
 })
 
-export class DatasetNodeComponent implements OnChanges {
+export class MemberNodeComponent implements OnChanges {
 
-    @Input() input: DatasetNode | Dataset;
+    @Input() input: MemberNode | User;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
+    node: MemberNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    isAdmin: boolean;
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService) {
+            private router: Router,
+            private keycloakService: KeycloakService) { 
+        this.isAdmin = keycloakService.isUserAdmin();
     }
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof DatasetNode) {
+            if (this.input instanceof MemberNode) {
                 this.node = this.input;
             } else {
                 throw new Error('not implemented yet');
@@ -47,22 +49,13 @@ export class DatasetNodeComponent implements OnChanges {
         }
     }
 
-    toggleMenu() {
-        this.menuOpened = !this.menuOpened;
-    }
-
-    download(format: string) {
-        this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
-    }
-
-    showDatasetDetails() {
-        this.router.navigate(['/dataset/details/' + this.node.id])
-    }
-
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.processings) return false;
-        else if (this.node.processings == 'UNLOADED') return 'unknown';
-        else return this.node.processings.length > 0;
-    } 
+        if (!this.node.rights) return false;
+        else if (this.node.rights == 'UNLOADED') return 'unknown';
+        else return this.node.rights.length > 0;
+    }
+
+    showDetails() {
+        this.router.navigate(['/user/details/' + this.node.id]);
+    }
 }

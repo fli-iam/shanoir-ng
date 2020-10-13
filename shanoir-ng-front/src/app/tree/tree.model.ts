@@ -39,6 +39,9 @@ export class StudyNode implements ShanoirNode {
 
     public open: boolean = false;
     public subjectsOpen: boolean = false;
+    public centersOpen: boolean = false;
+    public studycardsOpen: boolean = false;
+    public membersOpen: boolean = false;
 }
 
 
@@ -157,7 +160,7 @@ export class MemberNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public rights: RightNode[]
+        public rights: RightNode[] | UNLOADED
     ) {}
 
     public open: boolean = false;
