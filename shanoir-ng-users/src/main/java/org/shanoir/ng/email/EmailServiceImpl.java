@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shanoir.ng.events.ShanoirEvent;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -173,7 +174,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
-			final String content = build("notifyCreateAccountRequest", variables);
+			final String content = build("notifyNewUser", variables);
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
