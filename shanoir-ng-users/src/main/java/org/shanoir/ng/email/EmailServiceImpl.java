@@ -174,7 +174,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
-			final String content = build("notifyNewUser", variables);
+			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
