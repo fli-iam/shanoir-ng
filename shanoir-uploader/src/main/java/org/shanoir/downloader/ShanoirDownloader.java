@@ -1,23 +1,17 @@
 package org.shanoir.downloader;
 
-import org.json.*;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,18 +29,18 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-
+import org.shanoir.uploader.service.rest.CustomHostnameVerifier;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
 import org.springframework.http.HttpHeaders;
+
 /**
  * This class intends to be used as a binary executable to download datasets
  * from a remote Shanoir server to the local file system.
@@ -128,18 +122,17 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		OptionBuilder.withArgName("formatId");
 		OptionBuilder.hasArg();
 		OptionBuilder.isRequired(false);
-		OptionBuilder
-				.withDescription("The ref dataset expression format id. Default is Nifti. User ListReference service to see available RefDatasetExpressionFormats.");
+		OptionBuilder.withDescription(
+				"The ref dataset expression format id. Default is Nifti. User ListReference service to see available RefDatasetExpressionFormats.");
 		formatIdOption = OptionBuilder.create("formatId");
 	}
 	static {
 		OptionBuilder.withArgName("destDir");
 		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("Destination directory, "
-				+ SystemUtils.JAVA_IO_TMPDIR + " by default.");
+		OptionBuilder.withDescription("Destination directory, " + SystemUtils.JAVA_IO_TMPDIR + " by default.");
 		destDirOption = OptionBuilder.create("destDir");
 	}
-	
+
 	/**
 	 * Main method.
 	 *
@@ -149,17 +142,15 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	 * @throws ParserConfigurationException
 	 *             the parser configuration exception
 	 */
-	public static void main(final String[] args)
-			throws ParserConfigurationException {
+	public static void main(final String[] args) throws ParserConfigurationException {
 
-		if(java.util.Arrays.asList(args).contains("-sslDisableVerifier")){
-			// HttpsURLConnection.setDefaultHostnameVerifier(new NullHostnameVerifier());
+		if (java.util.Arrays.asList(args).contains("-sslDisableVerifier")) {
 			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-	            public boolean verify(String s, SSLSession sslSession) {
-	                return true;
-	            }
-	        });
-			
+				public boolean verify(String s, SSLSession sslSession) {
+					return true;
+				}
+			});
+
 		}
 
 		// Define the options needed in addition of those from the generic
@@ -188,32 +179,29 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 
 	}
-	
+
 	private void keycloakAuthentification(String host, String username, String password) {
 		try {
-
-			InputStream iS = Util.class.getResourceAsStream("/" + ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.KEYCLOAK_JSON);
+			InputStream iS = Util.class
+					.getResourceAsStream("/" + ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.KEYCLOAK_JSON);
 			if (iS != null) {
 				List<String> keycloakJsonString = IOUtils.readLines(iS, StandardCharsets.UTF_8);
 				iS.close();
-				
+
 				JSONObject keycloakJson = new JSONObject(String.join("", keycloakJsonString));
 
-				String keycloakAuthenticationURL = host + "/auth";
+				String keycloakAuthenticationURL = host + "/auth"; // keycloakJson.getString("auth-server-url");
 
-				keycloakAuthenticationURL += "/realms/" + keycloakJson.getString("realm") + "/protocol/openid-connect/token";
+				keycloakAuthenticationURL += "/realms/" + keycloakJson.getString("realm")
+						+ "/protocol/openid-connect/token";
 
-				SSLContext sslContext = null;
-				try {
-					sslContext = SSLContexts.custom().useTLS().build();
-				} catch (GeneralSecurityException e) {
-					log.error("Error during ssl context initialization", e);
-				}
+				// the below code solves the GitHub issue:
+				// https://github.com/fli-iam/shanoir-ng/issues/582,
+				// as Apache HttpClient does not per default use the HostnameVerifier from
+				// HttpsURLConnection (JDK/JRE)
+				final CloseableHttpClient httpclient = HttpClientBuilder.create()
+						.setHostnameVerifier(new CustomHostnameVerifier()).build();
 
-				final SSLConnectionSocketFactory f = new SSLConnectionSocketFactory(sslContext, new String[] { "TLSv1",
-						"TLSv1.1", "TLSv1.2" }, null, SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-
-				final CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(f).build();
 				final HttpPost httpost = new HttpPost(keycloakAuthenticationURL);
 				StringEntity se = null;
 				try {
@@ -222,25 +210,22 @@ public final class ShanoirDownloader extends ShanoirCLI {
 					str.append("&grant_type=password");
 					str.append("&username=").append(username);
 					str.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
-					// str.append("&scope=openid info");
 					str.append("&scope=openid info offline_access");
 					se = new StringEntity(str.toString());
 				} catch (UnsupportedEncodingException e) {
 					log.error("Keycloak authentication. Unsupported encoding exception on entity creation", e);
 				}
-
+				
 				httpost.setEntity(se);
 				httpost.setHeader("Content-type", "application/x-www-form-urlencoded");
 
 				CloseableHttpResponse response = null;
 				try {
 					response = httpclient.execute(httpost);
-
 					String responseEntityString = EntityUtils.toString(response.getEntity());
-					
 					final int statusCode = response.getStatusLine().getStatusCode();
 					if (HttpStatus.SC_OK == statusCode) {
-						JSONObject responseEntityJson = new JSONObject(responseEntityString);					
+						JSONObject responseEntityJson = new JSONObject(responseEntityString);
 						ShUpOnloadConfig.tokenString = responseEntityJson.getString("access_token");
 					}
 				} catch (ClientProtocolException e) {
@@ -279,13 +264,15 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	public void initialize() {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
-		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES, ShUpConfig.profileProperties);
+		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES,
+				ShUpConfig.profileProperties);
 		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());
 		ShUpOnloadConfig.setShanoirNg(true);
 	}
-	
+
 	/**
-	 * Reads properties from .su folder into memory, or copies property file if not existing.
+	 * Reads properties from .su folder into memory, or copies property file if not
+	 * existing.
 	 */
 	private void initProperties(final String fileName, final Properties properties) {
 		try {
@@ -303,17 +290,18 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
 		String fileName = header.getValue();
 		fileName = fileName.replace("attachment;filename=", "");
-		
+
 		final File downloadedFile = new File(destDir + "/" + fileName);
 
 		FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
 	}
 
-	public static String downloadDataset(File destDir, Long datasetId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDataset(File destDir, Long datasetId, String format,
+			ShanoirUploaderServiceClientNG shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetId + "...");
 		HttpResponse response = shng.downloadDatasetById(datasetId, format);
 		String message = "";
-		if(response == null) {
+		if (response == null) {
 			message = "Dataset with id " + datasetId + " not found.";
 			System.out.println(message);
 			return message;
@@ -323,18 +311,19 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		return message;
 	}
 
-	public static String downloadDatasets(File destDir, List<Long> datasetIds, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasets(File destDir, List<Long> datasetIds, String format,
+			ShanoirUploaderServiceClientNG shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetIds + "...");
 		HttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
 		String message = "";
-		if(response == null) {
-			if(datasetIds.size() > 0) {
+		if (response == null) {
+			if (datasetIds.size() > 0) {
 				String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(", "));
 				message = "Datasets with ids [" + datasetIdsString + "] not found.";
 			} else {
 				message = "Could not get datasets: no dataset ids provided.";
 			}
-			
+
 			System.out.println(message);
 			return message;
 		}
@@ -343,10 +332,11 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		return message;
 	}
 
-	public static String downloadDatasetByStudy(File destDir, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetByStudy(File destDir, Long studyId, String format,
+			ShanoirUploaderServiceClientNG shng) throws Exception {
 		HttpResponse response = shng.downloadDatasetsByStudyId(studyId, format);
 		String message = "";
-		if(response == null) {
+		if (response == null) {
 			message = "Datasets of study " + studyId + " not found.";
 			System.out.println(message);
 			return message;
@@ -356,10 +346,11 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		return message;
 	}
 
-	public static String downloadDatasetBySubject(File destDir, Long subjectId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetBySubject(File destDir, Long subjectId, String format,
+			ShanoirUploaderServiceClientNG shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectId(subjectId);
 		String message = "";
-		if(datasetIds == null) {
+		if (datasetIds == null) {
 			message = "No dataset found.";
 			System.out.println(message);
 			return message;
@@ -368,10 +359,11 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		return message;
 	}
 
-	public static String downloadDatasetBySubjectIdStudyId(File destDir, Long subjectId, Long studyId, String format, ShanoirUploaderServiceClientNG shng) throws Exception {
+	public static String downloadDatasetBySubjectIdStudyId(File destDir, Long subjectId, Long studyId, String format,
+			ShanoirUploaderServiceClientNG shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectIdStudyId(subjectId, studyId);
 		String message = "";
-		if(datasetIds == null) {
+		if (datasetIds == null) {
 			message = "No dataset found.";
 			System.out.println(message);
 			return message;
@@ -381,13 +373,13 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	/**
-	 * This method download Dataset corresponding to the properties set by the
-	 * user.
+	 * This method download Dataset corresponding to the properties set by the user.
 	 */
 	private void download() {
 		String[] args = cl.getArgs();
-		for(String arg : args) {
-			System.out.println("WARNING: invalid " + arg + " argument. Try -" + arg + " (with the '-' character) instead.");
+		for (String arg : args) {
+			System.out.println(
+					"WARNING: invalid " + arg + " argument. Try -" + arg + " (with the '-' character) instead.");
 		}
 
 		File destDir = new File(SystemUtils.JAVA_IO_TMPDIR);
@@ -399,9 +391,9 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 
 		keycloakAuthentification(getHost(), cl.getOptionValue("user"), cl.getOptionValue("password"));
-		
+
 		shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
-		
+
 		try {
 			String format = "nii";
 
@@ -412,28 +404,28 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			if (cl.hasOption("datasetId")) {
 				Long datasetId = Long.parseLong(cl.getOptionValue("datasetId"));
 				downloadDataset(destDir, datasetId, format, shanoirUploaderServiceClientNG);
-			
+
 			} else {
 
 				if (cl.hasOption("studyId") && !cl.hasOption("subjectId")) {
 					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
 					downloadDatasetByStudy(destDir, studyId, format, shanoirUploaderServiceClientNG);
 				}
-	
+
 				if (cl.hasOption("subjectId") && !cl.hasOption("studyId")) {
 					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
 					downloadDatasetBySubject(destDir, subjectId, format, shanoirUploaderServiceClientNG);
 				}
-	
+
 				if (cl.hasOption("subjectId") && cl.hasOption("studyId")) {
 					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
 					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
-					downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format, shanoirUploaderServiceClientNG);
+					downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format,
+							shanoirUploaderServiceClientNG);
 				}
-				
+
 			}
 
-	       
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 			exit("Download failed: could not parse your dataset, subject or study id, make sure it only contains numbers.");
@@ -449,8 +441,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	 * @see org.shanoir.toolkit.ShanoirTkCLI#postParse()
 	 */
 	@Override
-	protected void postParse() throws MissingArgumentException,
-			DatatypeConfigurationException {
+	protected void postParse() throws MissingArgumentException, DatatypeConfigurationException {
 		if (cl.hasOption("studyId") && cl.hasOption("subjectId") && cl.hasOption("datasetId")) {
 			exit("Either -datasetId -subjectId or -studyId is required");
 		}
