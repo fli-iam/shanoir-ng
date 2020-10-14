@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, forwardRef, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FacetResultPage } from "../../solr/solr.document.model";
 
@@ -30,6 +30,7 @@ import { FacetResultPage } from "../../solr/solr.document.model";
 
 export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     onChange = (_: any) => {};
+    searchBarContent: string;
     onTouched = () => {};
     @Input() items: FacetResultPage;
     selectedItems: any[] = [];
@@ -37,12 +38,35 @@ export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
     currentPage: number = 0;
     itemsPersPage: number = 10;
     totalPages: number =  0;
-    
+   
+   constructor(
+      private cdr: ChangeDetectorRef,
+    ) {
+    }
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.items && this.items !== undefined) {
             this.totalPages = Math.ceil(this.items.totalElements / this.itemsPersPage);
             // this.selectUnselectAll(false); // checked all by default
         }
+    }
+
+    search() {
+        if (!this.searchBarContent) {
+            this.searchBarContent = "";
+        }
+        // Set searched values on top, then order by value count  
+        this.items.content = this.items.content.sort((a, b) => {
+            if (a.value.indexOf(this.searchBarContent) == 0 && b.value.indexOf(this.searchBarContent) != 0) {
+                return -1
+            } else if (a.value.indexOf(this.searchBarContent) != 0 && b.value.indexOf(this.searchBarContent) == 0) {
+                return 1;
+            } else {
+                // If not searched or both searched, compare using count
+                return (b.valueCount - a.valueCount);
+            }
+        });
+        this.cdr.detectChanges();
     }
 
     selectUnselectAll (isChecked: boolean) {
