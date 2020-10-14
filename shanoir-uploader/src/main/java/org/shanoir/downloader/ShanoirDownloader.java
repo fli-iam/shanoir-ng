@@ -72,7 +72,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	private static Option destDirOption;
 
 	/** The Constant EXAMPLE. */
-	private static final String EXAMPLE = "downloadDataset -destDir /tmp/dataset123 -port 8080 -host 127.0.0.1 -datasetId 123\n"
+	private static final String EXAMPLE = "downloadDataset -destDir /tmp/dataset123 -host shanoir-qualif.irisa.fr -datasetId 123\n"
 			+ "=> download the dataset 123 to the destination directory /tmp/dataset123.";
 	/**
 	 * -refDatasetExpressionFormatId to set the id of the ref dataset expression
@@ -83,7 +83,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	/** -h used to request help on command line options. */
 	private static Option helpOption;
 	/** The Constant USAGE. */
-	private static final String USAGE = "downloadDataset [Options] -datasetId <ID> -host <HOST> -port <PORT>";
+	private static final String USAGE = "downloadDataset [Options] -datasetId <ID> -host <HOST>";
 
 	private static final String NG_PROFILE = "dev-NG";
 
@@ -177,9 +177,8 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 		try {
 			shanoirDownloader.parse(args);
-
+			shanoirDownloader.initialize();
 			shanoirDownloader.download();
-
 		} catch (MissingArgumentException e) {
 			exit(e.getMessage());
 		} catch (java.text.ParseException e) {
@@ -189,8 +188,8 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 
 	}
-
-	private void keycloakAuthentification(String username, String password) {
+	
+	private void keycloakAuthentification(String host, String username, String password) {
 		try {
 
 			InputStream iS = Util.class.getResourceAsStream("/" + ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.KEYCLOAK_JSON);
@@ -200,7 +199,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 				
 				JSONObject keycloakJson = new JSONObject(String.join("", keycloakJsonString));
 
-				String keycloakAuthenticationURL = keycloakJson.getString("auth-server-url");
+				String keycloakAuthenticationURL = host + "/auth";
 
 				keycloakAuthenticationURL += "/realms/" + keycloakJson.getString("realm") + "/protocol/openid-connect/token";
 
@@ -276,27 +275,13 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	 */
 	public ShanoirDownloader(final Options opts) {
 		super(opts, DESCRIPTION, EXAMPLE, USAGE);
-		initShanoirUploaderFolder();
+	}
 
+	public void initialize() {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
 		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES, ShUpConfig.profileProperties);
-
-		// put settings into ShUpOnloadConfig for sh-ng
-		ShUpOnloadConfig.setShanoirNg(Boolean.parseBoolean(ShUpConfig.profileProperties.getProperty("is.ng.up")));
-	}
-	
-	private void initShanoirUploaderFolder() {
-		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
-		final String shanoirUploaderFolderPath = userHomeFolderPath
-				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;
-		final File shanoirUploaderFolder = new File(shanoirUploaderFolderPath);
-		boolean shanoirUploaderFolderExists = shanoirUploaderFolder.exists();
-		if (shanoirUploaderFolderExists) {
-			// do nothing
-		} else {
-			shanoirUploaderFolder.mkdirs();
-		}
-		ShUpConfig.shanoirUploaderFolder = shanoirUploaderFolder;
+		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());
+		ShUpOnloadConfig.setShanoirNg(true);
 	}
 	
 	/**
@@ -413,11 +398,9 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			}
 		}
 
-		keycloakAuthentification(cl.getOptionValue("user"), cl.getOptionValue("password"));
+		keycloakAuthentification(getHost(), cl.getOptionValue("user"), cl.getOptionValue("password"));
 		
 		shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
-		
-		ShUpConfig.profileProperties.setProperty("shanoir.server.url", "http://" + getHost() + ":" + getPort());
 		
 		try {
 			String format = "nii";
