@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -265,13 +264,13 @@ public class DatasetApiController implements DatasetApi {
 
 		/* Create folder and file */
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		long n = RANDOM.nextLong();
-		if (n == Long.MIN_VALUE) {
-			n = 0; // corner case
-		} else {
-			n = Math.abs(n);
+		String datasetName = "";
+		datasetName += dataset.getId() + "-" + dataset.getName();
+		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+
+		String tmpFilePath = tmpDir + File.separator + datasetName;
 		File workFolder = new File(tmpFilePath + DOWNLOAD);
 		workFolder.mkdirs();
 		File zipFile = new File(tmpFilePath + ZIP);
