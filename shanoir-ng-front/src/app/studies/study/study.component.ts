@@ -346,7 +346,15 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onUserAdd(selectedUser: User) {
-        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+        if (!selectedUser) {
+            return;
+        }
+        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
+            return;   
+        }
+        if (this.isMe(selectedUser)) {
+            this.freshlyAddedMe = true;
+        }
         this.addUser(selectedUser);
     }
 
