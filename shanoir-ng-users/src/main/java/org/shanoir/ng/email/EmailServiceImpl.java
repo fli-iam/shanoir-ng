@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -153,6 +152,7 @@ public class EmailServiceImpl implements EmailService {
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyCreateUser", variables);
@@ -174,6 +174,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			final String content = build("notifyNewUser", variables);
 			messageHelper.setText(content, true);
 		};
