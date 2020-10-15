@@ -25,9 +25,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
         <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
     </div>
-    <div class="welcome">{{username}}</div> 
+    <div class="welcome">{{username}}</div>
     <div class="logout">
-        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout<i class="fas fa-sign-out-alt"></i></a>
+        <br/>
+        <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
+        <br/><br/>
+    </div>
+    <div class="logout">
+        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 

@@ -40,6 +40,7 @@ export class SideMenuComponent {
     public uploadOpened: boolean = false;
     public adminOpened: boolean = false;
     public tasksOpened: boolean = false;
+    private userId: number = 0;
     public VERSION = VERSION;
 
     constructor(
@@ -49,6 +50,7 @@ export class SideMenuComponent {
             public notificationsService: NotificationsService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
+            this.userId = KeycloakService.auth.userId;
         }
         this.notificationsService.connect();
     }
