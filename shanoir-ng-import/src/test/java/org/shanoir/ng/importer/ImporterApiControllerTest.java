@@ -16,27 +16,36 @@ package org.shanoir.ng.importer;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.zip.ZipOutputStream;
-import org.shanoir.ng.importer.dicom.DicomDirToModelService;
-import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -107,6 +116,21 @@ public class ImporterApiControllerTest {
 	
 	@MockBean
 	private DicomDirGeneratorService dicomDirGeneratorService;
+
+	@Autowired
+	ImporterApiController controller;
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+
+	    System.setProperty("shanoir.import.directory", tempFolderPath);
+	}
 
 	@Before
 	public void setup() throws ShanoirException, IOException {
@@ -213,6 +237,69 @@ public class ImporterApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(GET_DICOM)
 				.param("path", ""))
 		.andExpect(status().is(200));
+	}
+
+	@Test
+	public void testCleanTempFiles() {
+		// GIVEN a temporary folder with many undeleted folders
+		List<File> filesDeleted = new ArrayList<>();
+	    try {
+		    File userDir = new File(tempFolderPath + "/3465468");
+		    userDir.mkdirs();
+		    filesDeleted.add(userDir);
+		    userDir.setLastModified(new DateTime().minusDays(3).getMillis());
+
+		    File downloadFile = new File(tempFolderPath + "/test.download");
+		    downloadFile.createNewFile();
+		    filesDeleted.add(downloadFile);
+		    downloadFile.setLastModified(new DateTime().minusDays(3).getMillis());
+		
+		    File zipFile = new File(tempFolderPath + "/test.zip");
+		    zipFile.createNewFile();
+		    filesDeleted.add(zipFile);
+		    zipFile.setLastModified(new DateTime().minusDays(3).getMillis());
+		    
+		    File recentZipFile = new File(tempFolderPath + "/test-recent.zip");
+		    recentZipFile.createNewFile();
+		    filesDeleted.add(recentZipFile);
+
+		    File brukerFile = new File(tempFolderPath + "/bruker");
+		    brukerFile.mkdir();
+		    filesDeleted.add(brukerFile);
+		    brukerFile.setLastModified(new DateTime().minusDays(3).getMillis());
+	
+		    File tomcatFile = new File(tempFolderPath + "/tomcat-docbase-2018512");
+			tomcatFile.createNewFile();
+			filesDeleted.add(tomcatFile);
+			tomcatFile.setLastModified(new DateTime().minusDays(3).getMillis());
+	
+		    File randomFile = new File(tempFolderPath + "/random123");
+		    randomFile.createNewFile();
+		    filesDeleted.add(randomFile);
+		    randomFile.setLastModified(new DateTime().minusDays(3).getMillis());
+
+		    // WHEN we clean the temp folder
+		    controller.cleanTempFiles();
+		    
+		    // THEN the folder is cleaned of certain folders (not all)
+		    assertTrue(randomFile.exists());
+		    assertTrue(recentZipFile.exists());
+		    assertTrue(tomcatFile.exists());
+
+		    assertFalse(userDir.exists());
+		    assertFalse(zipFile.exists());
+		    assertFalse(downloadFile.exists());
+		    assertFalse(brukerFile.exists());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		} finally {
+			// Delete all created files
+			for (File fileToDelete : filesDeleted) {
+				FileUtils.deleteQuietly(fileToDelete);
+			}
+		}
 	}
 
 }
