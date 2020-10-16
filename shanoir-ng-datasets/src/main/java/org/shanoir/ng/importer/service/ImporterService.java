@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -58,6 +57,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,7 +227,7 @@ public class ImporterService {
 			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
 			uploadZipFile.delete();
 			// delete workFolder
-			final boolean success = FileUtils.deleteQuietly(new File(workFolder));
+			final boolean success = Utils.deleteFolder(new File(workFolder));
 			if (!success) {
 				if (new File(workFolder).exists()) {
 					LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
