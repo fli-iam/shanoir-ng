@@ -24,15 +24,18 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-// import org.jboss.resteasy.util.Base64.InputStream;
+import org.joda.time.DateTime;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.exchange.model.ExExamination;
 import org.shanoir.ng.exchange.model.ExStudy;
@@ -73,13 +76,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.mysql.jdbc.StringUtils;
 
 import io.swagger.annotations.ApiParam;
 
@@ -719,5 +726,36 @@ public class ImporterApiController implements ImporterApi {
 				.contentType(MediaType.parseMediaType("application/dicom"))
 				.contentLength(uCon.getContentLength())
 				.body(resource);
+	}
+
+	@Transactional
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void cleanTempFiles() throws IOException {
+		LOG.info("Cleaning import folder...");
+		// Clean temporary files regularly (every night) => older than 48h
+		File importDirectory = new File(importDir);
+		// List only file:
+		// - .zip
+		// - .download
+		// - in /bruker folder
+		// - Users folders (only numbers)
+		
+		// How to get dicom files
+		
+		for (File tempFile : importDirectory.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return
+					   name.endsWith(".zip")
+					|| name.endsWith(".download")
+					|| name.equals("bruker")
+					|| StringUtils.isStrictlyNumeric(name);
+			}
+		})) {
+			BasicFileAttributes attr = Files.readAttributes(tempFile.toPath(), BasicFileAttributes.class);
+			if (attr.lastModifiedTime().toMillis() < new DateTime().minusDays(2).getMillis()) {
+				FileUtils.deleteQuietly(tempFile);
+			}
+		}
 	}
 }
