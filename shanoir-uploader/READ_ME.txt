@@ -3,8 +3,8 @@ Hints on working with ShanoirUploader
 ##############################################
 
 ####### Version update #############
-For a new version, e.g. from v6.0.4 to v7.0.0:
-Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences with 7.0.0.
+For a new version, e.g. from v6.0.4 to v7.0.1:
+Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences with 7.0.1.
 This is important, that all scripts .sh or .bat find the correct version to start and create
 the correct folder.
 
