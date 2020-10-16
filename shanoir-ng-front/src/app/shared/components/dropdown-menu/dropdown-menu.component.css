@@ -22,4 +22,4 @@ li.active, li.opened { color: var(--very-light-grey); background-color: var(--co
     :host(.tree-mode) .sub-content { left: 0px; top: 11px; }
     :host(.tree-mode) .sub-sub-content:before { box-shadow: 0 0 5px 0 var(--shadow-color); }
 
-svg { font-size: 14px; }
+i { font-size: 14px; }
