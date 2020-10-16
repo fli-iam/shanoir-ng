@@ -54,6 +54,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -159,6 +160,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNull() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 
@@ -176,6 +178,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
@@ -213,6 +216,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
@@ -252,6 +256,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdNoIds() {
 		// GIVEN a list of datasets to export
 
@@ -271,6 +276,7 @@ public class DatasetApiControllerTest {
 
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdToMuchIds() {
 		// GIVEN a list of datasets to export
 		StringBuilder strb = new StringBuilder();
@@ -294,6 +300,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdTooMuchDatasets() throws Exception {
 		// GIVEN a study with more then 50 datasets to export
 
@@ -315,6 +322,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
