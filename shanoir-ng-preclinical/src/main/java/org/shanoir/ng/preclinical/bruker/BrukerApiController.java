@@ -28,7 +28,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -83,7 +82,6 @@ public class BrukerApiController implements BrukerApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded", null));
 		}
-		Path brukerDirFile = null;
 		try {
 			MultipartFile brukerFile = uploadfiles[0];
 			String fileName = brukerFile.getOriginalFilename();
@@ -92,7 +90,7 @@ public class BrukerApiController implements BrukerApi {
 				fileName = fileName.substring(0, id);
 			}
 			LOG.info("upload bruker file [{}]", fileName);
-			brukerDirFile = createBrukerTempFile(fileName);
+			Path brukerDirFile = createBrukerTempFile(fileName);
 			String brukerDirString = brukerDirFile.getFileName().toString();
 
 			LOG.info("bruker temp file has been created {}", brukerDirFile.toFile().getAbsolutePath());
@@ -125,10 +123,6 @@ public class BrukerApiController implements BrukerApi {
 			LOG.error("Error while zipping dicom files: {}", e.getMessage(), e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
-		} finally {
-			if (brukerDirFile != null) {
-				FileUtils.deleteQuietly(brukerDirFile.toFile());
-			}
 		}
 	}
 
