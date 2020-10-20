@@ -69,6 +69,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 			final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
 			// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
+			// TODO Remove
 			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
 			// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
 			final String dataTypeLabel = ANAT + "/";

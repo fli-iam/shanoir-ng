@@ -229,7 +229,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-tree [study]="study"></study-tree>
 			</fieldset>
             <fieldset *ngIf="mode == 'view'">
-                <bids-tree [studyId]="id"></bids-tree>
+                <bids-tree [study]="study"></bids-tree>
             </fieldset>
 			<form-footer
 				[state]="footerState"

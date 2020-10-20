@@ -40,6 +40,14 @@ public class BidsApiController implements BidsApi {
 	@Autowired
 	BIDSService bidsService;
 
+    @Override
+	public ResponseEntity<Void> updateBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    	this.bidsService.updateBidsFolder(studyId, studyName);
+		return ResponseEntity.ok().build();
+    }
+
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
     		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,

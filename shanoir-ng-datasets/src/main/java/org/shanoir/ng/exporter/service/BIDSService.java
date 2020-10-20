@@ -49,4 +49,13 @@ public interface BIDSService {
 	 */
 	public void deleteExam(Long examId);
 
+	/**
+	 * This method has been created to update (delete and recreate from scratch) a folder BIDS after a change
+	 * @param studyId the study ID to update
+	 * @param studyName the studyname
+	 * @return the Bids Folder
+	 * @throws IOException when the generation fails
+	 */
+	File updateBidsFolder(Long studyId, String studyName) throws IOException;
+
 }

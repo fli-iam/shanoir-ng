@@ -31,7 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="Bids" awesome="far fa-folder" [deploy]="false" [dataRequest]="true" (openClick)="getBidsStructure()" ([awesome])="(load=='loading') ? 'far fa-spin' : 'fas fa-folder'">
+<p><button (click)="updateStructure()">Update</button>  <tool-tip>Updating BIDS folder allows to calculate session and update data.</tool-tip></p>
+<node #bidsTree label="Bids" awesome="far fa-folder" [deploy]="false" [dataRequest]="true" (openClick)="getBidsStructure()" ([awesome])="(load=='loading') ? 'far fa-spin' : 'fas fa-folder'">
   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
 </node>
 

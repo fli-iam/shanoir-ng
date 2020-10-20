@@ -48,5 +48,17 @@ public interface BidsApi {
     ResponseEntity<ByteArrayResource> exportBIDSFile(
     		@ApiParam(value = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
     		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException;
-  
+
+    @ApiOperation(value = "", nickname = "updateBidsFolder", notes = "Updates and returns the BIDS structure corresponding to the given study", response = Resource.class, tags={})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/updateBids/studyId/{studyId}/studyName/{studyName}")
+    ResponseEntity<Void> updateBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+
 }

@@ -110,6 +110,18 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 
 	@Override
+	public File updateBidsFolder(final Long studyId, final String studyName) throws IOException {
+		// Get base bids folder
+		String baseFolder = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
+		
+		// Delete it
+		FileUtils.deleteQuietly(new File(baseFolder));
+		
+		// Recreate it from scratch
+		return this.exportAsBids(studyId, studyName);
+	}
+
+	@Override
 	public File addDataset(Examination exam, String subjectName, String studyName) throws IOException {
 		// 0. If base file does not exist, create it from scratch
 		File baseDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + exam.getStudyId() + "_" + studyName);
@@ -120,8 +132,17 @@ public class BIDSServiceImpl implements BIDSService {
 		// 1. Create Subject File if not existing
 		File subjDir = createSubjectFolder(subjectName, exam.getSubjectId().toString(), baseDir);
 
+		// Get subject examinations and filter on the one with adapted study only
+		final List<Examination> examinationList = examService.findBySubjectId(exam.getSubjectId());
+
+		// Iterate over examinations to export them as BIDS
+		boolean createSessionLevel = examinationList.size() > 1;
+		
+		// Here we should decide if we have to update all session levels to avoid inconsistency.
+		// Or set a warning message here ?
+
 		// 2. Create dataset files
-		exportAsBids(exam, subjDir, studyName, subjectName);
+		exportAsBids(exam, subjDir, studyName, subjectName, createSessionLevel);
 		return baseDir;
 	}
 
@@ -316,9 +337,11 @@ public class BIDSServiceImpl implements BIDSService {
 		final List<Examination> examinationList = examService.findBySubjectId(subject.getId());
 
 		// Iterate over examinations to export them as BIDS
+		boolean createSessionLevel = examinationList.size() > 1;
+		
 		for (Examination exam : examinationList) {
 			// OTHER: can we imagine a subject in multiple studies ? Do the filter here
-			exportAsBids(exam, subjDir, studyName, subject.getName());
+			exportAsBids(exam, subjDir, studyName, subject.getName(), createSessionLevel);
 		}
 	}
 
@@ -345,11 +368,15 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param subjDir examination BIDS directory where we are working.
 	 * @param studyName the study name
 	 * @param subjectName the subject name
+	 * @param createSessionLevel do we have to create the session level
 	 * @return data from the examination formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
-	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) throws IOException {
-		File examDir = createExaminationFolder(examination, subjDir);
+	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName, boolean createSessionLevel) throws IOException {
+		File examDir = subjDir;
+		if (createSessionLevel) {
+			examDir = createExaminationFolder(examination, subjDir);
+		}
 
 		// Iterate over acquisitions/datasets
 		for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {

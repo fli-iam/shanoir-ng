@@ -296,6 +296,8 @@ public class ImporterService {
 
 					// Copy the data somewhere else
 					final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+					
+					// TODO: remove this
 					final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
 					final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
