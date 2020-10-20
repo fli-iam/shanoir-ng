@@ -139,4 +139,8 @@ export class UserComponent extends EntityComponent<User> {
         return false;
     }
 
+    isUserAdmin(): boolean {
+        return this.keycloakService.isUserAdmin();
+    }
+
 }
