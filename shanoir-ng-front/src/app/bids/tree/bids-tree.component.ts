@@ -45,11 +45,11 @@ export class BidsTreeComponent {
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
-    @Input() list: BidsElement[];
     public json: JSON;
     public tsv: string;
     public title: string;
     @Input() studyId: number;
+    public list: BidsElement[] = [];
     protected load: string;
 
     getBidsStructure() {

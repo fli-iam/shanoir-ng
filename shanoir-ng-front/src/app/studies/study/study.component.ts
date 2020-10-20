@@ -64,8 +64,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    public bidsStructure: BidsElement[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
