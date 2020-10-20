@@ -41,7 +41,7 @@ export class BrowserPaging<T> {
         }
         let filtered: T[] = this.filter(this.items, pageable.filter); // FILTER
         let result: T[] = this.slice(filtered, pageable); // SLICE
-
+        
         let page: Page<T> = new Page();
         page.content = result;
         page.number = pageable.pageNumber;

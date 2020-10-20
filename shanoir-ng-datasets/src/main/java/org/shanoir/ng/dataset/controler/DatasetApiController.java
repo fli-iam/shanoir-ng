@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +37,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -61,6 +62,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,8 +136,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private SubjectRepository subjectRepo;
-
-	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
@@ -254,13 +254,15 @@ public class DatasetApiController implements DatasetApi {
 
 		/* Create folder and file */
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		long n = RANDOM.nextLong();
-		if (n == Long.MIN_VALUE) {
-			n = 0; // corner case
-		} else {
-			n = Math.abs(n);
+		File userDir = getUserImportDir(tmpDir);
+
+		String datasetName = "";
+		datasetName += dataset.getId() + "-" + dataset.getName();
+		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+
+		String tmpFilePath = userDir + File.separator + datasetName;
 		File workFolder = new File(tmpFilePath + DOWNLOAD);
 		workFolder.mkdirs();
 		File zipFile = new File(tmpFilePath + ZIP);
@@ -282,6 +284,8 @@ public class DatasetApiController implements DatasetApi {
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
 		} catch (IOException | MessagingException e) {
+			FileUtils.deleteQuietly(workFolder);
+
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", e.getLocalizedMessage()));
 		}
@@ -350,10 +354,11 @@ public class DatasetApiController implements DatasetApi {
 		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		String tmpFilePath = tmpDir + File.separator + "Datasets";
-
-		File tmpFile = new File(tmpFilePath);
+		File userDir = getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));
+		
+		// Add timestamp to get a difference
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
 		tmpFile.mkdirs();
 
 		// Get the data
@@ -380,11 +385,17 @@ public class DatasetApiController implements DatasetApi {
 			}
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error while copying files: ", e);
+			FileUtils.deleteQuietly(tmpFile);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files. Please contact an administrator.", e));
+		} catch(OutOfMemoryError error) {
+			LOG.error("Out of memory error while copying files: ", error);
+			FileUtils.deleteQuietly(tmpFile);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "The size of data you tried to download is too Important. Please split your download.", error));
 		}
 		// Zip it
-		File zipFile = new File(tmpFilePath + ZIP);
+		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
 		zipFile.createNewFile();
 
 		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
@@ -507,6 +518,16 @@ public class DatasetApiController implements DatasetApi {
 			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
 			Files.copy(srcFile.toPath(), destFile.toPath());
 		}
+	}
+
+	public static File getUserImportDir(String importDir) {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		return userImportDir;
 	}
 
 	/**
