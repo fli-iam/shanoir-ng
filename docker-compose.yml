@@ -342,6 +342,7 @@ volumes:
   dcm4chee-arc-storage-data:
   solr-data:
   certificate-share-data:
+  tmp:
   logs:
 
 networks:

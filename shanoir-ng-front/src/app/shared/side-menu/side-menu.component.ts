@@ -40,7 +40,7 @@ export class SideMenuComponent {
     public uploadOpened: boolean = false;
     public adminOpened: boolean = false;
     public tasksOpened: boolean = false;
-    private userId: number = 0;
+    public userId: number = 0;
     public VERSION = VERSION;
 
     constructor(
