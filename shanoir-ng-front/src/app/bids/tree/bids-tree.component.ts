@@ -50,7 +50,7 @@ export class BidsTreeComponent {
     public title: string;
     @Input() studyId: number;
     public list: BidsElement[] = [];
-    protected load: string;
+    public load: string;
 
     getBidsStructure() {
        if (!this.load) {
