@@ -108,6 +108,7 @@ export class SelectSeriesComponent {
             else if (nbChecked == 0) this.studiesCheckboxes[study.studyInstanceUID] = false;
             else this.studiesCheckboxes[study.studyInstanceUID] = 'intederminate';
         }
+        this.onPatientUpdate();
     }
 
     onPatientUpdate(): void {

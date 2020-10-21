@@ -53,8 +53,10 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() editable: boolean = false;
     @Input() tooltip: string;
     @Input() hasChildren: boolean | 'unknown' = 'unknown';
+    @Input() clickable: boolean;
     @Input() buttonPicto: string;
     @Input() dataLoading: boolean = false;
+    @Input() title: string;
     protected isOpen: boolean = false;
     @Input() opened: boolean = false;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
@@ -93,7 +95,8 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     }
 
     public isClickable(): boolean {
-        if (this.labelClick.observers.length > 0) {
+        if (this.clickable != undefined) return this.clickable;
+        else if (this.labelClick.observers.length > 0) {
             return true;
         }
         return false;
@@ -103,6 +106,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
         this.dataLoading = false;
         this.isOpen = true;
         this.openedChange.emit(this.isOpen);
+        if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
     }
 
     public close() {
@@ -112,8 +116,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
 
     public toggle() {
         if (this.isOpen) this.close();
-        else {
-            if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
+        else {     
             this.open();
         }
     }

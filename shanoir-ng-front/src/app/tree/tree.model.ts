@@ -62,23 +62,12 @@ export class ExaminationNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED
+        public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
+        public extraDataFilePathList: string[] | UNLOADED
     ) {}
 
-    // static fromSubjectExamination(subjectExamination: SubjectExamination): ExaminationNode {
-    //     let examNode: ExaminationNode = new ExaminationNode(
-    //         subjectExamination.id,
-    //         new ExaminationPipe().transform(subjectExamination),
-    //         UNLOADED
-    //     );
-    //     if (subjectExamination) {
-    //         subjectExamination.datasetAcquisitions.forEach(acq => {
-    //             examNode.push(DatasetAcquisitionNode.)
-    //         })
-    //     }
-    // }
-
     public open: boolean = false;
+    public extraDataOpen: boolean = false;
 }
 
 
@@ -174,5 +163,29 @@ export class RightNode implements ShanoirNode {
         public label: string
     ) {}
 
+    public open: boolean = false;
+}
+
+
+export class ReverseSubjectNode implements ShanoirNode {
+
+    constructor(
+        public id: number,
+        public label: string,
+        public studies: ReverseStudyNode[] | UNLOADED
+    ) {}
+        
+    public open: boolean = false;
+}
+
+
+export class ReverseStudyNode implements ShanoirNode {
+
+    constructor(
+        public id: number,
+        public label: string,
+        public examinations: ExaminationNode[] | UNLOADED
+    ) {}
+        
     public open: boolean = false;
 }

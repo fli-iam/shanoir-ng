@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="hasChildren()">
 
-    <dropdown-menu [(openInput)]="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>
 

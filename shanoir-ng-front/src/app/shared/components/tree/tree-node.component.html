@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span *ngIf="hasChildren==true && !isOpen"><i class="fas fa-angle-right"></i></span>
     <span *ngIf="hasChildren=='unknown' && !isOpen && !dataLoading"><i class="fas fa-angle-right"></i></span>
 </span>
-<div class="node" [class.clickable-node]="isClickable()">
+<div class="node" [class.clickable-node]="isClickable()" title="{{title}}">
     <span *ngIf="pictoUrl" (click)="labelClick.emit()" class="picto" [class.clickable]="isClickable()">
         <img class="picto" src="{{pictoUrl}}" />
     </span>

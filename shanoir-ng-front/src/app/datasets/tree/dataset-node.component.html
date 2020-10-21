@@ -15,17 +15,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="this.menuOpened"
-        [label]="node.label" 
+        [label]="node.label + ' / ' + menuOpened" 
         awesome="fas fa-camera" 
         [(opened)]="node.open"
         (labelClick)="toggleMenu()"
         [dataLoading]="loading"
-        [hasBox]="true"
+        [hasBox]="hasBox"
         [(ngModel)]="node.selected"
         (chkbxChange)="selectedChange.emit()"
         [hasChildren]="hasChildren()">
 
-    <dropdown-menu [(openInput)]="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDatasetDetails()"></menu-item>
         <menu-item *ngIf="node.type != 'Eeg'" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
         <menu-item *ngIf="node.type != 'Eeg'" label="Download as Niftii" awesome="fas fa-download" (click)="download('nii')"></menu-item>
@@ -37,7 +37,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let processing of node.processings"
                 [input]="processing"
-                (selectedChange)="selectedChange.emit()">
+                (selectedChange)="selectedChange.emit()"
+                [hasBox]="hasBox">
         </processing-node>
 
     </ng-container>

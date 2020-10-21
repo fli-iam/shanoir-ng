@@ -110,6 +110,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></mr-protocol>
 				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
 			</ng-container>
+
+			<fieldset *ngIf="mode=='view'">
+				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
+				<dataset-acquisition-node 
+						[input]="breadcrumbsService.currentStep.data.datasetAcquisitionNode ? breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition" 
+						(nodeInit)="onNodeInit($event)"></dataset-acquisition-node >
+			</fieldset>
 			
 			<form-footer
 				[state]="footerState"

@@ -13,8 +13,12 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { DatasetService } from '../../datasets/shared/dataset.service';
+import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
-import { DatasetAcquisitionNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 
 
@@ -32,9 +36,11 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     node: DatasetAcquisitionNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    @Input() hasBox: boolean = false;
 
     constructor(
-        private router: Router) {
+        private router: Router,
+        private datasetService: DatasetService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -42,7 +48,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
             if (this.input instanceof DatasetAcquisitionNode) {
                 this.node = this.input;
             } else {
-                throw new Error('not implemented yet');
+                let label: string = 'Dataset Acquisition n° ' + this.input.id;
+                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED);
             }
         }
     }
@@ -55,5 +62,30 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
 
     showDetails() {
         this.router.navigate(['/dataset-acquisition/details/' + this.node.id]);
+    }
+
+    loadDatasets() {
+        if (this.node.datasets == UNLOADED) {
+            this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
+                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds))
+            });
+        }
+    }
+
+    private mapDatasetNode(dataset: Dataset): DatasetNode {
+        return new DatasetNode(
+            dataset.id,
+            dataset.name,
+            dataset.type,
+            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : []
+        );
+    }
+    
+    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
+        return new ProcessingNode(
+            processing.id,
+            DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds)) : []
+        );
     }
 }

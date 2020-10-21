@@ -13,9 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <li #container
-        [class.opened]="init && opened"
+        [class.opened]="opened"
         [class.animate]="overflow">
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideDown]="opened" [hidden]="!init"> 
+    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened"> 
         <div class="sub-sub-content"><ng-content></ng-content></div>
     </ul>
 </li>

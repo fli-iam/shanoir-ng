@@ -33,12 +33,14 @@ export class StudyNodeComponent implements OnChanges {
     node: StudyNode;
     loading: boolean = false;
     menuOpened: boolean = false;
-    studyCardsLoading = false;
+    studyCardsLoading: boolean = false;
+    showDetails: boolean;
+    @Input() hasBox: boolean = false;
 
     constructor(
-        private router: Router,
-        private subjectStudyPipe: SubjectStudyPipe,
-        private studyCardService: StudyCardService) {
+            private router: Router,
+            private subjectStudyPipe: SubjectStudyPipe,
+            private studyCardService: StudyCardService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -66,6 +68,7 @@ export class StudyNodeComponent implements OnChanges {
                         members);  // members    
             }
             this.nodeInit.emit(this.node);
+            this.showDetails = this.router.url != '/study/details/' + this.node.id;
         }
     }
 
@@ -73,7 +76,7 @@ export class StudyNodeComponent implements OnChanges {
         this.router.navigate(['/study/details/' + this.node.id]);
     }
 
-    private hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
+    hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';
         else return dependencyArr.length > 0;

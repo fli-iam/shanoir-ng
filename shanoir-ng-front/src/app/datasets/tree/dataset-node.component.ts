@@ -31,6 +31,7 @@ export class DatasetNodeComponent implements OnChanges {
     node: DatasetNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    @Input() hasBox: boolean = false;
 
     constructor(
         private router: Router,

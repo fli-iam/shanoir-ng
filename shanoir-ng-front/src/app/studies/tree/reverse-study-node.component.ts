@@ -13,67 +13,60 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
+
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import {
-    DatasetAcquisitionNode,
-    DatasetNode,
-    ExaminationNode,
-    ProcessingNode,
-    SubjectNode,
-    UNLOADED,
-} from '../../tree/tree.model';
-import { Subject } from '../shared/subject.model';
-
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, UNLOADED } from '../../tree/tree.model';
+import { Study } from '../shared/study.model';
 
 @Component({
-    selector: 'subject-node',
-    templateUrl: 'subject-node.component.html'
+    selector: 'reverse-study-node',
+    templateUrl: 'reverse-study-node.component.html'
 })
 
-export class SubjectNodeComponent implements OnChanges {
+export class ReverseStudyNodeComponent implements OnChanges {
 
-    @Input() input: Subject | SubjectNode;
-    @Input() studyId: number;
-    @Output() nodeInit: EventEmitter<SubjectNode> = new EventEmitter();
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: SubjectNode;
+    @Input() input: ReverseStudyNode | Study;
+    @Input() subjectId: number;
+    @Output() nodeInit: EventEmitter<ReverseStudyNode> = new EventEmitter();
+    @Output() selectedChange: EventEmitter<ReverseStudyNode> = new EventEmitter();
+    node: ReverseStudyNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    studyCardsLoading: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
 
     constructor(
-            private examinationService: ExaminationService,
             private router: Router,
+            private examinationService: ExaminationService,
             private examPipe: ExaminationPipe) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            if (this.input instanceof SubjectNode) {
+            if (this.input instanceof ReverseStudyNode) {
                 this.node = this.input;
             } else {
-                this.node  = new SubjectNode(
-                    this.input.id,
-                    this.input.name,
-                    UNLOADED);
+                this.node = new ReverseStudyNode(
+                        this.input.id,
+                        this.input.name,
+                        UNLOADED);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/subject/details/' + this.node.id;
-        } 
+            this.showDetails = this.router.url != '/study/details/' + this.node.id;
+        }
     }
-    
+
     loadExaminations() {
         if (this.node.examinations == UNLOADED) {
             this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
+            this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
             .then(examinations => {
                 this.node.examinations = [];
                 if (examinations) {
@@ -122,18 +115,14 @@ export class SubjectNodeComponent implements OnChanges {
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds)) : []
         );
     }
-    
-    hasChildren(): boolean | 'unknown' {
-        if (!this.node.examinations) return false;
-        else if (this.node.examinations == 'UNLOADED') return 'unknown';
-        else return this.node.examinations.length > 0;
+
+    showStudyDetails() {
+        this.router.navigate(['/study/details/' + this.node.id]);
     }
 
-    showSubjectDetails() {
-        this.router.navigate(['/subject/details/' + this.node.id]);
-    }
-
-    collapseAll() {
-        console.log('collapse');
+    hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
+        if (!dependencyArr) return false;
+        else if (dependencyArr == UNLOADED) return 'unknown';
+        else return dependencyArr.length > 0;
     }
 }

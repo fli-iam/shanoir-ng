@@ -24,7 +24,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.selected]="detailedPatient == patient"
             deploy=true
             buttonPicto="fa fa-eye"
-            (buttonClick)="showPatientDetails($event)">
+            (buttonClick)="showPatientDetails($event)"
+            [hasChildren]="patient.studies.length > 0">
                 <node  
                     *ngFor="let study of patient.studies" 
                     [(label)]="study.studyDescription"
@@ -33,7 +34,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                     awesome="fa fa-procedures" 
                     hasBox="true"
-                    deploy=true>
+                    deploy=true
+                    [hasChildren]="study.series.length > 0">
                         <node  
                             *ngFor="let serie of study.series" 
                             [label]="serie.seriesDescription" 
@@ -45,7 +47,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}"
                             buttonPicto="fa fa-eye"
-                            (buttonClick)="showSerieDetails($event)">
+                            (buttonClick)="showSerieDetails($event)"
+                            [hasChildren]="false">
                         </node>
                 </node>
         </node>

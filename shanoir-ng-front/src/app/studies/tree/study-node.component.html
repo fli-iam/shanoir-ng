@@ -14,30 +14,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <node
         *ngIf="node"
-        [class.selected]="this.menuOpened"
+        [class.selected]="showDetails && this.menuOpened"
         [label]="node.label" 
         awesome="fas fa-folder-open"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
-        [hasChildren]="true">
+        [hasChildren]="true"
+        [clickable]="showDetails">
 
-        <dropdown-menu [(openInput)]="menuOpened">
+        <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
             <menu-item label="Details..." awesome="fas fa-eye" (click)="showStudyDetails()"></menu-item>
         </dropdown-menu>
 
     <node
             *ngIf="node.open"
+            class="subjects"
             label="Subjects" 
-            awesome="far fa-folder"
+            awesome="fas fa-user-injured"
             [(opened)]="node.subjectsOpen"
-            [hasChildren]="hasDependency(this.node.subjects)">    
+            [hasChildren]="hasDependency(this.node.subjects)">
        
         <ng-container *ngIf="node.subjectsOpen && node.subjects && node.subjects != 'UNLOADED'"> 
             <subject-node
                     *ngFor="let subject of node.subjects"
                     [input]="subject"
                     [studyId]="node.id"
-                    (selectedChange)="selectedChange.emit(node)">
+                    (selectedChange)="selectedChange.emit(node)"
+                    [hasBox]="hasBox">
             </subject-node>
         </ng-container>
 
@@ -45,8 +48,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <node
             *ngIf="node.open"
+            class="centers"
             label="Centers" 
-            awesome="far fa-folder"
+            awesome="fas fa-hospital"
             [(opened)]="node.centersOpen"
             [hasChildren]="hasDependency(this.node.centers)">     
 
@@ -61,8 +65,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <node
             *ngIf="node.open"
+            class="studycards"
             label="Study Cards" 
-            awesome="far fa-folder"
+            awesome="fab fa-accusoft"
             (firstOpen)="loadStudyCards()"
             [(opened)]="node.studycardsOpen"
             [hasChildren]="hasDependency(this.node.studyCards)"
@@ -79,8 +84,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <node
             *ngIf="node.open"
+            class="members"
             label="Members" 
-            awesome="far fa-folder"
+            awesome="far fa-user"
             [(opened)]="node.membersOpen"
             [hasChildren]="hasDependency(this.node.members)">     
 

@@ -9,7 +9,7 @@
 .picto { height: 14px; width: 15px; text-align: center; color: var(--color-b);}
 checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px; }
     input[type="text"] { color: var(--very-dark-grey); width: 160px; }
-    input[type="checkbox"] { vertical-align: middle; }
+    input[type="checkbox"] { vertical-align: top; height: 15px; }
 .clickable { cursor: pointer; }
 .button-picto { color: var(--greyer); margin-left: 7px; }
 tool-tip { color: var(--greyer); vertical-align: initial; }

@@ -19,9 +19,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         awesome="fas fa-procedures" 
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        (firstOpen)="loadDatasets()">
 
-    <dropdown-menu [(openInput)]="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>   
 
@@ -31,7 +32,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let dsNode of node.datasets" 
                 [input]="dsNode"
-                (selectedChange)="selectedChange.emit()">
+                (selectedChange)="selectedChange.emit()"
+                [hasBox]="hasBox">
             </dataset-node>
 
     </ng-container>

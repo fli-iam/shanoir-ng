@@ -510,6 +510,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onStudyNodeInit(studyNode: StudyNode) {
+        studyNode.open = true;
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
     }
 

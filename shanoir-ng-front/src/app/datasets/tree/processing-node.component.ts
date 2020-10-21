@@ -29,6 +29,7 @@ export class ProcessingNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: ProcessingNode;
     loading: boolean = false;
+    @Input() hasBox: boolean = false;
 
     constructor(
         private router: Router) {

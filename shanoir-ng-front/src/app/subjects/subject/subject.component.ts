@@ -11,20 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
+
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
+import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { Option } from '../../shared/select/select.component';
+
 
 @Component({
     selector: 'subject-detail',
@@ -185,5 +187,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    onSubjectNodeInit(node: ReverseSubjectNode) {
+        this.breadcrumbsService.currentStep.data.subjectNode = node;
     }
 }

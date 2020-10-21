@@ -42,6 +42,7 @@ import { DatepickerComponent } from '../../../shared/date-picker/date-picker.com
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { ExaminationNode } from '../../../tree/tree.model';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -379,6 +380,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
-    }    
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
+    }
 
 }

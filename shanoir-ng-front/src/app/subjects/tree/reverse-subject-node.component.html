@@ -16,12 +16,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened"
         [label]="node.label" 
-        awesome="fab fa-accusoft"
+        awesome="fas fa-user-injured"
         [(opened)]="node.open"
+        [hasChildren]="hasChildren()"
         (labelClick)="menuOpened = !menuOpened"
-        [hasChildren]="false">
+        [dataLoading]="loading"
+        title="subject">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
+        <menu-item label="Details..." awesome="fas fa-eye" (click)="showSubjectDetails()"></menu-item>
     </dropdown-menu>
+
+    <ng-container *ngIf="node.open && node.studies && node.studies != 'UNLOADED'">        
+        <reverse-study-node
+                *ngFor="let studyNode of node.studies"
+                [input]="studyNode"
+                [subjectId]="node.id"
+                (selectedChange)="selectedChange.emit()"
+                [hasBox]="hasBox">
+        </reverse-study-node>
+    </ng-container>
 </node>

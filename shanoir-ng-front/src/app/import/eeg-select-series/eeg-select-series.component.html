@@ -24,7 +24,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         label="EEG dataset list"
         [deploy]="true"
         [hasBox]="true"
-        (chkbxChange)="changeDatasets($event);">
+        (chkbxChange)="changeDatasets($event);"
+        [hasChildren]="datasets && datasets.length > 0">
             <node  
                 *ngFor="let dataset of datasets" 
                 [label]="dataset.name" 
@@ -35,7 +36,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [hasBox]="true"
                 (chkbxChange)="changeDataset(dataset)"
                 buttonPicto="fa fa-eye"
-                (buttonClick)="showDatasetDetail($event)">
+                (buttonClick)="showDatasetDetail($event)"
+                [hasChildren]="false">
             </node>
         </node>
     </div>

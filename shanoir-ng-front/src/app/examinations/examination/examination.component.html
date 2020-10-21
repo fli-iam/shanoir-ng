@@ -171,7 +171,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-				<examination-tree *ngIf="examination" [examination]="examination"></examination-tree> 
+				<examination-node 
+						[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : examination" 
+						(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 			</fieldset>
 			<form-footer
 				[state]="footerState"

@@ -68,7 +68,6 @@ import { ExaminationDTOService } from './examinations/shared/examination.dto';
 import { ExaminationPipe } from './examinations/shared/examination.pipe';
 import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
-import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
@@ -176,7 +175,6 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
-import { StudyTreeComponent } from './studies/tree/study-tree.component';
 import { DicomService } from './study-cards/shared/dicom.service';
 import { StudyCardDTOService } from './study-cards/shared/study-card.dto';
 import { StudyCardService } from './study-cards/shared/study-card.service';
@@ -193,7 +191,6 @@ import { SubjectStudyPipe } from './subjects/shared/subject-study.pipe';
 import { SubjectService } from './subjects/shared/subject.service';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
-import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { AccountEventsService } from './users/account/account-events.service';
@@ -207,11 +204,13 @@ import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader/loader.service';
 import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
 import { SubjectNodeComponent } from './subjects/tree/subject-node.component';
+import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-node.component';
 import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
+import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
 import { CenterNodeComponent } from './centers/tree/center-node.component';
 import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
 import { MemberNodeComponent } from './users/tree/member-node.component';
@@ -246,7 +245,6 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
         ExaminationListComponent,
         ExaminationComponent,
         ExaminationPipe,
-        ExaminationTreeComponent,
         UploadExtraDataComponent,
         ExtensionRequestComponent,
         HeaderComponent,
@@ -260,7 +258,6 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
         MenuItemComponent,
         StudyComponent,
         StudyListComponent,
-        StudyTreeComponent,
         SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,
@@ -274,7 +271,6 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
         CoilListComponent,
         SubjectListComponent,
         SubjectComponent,
-        SubjectTreeComponent,
         StudyNamePipe,
         DatasetComponent,
         EegDatasetComponent,
@@ -367,7 +363,9 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
         CenterNodeComponent,
         EquipmentNodeComponent,
         MemberNodeComponent,
-        StudyCardNodeComponent
+        StudyCardNodeComponent,
+        ReverseSubjectNodeComponent,
+        ReverseStudyNodeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

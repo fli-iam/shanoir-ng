@@ -49,6 +49,12 @@ export class DatasetService extends EntityService<Dataset> {
             .then(this.mapPage);
     }
 
+    getByAcquisitionId(acquisitionId: number): Promise<Dataset[]> {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/acquisition/' + acquisitionId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
     public downloadDatasets(ids: number[], format: string): Promise<void> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
