@@ -20,7 +20,6 @@ import { GlobalService } from '../../shared/services/global.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { BidsElement } from '../model/bidsElement.model';
-import { HttpParams } from '@angular/common/http';
 import { StudyService } from '../../studies/shared/study.service';
 
 

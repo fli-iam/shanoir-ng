@@ -26,7 +26,6 @@ import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { Option } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 
 @Component({
