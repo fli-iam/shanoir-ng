@@ -112,6 +112,7 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -204,7 +205,7 @@ services:
   #
   preclinical-bruker2dicom:
     container_name: "${SHANOIR_PREFIX}preclinical-bruker2dicom"
-    image: jcomedouteau/dicomifier.ws
+    image: jcomedouteau/dicomifier.ws:1.1
     command: ["python3", "/opt/dicomifier.ws/run.py"]
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -322,6 +323,7 @@ volumes:
   rabbitmq-data:
   database-data:
   datasets-data:
+  studies-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:

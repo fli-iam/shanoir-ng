@@ -123,7 +123,7 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 				for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
 					SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
 					// subject is already in study: display values in GUI and stop editing
-					if (subjectStudy.getStudy().getId() == study.getId()) {
+					if (subjectStudy.getStudy().getId().equals(study.getId())) {
 						mainWindow.importDialog.subjectStudyIdentifierTF.setText(subjectStudy.getSubjectStudyIdentifier());
 						mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
 						mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(false);

@@ -39,7 +39,6 @@ ul { padding: 0; }
 li { list-style: none; } 
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
-svg { vertical-align: -1; }
 a:link, a:visited { color: inherit; text-decoration: none; }
 a:hover, a:active { color: var(--color-a); text-decoration: none; }
 a:hover { cursor: pointer; }
@@ -65,7 +64,6 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
   button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
-  button svg { vertical-align: inherit; }
 
 input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
@@ -94,6 +92,7 @@ form { color: var(--dark-grey); position: relative; }
   form button { margin: 10px 0; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
+  form fieldset.disabled { color: var(--grey); }
   form fieldset ~ fieldset { margin-right: 20px; } 
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
@@ -107,7 +106,7 @@ form { color: var(--dark-grey); position: relative; }
     form fieldset li select,
     form fieldset li button { height: 21px; }
     form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 473px; border-radius: 2px; }
-      form li.info svg { margin-right: 6px; vertical-align: -3; color: var(--color-b); font-size: 16px; }
+      form li.info i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { }
   form .header { padding-top: 10px; padding-bottom: 10px; }
@@ -121,7 +120,7 @@ form { color: var(--dark-grey); position: relative; }
     form .right-col button:hover { background-color: inherit; color: inherit; }
     form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button svg { vertical-align: -1; color: var(--color-a); }
+    form .right-col button i { color: var(--color-a); }
 
   form.disabled::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: var(--very-light-grey); opacity: 0.5; }
 
@@ -156,8 +155,8 @@ form { color: var(--dark-grey); position: relative; }
   my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
   my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
-.left-icon svg { margin-right: 7px; vertical-align: -2; }
-.right-icon svg { margin-left: 7px; vertical-align: -2; }
+.left-icon i { margin-right: 7px; }
+.right-icon i { margin-left: 7px; }
 
 .content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
 .max-content { display: inline-block; }
@@ -178,12 +177,10 @@ form { color: var(--dark-grey); position: relative; }
 .detail .left { float: left; }
 .detail .right { float: right; -webkit-margin-start: 2px; }
 
-.svg-inline--fa { vertical-align: baseline; }
-
 .loading { display: table; width: 100%; height: 100%;}
 .loading-middle { display: table-cell; width: 100%; height: 100%; vertical-align: middle; text-align: center; }
 .loading-msg { margin: 0; margin-bottom: 170px; }
 .cat { width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 
-.mat-dialog-container { background: var(--color-overlay); position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: none !important; }
+node node { margin-left: 18px; }

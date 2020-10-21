@@ -281,7 +281,7 @@ public class MrProtocolStrategy {
 		final String receivingCoilName = attributes.getString(Tag.ReceiveCoilName);
 		final String receivingCoilType = attributes.getString(Tag.ReceiveCoilType);
 		if (receivingCoilName != null && !receivingCoilName.equals("")
-				|| receivingCoilType != null && !receivingCoilType.equals("")) {
+				&& receivingCoilType != null && !receivingCoilType.equals("")) {
 			receivingCoil = new CoilDTO();
 			receivingCoil.setName(receivingCoilName);
 			receivingCoil.setCoilType(CoilType.valueOf(receivingCoilType));
@@ -295,7 +295,7 @@ public class MrProtocolStrategy {
 		final String transmittingCoilName = attributes.getString(Tag.TransmitCoilName);
 		final String transmittingCoilType = attributes.getString(Tag.TransmitCoilType);
 		if (transmittingCoilName != null && !transmittingCoilName.equals("")
-				|| transmittingCoilType != null && !transmittingCoilType.equals("")) {
+				&& transmittingCoilType != null && !transmittingCoilType.equals("")) {
 			transmittingCoil = new CoilDTO();
 			transmittingCoil.setName(transmittingCoilName);
 			if (transmittingCoilType != null) {

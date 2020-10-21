@@ -1,5 +1,5 @@
 fieldset { min-width: auto; }
-.tree { margin: 0 50px 20px -15px; display: inline-block; vertical-align: top; }
+.tree { margin: 20px 50px 20px 0; display: inline-block; vertical-align: top; }
 
 .data-preview { display: inline-block; vertical-align: top; margin: 0 0 20px 0; overflow: hidden; border: 1px solid var(--grey); border-radius: 2px; }
     .data-preview[hidden] { display: none; }
@@ -8,7 +8,7 @@ fieldset { min-width: auto; }
     .data-preview h3 { margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
 
 papaya { margin: auto 20px 15px; }
-.warning svg { margin-right: 7px; color: var(--color-a); }
+.warning i { margin-right: 7px; color: var(--color-a); }
 .error { padding-left: 20px; color: var(--color-error); }
 
 .modality { margin-bottom: 0; }

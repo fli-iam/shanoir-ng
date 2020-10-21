@@ -88,7 +88,7 @@ if [ -n "$build" ] ; then
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" - <<EOF
 FROM debian:stretch
-RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-8-jdk-headless maven bzip2
+RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-8-jdk-headless maven bzip2 git
 EOF
 	# 2. run the maven build
 	mkdir -p /tmp/home
