@@ -55,6 +55,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
 		return repository.findByStudyCardId(studyCardId);
 	}
+	
+	@Override
+	public List<DatasetAcquisition> findByExamination(Long examinationId) {
+		return repository.findByExaminationId(examinationId);
+	}
 
 	private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
 		to.setAcquisitionEquipmentId(from.getAcquisitionEquipmentId());

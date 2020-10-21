@@ -219,6 +219,13 @@ public class DatasetApiController implements DatasetApi {
 		}
 		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
 	}
+	
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
+		
+		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(

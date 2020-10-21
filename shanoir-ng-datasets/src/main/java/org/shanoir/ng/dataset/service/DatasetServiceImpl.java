@@ -143,4 +143,11 @@ public class DatasetServiceImpl implements DatasetService {
 		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
 	}
 
+	@Override
+	public List<Dataset> findByAcquisition(Long acquisitionId) {
+		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
+	}
+	
+	
+
 }

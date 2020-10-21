@@ -27,7 +27,17 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 public class ExaminationDatasetAcquisitionDTO extends IdName {
 
+	private String type;
+
 	private List<DatasetAndProcessingsDTO> datasets;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	/**
 	 * @return the datasets
@@ -37,8 +47,7 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	}
 
 	/**
-	 * @param datasets
-	 *            the datasets to set
+	 * @param datasets the datasets to set
 	 */
 	public void setDatasets(List<DatasetAndProcessingsDTO> datasets) {
 		this.datasets = datasets;
