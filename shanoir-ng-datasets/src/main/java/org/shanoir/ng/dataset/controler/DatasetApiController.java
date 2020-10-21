@@ -661,7 +661,6 @@ public class DatasetApiController implements DatasetApi {
 		ByteArrayResource resource = new ByteArrayResource(data);
 
 		statisticsFile.delete();
-		zipFile.delete();
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
