@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  *         must be parsed in the postparse funtion.
  *
  *         For instance, the ShanoirTkCLI class will take care of loading user
- *         preferences saved in a user property file. This works for host, port,
+ *         preferences saved in a user property file. This works for host,
  *         username, password, truststore path...
  */
 public abstract class ShanoirCLI {
@@ -58,11 +58,6 @@ public abstract class ShanoirCLI {
 	 *         connection.
 	 *
 	 */
-	public static class NullHostnameVerifier implements HostnameVerifier {
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}
-	}
 
 	/**
 	 * To store the path to the user property file. Initialized at
@@ -82,7 +77,8 @@ public abstract class ShanoirCLI {
 	static {
 		OptionBuilder.withArgName("host");
 		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("host of the webservice. 127.0.0.1 by default.");
+		OptionBuilder.isRequired(true);
+		OptionBuilder.withDescription("host of the shanoir server.");
 		hostOption = OptionBuilder.create("host");
 	}
 
@@ -104,15 +100,6 @@ public abstract class ShanoirCLI {
 		OptionBuilder.isRequired(true);
 		OptionBuilder.withDescription("password for user identitification.");
 		passwordOption = OptionBuilder.create("password");
-	}
-
-	/** -port to set the port. Can be defined in the user property file. */
-	private static Option portOption;
-	static {
-		OptionBuilder.withArgName("port");
-		OptionBuilder.hasArg();
-		OptionBuilder.withDescription("port used for the webservice. 8080 by default.");
-		portOption = OptionBuilder.create("port");
 	}
 
 	/** -h used to request help on command line options. */
@@ -222,9 +209,6 @@ public abstract class ShanoirCLI {
 	/** The collection of Option used by the Command Line */
 	protected Options options;
 
-	/** The port we are using for the connection. */
-	protected String port;
-
 	/** The properties issued from the user property file. */
 	private Properties properties;
 
@@ -260,7 +244,6 @@ public abstract class ShanoirCLI {
 		opts.addOption(helpOption);
 		opts.addOption(versionOption);
 		opts.addOption(hostOption);
-		opts.addOption(portOption);
 		opts.addOption(userOption);
 		opts.addOption(passwordOption);
 		options = opts;
@@ -299,15 +282,6 @@ public abstract class ShanoirCLI {
 	}
 
 	/**
-	 * Gets the port. Can be defined in the user property file.
-	 *
-	 * @return the port
-	 */
-	public String getPort() {
-		return port;
-	}
-
-	/**
 	 * Checks whether an option is present within the command line.
 	 *
 	 * @param opt
@@ -332,7 +306,7 @@ public abstract class ShanoirCLI {
 
 	/**
 	 * This method parses the different options given as argument. It checks whether
-	 * username, password, host, port and truststore options are given in argument
+	 * username, password, host and truststore options are given in argument
 	 * and initialise the matching attributes. If an option above is not given, then
 	 * it checks if the value is present is the user property file. If no value is
 	 * present, it throws a MissingArgumentException.
@@ -377,15 +351,7 @@ public abstract class ShanoirCLI {
 		} else if (properties.containsKey("host")) {
 			this.setHost(properties.getProperty("host"));
 		} else {
-			setHost("127.0.0.1");
-		}
-
-		if (cl.hasOption("port")) {
-			setPort(cl.getOptionValue("port"));
-		} else if (properties.containsKey("port")) {
-			setPort(properties.getProperty("port"));
-		} else {
-			setPort("8080");
+			exitAndHelp("ShanoirTkCLI ERROR: no host provided. The host parameter is required.");
 		}
 
 		postParse();
@@ -409,17 +375,7 @@ public abstract class ShanoirCLI {
 	 *            the host to set
 	 */
 	public void setHost(final String host) {
-		this.host = host;
+		String finalHost = host.startsWith("http://") ? host.replace("http://", "https://") : host.startsWith("https://") ? host : "https://" + host;
+		this.host = finalHost.endsWith("/") ? finalHost.substring(0, finalHost.length()-1) : finalHost;
 	}
-
-	/**
-	 * Sets the port.
-	 *
-	 * @param port
-	 *            the port to set
-	 */
-	public void setPort(final String port) {
-		this.port = port;
-	}
-
 }

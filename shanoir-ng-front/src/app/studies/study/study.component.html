@@ -229,8 +229,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
             <fieldset *ngIf="mode == 'view'">
-				<legend>BIDS tree</legend>
-                <bids-tree [(list)]="bidsStructure" [studyId]="id"></bids-tree>
+				        <legend>BIDS tree</legend>
+                <bids-tree [studyId]="id"></bids-tree>
             </fieldset>
 			<form-footer
 					[state]="footerState"

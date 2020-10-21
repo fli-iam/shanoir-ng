@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
@@ -52,7 +53,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-	
+
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
 
@@ -73,7 +74,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		}
 		// Delete examination
 		examinationRepository.delete(id);
-		
+
 		for (Long dsId : datasets) {
 			solrService.deleteFromIndex(dsId);
 		}
@@ -89,7 +90,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
 		}
 	}
 
@@ -97,12 +98,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public List<Examination> findBySubjectId(final Long subjectId) {
 		return examinationRepository.findBySubjectId(subjectId);
 	}
-	
+
 	@Override
 	public List<Examination> findByStudyId(Long studyId) {
 		return examinationRepository.findByStudyId(studyId);
 	}
-	
+
 	@Override
 	public Examination findById(final Long id) {
 		return examinationRepository.findOne(id);
@@ -114,7 +115,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		savedExamination = examinationRepository.save(examination);
 		return savedExamination;
 	}
-	
+
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
@@ -134,7 +135,16 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * @return database examination with new values.
 	 */
 	private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
-
+		// Update extra data paths => delete files not present anymore
+		if (examinationDb.getExtraDataFilePathList() != null) {
+			for(String filePath : examinationDb.getExtraDataFilePathList()) {
+				if (!examination.getExtraDataFilePathList().contains(filePath)) {
+					// Delete file
+					String filePathToDelete = getExtraDataFilePath(examinationDb.getId(), filePath);
+					FileUtils.deleteQuietly(new File(filePathToDelete));
+				}
+			}
+		}
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());

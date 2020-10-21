@@ -20,7 +20,8 @@ import { GlobalService } from '../../shared/services/global.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { BidsElement } from '../model/bidsElement.model';
-
+import { HttpParams } from '@angular/common/http';
+import { StudyService } from '../../studies/shared/study.service';
 
 
 @Component({
@@ -32,17 +33,16 @@ import { BidsElement } from '../model/bidsElement.model';
 export class BidsTreeComponent implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
-    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
-
-    @Input() list: BidsElement[];
     @Input() studyId: number;
+    protected list: BidsElement[] = [];
     protected json: JSON;
     protected tsv: string[][];
     protected title: string;
     protected selectedIndex: string;
     private globalClickSubscription: Subscription;
+    protected load: string;
 
-    constructor(private globalService: GlobalService, private elementRef: ElementRef) {
+    constructor(private globalService: GlobalService, private elementRef: ElementRef, private studyService: StudyService, protected http: HttpClient) {
         this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
             if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
                 this.selectedIndex = null;
@@ -53,6 +53,35 @@ export class BidsTreeComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         this.globalClickSubscription.unsubscribe();
+    }
+
+    getBidsStructure() {
+       if (!this.load) {
+        this.load="loading"
+            this.studyService.getBidsStructure(this.studyId).then(element => {
+                this.sort(element);
+                this.list = [element];
+                this.load = "loaded";
+            });
+        }
+    }
+
+    sort(element: BidsElement) {
+        if (element.elements) {
+            element.elements.sort(function(elem1, elem2) {
+                if (elem1.file && !elem2.file) {
+                    return 1
+                } else if (!elem1.file && elem2.file) {
+                    return -1;
+                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
+                    return elem1.path < elem2.path ? -1 : 1;
+                }
+            });
+            // Then sort all sub elements folders
+            for (let elem of element.elements) {
+                this.sort(elem);
+            }
+        }
     }
 
     getFileName(element): string {

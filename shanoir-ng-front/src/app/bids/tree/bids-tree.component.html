@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="Bids" awesome="far fa-folder" [deploy]="true" class="root-node">
+<node label="Bids" awesome="far fa-folder" [deploy]="false" class="root-node" [dataRequest]="true" (openClick)="getBidsStructure()" ([awesome])="(load=='loading') ? 'far fa-spin' : 'fas fa-folder'">
     <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
 </node>
 

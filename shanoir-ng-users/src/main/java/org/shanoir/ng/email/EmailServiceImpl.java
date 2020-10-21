@@ -153,6 +153,7 @@ public class EmailServiceImpl implements EmailService {
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyCreateUser", variables);
@@ -174,7 +175,8 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
-			final String content = build("notifyNewUser", variables);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);

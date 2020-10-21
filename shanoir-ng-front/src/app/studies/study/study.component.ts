@@ -63,8 +63,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    protected bidsStructure: BidsElement[];
 
     protected selectedDatasetIds: number[];
 
@@ -89,7 +87,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
-        this.getBidsStructure(this.id);
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -447,31 +444,6 @@ export class StudyComponent extends EntityComponent<Study> {
         return element.split('\\').pop().split('/').pop();
     }
 
-    getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {
-            this.sort(element);
-            this.bidsStructure = [element];
-        });
-    }
-
-    sort(element: BidsElement) {
-        if (element.elements) {
-            element.elements.sort(function(elem1, elem2) {
-                if (elem1.file && !elem2.file) {
-                    return 1
-                } else if (!elem1.file && elem2.file) {
-                    return -1;
-                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
-                    return elem1.path < elem2.path ? -1 : 1;
-                }
-            });
-            // Then sort all sub elements folders
-            for (let elem of element.elements) {
-                this.sort(elem);
-            }
-        }
-    }
-
     onTreeSelectedChange(study: StudyNode) {
         let dsIds: number [] = [];
         if (study.subjects && study.subjects != 'UNLOADED') {
@@ -513,5 +485,4 @@ export class StudyComponent extends EntityComponent<Study> {
         studyNode.open = true;
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
     }
-
 }

@@ -26,7 +26,8 @@ import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-
+import { Option } from '../../shared/select/select.component';
+import { Study } from '../../studies/shared/study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -44,6 +45,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private firstName: string = "";
     private lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    forceStudy: Study = null;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -72,6 +74,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
+            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
         }
     }
 
@@ -191,5 +194,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     onSubjectNodeInit(node: ReverseSubjectNode) {
         this.breadcrumbsService.currentStep.data.subjectNode = node;
+    }
+
+    public toggleAnonymised() {
+        if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
+            this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
+        }
     }
 }
