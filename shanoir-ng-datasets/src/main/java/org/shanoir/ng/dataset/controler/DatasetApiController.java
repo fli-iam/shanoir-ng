@@ -504,22 +504,22 @@ public class DatasetApiController implements DatasetApi {
 	private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
 		
 		byte[] buffer = new byte[1024];
-		FileOutputStream fos = new FileOutputStream(zipFile);
-		ZipOutputStream zos = new ZipOutputStream(fos);
-		FileInputStream fis = new FileInputStream(sourceFile);
+		
 
-		// begin writing a new ZIP entry, positions the stream to the start of the entry data
-		zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-			
-		int length;
+		try (	FileOutputStream fos = new FileOutputStream(zipFile);
+				ZipOutputStream zos = new ZipOutputStream(fos);
+				FileInputStream fis = new FileInputStream(sourceFile);
+				) {
+				// begin writing a new ZIP entry, positions the stream to the start of the entry data
+				zos.putNextEntry(new ZipEntry(sourceFile.getName()));
+					
+				int length;
 
-		while ((length = fis.read(buffer)) > 0) {
-			zos.write(buffer, 0, length);
+				while ((length = fis.read(buffer)) > 0) {
+					zos.write(buffer, 0, length);
+				}
+				zos.closeEntry();
 		}
-
-		zos.closeEntry();
-		fis.close();
-		zos.close();
 	}
 
 	private File recreateFile(final String fileName) throws IOException {
