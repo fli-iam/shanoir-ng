@@ -25,9 +25,6 @@ import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
-import { BoutiquesDatasetListComponent } from './boutiques/dataset-list/dataset-list.component';
-import { BoutiquesDatasetComponent } from './boutiques/dataset/dataset.component';
-import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
@@ -50,7 +47,6 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
-import { BoutiquesComponent } from './boutiques/boutiques.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
@@ -157,12 +153,6 @@ let routes: Routes = [
         path: 'task',
         component: AsyncTasksComponent
     }, {
-        path: 'boutiques',
-        component: BoutiquesComponent
-    }, {
-        path: 'boutiques/:toolId',
-        component: InvocationExecutionComponent
-    }, { 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent
     }, { 
@@ -254,15 +244,6 @@ let routes: Routes = [
     {
         path: 'dataset/list',
         component: DatasetListComponent,
-    },
-    {
-        path: 'boutiques/dataset/list',
-        component: BoutiquesDatasetListComponent,
-    },
-    {
-        path: 'boutiques/dataset/details/:id',
-        component: BoutiquesDatasetComponent,
-        data: { mode: 'view' },
     },
     {
         path: 'dataset/details/:id',

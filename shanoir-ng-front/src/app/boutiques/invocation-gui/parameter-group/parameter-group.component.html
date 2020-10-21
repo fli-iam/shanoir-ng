@@ -1,9 +1,0 @@
-<h4 *ngIf="parameterGroup.name">{{ parameterGroup.name }}</h4>
-<p *ngIf="parameterGroup.description">{{ parameterGroup.description }}</p>
-
-<select *ngIf="parameterGroup.exclusive" name="parameterGroup.id" [(ngModel)]="selectedParameterId" (change)="onParameterSelectionChange($event)">
-    <option *ngFor="let parameter of parameterGroup.parameters" [value]="parameter.id">{{parameter.name}}</option>
-</select>
-<ng-container *ngFor="let parameter of parameterGroup.parameters">
-  <parameter *ngIf="!parameterGroup.exclusive || selectedParameterId == parameter.id" [parameter]="parameter" [formGroup]="formGroup" (selectDataClicked)="onSelectData($event)" ></parameter>
-</ng-container>

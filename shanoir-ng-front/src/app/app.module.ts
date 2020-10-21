@@ -57,9 +57,6 @@ import { PetProtocolComponent } from './dataset-acquisitions/modality/pet/pet-pr
 import { DatasetAcquisitionDTOService } from './dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
-import { BoutiquesDatasetListComponent } from './boutiques/dataset-list/dataset-list.component';
-import { BoutiquesDatasetComponent } from './boutiques/dataset/dataset.component';
-import { FileTreeComponent } from './boutiques/tree/file-tree.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
@@ -170,21 +167,6 @@ import { RouterModule } from '@angular/router';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { LoaderService } from './shared/loader/loader.service';
 import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
-
-// Boutiques
-// import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
-// import { BoutiquesRxStompConfig } from './boutiques/boutiques-rx-stomp.config';
-import { BoutiquesComponent } from './boutiques/boutiques.component';
-import { ParameterComponent } from './boutiques/invocation-gui/parameter/parameter.component';
-import { ParameterGroupComponent } from './boutiques/invocation-gui/parameter-group/parameter-group.component';
-import { InvocationExecutionComponent } from './boutiques/invocation-execution/invocation-execution.component';
-import { InvocationComponent } from './boutiques/invocation/invocation.component';
-import { InvocationGuiComponent } from './boutiques/invocation-gui/invocation-gui.component';
-import { ExecutionComponent } from './boutiques/execution/execution.component';
-import { SearchToolsComponent } from './boutiques/search-tools/search-tools.component';
-import { ToolListComponent } from './boutiques/tool-list/tool-list.component';
-import { ToolDescriptorInfoComponent } from './boutiques/tool-descriptor-info/tool-descriptor-info.component';
-import { ToolService } from './boutiques/tool.service';
 
 import { ReplaceSpacePipe } from './utils/pipes';
 
@@ -305,9 +287,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatasetListComponent,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
-        BoutiquesDatasetListComponent,
-        BoutiquesDatasetComponent,
-        FileTreeComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,
@@ -336,15 +315,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent,
-        BoutiquesComponent,
-        ToolListComponent,
-        InvocationComponent,
-        InvocationGuiComponent,
-        ExecutionComponent,
-        SearchToolsComponent,
-        ParameterComponent,
-        ParameterGroupComponent,
-        ToolDescriptorInfoComponent,
         ReplaceSpacePipe,
         SideMenuComponent,
         StudyCardComponent,
@@ -395,7 +365,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
         BrukerFinishImportComponent,
-        InvocationExecutionComponent,
         LoaderComponent
     ],
     // Not required anymore with Angular > 9.0
@@ -456,11 +425,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         NiftiConverterService,
         TaskService,
         StudyRightsService,
-        ToolService,
-        // {
-        //   provide: InjectableRxStompConfig,
-        //   useValue: BoutiquesRxStompConfig
-        // },
         // {
         //   provide: RxStompService,
         //   useFactory: rxStompServiceFactory,
