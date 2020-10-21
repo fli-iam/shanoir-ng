@@ -34,6 +34,7 @@ export class SideMenuComponent {
 
     private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     private username: string = "";
+    private userId: number = 0;
     private dataOpened: boolean = false;
     private precOpened: boolean = false;
     private eqOpened: boolean = false;
@@ -49,6 +50,7 @@ export class SideMenuComponent {
             public notificationsService: NotificationsService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
+            this.userId = KeycloakService.auth.userId;
         }
         this.notificationsService.connect();
     }

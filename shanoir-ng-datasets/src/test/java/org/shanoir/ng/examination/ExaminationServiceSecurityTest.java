@@ -155,6 +155,7 @@ public class ExaminationServiceSecurityTest {
 		Examination ex3 = mockExam(3L); ex3.setStudyId(1L); exList.add(ex3);
 		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);
 		Pageable pageable = new PageRequest(0, 10);
+		given(examinationRepository.findByPreclinicalAndStudyIdIn(false, Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(exList));
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
 		given(examinationRepository.findByStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(exList));
@@ -168,6 +169,8 @@ public class ExaminationServiceSecurityTest {
 		Examination ex12 = mockExam(2L); ex12.setStudyId(1L); exList2.add(ex12);
 		Examination ex13 = mockExam(3L); ex13.setStudyId(1L); exList2.add(ex13);
 		Examination ex14 = mockExam(4L); ex14.setStudyId(2L); exList2.add(ex14);
+		given(examinationRepository.findByPreclinicalAndStudyIdIn(false, Arrays.asList(1L, 2L), pageable)).willReturn(new PageImpl<>(exList2));
+		given(examinationRepository.findByPreclinicalAndStudyIdIn(false, Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(exList2));
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList2));
 		given(examinationRepository.findByStudyIdIn(Arrays.asList(1L, 2L), pageable)).willReturn(new PageImpl<>(exList2));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L, 2L)));
@@ -215,20 +218,6 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		assertAccessAuthorized(service::save, mrDs);
 	}
-	
-//	private void testCreateDTO() throws ShanoirException {
-//		ExaminationDTO dto = mockExamDTO();
-//		IdName studyDto = new IdName();
-//		studyDto.setId(10L);
-//		dto.setStudy(studyDto);
-//		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
-//		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
-//		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
-//		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(false);
-//		assertAccessDenied(service::save, dto);
-//		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
-//		assertAccessAuthorized(service::save, dto);
-//	}
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
