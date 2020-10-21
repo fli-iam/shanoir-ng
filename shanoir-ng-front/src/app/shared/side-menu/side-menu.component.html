@@ -12,8 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="isAuthenticated()" class="logo"><a [routerLink]="['/home']"><img [src]="shanoirLogoUrl" /></a></div>
-<div *ngIf="!isAuthenticated()" class="logo"><img [src]="shanoirLogoUrl" /></div>
+<div class="logo">
+    <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
+        <img [src]="shanoirLogoUrl" />
+    </a>
+    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" />
+</div>
 
 <div *ngIf="isAuthenticated()" class="user">
     <div class="user-logo">
@@ -21,9 +25,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
         <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
     </div>
-    <div class="welcome">{{username}}</div> 
+    <div class="welcome">{{username}}</div>
     <div class="logout">
-        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout<i class="fas fa-sign-out-alt"></i></a>
+        <br/>
+        <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
+        <br/><br/>
+    </div>
+    <div class="logout">
+        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
@@ -78,7 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
         <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
         <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-hat-wizard"></i>From EEG archives</li>
-        <!--li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li -->
+        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li>
         <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
         <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
         <li routerLink="" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets (NifTi)</li>
@@ -90,5 +99,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
     </div>
-
 </ul>
+
+<div class="bottom-info">
+    <div>{{VERSION.raw}}</div>
+    <div>Copyright (C) 2009-2019 Inria</div>
+    <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
+</div>

@@ -21,6 +21,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { Examination } from './examination.model';
+import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 
 @Injectable()
 export class ExaminationDTOService {
@@ -79,6 +80,8 @@ export class ExaminationDTOService {
         entity.note = dto.note;
         entity.subjectWeight = dto.subjectWeight;
         entity.preclinical = dto.preclinical;
+        entity.extraDataFilePathList = dto.extraDataFilePathList;
+        entity.instrumentBasedAssessmentList = dto.instrumentBasedAssessmentList;
         if (dto.studyId) {
             entity.study = new Study();
             entity.study.id = dto.studyId;
@@ -105,6 +108,8 @@ export class ExaminationDTO {
     subjectId: number;
     subjectWeight: number;
     preclinical: boolean;
+    instrumentBasedAssessmentList: InstrumentBasedAssessment[];
+    extraDataFilePathList: string[] = [];
 
     constructor(examination?: Examination) {
         if (examination) {
@@ -117,6 +122,8 @@ export class ExaminationDTO {
             this.subjectId = examination.subject ? examination.subject.id : null;
             this.subjectWeight = examination.subjectWeight;
             this.preclinical = examination.preclinical;
+            this.extraDataFilePathList = examination.extraDataFilePathList;
+            this.instrumentBasedAssessmentList = examination.instrumentBasedAssessmentList;
         }
     }
 }

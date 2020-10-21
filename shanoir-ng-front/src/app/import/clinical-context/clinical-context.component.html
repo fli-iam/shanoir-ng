@@ -61,11 +61,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
             </ng-container>
         </li>
+        <li class="info" *ngIf="scHasDifferentModality && study">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>That study card would set a different modality than detected in your data.</strong>
+            <br/>Your data says <strong>{{modality}}</strong> while the study card would set <strong>{{scHasDifferentModality}}</strong> in the imported metadata.
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+            </ng-container>
+        </li>
         <li>
             <label [class.required-label]="!useStudyCard">Select a center</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || center"
-                        [disabled]="!useStudyCard && (!study || !centerOptions || centerOptions.length == 0)"
+                        [disabled]="!useStudyCard && (!study || !centerOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
                         (change)="onSelectCenter(); onContextChange();" 
@@ -89,7 +100,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
-                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions || acquisitionEquipmentOptions.length == 0)"
+                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
                         (change)="onSelectAcquisitonEquipment(); onContextChange();"
@@ -131,38 +142,39 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li *ngIf="subject !== null && subject !== undefined">
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="label-col">Common name</th>
-                            <th class="input-col">Subject identifier for this study</th>
-                            <th class="chkbx-col" title="Physically Involved">PI</th>
-                            <th *ngIf="importMode != 'BRUKER'" class="dropdown-col">Subject Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="label-col">
-                                {{subject.name}}
-                            </td>
-                            <td class="input-col">
-                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                    [ngModelOptions]="{standalone: true}"/>
-                            </td>
-                            <td class="chkbx-col">
-                                <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
-                            </td>
-                            <td *ngIf="importMode != 'BRUKER'" class="dropdown-col">
-                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
-                                </select-box>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </li>
+    </ol>
+    <ol class="subject-study">
+        <legend 
+                class="clickable"
+                [class.disabled]="!subject || !subject.subjectStudy"
+                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
+            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
+        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
+            <li>
+                <label>Common name</label>
+                <span class="right-col">{{subject.name}}</span>
+            </li>
+            <li>
+                <label>Subject identifier for this study</label>
+                <span class="right-col">
+                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                    [ngModelOptions]="{standalone: true}"/>
+                </span>
+            </li>
+            <li>
+                <label>Physically involved</label>
+                <span class="right-col">
+                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+                </span>
+            </li>
+            <li *ngIf="importMode != 'BRUKER'">
+                <label>Subject Type</label>
+                <span class="right-col">
+                    <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
+                    </select-box>
+                </span>
+            </li>
+        </div>
     </ol>
 
     <ol>

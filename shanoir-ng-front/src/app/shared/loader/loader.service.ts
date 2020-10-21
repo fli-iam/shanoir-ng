@@ -12,14 +12,33 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.strategies.protocol;
+import { Injectable } from '@angular/core';
 
-import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
-import org.shanoir.ng.importer.dto.Serie;
+@Injectable()
+export class LoaderService {
 
-public interface ProtocolStrategy {
+    private counter: number = 0;
 
-	MrProtocol generateMrProtocolForSerie(Attributes dicomAttributes, Serie serie);
+    // private open() {
+    //     if (!this.opened) {
+    //         this.opened = true;
+    //         Promise
+    //         this.appRef.then(appRef => appRef.tick());
+    //     }
+    // }
+
+    startLoader() {
+        let prev = this.counter;
+        this.counter++;
+    }
+
+    stopLoader() {
+        this.counter--;
+    }
+
+    isLoading(): boolean {
+        return this.counter > 0;
+    }
 
 }
+

@@ -36,6 +36,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private filename: string;
     private hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
+    protected downloading: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
@@ -92,7 +93,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
     
     private download(format: string) {
-        this.datasetService.download(this.dataset, format);
+        this.downloading = true;
+        this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
     }
 
     private loadDicomInMemory() {
@@ -103,8 +105,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                             this.dicomArchiveService.extractFileDirectoryStructure()
                             .then(response => {
                                 this.initPapaya(response);
-                            })
-                    })
+                            });
+                    });
         });
     }
 
@@ -123,7 +125,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+    
+    public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

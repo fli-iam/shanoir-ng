@@ -41,7 +41,7 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
     }
 
     getOptions() {
-        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload':true};
+        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload':true, id: false};
     }
 
     getEntities(): Promise<Task[]> {
@@ -57,8 +57,8 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
             return null;
         };
         return [
-            { headerName: 'Message', field: 'message'},
-            { headerName: 'Status', field: 'status', type: 'Status', cellRenderer: function (params: any) {
+            { headerName: 'Message', field: 'message', width: '100%',},
+            { headerName: 'Status', field: 'status', width: '70px', type: 'Status', cellRenderer: function (params: any) {
                     if (params.data.status == 0) {
                         return "In progress"
                     }
@@ -70,17 +70,17 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
                     }
                 } 
             },
-            { headerName: 'Progress', field: 'progress', type: 'progress', cellRenderer: function (params: any) {
+            { headerName: 'Progress', field: 'progress', width: '40px', type: 'progress', cellRenderer: function (params: any) {
                     return params.data.progress * 100 + '%';
                 } 
             },
             {
-                headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
+                headerName: "Creation", field: "creationDate", width: '130px', cellRenderer: function (params: any) {
                     return dateRenderer(params.data.creationDate);
                 }
             },
             {
-                headerName: "Last update", field: "lastUpdate", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
+                headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                     return dateRenderer(params.data.lastUpdate);
                 }
             },

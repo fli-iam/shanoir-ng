@@ -37,6 +37,8 @@ export class SelectSeriesComponent {
     private detailedSerie: Object;
     private detailedStudy: Object;
     private papayaParams: object[];
+    public papayaError: boolean = false;
+    public modality: string;
 
     constructor(
             private importService: ImportService,
@@ -50,6 +52,7 @@ export class SelectSeriesComponent {
         }
         breadcrumbsService.nameStep('2. Series');
         this.patients = this.importDataService.patientList.patients;
+        this.modality = this.patients[0].studies[0].series[0].modality.toString()
         this.workFolder = this.importDataService.patientList.workFolder;
     }
 
@@ -61,7 +64,9 @@ export class SelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = nodeParams;
-            if (serie && serie.images) this.initPapaya(serie); 
+            setTimeout(() => { // so the details display has no delay
+                if (serie && serie.images) this.initPapaya(serie); 
+            });
         }
     }
 
@@ -90,6 +95,7 @@ export class SelectSeriesComponent {
     }
 
     private initPapaya(serie: SerieDicom): void {
+        this.papayaError = false;
         let listOfPromises = serie.images.map((image) => {
             return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
         });
@@ -98,6 +104,9 @@ export class SelectSeriesComponent {
             let params: object[] = [];
             params['binaryImages'] = [values];
             this.papayaParams = params;
+        }).catch(reason => {
+            this.papayaError = true;
+            console.error(reason);
         });
     }
 

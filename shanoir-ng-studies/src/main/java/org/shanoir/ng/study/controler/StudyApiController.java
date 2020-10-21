@@ -72,7 +72,7 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class StudyApiController implements StudyApi {
 
-	@Value("${study-data}")
+	@Value("${studies-data}")
 	private String dataDir;
 	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
 

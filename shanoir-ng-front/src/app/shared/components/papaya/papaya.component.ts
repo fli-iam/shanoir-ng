@@ -13,7 +13,6 @@
  */
 
 import { Component, OnInit, SimpleChange, Input } from "@angular/core";
-import { ImagesUrlUtil } from "../../utils/images-url.util";
 
 declare var papaya: any;
 declare var papayaContainers: any[];

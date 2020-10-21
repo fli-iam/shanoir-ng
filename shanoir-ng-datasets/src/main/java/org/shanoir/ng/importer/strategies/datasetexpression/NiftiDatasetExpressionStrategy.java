@@ -57,8 +57,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 		niftiDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		niftiDatasetExpression.setDatasetProcessingType(DatasetProcessingType.FORMAT_CONVERSION);
 		
-		//TODO ATO Specify nifti converter used..
-		niftiDatasetExpression.setNiftiConverterId(4L);
+		niftiDatasetExpression.setNiftiConverterId(importJob.getConverterId());
 				
 		niftiDatasetExpression.setOriginalNiftiConversion(true);
 		if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {

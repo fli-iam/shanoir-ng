@@ -92,7 +92,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
     
     private get isMR(): boolean { 
-        return this.manufModel && this.manufModel.datasetModalityType == 'MR_DATASET'; 
+        return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR; 
     }
 
     private getManufacturerModel(): Promise<void> {
@@ -118,7 +118,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return null;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

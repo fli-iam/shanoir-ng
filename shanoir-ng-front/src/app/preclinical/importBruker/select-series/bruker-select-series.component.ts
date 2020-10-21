@@ -53,7 +53,7 @@ export class BrukerSelectSeriesComponent {
     }
 
 
-    private showSerieDetails(nodeParams: any): void {
+    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
         this.detailedPatient = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
@@ -73,19 +73,6 @@ export class BrukerSelectSeriesComponent {
 
     private onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
-    }
-
-    private initPapaya(serie: SerieDicom): void {
-        if (!serie) return;
-        let listOfPromises = serie.images.map((image) => {
-            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
-        });
-        let promiseOfList = Promise.all(listOfPromises);
-        promiseOfList.then((values) => {
-            let params: object[] = [];
-            params['binaryImages'] = [values];
-            this.papayaParams = params;
-        });
     }
 
     get valid(): boolean {

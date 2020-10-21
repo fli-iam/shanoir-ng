@@ -114,6 +114,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	        </plugin>
             <plugin>
 	        	<artifactId>maven-resources-plugin</artifactId>
+		    	<configuration>
+				<nonFilteredFileExtensions>
+				    <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>woff</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>svg</nonFilteredFileExtension>
+				</nonFilteredFileExtensions>
+		        </configuration>
 	        	<executions>
 	          		<execution>
 	            		<id>copy-resources</id>

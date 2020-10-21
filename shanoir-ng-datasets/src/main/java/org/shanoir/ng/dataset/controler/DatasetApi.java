@@ -40,6 +40,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -142,21 +143,7 @@ public interface DatasetApi {
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
-    
-    @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/subjectId/{subjectId}/subjectName/{subjectName}/studyName/{studyName}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(
-    		@ApiParam(value = "id of the subject", required=true) @PathVariable("subjectId") Long subjectId,
-    		@ApiParam(value = "name of the subject", required=true) @PathVariable("subjectName") String subjectName,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, MalformedURLException, IOException;
-  
+
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),
@@ -164,8 +151,8 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/massiveDownload", produces = { "application/zip" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PostMapping(value = "/massiveDownload")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
     		@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
@@ -179,8 +166,8 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/massiveDownloadByStudy", produces = { "application/zip" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnAtLeastOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @GetMapping(value = "/massiveDownloadByStudy")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
     		@ApiParam(value = "id of the study", required=true) @Valid
     		@RequestParam(value = "studyId", required = true) Long studyId,

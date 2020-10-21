@@ -93,7 +93,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		} else {
 			LOG.warn("No studycard given for this import");
 		}
-		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.

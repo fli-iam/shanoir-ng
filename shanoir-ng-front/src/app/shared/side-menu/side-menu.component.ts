@@ -19,6 +19,7 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 import { MsgBoxService } from '../msg-box/msg-box.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { VERSION } from '../../../environments/version';
 
 
 
@@ -33,12 +34,14 @@ export class SideMenuComponent {
 
     private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     private username: string = "";
+    private userId: number = 0;
     private dataOpened: boolean = false;
     private precOpened: boolean = false;
     private eqOpened: boolean = false;
     private uploadOpened: boolean = false;
     private adminOpened: boolean = false;
     private tasksOpened: boolean = false;
+    public VERSION = VERSION;
 
     constructor(
             private keycloakService: KeycloakService, 
@@ -47,6 +50,7 @@ export class SideMenuComponent {
             public notificationsService: NotificationsService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
+            this.userId = KeycloakService.auth.userId;
         }
         this.notificationsService.connect();
     }

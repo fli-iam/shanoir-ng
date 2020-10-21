@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -166,6 +167,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNull() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 
@@ -183,7 +185,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(id = 2)
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
@@ -227,7 +229,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(id = 2)
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
@@ -260,7 +262,7 @@ public class DatasetApiControllerTest {
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
 
 		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
@@ -272,12 +274,13 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdNoIds() {
 		// GIVEN a list of datasets to export
 
 		// WHEN we export all the datasets with no datasets ID
 		try {
-			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 					.param("format", "nii")
 					.param("datasetIds", ""))
 			.andExpect(status().isForbidden());
@@ -289,8 +292,55 @@ public class DatasetApiControllerTest {
 		// THEN we expect an error
 	}
 
+
 	@Test
-	@WithMockKeycloakUser(id = 2)
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testMassiveDownloadByDatasetsIdToMuchIds() {
+		// GIVEN a list of datasets to export
+		StringBuilder strb = new StringBuilder();
+		for (int i = 0; i < 55 ; i++) {
+			strb.append(i).append(",");
+		}
+		String ids = strb.substring(0, strb.length() -1);
+
+		// WHEN we export all the datasets with no datasets ID
+		try {
+			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
+					.param("format", "nii")
+					.param("datasetIds", ids))
+			.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can't download more than 50 datasets.\",\"details\":null}");
+		}
+
+
+		// THEN we expect an error
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testMassiveDownloadByStudyIdTooMuchDatasets() throws Exception {
+		// GIVEN a study with more then 50 datasets to export
+
+		List<Dataset> hugeList = new ArrayList<Dataset>();
+		for (int i = 0; i < 51 ; i++) {
+			hugeList.add(new MrDataset());
+		}
+		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
+
+		try {
+		// WHEN we export all the datasets
+		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+				.param("format", "nii")
+				.param("studyId", "1"))
+		.andExpect(status().isForbidden());
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
+		}
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
@@ -326,9 +376,9 @@ public class DatasetApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
 				.param("format", "otherWRONG")
 				.param("studyId", "1"))
-		.andExpect(status().isForbidden());
+		.andExpect(status().isUnprocessableEntity());
 	} catch (Exception e) {
-		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Bad arguments.\",\"details\":null}", e.getMessage());
+		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
 	}
 
 		// THEN we expect a failure

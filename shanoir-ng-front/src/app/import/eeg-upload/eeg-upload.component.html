@@ -15,11 +15,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="header command-zone">1. Select Brainvision archive</div>
 <fieldset>
     <p>Please select a Brainvision or EDF zip archive to import.</p>
-    <p>The files should be organized like this:</p>
-    <p>directory_name.zip -> directory_name/dataset_name.vhdr</p>
-    <p>directory_name.zip -> directory_name/dataset_name.edf</p>
-    <p>Other files linked to a dataset should have the same name (extension does not matter): dataset_name.other <br/>
-    Multiple datasets can be imported at once (dataset1.edf, dataset2.edf, etc...)</p>
+    <ul>
+        <li>
+            The files should be organized like this :
+            <ul>
+                <li>directory_name.zip -> directory_name/dataset_name.vhdr</li>
+                <li>directory_name.zip -> directory_name/dataset_name.edf</li>
+            </ul>
+        </li>
+        <li>Other files linked to a dataset should have the same name (extension does not matter) : dataset_name.other</li>
+        <li>Multiple datasets can be imported at once (dataset1.edf, dataset2.edf, etc...)</li>
+
+    </ul>
 
     <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
     

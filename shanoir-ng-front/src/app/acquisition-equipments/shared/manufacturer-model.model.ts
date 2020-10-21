@@ -16,13 +16,14 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ServiceLocator } from '../../utils/locator.service';
 import { ManufacturerModelService } from './manufacturer-model.service';
 import { Manufacturer } from './manufacturer.model';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 export class ManufacturerModel extends Entity {
     id: number;
     name: string;
     manufacturer: Manufacturer;
     magneticField: number;
-    datasetModalityType: string;
+    datasetModalityType: DatasetModalityType;
 
     service: ManufacturerModelService = ServiceLocator.injector.get(ManufacturerModelService);
 }

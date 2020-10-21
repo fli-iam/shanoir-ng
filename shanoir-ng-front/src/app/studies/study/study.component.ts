@@ -63,8 +63,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    protected bidsStructure: BidsElement[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -87,7 +85,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
-        this.getBidsStructure(this.id);
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -172,13 +169,22 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
 
     private newStudy(): Study {
         let study: Study = new Study();
@@ -435,16 +441,5 @@ export class StudyComponent extends EntityComponent<Study> {
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
     }
-
-    getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {this.bidsStructure = [element]});
-    }
-
-    // removeTimepoint(timepoint: Timepoint): void {
-    //     const index: number = this.study.timepoints.indexOf(timepoint);
-    //     if (index !== -1) {
-    //         this.study.timepoints.splice(index, 1);
-    //     }
-    // }
 
 }

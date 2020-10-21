@@ -80,7 +80,7 @@ export class FinishImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'The data has been successfully imported')
+                            that.msgService.log('info', 'the import successfully started.')
                         }, 0);
                         // go back to the first step of import
                         if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);
@@ -117,7 +117,7 @@ export class FinishImportComponent {
             else if (this.importMode == 'PACS') importJob.fromPacs = true;
             importJob.examinationId = this.context.examination.id;
             importJob.studyId = this.context.study.id;
-            importJob.studyCardId = this.context.studyCard.id;
+            importJob.studyCardId = this.context.studyCard ? this.context.studyCard.id : null;
             importJob.acquisitionEquipmentId = this.context.acquisitionEquipment.id;
             importJob.converterId = this.context.niftiConverter.id;
             importJob.subjectName = this.context.subject.name;

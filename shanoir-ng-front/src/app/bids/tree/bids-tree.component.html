@@ -24,12 +24,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [deploy]="false"
     [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
     (labelClick)="getContent(item)"
+    [buttonPicto]="'fas fa-save'"
+    (buttonClick)="download(item)"
     (openClick)="getDetail($event)">
       <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements }"></ng-container>
     </node>
 </ng-template>
 
-<node label="Bids" awesome="far fa-folder" [deploy]="true" >
+<node label="Bids" awesome="far fa-folder" [deploy]="false" [dataRequest]="true" (openClick)="getBidsStructure()" ([awesome])="(load=='loading') ? 'far fa-spin' : 'fas fa-folder'">
   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
 </node>
 
