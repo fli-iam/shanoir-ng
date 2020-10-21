@@ -631,25 +631,22 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 	) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File statisticsFile = recreateFile(tmpDir + File.separator + "shanoirExportStatistics.txt");
-		File zipFile = recreateFile(tmpDir + File.separator + "shanoirExportStatistics" + ZIP);
+		File userDir = getUserImportDir(tmpDir);
+		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.txt");
+		File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics" + ZIP);
 
 		// Get the data
-		try {
+		try (	FileOutputStream fos = new FileOutputStream(statisticsFile);
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));	){
 
 
 			List<Object[]> results = datasetService.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
-			
-			FileOutputStream fos = new FileOutputStream(statisticsFile);
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 
 			for (Object[] or : results) {
 				List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
 				bw.write(String.join("\t", strings));
 				bw.newLine();
 			}
-		 
-			bw.close();
 			
 		} catch (javax.persistence.NoResultException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
@@ -657,10 +654,14 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
 		}
+
 		zipSingleFile(statisticsFile, zipFile);
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
+
+		statisticsFile.delete();
+		zipFile.delete();
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
