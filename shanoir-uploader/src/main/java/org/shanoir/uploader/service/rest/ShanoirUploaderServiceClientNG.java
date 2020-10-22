@@ -1,7 +1,10 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +14,11 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
@@ -20,7 +27,6 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
-
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,6 +100,8 @@ public class ShanoirUploaderServiceClientNG {
 	private Map<Integer, String> apiResponseMessages;
 
 	public ShanoirUploaderServiceClientNG() {
+		this.httpService = new HttpService();
+		
 		apiResponseMessages = new HashMap<Integer, String>();
 		apiResponseMessages.put(200, "ok");
 		apiResponseMessages.put(204, "no item found");
@@ -101,7 +109,6 @@ public class ShanoirUploaderServiceClientNG {
 		apiResponseMessages.put(403, "forbidden");
 		apiResponseMessages.put(500, "unexpected error");
 		
-		this.httpService = new HttpService();
 		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 			this.serviceURLStudiesNamesAndCenters = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
@@ -130,13 +137,36 @@ public class ShanoirUploaderServiceClientNG {
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
+	public String loginWithKeycloakForToken(String username, String password) {
+		String keycloakURL = this.serverURL + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
+		try {
+			final StringBuilder postBody = new StringBuilder();
+			postBody.append("client_id=shanoir-uploader");
+			postBody.append("&grant_type=password");
+			postBody.append("&username=").append(username);
+			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
+			postBody.append("&scope=openid info offline_access");
+			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+			String responseEntityString = EntityUtils.toString(response.getEntity());
+			final int statusCode = response.getStatusLine().getStatusCode();
+			if (HttpStatus.SC_OK == statusCode) {
+				JSONObject responseEntityJson = new JSONObject(responseEntityString);
+				return responseEntityJson.getString("access_token");
+			}
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (ParseException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
 	public List<Study> findStudiesNamesAndCenters() {
 		HttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
+		if (code == HttpStatus.SC_OK) {
 			List<Study> studies = Util.getMappedList(response, Study.class);
 			return studies;
 		} else {
@@ -148,9 +178,9 @@ public class ShanoirUploaderServiceClientNG {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
-			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json);
+			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
 				return studyCards;
 			}
@@ -163,7 +193,7 @@ public class ShanoirUploaderServiceClientNG {
 	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
 		HttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + subjectIdentifier);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
+		if (code == HttpStatus.SC_OK) {
 			Subject subjectDTO = Util.getMappedObject(response, Subject.class);
 			return subjectDTO;
 		} else {
@@ -174,7 +204,7 @@ public class ShanoirUploaderServiceClientNG {
 	public String createTempDir() throws Exception {
 		HttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
+		if (code == HttpStatus.SC_OK) {
 			String importTempDirId = Util.getMappedObject(response, String.class);
 			return importTempDirId;
 		} else {
@@ -186,7 +216,7 @@ public class ShanoirUploaderServiceClientNG {
 		if (subjectId != null) {
 			HttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 //				ResponseHandler<String> handler = new BasicResponseHandler();
 //				String body = handler.handleResponse(response);
 //				logger.info(body);
@@ -200,13 +230,10 @@ public class ShanoirUploaderServiceClientNG {
 	public List<Long> findDatasetIdsByStudyId(Long studyId) throws Exception {
 		if (studyId != null) {
 			List<Long> datasetIds = new ArrayList<Long>();
-			
 			URI url = UriBuilder.fromUri(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects").queryParam("preclinical",  "null").build();
-
 			HttpResponse response = httpService.get(url.toString());
 			int code = response.getStatusLine().getStatusCode();
-						
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				List<Subject> subjects = Util.getMappedList(response, Subject.class);
 				for(Subject subject : subjects) {
 					List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
@@ -225,9 +252,8 @@ public class ShanoirUploaderServiceClientNG {
 	public List<Long> findDatasetIdsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
 			HttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId);
-			
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
 			} else {
@@ -239,10 +265,9 @@ public class ShanoirUploaderServiceClientNG {
 
 	public List<Long> findDatasetIdsBySubjectIdStudyId(Long subjectId, Long studyId) throws Exception {
 		if (subjectId != null) {
-			
 			HttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId + "/study/" + studyId);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				List<Long> datasetIds = Util.getMappedList(response, Long.class);
 				return datasetIds;
 			} else {
@@ -256,7 +281,7 @@ public class ShanoirUploaderServiceClientNG {
 		if (acquisitionEquipmentId != null) {
 			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				AcquisitionEquipment acquisitionEquipment = Util.getMappedObject(response, AcquisitionEquipment.class);
 				return acquisitionEquipment;
 			}
@@ -267,25 +292,25 @@ public class ShanoirUploaderServiceClientNG {
 	public void uploadFile(String tempDirId, File file) throws Exception {
 		HttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId, file);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
+		if (code == HttpStatus.SC_OK) {
 		} else {
 			throw new Exception("Error in uploadFile.");
 		}
 	}
 	
 	public void startImportJob(String importJobJsonStr) throws Exception {
-		HttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr);
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr, false);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
+		if (code == HttpStatus.SC_OK) {
 		} else {
 			throw new Exception("Error in startImportJob.");
 		}
 	}
 	
 	public void startImport(String exchangeJsonStr) throws Exception {
-		HttpResponse response = httpService.post(this.serviceURLImporterStartImport, exchangeJsonStr);
+		HttpResponse response = httpService.post(this.serviceURLImporterStartImport, exchangeJsonStr, false);
 		int code = response.getStatusLine().getStatusCode();
-		if (code == 200) {
+		if (code == HttpStatus.SC_OK) {
 		} else {
 			throw new Exception("Error in startImport.");
 		}
@@ -294,11 +319,9 @@ public class ShanoirUploaderServiceClientNG {
 	public HttpResponse downloadDatasetById(Long datasetId, String format) throws Exception {
 		if (datasetId != null) {
 			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "download/" + datasetId).queryParam("format", format).build();
-			
 			HttpResponse response = httpService.get(url.toString());
-
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				return response;
 			} else {
 				logger.error("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -309,17 +332,11 @@ public class ShanoirUploaderServiceClientNG {
 
 	public HttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
 		if (datasetIds != null) {
-			
-			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIds.toArray(new Object[0])).queryParam("format", format).build();
-			// URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownload").queryParam("datasetIds", datasetIdsString).queryParam("format", format).build();
-			
 			String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
 			String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format=" + format;
-			
 			HttpResponse response = httpService.get(url.toString());
-
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				return response;
 			} else {
 				logger.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -331,11 +348,9 @@ public class ShanoirUploaderServiceClientNG {
 	public HttpResponse downloadDatasetsByStudyId(Long studyId, String format) throws Exception {
 		if (studyId != null) {
 			URI url = UriBuilder.fromUri(this.serviceURLDatasets + "massiveDownloadByStudy").queryParam("studyId", studyId).queryParam("format", format).build();
-			
 			HttpResponse response = httpService.get(url.toString());
-
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				return response;
 			} else {
 				logger.error("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -362,12 +377,12 @@ public class ShanoirUploaderServiceClientNG {
 			String json = ow.writeValueAsString(subject);
 			HttpResponse response;
 			if (modeSubjectCommonNameManual) {
-				response = httpService.post(this.serviceURLSubjectsCreate, json);
+				response = httpService.post(this.serviceURLSubjectsCreate, json, false);
 			} else {
-				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json);
+				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json, false);
 			}
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
 				return subjectDTOCreated;
 			}
@@ -391,7 +406,7 @@ public class ShanoirUploaderServiceClientNG {
 			String json = ow.writeValueAsString(subject);
 			HttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 204) {
+			if (code == HttpStatus.SC_NO_CONTENT) {
 				return subject;
 			}
 		} catch (JsonProcessingException e) {
@@ -410,9 +425,9 @@ public class ShanoirUploaderServiceClientNG {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(examinationDTO);
-			HttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json);
+			HttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false);
 			int code = response.getStatusLine().getStatusCode();
-			if (code == 200) {
+			if (code == HttpStatus.SC_OK) {
 				Examination examinationDTOCreated = Util.getMappedObject(response, Examination.class);
 				return examinationDTOCreated;
 			}
