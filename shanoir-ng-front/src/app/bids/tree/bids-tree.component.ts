@@ -33,7 +33,7 @@ export class BidsTreeComponent implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     @Input() studyId: number;
-    protected list: BidsElement[] = [];
+    protected list: BidsElement[];
     protected json: JSON;
     protected tsv: string[][];
     protected title: string;
