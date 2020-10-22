@@ -385,7 +385,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(id = 2)
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdFileTooBig() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
@@ -424,7 +424,7 @@ public class DatasetApiControllerTest {
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
 
 		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownload")
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", format)
 				.param("datasetIds", "1"))
 		.andExpect(status().isPayloadTooLarge());
