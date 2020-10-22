@@ -44,7 +44,7 @@ public class ShUpOnloadConfig {
 
 	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	
-	private static KeycloakInstalled keycloakInstalled = null;
+	private static KeycloakInstalled keycloakInstalled;
 	
 	private static ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
@@ -54,7 +54,7 @@ public class ShUpOnloadConfig {
 
 	private static boolean shanoirNg;
 
-	public static String tokenString;
+	private static String tokenString;
 
 	/** Constructeur privé */
 	private ShUpOnloadConfig() {
@@ -169,6 +169,10 @@ public class ShUpOnloadConfig {
 		return keycloakInstalled != null ? keycloakInstalled.getTokenString() : tokenString;
 	}
 	
+	public static void setTokenString(String tokenString) {
+		ShUpOnloadConfig.tokenString = tokenString;
+	}
+
 	public static KeycloakInstalled getKeycloakInstalled() {
 		return keycloakInstalled;
 	}
