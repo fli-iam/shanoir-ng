@@ -106,6 +106,14 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
+            if (study.studyUserList) {
+                study.studyUserList.forEach(studyUser => {
+                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
+                    if (option) option.disabled = true;
+                })
+            }
+        });
+
         });
         Promise.all([
             studyPromise,
@@ -395,7 +403,7 @@ export class StudyComponent extends EntityComponent<Study> {
         StudyUser.completeMember(item, this.users);
         if (this.userOptions) {
             let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = true;
+            if (option) option.disabled = false;
         }
     }
 
