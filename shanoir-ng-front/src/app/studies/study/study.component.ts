@@ -110,11 +110,10 @@ export class StudyComponent extends EntityComponent<Study> {
                 study.studyUserList.forEach(studyUser => {
                     let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
                     if (option) option.disabled = true;
-                })
+                });
             }
         });
-
-        });
+        
         Promise.all([
             studyPromise,
             this.getCenters()
