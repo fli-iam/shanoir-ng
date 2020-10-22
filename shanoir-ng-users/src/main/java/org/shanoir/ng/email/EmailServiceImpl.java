@@ -23,9 +23,10 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +60,7 @@ public class EmailServiceImpl implements EmailService {
 	
 	private static final String EXAMINATION = "examination";
 	
-	
+	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
 	@Autowired
 	private JavaMailSender mailSender;
@@ -385,6 +386,7 @@ public class EmailServiceImpl implements EmailService {
 			};
 
 			// Send the message
+			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), studyId);
 			mailSender.send(messagePreparator);
 		}
 		
@@ -401,6 +403,7 @@ public class EmailServiceImpl implements EmailService {
 			return response;
 		} catch (Exception e) {
 			// Cannot get administrators, return empty list
+			LOG.error("Could not get study administrator. No mails will be sent.", e);
 			return Collections.emptyList();
 		}
 	}
