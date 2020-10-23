@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -85,8 +86,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(secure = false)
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-	    "maxDownloadSize=200",
-	})
+		"maxDownloadSize=200",
+})
 public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
@@ -112,6 +113,9 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private DatasetSecurityService datasetSecurityService;
+	
+    @Rule
+    public TemporaryFolder testFolder = new TemporaryFolder();
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -124,10 +128,6 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private SubjectRepository subjectRepository;
-
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
-    
 	private Subject subject = new Subject(3L, "name");
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
@@ -201,7 +201,7 @@ public class DatasetApiControllerTest {
 		metadata.setName("datasetName");
 		dataset.setOriginMetadata(metadata );
 		dataset.setId(1L);
-	
+
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
@@ -244,7 +244,7 @@ public class DatasetApiControllerTest {
 		metadata.setName("datasetName");
 		dataset.setOriginMetadata(metadata );
 		dataset.setId(1L);
-	
+
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
@@ -329,11 +329,11 @@ public class DatasetApiControllerTest {
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
 
 		try {
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-				.param("format", "nii")
-				.param("studyId", "1"))
-		.andExpect(status().isForbidden());
+			// WHEN we export all the datasets
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+					.param("format", "nii")
+					.param("studyId", "1"))
+			.andExpect(status().isForbidden());
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
 		}
@@ -354,7 +354,7 @@ public class DatasetApiControllerTest {
 		metadata.setName("datasetName");
 		dataset.setOriginMetadata(metadata );
 		dataset.setId(1L);
-		
+
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
@@ -371,15 +371,15 @@ public class DatasetApiControllerTest {
 
 		// GIVEN a study with some datasets to export in nii format
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
-	try {
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-				.param("format", "otherWRONG")
-				.param("studyId", "1"))
-		.andExpect(status().isUnprocessableEntity());
-	} catch (Exception e) {
-		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
-	}
+		try {
+			// WHEN we export all the datasets
+			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
+					.param("format", "otherWRONG")
+					.param("studyId", "1"))
+			.andExpect(status().isUnprocessableEntity());
+		} catch (Exception e) {
+			assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
+		}
 
 		// THEN we expect a failure
 	}
@@ -389,24 +389,24 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByDatasetsIdFileTooBig() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
-		
+
 		String format = "nii";
-		
+
 		File datasetFile = testFolder.newFile("testToBig.nii");
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		String repeated = String.join("", Collections.nCopies(100, "Ceci est un texte repete beaucoup plus long pour faire un fichier plus grand"));
 
 		FileUtils.write(datasetFile, repeated, Charset.forName("UTF8"));
-		
+
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
-		
+
 		DatasetMetadata metadata = new DatasetMetadata();
 		metadata.setName("datasetName");
 		dataset.setOriginMetadata(metadata );
 		dataset.setId(1L);
-		
+
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
@@ -414,7 +414,7 @@ public class DatasetApiControllerTest {
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
-		
+
 		DatasetAcquisition dsa = new MrDatasetAcquisition();
 		dsa.setRank(Integer.valueOf(1));
 		dsa.setSortingIndex(Integer.valueOf(1));
@@ -433,15 +433,29 @@ public class DatasetApiControllerTest {
 		ArgumentCaptor<ShanoirEvent> eventCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
 
 		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
-		
+
 		ShanoirEvent event = eventCaptor.getValue();
 		assertEquals(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, event.getEventType());
 		assertEquals(dataset.getId().toString(), event.getObjectId());
 		// This is important as this is parsed to get the
-		assertEquals(dataset.getName() + " : " + format, event.getMessage());
+		assertTrue(event.getMessage().startsWith("Datasets"));
 		assertEquals(ShanoirEvent.SUCCESS, event.getStatus());
-		
+
 
 		// THEN payload is too large but events are emited
 	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testDirectDownloadException() throws Exception {
+		// GIVEN a null datasetId
+		
+		// WHEN we try to download the dataset data
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/directDownload/")
+				.param("datasetId", null)
+				.param("pathName", "1"))
+		.andExpect(status().isInternalServerError());
+		// THEN we expect an internal server error
+	}
+	
 }

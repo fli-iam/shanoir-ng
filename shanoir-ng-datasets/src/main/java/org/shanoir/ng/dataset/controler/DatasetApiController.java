@@ -225,7 +225,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		
+
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -318,12 +318,12 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
-		
+
 		if (datasetIds.size() > DATASET_LIMIT) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
-		
+
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
@@ -359,21 +359,23 @@ public class DatasetApiController implements DatasetApi {
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
 		File userDir = getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));
-		
+
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
 		tmpFile.mkdirs();
-		
+
 		List<ShanoirEvent> events = new ArrayList<>();
 
+		byte[] data = {};
+		File zipFile = null;
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
 				// Create a new folder for every dataset
 				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
 				datasetFile.mkdir();
- 
+
 				List<URL> pathURLs = new ArrayList<>();
 				if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
@@ -388,47 +390,55 @@ public class DatasetApiController implements DatasetApi {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
 				}
-				ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getName() + " : " + format, ShanoirEvent.SUCCESS);
+				ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), tmpFile.getName(), ShanoirEvent.SUCCESS);
 				events.add(event);
 			}
+
+			// Zip it
+			zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
+			zipFile.createNewFile();
+	
+			Utils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+	
+			long fileSize = FileUtils.sizeOf(zipFile);
+	
+			// Nginx limit is set to 5Gb => split by dataset if file is bigger
+	
+			boolean fileIsTooBig = fileSize > maxFileSize;
+	
+			if (fileIsTooBig) {
+				// Publish events to download files on by one
+	
+				for (ShanoirEvent event : events) {
+					// publish all events for every datasets
+					eventService.publishEvent(event);
+				}
+	
+				// Here delete zip file only (tmp file is kept to be downloaded)
+				FileUtils.deleteQuietly(zipFile);
+				return new ResponseEntity<>(HttpStatus.PAYLOAD_TOO_LARGE);
+			}
+	
+			data = Files.readAllBytes(zipFile.toPath());
+		
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error while copying files: ", e);
 			FileUtils.deleteQuietly(tmpFile);
+			FileUtils.deleteQuietly(zipFile);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files. Please contact an administrator.", e));
 		} catch(OutOfMemoryError error) {
 			LOG.error("Out of memory error while copying files: ", error);
-			FileUtils.deleteQuietly(tmpFile);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "The size of data you tried to download is too Important. Please split your download.", error));
-		}
-		// Zip it
-		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
-		zipFile.createNewFile();
-
-		Utils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
-		
-		long fileSize = FileUtils.sizeOf(zipFile);
-
-		// Nginx limit is set to 5Gb => split by dataset if file is bigger
-	
-		boolean fileIsTooBig = fileSize > maxFileSize;
-
-		if (fileIsTooBig) {
-			// Publish events to download files on by one
-			
+			FileUtils.deleteQuietly(zipFile);
 			for (ShanoirEvent event : events) {
 				// publish all events for every datasets
 				eventService.publishEvent(event);
 			}
 
-			// Here delete zip file only
+			// Here delete zip file only (tmp file is kept to be downloaded)
 			FileUtils.deleteQuietly(zipFile);
-			FileUtils.deleteQuietly(tmpFile);
 			return new ResponseEntity<>(HttpStatus.PAYLOAD_TOO_LARGE);
 		}
-
-		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
 
 		FileUtils.deleteDirectory(tmpFile);
@@ -438,6 +448,39 @@ public class DatasetApiController implements DatasetApi {
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.contentLength(data.length)
 				.body(resource);
+	}
+
+	@Override
+	public ResponseEntity<ByteArrayResource> downloadDirectDatasetById(
+			@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "pathName of the file", required=true) @PathVariable("pathName") String pathName) throws RestServiceException {
+		// Download directly an existing file (rights check is done in API)
+		try {
+			File userDir = getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));
+			File tmpFile = new File(userDir.getAbsolutePath() + File.separator + pathName);
+			File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + datasetId);
+
+			if (!datasetFile.exists()) {
+				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
+
+			File zipFile = new File(datasetFile.getAbsolutePath() + ZIP);
+			zipFile.createNewFile();
+
+			Utils.zip(datasetFile.getAbsolutePath(), zipFile.getAbsolutePath());
+
+			byte[] data = Files.readAllBytes(zipFile.toPath());
+			ByteArrayResource resource = new ByteArrayResource(data);
+
+			return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+					.contentType(MediaType.MULTIPART_FORM_DATA)
+					.contentLength(data.length)
+					.body(resource);
+		} catch (Exception e) {
+			LOG.error("An error occured while retrieving dataset. See Exception " + datasetId, e);
+			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occured while retrieving dataset. Please contact an administrator."));
+		}
 	}
 
 	/**
@@ -454,7 +497,7 @@ public class DatasetApiController implements DatasetApi {
 
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 			StringBuilder name = new StringBuilder("");
-			
+
 			Subject subject = subjectRepo.findOne(dataset.getSubjectId());
 			if (subject != null) {
 				name.append(subject.getName());
@@ -538,36 +581,36 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(error);
 		}
 	}
-	
+
 	/**
 	 * This enum is for coordinates system and associated units
 	 */
 	public enum CoordinatesSystem {
-	    ACPC("mm"),
-	    ALLEN("mm"),
-	    ANALYZE("mm"),
-	    BTI_4D("m"),
-	    CTF_MRI("mm"),
-	    CTF_GRADIOMETER("cm"),
-	    CAPTRAK("mm"),
-	    CHIETI("mm"),
-	    DICOM("mm"),
-	    FREESURFER("mm"),
-	    MNI("mm"),
-	    NIFTI("mm"),
-	    NEUROMAG_ELEKTA("m"),
-	    PAXINOS_FRANKLIN("mm"),
-	    TALAIRACH_TOURNOUX("mm"),
-	    YOKOGAWA("n/a");
-	    
-	    private String unit;
-	    
-	    CoordinatesSystem(final String pUnit) {
-	    	this.unit = pUnit;
-	    }
-	    public String getUnit() {
-	    	return unit;
-	    }
+		ACPC("mm"),
+		ALLEN("mm"),
+		ANALYZE("mm"),
+		BTI_4D("m"),
+		CTF_MRI("mm"),
+		CTF_GRADIOMETER("cm"),
+		CAPTRAK("mm"),
+		CHIETI("mm"),
+		DICOM("mm"),
+		FREESURFER("mm"),
+		MNI("mm"),
+		NIFTI("mm"),
+		NEUROMAG_ELEKTA("m"),
+		PAXINOS_FRANKLIN("mm"),
+		TALAIRACH_TOURNOUX("mm"),
+		YOKOGAWA("n/a");
+
+		private String unit;
+
+		CoordinatesSystem(final String pUnit) {
+			this.unit = pUnit;
+		}
+		public String getUnit() {
+			return unit;
+		}
 	}
-	
+
 }

@@ -144,6 +144,19 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
 
+    @ApiOperation(value = "", nickname = "downloadDirectDatasetById", notes = "If exists, returns a zip file of the dataset corresponding to the given id", response = Resource.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/directDownload/{datasetId}/{pathName}", produces = { "application/zip" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
+    ResponseEntity<ByteArrayResource> downloadDirectDatasetById(
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
+    		@ApiParam(value = "pathName of the file", required=true) @PathVariable("pathName") String pathName) throws RestServiceException, IOException;
+
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),

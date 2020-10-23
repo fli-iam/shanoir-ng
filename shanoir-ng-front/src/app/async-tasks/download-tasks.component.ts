@@ -52,6 +52,7 @@ export class DownloadTasksComponent extends BrowserPaginEntityListComponent<Task
             if (!entitiesGot) {
                 return [];
             }
+            return entitiesGot;
         });
     }
 
@@ -64,13 +65,12 @@ export class DownloadTasksComponent extends BrowserPaginEntityListComponent<Task
             return null;
         };
         return [
-            { headerName: 'Dataset name', field: 'message'},
+            { headerName: 'Dataset ID', field: 'objectId'},
             {
                 headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.creationDate);
                 }
             },
-            { headerName: 'Dataset ID', field: 'objectId'},
             {
                 headerName: "download", type: "button", awesome: "fa-download", action: item => this.download(item.objectId, item.message)
             },
@@ -78,9 +78,7 @@ export class DownloadTasksComponent extends BrowserPaginEntityListComponent<Task
     }
     
     download(id: number, message: string) {
-        let ds = new MrDataset();
-        ds.id = id;
-        this.datasetService.download(ds, message.substr(message.length - 3));
+        this.datasetService.directDownload(id, message);
     }
 
     getCustomActionsDefs(): any[] {

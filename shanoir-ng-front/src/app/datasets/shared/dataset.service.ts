@@ -83,6 +83,22 @@ export class DatasetService extends EntityService<Dataset> {
       });
     }
 
+    directDownload(id: number, pathName: string): Promise<void> {
+        return this.http.get(
+                AppUtils.BACKEND_API_DATASET_URL + '/directDownload/' + id + '/' + pathName,
+                { observe: 'response', responseType: 'blob' }
+            ).toPromise().then(
+                response => {
+                    this.downloadIntoBrowser(response);
+            }).catch((err: HttpErrorResponse) => {
+            if (err.status == 422) {
+                this.msgService.log("error", "Dataset not available anymore.")
+            } else {
+                this.msgService.log("error", err["error"]);
+            }
+          });
+    }
+
     download(dataset: Dataset, format: string): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         return this.downloadToBlob(dataset.id, format).toPromise().then(
