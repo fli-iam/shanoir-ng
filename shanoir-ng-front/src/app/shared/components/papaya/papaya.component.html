@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <button [disabled]="isLoading() || !params" *ngIf="!this.autoLoading && !loaded" (click)="load()">
-    <span *ngIf="!(isLoading() || !params)" class="right-icon">Load preview<i class="fas fa-search"></i></span>
-    <span *ngIf="isLoading() || !params" class="loader right-icon">Load preview<i class="fa fa-cog fa-spin"></i></span>
+    <span *ngIf="!(isLoading() || !params)" class="right-icon">Show preview<i class="fas fa-search"></i></span>
+    <span *ngIf="isLoading() || !params" class="loader right-icon">Loading<i class="fa fa-cog fa-spin"></i></span>
 </button>
 <div [hidden]="!loaded || !params" class="preview papaya" data-params="params"></div> 

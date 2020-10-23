@@ -263,7 +263,9 @@ public class DatasetApiController implements DatasetApi {
 		}
 
 		String tmpFilePath = userDir + File.separator + datasetName;
-		File workFolder = new File(tmpFilePath + DOWNLOAD);
+
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()) + DOWNLOAD);
 		workFolder.mkdirs();
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
@@ -284,10 +286,12 @@ public class DatasetApiController implements DatasetApi {
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
 		} catch (IOException | MessagingException e) {
+			LOG.error("Error while retrieveing dataset data.", e);
 			FileUtils.deleteQuietly(workFolder);
+			FileUtils.deleteQuietly(zipFile);
 
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", e.getLocalizedMessage()));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieveing dataset data.", e));
 		}
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
@@ -296,6 +300,8 @@ public class DatasetApiController implements DatasetApi {
 
 		byte[] data = Files.readAllBytes(zipFile.toPath());
 		ByteArrayResource resource = new ByteArrayResource(data);
+		
+		FileUtils.deleteQuietly(workFolder);
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
