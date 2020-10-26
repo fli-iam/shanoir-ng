@@ -8,7 +8,7 @@ sourceConn = pymysql.connect(
         host        = os.environ.get("SRC_HOST")        or "localhost",
         user        = os.environ.get("SRC_USER")        or "root",
         password    = os.environ.get("SRC_PASSWORD")    or "",
-        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        database    = os.environ.get("SRC_DATABASE")    or "ofsep",
         charset     = os.environ.get("SRC_CHARSET")     or "utf8")
 targetConn = pymysql.connect(
         host        = os.environ.get("TGT_HOST")        or "localhost",
@@ -19,6 +19,26 @@ targetConn = pymysql.connect(
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
+
+
+print("######## CLEANING OF SOURCE DB SHANOIR_OLD_OFSEP: START ###################")
+######## REL_STUDY_SUBJECT ###################
+print("Delete duplicate entries (study_id, subject_id) in rel_study_subject: start")
+query = """DELETE FROM rel_subject_study WHERE rel_subject_study_id IN (
+	SELECT rel_subject_study_id FROM (
+		SELECT a.rel_subject_study_id FROM rel_subject_study a JOIN (
+			SELECT study_id, subject_id, COUNT(*) FROM rel_subject_study GROUP BY study_id, subject_id HAVING COUNT(*) > 1
+		) b ON a.study_id = b.study_id AND a.subject_id = b.subject_id ORDER BY a.rel_subject_study_id
+	) AS c
+)"""
+sourceCursor.execute(query)
+sourceConn.commit()
+print("Delete duplicate entries in rel_study_subject: end")
+print("######## CLEANING OF SOURCE DB SHANOIR_OLD_OFSEP: END ###################")
+
+
+
+
 
 
 print("######## CLEANING OF TARGET DB MS STUDIES: START ###################")
