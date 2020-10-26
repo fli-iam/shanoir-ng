@@ -203,6 +203,9 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { LoaderService } from './shared/loader/loader.service';
+import { ShanoirHttpInterceptor } from './http-interceptor/http-interceptor';
 
 
 @NgModule({
@@ -343,7 +346,8 @@ import { ServiceLocator } from './utils/locator.service';
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent
+        BrukerFinishImportComponent,
+        LoaderComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -389,11 +393,7 @@ import { ServiceLocator } from './utils/locator.service';
         AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: KeycloakHttpInterceptor,
-            multi: true
-        },
+        { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         Router,
         GlobalService,
@@ -414,7 +414,9 @@ import { ServiceLocator } from './utils/locator.service';
         DatasetDTOService,
         SolrService,
         NotificationsService,
-        CenterDTOService
+        CenterDTOService,
+        LoaderService,
+        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent],
 })

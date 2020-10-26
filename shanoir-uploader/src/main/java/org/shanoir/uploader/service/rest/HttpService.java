@@ -29,14 +29,16 @@ import org.slf4j.LoggerFactory;
 /**
  * This class wraps the usage of Apache HttpClient, currently 4.3.1.
  * 
- * As with https://shanoir-qualif.irisa.fr ShUp did not work because of an exception:
- * sun.security.provider.certpath.SunCertPathBuilderException:
- * unable to find valid certification path to requested target
- * And as even the import of the certificate did not bring a solution,
- * HttpService creates a socketFactory in the constructor, that "solves"
- * the certificate issue for testing purpose only.
+ * In case of development environments with self-signed certificates a special
+ * SocketFactory is used, that avoid the below exception:
+ * sun.security.provider.certpath.SunCertPathBuilderException: unable to find
+ * valid certification path to requested target And as even the import of the
+ * certificate did not bring a solution, HttpService creates a socketFactory in
+ * the constructor, that "solves" the certificate issue for testing/development
+ * purpose only.
  * 
- * The SocketFactory is only used in case of "-qualif" is present in the URL.
+ * The SocketFactory is only used in case of "-dev" or "shanoir-ng-nginx" is
+ * present in the URL.
  * 
  * @author mkain
  *
@@ -44,35 +46,46 @@ import org.slf4j.LoggerFactory;
 public class HttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
-	
-	private static final String QUALIF = "-qualif";
 
-	// only used for qualif environments, not for prod
-	private SSLConnectionSocketFactory socketFactory;
-	
+	private static final String DEV_SERVER = "-dev";
+
+	private static final String DEV_LOCAL = "shanoir-ng-nginx";
+
+	// only used for dev environments, not for prod
+	private SSLConnectionSocketFactory socketFactoryDevEnv;
+
 	/**
 	 * Initiates a SocketFactory only for qualif testing.
 	 */
 	public HttpService() {
-		TrustManager[] trustManager = new TrustManager[] {
-			    new X509TrustManager() {
-			       public X509Certificate[] getAcceptedIssuers() {
-			           return new X509Certificate[0];
-			       }
-			       public void checkClientTrusted(X509Certificate[] certificate, String str) {}
-			       public void checkServerTrusted(X509Certificate[] certificate, String str) {}
-			    }
-			};
 		try {
+			TrustManager[] trustManager = initWeakTrustManager();
 			SSLContext context = SSLContext.getInstance("TLSv1.2");
 			context.init(null, trustManager, new SecureRandom());
-			socketFactory = new SSLConnectionSocketFactory(context,
-			        SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			socketFactoryDevEnv = new SSLConnectionSocketFactory(context,
+					SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		} catch (NoSuchAlgorithmException e) {
 			LOG.error(e.getMessage(), e);
 		} catch (KeyManagementException e) {
 			LOG.error(e.getMessage(), e);
 		}
+	}
+
+	private TrustManager[] initWeakTrustManager() {
+		TrustManager[] trustManager = new TrustManager[] {
+			new X509TrustManager() {
+				public X509Certificate[] getAcceptedIssuers() {
+					return new X509Certificate[0];
+				}
+	
+				public void checkClientTrusted(X509Certificate[] certificate, String str) {
+				}
+	
+				public void checkServerTrusted(X509Certificate[] certificate, String str) {
+				}
+			}
+		};
+		return trustManager;
 	}
 
 	public HttpResponse get(String url) {
@@ -88,34 +101,38 @@ public class HttpService {
 		return null;
 	}
 
-	public HttpResponse post(String url, String json) {
+	public HttpResponse post(String url, String json, boolean isLoginPost) {
 		try {
 			HttpClient httpClient = buildHttpClient(url);
 			HttpPost httpPost = new HttpPost(url);
-			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			if (isLoginPost) {
+				httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+			} else {
+				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());				
+			}
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
-			HttpResponse	 response = httpClient.execute(httpPost);
+			HttpResponse response = httpClient.execute(httpPost);
 			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}
-	
+
 	public HttpResponse postFile(String url, String tempDirId, File file) {
 		try {
 			HttpClient httpClient = buildHttpClient(url);
 			HttpPost httpPost = new HttpPost(url + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-//			for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-//				File file = (File) iterator.next();
-				builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());				
-//			}
+			// for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+			// File file = (File) iterator.next();
+			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
+			// }
 			HttpEntity entity = builder.build();
 			httpPost.setEntity(entity);
-			HttpResponse	 response = httpClient.execute(httpPost);
+			HttpResponse response = httpClient.execute(httpPost);
 			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -130,7 +147,7 @@ public class HttpService {
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPut.setEntity(requestEntity);
-			HttpResponse	 response = httpClient.execute(httpPut);
+			HttpResponse response = httpClient.execute(httpPut);
 			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -139,10 +156,12 @@ public class HttpService {
 	}
 
 	private CloseableHttpClient buildHttpClient(String url) {
-		if (url.contains(QUALIF)) {
-			return HttpClientBuilder.create().setSSLSocketFactory(socketFactory).build();			
+		if (url.contains(DEV_SERVER) || url.contains(DEV_LOCAL)) {
+			return HttpClientBuilder.create().setSSLSocketFactory(socketFactoryDevEnv).build();
 		} else {
-			return HttpClientBuilder.create().build();
+			// the below code solves the GitHub issue: https://github.com/fli-iam/shanoir-ng/issues/582,
+			// as Apache HttpClient does not per default use the HostnameVerifier from HttpsURLConnection (JDK/JRE)
+			return HttpClientBuilder.create().setHostnameVerifier(new CustomHostnameVerifier()).build();
 		}
 	}
 

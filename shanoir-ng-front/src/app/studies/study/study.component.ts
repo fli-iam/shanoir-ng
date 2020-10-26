@@ -63,8 +63,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    
-    protected bidsStructure: BidsElement[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -87,7 +85,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
-        this.getBidsStructure(this.id);
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -106,7 +103,14 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
+            if (study.studyUserList) {
+                study.studyUserList.forEach(studyUser => {
+                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
+                    if (option) option.disabled = true;
+                });
+            }
         });
+        
         Promise.all([
             studyPromise,
             this.getCenters()
@@ -346,7 +350,15 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onUserAdd(selectedUser: User) {
-        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+        if (!selectedUser) {
+            return;
+        }
+        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
+            return;   
+        }
+        if (this.isMe(selectedUser)) {
+            this.freshlyAddedMe = true;
+        }
         this.addUser(selectedUser);
     }
 
@@ -387,7 +399,7 @@ export class StudyComponent extends EntityComponent<Study> {
         StudyUser.completeMember(item, this.users);
         if (this.userOptions) {
             let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = true;
+            if (option) option.disabled = false;
         }
     }
 
@@ -444,30 +456,4 @@ export class StudyComponent extends EntityComponent<Study> {
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
     }
-
-    getBidsStructure(id: number) {
-       this.studyService.getBidsStructure(id).then(element => {
-            this.sort(element);
-            this.bidsStructure = [element];
-        });
-    }
-
-    sort(element: BidsElement) {
-        if (element.elements) {
-            element.elements.sort(function(elem1, elem2) {
-                if (elem1.file && !elem2.file) {
-                    return 1
-                } else if (!elem1.file && elem2.file) {
-                    return -1;
-                } else if (elem1.file && elem2.file || !elem1.file && !elem2.file) {
-                    return elem1.path < elem2.path ? -1 : 1;
-                }
-            });
-            // Then sort all sub elements folders
-            for (let elem of element.elements) {
-                this.sort(elem);
-            }
-        }
-    }
-
 }
