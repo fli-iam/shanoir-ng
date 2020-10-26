@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ public class RabbitMQStudiesService {
 	@RabbitListener(queues = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public List<Long> manageAdminsStudy(String studyId) throws JsonProcessingException {
+	public List<Long> manageAdminsStudy(String studyId) {
 		try {
 			Study study = studyRepo.findOne(Long.valueOf(studyId));
 			if (study == null) {
@@ -58,8 +57,8 @@ public class RabbitMQStudiesService {
 			}
 			// Filter administrators and map to get only IDs
 			List<Long> ids = study.getStudyUserList().stream()
-					.filter(studyUser -> studyUser.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE) && studyUser.isReceiveAnonymizationReport())
-					.map(studyUser -> studyUser.getId())
+					.filter(studyUser -> studyUser.isReceiveNewImportReport())
+					.map(studyUser -> studyUser.getUserId())
 					.collect(Collectors.toList());
 			return ids;
 		} catch (Exception e) {
