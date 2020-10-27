@@ -11,12 +11,12 @@ sourceConn = pymysql.connect(
         host        = os.environ.get("SRC_HOST")        or "localhost",
         user        = os.environ.get("SRC_USER")        or "root",
         password    = os.environ.get("SRC_PASSWORD")    or "",
-        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        database    = os.environ.get("SRC_DATABASE")    or "ofsep",
         charset     = os.environ.get("SRC_CHARSET")     or "utf8")
 targetConn = pymysql.connect(
         host        = os.environ.get("TGT_HOST")        or "localhost",
         user        = os.environ.get("TGT_USER")        or "datasets",
-        password    = os.environ.get("TGT_PASSWORD")    or "passwords",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
         database    = os.environ.get("TGT_DATABASE")    or "datasets",
         charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
@@ -69,6 +69,13 @@ targetConn.commit()
 print("Delete mr_dataset_acquisition: end")
 
 
+print("Delete diffusion_gradient: start")
+query = "DELETE FROM diffusion_gradient"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete diffusion_gradient: end")
+
+
 print("Delete inversion_time: start")
 query = "DELETE FROM inversion_time"
 targetCursor.execute(query)
@@ -95,6 +102,13 @@ query = "DELETE FROM flip_angle"
 targetCursor.execute(query)
 targetConn.commit()
 print("Delete flip_angle: end")
+
+
+print("Delete segmentation_dataset: start")
+query = "DELETE FROM segmentation_dataset"
+targetCursor.execute(query)
+targetConn.commit()
+print("Delete segmentation_dataset: end")
 
 
 print("Delete mr_dataset: start")
@@ -986,7 +1000,7 @@ query = """INSERT INTO study
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
-print("Import study: end")
+print("Import dataset_study: end")
 
 print("Import dataset_subject: start")
 
@@ -999,7 +1013,7 @@ query = """INSERT INTO subject
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
-print("Import subject: end")
+print("Import dataset_subject: end")
 
 query = "SET FOREIGN_KEY_CHECKS=1"
 targetCursor.execute(query)
