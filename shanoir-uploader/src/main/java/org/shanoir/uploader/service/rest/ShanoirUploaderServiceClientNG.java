@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -191,7 +192,7 @@ public class ShanoirUploaderServiceClientNG {
 	}
 
 	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
-		HttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + subjectIdentifier);
+		HttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"));
 		int code = response.getStatusLine().getStatusCode();
 		if (code == HttpStatus.SC_OK) {
 			Subject subjectDTO = Util.getMappedObject(response, Subject.class);

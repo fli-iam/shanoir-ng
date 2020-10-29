@@ -20,14 +20,15 @@ import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 
 public class CurrentUploadsWindowTable implements Observer {
 
-	private boolean DEBUG = false;
 	public MainWindow frame;
 	public static JTable table;
 	Object[] columnNames;
 	Object[] paths;
-	public int actionColumn = 7;
+	public int importColumn = 7;
+	public int deleteColumn = 8;
 	public int patientNameColumn = 2;
 	public int uploadStateColumn = 6;
+	public String readyUploadState = "READY";
 	public String startUploadState = "START";
 	public String startAutoImportUploadState = "START_AUTOIMPORT";
 	public String finishedUploadState = "FINISHED";
@@ -37,13 +38,17 @@ public class CurrentUploadsWindowTable implements Observer {
 
 	public CurrentUploadsWindowTable(final MainWindow frame) {
 		this.frame = frame;
-		final Object[] columnNames = { "id", frame.resourceBundle.getString("shanoir.uploader.currentUploads.ID"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.patientName"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.uploadState"),
-				frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action") };
+		final Object[] columnNames = {
+			"id",
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.ID"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.patientName"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.importState"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
+			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
+		};
 		this.columnNames = columnNames;
 		table = new JTable(new DefaultTableModel(columnNames, 0));
 		table.setPreferredScrollableViewportSize(new Dimension(800, 100));
@@ -56,7 +61,9 @@ public class CurrentUploadsWindowTable implements Observer {
 		table.getColumnModel().getColumn(1).setPreferredWidth(150);
 		table.getColumnModel().getColumn(2).setPreferredWidth(150);
 		table.getColumnModel().getColumn(5).setPreferredWidth(100);
+		table.getColumnModel().getColumn(6).setPreferredWidth(40);
 		table.getColumnModel().getColumn(7).setPreferredWidth(40);
+		table.getColumnModel().getColumn(8).setPreferredWidth(50);
 
 		// Resize and center the JTable header
 		table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -71,7 +78,8 @@ public class CurrentUploadsWindowTable implements Observer {
 			table.getColumnModel().getColumn(j).setCellRenderer(centerRenderer);
 		}
 		// Change Background color of action column
-		table.getColumnModel().getColumn(actionColumn).setCellRenderer(new Background_Renderer());
+		table.getColumnModel().getColumn(importColumn).setCellRenderer(new Background_Renderer());
+		table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
 
@@ -88,7 +96,7 @@ public class CurrentUploadsWindowTable implements Observer {
 	}
 
 	private void addLastRow(DefaultTableModel model) {
-		model.addRow(new Object[] { "", "", "", "", "", "", "",
+		model.addRow(new Object[] { "", "", "", "", "", "", "", "",
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll") });
 	}
 
@@ -98,24 +106,26 @@ public class CurrentUploadsWindowTable implements Observer {
 				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
 				nominativeDataUploadJob.getUploadState().toString(),
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import") });
+				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
+				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
+			});
 		} else if (UploadState.FINISHED_UPLOAD.equals(nominativeDataUploadJob.getUploadState())) {
 			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(),
+				nominativeDataUploadJob.getUploadPercentage(), "",
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
 		} else if (UploadState.ERROR.equals(nominativeDataUploadJob.getUploadState())) {
 			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(),
+				nominativeDataUploadJob.getUploadState().toString(), "",
 				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
 		} else {
 			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
 				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
 				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(), "" });
+				nominativeDataUploadJob.getUploadPercentage(), "", "" });
 		}
 	}
 
@@ -133,9 +143,6 @@ public class CurrentUploadsWindowTable implements Observer {
 		for (int i = 0; i < nbRow - 1; i++) {
 			if (model.getValueAt(i, 0).equals(path)) {
 				model.setValueAt(percentage, i, uploadStateColumn);
-				if (percentage != null && percentage.compareTo("FINISHED") == 0) {
-					model.setValueAt((String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete"), i, actionColumn);
-				}
 			}
 		}
 	}
@@ -160,6 +167,9 @@ public class CurrentUploadsWindowTable implements Observer {
 	}
 
 	class Background_Renderer extends DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = -7514583714509447137L;
+
 		Background_Renderer() {
 		}
 
@@ -182,8 +192,6 @@ public class CurrentUploadsWindowTable implements Observer {
 		int totalUploadPercent = 0;
 		for (Map.Entry<String, NominativeDataUploadJob> entry : currentNominativeDataModel.getCurrentUploads()
 				.entrySet()) {
-			String key = entry.getKey();
-			NominativeDataUploadJob value = entry.getValue();
 			if (entry.getValue() != null) {
 				if (entry.getValue().getUploadPercentage() == null
 					|| entry.getValue().getUploadPercentage().isEmpty()
