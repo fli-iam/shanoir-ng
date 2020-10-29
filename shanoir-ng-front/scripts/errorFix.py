@@ -25,7 +25,8 @@ for matchNum, match in enumerate(matches, start=1):
         
     #     print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
 
-    filename = '../shanoir-ng/shanoir-ng-front/src/app' + match.group('file')
+    # filename = '../shanoir-ng/shanoir-ng-front/src/app' + match.group('file')
+    filename = '../src/app' + match.group('file')
     text_to_search = match.group('type') + ' get ' + match.group('property') + '('
     replacement_text =  'public get ' + match.group('property') + '('
     # print('text_to_search', text_to_search, replacement_text)

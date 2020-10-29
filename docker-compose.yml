@@ -303,6 +303,7 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "./shanoir-ng-front/dist/:/etc/nginx/html/"
     networks:
       - shanoir_ng_network
     ports:
