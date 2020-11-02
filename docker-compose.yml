@@ -303,7 +303,6 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
-      - "./shanoir-ng-front/dist/:/etc/nginx/html/"
     networks:
       - shanoir_ng_network
     ports:
@@ -316,19 +315,6 @@ services:
       - "datasets"
       - "dcm4chee-arc"
       - "rabbitmq"
-      - "front-dev"
-
-  front-dev:
-    container_name: front-dev
-    build: ./docker-compose/front-dev
-    volumes:
-      - "./shanoir-ng-front:/app/"
-    command: ng serve --host 0.0.0.0 --disableHostCheck
-    ports:
-     - "4200:4200"
-    tty: true
-    networks:
-      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:

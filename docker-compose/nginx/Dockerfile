@@ -15,7 +15,7 @@ FROM nginx
 COPY nginx.conf http.conf https.conf shanoir.template.conf /etc/nginx/
 COPY entrypoint entrypoint_common /bin/
 
-# COPY webapp/ /etc/nginx/html/
+COPY webapp/ /etc/nginx/html/
 
 ENTRYPOINT ["/bin/entrypoint"]
 CMD ["nginx", "-g", "daemon off;"]

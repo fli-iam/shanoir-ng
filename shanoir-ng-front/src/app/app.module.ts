@@ -16,7 +16,7 @@ import '../assets/css/papaya.css';
 
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
-import { CommonModule } from '@angular/common';
+import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -154,7 +154,7 @@ import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
-import { AccountEventsService } from './users/account/account-events.service';
+// import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
@@ -220,6 +220,7 @@ import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-uploa
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
     imports: [
@@ -373,11 +374,11 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     //     ModalsComponent
     // ],
     providers: [
-        // {
-        //     provide: APP_BASE_HREF, 
-        //     useValue: environment.production  ? '/shanoir-ng/' : '/front-dev/'
-        // },
-        AccountEventsService,
+        {
+            provide: APP_BASE_HREF, 
+            useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
+        },
+        // AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
