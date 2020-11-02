@@ -142,16 +142,25 @@ if [ -n "$deploy" ] ; then
 			' INFO  \[org.jboss.as\] .* Keycloak .* started in [0-9]*ms'	\
 			-- docker-compose logs --no-color --follow keycloak >/dev/null
 
-	# 3. microservices
-	for ms in users studies datasets import preclinical
+	# 3. infrastructure services
+	step "start: infrastructure services"
+	for infra_ms in ldap dcm4chee-database dcm4chee-arc preclinical-bruker2dicom solr
 	do
-		step "init: $ms"
+		step "start: $infra_ms infrastructure microservice"
+		docker-compose up -d "$infra_ms"
+	done
+	
+	# 4. Shanoir-NG microservices
+	step "start: sh-ng microservices"
+	for ms in users studies datasets import #preclinical 
+	do
+		step "init: $ms microservice"
 		docker-compose run --rm -e SHANOIR_MIGRATION=init "$ms"
-		step "start: $ms"
+		step "start: $ms microservice"
 		docker-compose up -d "$ms"
 	done
 
-	# 4. nginx
+	# 5. nginx
 	step "start: nginx"
 	docker-compose up -d nginx
 fi
