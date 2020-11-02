@@ -103,7 +103,14 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
+            if (study.studyUserList) {
+                study.studyUserList.forEach(studyUser => {
+                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
+                    if (option) option.disabled = true;
+                });
+            }
         });
+        
         Promise.all([
             studyPromise,
             this.getCenters()
@@ -343,7 +350,15 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onUserAdd(selectedUser: User) {
-        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+        if (!selectedUser) {
+            return;
+        }
+        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
+            return;   
+        }
+        if (this.isMe(selectedUser)) {
+            this.freshlyAddedMe = true;
+        }
         this.addUser(selectedUser);
     }
 
@@ -384,7 +399,7 @@ export class StudyComponent extends EntityComponent<Study> {
         StudyUser.completeMember(item, this.users);
         if (this.userOptions) {
             let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = true;
+            if (option) option.disabled = false;
         }
     }
 
@@ -441,5 +456,4 @@ export class StudyComponent extends EntityComponent<Study> {
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
     }
-
 }
