@@ -41,7 +41,7 @@ export class DatasetDownaloadComponent {
     @Input() datasets: Dataset[] = [];
     @Input() studyId: number;
     protected useBids: boolean = false;
-    protected type: string = 'nii';
+    protected type = {value: 'nii', label: 'Nifti'};
     protected inError: boolean = false;
     protected errorMessage: string;
     protected loading: boolean = false;
@@ -64,12 +64,12 @@ export class DatasetDownaloadComponent {
         // Call service method to download datasets
         this.loading = true;
         if (!this.studyId) {
-            this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type).then(() => this.loading = false);
+            this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type.value).then(() => this.loading = false);
         } else {
             if (this.useBids) {
                 this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
             } else {
-                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type.value).then(() => this.loading = false);
             }
         }
         this.downloadDialog.hide();
