@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long> {
+public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, DatasetRepositoryCustom {
 
 	Page<Dataset> findByDatasetAcquisitionExaminationStudyIdIn(Iterable<Long> studyIds, Pageable pageable);
 

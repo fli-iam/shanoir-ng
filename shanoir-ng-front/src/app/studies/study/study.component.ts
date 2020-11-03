@@ -329,9 +329,9 @@ export class StudyComponent extends EntityComponent<Study> {
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
             { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
-            { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
+            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
             { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser }
         ];
     }
