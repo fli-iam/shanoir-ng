@@ -76,7 +76,6 @@ if [ -z "$clean$force" ] && [ -n "$deploy" ] ; then
 	die "you must provide at least --clean, --force or --no-deploy"
 fi
 
-
 if [ -n "$build" ] ; then
 	#
 	# Build stage
@@ -144,7 +143,7 @@ if [ -n "$deploy" ] ; then
 
 	# 3. infrastructure services
 	step "start: infrastructure services"
-	for infra_ms in ldap dcm4chee-database dcm4chee-arc preclinical-bruker2dicom solr
+	for infra_ms in rabbitmq ldap dcm4chee-database dcm4chee-arc preclinical-bruker2dicom solr
 	do
 		step "start: $infra_ms infrastructure microservice"
 		docker-compose up -d "$infra_ms"
@@ -152,7 +151,7 @@ if [ -n "$deploy" ] ; then
 	
 	# 4. Shanoir-NG microservices
 	step "start: sh-ng microservices"
-	for ms in users studies datasets import #preclinical 
+	for ms in users studies datasets import preclinical 
 	do
 		step "init: $ms microservice"
 		docker-compose run --rm -e SHANOIR_MIGRATION=init "$ms"
