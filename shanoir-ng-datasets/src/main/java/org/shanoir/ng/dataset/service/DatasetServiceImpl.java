@@ -16,6 +16,11 @@ package org.shanoir.ng.dataset.service;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.ParameterMode;
+import javax.persistence.PersistenceContext;
+import javax.persistence.StoredProcedureQuery;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -42,6 +47,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetServiceImpl implements DatasetService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
 	
 	@Autowired
 	private DatasetRepository repository;
@@ -143,4 +150,8 @@ public class DatasetServiceImpl implements DatasetService {
 		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
 	}
 
+	@Override
+	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
+		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
 }
