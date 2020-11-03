@@ -184,5 +184,24 @@ public interface DatasetApi {
     		@RequestParam(value = "studyId", required = true) Long studyId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException;
-
+	
+	@ApiOperation(value = "", nickname = "downloadStatistics", notes = "Download statistics from the entire database", response = Resource.class, tags={  })
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "exported statistics", response = Resource.class),
+		@ApiResponse(code = 401, message = "unauthorized"),
+		@ApiResponse(code = 403, message = "forbidden"),
+		@ApiResponse(code = 404, message = "no dataset found"),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/downloadStatistics", produces = { "application/zip" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadStatistics(
+			@ApiParam(value = "Study name including regular expression", required=false) @Valid
+			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
+			@ApiParam(value = "Study name excluding regular expression", required=false) @Valid
+			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
+			@ApiParam(value = "Subject name including regular expression", required=false) @Valid
+			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
+			@ApiParam(value = "Subject name excluding regular expression", required=false) @Valid
+			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException;
+		
 }

@@ -3,9 +3,6 @@ package org.shanoir.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -21,22 +18,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.rest.CustomHostnameVerifier;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 import org.shanoir.uploader.utils.Util;
 import org.springframework.http.HttpHeaders;
@@ -180,78 +166,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	}
 
-	private void keycloakAuthentification(String host, String username, String password) {
-		try {
-			InputStream iS = Util.class
-					.getResourceAsStream("/" + ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.KEYCLOAK_JSON);
-			if (iS != null) {
-				List<String> keycloakJsonString = IOUtils.readLines(iS, StandardCharsets.UTF_8);
-				iS.close();
-
-				JSONObject keycloakJson = new JSONObject(String.join("", keycloakJsonString));
-
-				String keycloakAuthenticationURL = host + "/auth"; // keycloakJson.getString("auth-server-url");
-
-				keycloakAuthenticationURL += "/realms/" + keycloakJson.getString("realm")
-						+ "/protocol/openid-connect/token";
-
-				// the below code solves the GitHub issue:
-				// https://github.com/fli-iam/shanoir-ng/issues/582,
-				// as Apache HttpClient does not per default use the HostnameVerifier from
-				// HttpsURLConnection (JDK/JRE)
-				final CloseableHttpClient httpclient = HttpClientBuilder.create()
-						.setHostnameVerifier(new CustomHostnameVerifier()).build();
-
-				final HttpPost httpost = new HttpPost(keycloakAuthenticationURL);
-				StringEntity se = null;
-				try {
-					final StringBuilder str = new StringBuilder();
-					str.append("client_id=shanoir-uploader");
-					str.append("&grant_type=password");
-					str.append("&username=").append(username);
-					str.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
-					str.append("&scope=openid info offline_access");
-					se = new StringEntity(str.toString());
-				} catch (UnsupportedEncodingException e) {
-					log.error("Keycloak authentication. Unsupported encoding exception on entity creation", e);
-				}
-				
-				httpost.setEntity(se);
-				httpost.setHeader("Content-type", "application/x-www-form-urlencoded");
-
-				CloseableHttpResponse response = null;
-				try {
-					response = httpclient.execute(httpost);
-					String responseEntityString = EntityUtils.toString(response.getEntity());
-					final int statusCode = response.getStatusLine().getStatusCode();
-					if (HttpStatus.SC_OK == statusCode) {
-						JSONObject responseEntityJson = new JSONObject(responseEntityString);
-						ShUpOnloadConfig.tokenString = responseEntityJson.getString("access_token");
-					}
-				} catch (ClientProtocolException e) {
-					log.error("Keycloak is unreachable. Client protocol exception", e);
-				} catch (IOException e) {
-					log.error("Keycloak is unreachable. IO exception", e);
-				} finally {
-					try {
-						httpclient.close();
-						response.close();
-					} catch (Exception e) {
-						log.error("There was an error closing the Keycloak connection", e);
-					}
-				}
-			} else if (ShUpOnloadConfig.isShanoirNg()) {
-				System.err.println("Error: missing keycloak.json! Connection with sh-ng will not work.");
-			}
-
-			// return false;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-	}
-
 	/** Our business Service. */
-	// private Downloader downloader;
 	private ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
 	/**
@@ -390,9 +305,14 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			}
 		}
 
-		keycloakAuthentification(getHost(), cl.getOptionValue("user"), cl.getOptionValue("password"));
-
 		shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
+		String token = shanoirUploaderServiceClientNG.loginWithKeycloakForToken(
+			cl.getOptionValue("user"), cl.getOptionValue("password"));
+		if (token != null) {
+			ShUpOnloadConfig.setTokenString(token);
+		} else {
+			System.out.println("ERROR: login not successful.");
+		}
 
 		try {
 			String format = "nii";

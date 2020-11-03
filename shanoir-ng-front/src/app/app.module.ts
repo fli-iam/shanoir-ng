@@ -57,7 +57,8 @@ import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
-import { DatasetDownaloadComponent } from './datasets/download/dataset-download.component';
+import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
+import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
@@ -275,7 +276,8 @@ import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.compo
         DatasetComponent,
         EegDatasetComponent,
         DatasetListComponent,
-        DatasetDownaloadComponent,
+        DatasetDownloadComponent,
+        DownloadStatisticsComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,

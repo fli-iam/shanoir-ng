@@ -101,11 +101,15 @@ public class HttpService {
 		return null;
 	}
 
-	public HttpResponse post(String url, String json) {
+	public HttpResponse post(String url, String json, boolean isLoginPost) {
 		try {
 			HttpClient httpClient = buildHttpClient(url);
 			HttpPost httpPost = new HttpPost(url);
-			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			if (isLoginPost) {
+				httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+			} else {
+				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());				
+			}
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
 			HttpResponse response = httpClient.execute(httpPost);

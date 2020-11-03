@@ -1,6 +1,7 @@
 package org.shanoir.uploader.action.init;
 
 import java.io.FileInputStream;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -62,6 +63,13 @@ public class AuthenticationConfigurationState implements State {
 					}
 				};
 				executor.scheduleAtFixedRate(task, 0, 60, TimeUnit.SECONDS);
+			// https://github.com/fli-iam/shanoir-ng/issues/615
+			} catch (ConnectException connEx) {
+				context.getShUpStartupDialog().updateStartupText(
+						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+				context.setState(new AuthenticationManualConfigurationState());
+				context.nextState();
+				return;
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(

@@ -101,7 +101,17 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(studyId, 'CAN_SEE_ALL'))")
 	public List<Dataset> findByStudyId(Long studyId);
 
+  
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(studyId, 'CAN_SEE_ALL'))")
 	List<Dataset> findByAcquisition(Long acquisitionId);
+  
+  
+	/**
+	 * Get database statistics
+	 * 
+	 * @return statistics
+	 */
+	@PreAuthorize("hasRole('ADMIN')")
+	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 
 }
