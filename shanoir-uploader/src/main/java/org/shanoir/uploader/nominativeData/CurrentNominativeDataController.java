@@ -57,7 +57,7 @@ public class CurrentNominativeDataController {
 				int col = cuw.table.getSelectedColumn();
 				int rows = cuw.table.getRowCount();
 				// Last row and last column: delete all
-				if (col == cuw.actionColumn && row == rows - 1) {
+				if (col == cuw.deleteColumn && row == rows - 1) {
 					String message = cuw.frame.resourceBundle
 							.getString("shanoir.uploader.currentUploads.Action.deleteAll.confirmation.message");
 					UIManager.put("OptionPane.cancelButtonText", cuw.frame.resourceBundle
@@ -91,11 +91,17 @@ public class CurrentNominativeDataController {
 						}
 						processWorkFolder(workFolderFilePath);
 					}
-				// Other rows and last column: import or delete one upload
-				} else if (col == cuw.actionColumn && row != -1) {
-					final String importOrDelete = (String) cuw.table.getModel().getValueAt(row, cuw.actionColumn);
-					final String importPropString = cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
-					if (importOrDelete.equals(importPropString)) {
+				// delete one import: ready (to gain disk space) or finished
+				} else if (col == cuw.deleteColumn && row != -1) {
+					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					if (uploadState.equals(cuw.finishedUploadState)
+							|| uploadState.equals(cuw.readyUploadState)) {
+						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);					
+					}
+				// start the import
+				} else if (col == cuw.importColumn && row != -1) {
+					String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
+					if (uploadState.equals(cuw.readyUploadState)) {
 						String uploadJobFilePath = (String) cuw.table.getModel().getValueAt(row, 0) + File.separator + UploadJobManager.UPLOAD_JOB_XML;
 						File uploadJobFile = new File(uploadJobFilePath);
 						uploadJobManager = new UploadJobManager(uploadJobFile);
@@ -105,8 +111,6 @@ public class CurrentNominativeDataController {
 						} else {
 							cuw.frame.getImportDialogOpenerNG().openImportDialog(uploadJob, uploadJobFile.getParentFile());
 						}
-					} else {
-						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
 					}
 				}
 			}
@@ -157,9 +161,9 @@ public class CurrentNominativeDataController {
 				int x = e.getX() - bounds.x;
 				int y = e.getY() - bounds.y;
 				cuw.rowsNb = cuw.table.getRowCount();
-				if (cuw.selectedRow == cuw.rowsNb - 1 && col == cuw.actionColumn) {
+				if (cuw.selectedRow == cuw.rowsNb - 1 && col == cuw.importColumn) {
 					cuw.table.getColumnModel().getColumn(col).setCellRenderer(new DeleteAllRenderer());
-				} else if (col == cuw.actionColumn) {
+				} else if (col == cuw.importColumn) {
 					try {
 						cuw.table.getColumnModel().getColumn(col).setCellRenderer(new Delete_Renderer());
 					} catch (Exception exp) {

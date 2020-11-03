@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Observable;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.UploadState;
 
 /**
  * This class contains a hash key of nominative data extracted from the
