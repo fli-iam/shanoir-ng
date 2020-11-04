@@ -11,10 +11,10 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-  <node [label]="instrumentBasedAssesment.instrument.acronym">
+  <node  [label]="instrumentBasedAssesment.instrument.acronym">
     <ng-template ngFor let-varAssess [ngForOf]="instrumentBasedAssesment.variableAssessmentList">
-        <node [label]="getInstrumentVarName(varAssess, instrumentBasedAssesment.instrument)" (isOpen)="true">
-           <node *ngFor="let score of varAssess.scoreList" [label]="score.scaleItem ? score.scaleItem.qualitativeScaleItem : score.id">
+        <node  [label]="getInstrumentVarName(varAssess, instrumentBasedAssesment.instrument)" (isOpen)="true" [hasChildren]="varAssess.scoreList && varAssess.scoreList.length > 0">
+           <node  *ngFor="let score of varAssess.scoreList" [label]="score.scaleItem ? score.scaleItem.qualitativeScaleItem : score.id" [hasChildren]="false">
            </node>
         </node>
     </ng-template>

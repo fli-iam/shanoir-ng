@@ -137,6 +137,7 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

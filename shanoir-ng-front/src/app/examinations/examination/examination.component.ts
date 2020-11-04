@@ -29,6 +29,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { ExaminationNode } from '../../tree/tree.model';
 
 @Component({
     selector: 'examination',
@@ -181,5 +182,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
     }
 }

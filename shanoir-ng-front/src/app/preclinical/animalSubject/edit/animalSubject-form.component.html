@@ -148,7 +148,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
 					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-					<subject-tree [subject]="preclinicalSubject.subject" [studies]="studies"></subject-tree>
+					<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : preclinicalSubject.subject" 
+						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
 			</fieldset>	
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>

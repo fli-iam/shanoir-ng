@@ -34,7 +34,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<fieldset *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'">
 				<legend>Preview</legend>
-				<papaya [params]="papayaParams"></papaya>
+                <button *ngIf="!papayaLoaded" (click)="loadDicomInMemory()">Load preview</button>
+				<papaya *ngIf="papayaLoaded" [params]="papayaParams"></papaya>
 			</fieldset>
 
 			<form-footer

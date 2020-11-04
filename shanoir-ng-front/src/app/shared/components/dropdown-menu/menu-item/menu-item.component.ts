@@ -13,7 +13,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, forwardRef, Input, QueryList } from '@angular/core';
+import { Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList } from '@angular/core';
 import { Observable } from 'rxjs';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 import { ImagesUrlUtil } from '../../../utils/images-url.util';
@@ -30,7 +30,8 @@ export class MenuItemComponent {
     @Input() label: string;
     @Input() link: string;
     @Input() boolVar: boolean;
-    @Input() icon: string;
+    @Input() awesome: string;
+    @Output() click: EventEmitter<void> = new EventEmitter();;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
     public opened: boolean = false;
@@ -39,7 +40,6 @@ export class MenuItemComponent {
     public hasChildren: boolean = true;
     public overflow: boolean = false;
     public init: boolean = false;
-    private notepadIconPath: string = ImagesUrlUtil.NOTEPAD_ICON_PATH;
 
     public closeAll: () => void;
 
@@ -116,7 +116,7 @@ export class MenuItemComponent {
         else this.open();
     }
 
-    public click() {
+    public onClick() {
         if (this.link != undefined || this.boolVar == undefined) {
             this.cascadingClose();
         }
@@ -124,13 +124,5 @@ export class MenuItemComponent {
 
     public cascadingClose() {
         if (this.parent) this.parent.cascadingClose();
-    }
-
-    public getMode(): "top" | "tree" {
-        if (this.parent) {
-            return this.parent.getMode();
-        } else {
-            return "top";
-        }
     }
 }
