@@ -17,7 +17,9 @@ package org.shanoir.ng.dataset.modality;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -50,8 +52,9 @@ public interface EegDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "standard")
 	EegDatasetDTO datasetToDatasetDTO(EegDataset dataset);
-	
+
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
 	 * 
@@ -59,6 +62,16 @@ public interface EegDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "withProcessings")
+	EegDatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset);
+	/**
+	 * Map a @Dataset to a @DatasetDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	@IterableMapping(qualifiedByName = "standard")
 	List<EegDatasetDTO> datasetToDatasetDTO(List<EegDataset> datasets);
 
 	/**
@@ -68,6 +81,7 @@ public interface EegDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@IterableMapping(qualifiedByName = "standard")
 	PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page);
 
 	/**

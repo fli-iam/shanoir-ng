@@ -22,6 +22,7 @@ import { Dataset, DatasetMetadata } from './dataset.model';
 import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
+import { DatasetProcessing } from './dataset-processing.model';
 
 @Injectable()
 export class DatasetDTOService {
@@ -99,6 +100,7 @@ export class DatasetDTOService {
         if (entity.type == 'Eeg') {
             this.mapSyncFieldsEeg(dto as EegDatasetDTO, entity as EegDataset);
         }
+        entity.processings = dto.processings;
         return entity;
     }
 
@@ -139,7 +141,8 @@ export class DatasetDTO {
     subjectId: number;
     updatedMetadata: DatasetMetadata;
 	name: string;
-	type: DatasetType;
+    type: DatasetType;
+    processings: DatasetProcessing[];
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -152,6 +155,7 @@ export class DatasetDTO {
             this.updatedMetadata = dataset.updatedMetadata;
             this.name = dataset.name;
             this.type = dataset.type;
+            this.processings = dataset.processings;
         }
     }
 }

@@ -151,6 +151,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
+	public List<Dataset> findByAcquisition(Long acquisitionId) {
+		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
+	}
+	
+  @Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}

@@ -23,6 +23,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -112,6 +113,18 @@ public interface DatasetAcquisitionApi {
 	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getExamination().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
+	
+	@ApiOperation(value = "", notes = "If exists, returns the datasetAcquisitions corresponding to the given examination id", response = DatasetAcquisition.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasetAcquisition", response = DatasetAcquisition.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no datasetAcquisition found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/datasetacquisition/examination/{examinationId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 	
 	@ApiOperation(value = "", notes = "Returns a dataset acquisitions page", response = Page.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset acquisitions", response = Page.class),

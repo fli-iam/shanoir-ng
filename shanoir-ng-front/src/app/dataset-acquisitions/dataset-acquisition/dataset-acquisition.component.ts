@@ -24,6 +24,7 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { DatasetAcquisitionNode } from '../../tree/tree.model';
 
 
 @Component({
@@ -85,5 +86,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
+    }
+
+    onNodeInit(node: DatasetAcquisitionNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
     }
 }
