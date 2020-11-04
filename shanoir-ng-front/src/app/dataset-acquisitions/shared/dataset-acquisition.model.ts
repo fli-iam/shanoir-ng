@@ -33,6 +33,7 @@ export abstract class DatasetAcquisition extends Entity {
     sortingIndex: number;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg'; // TODO : other types
     protocol: any;
+    name: string; // set in ExaminationDatasetAcquisitionDecorator.java
 
     service: DatasetAcquisitionService = ServiceLocator.injector.get(DatasetAcquisitionService);
 

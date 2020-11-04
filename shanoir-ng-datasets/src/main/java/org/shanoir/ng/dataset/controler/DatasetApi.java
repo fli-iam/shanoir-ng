@@ -25,6 +25,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -77,7 +78,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-	ResponseEntity<DatasetDTO> findDatasetById(
+	ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
 	@ApiOperation(value = "", notes = "Updates a dataset", response = Void.class, tags = {})
@@ -104,6 +105,16 @@ public interface DatasetApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/acquisition/{acquisitionId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
 
 	@ApiOperation(value = "", notes = "Returns the list of dataset id by subject id and study id", response = Long.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

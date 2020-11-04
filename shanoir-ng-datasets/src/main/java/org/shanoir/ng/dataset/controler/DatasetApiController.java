@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +43,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -168,21 +168,23 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<DatasetDTO> findDatasetById(
+	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
+
 		if (dataset == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
 		if (dataset instanceof MrDataset) {
-			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetDTO((MrDataset) dataset), HttpStatus.OK);
+			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset), HttpStatus.OK);
 		}
 		else if (dataset instanceof EegDataset) {
-			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO((EegDataset) dataset), HttpStatus.OK);
+			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset), HttpStatus.OK);			
 		}
-		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
 
 	@Override
@@ -223,6 +225,13 @@ public class DatasetApiController implements DatasetApi {
 			}
 		}
 		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
+	}
+	
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
+		
+		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import { DatasetAcquisition } from './dataset-acquisition.model';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
 import { EegDatasetAcquisition } from '../modality/eeg/eeg-dataset-acquisition.model';
-import { DatasetAcquisitionDTOService, DatasetAcquisitionDTO } from './dataset-acquisition.dto';
+import { DatasetAcquisitionDTOService, DatasetAcquisitionDTO, ExaminationDatasetAcquisitionDTO } from './dataset-acquisition.dto';
 import { ServiceLocator } from '../../utils/locator.service';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
@@ -70,5 +70,10 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
                 this.dsAcqDtoService.toDatasetAcquisitions(page.content, immediateResult);
                 return Page.transType<DatasetAcquisition>(page, immediateResult);
             });
+    }
+
+    getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> {
+        return this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId)
+            .toPromise();
     }
 }
