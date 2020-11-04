@@ -29,6 +29,10 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
+import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
@@ -149,7 +153,7 @@ public class BIDSServiceImpl implements BIDSService {
 	@Override
 	public void deleteDataset(Dataset dataset) {
 		try {
-			Long examId = dataset.getDatasetAcquisition().getExamination().getId();
+			String examId = dataset.getDatasetAcquisition().getExamination().getComment();
 			Long subjectId = dataset.getSubjectId();
 			Long studyId = dataset.getStudyId();
 	
@@ -159,7 +163,7 @@ public class BIDSServiceImpl implements BIDSService {
 			// Get subject folder
 			File subjectFolder = getFileFromId(subjectId.toString(), fileToDelete);
 			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), subjectFolder);
+			fileToDelete = getFileFromId(examId, subjectFolder);
 			// Get anat, eeg, [...] folder
 			if (dataset instanceof EegDataset) {
 				fileToDelete = getFileFromId("eeg", fileToDelete);
@@ -194,8 +198,7 @@ public class BIDSServiceImpl implements BIDSService {
 			}
 			
 		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
-			e.printStackTrace();
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually.", e);
 		}
 	}
 
@@ -398,7 +401,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  examination.getId());
+		// Use examination comment here
+		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  examination.getComment());
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
 		}
@@ -415,7 +419,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @throws IOException when we fail to create a file
 	 */
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
-		File dataFolder;
+		File dataFolder = null;
 
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
@@ -423,7 +427,37 @@ public class BIDSServiceImpl implements BIDSService {
 			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
 		} else if (dataset instanceof MrDataset) {
 			// Do something specific about MR dataset
-			dataFolder = createDataFolder("anat", workDir);
+			// Here we want to know whether we have anat/func/dwi/fmap
+			// We base ourselves on SeriesDescription here
+			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
+			if (protocol != null) {
+				MrProtocolSCMetadata metadata = protocol.getUpdatedMetadata();
+				if (metadata != null) {
+					MrSequenceApplication application = metadata.getMrSequenceApplication();
+					if (application != null) {
+						// CALIBRATION(1), --> fieldmap
+						if (application.equals(MrSequenceApplication.CALIBRATION)) {
+							dataFolder = createDataFolder("fmap", workDir);
+						}
+						//MORPHOMETRY(2), ==> anat
+						else if (application.equals(MrSequenceApplication.MORPHOMETRY)) {
+							dataFolder = createDataFolder("anat", workDir);
+						}
+						// DIFFUSION(8), , ==> diffusion
+						else if (application.equals(MrSequenceApplication.DIFFUSION)) {
+							dataFolder = createDataFolder("dwi", workDir);
+						}
+						// BOLD(9), , ==> functional
+						else if (application.equals(MrSequenceApplication.BOLD)) {
+							dataFolder = createDataFolder("func", workDir);
+						}
+					}
+				}
+			}
+			// default case, dataFolder is still null => undefined folder
+			if (dataFolder == null) {
+				dataFolder = createDataFolder("undefined", workDir);
+			}
 		} else {
 			dataFolder = workDir;
 		}
@@ -448,7 +482,6 @@ public class BIDSServiceImpl implements BIDSService {
 					.append(dataset.getDatasetAcquisition().getExamination().getId())
 					.append(NEW_LINE);
 
-				// TODO: center_id / comment / weigth / other examination things ?
 				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 
 			} catch (IOException exception) {
@@ -466,7 +499,6 @@ public class BIDSServiceImpl implements BIDSService {
 				.append("acq_time").append(TABULATION)
 				.append("session_id")
 				.append(NEW_LINE);
-			// TODO: center_id / comment / weigth / other examination things ?
 			Files.write(Paths.get(scansFile.getAbsolutePath()), buffer.toString().getBytes());
 		}
 		return scansFile;
