@@ -1,26 +1,29 @@
 package org.shanoir.ng.exporter.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,39 +52,52 @@ public class BidsApiController implements BidsApi {
 	}
 
 	@Override
-    public ResponseEntity<ByteArrayResource> exportBIDSFile(
+    public void exportBIDSFile(
     		@ApiParam(value = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
+    		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
 		if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			response.sendError(HttpStatus.UNAUTHORIZED.value());
+			return;
 		}
 
 		// Get file, zip it and download it
     	File fileToBeZipped = new File(filePath);
     	if (!fileToBeZipped.exists()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			response.sendError(HttpStatus.NO_CONTENT.value());
+			return;
     	}
     	
     	// Copy / zip it (and by the way filter only folder that we are interested in)
+    	String userDir = getUserDir(System.getProperty(JAVA_IO_TMPDIR)).getAbsolutePath();
 
-    	String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File zipFile = new File(tmpDir + File.separator + fileToBeZipped.getName() + ZIP);
+		// Add timestamp to get a "random" difference
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		File tmpFile = new File(userDir + File.separator + formatter.format(new DateTime().toDate()) + File.separator);
+		tmpFile.mkdirs();
+		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
 		zipFile.createNewFile();
 
 		zip(fileToBeZipped.getAbsolutePath(), zipFile.getAbsolutePath());
 
-		byte[] data = Files.readAllBytes(zipFile.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
+		try (InputStream is = new FileInputStream(zipFile);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		} finally {
+			FileUtils.deleteQuietly(zipFile);
+		}
+	}
 
-		FileUtils.deleteQuietly(zipFile);
-
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.contentLength(data.length)
-				.body(resource);
+	public static File getUserDir(String importDir) {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		return userImportDir;
 	}
 
 	/**
