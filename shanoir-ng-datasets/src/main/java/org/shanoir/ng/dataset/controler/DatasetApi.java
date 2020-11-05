@@ -147,7 +147,7 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/download/{datasetId}", produces = { "application/zip" })
+    @GetMapping(value = "/download/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
