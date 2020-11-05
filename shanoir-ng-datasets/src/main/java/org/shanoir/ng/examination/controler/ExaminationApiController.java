@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -70,6 +71,13 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	ShanoirEventService eventService;
+
+	private final HttpServletRequest request;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExaminationApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
@@ -202,8 +210,11 @@ public class ExaminationApiController implements ExaminationApi {
 			return;
 		}
 
+		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
+
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}

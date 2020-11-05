@@ -161,14 +161,15 @@ public interface StudyApi {
 	ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Add protocol file to a study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = Void.class),
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "protocol file", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "protocol-file-upload/{studyId}", produces = { "application/json" }, consumes = {
 			"multipart/form-data" })
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> uploadProtocolFile(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
@@ -176,15 +177,15 @@ public interface StudyApi {
 
 	@ApiOperation(value = "", notes = "Download protocol file from a study", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 204, message = "examination updated"),
+	        @ApiResponse(code = 200, message = "protocol file", response = Resource.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "protocol-file-download/{studyId}/{fileName:.+}/")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	void downloadProtocolFile(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long examinationId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 
@@ -209,6 +210,7 @@ public interface StudyApi {
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "/exportBIDS/studyId/{studyId}")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     void exportBIDSByStudyId(
     		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId, HttpServletResponse response) throws RestServiceException, IOException;
 
