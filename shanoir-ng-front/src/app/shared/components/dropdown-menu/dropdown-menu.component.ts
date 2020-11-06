@@ -12,48 +12,60 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, Input, QueryList, ViewChild, Renderer2 } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 
-import { menuAnimDur, menuSlideDown } from '../../animations/animations';
+import { menuAnimDur, menuSlideRight } from '../../animations/animations';
+import { GlobalService } from '../../services/global.service';
 import { MenuItemComponent } from './menu-item/menu-item.component';
-import { timer } from 'rxjs/observable/timer';
 
 // @dynamic
 @Component({
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
-    animations: [menuSlideDown]
+    animations: [menuSlideRight]
 })
-export class DropdownMenuComponent {
+export class DropdownMenuComponent implements OnChanges, OnDestroy {
 
     @Input() label: string;
     @Input() awesome: string;
     @Input() link: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
-    @ViewChild('container', { static: false }) container: ElementRef;
-    @Input() mode: "top" | "tree";
 
-    public opened: boolean = true;
+    @ViewChild('container', { static: false }) container: ElementRef;
+
+    @HostBinding('class.opened') opened: boolean = false;
+    @Input() openInput: boolean = false;
+    @Output() openInputChange: EventEmitter<boolean> = new EventEmitter();
     public parent: any;
     public hasChildren: boolean = true;
     public overflow: boolean = false;
-    public init: boolean = false;
+    private globalClickSubscription: Subscription;
 
-    private static documentListenerInit = false;
-    private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
+    constructor(public elementRef: ElementRef, private globalService: GlobalService) {
+        setTimeout(() => {
+            this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
+                if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
+                    this.close();
+                }
+            }) 
+        })
+    }
+    
+    ngOnDestroy(): void {
+        this.globalClickSubscription.unsubscribe();
+    }
 
-    constructor(public elementRef: ElementRef, private renderer: Renderer2) {
-        this.elementRef = elementRef;
-        this.renderer = renderer;
-        this.mode = "top";
-        DropdownMenuComponent.openedMenus = new Set<DropdownMenuComponent>();
-
-        if (!DropdownMenuComponent.documentListenerInit) {
-            DropdownMenuComponent.documentListenerInit = true;
-            document.addEventListener('click', DropdownMenuComponent.closeAll.bind(this));
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.openInput) {
+            if (this.openInput && !this.opened) {
+                this.openAction();
+            }
+            else if (!this.openInput && this.opened) {
+                this.close(() => {});
+            }
         }
     }
 
@@ -62,32 +74,15 @@ export class DropdownMenuComponent {
             itemMenu.siblings = this.itemMenus;
             itemMenu.parent = this;
         });
-
-        let subscription = timer(0, 100).subscribe(t => {
-            this.hasChildren = this.itemMenus.length > 0;
-            this.opened = false;
-            this.overflow = true;
-            this.init = true;
-            subscription.unsubscribe();
-        });
-
-        this.renderer.addClass(this.elementRef.nativeElement, this.mode + "-mode");
     }
 
     public open(event: Event) {
-        if (DropdownMenuComponent.openedMenus.size > 0) {
-            event.stopPropagation();
-            DropdownMenuComponent.closeAll(event, () => {
-                this.openAction();
-            });
-        } else {
-            this.openAction();
-        }
+        this.openAction();
     }
 
     private openAction() {
         this.opened = true;
-        DropdownMenuComponent.openedMenus.add(this);
+        this.openInputChange.emit(this.opened);
         setTimeout(() => this.overflow = false, menuAnimDur);
     }
 
@@ -96,7 +91,7 @@ export class DropdownMenuComponent {
             this.closeChildren(() => {
                 this.overflow = true;
                 this.opened = false;
-                DropdownMenuComponent.openedMenus.delete(this);
+                this.openInputChange.emit(this.opened);
                 setTimeout(callback, menuAnimDur);
             });
         } else {
@@ -105,6 +100,7 @@ export class DropdownMenuComponent {
     }
 
     public closeChildren(callback: () => void = () => { }) {
+        if (!this.itemMenus) return;
         let menusToClose: MenuItemComponent[] = [];
         this.itemMenus.forEach((itemMenu, index) => {
             if (index != 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
@@ -126,11 +122,6 @@ export class DropdownMenuComponent {
         }
     }
 
-    public toggle(event: Event) {
-        if (this.opened) this.close();
-        else this.open(event);
-    }
-
     public click() {
         if (this.link != undefined || this.boolVar == undefined) {
             this.cascadingClose();
@@ -140,29 +131,5 @@ export class DropdownMenuComponent {
     public cascadingClose() {
         if (this.parent != undefined)
             this.parent.cascadingClose();
-    }
-
-    public static closeAll = (event: Event, callback: () => void = () => { }) => {
-        let remains: number = DropdownMenuComponent.openedMenus.size;
-        DropdownMenuComponent.openedMenus.forEach((menu) => {
-            if (!menu.container.nativeElement.contains(event.target)) {
-                menu.close(() => {
-                    remains--;
-                    if (remains == 0) {
-                        callback();
-                    }
-                });
-            } else {
-                remains--;
-            }
-        });
-    }
-
-    public getMode(): "top" | "tree" {
-        if (this.mode == "top" || this.mode == "tree") {
-            return this.mode;
-        } else {
-            return "top";
-        }
     }
 }

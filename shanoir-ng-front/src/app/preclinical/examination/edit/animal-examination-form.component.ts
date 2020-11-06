@@ -44,6 +44,7 @@ import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.s
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
+import { ExaminationNode } from '../../../tree/tree.model';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -391,6 +392,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
-    }    
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
+    }
 
 }

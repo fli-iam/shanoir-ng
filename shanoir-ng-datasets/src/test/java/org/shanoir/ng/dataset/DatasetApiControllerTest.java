@@ -210,7 +210,6 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
 		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 		// THEN all datasets are exported
 	}
@@ -248,7 +247,6 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
 		.andExpect(content().string(containsString("name_comment_2_2.nii")));
 
 

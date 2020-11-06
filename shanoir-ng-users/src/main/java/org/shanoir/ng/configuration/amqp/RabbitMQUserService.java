@@ -57,13 +57,13 @@ public class RabbitMQUserService {
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
-		LOG.error("Receiving event: " + eventAsString);
+		LOG.info("Receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			eventsService.addEvent(event);
 		} catch (Exception e) {
-			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			LOG.error("Something went wrong deserializing the event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
 		}
 	}
 
@@ -87,8 +87,8 @@ public class RabbitMQUserService {
 				emailService.notifyStudyManagerDataImported(event);
 			}
 		} catch (Exception e) {
-			LOG.error("Something went wrong deserializing the import event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			LOG.error("Something went wrong deserializing the import event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
 		}
 	}
 	

@@ -13,11 +13,9 @@
  */
 
 import { Component, ViewChild, Input } from '@angular/core';
-import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { MatDialogRef } from '@angular/material/dialog';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 
@@ -33,28 +31,41 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
     - Use bids format
     - nii.gz or .zip */
 export class DatasetDownloadComponent {
-
+    
     constructor(private datasetService: DatasetService, private studyService: StudyService) {
     }
 
-    @Input() datasets: Dataset[] = [];
+    @Input() datasetIds: number[] = [];
     @Input() studyId: number;
+
     public useBids: boolean = false;
-    public type: string = 'nii';
+    public type = {value: 'nii', label: 'Nifti'};
     public inError: boolean = false;
     public errorMessage: string;
     public loading: boolean = false;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
+    protected mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 
     /** Click on first button */
-    prepareDownload() {
-        if ((!this.datasets || this.datasets.length == 0) && (!this.studyId)) {
+    prepareDownloadAll() {
+        if (!this.studyId) {
             this.inError = true;
             this.errorMessage = 'No datasets available for the current selection.';
         }
         // Display the messageBox with options
+        this.mode = 'all';
+        this.downloadDialog.show();
+    }
+
+    prepareDownloadSelected() {
+        if (!this.datasetIds || this.datasetIds.length == 0) {
+            this.inError = true;
+            this.errorMessage = 'No datasets available for the current selection.';
+        }
+        // Display the messageBox with options
+        this.mode = 'selected';
         this.downloadDialog.show();
     }
 
@@ -62,15 +73,15 @@ export class DatasetDownloadComponent {
     public download() {
         // Call service method to download datasets
         this.loading = true;
-        if (!this.studyId) {
-            this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type).then(() => this.loading = false);
-        } else {
+        if (this.mode == 'selected') {
+            this.datasetService.downloadDatasets(this.datasetIds, this.type.value).then(() => this.loading = false);
+        } else if (this.mode == 'all') {
             if (this.useBids) {
                 this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
             } else {
-                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type.value).then(() => this.loading = false);
             }
-        }
+        } 
         this.downloadDialog.hide();
     }
 

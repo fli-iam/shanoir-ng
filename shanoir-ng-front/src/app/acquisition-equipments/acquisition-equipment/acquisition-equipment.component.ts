@@ -36,9 +36,9 @@ import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    manufModels: ManufacturerModel[];
-    centers: IdName[];
-    datasetModalityTypeStr: string;
+    public manufModels: ManufacturerModel[];
+    public centers: IdName[];
+    public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 

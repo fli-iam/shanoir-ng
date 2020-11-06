@@ -58,6 +58,12 @@ export class DatasetService extends EntityService<Dataset> {
             .then(this.mapPage);
     }
 
+    getByAcquisitionId(acquisitionId: number): Promise<Dataset[]> {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/acquisition/' + acquisitionId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
     public downloadDatasets(ids: number[], format: string): Promise<void> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
@@ -88,15 +94,6 @@ export class DatasetService extends EntityService<Dataset> {
             });
     }
 
-    download(dataset: Dataset, format: string): Promise<void> {
-        if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(dataset.id, format).toPromise().then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        );
-    }
-
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
                                         .set("studyNameOutRegExp", studyNameOutRegExp)
@@ -109,6 +106,20 @@ export class DatasetService extends EntityService<Dataset> {
                 this.downloadIntoBrowser(response);
             }
         )
+    }
+
+    download(dataset: Dataset, format: string): Promise<void> {
+        if (!dataset.id) throw Error('Cannot download a dataset without an id');
+        return this.downloadFromId(dataset.id, format);
+    }
+
+    downloadFromId(datasetId: number, format: string): Promise<void> {
+        if (!datasetId) throw Error('Cannot download a dataset without an id');
+        return this.downloadToBlob(datasetId, format).toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        );
     }
 
     downloadToBlob(id: number, format: string): Observable<HttpResponse<Blob>> {

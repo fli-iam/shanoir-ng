@@ -82,6 +82,7 @@ export class ClinicalContextComponent implements OnDestroy {
         new Option<string>('PHANTOM', 'Phantom')
     ];
     public useStudyCard: boolean = true;
+
     public scHasCoilToUpdate: boolean;
     public isAdminOfStudy: boolean[] = [];
     public scHasDifferentModality: string;
@@ -315,6 +316,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.onSelectStudyCard();
             }
         }
+
         this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
     }
 

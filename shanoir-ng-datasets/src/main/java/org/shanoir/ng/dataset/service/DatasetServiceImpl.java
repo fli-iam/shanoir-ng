@@ -151,28 +151,12 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
-
-        //"login" this is the name of your procedure
-		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics"); 
-
-        //Declare the parameters in the same order
-        query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
-
-        //Pass the parameter values
-        query.setParameter(1, studyNameInRegExp);
-        query.setParameter(2, studyNameOutRegExp);
-        query.setParameter(3, subjectNameInRegExp);
-        query.setParameter(4, subjectNameOutRegExp);
-
-        //Execute query
-        query.execute();
-
-		List<Object[]> results = query.getResultList();
-        return results;
+	public List<Dataset> findByAcquisition(Long acquisitionId) {
+		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
 	}
-
+	
+  @Override
+	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
+		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+	}
 }

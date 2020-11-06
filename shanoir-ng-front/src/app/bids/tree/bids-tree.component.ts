@@ -11,21 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { Component, ElementRef, Input, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { CenterService } from '../../centers/shared/center.service';
-import { ExaminationService } from '../../examinations/shared/examination.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { BidsElement } from '../model/bidsElement.model'
 import * as AppUtils from '../../utils/app.utils';
-import { HttpResponse } from '@angular/common/http';
-import { HttpClient } from '@angular/common/http';
-import { ServiceLocator } from '../../utils/locator.service';
-import { HttpParams } from '@angular/common/http';
+import { GlobalService } from '../../shared/services/global.service';
 import { StudyService } from '../../studies/shared/study.service';
 
 
@@ -34,23 +27,30 @@ import { StudyService } from '../../studies/shared/study.service';
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
 })
+export class BidsTreeComponent implements OnDestroy {
 
-export class BidsTreeComponent {
-
-    constructor(
-        private studyService: StudyService, 
-    ) {
-        
-    }
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
-    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
-
-    public json: JSON;
-    public tsv: string;
-    public title: string;
     @Input() studyId: number;
-    public list: BidsElement[] = [];
+    public list: BidsElement[];
+    public json: JSON;
+    public tsv: string[][];
+    public title: string;
+    public selectedIndex: string;
     public load: string;
+    private globalClickSubscription: Subscription;
+
+    constructor(private globalService: GlobalService, private elementRef: ElementRef, private studyService: StudyService, protected http: HttpClient) {
+        this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
+            if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
+                this.selectedIndex = null;
+                this.removeContent();
+            }
+        }) 
+    }
+
+    ngOnDestroy(): void {
+        this.globalClickSubscription.unsubscribe();
+    }
 
     getBidsStructure() {
        if (!this.load) {
@@ -91,16 +91,25 @@ export class BidsTreeComponent {
         component.open();
     }
 
-    getContent(bidsElem: BidsElement) {
+    getContent(bidsElem: BidsElement, id: string) {
         this.removeContent();
+        if (id == this.selectedIndex) {
+            this.selectedIndex = null;
+            return;
+        }
+        this.selectedIndex = id;
         if (bidsElem.content) {
             this.title = this.getFileName(bidsElem.path);
             if (bidsElem.path.indexOf('.json') != -1) {
                 this.json = JSON.parse(bidsElem.content);
             } else if (bidsElem.path.indexOf('.tsv') != -1) {
-                this.tsv = bidsElem.content;
+                this.tsv = this.parseTsv(bidsElem.content);
             }
         }
+    }
+
+    private parseTsv(tsv: string): string[][] {
+        return tsv.split('\n').map(line => line.split('\t'));
     }
 
     removeContent() {

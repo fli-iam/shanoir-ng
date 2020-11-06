@@ -3,8 +3,10 @@
 
     .header { font-size: 20px; color: var(--color-a); font-weight: bold; padding: 10px; background-color: var(--light-grey); }
 
-    .body { padding: 0 10px; text-align: left;}
+    .body { padding: 12px 10px; text-align: left;}
 
     .footer { background-color: var(--light-grey); padding: 10px; }
         .footer button { padding: 5px 10px; line-height: normal; min-width: auto; border: 0; color: var(--very-light-grey) !important; }
             .footer button * { color: var(--very-light-grey) !important; }
+
+checkbox { vertical-align: bottom; margin-right: 5px; }

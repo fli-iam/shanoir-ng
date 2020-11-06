@@ -12,23 +12,24 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<li class="menu-item {{getMode()}}-mode" 
+<li class="menu-item" 
     [class.opened]="init && opened" 
     [class.closed]="!opened" 
     [class.animate]="overflow"
-    [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')"
+    (click)="click.emit()"
     >
+    <!-- [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')" -->
     <span 
         *ngIf="hasChildren"
         class="label"
         (click)="toggle()"
-        ><img src="{{icon}}"/>{{label}}
+        ><i class="{{awesome}}"></i>{{label}}
         <span class="arrow">&nbsp;&#9656;</span>
     </span>
     <span 
         *ngIf="!hasChildren && boolVar != undefined"
         class="label"
-        ><img src="{{icon}}"/>{{label}}
+        ><i class="{{awesome}}"></i>{{label}}
         <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
         <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>
     </span>
@@ -37,8 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [routerLink]="link? link : null" 
         [routerLinkActive]="link? 'active' : 'unactive'"
         class="label" 
-        (click)="click()"
-        ><img src="{{icon}}"/>{{label}}
+        ><i class="{{awesome}}"></i>{{label}}
     </span>
     <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened" [hidden]="!init">
         <div class="sub-sub-content"><ng-content></ng-content></div>

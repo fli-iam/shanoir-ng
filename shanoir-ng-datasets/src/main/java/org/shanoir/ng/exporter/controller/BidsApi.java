@@ -3,6 +3,7 @@ package org.shanoir.ng.exporter.controller;
 
 import java.io.IOException;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -43,10 +44,9 @@ public interface BidsApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/studyId/{studyId}",
-        produces = { "application/zip" })
-    ResponseEntity<ByteArrayResource> exportBIDSFile(
+    @GetMapping(value = "/exportBIDS/studyId/{studyId}")
+    void exportBIDSFile(
     		@ApiParam(value = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException;
+    		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException;
   
 }

@@ -41,7 +41,7 @@ export class DatasetAcquisitionDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toDatasetAcquisitions instead
      * @param result can be used to get an immediate temporary result without async data
      */
-    public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {        
+    public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {   
         if (!result) result = DatasetAcquisitionService.getNewDAInstance(dto.type);
         DatasetAcquisitionDTOService.mapSyncFields(dto, result);
         return Promise.all([
@@ -89,8 +89,10 @@ export class DatasetAcquisitionDTOService {
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
-        entity.examination = new Examination();
-        ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
+        if (dto.examination) {
+            entity.examination = new Examination();
+            ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
+        }
         switch(entity.type) {
             case 'Mr': {
                 (entity as MrDatasetAcquisition).protocol = Object.assign(new MrProtocol(), (dto as MrDatasetAcquisitionDTO).protocol);
@@ -150,4 +152,11 @@ export class PetDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 
 export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
     protocol: any;
+}
+
+export class ExaminationDatasetAcquisitionDTO {
+    id: number;
+    name: string;
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
+    datasets: any;
 }

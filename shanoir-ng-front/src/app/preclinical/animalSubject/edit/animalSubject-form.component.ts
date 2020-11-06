@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
@@ -26,7 +26,8 @@ import { StudyService } from '../../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
-import * as AppUtils from '../../../utils/app.utils';
+import { SubjectService } from '../../../subjects/shared/subject.service';
+import { ReverseSubjectNode } from '../../../tree/tree.model';
 import { PathologyService } from '../../pathologies/pathology/shared/pathology.service';
 import { SubjectPathologiesListComponent } from '../../pathologies/subjectPathology/list/subjectPathology-list.component';
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
@@ -42,7 +43,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { SubjectService } from '../../../subjects/shared/subject.service';
 
 
 @Component({
@@ -548,6 +548,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
            this.form.get("pathologies").updateValueAndValidity({onlySelf: false, emitEvent: true});
            this.footerState.valid = this.form.valid;
         }
+    }
+
+    onSubjectNodeInit(node: ReverseSubjectNode) {
+        this.breadcrumbsService.currentStep.data.subjectNode = node;
     }
 
 }

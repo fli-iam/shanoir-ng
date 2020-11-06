@@ -11,8 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -26,18 +25,17 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { DatasetNode, StudyNode } from '../../tree/tree.model';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { Option } from '../../shared/select/select.component';
-import { BidsElement } from '../../bids/model/bidsElement.model'
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
@@ -64,6 +62,8 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
+
+    public selectedDatasetIds: number[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -108,7 +108,14 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
+            if (study.studyUserList) {
+                study.studyUserList.forEach(studyUser => {
+                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
+                    if (option) option.disabled = true;
+                });
+            }
         });
+        
         Promise.all([
             studyPromise,
             this.getCenters()
@@ -327,9 +334,9 @@ export class StudyComponent extends EntityComponent<Study> {
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
             { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
-            { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
+            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
             { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser }
         ];
     }
@@ -347,8 +354,16 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    onUserAdd(selectedUser: User) {
-        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+    public onUserAdd(selectedUser: User) {
+        if (!selectedUser) {
+            return;
+        }
+        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
+            return;   
+        }
+        if (this.isMe(selectedUser)) {
+            this.freshlyAddedMe = true;
+        }
         this.addUser(selectedUser);
     }
 
@@ -389,7 +404,7 @@ export class StudyComponent extends EntityComponent<Study> {
         StudyUser.completeMember(item, this.users);
         if (this.userOptions) {
             let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = true;
+            if (option) option.disabled = false;
         }
     }
 
@@ -437,7 +452,7 @@ export class StudyComponent extends EntityComponent<Study> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id);
+                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise().then(result => (console.log("file saved sucessfuly")));
             }
         });
         return prom;
@@ -447,4 +462,45 @@ export class StudyComponent extends EntityComponent<Study> {
         return element.split('\\').pop().split('/').pop();
     }
 
+    onTreeSelectedChange(study: StudyNode) {
+        let dsIds: number [] = [];
+        if (study.subjects && study.subjects != 'UNLOADED') {
+            study.subjects.forEach(subj => {
+                if (subj.examinations && subj.examinations != 'UNLOADED') {
+                    subj.examinations.forEach(exam => {
+                        if (exam.datasetAcquisitions && exam.datasetAcquisitions != 'UNLOADED') {
+                            exam.datasetAcquisitions.forEach(dsAcq => {
+                                dsIds = dsIds.concat(this.searchSelectedInDatasetNodes(dsAcq.datasets));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+        this.selectedDatasetIds = dsIds;
+    }
+
+    private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): number[] {
+        if (dsNodes && dsNodes != 'UNLOADED') {
+            return dsNodes.map(ds => {
+                // get selected dataset from this nodes
+                let idsFound: number[] = ds.selected ? [ds.id] : [];
+                // get selected datasets from this node's processings datasets
+                if (ds.processings && ds.processings != 'UNLOADED') {
+                    let foundInProc: number[] = ds.processings
+                            .map(proc => this.searchSelectedInDatasetNodes(proc.datasets))
+                            .reduce((allFromProc, oneProc) => allFromProc.concat(oneProc), []);
+                        idsFound = idsFound.concat(foundInProc);
+                }
+                return idsFound;
+            }).reduce((allFromDs, thisDs) => {
+                return allFromDs.concat(thisDs);
+            }, []);
+        } else return [];
+    }
+
+    onStudyNodeInit(studyNode: StudyNode) {
+        studyNode.open = true;
+        this.breadcrumbsService.currentStep.data.studyNode = studyNode;
+    }
 }

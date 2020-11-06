@@ -115,8 +115,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     private getSelectedExamination(id : number): Promise<Examination>{
         return this.examinationService.get(id).then(examination => {
             return examination;
-        }
-        );
+        });
     }
     
     private manageDelete() {
