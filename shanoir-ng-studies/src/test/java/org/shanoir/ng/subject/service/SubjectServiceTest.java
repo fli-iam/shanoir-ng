@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.subject.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
@@ -32,6 +34,8 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -42,6 +46,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpStatus;
 
 
 /**
@@ -106,18 +111,33 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void updateTest() throws RestServiceException, ShanoirException {
 		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
 		Assert.assertNotNull(updatedSubject);
-		Assert.assertTrue(UPDATED_SUBJECT_DATA.equals(updatedSubject.getName()));
+		Assert.assertTrue(Sex.F.equals(updatedSubject.getSex()));
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+	}
+
+	@Test
+	public void updateTestChangeName() throws EntityNotFoundException, MicroServiceCommunicationException, RestServiceException {
+		try {
+			Subject updated = createSubjectToUpdate();
+			updated.setName("new name");
+			subjectService.update(updated);
+		} catch (ShanoirException exception) {
+			assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorCode());
+			assertEquals("You cannot update subject common name.", exception.getMessage());
+			return;
+		}
+		fail();
 	}
 
 	private Subject createSubjectToUpdate() {
 		final Subject subject = new Subject();
 		subject.setId(SUBJECT_ID);
-		subject.setName(UPDATED_SUBJECT_DATA);
+		subject.setSex(Sex.F);
+		subject.setName(ModelsUtil.SUBJECT_NAME);
 		return subject;
 	}
 
