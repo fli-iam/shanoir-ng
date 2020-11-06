@@ -474,8 +474,10 @@ export class ClinicalContextComponent implements OnDestroy {
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
         newSubject.birthDate = this.patient.patientBirthDate;
-        if (this.patient.patientSex){
-            newSubject.sex = this.patient.patientSex; 
+        if (this.patient.patientSex) {
+            if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
+                newSubject.sex = this.patient.patientSex;
+            }
         }
         newSubject.subjectStudyList = [subjectStudy];
         if (this.importMode != 'BRUKER') {
