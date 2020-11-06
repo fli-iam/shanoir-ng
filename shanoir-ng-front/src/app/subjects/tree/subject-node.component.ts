@@ -125,7 +125,7 @@ export class SubjectNodeComponent implements OnChanges {
     
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == 'UNLOADED') return 'unknown';
+        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 

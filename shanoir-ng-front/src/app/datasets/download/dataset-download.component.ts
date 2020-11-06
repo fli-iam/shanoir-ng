@@ -44,7 +44,7 @@ export class DatasetDownloadComponent {
     public errorMessage: string;
     public loading: boolean = false;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
-    protected mode: 'all' | 'selected';
+    public mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 

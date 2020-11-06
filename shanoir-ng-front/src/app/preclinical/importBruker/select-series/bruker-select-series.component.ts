@@ -53,7 +53,7 @@ export class BrukerSelectSeriesComponent {
     }
 
 
-    public showSerieDetails(nodeParams: any, serie: SerieDicom): void {
+    public showSerieDetails(nodeParams: any, serie?: SerieDicom): void {
         this.detailedPatient = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;

@@ -54,7 +54,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected formBuilder: FormBuilder;
     public keycloakService: KeycloakService;
     protected msgBoxService: MsgBoxService; 
-    protected breadcrumbsService: BreadcrumbsService;
+    public breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
     abstract initView(): Promise<void>;

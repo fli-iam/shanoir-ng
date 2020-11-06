@@ -52,7 +52,7 @@ export class EegSelectSeriesComponent {
         this.selectedDatasets = [];
     }
 
-    changeDataset(datasetToMove: EegDataset) {
+    changeDataset(datasetToMove?: EegDataset) {
         let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);

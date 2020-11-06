@@ -59,7 +59,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private studyService: StudyService,
             private datasetService: DatasetService,
             private studyRightsService: StudyRightsService,
-            protected breadcrumbsService: BreadcrumbsService) {
+            public breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();

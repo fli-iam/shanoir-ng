@@ -10,7 +10,7 @@ from termcolor import colored
 
 regex = r"Property '(?P<property>\w+)' is (?P<type>private|protected) and only accessible within class '(?P<component>\w+)'([\w\W\s\n]*?)src/app(?P<file>[\w\/\.\-]+)"
 
-file = open('errors3.txt',mode='r')
+file = open('errors.txt',mode='r')
 test_str = file.read()
 file.close()
 
@@ -19,6 +19,7 @@ matches = re.finditer(regex, test_str, re.MULTILINE)
 for matchNum, match in enumerate(matches, start=1):
     
     print ( colored("\n\n\n\nMatch {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()), 'green') )
+    print ( colored("\t\t File: {file}, type: {type}, property: {property}".format(file = match.group('file'), type = match.group('type'), property = match.group('property')), 'blue') )
     
     # for groupNum in range(0, len(match.groups())):
     #     groupNum = groupNum + 1
@@ -27,8 +28,13 @@ for matchNum, match in enumerate(matches, start=1):
 
     # filename = '../shanoir-ng/shanoir-ng-front/src/app' + match.group('file')
     filename = '../src/app' + match.group('file')
-    text_to_search = match.group('type') + ' get ' + match.group('property') + '('
-    replacement_text =  'public get ' + match.group('property') + '('
+
+    # text_to_search = match.group('type') + ' get ' + match.group('property') + '('
+    # replacement_text =  'public get ' + match.group('property') + '('
+
+    text_to_search = match.group('type') + ' ' + match.group('property')
+    replacement_text =  'public ' + match.group('property')
+
     # print('text_to_search', text_to_search, replacement_text)
 
     with open(filename) as f:

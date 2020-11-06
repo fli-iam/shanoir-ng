@@ -86,7 +86,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private animalSubjectService: AnimalSubjectService, 
         private centerService: CenterService,
         private studyService: StudyService, 
-        protected breadcrumbsService: BreadcrumbsService) 
+        public breadcrumbsService: BreadcrumbsService) 
     {
 
         super(route, 'preclinical-examination');
