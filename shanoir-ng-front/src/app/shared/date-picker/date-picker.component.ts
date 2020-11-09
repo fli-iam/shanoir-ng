@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewChecked, Component, ElementRef, forwardRef } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, forwardRef, Input } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
 
@@ -21,7 +21,8 @@ import { IMyOptions } from 'mydatepicker';
     template: `
         <span>
             <my-date-picker 
-                [options]="options" 
+                [options]="options"
+                [disabled]="disabled"
                 [ngModel]="convertedDate"
                 (ngModelChange)="onModelChange($event)"
                 (inputFieldChanged)="onInputFieldChanged($event)"
@@ -48,6 +49,7 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
     private convertedDate: Object;
     private onTouch: () => void;
     private onChange: (value) => void;
+    @Input() disabled: boolean = false;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
