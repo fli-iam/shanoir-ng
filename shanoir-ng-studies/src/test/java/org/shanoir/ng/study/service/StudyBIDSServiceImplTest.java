@@ -184,42 +184,6 @@ public class StudyBIDSServiceImplTest {
 	}
 
 	@Test
-	public void testUpdateSubjectBids() {
-		// GIVEN a study with a subject
-		Subject oldSubject =  new Subject();
-		oldSubject.setName("otherName");
-		oldSubject.setId(subject.getId());
-		SubjectStudy subjstud = new SubjectStudy();
-		subjstud.setStudy(studyToCreate);
-		subjstud.setSubject(oldSubject);
-		
-		oldSubject.setSubjectStudyList(Collections.singletonList(subjstud));
-		studyToCreate.setSubjectStudyList(Collections.singletonList(subjstud));
-
-		service.createBidsFolder(studyToCreate);
-		File studyFolder = service.getStudyFolder(studyToCreate);
-		File subjectFile = new File(studyFolder
-				+ File.separator
-				+ "sub-" + subject.getId()
-				+ "_otherName");
-		subjectFile.mkdirs();
-		assertTrue(subjectFile.exists());
-		
-		given(subjectService.findById(subject.getId())).willReturn(oldSubject);
-
-		// WHEN the subject name changes
-		service.updateSubjectBids(subject.getId(), subject);
-
-		// THEN the subject folder name also changes
-		assertFalse(subjectFile.exists());
-		subjectFile = new File(studyFolder
-				+ File.separator
-				+ "sub-" + subject.getId()
-				+ "_" + subject.getName());
-		assertTrue(subjectFile.exists());
-	}
-
-	@Test
 	public void testCreateParticipantsFile() throws IOException {
 		// GIVEN a study with a list of subjects
 		File studyFolder = service.getStudyFolder(studyToCreate);
