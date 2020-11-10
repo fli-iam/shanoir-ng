@@ -17,7 +17,7 @@
         </ng-container>
     </div>
     <div class="footer">
-        <button *ngIf="!inError" type="button" (click)="download()" >OK</button>
+        <button *ngIf="!inError" type="button" (click)="download()" [disabled]="!type">OK</button>
         <button type="button" (click)="cancel()">Cancel</button>
     </div>
 </div>
