@@ -46,6 +46,6 @@ export class StudyCardNodeComponent implements OnChanges {
     }
 
     showDetails() {
-        this.router.navigate(['/study-cards/details/' + this.node.id]);
+        this.router.navigate(['/study-card/details/' + this.node.id]);
     }
 }

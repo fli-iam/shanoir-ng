@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
  *
  */
 public abstract class ExaminationDatasetAcquisitionDecorator implements ExaminationDatasetAcquisitionMapper {
-
+	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper delegate;
 
@@ -53,6 +53,7 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate
 				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
 		datasetAcquisitionDTO.setName(getExaminationDatasetAcquisitionDTOName(datasetAcquisition));
+		datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
 
 		return datasetAcquisitionDTO;
 	}
@@ -102,9 +103,8 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 				result.append(" rank=").append(datasetAcquisition.getRank());
 			}
 		}
-		// TODO: retrieve dataset acquisition type
-		final String type = "";
-
+		
+		final String type = datasetAcquisition.getType();
 		return result.append(" (").append(type).append(")").toString();
 	}
 
