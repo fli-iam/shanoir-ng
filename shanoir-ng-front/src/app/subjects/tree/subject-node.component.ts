@@ -99,6 +99,7 @@ export class SubjectNodeComponent implements OnChanges {
     }
     
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
+        console.log(dsAcq.name);
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,

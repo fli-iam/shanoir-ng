@@ -30,6 +30,9 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	private String type;
 
 	private List<DatasetAndProcessingsDTO> datasets;
+	
+	private Long studyId;
+	
 
 	public String getType() {
 		return type;
@@ -53,4 +56,12 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 		this.datasets = datasets;
 	}
 
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+	
 }
