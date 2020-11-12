@@ -68,6 +68,7 @@ export class DatasetDownloadComponent {
         }
         // Display the messageBox with options
         this.mode = 'selected';
+        this.type = 'nii';
         this.downloadDialog.show();
     }
 
