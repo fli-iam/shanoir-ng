@@ -83,6 +83,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ng-template [ngSwitchCase]="'view'">
                                 {{subject.name}}
                             </ng-template>
+                            <ng-template [ngSwitchCase]="'edit'">
+                                {{subject.name}}
+                            </ng-template>
                             <ng-template ngSwitchDefault>
                                 <input type="text" id="name" formControlName="name" [(ngModel)]="subject.name"/>
                                 <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>

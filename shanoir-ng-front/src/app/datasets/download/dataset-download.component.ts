@@ -41,7 +41,7 @@ export class DatasetDownloadComponent {
     @Input() datasetIds: number[] = [];
     @Input() studyId: number;
     protected useBids: boolean = false;
-    protected type = 'nii';
+    protected type: 'nii' | 'dcm' = 'nii';
     protected inError: boolean = false;
     protected errorMessage: string;
     protected loading: boolean = false;

@@ -31,7 +31,6 @@ export class MenuItemComponent {
     @Input() link: string;
     @Input() boolVar: boolean;
     @Input() awesome: string;
-    @Output() click: EventEmitter<void> = new EventEmitter();;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
     public opened: boolean = false;
@@ -115,13 +114,7 @@ export class MenuItemComponent {
         if (this.opened) this.close();
         else this.open();
     }
-
-    public onClick() {
-        if (this.link != undefined || this.boolVar == undefined) {
-            this.cascadingClose();
-        }
-    }
-
+    
     public cascadingClose() {
         if (this.parent) this.parent.cascadingClose();
     }
