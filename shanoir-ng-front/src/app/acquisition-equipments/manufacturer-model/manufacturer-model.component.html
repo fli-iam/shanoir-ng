@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<select-box formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
-									(change)="onModalityChange($event)" formControlName="datasetModalityType">
+									(userChange)="onModalityChange($event)" formControlName="datasetModalityType">
 								</select-box>
 							</ng-template>
 						</span>
