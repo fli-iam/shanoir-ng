@@ -2,7 +2,6 @@ package org.shanoir.ng.bids.service;
 
 import java.io.File;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subject.model.Subject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,8 +16,6 @@ public interface StudyBIDSService {
 	void deleteBids(Long studyDeletedId);
 
 	void deleteSubjectBids(Long subjectId);
-
-	void updateSubjectBids(Long subjectId, Subject subject);
 
 	File getStudyFolder(Study studyToCreate);
 

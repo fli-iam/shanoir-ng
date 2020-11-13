@@ -239,9 +239,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<dataset-download [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<dataset-download  *ngIf="mode == 'view'" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
 			</form-footer>
 		</form>
-        <dataset-download *ngIf="mode == 'view'" [studyId]="id" > </dataset-download>
 	</div>
 </div>
