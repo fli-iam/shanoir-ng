@@ -70,6 +70,14 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(LocalDate expirationDate);
 
 	/**
+	 * Find users who have account that expire today
+	 * 
+	 * @param expirationDate expiration date to check.
+	 * @return list of users.
+	 */
+	List<User> findByExpirationDate(LocalDate expirationDate);
+
+	/**
 	 * Find users by their id.
 	 * 
 	 * @param userIdList

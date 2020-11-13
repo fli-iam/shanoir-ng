@@ -175,6 +175,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<User> getExpiredUsers() {
+		final LocalDate expirationDate = LocalDate.now();
+		return userRepository.findByExpirationDate(expirationDate);
+	}
+
+	@Override
 	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
