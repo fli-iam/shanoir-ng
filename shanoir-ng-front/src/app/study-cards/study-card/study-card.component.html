@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" (change)="onChangeAcqEq()" [options]="acquisitionEquipments">
+								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" (userChange)="onChangeAcqEq()" [options]="acquisitionEquipments">
 								</select-box>
 							</ng-template>
 						</span>
