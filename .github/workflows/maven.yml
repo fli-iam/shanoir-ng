@@ -30,4 +30,5 @@ jobs:
         SHANOIR_PREFIX: github
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
-        SHANOIR_KEYCLOAK_PASSWORD: &a1A&a1A
+        SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        
