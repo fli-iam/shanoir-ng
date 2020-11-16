@@ -177,7 +177,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<User> getExpiredUsers() {
 		final LocalDate expirationDate = LocalDate.now();
-		return userRepository.findByExpirationDate(expirationDate);
+		final LocalDate expirationDateLessOneWeek = expirationDate.minusWeeks(1);
+		return userRepository.findByExpirationDateLessThanEqualAndExpirationDateGreaterThan(expirationDate, expirationDateLessOneWeek);
 	}
 
 	@Override

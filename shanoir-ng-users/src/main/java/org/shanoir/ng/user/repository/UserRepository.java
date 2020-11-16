@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.user.model.User;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -73,9 +74,10 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	 * Find users who have account that expire today
 	 * 
 	 * @param expirationDate expiration date to check.
-	 * @return list of users.
+	 * @param expirationDateLessOneWeek {@link Expiration} date minus one week.
+	 * @return list of expired users of less than one week.
 	 */
-	List<User> findByExpirationDate(LocalDate expirationDate);
+	List<User> findByExpirationDateLessThanEqualAndExpirationDateGreaterThan(LocalDate expirationDate, LocalDate expirationDateLessOneWeek);
 
 	/**
 	 * Find users by their id.
