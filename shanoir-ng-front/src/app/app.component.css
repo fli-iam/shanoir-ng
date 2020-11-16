@@ -1,7 +1,6 @@
 .main-content { padding: 1px 20px 10px 20px; position: relative; margin-left: 0; }
 .main-content.open { margin-left: 300px; }
-side-menu { width: 300px; position: fixed; display: flex; flex-flow: column; top: 0; overflow-x: hidden; scrollbar-width: none;
-    overflow-y: scroll; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
+side-menu { width: 300px; position: fixed; display: flex; flex-flow: column; align-items: flex-end; top: 0; overflow-x: hidden; scrollbar-width: none; overflow-y: scroll; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
 
 .close-button, 
 .open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); }
