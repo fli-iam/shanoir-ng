@@ -19,12 +19,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 /**
- *
- * @author ifakhfak
- *
+ * Shanoir-NG microservice studies application.
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableSwagger2
 public class ShanoirStudiesApplication {
 
