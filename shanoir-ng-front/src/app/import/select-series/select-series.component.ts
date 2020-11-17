@@ -17,7 +17,7 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
-import { PatientDicom, SerieDicom } from '../shared/dicom-data.model';
+import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 
@@ -30,15 +30,16 @@ import { ImportService } from '../shared/import.service';
 })
 export class SelectSeriesComponent {
 
-    private patients: PatientDicom[];
+    patients: PatientDicom[];
     private workFolder: string;
     private dataFiles: any;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private detailedStudy: Object;
-    private papayaParams: object[];
+    detailedPatient: any;
+    detailedSerie: any;
+    detailedStudy: any;
+    papayaParams: object[];
     public papayaError: boolean = false;
     public modality: string;
+    studiesCheckboxes: any = {};
 
     constructor(
             private importService: ImportService,
@@ -57,20 +58,20 @@ export class SelectSeriesComponent {
     }
 
 
-    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
+    showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
         this.detailedStudy = null;
-        if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
+        if (serie && this.detailedSerie && serie.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
-            this.detailedSerie = nodeParams;
+            this.detailedSerie = serie;
             setTimeout(() => { // so the details display has no delay
                 if (serie && serie.images) this.initPapaya(serie); 
             });
         }
     }
 
-    private showStudyDetails(nodeParams: any): void {
+    showStudyDetails(nodeParams: any): void {
         this.detailedSerie = null;
         this.detailedPatient = null;
         if (nodeParams && this.detailedStudy && nodeParams.studyID == this.detailedStudy["studyID"]) {
@@ -80,7 +81,7 @@ export class SelectSeriesComponent {
         }
     }
 
-    private showPatientDetails(nodeParams: any): void {
+    showPatientDetails(nodeParams: any): void {
         this.detailedSerie = null;
         this.detailedStudy = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
@@ -90,7 +91,27 @@ export class SelectSeriesComponent {
         }
     }
 
-    private onPatientUpdate(): void {
+    onStudyCheckChange(checked: boolean, study: StudyDicom) {
+        if (study.series) {
+            study.series.forEach(serie => serie.selected = checked)
+        }
+        this.onPatientUpdate();
+    }
+
+    onSerieCheckChange(checked: boolean, study: StudyDicom) {
+        if (study.series) {
+            let nbChecked: number = 0;
+            study.series.forEach(serie => {
+                if (serie.selected) nbChecked++;
+            });
+            if (nbChecked == study.series.length) this.studiesCheckboxes[study.studyInstanceUID] = true;
+            else if (nbChecked == 0) this.studiesCheckboxes[study.studyInstanceUID] = false;
+            else this.studiesCheckboxes[study.studyInstanceUID] = 'intederminate';
+        }
+        this.onPatientUpdate();
+    }
+
+    onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
     }
 

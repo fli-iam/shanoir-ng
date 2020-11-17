@@ -29,6 +29,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { ExaminationNode } from '../../tree/tree.model';
 
 @Component({
     selector: 'examination',
@@ -157,7 +158,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     protected deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
-	this.form.markAsDirty();
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
@@ -165,7 +166,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
-	this.form.markAsDirty();
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
@@ -181,5 +182,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     getFileName(element): string {
         return element.split('\\').pop().split('/').pop();
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
     }
 }

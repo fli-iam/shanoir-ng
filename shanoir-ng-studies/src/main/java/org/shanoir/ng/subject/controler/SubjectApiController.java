@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -130,13 +131,14 @@ public class SubjectApiController implements SubjectApi {
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
 		try {
-			// Update subject BIDS
-			bidsService.updateSubjectBids(subjectId, subject);
 			subjectService.update(subject);
+
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 

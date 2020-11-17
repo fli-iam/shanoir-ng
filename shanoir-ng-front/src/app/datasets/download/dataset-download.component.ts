@@ -38,24 +38,37 @@ export class DatasetDownloadComponent {
         
     }
 
-    @Input() datasets: Dataset[] = [];
+    @Input() datasetIds: number[] = [];
     @Input() studyId: number;
     protected useBids: boolean = false;
-    protected type: string = 'nii';
+    protected type: 'nii' | 'dcm' = 'nii';
     protected inError: boolean = false;
     protected errorMessage: string;
     protected loading: boolean = false;
     protected readonly ImagesUrlUtil = ImagesUrlUtil;
+    protected mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 
     /** Click on first button */
-    prepareDownload() {
-        if ((!this.datasets || this.datasets.length == 0) && (!this.studyId)) {
+    prepareDownloadAll() {
+        if (!this.studyId) {
             this.inError = true;
             this.errorMessage = 'No datasets available for the current selection.';
         }
         // Display the messageBox with options
+        this.mode = 'all';
+        this.downloadDialog.show();
+    }
+
+    prepareDownloadSelected() {
+        if (!this.datasetIds || this.datasetIds.length == 0) {
+            this.inError = true;
+            this.errorMessage = 'No datasets available for the current selection.';
+        }
+        // Display the messageBox with options
+        this.mode = 'selected';
+        this.type = 'nii';
         this.downloadDialog.show();
     }
 
@@ -63,15 +76,15 @@ export class DatasetDownloadComponent {
     public download() {
         // Call service method to download datasets
         this.loading = true;
-        if (!this.studyId) {
-            this.datasetService.downloadDatasets(this.datasets.map(dataset => dataset.id), this.type).then(() => this.loading = false);
-        } else {
+        if (this.mode == 'selected') {
+            this.datasetService.downloadDatasets(this.datasetIds, this.type).then(() => this.loading = false);
+        } else if (this.mode == 'all') {
             if (this.useBids) {
                 this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
             } else {
                 this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
             }
-        }
+        } 
         this.downloadDialog.hide();
     }
 

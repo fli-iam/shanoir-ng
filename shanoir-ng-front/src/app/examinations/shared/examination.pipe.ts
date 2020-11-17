@@ -15,13 +15,14 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 import { Examination } from "./examination.model";
+import { SubjectExamination } from "./subject-examination.model";
 
 @Pipe({ name: "examinationLabel" })
 export class ExaminationPipe implements PipeTransform {
 
-    transform(examination: Examination) {
+    transform(examination: Examination | SubjectExamination) {
         if (examination) {
-            return   new Date(examination.examinationDate).toLocaleDateString()  + " , ENCÉPHALIQUE  ( id = " + examination.id + " ) ";
+            return new Date(examination.examinationDate).toLocaleDateString()  + " , ENCÉPHALIQUE  ( id = " + examination.id + " ) ";
         }
         return "";
     }

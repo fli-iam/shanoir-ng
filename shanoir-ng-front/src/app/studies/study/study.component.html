@@ -186,20 +186,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
 						</span>
                         <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
-                            <p> {{study.protocolFilePaths[0]}}
+                            {{study.protocolFilePaths[0]}}
                             <button (click)="deleteFile()" class="left-icon"><i class="fas fa-trash"></i></button>
-                            <p>
                         </span>
                         
 					</li>
                     <li *ngIf="mode == 'view'">
                         <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
                         <span class="right-col">
-                            <p *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
-                            <button (click)="downloadFile()"><i class="fas fa-save"></i></button>
-                            </p>
-                            <p *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-
-                            </p>
+                            <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
+                            	<button (click)="downloadFile()"><i class="fas fa-save"></i></button>
+							</span>
+                            <span *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-</span>
                         </span>
                     </li>
 				</ol>
@@ -226,20 +224,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
-				<study-tree [study]="study"></study-tree>
+				<legend>Tree</legend>
+				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
+						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
             <fieldset *ngIf="mode == 'view'">
+                <legend>BIDS tree</legend>
                 <bids-tree [study]="study"></bids-tree>
             </fieldset>
 			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+				<dataset-download  *ngIf="mode == 'view'" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+			</form-footer>
 		</form>
-        <dataset-download *ngIf="mode == 'view'" [studyId]="id" > </dataset-download>
 	</div>
 </div>

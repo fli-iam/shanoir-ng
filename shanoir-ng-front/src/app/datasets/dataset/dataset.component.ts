@@ -37,6 +37,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
     protected downloading: boolean = false;
+    protected papayaLoaded: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
@@ -55,14 +56,12 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
                 this.hasDownloadRight = true;
-                this.loadDicomInMemory();
                 this.dataset = dataset;
                 return;
             } else {
                 return this.studyRightsService.getMyRightsForStudy(dataset.study.id).then(rights => {
                     this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                     this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                    if (this.hasDownloadRight) this.loadDicomInMemory();
                     this.dataset = dataset;
                 });
             }
@@ -98,6 +97,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     private loadDicomInMemory() {
+        this.papayaLoaded = true;
         this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
                 this.dicomArchiveService.importFromZip(blobReponse.body)

@@ -37,3 +37,5 @@ progress-bar { width: 100px; }
 
 .bottom-info { min-width: 300px; font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
 .bottom-info a { color: inherit; }
+
+.user-commands a + a { margin-left: 20px; }

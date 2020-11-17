@@ -83,6 +83,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ng-template [ngSwitchCase]="'view'">
                                 {{subject.name}}
                             </ng-template>
+                            <ng-template [ngSwitchCase]="'edit'">
+                                {{subject.name}}
+                            </ng-template>
                             <ng-template ngSwitchDefault>
                                 <input type="text" id="name" formControlName="name" [(ngModel)]="subject.name"/>
                                 <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
@@ -165,10 +168,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
-				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-				<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
+				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
+				<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : subject" 
+						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
 			</fieldset>
-			
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
