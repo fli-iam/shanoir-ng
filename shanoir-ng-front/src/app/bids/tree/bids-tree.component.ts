@@ -36,7 +36,6 @@ import { Study } from '../../studies/shared/study.model'
 export class BidsTreeComponent implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
-    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     @Input() study: Study;
     protected list: BidsElement[] = [];
