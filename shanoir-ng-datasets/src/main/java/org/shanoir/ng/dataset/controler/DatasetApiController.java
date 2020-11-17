@@ -320,12 +320,16 @@ public class DatasetApiController implements DatasetApi {
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.IN_PROGRESS);
+		eventService.publishEvent(event);
+		
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS));
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 			FileUtils.deleteQuietly(zipFile);
