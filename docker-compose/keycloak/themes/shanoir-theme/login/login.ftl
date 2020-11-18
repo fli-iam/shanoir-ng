@@ -41,6 +41,9 @@
 									<span><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
 								</#if>
 							</div>
+							<div>
+							    <a href="${properties.requestExtension!}">Request an extension.</a>
+							</div>
 						</div>
 	
 						<div>

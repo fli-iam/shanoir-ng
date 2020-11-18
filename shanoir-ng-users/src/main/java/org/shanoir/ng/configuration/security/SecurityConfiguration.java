@@ -80,6 +80,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 				.disable()
 			.authorizeRequests()
 				.antMatchers("/accountrequest").permitAll()
+				.antMatchers("/extensionrequest").permitAll()
 				.antMatchers("/last_login_date").permitAll()
 				.anyRequest().authenticated();
 		// the swagger API of is not exposed here for security reasons (MK)
