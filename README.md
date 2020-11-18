@@ -47,6 +47,8 @@ Below an example for the dev environment:
 * MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
 * MS Preclinical: https://shanoir-ng-nginx/shanoir-ng/preclinical/swagger-ui.html
 
+Please note, that the MS Users does for security reasons not publicly expose his REST-interface.
+
 # Requirements
 
 To build and deploy Shanoir, you will need:
