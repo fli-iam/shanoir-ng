@@ -35,7 +35,7 @@ Many thanks to all these giants, on their shoulders we are standing to develop S
 
 # Access to REST-API on using Swagger2
 
-You can easily connect and investigate the REST interface of Shanoir-NG using Swagger2.
+You can easily connect and investigate the REST-interface of Shanoir-NG using Swagger2.
 Depending on your server domain just call (e.g. for Neurinfo server):
 
 * MS Studies: https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui.html
