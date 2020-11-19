@@ -14,14 +14,17 @@
 
 package org.shanoir.ng.extensionrequest.controller;
 
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,11 +35,16 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExtensionRequestApiController.class);
 
+	@Autowired
+	private KeycloakClient keycloakClient;
+
+	@Autowired
+	private EmailService emailService;
+
 	@Override
 	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
 			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-
 			User userToExtend = getUserService().findByEmail(requestInfo.getEmail()).orElseThrow(() -> new EntityNotFoundException(requestInfo.getEmail()));
 			if (userToExtend.isEnabled()) {
 				throw new ShanoirException("This user is not disabled, please enter an email of a disabled account. If you forgot your password, please return to login page and follow the adapted link.");
@@ -44,12 +52,16 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
 			if (userToExtend.isExtensionRequestDemand().booleanValue()) {
 				throw new ShanoirException("An extension has already been requested for this user, please be patient of contact an administrator to accept the extension request.");
 			}
+			LOG.info("Resetting password after extension request for user {}", userToExtend.getUsername());
+
 			getUserService().requestExtension(userToExtend.getId(), requestInfo);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
+			String password = keycloakClient.resetPassword(userToExtend.getKeycloakId());
+			emailService.notifyUserResetPassword(userToExtend, password);
+
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (EntityNotFoundException e) {
 			LOG.error("User with email {} not found", requestInfo.getEmail(), e);
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (ShanoirException e) {
 			LOG.error(e.getMessage(), e);
 			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);

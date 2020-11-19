@@ -58,11 +58,12 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
         this.userService.requestExtension(this.extensionRequestInfo)
             .then((res) => {
                 this.requestSent = true;
+                this.errorMessage = null;
             }).catch(exception => {
                 if (exception.status == 406) {
                     this.requestSent = true;
                     this.errorMessage = "This account is not disabled or has already an extension request pending. Please contact an administrator for more information."
-                } else if (exception.status == 404) {
+                } else if (exception.status == 400) {
                     this.errorMessage = "No account associated to this email, please enter a valid email address."
                 } else {
                     throw exception;
