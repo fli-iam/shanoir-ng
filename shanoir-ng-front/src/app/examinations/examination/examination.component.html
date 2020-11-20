@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="examination.study" (change)="onStudyChange()" [optionArr]="studies">
+								<select-box formControlName="study" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -86,12 +86,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
-						<span class="right-col" [ngSwitch]="mode">
+                                                <span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{examination?.examinationDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
+								<datepicker [disabled]="inImport && examination.examinationDate" [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
 								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: dd/mm/yyyy</label>
 								<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 							</ng-template>

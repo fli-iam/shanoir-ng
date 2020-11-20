@@ -258,7 +258,10 @@ export class ClinicalContextComponent implements OnDestroy {
                         } else if (this.importMode == 'DICOM') opt.compatible = false;
                         return opt;
                     });
-                    //if (!this.studycard) this.useStudyCard = false;
+                    if (!this.studycard && studycards && studycards.length == 1) {
+                        this.studycard = studycards[0];
+                        this.onSelectStudyCard();
+                    }
                 });
             }
         }

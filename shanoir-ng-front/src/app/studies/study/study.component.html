@@ -159,7 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
+							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
@@ -167,6 +167,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view' && !study.monoCenter">
 						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI">Current centers and investigators</label>
 						<span class="right-col study-center-list">
+							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<div *ngFor="let studyCenter of study.studyCenterList">
 								{{studyCenter.center.name}}
 								<span class="icon icon-clickable" (click)="goToCenter(studyCenter.center.id)"><i class="fas fa-external-link-alt"></i></span>
@@ -239,9 +240,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<dataset-download [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<dataset-download  *ngIf="mode == 'view'" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
 			</form-footer>
 		</form>
-        <dataset-download *ngIf="mode == 'view'" [studyId]="id" > </dataset-download>
 	</div>
 </div>

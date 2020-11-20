@@ -93,6 +93,5 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     }
 
     collapseAll() {
-        console.log('collapse');
     }
 }

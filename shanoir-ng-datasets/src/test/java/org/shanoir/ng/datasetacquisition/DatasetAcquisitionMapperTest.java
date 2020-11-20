@@ -25,6 +25,7 @@ import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,8 +45,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class DatasetAcquisitionMapperTest {
 
 	private static final Long DATASET_ACQUISITION_ID = 1L;
-	private static final String DATASET_ACQUISITION_WIHTOUT_DATASET_NAME = "id=1 ()";
-	private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " ()";
+	private static final String DATASET_ACQUISITION_WIHTOUT_DATASET_NAME = "id=1 (Mr)";
+	private static final String DATASET_ACQUISITION_WIHT_DATASET_NAME = ModelsUtil.DATASET_NAME + " (Mr)";
 
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper datasetAcquisitionMapper;
@@ -76,6 +77,8 @@ public class DatasetAcquisitionMapperTest {
 		final DatasetAcquisition datasetAcquisition = new MrDatasetAcquisition();
 		datasetAcquisition.setId(DATASET_ACQUISITION_ID);
 		datasetAcquisition.setDatasets(new ArrayList<>());
+		datasetAcquisition.setExamination(new Examination());
+		datasetAcquisition.getExamination().setStudyId(1L);
 		return datasetAcquisition;
 	}
 

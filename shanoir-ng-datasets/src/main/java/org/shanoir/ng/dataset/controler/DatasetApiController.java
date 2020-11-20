@@ -310,9 +310,13 @@ public class DatasetApiController implements DatasetApi {
 		zipFile.createNewFile();
 
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+		
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		} finally {
@@ -415,8 +419,13 @@ public class DatasetApiController implements DatasetApi {
 		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
 		zipFile.createNewFile();
 		zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+
 		try (InputStream is = new FileInputStream(zipFile);) {
 		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+		    response.setContentType(contentType);
 		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 		    response.flushBuffer();
 		} finally {

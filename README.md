@@ -11,11 +11,9 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 # :warning: Disclaimers :warning:
 
-* The latest version of Shanoir-NG is currently on the branch "develop", or on the branch "appning" for the preclinical solution,
-that will soon be merged into the "develop" branch. The "develop" branch is operational, we wait until our go-live in April/May
-2020 is finished before merging "develop" into the "master", to have a real stable production version 1.0 "master" afterwards.
+* The latest version of Shanoir-NG is currently on the branch "develop".
 
-* You can find the installation instruction for "develop" branch below
+* You can find the installation instruction for "develop" branch below.
 
 * Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
 
@@ -35,11 +33,21 @@ Many thanks to all these giants, on their shoulders we are standing to develop S
 
 # Access to REST-API on using Swagger2
 
-You can easily connect and investigate the REST interface of Shanoir-NG using Swagger2.
-Depending on your server domain, below an example for the dev environment, just call:
+You can easily connect and investigate the REST-interface of Shanoir-NG using Swagger2.
+Depending on your server domain just call (e.g. for Neurinfo server):
+
+* MS Studies: https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui.html
+* MS Import: https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui.html
+* MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui.html
+* MS Preclinical: https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html
+
+Below an example for the dev environment:
 * MS Studies: https://shanoir-ng-nginx/shanoir-ng/studies/swagger-ui.html
 * MS Import: https://shanoir-ng-nginx/shanoir-ng/import/swagger-ui.html
 * MS Datasets: https://shanoir-ng-nginx/shanoir-ng/datasets/swagger-ui.html
+* MS Preclinical: https://shanoir-ng-nginx/shanoir-ng/preclinical/swagger-ui.html
+
+Please note, that the MS Users does for security reasons not publicly expose his REST-interface.
 
 # Requirements
 

@@ -108,9 +108,9 @@ public class StudyApiController implements StudyApi {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	private final HttpServletRequest request;
-	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
+
+	private final HttpServletRequest request;
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public StudyApiController(final HttpServletRequest request) {
@@ -253,9 +253,9 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public void downloadProtocolFile(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long examinationId,
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getProtocolFilePath(examinationId, fileName);
+		String filePath = getProtocolFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -265,7 +265,7 @@ public class StudyApiController implements StudyApi {
 
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
-			response.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
+			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}
@@ -331,9 +331,12 @@ public class StudyApiController implements StudyApi {
 		// Zip it
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
-			response.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
+			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		} finally {

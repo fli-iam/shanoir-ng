@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -42,6 +43,13 @@ public class BidsApiController implements BidsApi {
 
 	@Autowired
 	BIDSService bidsService;
+
+	private final HttpServletRequest request;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public BidsApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
@@ -80,9 +88,13 @@ public class BidsApiController implements BidsApi {
 		zipFile.createNewFile();
 
 		zip(fileToBeZipped.getAbsolutePath(), zipFile.getAbsolutePath());
+		
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		} finally {

@@ -134,6 +134,5 @@ export class SubjectNodeComponent implements OnChanges {
     }
 
     collapseAll() {
-        console.log('collapse');
     }
 }

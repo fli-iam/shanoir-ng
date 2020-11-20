@@ -167,7 +167,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
-            'studyCenterList': [this.selectedCenter, [this.validateCenter]],
+            'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'protocolFile': []
         });
@@ -242,16 +242,16 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onCenterAdd(): void {
-        if (!this.selectedCenter) return;
-        let studyCenter: StudyCenter = new StudyCenter();
-        studyCenter.center = new Center();
-        studyCenter.center.id = this.selectedCenter.id;
-        studyCenter.center.name = this.selectedCenter.name;
-        this.study.studyCenterList.push(studyCenter);
-
-        let option = this.centerOptions.find(option => option.value.id == this.selectedCenter.id);
-        if (option) option.disabled = true;
-
+        if (this.selectedCenter) {
+            let studyCenter: StudyCenter = new StudyCenter();
+            studyCenter.center = new Center();
+            studyCenter.center.id = this.selectedCenter.id;
+            studyCenter.center.name = this.selectedCenter.name;
+            this.study.studyCenterList.push(studyCenter);
+    
+            let option = this.centerOptions.find(option => option.value.id == this.selectedCenter.id);
+            if (option) option.disabled = true;
+        }
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }

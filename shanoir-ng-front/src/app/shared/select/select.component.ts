@@ -50,7 +50,7 @@ import { inspect } from 'util';
 
 export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges {
 
-    @Output() change = new EventEmitter();
+    @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
     @Input() options: Option<any>[];
@@ -284,7 +284,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.selectedOptionIndex = index;
         this.close();
         this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
-        this.change.emit(this.selectedOption ? this.selectedOption.value : null);
+        this.userChange.emit(this.selectedOption ? this.selectedOption.value : null);
         this.selectOption.emit(this.selectedOption);
     }
 
@@ -543,7 +543,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public onTypeText(text: string) {
         this.unSelectOption();
         this.onChangeCallback(null);
-        this.change.emit(null);
+        this.userChange.emit(null);
         this.inputText = text;
         this.searchText = text;
         this.open();
