@@ -4,6 +4,7 @@
 package org.shanoir.ng.solr.repository;
 
 import java.util.Collection;
+
 import javax.annotation.Resource;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
