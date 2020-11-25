@@ -45,8 +45,8 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -63,7 +63,6 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -136,9 +135,6 @@ public class DatasetApiController implements DatasetApi {
 	private WADODownloaderService downloader;
 
 	@Autowired
-	private BIDSService bidsService;
-
-	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	@Autowired
@@ -158,8 +154,6 @@ public class DatasetApiController implements DatasetApi {
 					throws RestServiceException {
 
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {

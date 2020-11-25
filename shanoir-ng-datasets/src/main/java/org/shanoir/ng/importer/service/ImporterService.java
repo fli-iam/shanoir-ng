@@ -45,7 +45,6 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
@@ -94,9 +93,6 @@ public class ImporterService {
 	private DicomPersisterService dicomPersisterService;
 
 	@Autowired
-	private BIDSService bidsService;
-
-	@Autowired
 	private ShanoirEventService eventService;
 
 	private static final String SESSION_PREFIX = "ses-";
@@ -139,14 +135,6 @@ public class ImporterService {
 			+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
-			// Create BIDS folder
-			try {
-				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (Exception e2) {
-				// Only log exception, don't fail for the moment
-				event.setMessage("Almost success - BIDS folder creation failed");
-				LOG.error("ERROR: Could not create BIDS folder", e2);
-			}
 			// Manage archive
 			if (importJob.getArchive() == null) {
 				return;
@@ -367,12 +355,6 @@ public class ImporterService {
 			event.setMessage("Success");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			// Complete BIDS with data
-			try {
-				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (Exception e) {
-				LOG.error("Something went wrong creating the bids data: ", e);
-			}
 		} catch (Exception e) {
 			LOG.error("Error while importing EEG: ", e);
 			event.setStatus(ShanoirEvent.ERROR);

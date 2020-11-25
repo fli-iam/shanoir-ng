@@ -1,10 +1,6 @@
 package org.shanoir.ng.exporter.service;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,8 +12,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
@@ -40,9 +34,18 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,8 +116,34 @@ public class BIDSServiceImpl implements BIDSService {
 		return baseDir;
 	}
 
+	/**
+	 * Updates a BIDS folder after receiving some specific events
+	 */
+	/**
+	 * Receives a shanoirEvent as a json object, concerning a subject deletion
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+			key = ShanoirEventType.UPDATE_SUBJECT_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			)
+	public void updateBidsFolderFromEvent(String event) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			ShanoirEvent shanoirEvent =  objectMapper.readValue(event, ShanoirEvent.class);
+			
+			// Get associated study and update bids folder accordingly
+		} catch (Exception e) {
+			LOG.error("Could not update BIDS folder after following event: {}", event, e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+		}
+	}
+
 	@Override
-	public File updateBidsFolder(final Long studyId, final String studyName) throws IOException {
+	public synchronized File updateBidsFolder(final Long studyId, final String studyName) throws IOException {
 		// Get base bids folder
 		String baseFolder = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
 		
@@ -123,157 +152,6 @@ public class BIDSServiceImpl implements BIDSService {
 		
 		// Recreate it from scratch
 		return this.exportAsBids(studyId, studyName);
-	}
-
-	@Override
-	public File addDataset(Examination exam, String subjectName, String studyName) throws IOException {
-		// 0. If base file does not exist, create it from scratch
-		File baseDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + exam.getStudyId() + "_" + studyName);
-		if (!baseDir.exists()) {
-			return exportAsBids(exam.getStudyId(), studyName);
-		}
-
-		// 1. Create Subject File if not existing
-		File subjDir = createSubjectFolder(subjectName, exam.getSubjectId().toString(), baseDir);
-
-		// Get subject examinations and filter on the one with adapted study only
-		final List<Examination> examinationList = examService.findBySubjectId(exam.getSubjectId());
-
-		// Iterate over examinations to export them as BIDS
-		boolean createSessionLevel = examinationList.size() > 1;
-		
-		// Here we should decide if we have to update all session levels to avoid inconsistency.
-		// Or set a warning message here ?
-
-		// 2. Create dataset files
-		exportAsBids(exam, subjDir, studyName, subjectName, createSessionLevel);
-		return baseDir;
-	}
-
-	@Override
-	public void deleteDataset(Dataset dataset) {
-		try {
-			String examId = dataset.getDatasetAcquisition().getExamination().getComment();
-			Long subjectId = dataset.getSubjectId();
-			Long studyId = dataset.getStudyId();
-	
-			File fileToDelete = null;
-			// Get study folder
-			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
-			// Get subject folder
-			File subjectFolder = getFileFromId(subjectId.toString(), fileToDelete);
-			// Get exam folder
-			fileToDelete = getFileFromId(examId, subjectFolder);
-			// Get anat, eeg, [...] folder
-			if (dataset instanceof EegDataset) {
-				fileToDelete = getFileFromId("eeg", fileToDelete);
-			} else if (dataset instanceof MrDataset) {
-				fileToDelete = getFileFromId("anat", fileToDelete);
-			}
-
-			// Now delete only the data files we are interested in
-			for (DatasetExpression expr : dataset.getDatasetExpressions()) {
-				for (DatasetFile dataFile : expr.getDatasetFiles()) {
-					if (!dataFile.isPacs()) {
-						// Get FileName path object
-				        Path path = Paths.get(dataFile.getPath());
-				        Path fileName = path.getFileName();
-						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
-
-						// Delete from  scans.tsv searching by examination id / file name
-						deleteLineFromFile(getScansFile(subjectFolder), dataset.getDatasetAcquisition().getExamination().getId(), fileName.toString());
-					}
-				}
-			}
-			
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				return;
-			}
-
-			// And delete metadata files created for bids
-			for (File metaDataFile : fileToDelete.listFiles()) {
-				if (metaDataFile.getName() != null && metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
-					metaDataFile.delete();
-				}
-			}
-			
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually.", e);
-		}
-	}
-
-	@Override
-	public void deleteExam(Long examId) {
-		Examination exam = examService.findById(examId);
-		if (exam == null) {
-			// Not found, just get back
-			return;
-		}
-
-		File fileToDelete = null;
-		try {
-			// Get study folder
-			fileToDelete = getFileFromId(exam.getStudyId().toString(), new File(bidsStorageDir));
-
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				LOG.info("Trying to delete a non existing examination folder, file not deleted");
-				return;
-			}
-
-			// Get subject folder
-			fileToDelete = getFileFromId(exam.getSubjectId().toString(), fileToDelete);
-			
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				LOG.info("Trying to delete a non existing exmaination folder, file not deleted");
-				return;
-			}
-
-			// delete from scans.tsv searching by examination ID
-			File scans = getScansFile(fileToDelete);
-			deleteLineFromFile(scans, examId, ".*");
-
-			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
-
-
-			// Delete all the folder
-			FileUtils.deleteDirectory(fileToDelete);
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
-		}
-	}
-
-	/**
-	 * Deletes a line with given regex in the given file
-	 * @param fileNameRegex the regex to find the filename to delete
-	 * @param examId the examination ID
-	 * @throws IOException
-	 */
-	private void deleteLineFromFile(File scansFile, Long examId, String fileNameRegex) throws IOException {
-		File tempFile = new File(scansFile.getAbsolutePath() + "_tmp.tsv");
-
-		BufferedReader reader = new BufferedReader(new FileReader(scansFile));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-		String currentLine;
-
-		while((currentLine = reader.readLine()) != null) {
-		    // trim newline when comparing with lineToRemove
-		    String trimmedLine = currentLine.trim();
-		    String[] columns = trimmedLine.split(TABULATION);
-		    if(columns[2].equals(examId.toString())) {
-		    	// Check filename regex
-		        Pattern pattern = Pattern.compile(fileNameRegex);
-		        Matcher matcher = pattern.matcher(columns[0]);
-		    	if (matcher.find()) {
-					continue;
-				}
-			}
-		    writer.write(currentLine + System.getProperty("line.separator"));
-		}
-		writer.close();
-		reader.close();
-		tempFile.renameTo(scansFile);
 	}
 
 	/**

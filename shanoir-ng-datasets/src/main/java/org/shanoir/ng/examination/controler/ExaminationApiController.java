@@ -30,7 +30,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -67,9 +66,6 @@ public class ExaminationApiController implements ExaminationApi {
 	private ExaminationService examinationService;
 
 	@Autowired
-	BIDSService bidsService;
-
-	@Autowired
 	ShanoirEventService eventService;
 
 	private final HttpServletRequest request;
@@ -84,8 +80,6 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
 		try {
-			// delete bids folder
-			bidsService.deleteExam(examinationId);
 			// Check if user rights needed
 			examinationService.deleteById(examinationId);
 

@@ -28,10 +28,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ng-template>
 
 
-<node #bidsTree label="BIDS" awesome="far fa-folder" [deploy]="false" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' ">
+<node #bidsTree 
+    label="BIDS" 
+    awesome="far fa-folder" 
+    [deploy]="false" 
+    class="root-node" 
+    (openClick)="getBidsStructure()" 
+    (firstOpen)="getBidsStructure()" 
+    [dataLoading]="load=='loading'" 
+    >
     <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
 </node>
 
+<p><button (click)="updateStructure()">Update</button>  <tool-tip>Updating BIDS folder allows to calculate session and update data.</tool-tip></p>
 <div *ngIf="json" class="content">
     <b> {{title}} </b> <br/>
     <ngx-json-viewer [json]="json"></ngx-json-viewer>

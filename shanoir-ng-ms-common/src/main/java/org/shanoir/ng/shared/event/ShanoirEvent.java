@@ -16,6 +16,8 @@ public class ShanoirEvent {
 
 	protected Long userId;
 
+	protected Long studyId;
+
 	protected String message;
 
 	protected int status;
@@ -136,6 +138,20 @@ public class ShanoirEvent {
 	 */
 	public void setProgress(Float progress) {
 		this.progress = progress;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }
