@@ -12,29 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export abstract class Entity {
-    
-    abstract id: number;
-}
+import { EegDataset } from '../dataset/eeg/dataset.eeg.model';
+import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { DatasetType } from './dataset-type.model';
+import { Dataset } from './dataset.model';
 
-export class EntityRoutes {
 
-    constructor(public routingName: string) {}
+export abstract class DatasetUtils{
 
-    public getRouteToView(id: number): string {
-        return '/' + this.routingName + '/details/' + id;
+    static getDatasetInstance(type: DatasetType): Dataset {
+        if (type == 'Mr') return new MrDataset();
+        if (type == 'Eeg') return new EegDataset();
+        else return new MrDataset(); 
     }
 
-    public getRouteToEdit(id: number): string {
-        return '/' + this.routingName + '/edit/' + id;
-    }
-
-    public getRouteToCreate(): string {
-        return '/' + this.routingName + '/create';
-    }
-
-    public getRouteToList(): string {
-        return '/' + this.routingName + '/list';
+    static getEntityInstance(entity: Dataset) { 
+        return DatasetUtils.getDatasetInstance(entity.type);
     }
 
 }

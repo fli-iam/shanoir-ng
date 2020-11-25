@@ -13,8 +13,6 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
-import { ServiceLocator } from '../utils/locator.service';
-import { TaskService } from './task.service';
 
 export class Task extends Entity {
 
@@ -26,6 +24,4 @@ export class Task extends Entity {
     progress: number;
     eventType: string;
     objectId: number;
-
-    service: TaskService = ServiceLocator.injector.get(TaskService);
 }

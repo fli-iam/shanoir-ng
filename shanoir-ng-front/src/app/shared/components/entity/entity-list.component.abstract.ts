@@ -52,6 +52,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private new: boolean = false;
     private showId: boolean = true;
 
+    abstract getService(): EntityService<T>;
+
     constructor(
             protected readonly ROUTING_NAME: string) {
         
@@ -120,7 +122,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh().then(() => {
                             this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');

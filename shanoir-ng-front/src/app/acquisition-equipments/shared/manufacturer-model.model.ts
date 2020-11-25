@@ -13,11 +13,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Manufacturer } from './manufacturer.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import { ManufacturerModelService } from './manufacturer-model.service';
 
 export class ManufacturerModel extends Entity {
     id: number;
@@ -25,6 +23,4 @@ export class ManufacturerModel extends Entity {
     manufacturer: Manufacturer;
     magneticField: number;
     datasetModalityType: DatasetModalityType;
-
-    service: ManufacturerModelService = ServiceLocator.injector.get(ManufacturerModelService);
 }

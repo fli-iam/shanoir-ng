@@ -201,27 +201,6 @@ export class Step {
             public timestamp: number) {
     }
 
-    // static parse(str: string): Step {
-    //     let json: Step = JSON.parse(str);
-    //     let step: Step = new Step(json.label, json.route, json.entity);
-    //     step.id = step.id;
-    //     step.subscribers = step.subscribers;
-    //     step.disabled = step.disabled;
-    //     step.displayWaitStatus = step.displayWaitStatus;
-    //     step.prefilled = step.prefilled;
-    //     return step;
-    // }
-
-    // stringify(): string {
-    //     let ignoreList: string[] = ['onSaveSubject'];
-    //     let replacer = (key, value) => {
-    //         if (ignoreList.indexOf(key) > -1) return undefined;
-    //         else if (key == 'entity') return (value as Entity).stringify();
-    //         else return value;
-    //     }
-    //     return JSON.stringify(this, replacer);
-    // }
-
     public id = new Date().getTime();
     public subscribers: number = 0;
     public disabled: boolean = false;
@@ -279,39 +258,4 @@ export class Step {
     public resetWait() {
         this.waitStep = null;
     }
-
-    // public save() {
-    //     return {
-    //         label: this.label,
-    //         route: this.route,
-    //         timestamp: this.timestamp,
-    //         id: this.id, 
-    //         subscribers: this.subscribers,
-    //         disabled: this.disabled,
-    //         displayWaitStatus: this.displayWaitStatus,
-    //         prefilled: this.prefilled,
-    //         waitStep: this.waitStep != null ? this.waitStep.id : null,
-    //         onSaveSubject: null,
-    //         milestone: this.milestone,
-    //         entity: this.entity != null ? this.entity.id : null,
-    //         data: this.data,
-    //         importStart: this.importStart
-    //     }
-    // }
-
-    // static load(json: any) {
-    //     let step = new Step(json.label, json.route, json.timestamp);
-    //     step.id = json.id;
-    //     step.subscribers = json.subscribers;
-    //     step.disabled = json.disabled;
-    //     step.displayWaitStatus = json.displayWaitStatus;
-    //     step.prefilled = json.prefilled;
-    //     step.waitStep = json.waitStep;
-    //     step.onSaveSubject = json.onSaveSubject;
-    //     step.milestone = json.milestone;
-    //     step.entity = json.entity;
-    //     step.data = json.data;
-    //     step.importStart = json.importStart;
-    //     return step;
-    // }
 }

@@ -222,20 +222,3 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
 export function isFunction(obj) {
     return !!(obj && obj.constructor && obj.call && obj.apply);
 }
-
-export function getDatasetInstance(type: string) { 
-    if (type == 'Mr') return new MrDataset();
-    if (type == 'Eeg') return new EegDataset();
-    else return new MrDataset(); 
-}
-
-export function getEntityInstance(entity: Dataset) { 
-    return getDatasetInstance(entity.type);
-
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    // fixes errors with our test dataset (which have no real types)
-    // TODO : Throw en exception
-}

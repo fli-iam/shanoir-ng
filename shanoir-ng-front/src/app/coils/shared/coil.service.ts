@@ -15,7 +15,7 @@
 import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
-import { Coil } from './coil.model';
+import { Coil, CoilDTO } from './coil.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -30,4 +30,10 @@ export class CoilService extends EntityService<Coil> {
 
     getEntityInstance() { return new Coil(); }
 
+    public stringify(entity: Coil) {
+        let dto = new CoilDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
+    }
 }

@@ -11,18 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import 'rxjs/add/operator/map';
 
-import { HttpResponse, HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, ErrorHandler } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
-import 'rxjs/add/operator/map'
-import { HandleErrorService } from '../../shared/utils/handle-error.service'
+import { DatasetUtils } from './dataset.utils';
+
 
 
 @Injectable()
@@ -43,7 +45,7 @@ export class DatasetService extends EntityService<Dataset> {
     private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
 
     getEntityInstance(entity: Dataset) { 
-        return AppUtils.getDatasetInstance(entity.type);
+        return DatasetUtils.getDatasetInstance(entity.type);
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
@@ -163,7 +165,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     protected mapEntity = (dto: DatasetDTO): Promise<Dataset> => {
-        let result: Dataset = AppUtils.getDatasetInstance(dto.type);
+        let result: Dataset = DatasetUtils.getDatasetInstance(dto.type);
         this.datasetDTOService.toEntity(dto, result);
         return Promise.resolve(result);
     }
@@ -172,5 +174,12 @@ export class DatasetService extends EntityService<Dataset> {
         let result: Dataset[] = [];
         if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
+    }
+    
+    public stringify(entity: Dataset) {
+        let dto = new DatasetDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
     }
 }

@@ -47,7 +47,7 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     updateSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<SubjectTherapy> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${subjectTherapy.id}`;
         return this.http
-            .put<SubjectTherapy>(url, subjectTherapy.stringify())
+            .put<SubjectTherapy>(url, this.stringify(subjectTherapy))
             .map((entity) => entity? this.toRealObject(entity) : entity)
             .toPromise();
     }
