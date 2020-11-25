@@ -2,6 +2,3 @@
 
 @import 'assets/css/common.css';
 @import 'assets/css/papaya.css';
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
