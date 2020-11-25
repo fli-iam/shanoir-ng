@@ -21,7 +21,6 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.utils.KeycloakClient;
-import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +43,7 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
 	@Override
 	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
-			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-			User userToExtend = getUserService().findByEmail(requestInfo.getEmail()).orElseThrow(() -> new EntityNotFoundException(requestInfo.getEmail()));
+			User userToExtend = getUserService().findByEmailForExtension(requestInfo.getEmail()).orElseThrow(() -> new EntityNotFoundException(requestInfo.getEmail()));
 			if (userToExtend.isEnabled()) {
 				throw new ShanoirException("This user is not disabled, please enter an email of a disabled account. If you forgot your password, please return to login page and follow the adapted link.");
 			}

@@ -153,6 +153,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public Optional<User> findByEmailForExtension(final String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	@Override
 	public User findById(final Long id) {
 		return userRepository.findOne(id);
 	}

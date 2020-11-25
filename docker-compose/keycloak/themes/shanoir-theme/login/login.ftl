@@ -42,7 +42,7 @@
 								</#if>
 							</div>
 							<div>
-							    <a href="${properties.requestExtension!}">Request an extension.</a>
+							    <a href="${properties.requestExtension!}">Account expired?</a>
 							</div>
 						</div>
 	
