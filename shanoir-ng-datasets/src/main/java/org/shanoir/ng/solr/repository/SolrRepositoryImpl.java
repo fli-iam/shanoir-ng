@@ -4,8 +4,6 @@
 package org.shanoir.ng.solr.repository;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
@@ -52,8 +50,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) {
 		if (facet.getStudyName() != null && !facet.getStudyName().isEmpty()) {
-			facet.setStudyName(facet.getStudyName().stream().map(name -> name.replace(" ", "%20")).collect(Collectors.toSet()));
-
 			for (String studyName: facet.getStudyName()) {
 				if(!studyName.contains(WILDCARD)) {
 					criteria.and(Criteria.where(STUDY_NAME).is(facet.getStudyName()));
@@ -67,7 +63,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 			}
 		}
 		if (facet.getSubjectName() != null && !facet.getSubjectName().isEmpty()) {
-			facet.setSubjectName(facet.getSubjectName().stream().map(name -> name.replace(" ", "%20")).collect(Collectors.toSet()));
 			for (String subjectName: facet.getSubjectName()) {
 				if(!subjectName.contains(WILDCARD)) {
 					criteria.and(Criteria.where(SUBJECT_NAME).is(facet.getSubjectName()));

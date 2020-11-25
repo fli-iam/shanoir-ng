@@ -72,7 +72,7 @@ public class ExtensionRequestApiControllerTest {
 		User mockUser = ModelsUtil.createUser(1L);
 		mockUser.setExpirationDate(LocalDate.now().minusDays(1));
 		mockUser.setExtensionRequestDemand(Boolean.FALSE);
-		Mockito.when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(mockUser));
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.of(mockUser));
 
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
@@ -92,7 +92,7 @@ public class ExtensionRequestApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void extensionRequestNoUserTest() throws Exception {
 		// GIVEN a non existing user
-		Mockito.when(userService.findByEmail(EMAIL)).thenReturn(Optional.ofNullable(null));
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.ofNullable(null));
 		
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
@@ -113,7 +113,7 @@ public class ExtensionRequestApiControllerTest {
 		// GIVEN an ENABLED user with no current extension request
 		User mockUser = ModelsUtil.createUser(1L);
 		mockUser.setExpirationDate(LocalDate.now().plusDays(1));
-		Mockito.when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(mockUser));
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.of(mockUser));
 
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
@@ -134,7 +134,7 @@ public class ExtensionRequestApiControllerTest {
 		User mockUser = ModelsUtil.createUser(1L);
 		mockUser.setExpirationDate(LocalDate.now().minusDays(1));
 		mockUser.setExtensionRequestDemand(Boolean.TRUE);
-		Mockito.when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(mockUser));
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.of(mockUser));
 
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
