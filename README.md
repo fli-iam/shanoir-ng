@@ -12,7 +12,7 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 # :warning: Disclaimers :warning:
 
 * The latest stable version of Shanoir-NG is on the branch "master".
-* The latest dev version of Shanoir-NG is on development (if mature -> merged into master)
+* The latest dev version of Shanoir-NG is on "develop" (if mature -> merged into master)
 * You can find the installation instructions for "master" branch below.
 
 * Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
@@ -41,46 +41,13 @@ Depending on your server domain just call (e.g. for Neurinfo server):
 * MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui.html
 * MS Preclinical: https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html
 
-Below an example for the dev environment:
-
-## DEPLOY
-* Install docker and docker-compose:
-    * https://docs.docker.com/install/
-    * https://docs.docker.com/compose/install/
-* Make sur docker has enough memory to run Shanoir (6Gb should be enough)
-* If you are on your **developer/local machine**:
-    * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
-	* 127.0.0.1       shanoir-ng-nginx
-    * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
-* If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
-    * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
-    * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently)
-        1. Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
-	    2. Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	    3. Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr. This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
-	    4. Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
-    * **Attention:** you will have to re-compile your code after these changes with Maven!!!
-* Just in case you have some old stuff of Shanoir-NG in your docker environment:
-    * **docker system prune -a**
-    * **docker volume prune**
-    * **Attention:** this will clean your entire docker system!
-* Go to the root folder (/shanoir-ng) and execute **docker-compose up --build**
-    * **Attention:** the file .env in the root folder is used to set environment variables
-and will not be found if you run docker-compose elsewhere; results in errors after
-* Access to shanoir-ng: https://shanoir-ng-nginx
-
-If you want to login, please configure a user in Keycloak :
-
-Please note, that the MS Users does for security reasons not publicly expose his REST-interface.
-
 # Requirements
 
 To build and deploy Shanoir, you will need:
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
-* jdk 8
 * maven 3
-* at least 6GB of available RAM
+* at least 10GB of available RAM
 
 # Installation of Shanoir NG
 
