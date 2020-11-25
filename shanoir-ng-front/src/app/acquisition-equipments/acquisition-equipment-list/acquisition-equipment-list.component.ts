@@ -13,12 +13,12 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 
@@ -44,6 +44,15 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
         super('acquisition-equipment');
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     // Grid data
     getEntities(): Promise<AcquisitionEquipment[]> {
         return this.acqEquipService.getAll();
@@ -65,22 +74,22 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
-                        + " (" + DatasetModalityType[acqEquip.manufacturerModel.datasetModalityType] + ")"
+                        + " (" + DatasetModalityType.getLabel(acqEquip.manufacturerModel.datasetModalityType) + ")"
                         + " " + acqEquip.serialNumber + " - " + acqEquip.center.name;
                 }
             },
             {
-                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id])
+                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name",
+                route: (acqEquip: AcquisitionEquipment) => '/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id
             },
             {
-                headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer-model/details/' + acqEquip.manufacturerModel.id])
+                headerName: "Manufacturer model name", field: "manufacturerModel.name",
+                route: (acqEquip: AcquisitionEquipment) => '/manufacturer-model/details/' + acqEquip.manufacturerModel.id
             },
             { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
-                headerName: "Center", field: "center.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/center/details/' + acqEquip.center.id])
+                headerName: "Center", field: "center.name",
+                route: (acqEquip: AcquisitionEquipment) => '/center/details/' + acqEquip.center.id
             }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {

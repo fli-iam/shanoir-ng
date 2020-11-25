@@ -1,0 +1,174 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<div class="header command-zone" i18n="View subject|Title">View subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
+					<div class="header command-zone" i18n="Edit subject|Title">Edit subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
+					<div class="header command-zone" i18n="Create subject|Title">Create subject</div>
+				</ng-template>
+			</span>
+
+			<fieldset>
+				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
+				<ol>
+					<li>
+						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory">Imaged object category</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{preclinicalSubject.subject.imagedObjectCategory}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" [options]="catOptions">
+								</select-box>
+								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Edit subject|Name label">Common name</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.subject?.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
+									<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
+									<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
+									<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
+								</ng-template>	
+						</span>
+					</li>
+                    </ol>
+                    <ol *ngIf="animalSelected()" [@slideDown]="animalSelected()">
+					<li>
+						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								<div [ngSwitch]="preclinicalSubject.subject.sex">
+									<ng-template [ngSwitchCase]="'F'">Female</ng-template>
+									<ng-template [ngSwitchCase]="'M'">Male</ng-template>
+									<ng-template ngSwitchDefault>{{preclinicalSubject?.subject?.sex}}</ng-template>
+								</div>
+							</ng-template>
+                            <ng-template ngSwitchDefault>
+                                <select-box formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex" [options]="genderOptions">
+                                </select-box>
+                            </ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Edit subject|Specie label">Species</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.animalSubject?.specie?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box (onNewClick)="goToRefPage('subject','specie')" formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie" [optionArr]="species">
+								</select-box>
+								<label *ngIf="hasError('specie', ['required'])" [@slideDown]="hasError('specie', ['required'])" class="form-validation-alert" i18n="Edit subjectSpecie|Specie required error@@animalSubjectDetailSpecieRequiredError">Species is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li >
+						<label i18n="Edit subject|Strain label">Strain</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.animalSubject?.strain?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box (onNewClick)="goToRefPage('subject','strain')" formControlName="strain" [(ngModel)]="preclinicalSubject.animalSubject.strain" [optionArr]="strains">
+								</select-box>
+								<label *ngIf="hasError('strain', ['required'])" [@slideDown]="hasError('strain', ['required'])" class="form-validation-alert" i18n="Edit subjectStrain|Strain required error@@animalSubjectDetailStrainRequiredError">Strain is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li >
+						<label i18n="Edit subject|Biotype label">Biological type</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.animalSubject?.biotype?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box (onNewClick)="goToRefPage('subject','biotype')" formControlName="biotype" [(ngModel)]="preclinicalSubject.animalSubject.biotype" [optionArr]="biotypes">
+								</select-box>
+								<label *ngIf="hasError('biotype', ['required'])" [@slideDown]="hasError('biotype', ['required'])" class="form-validation-alert" i18n="Edit subjectBiotype|Biotype required error@@animalSubjectDetailBiotypeRequiredError">Biological type is required!</label>
+							</ng-template>
+						</span>							
+					</li>
+					<li >
+						<label i18n="Edit subject|Provider label">Provider</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.animalSubject?.provider?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box (onNewClick)="goToRefPage('subject','provider')" formControlName="provider" [(ngModel)]="preclinicalSubject.animalSubject.provider" [optionArr]="providers">
+								</select-box>
+								<label *ngIf="hasError('provider', ['required'])" [@slideDown]="hasError('provider', ['required'])" class="form-validation-alert" i18n="Edit subjectProvider|Provider required error@@animalSubjectDetailProviderRequiredError">Provider is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Edit subject|Stabulation label">Stabulation</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+									{{preclinicalSubject?.animalSubject?.stabulation?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box (onNewClick)="goToRefPage('subject','stabulation')" formControlName="stabulation" [(ngModel)]="preclinicalSubject.animalSubject.stabulation" [optionArr]="stabulations">
+								</select-box>
+								<label *ngIf="hasError('stabulation', ['required'])" [@slideDown]="hasError('stabulation', ['required'])" class="form-validation-alert" i18n="Edit subjectStabulation|Stabulation required error@@animalSubjectDetailStabulationRequiredError">Stabulation is required!</label>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			
+			<fieldset *ngIf="mode !== 'view'">
+					<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+			</fieldset>
+			<fieldset *ngIf="mode == 'view'">
+					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
+					<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : preclinicalSubject.subject" 
+						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
+			</fieldset>	
+			<div *ngIf="displayPathologyTherapy">
+				<fieldset>
+					<legend i18n="AniamlSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
+				</fieldset>
+                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.pathologies" formControlName="pathologies" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
+    			<fieldset>
+    				<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
+    			</fieldset>
+                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.therapies" formControlName="therapies" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
+            </div>
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "delete()"
+				(cancel)="goToView(this.entity.animalSubject.id)"
+				(back)="goBack()">
+			</form-footer>
+		</div>
+    </form>
+</div>

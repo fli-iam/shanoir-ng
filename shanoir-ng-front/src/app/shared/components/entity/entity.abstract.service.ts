@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { ServiceLocator } from '../../../utils/locator.service';
 import { Entity } from './entity.abstract';
+import { Page } from '../table/pageable.model';
 
 export abstract class EntityService<T extends Entity> {
     
@@ -26,9 +27,25 @@ export abstract class EntityService<T extends Entity> {
     protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     getAll(): Promise<T[]> {
-        return this.http.get<T[]>(this.API_URL)
-            .map(entities => entities.map((entity) => this.toRealObject(entity)))
-            .toPromise();
+        return this.http.get<any[]>(this.API_URL)
+            .toPromise()
+            .then(this.mapEntityList);
+    }
+
+    getAllAdvanced(): { quick: Promise<T[]>, complete: Promise<T[]> } {
+        let res = { quick: null, complete: null };
+        res.complete = new Promise((resolve, reject) => {
+            res.quick = this.http.get<any[]>(this.API_URL)
+                .toPromise()
+                .then((all) => {
+                    let quickRes: T[] = [];
+                    let mapPromise = this.mapEntityList(all, quickRes);
+                    res.complete = mapPromise
+                    resolve(mapPromise);
+                    return quickRes;                   
+                }).catch(reason => reject(reason));
+        });
+        return res;
     }
 
     delete(id: number): Promise<void> {
@@ -37,23 +54,39 @@ export abstract class EntityService<T extends Entity> {
     }
 
     get(id: number): Promise<T> {
-        return this.http.get<T>(this.API_URL + '/' + id)
-        .map((entity) => this.toRealObject(entity))
-            .toPromise();
+        return this.http.get<any>(this.API_URL + '/' + id)
+            .toPromise()
+            .then(this.mapEntity);
     }
 
     create(entity: T): Promise<T> {
-        return this.http.post<T>(this.API_URL, entity.stringify())
-        .map((entity) => this.toRealObject(entity))
-            .toPromise();
+        return this.http.post<any>(this.API_URL, entity.stringify())
+            .toPromise()
+            .then(this.mapEntity);
     }
 
     update(id: number, entity: T): Promise<void> {
-        return this.http.put<void>(this.API_URL + '/' + id, entity.stringify())
+        return this.http.put<any>(this.API_URL + '/' + id, entity.stringify())
             .toPromise();
     }
 
-    private toRealObject(entity: T) {
+    protected mapEntity = (entity: any, quickResult?: T): Promise<T> => {
+        return Promise.resolve(this.toRealObject(entity));
+    }
+
+    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
+        return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
+    }
+
+    protected mapPage = (page: Page<T>): Promise<Page<T>> => {
+        if (!page) return null;
+        return this.mapEntityList(page.content).then(entities => {
+            page.content = entities;
+            return page;
+        });            
+    }
+
+    protected toRealObject(entity: T): T {
         let trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
             let value = entity[key];

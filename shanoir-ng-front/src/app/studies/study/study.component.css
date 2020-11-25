@@ -6,6 +6,5 @@
 .icon { margin-left: 5px; vertical-align: middle; }
 .icon-clickable { cursor: pointer;  }
 .data-loading img { height: 20px; vertical-align: bottom; }
-svg { color: var(--color-b); } 
-.mono { position: relative; margin-right: 20px; }
-.disabled::before { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: white; opacity: 0.5; }
+span.disabled { position: relative; }
+span.disabled::before { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: white; opacity: 0.5; }

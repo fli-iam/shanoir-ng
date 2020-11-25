@@ -27,14 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public class StudyCenterDecorator implements StudyCenterMapper{
-	@Autowired StudyCenterMapper delegate;
+	
+	@Autowired
+	private StudyCenterMapper delegate;
 	
 	@Override
 	public StudyCenterDTO studyCenterToStudyCenterDTO(StudyCenter studyCenter) {
-		final StudyCenterDTO studyCenterDTO = delegate.studyCenterToStudyCenterDTO(studyCenter);
-		
-		// Investigator
-		return studyCenterDTO;
+		return delegate.studyCenterToStudyCenterDTO(studyCenter);
 	}
 
 	@Override

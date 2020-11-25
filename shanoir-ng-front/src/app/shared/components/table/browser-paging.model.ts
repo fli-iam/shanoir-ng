@@ -28,6 +28,10 @@ export class BrowserPaging<T> {
     public setItems(items: T[]) {
         this.items = items;
     }
+    
+    public setColumnDefs(columnDefs: any[]) {
+        this.columnDefs = columnDefs;
+    }
 
     public getPage(pageable: FilterablePageable): Page<T> {
         if ((!this.lastSort || !this.lastSort.equals(pageable.sort)) 
@@ -113,12 +117,12 @@ export class BrowserPaging<T> {
             if (cell1 == null) {
                 cell1 = negInf;
             } else if (typeof cell1 == 'string') {
-                cell1 = cell1.toLowerCase();
+                cell1 = cell1.toLowerCase().trim();
             }
             if (cell2 == null) {
                 cell2 = negInf;
             } else if (typeof cell2 == 'string') {
-                cell2 = cell2.toLowerCase();
+                cell2 = cell2.toLowerCase().trim();
             }
 
             // Comparison

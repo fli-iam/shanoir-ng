@@ -38,6 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<npm.executable>npm</npm.executable>
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 		<nginx.webapp.directory.docker.compose>${basedir}/../docker-compose/nginx/webapp</nginx.webapp.directory.docker.compose>
+		<nginx.directory.docker.compose>${basedir}/../docker-compose/nginx</nginx.directory.docker.compose>
 		<sonar.skip>true</sonar.skip>
 		<npm.build.task>build:dev</npm.build.task>
 	</properties>
@@ -113,6 +114,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	        </plugin>
             <plugin>
 	        	<artifactId>maven-resources-plugin</artifactId>
+		    	<configuration>
+				<nonFilteredFileExtensions>
+				    <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>woff</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>eot</nonFilteredFileExtension>
+				    <nonFilteredFileExtension>svg</nonFilteredFileExtension>
+				</nonFilteredFileExtensions>
+		        </configuration>
 	        	<executions>
 	          		<execution>
 	            		<id>copy-resources</id>
@@ -148,6 +158,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	          		</execution>
 	          	</executions>
 	      	</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>1.7</version>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<configuration>
+						<target>
+							<copy file="../utils/entrypoint_common"
+								tofile="${nginx.directory.docker.compose}/entrypoint_common" />
+						</target>
+					</configuration>
+					<goals>
+						<goal>run</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
 		</plugins>
 	</build>
 

@@ -17,8 +17,10 @@ package org.shanoir.ng.scheduling;
 import java.util.List;
 
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserService;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.utils.KeycloakClient;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +47,16 @@ public class ScheduledTasks {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	KeycloakClient keycloakClient;
+
 	/**
 	 * Check users expiration date every day at 8am.
 	 */
 	@Scheduled(cron = "0 0 8 * * ?")
 	public void checkExpirationDate() {
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+		
 		// Get list of users who have to receive first expiration notification
 		List<User> usersToNotify = userService.getUsersToReceiveFirstExpirationNotification();
 		for (User userToNotify : usersToNotify) {
@@ -73,6 +80,13 @@ public class ScheduledTasks {
 				LOG.error("Error to send second expiration notification", e);
 			}
 		}
+		// Get list of expired users to expire them in keycloak too
+		usersToNotify = userService.getExpiredUsers();
+		for (User userToExpire : usersToNotify) {
+			keycloakClient.updateUser(userToExpire);
+		}
+		
+		SecurityContextUtil.clearAuthentication();
 	}
 
 }

@@ -11,19 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
+
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
+import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { Study } from '../../studies/shared/study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -36,11 +39,24 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdNameObject[] = [];
+    private studies: IdName[] = [];
     private isAlreadyAnonymized: boolean;
     private firstName: string = "";
     private lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    forceStudy: Study = null;
+
+    catOptions: Option<ImagedObjectCategory>[] = [
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.LIVING_HUMAN_BEING, 'Living human being'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.HUMAN_CADAVER, 'Human cadaver'),
+        new Option<ImagedObjectCategory>(ImagedObjectCategory.ANATOMICAL_PIECE, 'Anatomical piece')
+    ];
+
+    genderOptions: Option<string>[] = [
+        new Option<string>('F', 'Female'),
+        new Option<string>('M', 'Male'),
+    ];
 
     constructor(private route: ActivatedRoute,
             private subjectService: SubjectService,
@@ -57,10 +73,12 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
+            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
         }
     }
 
     initView(): Promise<void> {
+        this.loadAllStudies();
         return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
     }
 
@@ -118,6 +136,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
         formGroup.get('birthDate').updateValueAndValidity();
+        this.reloadRequiredStyles();
     }
 
     save(): Promise<void> {
@@ -166,5 +185,19 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private setSubjectBirthDateToFirstOfJanuary(): void {
         let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
+    }
+
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    onSubjectNodeInit(node: ReverseSubjectNode) {
+        this.breadcrumbsService.currentStep.data.subjectNode = node;
+    }
+
+    public toggleAnonymised() {
+        if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
+            this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
+        }
     }
 }

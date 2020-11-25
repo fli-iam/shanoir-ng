@@ -15,53 +15,48 @@
 package org.shanoir.ng.shared.error;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.shanoir.ng.utils.PasswordUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 public class UsersFieldErrorMap extends FieldErrorMap {
 
-	/**
-	 * UID
-	 */
 	private static final long serialVersionUID = -3176001477448120848L;
 
 	private static final String USERNAME_FIELD = "username";
 	private static final String ROLE_FIELD = "role";
+
 	
-	/**
-	 * Constructor
-	 */
-	public UsersFieldErrorMap() {
-		super();
+	public UsersFieldErrorMap checkBindingIgnoreBlankUsername(BindingResult result) {
+		return this.add(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result));
 	}
-
-	/**
-	 * Constructor
-	 */
-	public UsersFieldErrorMap(final UsersFieldErrorMap... maps) {
-		this.merge(maps);
+	
+	public UsersFieldErrorMap checkBindingIgnoreBlankUsernameAndRole(BindingResult result) {
+		return this.add(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result));
 	}
-
-	/**
-	 * Constructor
-	 *
-	 * @param {@link
-	 * 			BindingResult}
-	 * @return {@link UsersFieldErrorMap}
-	 */
-	public UsersFieldErrorMap(final BindingResult result) {
-		super(result);
+	
+	public UsersFieldErrorMap checkPasswordPolicy(String password) {
+		if (!PasswordUtils.checkPasswordPolicy(password)) {
+			List<FieldError> errors = new ArrayList<>();
+			errors.add(new FieldError("format", "Password does not match policy", null));
+			this.put("password", errors);
+		}
+		return this;
+	}
+	
+	public UsersFieldErrorMap add(UsersFieldErrorMap map) {
+		return (UsersFieldErrorMap) super.add(map);
 	}
 
 	/**
 	 * Tell Spring to remove the hibernante validation error on username blank
 	 *
-	 * @param {@link
-	 * 			BindingResult}
+	 * @param {@link BindingResult}
 	 * @return {@link UsersFieldErrorMap}
 	 */
-	public static UsersFieldErrorMap fieldErrorMapIgnoreUsernameBlank(final BindingResult result) {
+	private static UsersFieldErrorMap fieldErrorMapIgnoreUsernameBlank(final BindingResult result) {
 		final UsersFieldErrorMap fieldErrorMap = new UsersFieldErrorMap();
 		if (result.hasErrors()) {
 			for (ObjectError objectError : result.getAllErrors()) {
@@ -83,11 +78,10 @@ public class UsersFieldErrorMap extends FieldErrorMap {
 	 * Tell Spring to remove the hibernante validation error on username or role
 	 * blank for user account request
 	 *
-	 * @param {@link
-	 * 			BindingResult}
+	 * @param {@link BindingResult}
 	 * @return {@link UsersFieldErrorMap}
 	 */
-	public static UsersFieldErrorMap fieldErrorMapIgnoreUsernameAndRoleBlank(final BindingResult result) {
+	private static UsersFieldErrorMap fieldErrorMapIgnoreUsernameAndRoleBlank(final BindingResult result) {
 		final UsersFieldErrorMap fieldErrorMap = new UsersFieldErrorMap();
 		if (result.hasErrors()) {
 			for (ObjectError objectError : result.getAllErrors()) {

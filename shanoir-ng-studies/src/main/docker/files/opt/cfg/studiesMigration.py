@@ -57,6 +57,19 @@ targetConn.commit()
 
 print("Import study_study_card: end")
 
+
+print("Import study_protocol_files: start")
+    
+sourceCursor.execute("SELECT STUDY_ID, PATH, FROM PROTOCOL_FILE_PATH")
+
+query = "INSERT INTO protocol_file_path (study_id, path) VALUES (%s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import study_protocol_files: end")
+
+
 print("Import study_user: start")
     
 sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, REF_STUDY_USER_TYPE_ID, USER_ID FROM REL_STUDY_USER")

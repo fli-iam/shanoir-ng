@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -23,6 +23,8 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { Option } from '../../shared/select/select.component';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -31,8 +33,8 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
 
-    private datasetModalityTypes: Enum[] = [];
-    private manufs: Manufacturer[];
+    manufs: Manufacturer[];
+    datasetModalityTypes: Option<DatasetModalityType>[];
 
     constructor(
             private route: ActivatedRoute,
@@ -40,10 +42,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             private manufService: ManufacturerService) {
 
         super(route, 'manufacturer-model');
+        this.datasetModalityTypes = DatasetModalityType.options;
     }
 
-    private get manufModel(): ManufacturerModel { return this.entity; }
-    private set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
+    get manufModel(): ManufacturerModel { return this.entity; }
+    set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
 
 
     initView(): Promise<void> {
@@ -68,22 +71,28 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     buildForm(): FormGroup {
-        let magneticFieldFC: FormControl;
-        if (this.isMR) {
-            magneticFieldFC = new FormControl(this.manufModel.magneticField, Validators.required);
-        } else {
-            magneticFieldFC = new FormControl(this.manufModel.magneticField);
-        }
         return this.formBuilder.group({
             'name': [this.manufModel.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'manufacturer': [this.manufModel.manufacturer, Validators.required],
-            'magneticField': magneticFieldFC,
+            'magneticField': [this.manufModel.magneticField, this.getMagneticFieldValidators()],
             'datasetModalityType': [this.manufModel.datasetModalityType, Validators.required]
         });
     }
 
+    private getMagneticFieldValidators(): ValidatorFn | ValidatorFn[] {
+        if (this.isMR) return Validators.required;
+        else return;
+    }
+
+    private onModalityChange(modality: string) {
+        if (modality) {
+            this.form.get('magneticField').setValidators(this.getMagneticFieldValidators());
+            this.reloadRequiredStyles();
+        }
+    }
+    
     private get isMR(): boolean { 
-        return this.manufModel && this.manufModel.datasetModalityType == 'MR_DATASET'; 
+        return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR; 
     }
 
     private getManufacturerModel(): Promise<void> {
@@ -109,12 +118,18 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return null;
     }
 
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+
     private openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
+                })
+            );
         });
     }
 }

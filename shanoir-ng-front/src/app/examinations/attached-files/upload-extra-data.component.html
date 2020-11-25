@@ -17,8 +17,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout">
 			<fieldset>
 				<ol>
-                    <li class="required">
-                        <label i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in the next step the examination to which they are associated. 
+					<li class="required">
+							<label i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in the next step the examination to which they are associated. 
 							</label> 
 							<div class="form-group">
 									<label for="file">Choose File</label>
@@ -31,9 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
 								</label>
-								<select id="studyId" required formControlName="studyId" [(ngModel)]="examinationStudyId">
-										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-									</select> 
+								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId" [options]="studyOptions">
+								</select-box> 
 					</li>
 					<li class="required">
 						    <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">Select a subject 

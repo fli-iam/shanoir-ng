@@ -14,6 +14,9 @@
 
 import { Injectable } from '@angular/core';
 
+import * as AppUtils from '../../utils/app.utils';
+
+
 declare var Keycloak: any;
 
 @Injectable()
@@ -24,7 +27,7 @@ export class KeycloakService {
 
     static init(): Promise<any> {
         const keycloakAuth: any = Keycloak({
-            url: process.env.KEYCLOAK_BASE_URL,
+            url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
             clientId: 'shanoir-ng-front',
         });
@@ -38,7 +41,7 @@ export class KeycloakService {
                     // Connected user id
                     KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
                     KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
-                        + process.env.LOGOUT_REDIRECT_URL;
+                        + AppUtils.LOGOUT_REDIRECT_URL;
                     resolve();
                 })
                 .error(() => {
@@ -51,7 +54,6 @@ export class KeycloakService {
         KeycloakService.auth.authz.logout();
     }
     
-
     getToken(): Promise<string> {
         if (!this.gettingToken) {
             this.gettingToken = true;
@@ -81,8 +83,7 @@ export class KeycloakService {
         return this.isUserAdmin() || this.isUserExpert();
     }
 
-    isUserGuest(): boolean {
-        return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
+    canUserImportFromPACS(): boolean {
+        return this.isUserAdmin() || KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed.canImportFromPACS;
     }
-
 }

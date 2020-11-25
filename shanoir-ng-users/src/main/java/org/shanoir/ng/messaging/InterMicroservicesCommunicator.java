@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.messaging;
 
-import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.events.UserDeleteEvent;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -23,9 +23,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class handles on using Spring Application Events
@@ -49,7 +46,7 @@ public class InterMicroservicesCommunicator {
     public void handleUserDeleteEvent(UserDeleteEvent event) {
 		try {
 			LOG.debug("Start sending UserDeleteEvent...");
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.getMSUsersToMSStudiesUserDelete().getName(), event.getUserId());
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.MS_USERS_TO_MS_STUDIES_USER_DELETE, event.getUserId());
 			LOG.debug("Sending UserDeleteEvent finished...");
 		} catch (AmqpException e) {
 			LOG.error("Error while sending message to RabbitMQ", e);

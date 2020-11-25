@@ -16,15 +16,28 @@ package org.shanoir.ng.utils;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ShanoirExec {
 	
+	/** Dicomifier error. */
+	private static final String ERROR_DICOM2NIFTI_REQUEST = "Error on dicom2nifti microservice request";
+
 	/**
 	 * Logger
 	 */
@@ -32,6 +45,12 @@ public class ShanoirExec {
 	
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
     private String clidcmPathLib;
+
+	@Value("${ms.url.dicom2nifti}")
+	private String dicomifierMsUrl;
+
+	@Autowired
+	RestTemplate restTemplate;
 	
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
@@ -47,7 +66,7 @@ public class ShanoirExec {
 	 */
 	public String clidcmExec(final String inputFolder, final String clidcmPath, final String outputFolder) {
 		LOG.debug("clidcmExec : Begin");
-		LOG.info("clidcmExec : " + clidcmPath);
+		LOG.info("clidcmExec : {}", clidcmPath);
 
 		String[] cmd = new String[4];
 		cmd[0] = clidcmPath;
@@ -64,8 +83,8 @@ public class ShanoirExec {
 		
 		String[] envp = new String[size];
 		int i = 0;
-		for (final String key : systemEnv.keySet()) {
-			envp[i] = key + "=" + systemEnv.get(key);
+		for (final Entry<String, String> entry : systemEnv.entrySet()) {
+			envp[i] = entry.getKey() + "=" + entry.getValue();
 			i++;
 		}
 		
@@ -114,13 +133,13 @@ public class ShanoirExec {
 	 */
 	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder, boolean is4D) {
 		LOG.debug("dcm2niiExec : Begin");
-		LOG.info("dcm2niiExec : " + dcm2niiPath);
+		LOG.info("dcm2niiExec : {}", dcm2niiPath);
 
 		String[] cmd = null;
 
 		if(dcm2niiPath.contains("dcm2niix")){
 			cmd = new String[22];
-			cmd[0] = dcm2niiPath;
+			cmd[0] = "dcm2niix";
 			//BIDS sidecar
 			cmd[1] = "-b";
 			cmd[2] = "y";
@@ -233,7 +252,7 @@ public class ShanoirExec {
 			}
 		}
 
-		LOG.info("CMD DCM2NII " + Arrays.asList(cmd).toString());
+		LOG.info("CMD DCM2NII {}", Arrays.asList(cmd));
 
 		final String result = exec(cmd);
 
@@ -255,7 +274,7 @@ public class ShanoirExec {
 	 */
 	public String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder, boolean is4D) {
 		LOG.debug("mcverterExec : Begin");
-		LOG.info("mcverterExec : " + mcverterPath);
+		LOG.info("mcverterExec : {}", mcverterPath);
 
 		String[] cmd = null;
 		if(is4D){
@@ -317,11 +336,11 @@ public class ShanoirExec {
 		// output folder
 		cmd[1] = "-V";
 
-		String executingCommand = "";
+		StringBuilder executingCommand = new StringBuilder("");
 		for (final String item : cmd) {
-			executingCommand += (item + " ");
+			executingCommand.append(item).append(" ");
 		}
-		LOG.debug("exec : Executing " + executingCommand);
+		LOG.debug("exec : Executing {}", executingCommand);
 
 		StreamGobbler errorGobbler = null;
 		StreamGobbler outputGobbler = null;
@@ -349,22 +368,20 @@ public class ShanoirExec {
 			by checking if the cmd is for the version*/
 
 			if (exitVal != 0 && exitVal != 1) {
-				LOG.error("The exit value is " + exitVal + ", an error has probably occured");
+				LOG.error("The exit value is {}, an error has probably occured", exitVal);
 			}
 
 			proc.getInputStream().close();
 			proc.getErrorStream().close();
-			LOG.debug("exec : ExitValue: " + exitVal);
+			LOG.debug("exec : ExitValue: {}", exitVal);
 		} catch (final Exception exc) {
-			LOG.error("exec : " + exc.getMessage());
+			LOG.error("exec : {}", exc.getMessage());
 			if (errorGobbler != null && outputGobbler != null) {
 				result = errorGobbler.getStringDisplay();
 				if (result != null && !"".equals(result)) {
 					result += "\n\n";
 				}
 				result += outputGobbler.getStringDisplay();
-				errorGobbler = null;
-				outputGobbler = null;
 				return result;
 			}
 		}
@@ -378,7 +395,7 @@ public class ShanoirExec {
 			result += outputGobbler.getStringDisplay();
 		}
 
-		LOG.info("mcverterVersionExec = " + result);
+		LOG.info("mcverterVersionExec = {}", result);
 		LOG.debug("mcverterVersionExec : End");
 		return result;
 
@@ -396,11 +413,11 @@ public class ShanoirExec {
 	 */
 	public String dcm2niiVersionExec(final String dcm2niiPath) {
 		LOG.debug("dcm2niiVersionExec : Begin");
-		LOG.info("dcm2niiVersionExec : " + dcm2niiPath);
+		LOG.info("dcm2niiVersionExec : {}", dcm2niiPath);
 		String[] cmd = new String[1];
 		cmd[0] = dcm2niiPath;
 		final String result = exec(cmd);
-		LOG.info("dcm2niiVersionExec : " + result);
+		LOG.info("dcm2niiVersionExec : {}", result);
 		LOG.debug("dcm2niiVersionExec : End");
 		return result;
 	}
@@ -418,10 +435,10 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder, boolean is4D) {
+	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder) {
 		LOG.debug("dicom2niftiExec : Begin");
 
-		LOG.debug("dicom2niftiExec : " + dicom2niftiPath);
+		LOG.debug("dicom2niftiExec : {}", dicom2niftiPath);
 
 		String[] cmd = null;
 		//Usage: dicom2nifti [OPTIONS] input output
@@ -445,7 +462,7 @@ public class ShanoirExec {
 		cmdLine.append(outputFolder);
 		cmd[2] = cmdLine.toString();
 
-		LOG.info("CMD DICOM2NIFTI " + Arrays.asList(cmd).toString());
+		LOG.info("CMD DICOM2NIFTI {}", Arrays.asList(cmd));
 
 		final String result = exec(cmd);
 
@@ -466,7 +483,7 @@ public class ShanoirExec {
 	 */
 	public String dcmdjpeg(final String dcmdjpegPath, final String inputFile, final String outputFile) {
 		LOG.debug("dcmdjpeg : Begin");
-		LOG.info("dcmdjpeg : " + dcmdjpegPath);
+		LOG.info("dcmdjpeg : {}", dcmdjpegPath);
 
 		String[] cmd = new String[3];
 		cmd[0] = dcmdjpegPath;
@@ -505,11 +522,11 @@ public class ShanoirExec {
 	 */
 	public String exec(final String[] cmd, final String[] envp) {
 
-		String executingCommand = "";
+		StringBuilder executingCommand = new StringBuilder("");
 		for (final String item : cmd) {
-			executingCommand += (item + " ");
+			executingCommand.append(item).append(" ");
 		}
-		LOG.debug("exec : Executing " + executingCommand);
+		LOG.debug("exec : Executing {}", executingCommand);
 
 		StreamGobbler errorGobbler = null;
 		StreamGobbler outputGobbler = null;
@@ -533,7 +550,7 @@ public class ShanoirExec {
 			final int exitVal = proc.waitFor();
 
 			if (exitVal != 0) {
-				LOG.error("The exit value is " + exitVal + ", an error has probably occured");
+				LOG.error("The exit value is {}, an error has probably occured", exitVal);
 			}
 			// let errorGobbler and outputGobbler finish execution before finishing main thread
 			errorGobbler.join();
@@ -541,17 +558,15 @@ public class ShanoirExec {
 
 			proc.getInputStream().close();
 			proc.getErrorStream().close();
-			LOG.debug("exec : ExitValue: " + exitVal);
+			LOG.debug("exec : ExitValue: {}", exitVal);
 		} catch (final Exception exc) {
-			LOG.error("exec : " + exc.getMessage());
+			LOG.error("exec : {}", exc.getMessage());
 			if (errorGobbler != null && outputGobbler != null) {
 				result = errorGobbler.getStringDisplay();
 				if (result != null && !"".equals(result)) {
 					result += "\n\n";
 				}
 				result += outputGobbler.getStringDisplay();
-				errorGobbler = null;
-				outputGobbler = null;
 				return result;
 			}
 		}
@@ -565,9 +580,43 @@ public class ShanoirExec {
 			result += outputGobbler.getStringDisplay();
 		}
 
-		LOG.debug("exec : return result " + result);
+		LOG.debug("exec : return result {}", result);
 
 		return result;
+	}
+
+	/**
+	 * Execute dicomifier conversion DICOM => NIFTI
+	 * @param inputFolder the input folder where the DICOM are
+	 * @param outputFolder the output folder where to set the nifti
+	 * @return Informations about the conversion
+	 * @throws RestServiceException when the request fails.
+	 */
+	public String dicomifier(String inputFolder, String outputFolder) {
+		String requestJson = "{\"source\":\"" + inputFolder
+				+ "\", \"destination\":\"" + outputFolder
+				+ "\", \"zip\": false"
+				+ ", \"dicomdir\": true }";
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		// HttpEntity represents the request
+		HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+
+		// Post to dicomifier to start conversion
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.exchange(dicomifierMsUrl, HttpMethod.POST, entity, String.class);
+		} catch (Exception e) {
+			LOG.error(ERROR_DICOM2NIFTI_REQUEST, e);
+			return ERROR_DICOM2NIFTI_REQUEST;
+		}
+
+		if (!HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+			return ERROR_DICOM2NIFTI_REQUEST;
+		}
+		return "Dicomifier: converting dicom to nifti, success.";
 	}
 
 }

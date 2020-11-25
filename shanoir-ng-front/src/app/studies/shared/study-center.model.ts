@@ -11,12 +11,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Center } from '../../centers/shared/center.model';
+import { Id } from '../../shared/models/id.model';
+import { Study } from './study.model';
 
-import { Center } from "../../centers/shared/center.model";
-import { Study } from "./study.model";
 
 export class StudyCenter {
     center: Center;
     id: number;
     study: Study;
+}
+
+export class StudyCenterDTO {
+    
+    id: number;
+    center: Id;
+    study: Id;
+   
+    constructor(studyCenter: StudyCenter) {
+        this.id = studyCenter.id;
+        this.center = studyCenter.center ? new Id(studyCenter.center.id) : null;
+        this.study = studyCenter.study ? new Id(studyCenter.study.id) : null;
+    }
 }

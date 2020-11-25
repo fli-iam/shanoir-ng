@@ -1,0 +1,2579 @@
+swagger: '2.0'
+info:
+  title: Preclinical
+  description: Preclinical microservice for shanoir-ng
+  version: "1.0.0"
+# the domain of the service
+host: shanoir-ng
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /preclinical
+produces:
+  - application/json
+paths:
+  /refs:
+    post:
+      tags:
+        - Reference
+      summary: Add a new reference
+      description: ""
+      operationId: createReferenceValue
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Reference object to add
+          required: true
+          schema:
+            $ref: "#/definitions/Reference"
+      responses:
+        "200":
+          description: success returns Reference
+        "400":
+          description: Invalid input / Bad Request
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /refs/reference/{id}:
+    get:
+      summary: Find reference by its id
+      description: |
+      operationId: getReferenceById
+      parameters:
+        - in: path
+          name: id
+          description: Id of the reference
+          required: true
+          type: string
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: Reference found
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Reference'
+        "404":
+          description: Not Found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Reference
+      summary: Deletes a reference
+      description: ""
+      operationId: deleteReferenceValue
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of reference to be deleted
+          required: true
+          type: string
+      responses:
+        "406":
+          description: Not acceptable
+        "404":
+          description: Not Found
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Reference
+      summary: Update an existing Ref according to given reference 
+      description: ""
+      operationId: updateReferenceValue
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of ref to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: New value for the ref in parameter
+          required: true
+          schema:
+            $ref: '#/definitions/Reference'
+      responses:
+        "404":
+          description: Reference to update not found
+        "400":
+          description: Invalid input / Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /refs/{category}:
+    get:
+      summary: Get existing references by category
+      description: |
+      operationId: getReferencesByCategory
+      parameters:
+        - in: path
+          name: category
+          description: Type of the reference
+          required: true
+          type: string
+      tags:
+        - Reference
+      responses:
+        200:
+          description: An array of references values according to category parameter
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Reference'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /refs/{category}/{type}:
+    get:
+      summary: Get all references for given category and type
+      description: |
+      operationId: getReferencesByCategoryAndType
+      parameters:
+        - in: path
+          name: category
+          description: Category of references
+          required: true
+          type: string
+        - in: path
+          name: type
+          description: Type of references
+          required: true
+          type: string
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: An array of references values according to category and type parameters
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Reference'
+        "204":
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /refs/{category}/{type}/{value}:
+    get:
+      summary: Find reference by category, type and value
+      description: |
+      operationId: getReferenceByCategoryTypeAndValue
+      parameters:
+        - in: path
+          name: category
+          description: Category of reference
+          required: true
+          type: string
+        - in: path
+          name: type
+          description: Type of reference
+          required: true
+          type: string
+        - in: path
+          name: value
+          description: Value of reference
+          required: true
+          type: string
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: An array of references values according to category and type parameters
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Reference'
+        "204":
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /refs/all:
+    get:
+      summary: Get all references
+      description: |
+      operationId: getReferences
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: An array of all references
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Reference'
+        "204":
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /refs/categories:
+    get:
+      summary: Get all existing categories
+      description: |
+      operationId: getReferenceCategories
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: An array of string categories values
+          schema:
+            type: array
+            items:
+              type: string
+        "204":
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /refs/{category}/types:
+    get:
+      summary: Get all existing types for given category
+      description: |
+      operationId: getReferenceTypesByCategory
+      parameters:
+        - in: path
+          name: category
+          description: Category of references
+          required: true
+          type: string
+      tags:
+        - Reference
+      responses:
+        "200":
+          description: An array of string types values
+          schema:
+            type: array
+            items:
+              type: string
+        "204":
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /subject:
+    post:
+      tags:
+        - Subject
+      summary: Add a new subject
+      description: ""
+      operationId: createSubject
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Subject object to add
+          required: true
+          schema:
+            $ref: "#/definitions/Subject"
+      responses:
+        "200":
+          description: success returns Subject
+          schema:
+            $ref: '#/definitions/Subject'
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/all:
+    get:
+      summary: List all subjects
+      description: |
+      operationId: getSubjects
+      tags:
+        - Subject
+      responses:
+        "200":
+          description: An array of Preclinical Subjects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Subject'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /subject/{id}:
+    get:
+      tags:
+        - Subject
+      summary: Find subject by ID
+      description: Returns a subject 
+      operationId: getSubjectById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject that needs to be fetched
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Subject"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Subject not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Subject
+      summary: Update an existing subject
+      description: ""
+      operationId: updateSubject
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject that needs to be updated
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Subject object that needs to be updated
+          required: true
+          schema:
+            $ref: "#/definitions/Subject"
+      responses:
+        "404":
+          description: Subject not found
+        "400":
+          description: Invalid input / Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Subject
+      summary: Deletes a subject
+      description: ""
+      operationId: deleteSubject
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: api_key
+          description: ""
+          required: true
+          type: string
+        - in: path
+          name: id
+          description: Subject id to delete
+          required: true
+          type: string
+      responses:
+        "400":
+          description: Invalid subject value
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/pathology:
+    post:
+      tags:
+        - Subject Pathology
+      summary: Add a new subject pathology
+      description: ""
+      operationId: addSubjectPathology
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: Id of subject to which add pathology
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: SubjectPathology object to add
+          required: true
+          schema:
+            $ref: "#/definitions/SubjectPathology"
+      responses:
+        "200":
+          description: success returns SubjectPathology
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/pathology/{pid}:
+    get:
+      tags:
+        - Subject Pathology
+      summary: Find subject pathology by ID
+      description: Returns a subject patholgy
+      operationId: getSubjectPathologyById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having pathology
+          required: true
+          type: string
+        - in: path
+          name: pid
+          description: Id of subject pathology
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/SubjectPathology"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Subject Pathology not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Subject Pathology
+      summary: Update an existing subject pathology
+      description: ""
+      operationId: updateSubjectPathology
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having pathology
+          required: true
+          type: string
+        - in: path
+          name: pid
+          description: Id of subject pathology
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Subject Pathology object for update
+          required: true
+          schema:
+            $ref: "#/definitions/SubjectPathology"
+      responses:
+        "404":
+          description: Subject not found
+        "406":
+          description: Not aceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Subject Pathology
+      summary: Deletes a pathology from subject
+      description: ""
+      operationId: deleteSubjectPathology
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having pathology
+          required: true
+          type: string
+        - in: path
+          name: pid
+          description: Id of subject pathology
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/pathology/all:
+    get:
+      tags:
+        - Subject Pathology
+      summary: List all pathologies for subject
+      description: Returns a list of subject patholgy
+      operationId: getSubjectPathologies
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having pathologies
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/SubjectPathology"
+        "206":
+          description: No content
+        "404":
+          description: Subject not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/all/pathology/{pid}:
+    get:
+      tags:
+        - Subject Pathology
+      summary: List all subjects pathology for given pathology
+      description: Returns a list of subject patholgy
+      operationId: getSubjectPathologiesByPathology
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of pathology
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/SubjectPathology"
+        "206":
+          description: Invalid ID supplied
+        "404":
+          description: Subject not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/therapy:
+    post:
+      tags:
+        - Subject Therapy
+      summary: Add a new subject therapy
+      description: ""
+      operationId: addSubjectTherapy
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: Id of subject to which add therapy
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: SubjectTherapy object to add
+          required: true
+          schema:
+            $ref: "#/definitions/SubjectTherapy"
+      responses:
+        "200":
+          description: success returns SubjectTherapy
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/therapy/{tid}:
+    get:
+      tags:
+        - Subject Therapy
+      summary: Find subject therapy by ID
+      description: Returns a subject therapy
+      operationId: getSubjectTherapyById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having therapy
+          required: true
+          type: string
+        - in: path
+          name: tid
+          description: Id of subject therapy
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/SubjectTherapy"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Subject Therapy not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Subject Therapy
+      summary: Update an existing subject therapy
+      description: ""
+      operationId: updateSubjectTherapy
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having therapy
+          required: true
+          type: string
+        - in: path
+          name: tid
+          description: Id of subject therapy
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Subject Therapy object for update
+          required: true
+          schema:
+            $ref: "#/definitions/SubjectTherapy"
+      responses:
+        "404":
+          description: Subject not found
+        "406":
+          description: Not aceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Subject Therapy
+      summary: Deletes a therapy from subject
+      description: ""
+      operationId: deleteSubjectTherapy
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having therapy
+          required: true
+          type: string
+        - in: path
+          name: tid
+          description: Id of subject therapy
+          required: true
+          type: string
+          format: long
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/{id}/therapy/all:
+    get:
+      tags:
+        - Subject Therapy
+      summary: List all therapies for subject
+      description: Returns a list of subject therapy
+      operationId: getSubjectTherapies
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of subject having therapies
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/SubjectTherapy"
+        "206":
+          description: No content
+        "404":
+          description: Subject not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /subject/all/therapy/{tid}:
+    get:
+      tags:
+        - Subject Therapy
+      summary: List all subjects therapy for given therapy
+      description: Returns a list of subject therapy
+      operationId: getSubjectTherapiesByTherapy
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: tid
+          description: ID of therapy
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/SubjectTherapy"
+        "206":
+          description: Invalid ID supplied
+        "404":
+          description: Subject not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology:
+    post:
+      tags:
+        - Pathology
+      summary: Add a new pathology
+      description: ""
+      operationId: createPathology
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Pathology object to add
+          required: true
+          schema:
+            $ref: "#/definitions/Pathology"
+      responses:
+        "200":
+          description: success returns Pathology
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/all:
+    get:
+      tags:
+        - Pathology
+      summary: List all pathologies
+      description: Returns a list of pathology
+      operationId: getPathologies
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Pathology"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/{id}:
+    get:
+      tags:
+        - Pathology
+      summary: Find pathology by ID
+      description: Returns a patholgy
+      operationId: getPathologyById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Pathology"
+        "404":
+          description: Pathology not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Pathology
+      summary: Update an existing pathology
+      description: ""
+      operationId: updatePathology
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Pathology object for update
+          required: true
+          schema:
+            $ref: "#/definitions/Pathology"
+      responses:
+        "404":
+          description: Pathology not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Pathology
+      summary: Deletes a pathology
+      description: ""
+      operationId: deletePathology
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/model:
+    post:
+      tags:
+        - Pathology Model
+      summary: Add a new pathology model
+      description: ""
+      operationId: createPathologyModel
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Pathology model object to add
+          required: true
+          schema:
+            $ref: "#/definitions/PathologyModel"
+      responses:
+        "200":
+          description: success returns Pathology model
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/model/all:
+    get:
+      tags:
+        - Pathology Model
+      summary: List all pathology models
+      description: Returns a list of pathology models
+      operationId: getPathologyModels
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/PathologyModel"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/{id}/model/all:
+    get:
+      tags:
+        - Pathology Model
+      summary: List all pathology models for given pathology
+      description: Returns a list of pathology models
+      operationId: getPathologyModelsByPathology
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/PathologyModel"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/model/{id}:
+    get:
+      tags:
+        - Pathology Model
+      summary: Find pathology model by ID
+      description: Returns a patholgy model
+      operationId: getPathologyModelById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology model
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/PathologyModel"
+        "404":
+          description: Pathology not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Pathology Model
+      summary: Update an existing pathology model
+      description: ""
+      operationId: updatePathologyModel
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology model to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Pathology model object for update
+          required: true
+          schema:
+            $ref: "#/definitions/PathologyModel"
+      responses:
+        "404":
+          description: Pathology model not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Pathology Model
+      summary: Deletes a pathology model
+      description: ""
+      operationId: deletePathologyModel
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology model
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/model/upload/specs/{id}:
+    post:
+      tags:
+        - Pathology Model
+      summary: Upload model specifications
+      description: ""
+      operationId: uploadModelSpecifications
+      consumes:
+        - application/json
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology model
+          required: true
+          type: string
+        - in: formData
+          name: files
+          description: Files to uplaod as model specifications
+          required: true
+          type: file
+      responses:
+        "200":
+          description: success returns Pathology model
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /pathology/model/download/specs/{id}:
+    get:
+      tags:
+        - Pathology Model
+      summary: Download model specifications file
+      description: Returns a file
+      operationId: downloadModelSpecifications
+      produces:
+        - application/json
+        - application/octet-stream
+      parameters:
+        - in: path
+          name: id
+          description: ID of pathology model
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+        "206":
+          description: No content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /therapy:
+    post:
+      tags:
+        - Therapy
+      summary: Add a new therapy
+      description: ""
+      operationId: createTherapy
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Therapy object to add
+          required: true
+          schema:
+            $ref: "#/definitions/Therapy"
+      responses:
+        "200":
+          description: success returns Therapy
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /therapy/all:
+    get:
+      tags:
+        - Therapy
+      summary: List all therapies
+      description: Returns a list of therapies
+      operationId: getTherapies
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Therapy"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /therapy/type/{type}:
+    get:
+      tags:
+        - Therapy
+      summary: List all therapies by given type
+      description: Returns a list of therapies
+      operationId: getTherapyByType
+      parameters:
+        - in: path
+          name: type
+          description: type of therapy
+          required: true
+          type: string
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Therapy"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /therapy/{id}:
+    get:
+      tags:
+        - Therapy
+      summary: Find therapy by ID
+      description: Returns a therapy
+      operationId: getTherapyById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of therapy
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Therapy"
+        "404":
+          description: Therapy not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Therapy
+      summary: Update an existing therapy
+      description: ""
+      operationId: updateTherapy
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of therapy to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Therapy object for update
+          required: true
+          schema:
+            $ref: "#/definitions/Therapy"
+      responses:
+        "404":
+          description: Therapy not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Therapy
+      summary: Deletes a therapy
+      description: ""
+      operationId: deleteTherapy
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of therapy
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /protocol/{pid}/contrastagent/all:
+    get:
+      tags:
+        - Contrast Agent
+      summary: List all contrast agents for given protocol
+      description: Returns a list of contrast agents
+      operationId: getContrastAgents
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which agents are linked
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ContrastAgent"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /protocol/{pid}/contrastagent:
+    post:
+      tags:
+        - Contrast Agent
+      summary: Add a new contrast agent
+      description: ""
+      operationId: createContrastAgent
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Contrast agent object to add
+          required: true
+          schema:
+            $ref: "#/definitions/ContrastAgent"
+      responses:
+        "200":
+          description: success returns ContrastAgent
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    get:
+      tags:
+        - Contrast Agent
+      summary: Find contrast agent by its protocol ID
+      description: Returns a contrast agent
+      operationId: getContrastAgentByProtocolId
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ContrastAgent"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /protocol/{pid}/contrastagent/name/{name}:
+    get:
+      tags:
+        - Contrast Agent
+      summary: Find contrast agent by its reference agent name
+      description: Returns a contrast agent
+      operationId: getContrastAgentByName
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+        - in: path
+          name: name
+          description: name of reference contrast agent on which the one is based
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ContrastAgent"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /protocol/{pid}/contrastagent/{cid}:
+    get:
+      tags:
+        - Contrast Agent
+      summary: Find contrast agent by ID
+      description: Returns a contrast agent
+      operationId: getContrastAgentById
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+        - in: path
+          name: cid
+          description: ID of contrast agent
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ContrastAgent"
+        "404":
+          description: Contrast Agent not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Contrast Agent
+      summary: Update an existing contrast agent
+      description: ""
+      operationId: updateContrastAgent
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+        - in: path
+          name: cid
+          description: ID of agent to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Contrast agent object for update
+          required: true
+          schema:
+            $ref: "#/definitions/ContrastAgent"
+      responses:
+        "404":
+          description: Contrast agent not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Contrast Agent
+      summary: Deletes a contrast agent
+      description: ""
+      operationId: deleteContrastAgent
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: pid
+          description: ID of protocol to which the agent is linked
+          required: true
+          type: string
+        - in: path
+          name: cid
+          description: ID of agent to delete
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic:
+    post:
+      tags:
+        - Anesthetic
+      summary: Add a new anesthetic
+      description: ""
+      operationId: createAnesthetic
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Anesthetic object to add
+          required: true
+          schema:
+            $ref: "#/definitions/Anesthetic"
+      responses:
+        "200":
+          description: success returns Anesthetic
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/all:
+    get:
+      tags:
+        - Anesthetic
+      summary: List all anesthetics
+      description: Returns a list of anesthetics
+      operationId: getAnesthetics
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Anesthetic"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/type/{type}:
+    get:
+      tags:
+        - Anesthetic
+      summary: List all anesthetics by given type
+      description: Returns a list of anesthetics
+      operationId: getAnestheticsByType
+      parameters:
+        - in: path
+          name: type
+          description: type of anesthetic
+          required: true
+          type: string
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Anesthetic"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/{id}:
+    get:
+      tags:
+        - Anesthetic
+      summary: Find anesthetic by ID
+      description: Returns a anesthetic
+      operationId: getAnestheticById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Anesthetic"
+        "404":
+          description: Therapy not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Anesthetic
+      summary: Update an existing anesthetic
+      description: ""
+      operationId: updateAnesthetic
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Anesthetic object for update
+          required: true
+          schema:
+            $ref: "#/definitions/Anesthetic"
+      responses:
+        "404":
+          description: Anesthetic not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Anesthetic
+      summary: Deletes an anesthetic
+      description: ""
+      operationId: deleteAnesthetic
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/{id}/ingredient:
+    post:
+      tags:
+        - Anesthetic Ingredient
+      summary: Add a new ingredient to given anesthetic
+      description: ""
+      operationId: createAnestheticIngredient
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of anesthetic
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Anesthetic ingredient object to add
+          required: true
+          schema:
+            $ref: "#/definitions/AnestheticIngredient"
+      responses:
+        "200":
+          description: success returns Anesthetic ingredient
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/{id}/ingredient/all:
+    get:
+      tags:
+        - Anesthetic Ingredient
+      summary: List all anesthetic ingredients for given anesthetic
+      description: Returns a list of anesthetic ingredients
+      operationId: getAnestheticIngredients
+      parameters:
+        - in: path
+          name: id
+          description: id of anesthetic
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/AnestheticIngredient"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /anesthetic/{id}/ingredient/{aiid}:
+    get:
+      tags:
+        - Anesthetic Ingredient
+      summary: Find anesthetic ingredient by ID
+      description: Returns a anesthetic ingredient
+      operationId: getAnestheticIngredientById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic
+          required: true
+          type: string
+        - in: path
+          name: aiid
+          description: ID of anesthetic ingredient
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/AnestheticIngredient"
+        "404":
+          description: Ingredient not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Anesthetic Ingredient
+      summary: Update an existing anesthetic ingredient
+      description: ""
+      operationId: updateAnestheticIngredient
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic
+          required: true
+          type: string
+        - in: path
+          name: aiid
+          description: ID of ingredient to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Ingredient object for update
+          required: true
+          schema:
+            $ref: "#/definitions/AnestheticIngredient"
+      responses:
+        "404":
+          description: Anesthetic Ingredient not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Anesthetic Ingredient
+      summary: Deletes an anesthetic ingredient
+      description: ""
+      operationId: deleteAnestheticIngredient
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of anesthetic ingredient
+          required: true
+          type: string
+        - in: path
+          name: aiid
+          description: ID of anesthetic ingredient
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/anesthetic:
+    post:
+      tags:
+        - Examination Anesthetic
+      summary: Add an anesthetic to given examination
+      description: ""
+      operationId: addExaminationAnesthetic
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Anesthetic object to add
+          required: true
+          schema:
+            $ref: "#/definitions/ExaminationAnesthetic"
+      responses:
+        "200":
+          description: success returns Examination Anesthetic
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/anesthetic/all:
+    get:
+      tags:
+        - Examination Anesthetic
+      summary: List all anesthetics for examination
+      description: Returns a list of examination anesthetic
+      operationId: getExaminationAnesthetics
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ExaminationAnesthetic"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/anesthetic/{eaid}:
+    get:
+      tags:
+        - Examination Anesthetic
+      summary: Find examination anesthetic by ID
+      description: Returns an examination anesthetic
+      operationId: getExaminationAnestheticById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of examination
+          required: true
+          type: string
+        - in: path
+          name: eaid
+          description: ID of examination anesthetic
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ExaminationAnesthetic"
+        "404":
+          description: Examination Anesthetic not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Examination Anesthetic
+      summary: Update an existing examination anesthetic
+      description: ""
+      operationId: updateExaminationAnesthetic
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of examination
+          required: true
+          type: string
+        - in: path
+          name: eaid
+          description: ID of examination anesthetic to update
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Examination Anesthetic object for update
+          required: true
+          schema:
+            $ref: "#/definitions/ExaminationAnesthetic"
+      responses:
+        "404":
+          description: Examination Anesthetic not found
+        "400":
+          description: Bad Request
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Examination Anesthetic
+      summary: Deletes an examination anesthetic
+      description: ""
+      operationId: deleteExaminationAnesthetic
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of examination 
+          required: true
+          type: string
+        - in: path
+          name: eaid
+          description: ID of examination anesthetic to delete
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/extradata/all:
+    get:
+      tags:
+        - Examination Extra data
+      summary: List all extra data for given examination id
+      description: Returns a list of examination extra data
+      operationId: getExaminationExtraData
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/ExaminationExtraData"
+        "206":
+          description: No Content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/extradata:
+    post:
+      tags:
+        - Examination Extra data
+      summary: Create extra data
+      description: ""
+      operationId: createExtraData
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Examination extra data object to add
+          required: true
+          schema:
+            $ref: "#/definitions/ExaminationExtraData"
+      responses:
+        "200":
+          description: success returns Examination Extra data
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/physiologicaldata:
+    post:
+      tags:
+        - Examination Extra data
+      summary: Create physiological extra data
+      description: ""
+      operationId: createPhysiologicalExtraData
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Examination physiological extra data object to add
+          required: true
+          schema:
+            $ref: "#/definitions/PhysiologicalData"
+      responses:
+        "200":
+          description: success returns Examination Physiological Extra data
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/bloodgasdata:
+    post:
+      tags:
+        - Examination Extra data
+      summary: Create blood gas extra data
+      description: ""
+      operationId: createBloodGasExtraData
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of examination
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Examination blood gas extra data object to add
+          required: true
+          schema:
+            $ref: "#/definitions/BloodGasData"
+      responses:
+        "200":
+          description: success returns Examination Bllod gas Extra data
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/{id}/extradata/{eid}:
+    get:
+      tags:
+        - Examination Extra data
+      summary: Get extra data by id
+      description: Returns an examination extra data
+      operationId: getExtraDataById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of examination
+          required: true
+          type: string
+        - in: path
+          name: eid
+          description: ID of examination extra data
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ExaminationExtraData"
+        "404":
+          description: Examination Extra Data not found
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Examination Extra data
+      summary: Deletes an examination extradata
+      description: ""
+      operationId: deleteExtraData
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of examination 
+          required: true
+          type: string
+        - in: path
+          name: eid
+          description: ID of examination extradata
+          required: true
+          type: string
+      responses:
+        "404":
+          description: Not found
+        "406":
+          description: Not acceptable
+        "200":
+          description: Successful operation
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/extradata/upload/{id}:
+    post:
+      tags:
+        - Examination Extra data
+      summary: Upload extra data
+      description: ""
+      operationId: uploadExtraData
+      consumes:
+        - application/json
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: id of examination extra data to link the files to
+          required: true
+          type: string
+        - in: formData
+          name: files
+          description: Files to uplaod as extra data
+          required: true
+          type: file
+      responses:
+        "200":
+          description: success returns Examination Extra data
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /examination/extradata/download/{id}:
+    get:
+      tags:
+        - Examination Extra data
+      summary: Download extra data
+      description: ""
+      operationId: downloadExtraData
+      produces:
+        - application/json
+        - application/octet-stream
+      parameters:
+        - in: path
+          name: id
+          description: id of examination extra data to download the file from
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful operation returns file stream
+        "206":
+          description: No content
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+definitions:
+  Reference:
+    type: object
+    properties:
+      category:
+        type: string
+        description: Category of reference
+      reftype:
+        type: string
+        description: Type in the category
+      value:
+        type: string
+        description: Value of reference
+  Subject:
+    type: object
+    properties:
+      animalSubject:
+        type: object
+        items:
+          $ref: '#/definitions/AnimalSubject'
+      birthDate:
+        type: string
+        format: date
+      name:
+        type: string
+        description: none
+      identifier:
+        type: string
+        description: none
+  AnimalSubject:
+    type: object
+    properties:
+      specie:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      strain:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      biotype:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      provider:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      stabulation:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+  SubjectPathology:
+    type: object
+    properties:
+      subject:
+        type: object
+        items:
+          $ref: '#/definitions/Subject'
+      pathology:
+        type: object
+        items:
+          $ref: '#/definitions/Pathology'
+      pathologyModel:
+        type: object
+        items:
+          $ref: '#/definitions/PathologyModel'
+      location:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+  SubjectTherapy:
+    type: object
+    properties:
+      subject:
+        type: object
+        items:
+          $ref: '#/definitions/Subject'
+      therapy:
+        type: object
+        items:
+          $ref: '#/definitions/Therapy'
+      dose:
+        type: number
+        format: double
+      dose_unit:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+  Pathology:
+    type: object
+    properties:
+      name:
+        type: string
+        description: none
+  PathologyModel:
+    type: object
+    properties:
+      name:
+        type: string
+        description: none  
+      comment:
+        type: string
+        description: none
+      filename:
+        type: string
+        description: none
+      filepath:
+        type: string
+        description: none
+      pathology:
+        type: object
+        items:
+          $ref: '#/definitions/Pathology'
+  Therapy:
+    type: object
+    properties:
+      name:
+        type: string
+        description: none
+      comment:
+        type: string
+        description: none
+      therapyType:
+        type: string
+        description: none
+  ContrastAgent:
+    type: object
+    properties:
+      protocolId:
+        type: string
+        description: none
+      name:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      manufacturedName:
+        type: string
+        description: none
+      concentration:
+        type: number
+        format: double
+        description: none
+      concentration_unit:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      dose:
+        type: number
+        format: double
+        description: none
+      dose_unit:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      injection_interval:
+        type: string
+        description: none
+      injection_site:
+        type: string
+        description: none
+      injection_type:
+        type: string
+        description: none
+  Anesthetic:
+    type: object
+    properties:
+      name:
+        type: string
+        description: none
+      comment:
+        type: string
+        description: none
+      anestheticType:
+        type: string
+        description: none
+      ingredients:
+        type: array
+        items:
+          $ref: '#/definitions/AnestheticIngredient'
+  AnestheticIngredient:
+    type: object
+    properties:
+      anesthetic:
+        type: object
+        items:
+          $ref: '#/definitions/Anesthetic'
+      name:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      concentration:
+        type: number
+        format: double
+        description: none
+      concentration_unit:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+  ExaminationAnesthetic:
+    type: object
+    properties:
+      examination_id:
+        type: string
+        description: none
+      anesthetic:
+        type: object
+        items:
+          $ref: '#/definitions/Anesthetic'
+      dose:
+        type: number
+        format: double
+        description: none
+      dose_unit:
+        type: object
+        items:
+          $ref: '#/definitions/Reference'
+      injection_interval:
+        type: string
+        description: none
+      injection_site:
+        type: string
+        description: none
+      injection_type:
+        type: string
+        description: none
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+  ExaminationExtraData:
+    type: object
+    properties:
+      examination_id:
+        type: number
+        format: long
+      filename:
+        type: string
+      filepath:
+        type: string
+      extradatatype:
+        type: string
+  PhysiologicalData:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ExaminationExtraData'
+      - properties:
+          has_heart_rate:
+            type: boolean
+          has_respiratory_rate:
+            type: boolean 
+          has_sao2:
+            type: boolean 
+          has_temperature:
+            type: boolean 
+  BloodGasData:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ExaminationExtraData'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

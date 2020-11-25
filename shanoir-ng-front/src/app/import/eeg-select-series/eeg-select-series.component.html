@@ -1,0 +1,62 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="header command-zone">2. Select datasets</div>
+<fieldset class="step"> 
+    <p>Please select only the datasets useful for your study</p>
+    <ul>
+        <li>Please select the series of <strong class="warning">one</strong> patient at the time.</li>
+        <li>Only <strong class="warning">one</strong> examination will be created for all selected.</li>
+    </ul>
+    <div class="tree">
+        <node  #selectAll
+        label="EEG dataset list"
+        [deploy]="true"
+        [hasBox]="true"
+        (chkbxChange)="changeDatasets($event);"
+        [hasChildren]="datasets && datasets.length > 0">
+            <node  
+                *ngFor="let dataset of datasets" 
+                [label]="dataset.name" 
+                awesome="fa fa-hat-wizard" 
+                (labelClick)="showDatasetDetail(dataset)"
+                [class.selected]="datasetDetail == dataset"
+                [deploy]="false"
+                [hasBox]="true"
+                (chkbxChange)="changeDataset(dataset)"
+                buttonPicto="fa fa-eye"
+                (buttonClick)="showDatasetDetail($event)"
+                [hasChildren]="false">
+            </node>
+        </node>
+    </div>
+    <div class="data-preview" *ngIf="datasetDetail">
+        <h3>Dataset detail</h3>
+        <table>
+            <tr class="item">
+                <td class="label">Name</td>
+                <td class="value">{{datasetDetail?.name}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Channel count</td>
+                <td class="value">{{datasetDetail?.channelCount}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Sampling frequency (Hz)'</td>
+                <td class="value">{{datasetDetail?.samplingFrequency}}</td>
+            </tr>
+        </table>
+    </div>
+</fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

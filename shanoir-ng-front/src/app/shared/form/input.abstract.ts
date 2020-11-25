@@ -20,14 +20,11 @@ export abstract class AbstractInput implements ControlValueAccessor {
 
     @Input() protected mode: Mode;
     protected model: any;
-    private disabled: boolean = false;
-    propagateChange = (_: any) => {};
+    protected disabled: boolean = false;
+    protected propagateChange = (_: any) => {};
+    protected propagateTouched = () => {};
     
     constructor() {}
-    
-    onChange() {
-        this.propagateChange(this.model);
-    }
 
     writeValue(obj: any): void {
         if (obj) this.model = obj;
@@ -37,7 +34,9 @@ export abstract class AbstractInput implements ControlValueAccessor {
         this.propagateChange = fn;
     }
 
-    registerOnTouched(fn: any): void {}
+    registerOnTouched(fn: any): void {
+        this.propagateTouched = fn;
+    }
 
     setDisabledState(isDisabled: boolean): void {
         this.disabled = isDisabled;

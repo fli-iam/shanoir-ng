@@ -13,12 +13,12 @@
 								<#if usernameEditDisabled??>
 									<input id="username" name="username" value="${(login.username!'')}" type="text" disabled />
 								<#else>
-									<input id="username" name="username" value="${(login.username!'')}" type="text" autofocus autocomplete="off" 
+									<input id="username" name="username" value="${(login.username!'')}" type="text" autofocus autocomplete="on" 
 									placeholder ="<#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if>"/>
 								</#if>
 							</li>
 							<li>
-								<input id="password" name="password" type="password" autocomplete="off" placeholder="${msg("password")}"/>
+								<input id="password" name="password" type="password" autocomplete="on" placeholder="${msg("password")}"/>
 							</li>
 						</ol>
 					</fieldset>

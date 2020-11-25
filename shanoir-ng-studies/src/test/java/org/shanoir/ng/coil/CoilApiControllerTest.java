@@ -24,14 +24,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.coil.controler.CoilApiController;
+import org.shanoir.ng.coil.dto.CoilDTO;
+import org.shanoir.ng.coil.dto.mapper.CoilMapper;
+import org.shanoir.ng.coil.model.Coil;
+import org.shanoir.ng.coil.service.CoilService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -48,6 +54,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CoilApiController.class)
 @AutoConfigureMockMvc(secure = false)
+@WithMockKeycloakUser(id = 123)
 public class CoilApiControllerTest {
 
 	private static final String REQUEST_PATH = "/coils";
@@ -64,8 +71,11 @@ public class CoilApiControllerTest {
 	@MockBean
 	private CoilService coilServiceMock;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyListOf(Coil.class)))
@@ -75,11 +85,13 @@ public class CoilApiControllerTest {
 		doNothing().when(coilServiceMock).deleteById(1L);
 		given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
 		given(coilServiceMock.findById(1L)).willReturn(new Coil());
-		given(coilServiceMock.save(Mockito.mock(Coil.class))).willReturn(new Coil());
+		Coil coil = new Coil();
+		coil.setId(Long.valueOf(123));
+		given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteCoilTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
@@ -98,7 +110,7 @@ public class CoilApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewCoilTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCoil())))
@@ -106,10 +118,12 @@ public class CoilApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateCoilTest() throws Exception {
+		Coil coil = ModelsUtil.createCoil();
+		coil.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCoil())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(coil)))
 				.andExpect(status().isNoContent());
 	}
 

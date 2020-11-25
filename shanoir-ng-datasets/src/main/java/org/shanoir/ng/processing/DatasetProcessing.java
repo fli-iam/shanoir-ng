@@ -25,9 +25,9 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
-import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Dataset Processing.
@@ -35,7 +35,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * @author msimon
  */
 @Entity
-public class DatasetProcessing extends AbstractGenericItem {
+public class DatasetProcessing extends AbstractEntity {
 
 	/**
 	 * UID
@@ -52,10 +52,8 @@ public class DatasetProcessing extends AbstractGenericItem {
 	private Integer datasetProcessingType;
 
 	/** Input datasets. */
-	@ManyToMany @JoinTable (
-			name = "INPUT_OF_DATASET_PROCESSING",
-			joinColumns = @JoinColumn(name="PROCESSING_ID"),
-			inverseJoinColumns = @JoinColumn(name="DATASET_ID"))
+	@ManyToMany
+	@JoinTable(name = "INPUT_OF_DATASET_PROCESSING", joinColumns = @JoinColumn(name = "PROCESSING_ID"), inverseJoinColumns = @JoinColumn(name = "DATASET_ID"))
 	private List<Dataset> inputDatasets;
 
 	/** Output Dataset List. */
@@ -78,8 +76,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param comment
-	 *            the comment to set
+	 * @param comment the comment to set
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
@@ -93,8 +90,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param datasetProcessingType
-	 *            the datasetProcessingType to set
+	 * @param datasetProcessingType the datasetProcessingType to set
 	 */
 	public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
 		if (datasetProcessingType == null) {
@@ -103,7 +99,6 @@ public class DatasetProcessing extends AbstractGenericItem {
 			this.datasetProcessingType = datasetProcessingType.getId();
 		}
 	}
-
 
 	/**
 	 * @return the inputDatasets
@@ -127,8 +122,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param outputDatasets
-	 *            the outputDatasets to set
+	 * @param outputDatasets the outputDatasets to set
 	 */
 	public void setOutputDatasets(List<Dataset> outputDatasets) {
 		this.outputDatasets = outputDatasets;
@@ -142,8 +136,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param processingDate
-	 *            the processingDate to set
+	 * @param processingDate the processingDate to set
 	 */
 	public void setProcessingDate(LocalDate processingDate) {
 		this.processingDate = processingDate;
@@ -157,8 +150,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param studyId
-	 *            the studyId to set
+	 * @param studyId the studyId to set
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;

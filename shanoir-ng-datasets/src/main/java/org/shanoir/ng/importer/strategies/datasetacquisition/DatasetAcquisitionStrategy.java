@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
-import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
@@ -34,6 +34,6 @@ import org.shanoir.ng.importer.dto.Serie;
 public interface DatasetAcquisitionStrategy {
 	
 	// Create a new dataset acquisition 
-	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob);
+	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception;
 
 }

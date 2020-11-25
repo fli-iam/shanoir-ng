@@ -1,0 +1,11 @@
+table { margin-top: 15px; padding: 5px 0; font-weight: normal; border-collapse: collapse; background-color: var(--light-grey); }
+shanoir-table {width: 50%;}
+th { color: var(--color-a); padding: 10px 5px; font-weight: normal; }
+th, td { text-align: left; }
+td { padding: 3px 5px; }
+li.info { width: 532px; }
+li.info strong { color: var(--color-a); }
+li.info i { color: var(--color-a); font-size: 16px; }
+li.info code { color: var(--color-a); }
+.compatible { color: var(--color-c); }
+.not-compatible { color: var(--color-error); }

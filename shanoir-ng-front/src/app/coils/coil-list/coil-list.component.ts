@@ -34,6 +34,15 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         super('coil');
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     getEntities(): Promise<Coil[]> {
         return this.coilService.getAll();
     }
@@ -42,12 +51,12 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             
-            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/manufacturer-model/details/' + coil.manufacturerModel.id])
+            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name",
+            route: (coil: Coil) => '/manufacturer-model/details/' + coil.manufacturerModel.id
             },
            
-            { headerName: "Center", field: "center.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/center/details/' + coil.center.id])
+            { headerName: "Center", field: "center.name",
+            route: (coil: Coil) => '/center/details/' + coil.center.id
             },
 
             { headerName: "Coil Type", field: "coilType" },

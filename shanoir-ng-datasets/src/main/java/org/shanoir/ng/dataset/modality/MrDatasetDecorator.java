@@ -17,11 +17,12 @@ package org.shanoir.ng.dataset.modality;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
+@Component
 public abstract class MrDatasetDecorator implements MrDatasetMapper {
 
 	@Autowired
@@ -39,8 +41,8 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
 	}
 
 	@Override
-	public List<IdNameDTO> datasetsToIdNameDTOs(final List<MrDataset> datasets) {
-		final List<IdNameDTO> datasetDTOs = new ArrayList<>();
+	public List<IdName> datasetsToIdNameDTOs(final List<MrDataset> datasets) {
+		final List<IdName> datasetDTOs = new ArrayList<>();
 		for (MrDataset dataset : datasets) {
 			datasetDTOs.add(datasetToIdNameDTO(dataset));
 		}
@@ -48,7 +50,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
 	}
 
 	@Override
-	public IdNameDTO datasetToIdNameDTO(final MrDataset dataset) {
+	public IdName datasetToIdNameDTO(final MrDataset dataset) {
 		return delegate.datasetToIdNameDTO(dataset);
 	}
 
@@ -60,7 +62,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
 				return delegate.datasetToDatasetDTO(entity);
 			}
 		});
-		return new PageImpl<MrDatasetDTO>(mappedPage.getContent());
+		return new PageImpl<>(mappedPage.getContent());
 	}
 
 }

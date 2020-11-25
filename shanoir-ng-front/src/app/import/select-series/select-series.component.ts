@@ -11,31 +11,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
-import { PatientDicom, SerieDicom } from '../dicom-data.model';
-import { ImportDataService } from '../import.data-service';
-import { ImportService } from '../import.service';
+import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import { ImportDataService } from '../shared/import.data-service';
+import { ImportService } from '../shared/import.service';
+
 
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
-    styleUrls: ['select-series.component.css', '../import.step.css'],
+    styleUrls: ['select-series.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class SelectSeriesComponent {
 
-    private patients: PatientDicom[];
+    patients: PatientDicom[];
     private workFolder: string;
     private dataFiles: any;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private papayaParams: object[];
+    detailedPatient: any;
+    detailedSerie: any;
+    detailedStudy: any;
+    papayaParams: object[];
+    public papayaError: boolean = false;
+    public modality: string;
+    studiesCheckboxes: any = {};
 
     constructor(
             private importService: ImportService,
@@ -43,28 +47,43 @@ export class SelectSeriesComponent {
             private router: Router,
             private importDataService: ImportDataService) {
 
-        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted) {
+        if (!this.importDataService.patientList) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         breadcrumbsService.nameStep('2. Series');
-        this.dataFiles = this.importDataService.inMemoryExtracted;
-        this.patients = this.importDataService.archiveUploaded.patients;
-        this.workFolder = this.importDataService.archiveUploaded.workFolder;
+        this.patients = this.importDataService.patientList.patients;
+        this.modality = this.patients[0].studies[0].series[0].modality.toString()
+        this.workFolder = this.importDataService.patientList.workFolder;
     }
 
 
-    private showSerieDetails(nodeParams: any): void {
+    showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
-        if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
+        this.detailedStudy = null;
+        if (serie && this.detailedSerie && serie.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
-            this.detailedSerie = nodeParams;
+            this.detailedSerie = serie;
+            setTimeout(() => { // so the details display has no delay
+                if (serie && serie.images) this.initPapaya(serie); 
+            });
         }
     }
 
-    private showPatientDetails(nodeParams: any): void {
+    showStudyDetails(nodeParams: any): void {
         this.detailedSerie = null;
+        this.detailedPatient = null;
+        if (nodeParams && this.detailedStudy && nodeParams.studyID == this.detailedStudy["studyID"]) {
+            this.detailedStudy = null;
+        } else {
+            this.detailedStudy = nodeParams;
+        }
+    }
+
+    showPatientDetails(nodeParams: any): void {
+        this.detailedSerie = null;
+        this.detailedStudy = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
             this.detailedPatient = null;
         } else {
@@ -72,28 +91,43 @@ export class SelectSeriesComponent {
         }
     }
 
-    private onPatientUpdate(): void {
+    onStudyCheckChange(checked: boolean, study: StudyDicom) {
+        if (study.series) {
+            study.series.forEach(serie => serie.selected = checked)
+        }
+        this.onPatientUpdate();
+    }
+
+    onSerieCheckChange(checked: boolean, study: StudyDicom) {
+        if (study.series) {
+            let nbChecked: number = 0;
+            study.series.forEach(serie => {
+                if (serie.selected) nbChecked++;
+            });
+            if (nbChecked == study.series.length) this.studiesCheckboxes[study.studyInstanceUID] = true;
+            else if (nbChecked == 0) this.studiesCheckboxes[study.studyInstanceUID] = false;
+            else this.studiesCheckboxes[study.studyInstanceUID] = 'intederminate';
+        }
+        this.onPatientUpdate();
+    }
+
+    onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
     }
 
     private initPapaya(serie: SerieDicom): void {
-        if (!serie) return;
-        let listOfPromises;
-        if (this.dataFiles) {
-            listOfPromises = serie.images.map((image) => {
-                return this.dataFiles.files[image.path].async("arraybuffer");
-            });
-        } else {
-            listOfPromises = serie.images.map((image) => {
-                let url = AppUtils.BACKEND_API_IMAGE_VIEWER_URL + this.workFolder + '/' + image.path;
-                return this.importService.downloadImage(url);
-            });
-         }
+        this.papayaError = false;
+        let listOfPromises = serie.images.map((image) => {
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+        });
         let promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
             this.papayaParams = params;
+        }).catch(reason => {
+            this.papayaError = true;
+            console.error(reason);
         });
     }
 
@@ -111,5 +145,11 @@ export class SelectSeriesComponent {
 
     private next() {
         this.router.navigate(['imports/context']);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('patients', this.patients);
+        }
     }
 }

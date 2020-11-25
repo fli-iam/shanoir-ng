@@ -24,6 +24,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -73,14 +75,6 @@ public class StudyCardRepositoryTest {
 			nbStudyCard++;
 		}
 		assertThat(nbStudyCard).isEqualTo(4);
-	}
-	
-	@Test
-	public void findByTest() throws Exception {
-		List<StudyCard> studyCardDb = studyCardRepository.findBy("name", STUDYCARD_TEST_1_DATA);
-		assertNotNull(studyCardDb);
-		assertThat(studyCardDb.size()).isEqualTo(1);
-		assertThat(studyCardDb.get(0).getId()).isEqualTo(STUDYCARD_TEST_1_ID);
 	}
 	
 	@Test

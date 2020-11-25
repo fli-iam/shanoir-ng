@@ -1,0 +1,40 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<node
+        *ngIf="node"
+        [class.selected]="showDetails && this.menuOpened"
+        [label]="node.label" 
+        awesome="fas fa-folder-open"
+        [(opened)]="node.open"
+        (labelClick)="menuOpened = !menuOpened"
+        (firstOpen)="loadExaminations()"
+        [hasChildren]="hasDependency(node.examinations)"
+        [clickable]="showDetails"
+        [dataLoading]="loading">
+
+        <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
+            <menu-item label="Details..." awesome="fas fa-eye" (click)="showStudyDetails()"></menu-item>
+        </dropdown-menu>
+
+        <ng-container *ngIf="node.open && node.examinations && node.examinations != 'UNLOADED'">        
+            <examination-node
+                    node
+                    *ngFor="let examinationNode of node.examinations"
+                    [input]="examinationNode"
+                    (selectedChange)="selectedChange.emit()"
+                    [hasBox]="hasBox">
+            </examination-node>
+        </ng-container>
+</node>

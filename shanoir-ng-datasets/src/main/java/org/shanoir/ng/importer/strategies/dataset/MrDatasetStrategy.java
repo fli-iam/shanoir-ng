@@ -18,12 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
-import org.shanoir.ng.dataset.DatasetExpression;
-import org.shanoir.ng.dataset.DatasetMetadata;
-import org.shanoir.ng.dataset.DatasetModalityType;
-import org.shanoir.ng.dataset.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -32,20 +33,15 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
-import org.shanoir.ng.shared.model.EchoTimeMapper;
-import org.shanoir.ng.shared.model.FlipAngleMapper;
-import org.shanoir.ng.shared.model.InversionTimeMapper;
-import org.shanoir.ng.shared.model.RepetitionTimeMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.shanoir.ng.shared.mapper.EchoTimeMapper;
+import org.shanoir.ng.shared.mapper.FlipAngleMapper;
+import org.shanoir.ng.shared.mapper.InversionTimeMapper;
+import org.shanoir.ng.shared.mapper.RepetitionTimeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MrDatasetStrategy<T> implements DatasetStrategy {
-
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
+public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 	@Autowired
 	DicomProcessing dicomProcessing;
@@ -67,9 +63,9 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	
 	@Override
 	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
-			ImportJob importJob) {
+			ImportJob importJob) throws Exception {
 		
-		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<MrDataset>();
+		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
 		 * each dataset will be named with an int at the end of the name. else the is
@@ -87,7 +83,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		for (Dataset dataset : serie.getDatasets()) {
 			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			MrDataset mrDataset = new MrDataset();
-			mrDataset = (MrDataset) generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
+			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
@@ -119,7 +115,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	 */
 	@Override
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-			ImportJob importJob) {
+			ImportJob importJob) throws Exception {
 		MrDataset mrDataset = new MrDataset();
 		mrDataset.setCreationDate(serie.getSeriesDate());
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
@@ -138,8 +134,8 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 		// Set the study and the subject
 		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
-//		mrDataset.setGroupOfSubjectsId(importJob.getPatients().get(0).getFrontExperimentalGroupOfSubjectId());
-		mrDataset.setStudyId(importJob.getFrontStudyId());
+
+		//mrDataset.setStudyId(importJob.getStudyId());
 
 		// Set the modality from dicom fields
 		// TODO  :VERIFY NOT NEEDED ANY MORE ?
@@ -154,7 +150,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		mrDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
 		
 		if (dataset.getEchoTimes() != null) {
-			List<EchoTime> listEchoTime = new ArrayList<EchoTime>(dataset.getEchoTimes());
+			List<EchoTime> listEchoTime = new ArrayList<>(dataset.getEchoTimes());
 			mrDataset.getEchoTime().addAll(echoTimeMapper.EchoTimeDTOListToEchoTimeList(listEchoTime));
 			for (org.shanoir.ng.shared.model.EchoTime et: mrDataset.getEchoTime()) {
 				et.setMrDataset(mrDataset);
@@ -162,7 +158,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		}
 		
 		if (dataset.getRepetitionTimes() != null) {
-			List<Double> listRepetitionTime = new ArrayList<Double>(dataset.getRepetitionTimes());
+			List<Double> listRepetitionTime = new ArrayList<>(dataset.getRepetitionTimes());
 			mrDataset.getRepetitionTime().addAll(repetitionTimeMapper.RepetitionTimeDTOListToRepetitionTimeList(listRepetitionTime));
 			for ( org.shanoir.ng.shared.model.RepetitionTime rt: mrDataset.getRepetitionTime()) {
 				rt.setMrDataset(mrDataset);
@@ -170,7 +166,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		}
 		
 		if (dataset.getInversionTimes() != null) {
-			List<Double> listInversionTime = new ArrayList<Double>(dataset.getInversionTimes());
+			List<Double> listInversionTime = new ArrayList<>(dataset.getInversionTimes());
 			mrDataset.getInversionTime().addAll(inversionTimeMapper.InversionTimeDTOListToInversionTimeList(listInversionTime));
 			for ( org.shanoir.ng.shared.model.InversionTime rt: mrDataset.getInversionTime()) {
 				rt.setMrDataset(mrDataset);
@@ -178,7 +174,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		}
 		
 		if (dataset.getFlipAngles() != null) {
-			List<String> listFlipAngle = new ArrayList<String>(dataset.getFlipAngles());
+			List<String> listFlipAngle = new ArrayList<>(dataset.getFlipAngles());
 			mrDataset.getFlipAngle().addAll(flipAngleMapper.FlipAngleDTOListToFlipAngleList(listFlipAngle));
 			for ( org.shanoir.ng.shared.model.FlipAngle rt: mrDataset.getFlipAngle()) {
 				rt.setMrDataset(mrDataset);
@@ -188,13 +184,13 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
 		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 *   
+		 * 
 		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current mrDataset
 		 * 
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);	
+			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
 			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
 					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
@@ -216,6 +212,13 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 			datasetExpression.setDataset(mrDataset);
 			mrDataset.getDatasetExpressions().add(datasetExpression);
 		}
+		
+		// TODO by studycard: set updatedMetadata and updatedMrMetadata
+		DatasetMetadata originalDM = mrDataset.getOriginMetadata();
+		mrDataset.setUpdatedMetadata(originalDM);
+		MrDatasetMetadata originalMDM = mrDataset.getOriginMrMetadata();
+		mrDataset.setUpdatedMrMetadata(originalMDM);
+		
 		return mrDataset;
 	}
 

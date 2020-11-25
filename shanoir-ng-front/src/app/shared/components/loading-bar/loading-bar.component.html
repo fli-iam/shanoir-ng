@@ -12,4 +12,4 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span class="inner" [style.width]="progress*200">&nbsp;</span><span class="text">{{getProgressText()}}</span>
+<span class="inner" [class.done]="progress >= 1" [style.width]="progress*width"><div class="left-text" [style.margin-right]="progress*(width/2)-(width/2)">{{getProgressText()}}</div></span><span class="text">{{getProgressText()}}</span>

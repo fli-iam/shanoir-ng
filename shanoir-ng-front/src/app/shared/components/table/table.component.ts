@@ -12,9 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'shanoir-table',
@@ -23,33 +24,52 @@ import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pagea
 })
 
 export class TableComponent implements OnInit {
-    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
-    @Input() selectionAllowed: boolean = false; // TODO : selectable
+    selection: Map<number, any> = new Map();
+    @Input() selectionAllowed: boolean = false;
+    @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
+    selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
-    
+    @Input() disableCondition: (item: any) => boolean;
+    @Input() maxResults: number = 20;
+
     private page: Page<Object>;
     private isLoading: boolean = false;
+    private isError: boolean = false;
     private maxResultsField: number;
-    private maxResults: number = 20;
-    private lastSortedCol: Object = null;
+    private lastSortedCol: any = null;
     private lastSortedAsc: boolean = true;
     private currentPage: number = 1;
-    private filter: Filter;
-    private loaderImageUrl: string = "assets/images/loader.gif";
+    private filter: Filter = new Filter(null, null);
+    private firstLoading: boolean = true;
     
 
-    constructor(private applicationRef: ApplicationRef) {
+    constructor(
+            private applicationRef: ApplicationRef,
+            private breadcrumbsService: BreadcrumbsService) {
         this.maxResultsField = this.maxResults;
     }
 
 
     ngOnInit() {
-        this.goToPage(1);
+        let savedState = this.breadcrumbsService.currentStep.data.tableState;
+        if (savedState) {
+            this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
+            this.lastSortedAsc = savedState.lastSortedAsc;
+            this.filter = savedState.filter;
+            this.maxResults = savedState.maxResults;
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+                .then(() => this.firstLoading = false);
+        } else {
+            this.getDefaultSorting();
+            this.goToPage(1)
+                .then(() => this.firstLoading = false);
+        }
     }
 
     
@@ -70,29 +90,35 @@ export class TableComponent implements OnInit {
 
     private onSearchChange(filter: Filter) {
         this.filter = filter;
+        this.clearSelection();
         this.goToPage(1);
     }
 
 
     private onRowClick(item: Object) {
-        this.rowClick.emit(item);
+        if (!this.rowDisabled(item)) this.rowClick.emit(item);
     }
 
 
     public static getCellValue(item: Object, col: any): any {
-        let result: any;
-        if (col.field == undefined) {
-            return null;
-        } if (col.hasOwnProperty("cellRenderer")) {
+        if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
+        } else if (!col.field) {
+            return null;
         } else {
-            return this.getFieldRawValue(item, col["field"]);
+            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) return fieldValue;
+            else if (col.defaultField) 
+                return this.getFieldRawValue(item, col["defaultField"]);
+            else
+                return;
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
+        if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -115,12 +141,22 @@ export class TableComponent implements OnInit {
      * Set the property value
      */
     private setFieldRawValue(obj: Object, path: string, value: any) {
+        if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
         for(let i=0; i<split.length-1; i++) {
             currentObj = currentObj[split[i]];
         }
         currentObj[split[split.length-1]] = value;
+    }
+
+    /** 
+     * Triggered when a field is edited
+     */
+    private onFieldEdit(obj: Object, col: Object, value: any) {
+        this.setFieldRawValue(obj, col['field'], value); 
+        this.rowEdit.emit(obj);
+        if (col['onEdit']) col['onEdit'](obj, value);
     }
 
     /**
@@ -141,7 +177,7 @@ export class TableComponent implements OnInit {
     private isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = TableComponent.getCellValue(this.items[0], col);
-        return this.isValueBoolean(val);
+        return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
     private isColumnText(col: any): boolean {
@@ -192,23 +228,41 @@ export class TableComponent implements OnInit {
         return type != null ? "cell-" + type : "";
     }
 
-    private goToPage(p: number): void {
+    private goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
-        this.getPage(this.getPageable()).then(page => {
+        return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
-            setTimeout(() => this.isLoading = false, 200);
+            this.maxResultsField = page ? page.size : 0;
+            this.computeSelectAll();
+            setTimeout(() => {
+                this.isError = false;
+                this.isLoading = false;
+            }, 200);
+        }).catch(reason => {
+            setTimeout(() => {
+                this.isError = true;
+                this.isLoading = false;
+                throw reason;
+            }, 200);
         });
     }
 
     /**
      * Call to refresh from outsilde
      */
-    public refresh() {
-        this.goToPage(this.currentPage);
+    public refresh(): Promise<void> {
+        return this.goToPage(this.currentPage, true);
     }
 
     private getPageable(): Pageable {
+        this.breadcrumbsService.currentStep.data.tableState = {
+            lastSortedCol: this.lastSortedCol,
+            lastSortedAsc: this.lastSortedAsc,
+            filter: this.filter,
+            currentPage: this.currentPage,
+            maxResults: this.maxResults
+        };
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -241,26 +295,105 @@ export class TableComponent implements OnInit {
     }
 
     private getNbSelected(): number {
-        if (!this.items) return 0;
-        let nb: number = 0;
-        for (let item of this.items) {
-            if (item["isSelectedInTable"]) nb++;
-        }
-        return nb;
+        return this.selection ? this.selection.size : 0;
     }
 
-    private selectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = true;
+    onSelectAllChange() {
+        if (this.selectAll == true) {
+
+            // let pageableAll: Pageable;
+            // if (this.filter) {
+            //     pageableAll = new FilterablePageable(
+            //         1, 
+            //         this.page.totalElements,
+            //         null,
+            //         this.filter
+            //     );
+            // } else {
+            //     pageableAll = new Pageable(
+            //         1, 
+            //         this.page.totalElements
+            //     );
+            // }
+            // this.getPage(pageableAll).then(page => {
+            //     this.selection = new Map();
+            //     page.content.forEach(elt => this.selection.set(elt.id, elt));
+            // });
+            this.page.content.forEach(elt => this.selection.set(elt['id'], elt));
+            this.emitSelectionChange();
+        } else if (this.selectAll == false) {
+            this.page.content.forEach(elt => {
+                this.selection.delete(elt['id']);
+            });
+            this.emitSelectionChange();
         }
     }
 
-    private unSelectAll() {
-        if (!this.items) return;
-        for (let item of this.items) {
-            item["isSelectedInTable"] = false;
+    clearSelection() {
+        this.selection = new Map();
+        this.emitSelectionChange();
+        this.selectAll = false;
+    }
+
+    computeSelectAll() {
+        if (this.page && this.page.content) {
+            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+            if (selectedOnCurrentPage.length == this.page.content.length) {
+                this.selectAll = true;
+            } else if (selectedOnCurrentPage.length == 0) {
+                this.selectAll = false;
+            } else {
+                this.selectAll = 'indeterminate';
+            }
         }
     }
 
+    emitSelectionChange() {
+        let arr = [];
+        this.selection.forEach(sel => arr.push(sel));
+        this.selectionChange.emit(arr);
+    }
+
+    onSelectChange(item: Object, selected: boolean) {
+        if (selected) {
+            if (item['id']) this.selection.set(item['id'], item);
+        } else {
+            this.selection.delete(item['id']);
+        }
+        this.computeSelectAll();
+        this.emitSelectionChange();
+    }
+
+    isSelected(item: Object): boolean {
+        if (!item['id']) {
+            this.selectionAllowed = false;
+            throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
+        }
+        return this.selection.get(item['id']) != undefined;
+    }
+
+    private getDefaultSorting() {
+        for (let col of this.columnDefs) {
+            if (col.defaultSortCol) {
+                this.lastSortedCol = col;
+                this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+                return;
+            }
+        }
+    }
+
+    private cellEditable(item, col) {
+        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
+        return colEditable && !this.rowDisabled(item);
+    }
+
+    private rowDisabled(item): boolean {
+        return this.disableCondition && this.disableCondition(item);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('table items', this.items);
+        }
+    }
 }

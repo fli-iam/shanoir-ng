@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+<div #formContainer class="content-component">
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -37,21 +37,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</a>
 						</span>
 					</li>
-					<li class="required">
-						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel" class="required-label">Manufacturer model</label>
+					<li>
+						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
-									{{acqEquip.manufacturerModel?.name}}
+									{{acqEquip.manufacturerModel | manufModelLabel}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" [compareWith]="compareEntities">
-									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
-								</select>
-								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="openNewManufModel()">
-									<i class="fas fa-plus-square"></i> new manufacturer model
-								</button>
+								<select-box formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()" [optionArr]="manufModels" [pipe]="manufacturerModelPipe">
+								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
@@ -59,11 +55,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode=='view'">
 						<label i18n="AcqEquip detail|Model modality label@@acqEqptDetailModality">Model modality</label>
 						<span class="right-col">
-							{{datasetModalityTypeEnumValue}}
+							{{datasetModalityTypeStr}}
 						</span>
 					</li>
-					<li class="required">
-						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter" class="required-label">Center</label>
+					<li>
+						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/center/details/', acqEquip.center?.id]">
@@ -71,11 +67,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center" [compareWith]="compareEntities">
-									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
-								</select>
+								<select-box formControlName="center" [(ngModel)]="acqEquip.center" (onViewClick)="viewCenter($event)" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
+								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
-								<a *ngIf="acqEquip.center" [routerLink]="['/center/details/', acqEquip.center.id]">details</a>
 							</ng-template>
 						</span>
 					</li>
@@ -91,6 +85,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template ngSwitchDefault> 
 								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
 								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
+								<label *ngIf="hasError('serialNumber', ['spaces'])" class="form-validation-alert">There can't be spaces at the beginning neither at the end of the serial number !</label>
 							</ng-template>
 						</span>
 					</li>
@@ -99,7 +94,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
+                (delete) = "delete()"
 				(edit)="goToEdit()"
+				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 		</div>

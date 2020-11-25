@@ -1,0 +1,4 @@
+:host() { position: relative; display: inline-block; height: 19px; vertical-align: bottom; }
+.spacer { color: transparent !important; padding: 0 1px; }
+input { position: absolute; left: 0; right: 0; top: 0; box-sizing: border-box; width: auto; padding: 0 1px; border: none; width: 100% !important; }
+input:focus { border: none !important; }

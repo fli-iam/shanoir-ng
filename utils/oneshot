@@ -1,0 +1,68 @@
+#!/bin/bash
+
+tmp_fifo()
+{
+	local fifo="`mktemp -u`"
+	mkfifo "$fifo"
+	echo "$fifo"
+}
+
+set -e
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
+	cat <<EOF
+usage:	oneshot PATTERN [PATTERN...] -- COMMAND [ARG1 ...]
+
+Run a command, monitor its outputs, and kill it after the given patterns have
+been matched.
+
+- PATTERNs are expressed as POSIX Extended Regular Expressions 
+- COMMAND [ARG1 ...] is the command to be executed
+
+PATTERNs are searched in the combined output (stdout+stderr) of the executed
+process . The ordering is strict: they must be matched in the same order as
+given in the command line.
+
+After the last PATTERN is matched, the oneshot script sends  SIGTERM to the
+process, then wait for its termination and exit with code 0 if all PATTERNs
+have been matched successfully or code 1 otherwise.
+EOF
+	exit 0
+fi
+
+patterns=()
+while [ "$1" != "--" ] ; do
+	patterns+=("$1")
+	shift
+done
+shift
+
+fifo1="`tmp_fifo`"
+fifo2="`tmp_fifo`"
+
+exec "$@" >"$fifo1" 2>&1 &
+pid=$!
+trap "kill $pid" INT TERM
+
+tee "$fifo2" <"$fifo1" &
+
+set +e
+(	set -e
+	for pattern in "${patterns[@]}"
+	do
+		grep -E -q -m1 -- "$pattern"
+	done
+) <"$fifo2"
+result=$?
+rm "$fifo1" "$fifo2"
+
+if [ "$result" -eq 0 ] ; then
+	# successful
+	echo "  ------------------- sending SIGTERM -------------------"
+	kill "$pid"
+fi
+
+wait "$pid"
+echo "  ------------------- terminated (exit $result) -------------------"
+exit "$result"
+

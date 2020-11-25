@@ -39,18 +39,28 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         this.manageDelete();
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     getEntities(): Promise<Center[]> {
         return this.centerService.getAll(); 
     }
 
     getColumnDefs() {
         let columnDefs: any[] = [
+            { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-podcast", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }
@@ -59,9 +69,11 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled('center', center);
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                center.acquisitionEquipments.push(entity as AcquisitionEquipment);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    center.acquisitionEquipments.push(entity as AcquisitionEquipment);
+                })
+            );
         });
     }
 

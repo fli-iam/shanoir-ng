@@ -13,30 +13,29 @@
  */
 
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { IdName } from '../../shared/models/id-name.model';
+import { SubjectStudy, SubjectStudyDTO } from '../../subjects/shared/subject-study.model';
 import { User } from '../../users/shared/user.model';
 import { ServiceLocator } from '../../utils/locator.service';
-import { MembersCategory } from './members-category.model';
-import { StudyCenter } from './study-center.model';
+import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { StudyService } from './study.service';
 import { Timepoint } from './timepoint.model';
+import { Id } from '../../shared/models/id.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
 
 export class Study extends Entity {
     clinical: boolean;
-    compatible: boolean = false;
     downloadableByDefault: boolean;
     endDate: Date;
-    experimentalGroupsOfSubjects: IdNameObject[];
+    experimentalGroupsOfSubjects: IdName[];
     id: number;
-    membersCategories: MembersCategory[];
     monoCenter: boolean;
     name: string;
     nbExaminations: number;
     nbSujects: number;
-    protocolFilePathList: string[];
+    protocolFilePaths: string[];
     startDate: Date;
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
@@ -46,7 +45,7 @@ export class Study extends Entity {
     timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
-    selected: boolean = false;
+    studyCardList: StudyCard[];
     
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
@@ -64,4 +63,58 @@ export class Study extends Entity {
     }
     
     service: StudyService = ServiceLocator.injector.get(StudyService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new StudyDTO(this), this.replacer);
+    }
+}
+
+
+export class StudyDTO {
+    id: number;
+    clinical: boolean;
+    downloadableByDefault: boolean;
+    endDate: Date;
+    //examinationIds: number[];
+    experimentalGroupsOfSubjects: Id[];
+    monoCenter: boolean;
+    name: string;
+    protocolFilePaths: string[];
+    startDate: Date;
+    studyCenterList: StudyCenterDTO[];
+    studyStatus: 'IN_PROGRESS' | 'FINISHED';
+    studyType: StudyType;
+    studyUserList: StudyUser[];
+    subjectStudyList: SubjectStudyDTO[] = [];
+    //timepoints: Timepoint[];
+    visibleByDefault: boolean;
+    withExamination: boolean;
+
+    constructor(study: Study) {
+        this.id = study.id ? study.id : null;
+        this.clinical = study.clinical;
+        this.downloadableByDefault = study.downloadableByDefault;
+        this.endDate = study.endDate;
+        this.experimentalGroupsOfSubjects = study.experimentalGroupsOfSubjects ? study.experimentalGroupsOfSubjects.map(egos => new Id(egos.id)) : null;
+        this.monoCenter = study.monoCenter;
+        this.name = study.name;
+        this.protocolFilePaths = study.protocolFilePaths;
+        this.startDate = study.startDate;
+        this.studyCenterList = study.studyCenterList ? study.studyCenterList.map(sc => {
+            let dto = new StudyCenterDTO(sc);
+            dto.study = null;
+            return dto;
+        }) : null;
+        this.studyStatus = study.studyStatus;
+        this.studyType = study.studyType;
+        this.studyUserList = study.studyUserList;
+        this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
+            let dto = new SubjectStudyDTO(ss);
+            dto.study = null;
+            return dto;
+        }) : null;
+        this.visibleByDefault = study.visibleByDefault;
+        this.withExamination = study.withExamination;
+    }
 }

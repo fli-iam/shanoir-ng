@@ -4,7 +4,13 @@ th, td { text-align: left; }
 td { padding: 3px 5px; }
 li.info { width: 532px; }
 li.info strong { color: var(--color-a); }
-li.info svg { color: var(--color-a); font-size: 16px; vertical-align: -1; }
+li.info i { color: var(--color-a); font-size: 16px; }
 li.info code { color: var(--color-a); }
-.compatible { color: var(--color-c); }
-.not-compatible { color: var(--color-error); }
+li.info a { text-decoration: underline; color: var(--color-a); }
+
+legend i { margin-right: 7px; }
+.clickable:not(.disabled) { cursor: pointer; }
+.subject-study legend { color: var(--color-b); }
+.subject-study label { color: var(--color-b-light2); }
+.subject-study legend.disabled { color: var(--grey); }
+.optional { opacity: 0.6; }
