@@ -38,8 +38,8 @@ export class StudyService extends EntityService<Study> {
     
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-        .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
-        .toPromise();
+        .toPromise()
+        .then(entities => entities.map((entity) => Object.assign(new Study(), entity)));
     }
 
     getStudiesNames(): Promise<IdName[]> {

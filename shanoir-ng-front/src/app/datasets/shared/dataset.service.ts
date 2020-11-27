@@ -11,8 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import 'rxjs/add/operator/map';
-
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
@@ -50,14 +48,14 @@ export class DatasetService extends EntityService<Dataset> {
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
         return this.http.get<Page<Dataset>>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
-            .map((page: Page<Dataset>) => {
+            .toPromise()
+            .then((page: Page<Dataset>) => {
                 if (page && page.content) {
                     page.content = page.content.map(ds => Object.assign(ds, this.getEntityInstance(ds)));
                 }
                 return page;
             })
-            .toPromise()
-            .then(this.mapPage);
+            .then(this.mapPage); 
     }
 
     getByAcquisitionId(acquisitionId: number): Promise<Dataset[]> {
@@ -75,10 +73,10 @@ export class DatasetService extends EntityService<Dataset> {
                     observe: 'response',
                     responseType: 'blob'
                 })
-            .map((result: HttpResponse < Blob > ) => {
+            .toPromise()
+            .then((result: HttpResponse < Blob > ) => {
                 this.downloadIntoBrowser(result);
             })
-            .toPromise()
             .catch(error => this.errorService.handleError(error));
     }
 
@@ -117,19 +115,19 @@ export class DatasetService extends EntityService<Dataset> {
 
     downloadFromId(datasetId: number, format: string): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format).toPromise().then(
+        return this.downloadToBlob(datasetId, format).then(
             response => {
                 this.downloadIntoBrowser(response);
             }
         );
     }
 
-    downloadToBlob(id: number, format: string): Observable<HttpResponse<Blob>> {
+    downloadToBlob(id: number, format: string): Promise<HttpResponse<Blob>> {
         if (!id) throw Error('Cannot download a dataset without an id');
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format, 
             { observe: 'response', responseType: 'blob' }
-        ).map(response => response);
+        ).toPromise();
     }
 
     exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
