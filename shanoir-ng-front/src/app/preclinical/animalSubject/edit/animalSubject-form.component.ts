@@ -14,7 +14,7 @@
 import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import * as shajs from 'sha.js';
+import CryptoES from 'crypto-es';
 
 import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
@@ -511,9 +511,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     getHash(stringToBeHashed: string): string {
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = "";
-        hex = hash.substring(0, this.HASH_LENGTH);
+        let hash = CryptoES.SHA1(stringToBeHashed).toString(CryptoES.enc.Hex);
+        let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
     

@@ -58,7 +58,7 @@ export class ExaminationAnestheticService extends EntityService<ExaminationAnest
     updateAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.internal_id}`;
         return this.http
-            .put<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic))
+            .put<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic)) 
             .toPromise();
         }
     
