@@ -50,6 +50,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     protected readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
     private hasAdministrateRight: boolean = false;
+    private hasImportRight: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -85,10 +86,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.examination = examination;
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
+                this.hasImportRight = true;
                 return;
             } else {
                 return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                 });
             }
         });
@@ -152,7 +155,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-	   return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
+    }
+
+
+    public async hasDeleteRight(): Promise<boolean> {
+         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
     protected deleteFile(file: any) {
