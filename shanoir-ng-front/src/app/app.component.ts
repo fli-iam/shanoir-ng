@@ -32,7 +32,7 @@ import { WindowService } from './shared/services/window.service';
 
 export class AppComponent {
 
-    @HostBinding('@parent') public menuOpen: boolean = true; 
+    @HostBinding('@parent') public menuOpen: boolean = true;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
