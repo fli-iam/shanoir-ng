@@ -112,6 +112,14 @@ public interface UserService {
 	List<User> getUsersToReceiveSecondExpirationNotification();
 
 	/**
+	 * Find users that are now expired.
+	 * 
+	 * @return a list of users.
+	 */
+	@PreAuthorize("hasRole('ADMIN')")
+	List<User> getExpiredUsers();
+
+	/**
 	 * Request a date extension for an user.
 	 * 
 	 * @param userId the user id.
