@@ -14,8 +14,6 @@
 
 import { Reference } from '../../reference/shared/reference.model';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { ContrastAgentService } from "./contrastAgent.service";
 
 export class ContrastAgent extends Entity{
   id: number;
@@ -28,7 +26,5 @@ export class ContrastAgent extends Entity{
   injection_interval: Reference;
   injection_site: Reference;
   injection_type: Reference;
-  
-  service: ContrastAgentService = ServiceLocator.injector.get(ContrastAgentService);  
 }
 

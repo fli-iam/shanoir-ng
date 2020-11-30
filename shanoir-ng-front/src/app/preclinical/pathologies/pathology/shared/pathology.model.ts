@@ -13,12 +13,9 @@
  */
 
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { PathologyService } from "./pathology.service";
 
 export class Pathology  extends Entity {
   id: number;
   name: string;
-  service: PathologyService = ServiceLocator.injector.get(PathologyService);
 }
 

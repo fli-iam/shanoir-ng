@@ -34,22 +34,21 @@ export class ExtraDataService extends EntityService<ExtraData>{
     getExtraDatas(examId:number): Promise<ExtraData[]>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<ExtraData[]>(url)
-            .map(entities => entities.map((entity) => this.toRealObject(entity)))
-            .toPromise();
+            .toPromise()
+            .then(entities => entities.map((entity) => this.toRealObject(entity)));
     }
   
     getExtraData(id:string): Promise<ExtraData>{
         return this.http.get<ExtraData>(PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+id)
-            .map((entity) => this.toRealObject(entity))
-            .toPromise();
+            .toPromise()
+            .then((entity) => this.toRealObject(entity));
     }
   
     
     createExtraData(datatype:string,extradata: any): Observable<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
         return this.http
-        .post<ExtraData>(url, JSON.stringify(extradata))
-        .map(res => res);
+        .post<ExtraData>(url, JSON.stringify(extradata));
     }
         
         
@@ -58,8 +57,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
         return this.http
-            .post(endpoint, formData)
-            .map(response => response);
+            .post(endpoint, formData);
     }
     	
     getUploadUrl(extraData: ExtraData): string {
@@ -81,15 +79,13 @@ export class ExtraDataService extends EntityService<ExtraData>{
     download(extradata:ExtraData): Observable<any>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
         return this.http.get<ExtraData>(url);
-        //.map(res => res);
     }
     
         
     updateExtradata(datatype :string, id: number,extradata : ExtraData): Observable<ExtraData> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/`+datatype+`/`+id;
         return this.http
-        .put<ExtraData>(url, JSON.stringify(extradata))
-        .map(response => response);
+        .put<ExtraData>(url, JSON.stringify(extradata));
     }
     
 }

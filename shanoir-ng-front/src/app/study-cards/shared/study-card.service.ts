@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -12,8 +11,9 @@ import { HttpClient } from '@angular/common/http';
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Injectable } from '@angular/core';
 
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
@@ -48,5 +48,12 @@ export class StudyCardService extends EntityService<StudyCard> {
     protected mapEntityList = (dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]> => {
         if (result == undefined) result = [];
         if (dtos) return this.studyCardDTOService.toEntityList(dtos, result);
+    }
+
+    public stringify(entity: StudyCard) {
+        let dto = new StudyCardDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
     }
 }

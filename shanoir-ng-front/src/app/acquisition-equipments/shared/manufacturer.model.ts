@@ -11,12 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Entity } from "../../shared/components/entity/entity.abstract";
-import { ManufacturerService } from "./manufacturer.service";
 
 export class Manufacturer extends Entity {
     id: number;
     name: String;
-    service = ServiceLocator.injector.get(ManufacturerService);
 }

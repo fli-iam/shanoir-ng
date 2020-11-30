@@ -15,10 +15,9 @@
 import { Injectable } from "@angular/core";
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { switchMap } from 'rxjs/operators';
-import 'rxjs/add/observable/throw';
 
 import { KeycloakService } from "./keycloak.service";
 
@@ -59,7 +58,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
                         return next.handle(authReq);
                     }))
                 }
-                return Observable.throw(err);
+                throw(err);
             }
         }
         ));

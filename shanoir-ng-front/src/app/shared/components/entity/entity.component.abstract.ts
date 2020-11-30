@@ -298,7 +298,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
                         this.goToList();
                     }).catch(reason => {

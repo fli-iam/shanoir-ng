@@ -33,31 +33,31 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     getSubjectTherapies(preclinicalSubject: PreclinicalSubject): Promise<SubjectTherapy[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectTherapy[]>(url)
-            .map(entities => entities.map((entity) => this.toRealObject(entity)))    
-            .toPromise();
+            .toPromise()
+            .then(entities => entities.map((entity) => this.toRealObject(entity)));
     }
     
     getSubjectTherapy(preclinicalSubject: PreclinicalSubject, tid: string): Promise<SubjectTherapy>{
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
             return this.http.get<SubjectTherapy>(url)
-                .map((entity) => this.toRealObject(entity))        
-                .toPromise();
+                .toPromise()
+                .then((entity) => this.toRealObject(entity));
     }
 
     updateSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<SubjectTherapy> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${subjectTherapy.id}`;
         return this.http
-            .put<SubjectTherapy>(url, subjectTherapy.stringify())
-            .map((entity) => entity? this.toRealObject(entity) : entity)
-            .toPromise();
+            .put<SubjectTherapy>(url, this.stringify(subjectTherapy))
+            .toPromise()
+            .then((entity) => entity? this.toRealObject(entity) : entity);
     }
 
     createSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<SubjectTherapy> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}`;
         return this.http
             .post<SubjectTherapy>(url, JSON.stringify(subjectTherapy))
-            .map((entity) => this.toRealObject(entity))
-            .toPromise();
+            .toPromise()
+            .then((entity) => this.toRealObject(entity));
     }
     
     deleteSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<void> {
@@ -69,14 +69,14 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     deleteAllTherapiesForAnimalSubject(animalSubjectId: number): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubjectId}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.delete(url)
-            .map(res => res).toPromise();
+            .toPromise();
     }
 
      getAllSubjectForTherapy(tid: number): Promise<SubjectTherapy[]> {
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
     	return this.http.get<SubjectTherapy[]>(url)
-            .map(entities => entities.map((entity) => this.toRealObject(entity)))            
-            .toPromise();
+            .toPromise()
+            .then(entities => entities.map((entity) => this.toRealObject(entity)));
     }
 
 }

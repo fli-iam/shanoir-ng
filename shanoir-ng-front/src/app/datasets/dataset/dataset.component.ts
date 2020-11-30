@@ -103,7 +103,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     public loadDicomInMemory() {
         this.papayaLoaded = true;
-        this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
+        this.datasetService.downloadToBlob(this.id, 'nii').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
                 this.dicomArchiveService.importFromZip(blobReponse.body)
                     .then(response => {

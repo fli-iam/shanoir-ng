@@ -14,10 +14,7 @@
  */
 
 import { Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList } from '@angular/core';
-import { Observable } from 'rxjs';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-import { ImagesUrlUtil } from '../../../utils/images-url.util';
-import { timer } from 'rxjs/observable/timer';
 
 @Component({
     selector: 'menu-item',
@@ -56,13 +53,12 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = timer(0,100).subscribe (t=> {
+        let subscription = setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;
             this.init = true;
-            subscription.unsubscribe();
-        });
+        }, 100);
     }
 
     public open() {

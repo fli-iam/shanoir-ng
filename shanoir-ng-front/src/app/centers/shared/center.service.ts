@@ -52,4 +52,11 @@ export class CenterService extends EntityService<Center> {
         if (result == undefined) result = [];
         if (dtos) return this.centerDTOService.toEntityList(dtos, result);
     }
+
+    public stringify(entity: Center) {
+        let dto = new CenterDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
+    }
 }

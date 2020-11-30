@@ -79,6 +79,8 @@ import { StudyCardListComponent } from './study-cards/study-card-list/study-card
 import { StudyCardComponent } from './study-cards/study-card/study-card.component';
 import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
 import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
+import { SolrSearchComponent } from './solr/solr.search.component';
+import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 
 let routes: Routes = [
     {
@@ -95,6 +97,9 @@ let routes: Routes = [
         path: 'home',
         component: HomeComponent
     }, {
+        path: 'solr-search',
+        component: SolrSearchComponent
+    }, {
         path: 'imports',
         component: ImportComponent,
         children: [
@@ -106,20 +111,10 @@ let routes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
-            }, {
-                path: 'pacs',
-                component: QueryPacsComponent,
-                data: {importMode: 'PACS'},
-                canActivate: [CanImportFromPACSGuard]
-            }, {
-                path: 'series',
-                component: SelectSeriesComponent
-            }, {
-                path: 'context',
-                component: ClinicalContextComponent
-            }, {
-                path: 'finish',
-                component: FinishImportComponent
+            }, {   
+                path: 'bruker',
+                component: BrukerUploadComponent,
+                data: {importMode: 'BRUKER'}
             }, {   
                 path: 'eeg',
                 component: EegUploadComponent,
@@ -129,18 +124,32 @@ let routes: Routes = [
                 component: BidsUploadComponent,
                 data: {importMode: 'BIDS'}
             }, {
+                path: 'pacs',
+                component: QueryPacsComponent,
+                canActivate: [CanImportFromPACSGuard]
+            }, {
+                path: 'series',
+                component: SelectSeriesComponent
+            }, {
                 path: 'eegseries',
                 component: EegSelectSeriesComponent
+            }, {
+                path: 'context',
+                component: ClinicalContextComponent
             }, {
                 path: 'eegcontext',
                 component: EegClinicalContextComponent
             }, {
+                path: 'finish',
+                component: FinishImportComponent
+            }
+            , {
                 path: 'eegfinish',
                 component: FinishEegImportComponent
-            }, {   
+            }
+            , {
                 path: 'bruker',
-                component: BrukerUploadComponent,
-                data: {importMode: 'BRUKER'}
+                component: BrukerUploadComponent
             }, {
                 path: 'brukerseries',
                 component: BrukerSelectSeriesComponent
@@ -153,13 +162,28 @@ let routes: Routes = [
         path: 'task',
         component: AsyncTasksComponent
     }, {
+        path: 'study-card/select-rule',
+        children: [
+            {
+                path: 'list/:id',
+                component: StudyCardForRulesListComponent,
+            }, {
+                path: 'select/:id',
+                component: StudyCardComponent,
+                data: { mode: 'view', select: true }
+            }
+        ]
+    },
+        { 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent
-    }, { 
+    },{ 
         path: 'preclinical-contrastagent', 
         component: ContrastAgentFormComponent
+    },{ 
+        path: 'download-statistics', 
+        component: DownloadStatisticsComponent
     },
-
 
     // Automatically generated routes from:
     // https://www.typescriptlang.org/play/#code/LAKAZgrgdgxgLgSwPZQAQHMCmcBKSJyYDOAYkgE4AUmUicAngHICGAtpgFypFzkJToANKhp16AYSSsADilEdmUesIA2CHpJlzaCpcNCpDRw8wIALLgG9ymZgBMA-F0XLUMG80JPUL4RGl2npjeLgC+qACUzkqolqAGRjZwEORoANoJxoZxIFl5qNKeFiK0CAws7IKZ+YY2dgg28AAqSFyiZUxsmKgA1KgA5AD0ajz9Vbk1RoVwZgCynjDF-ZAqKmPVxqHCOZNTRW2l5V29A8PqcOsTuzBSslDyqCNwmnei47uGMIoAgvAIAG5BZzmAB0HjsqAcqDSphmYNsdgAuqguNA7JgwPxMHZ3vktrENvlpsV2kd2D0hui4MwECoiIMOAg7JcPm5bto4AcxC8ObjdoFqVZUKwkOiuP1-ghMAB3fqoLaEvJfKC-RCAwjAuHgyHQ2FmeH2ZGoqDozH3HGK+XbS3GYlcjoVTAUwbYsoMpksj43LT3HQlbns31wPmTAXMIUisUDV0XK02ozK1UAoE+UH+AXdKEwtMBIJG1BojFYi1XLL4nYfO3+h1dZ3uWyET3XQMPUkSFu0EM1MMR0WcAb1oJyhWlmqJv7q-t6kGDwg67Nw2eYfOFs3YrtGULVREAblAoT3IFAKmwqHI+EIRGi9DSyIAvNDd-EQOeCMRUA-X5eZygvnBKNUWC4BexBkFQ-Q8BAdj0GMAwAMrJNBPJBrB-QIVB9AADLnMhoiwZYS7it85jfHYrD8AA8uQACiAAe0iYOQcAAOIQMw5DMn4uYagMxEzKR5FQFRdEMUxrHscyoQRCGQF4G+pAUJQEEQAARgAVpg8CoXBqkafAuG0NpumaXA2EaB2FzbOmKb9HxZgCfw4kcf0UkydgcmXmBSmYLRbD8J4yBQKhdF+VAAUoAZlkDCFgnhVAZnPBZ+HWTxtkkWRjlsc5rmAe5IEKeBYZENgqEACKeMwxWJT6eHCP05XUlVCWRcl3H9ml-EZUJNH0YxLFZZJ0m5cB8lef0MCiIxqHiJN5AtXVM20IxzVJdshG8elgnCb1YkDbBKXtXZDndSJfVOYNbkjZ5in9MwMAAI4QOoZSBQAtJgj0INI7CGXVvyfUQL0oNRn3faI828Q9T2A4gwOgz9pk4atsTrR19lddton9RJ+1tURm2UT1WPnS5Q2lrJ+VjTctLTUgtIQ-0ki0itNW-SjHipUdGNE2de1cRm+OdVtPO7TjOXk3lo03RAxXkKhACqssM4ry1I6zUUERzh0E1AJP8zZXOCST4vGBTUvgawigQGAd3JDYct1fMUDW7bKSMQzAASUiYBDmsNtrQuE6dovOfrnM65jvNi2TpuS9dFtWzb8Bu+Qr2RpgayO4nrv27MfYqJ73u+6jhtBzt2OhwWeMbYHJ3l8bESgBEh6gDcUBEEgJ4gioSDoJQX7EI3R4gCecCoBe0gEB+AxpAAOkFh5gBQqCUKPZ4gePYDr-JEQEqWE9Tz0D79LPcCWPP-TVAfY9HwMp+n1Ws-9HKfQDyCxInCfYwX4exgIFv-cQLwnqI0OALRd4VjyNfXox9768FdKAloXAn4v23oQYBDQTItE-k-QQP9qhblLP-Feb9vSvFoBAy00Db4nzgKfMhHJxQnFIRZT+eCF4EOqMQwBb4QRhkoaOIw1DYF0LgD2WIwo+zIOfswoBYYQTpxwcOdh-Rf6bi4QA0hPwJxBAETUYRd9RHjjVCmNIqCtEqh0YQNIAAGZEfR+iIhUWowwhDjAGNoVsC++5W4oA7l3Hufdr4RCAA

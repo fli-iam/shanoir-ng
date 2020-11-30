@@ -2,6 +2,7 @@
 // just run `node convertRoutes.ts`
  
 function getRoutesFor(entityName, entityComponent, listComponent, auth) {
+    
     return [
         {
             path: entityName,
@@ -33,7 +34,16 @@ function getRoutesFor(entityName, entityComponent, listComponent, auth) {
 let routes = [];
 
 routes = routes.concat(
-
+    getRoutesFor('study', 'StudyComponent', 'StudyListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('subject', 'SubjectComponent', 'SubjectListComponent', {update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('examination', 'ExaminationComponent', 'ExaminationListComponent', {update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('dataset', 'DatasetComponent', 'DatasetListComponent', {update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('center', 'CenterComponent', 'CenterListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('acquisition-equipment', 'AcquisitionEquipmentComponent', 'AcquisitionEquipmentListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('coil', 'CoilComponent', 'CoilListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('user', 'UserComponent', 'UserListComponent', {create: 'AuthAdminGuard'}),
+    getRoutesFor('manufacturer', 'ManufacturerComponent', null, {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('manufacturer-model', 'ManufacturerModelComponent', null, {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
     getRoutesFor('study-card', 'StudyCardComponent', 'StudyCardListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
     getRoutesFor('dataset-acquisition', 'DatasetAcquisitionComponent', 'DatasetAcquisitionListComponent', {update: 'AuthAdminOrExpertGuard'}),
     getRoutesFor('instrument', 'InstrumentAssessmentComponent', null, {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
@@ -44,7 +54,7 @@ routes = routes.concat(
     getRoutesFor('preclinical-pathology-model', 'PathologyModelFormComponent', 'PathologyModelsListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
     getRoutesFor('preclinical-anesthetic-ingredient', 'AnestheticIngredientFormComponent', 'AnestheticIngredientsListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
     getRoutesFor('preclinical-anesthetic', 'AnestheticFormComponent', 'AnestheticsListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-    getRoutesFor('preclinical-subject', 'AnimalSubjectFormComponent', 'AnimalSubjectsListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
+    getRoutesFor('preclinical-subject', 'AnimalSubjectFormComponent', 'AnimalSubjectsListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'})
 );
 
 console.log(routes)

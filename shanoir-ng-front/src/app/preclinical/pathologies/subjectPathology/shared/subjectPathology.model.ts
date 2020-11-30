@@ -16,8 +16,6 @@ import { Reference } from '../../../reference/shared/reference.model';
 import { Pathology } from '../../pathology/shared/pathology.model';
 import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { SubjectPathologyService } from "./subjectPathology.service";
 
 export class SubjectPathology  extends Entity{
   id: number;
@@ -26,7 +24,5 @@ export class SubjectPathology  extends Entity{
   location: Reference;
   startDate: Date;
   endDate : Date;
-  
-  service: SubjectPathologyService = ServiceLocator.injector.get(SubjectPathologyService);
 }
 

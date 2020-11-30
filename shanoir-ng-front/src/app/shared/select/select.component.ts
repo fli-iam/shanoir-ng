@@ -29,10 +29,8 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-
-import { findLastIndex } from '../../utils/app.utils';
+import { findLastIndex, deepEquals } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
-import { inspect } from 'util';
 
 
 @Component({
@@ -296,7 +294,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (value1 == value2) return true;
         else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
         else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return inspect(value1) === inspect(value2);
+        else return deepEquals(value1, value2);
     }
 
     public open() {

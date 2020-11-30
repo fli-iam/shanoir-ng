@@ -75,7 +75,6 @@ export class ReferenceService extends EntityService<Reference>{
 
     getReferenceByCategoryTypeAndValue(category: string, reftype: string, value: string): Observable<Reference> {
         return this.http
-            .get<Reference>(PreclinicalUtils.PRECLINICAL_API_REFERENCES_URL+"/category/"+category+"/"+reftype+"/"+value)
-            .map(response => response);
+            .get<Reference>(PreclinicalUtils.PRECLINICAL_API_REFERENCES_URL+"/category/"+category+"/"+reftype+"/"+value);
     }
 }

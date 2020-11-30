@@ -21,7 +21,6 @@
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true,
-    "strictMetadataEmit" : true
+    "strictInjectionParameters": true
   }
 }

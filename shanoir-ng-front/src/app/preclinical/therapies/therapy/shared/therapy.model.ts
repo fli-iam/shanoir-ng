@@ -14,14 +14,11 @@
 
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { TherapyService } from "./therapy.service";
 
 export class Therapy extends Entity{
-  id: number;
-  name: string;
-  comment: string;
-  therapyType: TherapyType;
-  service: TherapyService = ServiceLocator.injector.get(TherapyService);
+    id: number;
+    name: string;
+    comment: string;
+    therapyType: TherapyType;
 }
 

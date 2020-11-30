@@ -85,4 +85,11 @@ export class ExaminationService extends EntityService<Examination> {
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
     }
+
+    public stringify(entity: Examination) {
+        let dto = new ExaminationDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
+    }
 }
