@@ -396,10 +396,10 @@ import { environment } from 'src/environments/environment';
     //     ModalsComponent
     // ],
     providers: [
-        {
-            provide: APP_BASE_HREF, 
-            useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
-        },
+        // {
+        //     provide: APP_BASE_HREF, 
+        //     useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
+        // },
         // AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
