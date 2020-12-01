@@ -31,10 +31,6 @@
           },
           "configurations": {
             "production": {
-              "index": {
-                "input": "src/index.prod.html",
-                "output": "index.html"
-              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -44,7 +40,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
