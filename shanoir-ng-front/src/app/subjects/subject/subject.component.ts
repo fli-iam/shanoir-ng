@@ -14,7 +14,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import CryptoES from 'crypto-es';
+import * as shajs from 'sha.js';
 
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -174,8 +174,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return this.getHash(hash);
     }
 
-    private getHash(stringToBeHashed: string): string {
-        let hash = CryptoES.SHA1(stringToBeHashed).toString(CryptoES.enc.Hex);
+    getHash(stringToBeHashed: string): string {
+        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
