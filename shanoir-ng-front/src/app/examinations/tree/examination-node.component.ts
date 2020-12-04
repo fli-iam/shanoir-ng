@@ -86,8 +86,11 @@ export class ExaminationNodeComponent implements OnChanges {
         this.loading = true;
         this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (dsAcqs) {
-                this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
-            }
+                this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq)).sort(
+                    function(a, b) {
+                        return a.sortingIndex - b.sortingIndex;
+                    })
+               }
             this.loading = false;
             this.node.open = true;
         }).catch(() => this.loading = false);
@@ -96,6 +99,7 @@ export class ExaminationNodeComponent implements OnChanges {
     private mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
+            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );

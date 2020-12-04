@@ -49,7 +49,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let label: string = 'Dataset Acquisition n° ' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED);
+                this.node = new DatasetAcquisitionNode(this.input.id, this.input.sortingIndex, label, UNLOADED);
             }
         }
     }
@@ -67,7 +67,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds))
+                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds)).sort();
             });
         }
     }
