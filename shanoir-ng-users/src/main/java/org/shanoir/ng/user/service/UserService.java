@@ -17,12 +17,12 @@ package org.shanoir.ng.user.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,6 +85,14 @@ public interface UserService {
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	Optional<User> findByEmail(String email);
+
+	/**
+	 * Find user by its email.
+	 *
+	 * @param email email.
+	 * @return optionally a user.
+	 */
+	Optional<User> findByEmailForExtension(String email);
 
 	/**
 	 * Find user by its username.

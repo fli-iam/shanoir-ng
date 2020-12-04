@@ -41,7 +41,7 @@ export class UserService extends EntityService<User>{
     }
 
     requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable> {
-        return this.http.put<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
+        return this.http.post<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise();
     }
 }
