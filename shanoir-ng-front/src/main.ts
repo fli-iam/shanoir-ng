@@ -13,4 +13,12 @@ if (environment.production) {
   enableProdMode();
 }
 
-KeycloakService.init().then(() => platformBrowserDynamic().bootstrapModule(AppModule) ).catch(err => console.error(err));
+if (window.location.href.endsWith('/account-request') || window.location.href.endsWith('/extension-request')) {
+  // Public URL
+  platformBrowserDynamic().bootstrapModule(AppModule);
+} else {
+  KeycloakService.init()
+    .then(() => {
+      platformBrowserDynamic().bootstrapModule(AppModule);
+    });
+}

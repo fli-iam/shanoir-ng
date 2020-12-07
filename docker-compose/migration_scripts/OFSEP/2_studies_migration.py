@@ -24,12 +24,12 @@ targetCursor = targetConn.cursor()
 print("######## CLEANING OF SOURCE DB SHANOIR_OLD_OFSEP: START ###################")
 ######## REL_STUDY_SUBJECT ###################
 print("Delete duplicate entries (study_id, subject_id) in rel_study_subject: start")
-query = """DELETE FROM rel_subject_study WHERE rel_subject_study_id IN (
-	SELECT rel_subject_study_id FROM (
-		SELECT a.rel_subject_study_id FROM rel_subject_study a JOIN (
-			SELECT study_id, subject_id, COUNT(*) FROM rel_subject_study GROUP BY study_id, subject_id HAVING COUNT(*) > 1
-		) b ON a.study_id = b.study_id AND a.subject_id = b.subject_id ORDER BY a.rel_subject_study_id
-	) AS c
+query = """DELETE FROM REL_SUBJECT_STUDY WHERE REL_SUBJECT_STUDY_ID IN (
+	SELECT REL_SUBJECT_STUDY_ID FROM (
+		SELECT A.REL_SUBJECT_STUDY_ID FROM REL_SUBJECT_STUDY A JOIN (
+			SELECT STUDY_ID, SUBJECT_ID, COUNT(*) FROM REL_SUBJECT_STUDY GROUP BY STUDY_ID, SUBJECT_ID HAVING COUNT(*) > 1
+		) B ON A.STUDY_ID = B.STUDY_ID AND A.SUBJECT_ID = B.SUBJECT_ID ORDER BY A.REL_SUBJECT_STUDY_ID
+	) AS C
 )"""
 sourceCursor.execute(query)
 sourceConn.commit()

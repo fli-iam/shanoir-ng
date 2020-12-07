@@ -45,8 +45,8 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -65,6 +65,9 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -143,7 +146,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private SubjectRepository subjectRepo;
-
+	
+	@Autowired
+	ShanoirEventService eventService;
+	
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
 
@@ -314,11 +320,16 @@ public class DatasetApiController implements DatasetApi {
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.IN_PROGRESS);
+		eventService.publishEvent(event);
+		
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 			FileUtils.deleteQuietly(zipFile);
@@ -423,11 +434,17 @@ public class DatasetApiController implements DatasetApi {
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
+		String ids = String.join(",", datasets.stream().map(dataset -> dataset.getId().toString()).collect(Collectors.toList()));
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, ids, KeycloakUtil.getTokenUserId(), ids + "." + format, ShanoirEvent.IN_PROGRESS);
+		eventService.publishEvent(event);
+
 		try (InputStream is = new FileInputStream(zipFile);) {
 		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 		    response.setContentType(contentType);
 		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 		    response.flushBuffer();
+		    event.setStatus(ShanoirEvent.SUCCESS);
+		    eventService.publishEvent(event);
 		} finally {
 		    FileUtils.deleteQuietly(tmpFile);
 		    FileUtils.deleteQuietly(zipFile);

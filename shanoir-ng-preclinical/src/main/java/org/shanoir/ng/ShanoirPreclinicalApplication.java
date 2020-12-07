@@ -20,7 +20,10 @@ import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+/**
+ * Shanoir-NG microservice preclinical application.
+ */
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableSwagger2
 public class ShanoirPreclinicalApplication {
 

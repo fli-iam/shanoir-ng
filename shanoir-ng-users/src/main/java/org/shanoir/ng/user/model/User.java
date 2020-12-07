@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;

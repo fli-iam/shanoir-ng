@@ -16,16 +16,14 @@ package org.shanoir.ng;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Shanoir application.
- *
- * @author ifakhfakh
- *
+ * Shanoir-NG microservice import application.
  */
-@SpringBootApplication(scanBasePackageClasses = {ShanoirImportApplication.class})
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableSwagger2
 public class ShanoirImportApplication {
 

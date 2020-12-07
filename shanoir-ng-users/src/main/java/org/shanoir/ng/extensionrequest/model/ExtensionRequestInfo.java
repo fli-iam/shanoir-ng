@@ -12,12 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.user.model;
+package org.shanoir.ng.extensionrequest.model;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
@@ -42,6 +43,10 @@ public class ExtensionRequestInfo implements Serializable {
 
 	@NotNull
 	private String extensionMotivation;
+
+	@Transient
+	private String email;
+
 
 	/**
 	 * @return the extensionDate
@@ -73,4 +78,17 @@ public class ExtensionRequestInfo implements Serializable {
 		this.extensionMotivation = extensionMotivation;
 	}
 
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }

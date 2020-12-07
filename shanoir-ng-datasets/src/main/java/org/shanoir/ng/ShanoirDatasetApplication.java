@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -35,15 +36,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Shanoir application.
- *
- * @author msimon
- *
+ * Shanoir-NG microservice datasets application.
  */
-@SpringBootApplication
-@EnableSwagger2
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableSpringDataWebSupport
 @EnableScheduling
+@EnableSwagger2
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {
