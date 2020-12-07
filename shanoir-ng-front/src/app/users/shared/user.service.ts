@@ -45,7 +45,7 @@ export class UserService extends EntityService<User>{
         return this.http.post<User>(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user)).toPromise();
     }
 
-    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable> {
+    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable<any>> {
         return this.http.post<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise();
     }
