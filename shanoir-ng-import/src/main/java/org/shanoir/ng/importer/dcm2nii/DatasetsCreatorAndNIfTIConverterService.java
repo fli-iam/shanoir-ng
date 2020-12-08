@@ -690,7 +690,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			for (Image image : serie.getImages()) {
 				final int acquisitionNumber = image.getAcquisitionNumber();
 				Set<EchoTime> echoTimes = image.getEchoTimes();
-				double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
+				double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null : image.getImageOrientationPatient().stream().mapToDouble(i->i).toArray();
 				SerieToDatasetsSeparator seriesToDatasetsSeparator =
 						new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
 				boolean found = false;
@@ -835,14 +835,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		int[] ret = new int[integers.size()];
 		for (int i = 0; i < ret.length; i++) {
 			ret[i] = integers.get(i).intValue();
-		}
-		return ret;
-	}
-
-	public static double[] convertDoubles(List<Double> doubles) {
-		double[] ret = new double[doubles.size()];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = doubles.get(i).doubleValue();
 		}
 		return ret;
 	}
