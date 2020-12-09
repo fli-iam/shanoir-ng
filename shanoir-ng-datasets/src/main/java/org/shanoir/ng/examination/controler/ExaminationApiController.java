@@ -86,15 +86,16 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			// delete bids folder
 			bidsService.deleteExam(examinationId);
-			// Check if user rights needed
-			examinationService.deleteById(examinationId);
-
+			
 			// Delete extra data
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
+
+			examinationService.deleteById(examinationId);
+			
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
