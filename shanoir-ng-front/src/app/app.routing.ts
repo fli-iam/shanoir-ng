@@ -188,7 +188,7 @@ let appRoutes: Routes = [
 appRoutes = appRoutes.concat(
     getRoutesFor('study', StudyComponent, StudyListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('subject', SubjectComponent, SubjectListComponent, {update: AuthAdminOrExpertGuard}),
-    getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, {update: AuthAdminOrExpertGuard}),
+    getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, {}),
     getRoutesFor('dataset', DatasetComponent, DatasetListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('center', CenterComponent, CenterListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
@@ -200,13 +200,13 @@ appRoutes = appRoutes.concat(
     getRoutesFor('dataset-acquisition', DatasetAcquisitionComponent, DatasetAcquisitionListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('instrument', InstrumentAssessmentComponent, null, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
-    getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, {update: AuthAdminOrExpertGuard}),
     getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('preclinical-pathology', PathologyFormComponent, PathologiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
     getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent, PathologyModelsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent, AnestheticIngredientsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('preclinical-anesthetic', AnestheticFormComponent, AnestheticsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-    getRoutesFor('preclinical-subject', AnimalSubjectFormComponent, AnimalSubjectsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
+    getRoutesFor('preclinical-subject', AnimalSubjectFormComponent, AnimalSubjectsListComponent, {update: AuthAdminOrExpertGuard})
 );
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 

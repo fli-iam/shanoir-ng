@@ -52,7 +52,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     protected readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
     private hasAdministrateRight: boolean = false;
-    hasDownloadRight: boolean = false;
+    private hasImportRight: boolean = false;
+    private hasDownloadRight: boolean = false;
     downloading: boolean = false;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
@@ -94,12 +95,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.examination = examination;
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
-                this.hasDownloadRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_IMPORT);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+        this.hasDownloadRight = true;
+        this.hasImportRight = true;
+        return;
+    } else {
+        return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
+            this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+            this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 });
             }
         });
@@ -171,7 +174,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public async hasEditRight(): Promise<boolean> {
-	   return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
+    }
+
+
+    public async hasDeleteRight(): Promise<boolean> {
+         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
     protected deleteFile(file: any) {

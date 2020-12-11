@@ -271,7 +271,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 			removeUnselectedSeries(importJob);
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
 			LOG.error("Missing importJobDir.");
 			throw new RestServiceException(

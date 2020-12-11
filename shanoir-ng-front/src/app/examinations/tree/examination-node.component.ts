@@ -13,7 +13,6 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { ExaminationDatasetAcquisitionDTO } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
@@ -21,7 +20,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
@@ -93,11 +92,13 @@ export class ExaminationNodeComponent implements OnChanges {
     loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
-            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
+            if (!dsAcqs) dsAcqs = [];
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq))
+                .sort((a, b) => a.sortingIndex - b.sortingIndex);
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false; 
-        }).catch(() => { this.loading = false; });
+        }).catch((reason) => { this.loading = false; });
     }
     
     private fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
@@ -122,7 +123,7 @@ export class ExaminationNodeComponent implements OnChanges {
         let datasetIdsReady: Promise<void>;
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
-            if (this.datasetIds.length == 0) {
+            if (!this.datasetIds || this.datasetIds.length == 0) {
                 this.msgService.log('warn', 'Sorry, no dataset for this examination');
                 return;
             }
@@ -140,6 +141,7 @@ export class ExaminationNodeComponent implements OnChanges {
     private mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
+            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );
