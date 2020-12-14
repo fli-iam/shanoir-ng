@@ -50,7 +50,7 @@ begin
     pr_md.name as protocol_type
 
     from studies.subject as sb
-    inner join studies.pseudonymus_hash_values as pseud
+    left join studies.pseudonymus_hash_values as pseud on (pseud.id = sb.pseudonymus_hash_values_id)
     inner join studies.study as st
     inner join studies.center as cnt
     inner join studies.manufacturer as man
@@ -65,8 +65,7 @@ begin
     inner join datasets.dataset_acquisition as dt_acq
     inner join datasets.mr_dataset_acquisition as mr_acq
 
-    on sb.pseudonymus_hash_values_id = pseud.id
-    and sb.id = rel_sb_st.subject_id
+    on sb.id = rel_sb_st.subject_id
     and rel_sb_st.study_id = st.id
     and sb.id = ex.subject_id
     and ex.center_id = cnt.id
@@ -80,8 +79,7 @@ begin
     and mr_acq.mr_protocol_id = pr.id
     and pr_md.id = pr.id
     and ex.id = dt_acq.examination_id
-
-    where sb.name rlike if(subjectNameInRegExp is null or subjectNameInRegExp = '', '.*', subjectNameInRegExp)
+    and sb.name rlike if(subjectNameInRegExp is null or subjectNameInRegExp = '', '.*', subjectNameInRegExp)
     and sb.name not rlike if(subjectNameOutRegExp is null or subjectNameOutRegExp = '', '^\b\B$', subjectNameOutRegExp)
     and st.name rlike if(studyNameInRegExp is null or studyNameInRegExp = '', '.*', studyNameInRegExp)
     and st.name not rlike if(studyNameOutRegExp is null or studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
