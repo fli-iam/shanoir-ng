@@ -280,7 +280,9 @@ public class StudyApiController implements StudyApi {
 			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip")) || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
 				Study stud = studyService.findById(studyId);
-				stud.getProtocolFilePaths().remove(file.getName());
+				if (stud.getProtocolFilePaths() != null) {
+					stud.getProtocolFilePaths().remove(file.getName());
+				}
 				studyService.update(stud);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
