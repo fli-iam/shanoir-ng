@@ -37,8 +37,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-
-
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 @Component({
     selector: 'study-detail',
@@ -63,7 +62,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-
+    protected hasDownloadRight: boolean;
     protected selectedDatasetIds: number[];
 
     centerOptions: Option<IdName>[];
@@ -78,7 +77,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private centerService: CenterService, 
             private studyService: StudyService, 
             private subjectService: SubjectService,
-            private userService: UserService) {
+            private userService: UserService,  
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'study');
     }
@@ -87,6 +87,9 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
+        this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
+            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+        })
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -499,5 +502,9 @@ export class StudyComponent extends EntityComponent<Study> {
     onStudyNodeInit(studyNode: StudyNode) {
         studyNode.open = true;
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
+    }
+   
+    public hasDownloadRights(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 }
