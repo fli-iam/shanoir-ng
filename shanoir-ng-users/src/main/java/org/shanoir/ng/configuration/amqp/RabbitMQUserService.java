@@ -14,13 +14,6 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -50,8 +43,6 @@ public class RabbitMQUserService {
 
 	@Autowired
 	EmailService emailService;
-
-	Map<Long, List<String>> series = new HashMap<>();
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
@@ -93,20 +84,7 @@ public class RabbitMQUserService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			// Do nothing if it's not a success
 			if (event.getStatus() == org.shanoir.ng.shared.event.ShanoirEvent.SUCCESS) {
-				// Send mail and clean series
-				emailService.notifyStudyManagerDataImported(event, series.get(event.getId()));
-				series.remove(event.getId());
-			} else if (event.getStatus() == org.shanoir.ng.shared.event.ShanoirEvent.IN_PROGRESS) {
-				// Get serie description
-				if (series.get(event.getId()) == null) {
-					series.put(event.getId(), new ArrayList<>());
-				}
-				// "Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId()
-				Pattern pat = Pattern.compile("Treating serie (.*) for examination \\d+");
-				Matcher mat = pat.matcher(event.getMessage());
-				if (mat.matches()) {
-					series.get(event.getId()).add(mat.group(1));
-				}
+				emailService.notifyStudyManagerDataImported(event);
 			}
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
