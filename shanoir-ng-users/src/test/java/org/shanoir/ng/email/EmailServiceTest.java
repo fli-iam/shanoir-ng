@@ -16,6 +16,7 @@ package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyLong;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -148,6 +149,9 @@ public class EmailServiceTest {
 	public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
 		// GIVEN a list of administrators to contact
 		ShanoirEvent event = new ShanoirEvent();
+		User value = new User();
+		value.setUsername("username");
+		Mockito.when(userRepositoryMock.findOne(anyLong())).thenReturn(value);
 
 		event.setMessage("StudyName(12)"
 		+": Successfully created datasets for subject SubjectName"
@@ -164,10 +168,10 @@ public class EmailServiceTest {
 		given(userRepositoryMock.findOne(13L)).willReturn(admin );
 
 		// WHEN we receive an event with elements stating that data was imported successfuly
-		emailService.notifyStudyManagerDataImported(event);
+		emailService.notifyStudyManagerDataImported(event, null);
 		
 		// THEN an email is sent to the administrators
-		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "Some data has been imported to study");
+		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
 	}
 
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
