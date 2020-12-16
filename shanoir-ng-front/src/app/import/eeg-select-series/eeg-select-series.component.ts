@@ -17,7 +17,7 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
-import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
+import { EegDataset, EegDatasetDTO } from '../../datasets/dataset/eeg/dataset.eeg.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
@@ -31,9 +31,9 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class EegSelectSeriesComponent {
 
     @ViewChild('selectAll') tree: TreeNodeComponent;
-    protected datasets: EegDataset[];
-    protected selectedDatasets: EegDataset[] = [];
-    protected datasetDetail: EegDataset;
+    protected datasets: EegDatasetDTO[];
+    protected selectedDatasets: EegDatasetDTO[] = [];
+    protected datasetDetail: EegDatasetDTO;
 
     constructor(
             private importService: ImportService,
@@ -52,7 +52,7 @@ export class EegSelectSeriesComponent {
         this.selectedDatasets = [];
     }
 
-    changeDataset(datasetToMove: EegDataset) {
+    changeDataset(datasetToMove: EegDatasetDTO) {
         let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
@@ -69,7 +69,7 @@ export class EegSelectSeriesComponent {
         }
     }
 
-    private showDatasetDetail(datasetToDetail: EegDataset): void {
+    private showDatasetDetail(datasetToDetail: EegDatasetDTO): void {
         this.datasetDetail = datasetToDetail
     }
 

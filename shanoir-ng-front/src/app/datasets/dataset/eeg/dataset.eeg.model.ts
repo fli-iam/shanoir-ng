@@ -13,6 +13,7 @@
  */
 
 import { Dataset } from "../../shared/dataset.model";
+import { DatasetDTO } from "../../shared/dataset.dto";
 import { allOfEnum } from '../../../utils/app.utils';
 
 export class EegDataset extends Dataset {
@@ -24,6 +25,20 @@ export class EegDataset extends Dataset {
     events: Event[];
     coordinatesSystem: string;
 }
+
+export class EegDatasetDTO extends DatasetDTO {
+    samplingFrequency: number;
+    channelCount: number;
+    name: string;
+    files: string[];
+    channels: Channel[];
+    events: Event[];
+    coordinatesSystem: string;
+    
+    stringify() {
+        
+    }
+  }
 
 /** Represents a brainvision EEG channel */
 export class Channel {

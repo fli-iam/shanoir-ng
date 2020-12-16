@@ -397,18 +397,18 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			for (Dataset dataset : datasets) {
 				// Create a new folder for every dataset
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId() + "_" + dataset.getName());
 				datasetFile.mkdir();
- 
 				List<URL> pathURLs = new ArrayList<>();
-				if (DCM.equals(format)) {
+
+				if (dataset instanceof EegDataset) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
+				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
-				}  else if (EEG.equals(format)) {
-					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
 				} else {
 					throw new RestServiceException(
