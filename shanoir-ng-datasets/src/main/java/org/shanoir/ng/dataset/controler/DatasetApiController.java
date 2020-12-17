@@ -397,7 +397,7 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			for (Dataset dataset : datasets) {
 				// Create a new folder for every dataset
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId() + "_" + dataset.getName());
+				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
 				datasetFile.mkdir();
 				List<URL> pathURLs = new ArrayList<>();
 
