@@ -93,18 +93,14 @@ export class SubjectNodeComponent implements OnChanges {
         return new ExaminationNode(
             exam.id,
             this.examPipe.transform(exam),
-            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)).sort(
-                    function(a, b) {
-                        return a.sortingIndex - b.sortingIndex;
-                    }) : [],
-                    []
+            exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
+            []
         );
     }
     
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
-            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );
