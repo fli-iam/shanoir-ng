@@ -37,8 +37,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-
-
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 @Component({
     selector: 'study-detail',
@@ -63,7 +62,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-
+    protected hasDownloadRight: boolean;
     protected selectedDatasetIds: number[];
 
     centerOptions: Option<IdName>[];
@@ -78,7 +77,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private centerService: CenterService, 
             private studyService: StudyService, 
             private subjectService: SubjectService,
-            private userService: UserService) {
+            private userService: UserService,  
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'study');
     }
@@ -87,6 +87,9 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) { this.entity = study; }
 
     initView(): Promise<void> {
+        this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
+            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+        })
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
 
@@ -107,7 +110,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
             if (study.studyUserList) {
                 study.studyUserList.forEach(studyUser => {
-                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.user.id);
+                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.userId);
                     if (option) option.disabled = true;
                 });
             }
@@ -312,7 +315,7 @@ export class StudyComponent extends EntityComponent<Study> {
     disableEdit(studyUser: StudyUser): boolean {
         return !this.freshlyAddedMe && studyUser.userId == KeycloakService.auth.userId;
     }
-        
+
     private createColumnDefs() {
         this.columnDefs = [
             { headerName: 'Username', field: 'userName' },
@@ -323,18 +326,18 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: true, width: '54px', suppressSorting: true, 
+            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: true, width: '54px', suppressSorting: true, 
+            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
+            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
             { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
-            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser }
+            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)}
         ];
     }
 
@@ -499,5 +502,9 @@ export class StudyComponent extends EntityComponent<Study> {
     onStudyNodeInit(studyNode: StudyNode) {
         studyNode.open = true;
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
+    }
+   
+    public hasDownloadRights(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 }
