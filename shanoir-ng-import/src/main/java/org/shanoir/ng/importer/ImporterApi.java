@@ -16,8 +16,6 @@ package org.shanoir.ng.importer;
 
 import java.io.IOException;
 
-import javax.websocket.Decoder.BinaryStream;
-
 import java.io.FileNotFoundException;
 
 import org.shanoir.ng.exchange.model.Exchange;

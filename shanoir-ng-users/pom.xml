@@ -32,8 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<description>Users management project for Shanoir NG</description>
 
 	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
 		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/users</docker.image.name>
         <powermock.version>1.7.1</powermock.version>
