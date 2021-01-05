@@ -24,6 +24,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -39,6 +40,8 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     uploadUrl: string;
     fileToUpload: File = null;
 
+    public isModelUnique = true;
+
     constructor(
         private route: ActivatedRoute,
         private modelService: PathologyModelService, 
@@ -51,6 +54,10 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     get model(): PathologyModel { return this.entity; }
     set model(model: PathologyModel) { this.entity = model; }
+
+    getService(): EntityService<PathologyModel> {
+        return this.modelService;
+    }
 
     initView(): Promise<void> {
         return this.modelService.get(this.id).then(model => {

@@ -21,6 +21,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -31,7 +32,7 @@ import { SubjectService } from '../shared/subject.service';
 
 export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(
@@ -41,6 +42,10 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
                 
         super('subject');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+    }
+    
+    getService(): EntityService<Subject> {
+        return this.subjectService;
     }
 
     getEntities(): Promise<Subject[]> {

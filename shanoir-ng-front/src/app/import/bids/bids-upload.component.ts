@@ -30,13 +30,13 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class BidsUploadComponent {
     
-    protected archiveStatus: Status = 'none';
+    public archiveStatus: Status = 'none';
     protected extensionError: boolean;
     private modality: string;
-    protected errorMessage: string;
+    public errorMessage: string;
 
     constructor(
-            private importService: ImportService, 
+            private importService: ImportService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
@@ -49,7 +49,7 @@ export class BidsUploadComponent {
         breadcrumbsService.currentStep.importMode = 'BIDS';
     }
 
-    private uploadArchive(fileEvent: any): void {
+    public uploadArchive(fileEvent: any): void {
         if (fileEvent.target.files.length > 0) {
             this.setArchiveStatus('uploading');
             this.uploadToServer(fileEvent.target.files);
