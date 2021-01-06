@@ -17,7 +17,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { ModesAware } from '../../../shared/mode/mode.decorator';
@@ -36,7 +35,7 @@ import { TherapyService } from '../shared/therapy.service';
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
     TherapyType = TherapyType;
-    public isTherapyUnique: Boolean = true;
+    private isTherapyUnique: Boolean = true;
     
     constructor(
         private route: ActivatedRoute,
@@ -49,9 +48,6 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
     get therapy(): Therapy { return this.entity; }
     set therapy(therapy: Therapy) { this.entity = therapy; }
 
-    getService(): EntityService<Therapy> {
-        return this.therapyService;
-    }
 
     initView(): Promise<void> {
         return this.therapyService.get(this.id).then(therapy => {

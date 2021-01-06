@@ -26,7 +26,6 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -55,9 +54,6 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     get bloodGasData(): BloodGasData { return this.entity; }
     set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
     
-    getService(): EntityService<BloodGasData> {
-        return this.extradatasService;
-    }
    
     initView(): Promise<void> {
         this.entity = new BloodGasData();
@@ -95,7 +91,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
 
-    public save(): Promise<void> {
+    protected save(): Promise<void> {
         this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).subscribe((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
             this.msgBoxService.log('info', 'The new preclinical-bloodgasdata has been successfully saved under the number ' + bloodGasData.id);

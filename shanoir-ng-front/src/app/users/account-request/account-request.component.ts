@@ -16,6 +16,7 @@ import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
@@ -28,16 +29,16 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 export class AccountRequestComponent {
     
-    public user: User;
-    public form: FormGroup;
+    private user: User;
+    private form: FormGroup;
 
-    public requestSent: boolean = false;
-    public errorOnRequest: boolean = false;
+    private requestSent: boolean = false;
+    private errorOnRequest: boolean = false;
 
     
     constructor(
             private fb: FormBuilder, 
-            public userService: UserService,
+            private userService: UserService,
             private location: Location) {}
 
     ngOnInit(): void {

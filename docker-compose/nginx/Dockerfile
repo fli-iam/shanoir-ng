@@ -12,7 +12,7 @@
 
 FROM nginx
 
-COPY nginx.conf http.conf https.conf shanoir.template.conf shanoir.template.dev.conf shanoir.template.prod.conf /etc/nginx/
+COPY nginx.conf http.conf https.conf shanoir.template.conf /etc/nginx/
 COPY entrypoint entrypoint_common /bin/
 
 COPY webapp/ /etc/nginx/html/

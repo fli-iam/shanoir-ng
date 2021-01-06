@@ -11,25 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-// import { Injectable } from '@angular/core';
-// import { Subject } from 'rxjs/Subject';
+import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs/Subject';
 
 
-// @Injectable()
-// export class AccountEventsService extends Subject<any> {
+@Injectable()
+export class AccountEventsService extends Subject<any> {
     
-//     loginSuccess(account:any) {
-//         if(account) {
-//             account.authenticated = true;
-//             super.next(account);
-//         }
-//     }
+    loginSuccess(account:any) {
+        if(account) {
+            account.authenticated = true;
+            super.next(account);
+        }
+    }
     
-//     logout(account:any) {
-//         if(account) {
-//             account.authenticated = false;
-//             super.next(account);
-//         }
-//     }
+    logout(account:any) {
+        if(account) {
+            account.authenticated = false;
+            super.next(account);
+        }
+    }
 
-// }
+}

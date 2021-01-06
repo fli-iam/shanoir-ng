@@ -16,9 +16,11 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ExaminationService } from './examination.service';
+import { ExaminationDTO } from './examination.dto';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { InstrumentBasedAssessment } from '../instrument-assessment/instrument.model';
-
+import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 
 export class Examination extends Entity {
     id: number;
@@ -34,5 +36,11 @@ export class Examination extends Entity {
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
     preclinical: boolean;
-    hasStudyCenterData: boolean = false; 
+    hasStudyCenterData: boolean = false;  
+    service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new ExaminationDTO(this), this.replacer);
+    }
 }

@@ -26,7 +26,7 @@ export class PagerComponent implements OnChanges {
     @Input() nbPages: number;
     @Output() pageChange: EventEmitter<number> = new EventEmitter<number>();
 
-    pagerList: number [] = [];
+    private pagerList: number [] = [];
 
 
     constructor() {
@@ -74,7 +74,7 @@ export class PagerComponent implements OnChanges {
     }
 
 
-    goToPage(page: number) {
+    private goToPage(page: number) {
         this.pageChange.emit(page);
     }
 

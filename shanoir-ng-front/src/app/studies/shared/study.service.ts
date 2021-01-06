@@ -11,35 +11,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
-import { BidsElement } from '../../bids/model/bidsElement.model';
+import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
+import { Study } from './study.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from './study-user-right.enum';
-import { Study, StudyDTO } from './study.model';
-
+import { Observable } from 'rxjs/Observable';
+import { BidsElement } from '../../bids/model/bidsElement.model';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
-        super(http)
+    constructor(private keycloakService: KeycloakService) {
+        super();
     }
 
     getEntityInstance() { return new Study(); }
     
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-        .toPromise()
-        .then(entities => entities.map((entity) => Object.assign(new Study(), entity)));
+        .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
+        .toPromise();
     }
 
     getStudiesNames(): Promise<IdName[]> {
@@ -125,16 +124,5 @@ export class StudyService extends EntityService<Study> {
         if (!studyId) throw Error('study id is required');
         return this.http.get<BidsElement>(AppUtils.BACKEND_API_STUDY_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
             .toPromise();
-    }
-
-    protected getIgnoreList(): string[] {
-        return super.getIgnoreList().concat(['completeMembers']);
-    }
-
-    public stringify(entity: Study) {
-        let dto = new StudyDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
     }
 }

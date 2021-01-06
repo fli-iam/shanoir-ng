@@ -12,10 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { Coil } from '../../coils/shared/coil.model';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
+import { StudyCardDTO } from './study-card.dto'
+import { ServiceLocator } from '../../utils/locator.service';
+import { StudyCardService } from './study-card.service';
+import { Coil } from '../../coils/shared/coil.model';
 
 
 export class StudyCard extends Entity {
@@ -26,6 +29,13 @@ export class StudyCard extends Entity {
     acquisitionEquipment: AcquisitionEquipment;
     niftiConverter: NiftiConverter;
     rules: StudyCardRule[] = [];
+
+    service: StudyCardService = ServiceLocator.injector.get(StudyCardService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new StudyCardDTO(this), this.replacer);
+    }
 }
 
 

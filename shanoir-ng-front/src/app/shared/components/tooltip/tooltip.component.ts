@@ -23,11 +23,11 @@ import { Component } from '@angular/core';
 
 export class TooltipComponent {
 
-    opened: boolean = false;
+    private opened: boolean = false;
     private opening: boolean = false;
     private closing: boolean = false;
 
-    onOver() {
+    private onOver() {
         if (!this.opening) {
             this.closing = false;
             this.opening = true;
@@ -38,7 +38,7 @@ export class TooltipComponent {
         }
     }
 
-    onLeave() {
+    private onLeave() {
         if (!this.closing) {
             this.closing = true;
             this.opening = false;
@@ -49,7 +49,7 @@ export class TooltipComponent {
         }
     }
 
-    onClick() {
+    private onClick() {
         this.opened = !this.opened;
         this.opening = false;
         this.closing = false;

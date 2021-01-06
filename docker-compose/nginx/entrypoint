@@ -11,12 +11,6 @@ set -e
 		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
 	fi
 
-	if [ -z "$SHANOIR_DEV" ] ; then
-		cat /etc/nginx/shanoir.template.prod.conf
-	else
-		cat /etc/nginx/shanoir.template.dev.conf
-	fi
-
 	optional SHANOIR_PREFIX
 	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
 ) >/etc/nginx/shanoir.conf

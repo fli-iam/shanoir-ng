@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examinationAnesthetic?.anesthetic?.name}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examinationAnesthetic.anesthetic" (ngModelChange)="eaChange()">
+						<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examinationAnesthetic.anesthetic" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
 						</select>
 						<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{enumUtils.getEnumValue(intervals,examinationAnesthetic?.injection_interval)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examinationAnesthetic.injection_interval" (ngModelChange)="eaChange()">
+						<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examinationAnesthetic.injection_interval" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
 						</select>
 					</ng-template>
@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{enumUtils.getEnumValue(sites,examinationAnesthetic?.injection_site)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examinationAnesthetic.injection_site" (ngModelChange)="eaChange()">
+						<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examinationAnesthetic.injection_site" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
 						</select>
 					</ng-template>
@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{enumUtils.getEnumValue(injtypes,examinationAnesthetic?.injection_type)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionType" formControlName="injectionType" [(ngModel)]="examinationAnesthetic.injection_type" (ngModelChange)="eaChange()">
+						<select id="injectionType" formControlName="injectionType" [(ngModel)]="examinationAnesthetic.injection_type" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
 						</select>
 					</ng-template>
@@ -93,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examinationAnesthetic?.dose}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<input type="text" id="dose" formControlName="dose" [(ngModel)]="examinationAnesthetic.dose" (ngModelChange)="eaChange()"/>
+						<input type="text" id="dose" formControlName="dose" [(ngModel)]="examinationAnesthetic.dose" (ngModelChange)="eaChange($event)"/>
 					</ng-template>
 				</span> 
 			</li>
@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examinationAnesthetic?.dose_unit?.value}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examinationAnesthetic.dose_unit" (ngModelChange)="eaChange()">
+						<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examinationAnesthetic.dose_unit" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 						</select>
 					</ng-template>
@@ -118,7 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examinationAnesthetic?.startDate}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examinationAnesthetic.startDate" (ngModelChange)="eaChange()" 
+						<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examinationAnesthetic.startDate" (ngModelChange)="eaChange($event)" 
 							(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
 						</my-date-picker>
 					</ng-template>
@@ -132,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examinationAnesthetic?.endDate}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examinationAnesthetic.endDate"  (ngModelChange)="eaChange()"
+						<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examinationAnesthetic.endDate"  (ngModelChange)="eaChange($event)"
 							(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
 						</my-date-picker>
 					</ng-template>

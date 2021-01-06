@@ -12,14 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, Renderer, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 
 import { menuAnimDur, menuSlideRight } from '../../animations/animations';
 import { GlobalService } from '../../services/global.service';
 import { MenuItemComponent } from './menu-item/menu-item.component';
 
-// @dynamic
 @Component({
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
@@ -33,8 +32,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
     @Input() link: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
-
-    @ViewChild('container', { static: false }) container: ElementRef;
+    @ViewChild('container') container: ElementRef;
 
     @HostBinding('class.opened') opened: boolean = false;
     @Input() openInput: boolean = false;
@@ -53,7 +51,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
             }) 
         })
     }
-    
+
     ngOnDestroy(): void {
         this.globalClickSubscription.unsubscribe();
     }

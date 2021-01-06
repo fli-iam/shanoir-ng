@@ -31,9 +31,9 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class EegSelectSeriesComponent {
 
     @ViewChild('selectAll') tree: TreeNodeComponent;
-    public datasets: EegDataset[];
+    protected datasets: EegDataset[];
     protected selectedDatasets: EegDataset[] = [];
-    public datasetDetail: EegDataset;
+    protected datasetDetail: EegDataset;
 
     constructor(
             private importService: ImportService,
@@ -52,7 +52,7 @@ export class EegSelectSeriesComponent {
         this.selectedDatasets = [];
     }
 
-    changeDataset(datasetToMove?: EegDataset) {
+    changeDataset(datasetToMove: EegDataset) {
         let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
@@ -69,7 +69,7 @@ export class EegSelectSeriesComponent {
         }
     }
 
-    public showDatasetDetail(datasetToDetail: EegDataset): void {
+    private showDatasetDetail(datasetToDetail: EegDataset): void {
         this.datasetDetail = datasetToDetail
     }
 
@@ -77,7 +77,7 @@ export class EegSelectSeriesComponent {
         return (this.selectedDatasets && this.selectedDatasets.length > 0);
     }
 
-    public next() {
+    private next() {
         this.importDataService.eegImportJob.datasets = this.selectedDatasets;
         this.router.navigate(['imports/eegcontext']);
     }

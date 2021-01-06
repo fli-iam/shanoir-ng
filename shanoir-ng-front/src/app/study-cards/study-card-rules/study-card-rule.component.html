@@ -57,6 +57,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</action>
 	</div>
 	<div *ngIf="mode != 'view'">
-		<span class="add" (click)="addNewAction()" [class.error]="rule.assignments.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
+		<span *ngIf="mode != 'view'" class="add" (click)="addNewAction()" [class.error]="rule.assignments.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
 	</div>
 </div>

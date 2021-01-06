@@ -23,18 +23,18 @@ import { ImagesUrlUtil } from '../../utils/images-url.util';
 })
 export class UploaderComponent {
 
-    @ViewChild('input', { static: false }) private fileInput: ElementRef;
+    @ViewChild('input') private fileInput: ElementRef;
     @Output() fileChange = new EventEmitter<any>();
     @Input() loading: boolean = false;
     @Input() error: boolean = false;
-    readonly ImagesUrlUtil = ImagesUrlUtil;
-    filename: string;
+    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    private filename: string;
     
-    click() {
+    private click() {
         this.fileInput.nativeElement.click();
     }
 
-    changeFile(file: any) {
+    private changeFile(file: any) {
         this.filename = undefined;
         if (file && file.target && file.target.files && file.target.files[0]) 
             this.filename = file.target.files[0].name;

@@ -20,7 +20,6 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'center-detail',
@@ -30,9 +29,9 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class CenterComponent extends EntityComponent<Center> {
 
-    isNameUniqueError: boolean = false;
-    phoneNumberPatternError: boolean = false;
-    openAcqEq: boolean = true;
+    private isNameUniqueError: boolean = false;
+    private phoneNumberPatternError: boolean = false;
+    private openAcqEq: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -43,10 +42,6 @@ export class CenterComponent extends EntityComponent<Center> {
 
     get center(): Center { return this.entity; }
     set center(center: Center) { this.entity = center; }
-
-    getService(): EntityService<Center> {
-        return this.centerService;
-    }
 
     initView(): Promise<void> {
         return this.centerService.get(this.id).then(center => {
@@ -77,7 +72,7 @@ export class CenterComponent extends EntityComponent<Center> {
         });
     }
 
-    goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
+    private goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
         this.router.navigate(['/acquisition-equipment/details/' + acqE.id]);
     }
 

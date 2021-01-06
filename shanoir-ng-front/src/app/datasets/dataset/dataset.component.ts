@@ -21,7 +21,6 @@ import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -32,13 +31,13 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
-    papayaParams: any;
+    private papayaParams: any;
     private blob: Blob;
     private filename: string;
-    hasDownloadRight: boolean = false;
+    private hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
-    public downloading: boolean = false;
-    public papayaLoaded: boolean = false;
+    protected downloading: boolean = false;
+    protected papayaLoaded: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
@@ -52,10 +51,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
     
-    getService(): EntityService<Dataset> {
-        return this.datasetService;
-    }
-
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
             if (this.keycloakService.isUserAdmin()) {
@@ -96,14 +91,14 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         }
     }
     
-    download(format: string) {
+    private download(format: string) {
         this.downloading = true;
         this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
     }
 
-    public loadDicomInMemory() {
+    private loadDicomInMemory() {
         this.papayaLoaded = true;
-        this.datasetService.downloadToBlob(this.id, 'nii').then(blobReponse => {
+        this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
                 this.dicomArchiveService.importFromZip(blobReponse.body)
                     .then(response => {

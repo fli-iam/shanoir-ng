@@ -27,8 +27,9 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { resolve } from 'path';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -57,7 +58,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
         private anestheticService: AnestheticService,
-        public enumUtils: EnumUtils) 
+        private enumUtils: EnumUtils) 
     {
         super(route, 'preclinical-examination-anesthetics');
     }
@@ -65,9 +66,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
     set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
-    getService(): EntityService<ExaminationAnesthetic> {
-        return this.examAnestheticService;
-    }    
+    
 
     initView(): Promise<void> {
         this.getEnums();
@@ -187,7 +186,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.router.navigate(['/preclinical-anesthetic/create']);
     }
 
-    public save(): Promise<void> {
+    protected save(): Promise<void> {
         return new  Promise<void>(resolve => {
             if (this.examinationAnesthetic.id){
                 this.updateExaminationAnesthetic().then(() => {
@@ -212,7 +211,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             return Promise.resolve(); 
         }
         Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic))
-        .then(() => Promise.resolve());
+        .then(() =>resolve());
     }
 
     updateExaminationAnesthetic(): Promise<void> {

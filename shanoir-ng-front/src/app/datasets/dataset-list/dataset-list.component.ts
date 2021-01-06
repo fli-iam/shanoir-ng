@@ -24,7 +24,6 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-list',
@@ -35,7 +34,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class DatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
 
     constructor(
             private datasetService: DatasetService,
@@ -45,10 +44,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         super('dataset');
         this.fetchStudies();
         this.fetchSubjects();
-    }
-
-    getService(): EntityService<Dataset> {
-        return this.datasetService;
     }
     
     getPage(pageable: Pageable): Promise<Page<Dataset>> {

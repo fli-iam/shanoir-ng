@@ -16,9 +16,8 @@ import { EntityListComponent } from "./entity-list.component.abstract";
 import { Entity } from "./entity.abstract";
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
-import { OnInit, Directive } from "@angular/core";
+import { OnInit } from "@angular/core";
 
-@Directive()
 export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
     private entitiesPromise: Promise<void>;

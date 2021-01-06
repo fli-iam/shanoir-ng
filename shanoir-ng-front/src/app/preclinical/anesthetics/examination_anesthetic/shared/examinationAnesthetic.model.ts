@@ -18,6 +18,8 @@ import { InjectionType } from "../../../shared/enum/injectionType";
 import { InjectionInterval } from "../../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../../shared/enum/injectionSite";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { ExaminationAnestheticService } from "./examinationAnesthetic.service";
+import { ServiceLocator } from "../../../../utils/locator.service";
 
 export class ExaminationAnesthetic extends Entity {
   id: number;
@@ -31,5 +33,8 @@ export class ExaminationAnesthetic extends Entity {
   injection_type: InjectionType;
   startDate: Date;
   endDate : Date;
+
+  service: ExaminationAnestheticService = ServiceLocator.injector.get(ExaminationAnestheticService);
+
 }
 

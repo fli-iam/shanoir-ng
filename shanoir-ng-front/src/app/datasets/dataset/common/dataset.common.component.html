@@ -82,11 +82,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">
 				<ng-template *ngIf="mode == 'view'">{{dataset.processing}}</ng-template>
 			</span>
-		</li> -->
-		<!-- <li>
+		</li>
+		<li>
 			<label i18n="Dataset detail|Dataset referenced for superimposition@@datasetDetailReferencedForSuperimposition">Can be superimposed with</label>
 			<span class="right-col">
-				<ng-template *ngIf="mode=='view'">{{dataset.referencedDatasetForSuperimposition}}</ng-template>
+				<ng-template *ngIf="mode=='view'">{{dataset.datasetReferencedForSuperimposition}}</ng-template>
 			</span>
 		</li> -->
 		
@@ -170,7 +170,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ng-template ngSwitchDefault>
 					<select-box 
 							[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType"
-							(ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event" 
+							(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event" 
 							[ngModelOptions]="{standalone: true}" 
 							[options]="processedDatasetTypeOptions">
 					</select-box>

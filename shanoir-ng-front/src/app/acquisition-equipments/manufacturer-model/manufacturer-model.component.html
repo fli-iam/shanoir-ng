@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{manufModel.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name"/>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name" (change)="isNameUniqueError=false"/>
 								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>

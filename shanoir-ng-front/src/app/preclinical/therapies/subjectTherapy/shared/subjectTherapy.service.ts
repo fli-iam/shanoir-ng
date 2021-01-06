@@ -18,46 +18,41 @@ import { SubjectTherapy } from './subjectTherapy.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
-    
     getEntityInstance() { return new SubjectTherapy(); }
 
     getSubjectTherapies(preclinicalSubject: PreclinicalSubject): Promise<SubjectTherapy[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectTherapy[]>(url)
-            .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))    
+            .toPromise();
     }
     
     getSubjectTherapy(preclinicalSubject: PreclinicalSubject, tid: string): Promise<SubjectTherapy>{
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
             return this.http.get<SubjectTherapy>(url)
-                .toPromise()
-                .then((entity) => this.toRealObject(entity));
+                .map((entity) => this.toRealObject(entity))        
+                .toPromise();
     }
 
     updateSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<SubjectTherapy> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${subjectTherapy.id}`;
         return this.http
-            .put<SubjectTherapy>(url, this.stringify(subjectTherapy))
-            .toPromise()
-            .then((entity) => entity? this.toRealObject(entity) : entity);
+            .put<SubjectTherapy>(url, subjectTherapy.stringify())
+            .map((entity) => entity? this.toRealObject(entity) : entity)
+            .toPromise();
     }
 
     createSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<SubjectTherapy> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}`;
         return this.http
             .post<SubjectTherapy>(url, JSON.stringify(subjectTherapy))
-            .toPromise()
-            .then((entity) => this.toRealObject(entity));
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
     }
     
     deleteSubjectTherapy(preclinicalSubject: PreclinicalSubject, subjectTherapy: SubjectTherapy): Promise<void> {
@@ -69,14 +64,14 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     deleteAllTherapiesForAnimalSubject(animalSubjectId: number): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubjectId}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.delete(url)
-            .toPromise();
+            .map(res => res).toPromise();
     }
 
      getAllSubjectForTherapy(tid: number): Promise<SubjectTherapy[]> {
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
     	return this.http.get<SubjectTherapy[]>(url)
-            .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))            
+            .toPromise();
     }
 
 }

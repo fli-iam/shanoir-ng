@@ -27,13 +27,5 @@ export class MsgBoxComponent {
 
     constructor(private msgboxService: MsgBoxService) {
         
-    }
-
-    isOpened() {
-      return this.msgboxService.isOpened();
-    }
-
-    getMsg() {
-      return this.msgboxService.getMsg();
-    }
+    }    
 }

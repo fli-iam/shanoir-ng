@@ -14,7 +14,7 @@
 
 import { Injectable, ElementRef } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { fromEvent } from 'rxjs';
+
 
 @Injectable()
 export class GlobalService {
@@ -24,7 +24,7 @@ export class GlobalService {
     constructor() { }
 
     registerGlobalClick(rootElement: ElementRef) {
-        this.onGlobalClick = fromEvent(rootElement.nativeElement, 'click');
+        this.onGlobalClick = Observable.fromEvent(rootElement.nativeElement, 'click');
     }
     
 }

@@ -24,7 +24,7 @@ import { WindowService } from './shared/services/window.service';
 
 
 @Component({
-    selector: 'app-root',
+    selector: 'shanoir-ng-app',
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
     animations: [ slideRight, slideMarginLeft, parent ]
@@ -32,7 +32,7 @@ import { WindowService } from './shared/services/window.service';
 
 export class AppComponent {
 
-    @HostBinding('@parent') public menuOpen: boolean = true;
+    @HostBinding('@parent') private menuOpen: boolean = true; 
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -55,7 +55,6 @@ export class AppComponent {
         //     if (storedBC.savedStep)
         //         this.breadcrumbsService.savedStep = Step.parse(storedBC.savedStep);
         // }
-        
     }
 
     ngOnInit() {

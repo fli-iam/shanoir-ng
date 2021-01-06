@@ -31,11 +31,13 @@ export class ImportBrukerService {
         formData.append('files', fileToUpload, fileToUpload.name);
         const options = {responseType: 'text' as 'text'};
         return this.http
-            .post(endpoint, formData, options);
+            .post(endpoint, formData, options)
+            .map(response => response);
     }
     
     importDicomFile(filePath: String): Observable<ImportJob> {
-        return this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath);
+        return this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath)
+            .map(response => response);
     }
     
 }

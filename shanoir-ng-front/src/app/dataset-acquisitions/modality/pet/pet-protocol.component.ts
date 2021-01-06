@@ -29,7 +29,7 @@ import { PetProtocol } from './pet-protocol.model';
 })
 export class PetProtocolComponent implements ControlValueAccessor {
     
-    public protocol: PetProtocol;
+    private protocol: PetProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
     protected propagateChange = (_: any) => {};

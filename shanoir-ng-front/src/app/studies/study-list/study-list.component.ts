@@ -19,7 +19,6 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -30,16 +29,12 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
     
     constructor(
         private studyService: StudyService) {
             
         super('study');
-    }
-    
-    getService(): EntityService<Study> {
-        return this.studyService;
     }
 
     getEntities(): Promise<Study[]> {

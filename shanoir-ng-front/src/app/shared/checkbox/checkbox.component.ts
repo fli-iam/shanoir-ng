@@ -15,6 +15,7 @@
 import { Component, Input, Output, SimpleChanges, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
+
 @Component({
     selector: 'checkbox',
     templateUrl: 'checkbox.component.html',
@@ -26,24 +27,25 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
           multi: true,
         }]   
 })
+
 export class CheckboxComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') model: boolean | 'indeterminate' = false;
     @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
-    @Input() @HostBinding('class.disabled') disabled: boolean = false;
+    @Input() @Input() @HostBinding('class.disabled') disabled: boolean = false;
 
     constructor() {}
 
-    @HostListener('click', []) 
-    onClick() {
+    @HostListener('click', ['$event']) 
+    private onClick() {
         if (this.disabled) return;
         this.toogle();
     }
 
     @HostListener('keydown', ['$event']) 
-    onKeyPress(event: any) {
+    private onKeyPress(event: any) {
         if (this.disabled) return;
         if (' ' == event.key) {
             this.toogle();
@@ -74,13 +76,13 @@ export class CheckboxComponent implements ControlValueAccessor {
         this.onTouchedCallback = fn;
     }
 
-    @HostListener('focusout', []) 
-    onFocusOut() {
+    @HostListener('focusout', ['$event']) 
+    private onFocusOut() {
         this.onTouchedCallback();
     }
 
     @HostBinding('attr.tabindex')
-    get tabindex(): number {
+    private get tabindex(): number {
         return this.disabled ? undefined : 0;
     } 
 }

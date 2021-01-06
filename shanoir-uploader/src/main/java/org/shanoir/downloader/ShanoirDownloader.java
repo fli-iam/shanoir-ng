@@ -1,6 +1,5 @@
 package org.shanoir.downloader;
 
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -307,16 +306,8 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 
 		shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
-		
-		String user = cl.getOptionValue("user");
-		String password = cl.getOptionValue("password");
-		if(password == null) {
-			Console console = System.console();
-			char[] passwordArray = console.readPassword("Enter your Shanoir password: ");
-			password = new String(passwordArray);
-		}
-		String token = shanoirUploaderServiceClientNG.loginWithKeycloakForToken(user, password);
-		
+		String token = shanoirUploaderServiceClientNG.loginWithKeycloakForToken(
+			cl.getOptionValue("user"), cl.getOptionValue("password"));
 		if (token != null) {
 			ShUpOnloadConfig.setTokenString(token);
 		} else {

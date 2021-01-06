@@ -22,9 +22,6 @@ import {  Page, Pageable } from '../../../shared/components/table/pageable.model
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
-import { ServiceLocator } from '../../../utils/locator.service';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
 
@@ -34,7 +31,7 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
     providers: [ExaminationService]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
-    @ViewChild('examTable', { static: false }) table: TableComponent;
+    @ViewChild('examTable') table: TableComponent;
     
     constructor(
         private examinationService:ExaminationService, 
@@ -44,11 +41,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     {
             super('preclinical-examination');
             this.manageDelete();
-    }
-
-    getService(): EntityService<Examination> {
-        return this.examinationService;
-    }
+     }
     
     getPage(pageable: Pageable): Promise<Page<Examination>> {
         return this.examinationService.getPage(pageable, true);
@@ -96,7 +89,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                 'Delete', 'Are you sure you want to delete preclinical-examination n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    this.getService().delete(selectedExamination.id).then(() => {
+                    selectedExamination.delete().then(() => {
                         this.onDelete.next(selectedExamination);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-examination sucessfully deleted');

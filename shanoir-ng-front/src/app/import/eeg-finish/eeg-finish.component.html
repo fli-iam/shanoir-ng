@@ -13,5 +13,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">4. Import the data</div>
-<button [disabled]="importing" (click)="startEegImportJob()">Import now</button>
+<button [disabled]="importing" (click)="startEegImportJob($event)">Import now</button>
 <span class="progress" *ngIf="importing">Importing in progress ...<img class="loader" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH"/></span>

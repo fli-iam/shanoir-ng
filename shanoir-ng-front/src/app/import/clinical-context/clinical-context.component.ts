@@ -49,6 +49,8 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 
+
+
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
@@ -58,23 +60,23 @@ import { ContextData, ImportDataService } from '../shared/import.data-service';
 export class ClinicalContextComponent implements OnDestroy {
     
     patient: PatientDicom;
-    public studyOptions: Option<Study>[] = [];
-    public studycardOptions: Option<StudyCard>[] = [];
-    public centerOptions: Option<Center>[] = [];
+    private studyOptions: Option<Study>[] = [];
+    private studycardOptions: Option<StudyCard>[] = [];
+    private centerOptions: Option<Center>[] = [];
     private allCenters: Center[];
-    public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
-    public subjects: SubjectWithSubjectStudy[] = [];
-    public examinations: SubjectExamination[] = [];
-    public niftiConverters: NiftiConverter[] = [];
-    public study: Study;
-    public studycard: StudyCard;
-    public center: Center;
-    public acquisitionEquipment: AcquisitionEquipment;
-    public subject: SubjectWithSubjectStudy;
-    public examination: SubjectExamination;
-    public niftiConverter: NiftiConverter;
+    private acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
+    private subjects: SubjectWithSubjectStudy[] = [];
+    private examinations: SubjectExamination[] = [];
+    private niftiConverters: NiftiConverter[] = [];
+    private study: Study;
+    private studycard: StudyCard;
+    private center: Center;
+    private acquisitionEquipment: AcquisitionEquipment;
+    private subject: SubjectWithSubjectStudy;
+    private examination: SubjectExamination;
+    private niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
-    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
+    private importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -82,27 +84,26 @@ export class ClinicalContextComponent implements OnDestroy {
         new Option<string>('PHANTOM', 'Phantom')
     ];
     public useStudyCard: boolean = true;
-
-    public scHasCoilToUpdate: boolean;
-    public isAdminOfStudy: boolean[] = [];
-    public scHasDifferentModality: string;
-    public modality: string;
+    protected scHasCoilToUpdate: boolean;
+    protected isAdminOfStudy: boolean[] = [];
+    protected scHasDifferentModality: string;
+    private modality: string;
     openSubjectStudy: boolean = false;
     
     constructor(
-            public studyService: StudyService,
-            public centerService: CenterService,
-            public niftiConverterService: NiftiConverterService,
-            public subjectService: SubjectService,
-            public examinationService: ExaminationService,
+            private studyService: StudyService,
+            private centerService: CenterService,
+            private niftiConverterService: NiftiConverterService,
+            private subjectService: SubjectService,
+            private examinationService: ExaminationService,
             private animalSubjectService: AnimalSubjectService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
             private acqEqPipe: AcquisitionEquipmentPipe,
-            public studycardService: StudyCardService,
-            public studyRightsService: StudyRightsService,
+            private studycardService: StudyCardService,
+            private studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
@@ -232,7 +233,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return center.acquisitionEquipments && center.acquisitionEquipments.find(eq => this.acqEqCompatible(eq)) != undefined;
     }
 
-    public onSelectStudy(): Promise<void> {
+    private onSelectStudy(): Promise<void> {
         let end: Promise<void> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
@@ -287,7 +288,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return end.then(() => this.onContextChange());
     }
 
-    public onSelectStudyCard(): void {
+    private onSelectStudyCard(): void {
         if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
             this.acquisitionEquipment = null;
             let scFound = this.study.studyCenterList.find(sc => {
@@ -319,11 +320,11 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.onSelectStudyCard();
             }
         }
-
-        this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
+        this.importDataService.contextBackup.useStudyCard = this.useStudyCard;;
+        
     }
 
-    public onSelectCenter(): void {
+    private onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
         this.openSubjectStudy = false;
         this.acquisitionEquipmentOptions =  [];
@@ -345,7 +346,7 @@ export class ClinicalContextComponent implements OnDestroy {
         this.onContextChange();
     }
 
-    public onSelectAcquisitonEquipment(): void {
+    private onSelectAcquisitonEquipment(): void {
         this.subject = this.examination = null;
         this.openSubjectStudy = false;
         this.subjects =  [];
@@ -364,7 +365,7 @@ export class ClinicalContextComponent implements OnDestroy {
         this.onContextChange();
     }
 
-    public onSelectSubject(): void {
+    private onSelectSubject(): void {
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
@@ -383,15 +384,15 @@ export class ClinicalContextComponent implements OnDestroy {
         this.onContextChange();
     }
 
-    public onSelectExam(): void {
+    private onSelectExam(): void {
         this.onContextChange();
     }
 
-    public onSelectNifti(): void {
+    private onSelectNifti(): void {
         this.onContextChange();
     }
 
-    public onContextChange() {
+    private onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -403,7 +404,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.subject, this.examination, this.niftiConverter, null);
     }
 
-    public openCreateCenter = () => {
+    private openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
@@ -430,7 +431,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return center;
     }
 
-    public openCreateAcqEqt() {
+    private openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -449,7 +450,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return acqEpt;
     }
 
-    public openCreateSubject = () => {
+    private openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createSubjectRoute: string = this.importMode == 'BRUKER' ? '/preclinical-subject/create' : '/subject/create';
         this.router.navigate([createSubjectRoute]).then(success => {
@@ -512,7 +513,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return names;
     }
     
-    public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
+    private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
         if (!subject) return;
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
         subjectWithSubjectStudy.id = subject.id;
@@ -522,7 +523,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return subjectWithSubjectStudy;
     }
 
-    public openCreateExam = () => {
+    private openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         let createExamRoute: string = this.importMode == 'BRUKER' ? '/preclinical-examination/create' : '/examination/create';
         this.router.navigate([createExamRoute]).then(success => {
@@ -562,32 +563,32 @@ export class ClinicalContextComponent implements OnDestroy {
         return subjectExam;
     }
 
-    public get hasCompatibleCenters(): boolean {
+    private get hasCompatibleCenters(): boolean {
         return this.centerOptions.find(center => center.compatible) != undefined;
     }
 
     
-    public get hasCompatibleEquipments(): boolean {
+    private get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipmentOptions.find(ae => ae.compatible) != undefined;
     }
 
-    public showStudyDetails() {
+    private showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    public showStudyCardDetails() {
+    private showStudyCardDetails() {
         window.open('study-card/details/' + this.studycard.id, '_blank');
     }
 
-    public showCenterDetails() {
+    private showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    public showAcquistionEquipmentDetails() {
+    private showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    public showSubjectDetails() {
+    private showSubjectDetails() {
         if (this.animalSubject.id){
         	window.open('preclinical-subject/details/' + this.animalSubject.id , '_blank');
         }else{
@@ -595,7 +596,7 @@ export class ClinicalContextComponent implements OnDestroy {
         }
     }
 
-    public showExaminationDetails() {
+    private showExaminationDetails() {
         if (this.importMode == 'BRUKER') {
             window.open('preclinical-examination/details/' + this.examination.id , '_blank');
         } else {
@@ -616,7 +617,7 @@ export class ClinicalContextComponent implements OnDestroy {
         );
     }
 
-    public next() {
+    private next() {
         if (this.importMode != 'BRUKER') {
             this.router.navigate(['imports/finish']);
         } else {
@@ -649,7 +650,7 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return false;
     }
-    
+
     protected hasAdminRightOn(study: Study): Promise<boolean> {
         if (!study) return Promise.resolve(false);
         else if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
@@ -659,7 +660,7 @@ export class ClinicalContextComponent implements OnDestroy {
         });
     }
 
-    public editStudyCard(studycard: StudyCard) {
+    protected editStudyCard(studycard: StudyCard) {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
             this.subscribtions.push(

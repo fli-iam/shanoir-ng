@@ -13,7 +13,6 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
@@ -24,11 +23,6 @@ import { ManufacturerModel } from './manufacturer-model.model';
 export class ManufacturerModelService extends EntityService<ManufacturerModel> {
     
     API_URL = AppUtils.BACKEND_API_MANUF_MODEL_URL;
-
-    // Warning: having a protected dependency injection is considered as a bad practice. See https://stackoverflow.com/questions/39038791/inheritance-and-dependency-injection
-    constructor(protected http: HttpClient) {
-        super(http);
-    }
 
     getEntityInstance() { return new ManufacturerModel(); }
 

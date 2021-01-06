@@ -25,9 +25,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
-	<properties>
-	</properties>
-
 	<artifactId>shanoir-ng-ms-common</artifactId>
 	<packaging>jar</packaging>
 

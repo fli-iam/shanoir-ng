@@ -21,7 +21,6 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -30,7 +29,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {
 
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
     private acqEquips: AcquisitionEquipment[];
 
     private createAcqEquip = false;
@@ -45,10 +44,6 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
         super('acquisition-equipment');
     }
 
-    getService(): EntityService<AcquisitionEquipment> {
-        return this.acqEquipService;
-    }
-    
     getOptions() {
         return {
             new: true,

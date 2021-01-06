@@ -17,16 +17,14 @@ import { Injectable } from '@angular/core';
 import { Pathology } from './pathology.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class PathologyService extends EntityService<Pathology> {
          
     API_URL = PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL;
 
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
-
-    getEntityInstance() { return new Pathology(); }
+    getEntityInstance() { return new Pathology(); }   
+           
+    
+    
 }

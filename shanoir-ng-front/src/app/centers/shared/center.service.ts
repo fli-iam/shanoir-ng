@@ -19,16 +19,13 @@ import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { CenterDTO, CenterDTOService } from './center.dto';
 import { Center } from './center.model';
-import { HttpClient } from '@angular/common/http';
+
 
 @Injectable()
 export class CenterService extends EntityService<Center> {
 
     API_URL = AppUtils.BACKEND_API_CENTER_URL;
 
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
     private centerDTOService: CenterDTOService = ServiceLocator.injector.get(CenterDTOService);
 
     getEntityInstance() { return new Center(); }
@@ -51,12 +48,5 @@ export class CenterService extends EntityService<Center> {
     protected mapEntityList = (dtos: CenterDTO[], result?: Center[]): Promise<Center[]> => {
         if (result == undefined) result = [];
         if (dtos) return this.centerDTOService.toEntityList(dtos, result);
-    }
-
-    public stringify(entity: Center) {
-        let dto = new CenterDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
     }
 }
