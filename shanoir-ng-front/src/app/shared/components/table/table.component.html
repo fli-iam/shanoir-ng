@@ -15,12 +15,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
-        <!-- <button (click)="selectAll()" title="select all"> -->
-            <!-- <img [src]="checkAllImageUrl"/> -->
-        <!-- </button> -->
-        <button (click)="unSelectAll()" title="unselect all">
-            <!-- <img [src]="uncheckAllImageUrl"/> -->
-        </button>
         <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
     <!-- Text search -->
@@ -29,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
     <!-- User defined buttons -->
     <span *ngFor="let command of customActionDefs">
-        <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active">
+        <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>
@@ -54,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [attr.title]="col.tip != undefined ? col.tip : col.headerName"
         [style.width]="col.width"
         >
-            <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="$any(lastSortedCol)?.field==$any(col).field && !col.suppressSorting && col.type!='button'">
+            <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="lastSortedCol?.field==col.field && !col.suppressSorting && col.type!='button'">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                     <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
                     <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
@@ -76,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <td 
         *ngFor="let col of columnDefs" 
-        class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
+        class="cell cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
         [class.bool]="isFieldBoolean(col)"
         [attr.title]="col.tip != undefined ? col.tip : null"
         (click)="col.type == 'button' ? null : onRowClick(item)"

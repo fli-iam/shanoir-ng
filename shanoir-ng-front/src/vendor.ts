@@ -12,20 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Pipe, PipeTransform } from '@angular/core';
+// Angular
+import '@angular/core';
+import '@angular/common';
+import '@angular/http';
+import '@angular/platform-browser';
+import '@angular/platform-browser-dynamic';
+import '@angular/router';
 
-/*
- * Raise the value exponentially
- * Takes an exponent argument that defaults to 1.
- * Usage:
- *   value | exponentialStrength:exponent
- * Example:
- *   {{ 2 | exponentialStrength:10 }}
- *   formats to: 1024
-*/
-@Pipe({name: 'replaceSpace'})
-export class ReplaceSpacePipe implements PipeTransform {
-  transform(value: string, replacementChar: string = '-'): string {
-    return value.replace(/ /g, replacementChar);
-  }
-}
+// RxJS
+import 'rxjs';
+
+// Other vendors for example jQuery, Lodash or Bootstrap
+// You can import js, ts, css, sass, ...

@@ -16,6 +16,9 @@ import { Dataset } from '../../datasets/shared/dataset.model';
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetAcquisitionService } from './dataset-acquisition.service';
+import { DatasetAcquisitionDTO } from './dataset-acquisition.dto';
 
 
 export abstract class DatasetAcquisition extends Entity {
@@ -31,4 +34,11 @@ export abstract class DatasetAcquisition extends Entity {
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg'; // TODO : other types
     protocol: any;
     name: string; // set in ExaminationDatasetAcquisitionDecorator.java
+
+    service: DatasetAcquisitionService = ServiceLocator.injector.get(DatasetAcquisitionService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new DatasetAcquisitionDTO(this), this.replacer);
+    }
 }

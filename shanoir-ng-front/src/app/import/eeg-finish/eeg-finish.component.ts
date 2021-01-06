@@ -32,8 +32,8 @@ export class FinishEegImportComponent {
 
     private importJob: EegImportJob;
     private context: ContextData;
-    public importing: boolean = false;
-    public readonly ImagesUrlUtil = ImagesUrlUtil;
+    private importing: boolean = false;
+    private readonly ImagesUrlUtil = ImagesUrlUtil;
     private step: Step;
 
     constructor(
@@ -56,7 +56,7 @@ export class FinishEegImportComponent {
         this.context = this.importDataService.contextData;
     }
     
-    public startEegImportJob(): void {
+    private startEegImportJob(): void {
         this.subjectService
             .updateSubjectStudyValues(this.context.subject.subjectStudy)
             .then(() => {

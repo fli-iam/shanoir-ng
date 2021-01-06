@@ -50,7 +50,7 @@
         <tr>
             <td colspan="2">
                 <div *ngIf="!requestSent" class="footer command-zone">
-                    <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelExtensionRequest()">Cancel</button>
+                    <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>
                     <button type="submit" i18n="Extension request|Request button label@@ExtensionRequestButton" (click)="extensionRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request an extension</button>
                 </div>
             </td>

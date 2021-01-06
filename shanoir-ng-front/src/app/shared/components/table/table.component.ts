@@ -22,6 +22,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
 })
+
 export class TableComponent implements OnInit {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
@@ -37,18 +38,15 @@ export class TableComponent implements OnInit {
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
 
-    page: Page<Object>;
-    isLoading: boolean = false;
-    maxResultsField: number;
-    lastSortedCol: Object = null;
-    lastSortedAsc: boolean = true;
-    currentPage: number = 1;
-    loaderImageUrl: string = "assets/images/loader.gif";
-    
-    public isError: boolean = false;
-    
-    public filter: Filter = new Filter(null, null);
-    public firstLoading: boolean = true;
+    private page: Page<Object>;
+    private isLoading: boolean = false;
+    private isError: boolean = false;
+    private maxResultsField: number;
+    private lastSortedCol: any = null;
+    private lastSortedAsc: boolean = true;
+    private currentPage: number = 1;
+    private filter: Filter = new Filter(null, null);
+    private firstLoading: boolean = true;
     
 
     constructor(
@@ -59,8 +57,7 @@ export class TableComponent implements OnInit {
 
 
     ngOnInit() {
-        let currentStep = this.breadcrumbsService.currentStep
-        let savedState = currentStep ? currentStep.data.tableState : null;
+        let savedState = this.breadcrumbsService.currentStep.data.tableState;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
@@ -76,12 +73,12 @@ export class TableComponent implements OnInit {
     }
 
     
-    get items(): Object[] {
+    private get items(): Object[] {
         return this.page ? this.page.content : [];
     }
     
 
-    sortBy(col: Object): void {
+    private sortBy(col: Object): void {
         if (col['suppressSorting'] || col["type"] == "button") return;
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
@@ -91,14 +88,14 @@ export class TableComponent implements OnInit {
     }
 
 
-    onSearchChange(filter: Filter) {
+    private onSearchChange(filter: Filter) {
         this.filter = filter;
         this.clearSelection();
         this.goToPage(1);
     }
 
 
-    onRowClick(item: Object) {
+    private onRowClick(item: Object) {
         if (!this.rowDisabled(item)) this.rowClick.emit(item);
     }
 
@@ -129,14 +126,14 @@ export class TableComponent implements OnInit {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    getCellValue(item: Object, col: any): any {
+    private getCellValue(item: Object, col: any): any {
         return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
-    getFieldRawValue(obj: Object, path: string): any {
+    private getFieldRawValue(obj: Object, path: string): any {
         return TableComponent.getFieldRawValue(obj, path);
     }
 
@@ -156,7 +153,7 @@ export class TableComponent implements OnInit {
     /** 
      * Triggered when a field is edited
      */
-    onFieldEdit(obj: Object, col: Object, value: any) {
+    private onFieldEdit(obj: Object, col: Object, value: any) {
         this.setFieldRawValue(obj, col['field'], value); 
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
@@ -165,7 +162,7 @@ export class TableComponent implements OnInit {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: any): string {
+    private renderCell(item: Object, col: any): string {
         let result: any = TableComponent.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
@@ -177,13 +174,13 @@ export class TableComponent implements OnInit {
     /**
      * Test if a cell content is a boolean
      */
-    isFieldBoolean(col: any): boolean {
+    private isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = TableComponent.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
-    isColumnText(col: any): boolean {
+    private isColumnText(col: any): boolean {
         return !this.isFieldBoolean(col)
             && col.type != 'link'
             && col.type != 'button'
@@ -191,7 +188,7 @@ export class TableComponent implements OnInit {
             && col.type != 'number';
     }
 
-    isColumnNumber(col: any): boolean {
+    private isColumnNumber(col: any): boolean {
         return col.type == 'number';
     }
 
@@ -207,7 +204,7 @@ export class TableComponent implements OnInit {
     /**
      * Get a column type attribute
      */
-    getColType(col: any): string {
+    private getColType(col: any): string {
         if (col.type != undefined) {
             return col.type;
         } else {
@@ -218,7 +215,7 @@ export class TableComponent implements OnInit {
     /**
      * Get a column type and format it to be used a dom element class
      */
-    getColTypeStr(col: any): string {
+    private getColTypeStr(col: any): string {
         let type: string = this.getColType(col);
         return type != null ? "col-" + type : "";
     }
@@ -226,12 +223,12 @@ export class TableComponent implements OnInit {
     /** 
      * Get a cell type and format it to be used a dom element class
      */
-    getCellTypeStr(col: any): string {
+    private getCellTypeStr(col: any): string {
         let type: string = this.getColType(col);
         return type != null ? "cell-" + type : "";
     }
 
-    goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
+    private goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
@@ -259,16 +256,13 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
-        let currentStep = this.breadcrumbsService.currentStep
-        if(currentStep) {
-            this.breadcrumbsService.currentStep.data.tableState = {
-                lastSortedCol: this.lastSortedCol,
-                lastSortedAsc: this.lastSortedAsc,
-                filter: this.filter,
-                currentPage: this.currentPage,
-                maxResults: this.maxResults
-            };
-        }
+        this.breadcrumbsService.currentStep.data.tableState = {
+            lastSortedCol: this.lastSortedCol,
+            lastSortedAsc: this.lastSortedAsc,
+            filter: this.filter,
+            currentPage: this.currentPage,
+            maxResults: this.maxResults
+        };
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -295,12 +289,12 @@ export class TableComponent implements OnInit {
         }
     }
 
-    updateMaxResults(): void {
+    private updateMaxResults(): void {
         this.maxResults = this.maxResultsField;
         this.goToPage(1);
     }
 
-    public getNbSelected(): number {
+    private getNbSelected(): number {
         return this.selection ? this.selection.size : 0;
     }
 
@@ -333,9 +327,6 @@ export class TableComponent implements OnInit {
             });
             this.emitSelectionChange();
         }
-    }
-
-    unSelectAll() {
     }
 
     clearSelection() {
@@ -391,12 +382,12 @@ export class TableComponent implements OnInit {
         }
     }
 
-    cellEditable(item, col) {
+    private cellEditable(item, col) {
         let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 
-    rowDisabled(item): boolean {
+    private rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
     }
 

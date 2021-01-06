@@ -49,23 +49,23 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 
 export class EegClinicalContextComponent implements OnInit {
     
-    @ViewChild('eventsTable', { static: false }) table: TableComponent;
+    @ViewChild('eventsTable') table: TableComponent;
     
-    public studies: Study[] = [];
-    public centers: Center[] = [];
-    public acquisitionEquipments: AcquisitionEquipment[] = [];
-    public examinations: SubjectExamination[] = [];
-    public study: Study;
-    public center: Center;
-    public acquisitionEquipment: AcquisitionEquipment;
-    public examination: SubjectExamination;
-    public subjects: SubjectWithSubjectStudy[] = [];
-    public subject: SubjectWithSubjectStudy;
-    public columnDefs: any[];
-    public hasPosition: boolean;
+    protected studies: Study[] = [];
+    protected centers: Center[] = [];
+    protected acquisitionEquipments: AcquisitionEquipment[] = [];
+    protected examinations: SubjectExamination[] = [];
+    protected study: Study;
+    protected center: Center;
+    protected acquisitionEquipment: AcquisitionEquipment;
+    protected examination: SubjectExamination;
+    protected subjects: SubjectWithSubjectStudy[] = [];
+    protected subject: SubjectWithSubjectStudy;
+    protected columnDefs: any[];
+    protected hasPosition: boolean;
     
-    public coordSystemOptions: Option<CoordSystems>[];
-    public coordsystem : string;
+    protected coordSystemOptions: Option<CoordSystems>[];
+    protected coordsystem : string;
 
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;
@@ -204,7 +204,7 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-   public getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
+   protected getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
         return new Promise((resolve) => {
             this.eventsPromise.then(() => {
                 resolve(this.browserPaging.getPage(pageable));
@@ -212,7 +212,7 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-    public onSelectStudy(): void {
+    private onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
@@ -224,7 +224,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    public onSelectCenter(): void {
+    private onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
@@ -234,7 +234,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    public onSelectAcquisitonEquipment(): void {
+    private onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
@@ -244,7 +244,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    public onSelectSubject(): void {
+    private onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -254,13 +254,13 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    public onSelectExam(): void {
+    private onSelectExam(): void {
     }
 
-    public onSelectCoord(): void {
+    private onSelectCoord(): void {
     }
 
-    public onContextChange() {
+    private onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -287,7 +287,7 @@ export class EegClinicalContextComponent implements OnInit {
         return center;
     }
 
-    public openCreateAcqEqt() {
+    private openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -303,7 +303,7 @@ export class EegClinicalContextComponent implements OnInit {
         return acqEpt;
     }
 
-    public openCreateSubject = () => {
+    private openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
@@ -333,7 +333,7 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectWithSubjectStudy;
     }
 
-    public openCreateExam = () => {
+    private openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
@@ -364,23 +364,23 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectExam;
     }
 
-    public showStudyDetails() {
+    private showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    public showCenterDetails() {
+    private showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    public showAcquistionEquipmentDetails() {
+    private showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    public showSubjectDetails() {
+    private showSubjectDetails() {
         window.open('subject/details/' + this.subject.id, '_blank');
     }
 
-    public showExaminationDetails() {
+    private showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
     }
 
@@ -396,7 +396,7 @@ export class EegClinicalContextComponent implements OnInit {
         );
     }
 
-    public next() {
+    private next() {
         this.router.navigate(['imports/eegfinish']);
     }
 }

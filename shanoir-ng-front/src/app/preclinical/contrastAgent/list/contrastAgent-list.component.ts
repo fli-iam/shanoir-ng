@@ -20,7 +20,6 @@ import { InjectionSite } from "../../shared/enum/injectionSite";
 import { InjectionType } from "../../shared/enum/injectionType";
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
   selector: 'contrast-agent-list',
@@ -39,10 +38,6 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
             super('preclinical-contrast-agent');
         }
 
-    getService(): EntityService<ContrastAgent> {
-        return this.contrastAgentsService;
-    }
-    
     getEntities(): Promise<ContrastAgent[]> {
         return this.contrastAgentsService.getContrastAgents(this.protocol_id);
     }

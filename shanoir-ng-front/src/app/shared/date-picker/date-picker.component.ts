@@ -16,40 +16,6 @@ import { AfterViewChecked, Component, ElementRef, forwardRef, Input } from '@ang
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
 
-
-// @Component({
-//     selector: 'datepicker',
-//             // <my-date-picker 
-//             //     [options]="options" 
-//             //     [ngModel]="convertedDate"
-//             //     (ngModelChange)="onModelChange($event)"
-//             //     (inputFieldChanged)="onInputFieldChanged($event)"
-//             //     (inputFocusBlur)="onTouch()">
-//             // </my-date-picker>
-//     template: `
-//         <span>
-//             <div class="input-box-container">
-//               <input class="input-box" placeholder="Click to select a date" 
-//                 angular-mydatepicker name="mydate" (click)="dp.toggleCalendar()" 
-//                 [(ngModel)]="convertedDate" [options]="options" 
-//                 #dp="angular-mydatepicker" (dateChanged)="onDateChanged($event)"/>
-//             </div>
-
-//         </span>
-//     `,
-//     styles: [
-//         ':host() { display: inline-block; height: 19px; }',
-//         ':host():has(input:focus) { border-bottom: 2px solid var(--color-a); }'
-//     ],
-//     providers: [
-//         {
-//           provide: NG_VALUE_ACCESSOR,
-//           useExisting: forwardRef(() => DatepickerComponent),
-//           multi: true,
-//         }]   
-// })
-
-// @dynamic
 @Component({
     selector: 'datepicker',
     template: `
@@ -75,16 +41,17 @@ import { IMyOptions } from 'mydatepicker';
           multi: true,
         }]   
 })
+
 export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
 
     private inputFieldContent: string;
     private lastInputFieldContent: string;
-    convertedDate: Object;
-    onTouch: () => void;
+    private convertedDate: Object;
+    private onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
 
-    options: IMyOptions = {
+    private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
         height: '21px',
         width: '160px',
@@ -99,7 +66,7 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
         });
     }
 
-    onInputFieldChanged(event) {
+    private onInputFieldChanged(event) {
         this.lastInputFieldContent = this.inputFieldContent;
         this.inputFieldContent = event.value;
     }

@@ -26,9 +26,7 @@ export class TherapyService  extends EntityService<Therapy>{
          
     API_URL = PreclinicalUtils.PRECLINICAL_API_THERAPIES_URL;
 
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
-
     getEntityInstance() { return new Therapy(); }
+     
+    
 }

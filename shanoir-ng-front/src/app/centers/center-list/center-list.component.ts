@@ -21,7 +21,6 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { ShanoirError } from '../../shared/models/error.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'center-list',
@@ -31,17 +30,13 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 export class CenterListComponent extends BrowserPaginEntityListComponent<Center> {
 
-    @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('table') table: TableComponent;
     
     constructor(
             private centerService: CenterService) {
 
         super('center');
         this.manageDelete();
-    }
-    
-    getService(): EntityService<Center> {
-        return this.centerService;
     }
 
     getOptions() {

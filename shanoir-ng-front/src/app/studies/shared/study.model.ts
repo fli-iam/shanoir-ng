@@ -11,21 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
-import { Id } from '../../shared/models/id.model';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy, SubjectStudyDTO } from '../../subjects/shared/subject-study.model';
 import { User } from '../../users/shared/user.model';
+import { ServiceLocator } from '../../utils/locator.service';
 import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
+import { StudyService } from './study.service';
 import { Timepoint } from './timepoint.model';
-
+import { Id } from '../../shared/models/id.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
 
 export class Study extends Entity {
     clinical: boolean;
-    compatible: boolean = false;
     downloadableByDefault: boolean;
     endDate: Date;
     experimentalGroupsOfSubjects: IdName[];
@@ -45,7 +46,7 @@ export class Study extends Entity {
     visibleByDefault: boolean;
     withExamination: boolean;
     studyCardList: StudyCard[];
-
+    
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
     }
@@ -55,6 +56,17 @@ export class Study extends Entity {
         for (let studyUser of study.studyUserList) {
             StudyUser.completeMember(studyUser, users); 
         }
+    }
+
+    protected getIgnoreList(): string[] {
+        return super.getIgnoreList().concat(['completeMembers']);
+    }
+    
+    service: StudyService = ServiceLocator.injector.get(StudyService);
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new StudyDTO(this), this.replacer);
     }
 }
 

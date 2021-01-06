@@ -57,7 +57,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Input() buttonPicto: string;
     @Input() dataLoading: boolean = false;
     @Input() title: string;
-    public isOpen: boolean = false;
+    protected isOpen: boolean = false;
     @Input() opened: boolean = false;
     @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
     public checked: boolean | 'indeterminate';

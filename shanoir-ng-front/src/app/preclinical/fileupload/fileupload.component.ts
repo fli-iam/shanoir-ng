@@ -13,10 +13,11 @@
  */
 
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, Injectable } from '@angular/core';
+import {Headers, RequestOptions } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
 
-import { FileUploadReady } from './fileUploadReady.model';
-import { Observable } from 'rxjs';
+import {FileUploadReady} from './fileUploadReady.model';
 
 @Component({
     selector: 'file-upload',
@@ -41,7 +42,7 @@ export class FileUploadComponent {
         this.progressObserver = observer}).share();    
     }
     
-    public prepareUploadRequest(){
+    private prepareUploadRequest(){
         
         this.fileUploadReady = new FileUploadReady();
         let inputEl: HTMLInputElement = this.inputEl.nativeElement;

@@ -28,13 +28,12 @@ export class BreadcrumbsService {
     public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
-    private ignoreNavigationEnd: boolean = false;
 
     constructor(
             private router: Router, 
             private locationStrategy: LocationStrategy,
             private titleService: Title) {
-        
+                
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
@@ -43,15 +42,10 @@ export class BreadcrumbsService {
                     break;
                 }
             }
-            // this.saveSession();
         });
 
         router.events.subscribe( (event: Event) => {
             if (event instanceof NavigationEnd) {
-                if(this.ignoreNavigationEnd) {
-                    this.ignoreNavigationEnd = false;
-                    return;
-                }
                 const timestamp: number = new Date().getTime();
                 if (this.replace) this.steps.pop();
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
@@ -70,10 +64,9 @@ export class BreadcrumbsService {
                 this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
-                // this.saveSession();
             }
         });
-        // this.loadSession();
+
     }
 
     private focusStep(index: number) {
@@ -88,12 +81,10 @@ export class BreadcrumbsService {
 
     public nameStep(label: string) {
         this.nextLabel = label;
-        // this.saveSession();
     }
 
     public markMilestone() {
         this.nextMilestone = true;
-        // this.saveSession();
     }
 
     public resetMilestone() {
@@ -150,39 +141,6 @@ export class BreadcrumbsService {
         return false;
     }
 
-    // public saveSession() {
-    //     let stepsJSON = [];
-    //     for(let step of this.steps) {
-    //         stepsJSON.push(step.save())
-    //     }
-
-    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
-    //         steps: stepsJSON, 
-    //         popFoundedStepIndex: this.popFoundedStepIndex,
-    //         replace: this.replace,
-    //         currentStepIndex: this.currentStepIndex,
-    //         nextLabel: this.nextLabel,
-    //         nextMilestone: this.nextMilestone }));
-    // }
-
-    // public loadSession() {
-    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
-    //     if(json == null) {
-    //         return;
-    //     }
-    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
-    //     this.replace = json.replace;
-    //     this.currentStepIndex = json.currentStepIndex;
-    //     this.nextLabel = json.nextLabel;
-    //     this.nextMilestone = json.nextMilestone;
-    //     this.steps = [];
-    //     for(let step of json.steps) {
-    //         this.steps.push(Step.load(step));
-    //     }
-
-    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
-    //     this.ignoreNavigationEnd = true;
-    // }
 
     public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
         for (let i=this.currentStepIndex; i>=0; i--) {
@@ -200,6 +158,27 @@ export class Step {
             public route: string,
             public timestamp: number) {
     }
+
+    // static parse(str: string): Step {
+    //     let json: Step = JSON.parse(str);
+    //     let step: Step = new Step(json.label, json.route, json.entity);
+    //     step.id = step.id;
+    //     step.subscribers = step.subscribers;
+    //     step.disabled = step.disabled;
+    //     step.displayWaitStatus = step.displayWaitStatus;
+    //     step.prefilled = step.prefilled;
+    //     return step;
+    // }
+
+    // stringify(): string {
+    //     let ignoreList: string[] = ['onSaveSubject'];
+    //     let replacer = (key, value) => {
+    //         if (ignoreList.indexOf(key) > -1) return undefined;
+    //         else if (key == 'entity') return (value as Entity).stringify();
+    //         else return value;
+    //     }
+    //     return JSON.stringify(this, replacer);
+    // }
 
     public id = new Date().getTime();
     public subscribers: number = 0;

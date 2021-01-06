@@ -15,6 +15,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { BidsElement } from '../../bids/model/bidsElement.model';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -36,8 +37,6 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 @Component({
@@ -49,23 +48,22 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 export class StudyComponent extends EntityComponent<Study> {
     
-    @ViewChild('memberTable', { static: false }) table: TableComponent;
-    @ViewChild('input', { static: false }) private fileInput: ElementRef;
+    @ViewChild('memberTable') table: TableComponent;
+    @ViewChild('input') private fileInput: ElementRef;
 
-    subjects: IdName[];
-    selectedCenter: IdName;
+    private subjects: IdName[];
+    private selectedCenter: IdName;
     
     private browserPaging: BrowserPaging<StudyUser>;
-    columnDefs: any[];
-    users: User[] = [];
+    private columnDefs: any[];
+    private users: User[] = [];
     
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-
-    public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    protected selectedDatasetIds: number[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -87,10 +85,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public get study(): Study { return this.entity; }
     public set study(study: Study) { this.entity = study; }
-
-    getService(): EntityService<Study> {
-        return this.studyService;
-    }
 
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
@@ -243,11 +237,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    goToCenter(id: number) {
+    private goToCenter(id: number) {
         this.router.navigate(['/center/details/' + id]);
     }
 
-    onCenterAdd(): void {
+    private onCenterAdd(): void {
         if (this.selectedCenter) {
             let studyCenter: StudyCenter = new StudyCenter();
             studyCenter.center = new Center();
@@ -262,7 +256,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    onCenterChange(center: IdName): void {
+    private onCenterChange(center: IdName): void {
         this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []
@@ -277,7 +271,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    removeCenterFromStudy(centerId: number): void {
+    private removeCenterFromStudy(centerId: number): void {
         if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         if (this.study.studyCenterList.length < 2) {
@@ -290,12 +284,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
     
-    enableAddIcon(): boolean {
+    private enableAddIcon(): boolean {
         return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
             && (!this.study.monoCenter || !this.study.studyCenterList || this.study.studyCenterList.length == 0);
     }    
 
-    isCenterAlreadyLinked(centerId: number): boolean {
+    private isCenterAlreadyLinked(centerId: number): boolean {
         if (!this.study.studyCenterList) return false;
         for (let studyCenter of this.study.studyCenterList) {
             if (centerId == studyCenter.center.id) {
@@ -360,7 +354,7 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    public onUserAdd(selectedUser: User) {
+    private onUserAdd(selectedUser: User) {
         if (!selectedUser) {
             return;
         }
@@ -414,20 +408,20 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    onStudyUserEdit() {
+    private onStudyUserEdit() {
         this.form.get('subjectStudyList').markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    studyStatusStr(studyStatus: string) {
+    private studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
-    public click() {
+    private click() {
         this.fileInput.nativeElement.click();
     }
 
-    public deleteFile() {
+    protected deleteFile(file: any) {
         if (this.mode == 'create') { 
             this.study.protocolFilePaths = [];
             this.protocolFile = null;
@@ -439,11 +433,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    public downloadFile() {
+    protected downloadFile() {
         this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
     }
 
-    public attachNewFile(event: any) {
+    private attachNewFile(event: any) {
         this.protocolFile = event.target.files[0];
         if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
             this.msgBoxService.log("error", "Only PDF files are accepted");
@@ -454,7 +448,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.updateValueAndValidity();
     }
 
-    save(): Promise<void> {
+    protected save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {

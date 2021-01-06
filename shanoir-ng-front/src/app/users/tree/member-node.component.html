@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.rights && node.rights != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.rights && node.rights != 'UNLOADED'"> 
             <node
                     *ngFor="let right of node.rights"
                     [label]="right.label" 

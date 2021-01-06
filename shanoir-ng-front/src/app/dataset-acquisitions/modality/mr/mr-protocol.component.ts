@@ -29,7 +29,7 @@ import { MrProtocol } from './mr-protocol.model';
 })
 export class MrProtocolComponent implements ControlValueAccessor {
     
-    public protocol: MrProtocol;
+    private protocol: MrProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
     protected propagateChange = (_: any) => {};

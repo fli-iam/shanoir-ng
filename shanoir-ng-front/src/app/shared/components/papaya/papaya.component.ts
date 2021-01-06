@@ -25,7 +25,7 @@ declare var papayaContainers: any[];
 export class PapayaComponent implements OnInit {
     @Input() params: any[];
     @Input() autoLoading: boolean = false;
-    loaded: boolean = false;
+    private loaded: boolean = false;
     private static loading: boolean = false;
 
     constructor() {}
@@ -50,7 +50,7 @@ export class PapayaComponent implements OnInit {
         }
     }
 
-    load() {
+    private load() {
         if (!PapayaComponent.loading) {
             this.loaded = true; 
             PapayaComponent.loading = true;

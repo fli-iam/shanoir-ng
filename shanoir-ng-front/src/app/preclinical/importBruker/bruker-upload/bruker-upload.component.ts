@@ -11,15 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component } from '@angular/core';
 
-import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { ImportJob } from '../../../import/shared/dicom-data.model';
-import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { slideDown } from '../../../shared/animations/animations';
-import { Router } from '../../../breadcrumbs/router';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../../breadcrumbs/router';
+import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImportDataService } from '../../../import/shared/import.data-service';
+import { slideDown } from '../../../shared/animations/animations';
+import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { ImportBrukerService } from '../importBruker.service';
+
+
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -30,13 +32,12 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class BrukerUploadComponent {
-
-    public archiveStatus: Status = 'none';
-    public extensionError: boolean;
-    public dicomDirMissingError: boolean;
-    public modality: string;
+    private archiveStatus: Status = 'none';
+    private extensionError: boolean;
+    private dicomDirMissingError: boolean;
+    private modality: string;
     
-    public readonly ImagesUrlUtil = ImagesUrlUtil;;
+    private readonly ImagesUrlUtil = ImagesUrlUtil;
     
     protected archive: string;
     protected archiveFolder: string;
@@ -59,7 +60,7 @@ export class BrukerUploadComponent {
     }
     
     
-    public uploadArchive(fileEvent: any): void {
+    private uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.uploadBruker(fileEvent);   
     }
@@ -107,7 +108,7 @@ export class BrukerUploadComponent {
             );
     }
 
-    public storeArchiveChanged(event: boolean) {
+    protected storeArchiveChanged(event: boolean) {
         // Get the name of the file to get
         if (event) {
             let archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
@@ -126,7 +127,7 @@ export class BrukerUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    public next() {
+    private next() {
         this.router.navigate(['imports/brukerseries']);
     }
 

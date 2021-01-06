@@ -33,14 +33,14 @@ import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum'
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html'
 })
+
 export class CommonDatasetComponent implements OnChanges {
 
-    @Input() mode: Mode;
-    @Input() dataset: Dataset;
-    @Input() parentFormGroup: FormGroup;
-    subjects: Subject[] = [];
-    studies: Study[] = [];
-    
+    @Input() private mode: Mode;
+    @Input() private dataset: Dataset;
+    @Input() private parentFormGroup: FormGroup;
+    private subjects: Subject[] = [];
+    private studies: Study[] = [];
     exploredEntityOptions: Option<ExploredEntity>[];
     datasetModalityTypes: Option<DatasetModalityType>[];
     processedDatasetTypeOptions: Option<ProcessedDatasetType>[];

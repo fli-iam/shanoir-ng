@@ -16,16 +16,11 @@ import { Injectable } from "@angular/core";
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
 import { NiftiConverter } from "./nifti.converter.model";
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class NiftiConverterService extends EntityService<NiftiConverter>{
 
     API_URL = AppUtils.BACKEND_API_NIFTI_CONVERTER_URL;
-
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
 
     getEntityInstance() { return new NiftiConverter(); }
 }

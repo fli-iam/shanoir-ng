@@ -37,7 +37,6 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     public studyOptions: Option<number>[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
-    examinationStudyId = null;
 
     constructor(
             private fb: FormBuilder, 
@@ -98,20 +97,9 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
         }
     }
 
-    create(): void {
-        
-    }
-
     add(): void {
       
     }
 
-    edit(): void {
-        
-    }
-
-    update(): void {
-
-    }
 
 }

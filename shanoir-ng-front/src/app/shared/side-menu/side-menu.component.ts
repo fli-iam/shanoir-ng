@@ -32,19 +32,19 @@ import { VERSION } from '../../../environments/version';
 
 export class SideMenuComponent {
 
-    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
-    public username: string = "";
-    public userId: number = 0;
-    public dataOpened: boolean = false;
-    public precOpened: boolean = false;
-    public eqOpened: boolean = false;
-    public uploadOpened: boolean = false;
-    public adminOpened: boolean = false;
-    public tasksOpened: boolean = false;
+    private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
+    private username: string = "";
+    private userId: number = 0;
+    private dataOpened: boolean = false;
+    private precOpened: boolean = false;
+    private eqOpened: boolean = false;
+    private uploadOpened: boolean = false;
+    private adminOpened: boolean = false;
+    private tasksOpened: boolean = false;
     public VERSION = VERSION;
 
     constructor(
-            public keycloakService: KeycloakService, 
+            private keycloakService: KeycloakService, 
             private solrService: SolrService,
             private msgboxService: MsgBoxService,
             public notificationsService: NotificationsService) {

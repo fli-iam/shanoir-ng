@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 import { HttpClient } from '@angular/common/http';
 
-import { Page } from '../table/pageable.model';
+import { ServiceLocator } from '../../../utils/locator.service';
 import { Entity } from './entity.abstract';
-
-
+import { Page } from '../table/pageable.model';
 
 export abstract class EntityService<T extends Entity> {
     
@@ -24,9 +24,7 @@ export abstract class EntityService<T extends Entity> {
 
     abstract getEntityInstance(entity?: T): T;
 
-    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
-
-    constructor(protected http: HttpClient) {}
+    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     getAll(): Promise<T[]> {
         return this.http.get<any[]>(this.API_URL)
@@ -62,13 +60,13 @@ export abstract class EntityService<T extends Entity> {
     }
 
     create(entity: T): Promise<T> {
-        return this.http.post<any>(this.API_URL, this.stringify(entity))
+        return this.http.post<any>(this.API_URL, entity.stringify())
             .toPromise()
             .then(this.mapEntity);
     }
 
     update(id: number, entity: T): Promise<void> {
-        return this.http.put<any>(this.API_URL + '/' + id, this.stringify(entity))
+        return this.http.put<any>(this.API_URL + '/' + id, entity.stringify())
             .toPromise();
     }
 
@@ -98,27 +96,5 @@ export abstract class EntityService<T extends Entity> {
             } 
         });
         return trueObject;
-    }
-
-    public stringify(obj: any) {
-        return JSON.stringify(obj, (key, value) => {
-            return this.customReplacer(key, value, obj);
-        });
-    }
-
-    protected getIgnoreList() { return ['_links']; }
-
-    protected customReplacer = (key, value, entity) => {
-        if (this.getIgnoreList().indexOf(key) > -1) return undefined;
-        else if (entity[key] instanceof Date) return this.datePattern(entity[key]);
-        else return value;
-    }
-
-    private datePattern(date: Date): string {
-         return date.getFullYear()
-         + '-' 
-         + ('0' + (date.getMonth() + 1)).slice(-2)
-         + '-' 
-         + ('0' + date.getDate()).slice(-2);
     }
 }

@@ -24,7 +24,6 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { DatasetAcquisitionNode } from '../../tree/tree.model';
 
 
@@ -35,8 +34,8 @@ import { DatasetAcquisitionNode } from '../../tree/tree.model';
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
-    public studyCards: StudyCard[];
-    public acquisitionEquipments: AcquisitionEquipment[];
+    private studyCards: StudyCard[];
+    private acquisitionEquipments: AcquisitionEquipment[];
     
     
     constructor(
@@ -44,12 +43,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private datasetAcquisitionService: DatasetAcquisitionService,
             private studyCardService: StudyCardService,
             private acqEqService: AcquisitionEquipmentService,
-            public acqEqPipe: AcquisitionEquipmentPipe) {
+            private acqEqPipe: AcquisitionEquipmentPipe) {
         super(route, 'dataset-acquisition');
-    }
-
-    getService(): EntityService<DatasetAcquisition> {
-        return this.datasetAcquisitionService;
     }
     
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }

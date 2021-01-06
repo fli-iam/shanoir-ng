@@ -30,10 +30,10 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class EegUploadComponent {
     
-    public archiveStatus: Status = 'none';
+    private archiveStatus: Status = 'none';
     protected extensionError: boolean;
     private modality: string;
-    public errorMessage: string;
+    protected errorMessage: string;
 
 
     constructor(
@@ -50,7 +50,7 @@ export class EegUploadComponent {
         breadcrumbsService.currentStep.importMode = 'EEG';
     }
 
-    public uploadArchive(fileEvent: any): void {
+    private uploadArchive(fileEvent: any): void {
         if (fileEvent.target.files.length > 0) {
             this.setArchiveStatus('uploading');
             this.uploadToServer(fileEvent.target.files);
@@ -87,7 +87,7 @@ export class EegUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    public next() {
+    private next() {
         this.router.navigate(['imports/eegseries']);
     }
 

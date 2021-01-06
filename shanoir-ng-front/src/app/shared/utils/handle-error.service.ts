@@ -13,6 +13,7 @@
  */
 
 import { ErrorHandler, Injectable } from '@angular/core';
+import { Response } from '@angular/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 

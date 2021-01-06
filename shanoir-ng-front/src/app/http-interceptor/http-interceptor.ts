@@ -22,7 +22,6 @@ import {
 
 import { Observable } from 'rxjs/Observable';
 import { LoaderService } from "../shared/loader/loader.service";
-import { finalize } from 'rxjs/operators';
 
 @Injectable()
 export class ShanoirHttpInterceptor implements HttpInterceptor {
@@ -34,9 +33,9 @@ export class ShanoirHttpInterceptor implements HttpInterceptor {
             return next.handle(request);
         } else {
             this.loaderService.startLoader();
-            return next.handle(request).pipe(finalize(() => {
+            return next.handle(request).finally(() => {
                 this.loaderService.stopLoader();
-            }));
+            });
         }
     }
 

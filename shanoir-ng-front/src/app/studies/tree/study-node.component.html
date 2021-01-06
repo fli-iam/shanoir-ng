@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(opened)]="node.subjectsOpen"
             [hasChildren]="hasDependency(this.node.subjects)">
        
-        <ng-container *ngIf="node.subjectsOpen && node.subjects && node.subjects != $any('UNLOADED')"> 
+        <ng-container *ngIf="node.subjectsOpen && node.subjects && node.subjects != 'UNLOADED'"> 
             <subject-node
                     *ngFor="let subject of node.subjects"
                     [input]="subject"
@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(opened)]="node.centersOpen"
             [hasChildren]="hasDependency(this.node.centers)">     
 
-        <ng-container *ngIf="node.centersOpen && node.centers && node.centers != $any('UNLOADED')"> 
+        <ng-container *ngIf="node.centersOpen && node.centers && node.centers != 'UNLOADED'"> 
             <center-node
                     *ngFor="let center of node.centers"
                     [input]="center">
@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [hasChildren]="hasDependency(this.node.studyCards)"
             [dataLoading]="studyCardsLoading">     
 
-        <ng-container *ngIf="node.studycardsOpen && node.studyCards && node.studyCards != $any('UNLOADED')"> 
+        <ng-container *ngIf="node.studycardsOpen && node.studyCards && node.studyCards != 'UNLOADED'"> 
             <studycard-node
                     *ngFor="let studycard of node.studyCards"
                     [input]="studycard">
@@ -90,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(opened)]="node.membersOpen"
             [hasChildren]="hasDependency(this.node.members)">     
 
-        <ng-container *ngIf="node.membersOpen && node.members && node.members != $any('UNLOADED')"> 
+        <ng-container *ngIf="node.membersOpen && node.members && node.members != 'UNLOADED'"> 
             <member-node
                     *ngFor="let member of node.members"
                     [input]="member">

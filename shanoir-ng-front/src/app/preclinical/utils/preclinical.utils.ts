@@ -13,8 +13,6 @@
  */
 import * as AppUtils from '../../utils/app.utils';
 
-import { process } from '../../process';
-  
 // PRECLINICAL Rest Service
 export const PRECLINICAL_API_ROOT_URL:string = AppUtils.BACKEND_API_PRECLINICAL_MS_URL;
 

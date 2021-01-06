@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <menu-item *ngIf="node.type == 'Eeg'" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.processings && node.processings != 'UNLOADED'"> 
         <processing-node
                 node
                 *ngFor="let processing of node.processings"

@@ -27,36 +27,35 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 export class AnestheticIngredientService extends EntityService<AnestheticIngredient> {
     API_URL = PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL;
 
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
-
     getEntityInstance() { return new AnestheticIngredient(); }    
-    
+       
+
     getIngredients(anesthetic:Anesthetic): Promise<AnestheticIngredient[]>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<AnestheticIngredient[]>(url)
-            .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))
+            .toPromise();
     }
     
         
     getIngredient(anesthetic_id:number,ingredient_id: number): Promise<AnestheticIngredient>{
         return this.http.get<AnestheticIngredient>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL+"/"+anesthetic_id+"/"+PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT+"/"+ingredient_id)
-            .toPromise()
-            .then((entity) => this.toRealObject(entity));
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
     }
      
     updateAnestheticIngredient(anesthetic_id:number,ingredient: AnestheticIngredient): Observable<AnestheticIngredient> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}/${ingredient.id}`;
         return this.http
-            .put<AnestheticIngredient>(url, JSON.stringify(ingredient));
+            .put<AnestheticIngredient>(url, JSON.stringify(ingredient))
+            .map(response => response);
     }
     
     createAnestheticIngredient(anesthetic_id:number, ingredient: AnestheticIngredient): Observable<AnestheticIngredient> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}`;
         return this.http
-            .post<AnestheticIngredient>(url, JSON.stringify(ingredient));
+            .post<AnestheticIngredient>(url, JSON.stringify(ingredient))
+            .map(res => res);
     }
         
     deleteAnestheticIngredient(anesthetic_id:number,ingredient_id: number): Promise<void> {
