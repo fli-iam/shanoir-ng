@@ -15,6 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="this.menuOpened"
+        [clickable] = "this.node.id != null"
         [label]="node.label" 
         awesome="fas fa-stethoscope" 
         [(opened)]="node.open"
@@ -22,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showExaminationDetails()"></menu-item>
     </dropdown-menu>   
 
