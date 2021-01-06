@@ -88,7 +88,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
-            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
