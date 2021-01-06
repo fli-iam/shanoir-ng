@@ -278,7 +278,7 @@ public class ImporterManagerService {
 		for (Iterator<Image> imagesIt = images.iterator(); imagesIt.hasNext();) {
 			Image image = imagesIt.next();
 			String path = image.getPath();
-			File file = new File(workFolderPath + File.separator + path);
+			File file = new File(path);
 			if(file.exists()) {
 				pathsSet.add(file);
 			} else {

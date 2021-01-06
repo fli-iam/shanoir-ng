@@ -61,14 +61,14 @@ public class PetProtocol extends AbstractEntity {
 	private Integer doseCalibrationFactor;
 
 	/**
-	 * Energy window lower limit in KeV. The unit of measure of the energy
-	 * window lower limit must be in KeV.
+	 * Energy window lower limit in KeV. 
+	 * The unit of measure of the energy window lower limit must be in KeV.
 	 */
 	private Integer energyWindowLowerLimit;
 
 	/**
-	 * Energy window upper limit in KeV. The unit of measure of the energy
-	 * window upper limit must be in KeV.
+	 * Energy window upper limit in KeV. 
+	 * The unit of measure of the energy window upper limit must be in KeV.
 	 */
 	private Integer energyWindowUpperLimit;
 
@@ -88,14 +88,14 @@ public class PetProtocol extends AbstractEntity {
 	private PetDatasetAcquisition petDatasetAcquisition;
 
 	/**
-	 * (0018,1075) Radionuclide Half Life in sec. The unit of measure of the
-	 * radionuclide half life must be in sec.
+	 * (0018,1075) Radionuclide Half Life in sec. 
+	 * The unit of measure of the radionuclide half life must be in sec.
 	 */
 	private Double radionuclideHalfLife;
 
 	/**
-	 * (0018,1074) Radionuclide Total Dose in bq. The unit of measure of the
-	 * radionuclide total dose must be in bq.
+	 * (0018,1074) Radionuclide Total Dose in bq. 
+	 * The unit of measure of the radionuclide total dose must be in bq.
 	 */
 	private Integer radionuclideTotalDose;
 
@@ -124,25 +124,25 @@ public class PetProtocol extends AbstractEntity {
 	private String units;
 
 	/**
-	 * (0028, 0030) Pixel Spacing in X direction in mm. The unit of measure of
-	 * voxel size X, must be in mm.
+	 * (0028, 0030) Pixel Spacing in X direction in mm. 
+	 * The unit of measure of voxel size X, must be in mm.
 	 */
 	@NotNull
-	private String voxelSizeX;
+	private Double voxelSizeX;
 
 	/**
-	 * (0028, 0030) Pixel Spacing in Y direction in mm. The unit of measure of
-	 * voxel size Y, must be in mm.
+	 * (0028, 0030) Pixel Spacing in Y direction in mm. 
+	 * The unit of measure of voxel size Y, must be in mm.
 	 */
 	@NotNull
-	private String voxelSizeY;
+	private Double voxelSizeY;
 
 	/**
-	 * (0018, 0050) Pixel Spacing in YZ direction in mm. The unit of measure of
-	 * voxel size Z, must be in mm.
+	 * (0018, 0050) Slice Thickness in mm. 
+	 * The unit of measure of voxel size Z, must be in mm.
 	 */
 	@NotNull
-	private String voxelSizeZ;
+	private Double voxelSizeZ;
 
 	/**
 	 * @return the attenuationCorrectionMethod
@@ -492,7 +492,7 @@ public class PetProtocol extends AbstractEntity {
 	/**
 	 * @return the voxelSizeX
 	 */
-	public String getVoxelSizeX() {
+	public Double getVoxelSizeX() {
 		return voxelSizeX;
 	}
 
@@ -500,14 +500,14 @@ public class PetProtocol extends AbstractEntity {
 	 * @param voxelSizeX
 	 *            the voxelSizeX to set
 	 */
-	public void setVoxelSizeX(String voxelSizeX) {
+	public void setVoxelSizeX(Double voxelSizeX) {
 		this.voxelSizeX = voxelSizeX;
 	}
 
 	/**
 	 * @return the voxelSizeY
 	 */
-	public String getVoxelSizeY() {
+	public Double getVoxelSizeY() {
 		return voxelSizeY;
 	}
 
@@ -515,14 +515,14 @@ public class PetProtocol extends AbstractEntity {
 	 * @param voxelSizeY
 	 *            the voxelSizeY to set
 	 */
-	public void setVoxelSizeY(String voxelSizeY) {
+	public void setVoxelSizeY(Double voxelSizeY) {
 		this.voxelSizeY = voxelSizeY;
 	}
 
 	/**
 	 * @return the voxelSizeZ
 	 */
-	public String getVoxelSizeZ() {
+	public Double getVoxelSizeZ() {
 		return voxelSizeZ;
 	}
 
@@ -530,7 +530,7 @@ public class PetProtocol extends AbstractEntity {
 	 * @param voxelSizeZ
 	 *            the voxelSizeZ to set
 	 */
-	public void setVoxelSizeZ(String voxelSizeZ) {
+	public void setVoxelSizeZ(Double voxelSizeZ) {
 		this.voxelSizeZ = voxelSizeZ;
 	}
 

@@ -819,7 +819,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			Image image = iterator.next();
 			// the path has been set in processDicomFile in DicomFileAnalyzer before
 			String filePath = image.getPath();
-			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
+			File oldFile = new File(filePath);
 			if (oldFile.exists()) {
 				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + oldFile.getName());
 				oldFile.renameTo(newFile);
