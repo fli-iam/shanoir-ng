@@ -25,6 +25,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 
 @Component({
@@ -35,9 +36,9 @@ import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manuf
 export class CoilComponent extends EntityComponent<Coil> {
    
     @Input() acqEquip: AcquisitionEquipment;
-    private centers: Center[] = [];
-    private manufModels: ManufacturerModel[] = [];
-    private coilTypes: CoilType[] = CoilType.all();
+    centers: Center[] = [];
+    manufModels: ManufacturerModel[] = [];
+    coilTypes: CoilType[] = CoilType.all();
     private prefilledCenter: Center;
     private prefilledManuf: ManufacturerModel;
 
@@ -45,13 +46,17 @@ export class CoilComponent extends EntityComponent<Coil> {
             private route: ActivatedRoute,
             private coilService: CoilService, 
             private centerService: CenterService,
-            private manufModelPipe: ManufacturerModelPipe) {
+            public manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');
     }
 
     get coil(): Coil { return this.entity; }
     set coil(coil: Coil) { this.entity = coil; }
 
+    getService(): EntityService<Coil> {
+        return this.coilService;
+    }
+    
     initView(): Promise<void> {
         return this.coilService.get(this.id).then(coil => {
             this.coil = coil;
@@ -110,7 +115,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         return form;
     }
 
-    private updateManufList(center: Center): void {
+    updateManufList(center: Center): void {
         this.coil.center = center;
         this.coil.manufacturerModel = null;
         if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
@@ -127,7 +132,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewCenter() {
+    openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             this.subscribtions.push(
@@ -138,7 +143,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         });
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             this.subscribtions.push(

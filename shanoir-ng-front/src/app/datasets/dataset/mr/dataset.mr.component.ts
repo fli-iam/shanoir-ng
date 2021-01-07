@@ -24,9 +24,10 @@ import { Option } from '../../../shared/select/select.component';
 
 export class MrDatasetComponent implements OnInit{
 
-    @Input() private mode: Mode;
-    @Input() private dataset: MrDataset;
-    private natureOptions: Option<MrDatasetNature>[];
+    @Input() mode: Mode;
+    @Input() dataset: MrDataset;
+    // allMrDatasetNatures: any[];
+    public natureOptions: Option<MrDatasetNature>[];
     
     constructor() {
         this.natureOptions = MrDatasetNature.options;

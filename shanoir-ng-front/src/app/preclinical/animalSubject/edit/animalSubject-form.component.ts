@@ -39,6 +39,7 @@ import { SubjectTherapiesListComponent } from '../../therapies/subjectTherapy/li
 import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
@@ -55,11 +56,11 @@ import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
 @ModesAware
 export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {
 
-    @ViewChild('subjectPathologiesTable') tablePathology: TableComponent; 
+    @ViewChild('subjectPathologiesTable', { static: false }) tablePathology: TableComponent; 
 
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    public readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[];
+    public studies: IdName[];
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
     species: Reference[] = [];
     strains: Reference[] = [];
@@ -70,8 +71,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
-    @ViewChild('therapiesComponent') therapiesComponent: SubjectTherapiesListComponent;
-    @ViewChild('pathologiesComponent') pathologiesComponent: SubjectPathologiesListComponent;
+    @ViewChild('therapiesComponent', { static: false }) therapiesComponent: SubjectTherapiesListComponent;
+    @ViewChild('pathologiesComponent', { static: false }) pathologiesComponent: SubjectPathologiesListComponent;
     private subjectStudyList: SubjectStudy[] = [];
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
@@ -105,8 +106,14 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     }
 
+    public GetModes(): any { return (<any>this).Modes; }
+
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
     public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
+
+    getService(): EntityService<PreclinicalSubject> {
+        return this.animalSubjectService;
+    }
 
     private addToCache(key: string, toBeCached: any) {
         if (!this.breadcrumbsService.currentStep.isPrefilled(key))	{
@@ -320,7 +327,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         super.goToEdit(this.preclinicalSubject.animalSubject.id);
     }
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         return new  Promise<void>(resolve => {
             if (this.preclinicalSubject.animalSubject.id){
                 this.updateSubject().then(() => {
@@ -505,8 +512,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     getHash(stringToBeHashed: string): string {
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = "";
-        hex = hash.substring(0, this.HASH_LENGTH);
+        let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
     
@@ -535,7 +541,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
     }
 
-    protected validateForm(eventName: string) {
+    public validateForm(eventName: string) {
         if (["create", "delete"].indexOf(eventName) != -1) {
            this.form.get("therapies").updateValueAndValidity({onlySelf: false, emitEvent: true});
            this.form.get("pathologies").updateValueAndValidity({onlySelf: false, emitEvent: true});
