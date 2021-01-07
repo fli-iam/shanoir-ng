@@ -33,6 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let dsNode of node.datasets" 
                 [input]="dsNode"
+                [related]="node.id == null"
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox">
             </dataset-node>
