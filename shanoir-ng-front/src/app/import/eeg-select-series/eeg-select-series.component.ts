@@ -53,7 +53,8 @@ export class EegSelectSeriesComponent {
     }
 
     changeDataset(datasetToMove: EegDatasetDTO) {
-        let index = this.selectedDatasets.indexOf(datasetToMove);
+
+      let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
         } else {
@@ -77,7 +78,7 @@ export class EegSelectSeriesComponent {
         return (this.selectedDatasets && this.selectedDatasets.length > 0);
     }
 
-    private next() {
+    public next() {
         this.importDataService.eegImportJob.datasets = this.selectedDatasets;
         this.router.navigate(['imports/eegcontext']);
     }

@@ -237,6 +237,7 @@
 				<target> and </target> in a build.xml. -->
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<phase>install</phase>

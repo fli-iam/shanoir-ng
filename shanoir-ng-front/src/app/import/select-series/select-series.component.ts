@@ -31,12 +31,13 @@ import { ImportService } from '../shared/import.service';
 export class SelectSeriesComponent {
 
     patients: PatientDicom[];
-    private workFolder: string;
-    private dataFiles: any;
-    detailedPatient: any;
-    detailedSerie: any;
-    detailedStudy: any;
-    papayaParams: object[];
+
+    public workFolder: string;
+    public dataFiles: any;
+    public detailedPatient: any;
+    public detailedSerie: any;
+    public detailedStudy: any;
+    public papayaParams: object[];
     public papayaError: boolean = false;
     public modality: string;
     studiesCheckboxes: any = {};
@@ -143,7 +144,7 @@ export class SelectSeriesComponent {
         return false;
     }
 
-    private next() {
+    next() {
         this.router.navigate(['imports/context']);
     }
 

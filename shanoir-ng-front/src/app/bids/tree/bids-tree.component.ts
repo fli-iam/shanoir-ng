@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, ElementRef, Input, OnDestroy } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { GlobalService } from '../../shared/services/global.service';
+import { BidsElement } from '../model/bidsElement.model'
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
-import { BidsElement } from '../model/bidsElement.model';
+import { GlobalService } from '../../shared/services/global.service';
 import { StudyService } from '../../studies/shared/study.service';
-
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'bids-tree',
@@ -29,25 +30,37 @@ import { StudyService } from '../../studies/shared/study.service';
     styleUrls: ['bids-tree.component.css'],
 })
 
-export class BidsTreeComponent implements OnDestroy {
+export class BidsTreeComponent implements OnDestroy, OnInit {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     @Input() studyId: number;
-    protected list: BidsElement[];
-    protected json: JSON;
-    protected tsv: string[][];
-    protected title: string;
-    protected selectedIndex: string;
+    public list: BidsElement[];
+    public json: JSON;
+    public tsv: string[][];
+    public title: string;
+    public selectedIndex: string;
     private globalClickSubscription: Subscription;
-    protected load: string;
+    public load: string;
+    private hasDownloadRight: boolean;
 
-    constructor(private globalService: GlobalService, private elementRef: ElementRef, private studyService: StudyService, protected http: HttpClient) {
+    constructor(private globalService: GlobalService,
+                private elementRef: ElementRef, 
+                private studyService: StudyService, 
+                protected http: HttpClient,
+                private keycloakService: KeycloakService,
+                private studyRightsService: StudyRightsService) {
         this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
             if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
                 this.selectedIndex = null;
                 this.removeContent();
             }
-        }) 
+        })
+    }
+
+    ngOnInit(): void {
+        this.studyRightsService.getMyRightsForStudy(this.studyId).then(rights => {
+            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+        })
     }
 
     ngOnDestroy(): void {
@@ -120,7 +133,7 @@ export class BidsTreeComponent implements OnDestroy {
         this.json = null;
     }
 
-    protected download(item: BidsElement): void {
+    public download(item: BidsElement): void {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
         
@@ -139,6 +152,10 @@ export class BidsTreeComponent implements OnDestroy {
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    public hasDownloadRights(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
 

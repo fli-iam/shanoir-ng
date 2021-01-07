@@ -101,10 +101,11 @@ public class WADODownloaderService {
 	 * 
 	 * @param urls
 	 * @param workFolder
+	 * @param subjectName
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder) throws IOException, MessagingException {
+	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName) throws IOException, MessagingException {
 		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
@@ -121,7 +122,8 @@ public class WADODownloaderService {
 				if (indexInstanceUID > 0) {
 					instanceUID = extractInstanceUID(url, instanceUID);
 					byte[] responseBody = downloadFileFromPACS(url);
-					File extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+					String name = subjectName + "_" + instanceUID;
+					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 					ByteArrayInputStream bIS = null;
 					try {
 						bIS = new ByteArrayInputStream(responseBody);
