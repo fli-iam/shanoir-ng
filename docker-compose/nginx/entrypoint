@@ -37,7 +37,7 @@ override_colors()
 			local name="${BASH_REMATCH[1]}"
 			local value="${BASH_REMATCH[2]}"
 
-			sed -i "s/^\( *--color-$name *:\).*/\1 $value;/" /etc/nginx/html/assets/css/common.css /etc/nginx/html/app.css
+			sed -i "s/^\( *--color-$name *:\).*/\1 $value;/" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles.*.css
 		else
 			error "malformatted color spec in SHANOIR_COLORS: '$spec'  (expected: name:#xxxxxx)"
 		fi
