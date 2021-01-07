@@ -410,7 +410,7 @@ public class DatasetApiController implements DatasetApi {
 
 				if (dataset instanceof EegDataset) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
