@@ -21,7 +21,7 @@ import { EegImportJob } from '../shared/eeg-data.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model'
+import { EegDataset, EegDatasetDTO } from '../../datasets/dataset/eeg/dataset.eeg.model'
 
 @Component({
     selector: 'eeg-finish-import',
@@ -85,7 +85,7 @@ export class FinishEegImportComponent {
         importJob.datasets = [];
 
         for (let dataset of this.importJob.datasets) {
-            let datasetToSet = new EegDataset();
+            let datasetToSet = new EegDatasetDTO();
             datasetToSet.channels = dataset.channels;
             datasetToSet.name = dataset.name;
             datasetToSet.files = dataset.files;

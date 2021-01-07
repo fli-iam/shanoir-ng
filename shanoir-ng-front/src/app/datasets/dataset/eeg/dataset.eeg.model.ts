@@ -11,8 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Dataset } from '../../shared/dataset.model';
 
+import { Dataset } from "../../shared/dataset.model";
+import { DatasetDTO } from "../../shared/dataset.dto";
+import { allOfEnum } from '../../../utils/app.utils';
 
 export class EegDataset extends Dataset {
     samplingFrequency: number;
@@ -23,6 +25,20 @@ export class EegDataset extends Dataset {
     events: Event[];
     coordinatesSystem: string;
 }
+
+export class EegDatasetDTO extends DatasetDTO {
+    samplingFrequency: number;
+    channelCount: number;
+    name: string;
+    files: string[];
+    channels: Channel[];
+    events: Event[];
+    coordinatesSystem: string;
+    
+    stringify() {
+        
+    }
+  }
 
 /** Represents a brainvision EEG channel */
 export class Channel {

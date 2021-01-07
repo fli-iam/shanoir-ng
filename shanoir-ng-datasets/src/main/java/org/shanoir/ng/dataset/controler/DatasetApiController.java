@@ -403,10 +403,15 @@ public class DatasetApiController implements DatasetApi {
 				// Create a new folder for every dataset
 				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
 				datasetFile.mkdir();
-				String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
- 
-				List<URL> pathURLs = new ArrayList<>();
-				if (DCM.equals(format)) {
+
+        String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
+
+        List<URL> pathURLs = new ArrayList<>();
+
+				if (dataset instanceof EegDataset) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
 				} else if (NII.equals(format)) {
