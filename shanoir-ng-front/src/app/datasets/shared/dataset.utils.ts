@@ -12,10 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-var path = require('path');
-var _root = path.resolve(__dirname, '..');
-function root(args) {
-    args = Array.prototype.slice.call(arguments, 0);
-    return path.join.apply(path, [_root].concat(args));
+import { EegDataset } from '../dataset/eeg/dataset.eeg.model';
+import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import { DatasetType } from './dataset-type.model';
+import { Dataset } from './dataset.model';
+
+
+export abstract class DatasetUtils{
+
+    static getDatasetInstance(type: DatasetType): Dataset {
+        if (type == 'Mr') return new MrDataset();
+        if (type == 'Eeg') return new EegDataset();
+        else return new MrDataset(); 
+    }
+
+    static getEntityInstance(entity: Dataset) { 
+        return DatasetUtils.getDatasetInstance(entity.type);
+    }
+
 }
-exports.root = root;
