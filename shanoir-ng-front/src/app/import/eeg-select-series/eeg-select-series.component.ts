@@ -31,9 +31,9 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class EegSelectSeriesComponent {
 
     @ViewChild('selectAll') tree: TreeNodeComponent;
-    protected datasets: EegDatasetDTO[];
+    public datasets: EegDatasetDTO[];
     protected selectedDatasets: EegDatasetDTO[] = [];
-    protected datasetDetail: EegDatasetDTO;
+    public datasetDetail: EegDatasetDTO;
 
     constructor(
             private importService: ImportService,
