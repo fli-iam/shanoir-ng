@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import { EventSourcePolyfill } from 'ng-event-source';
 
 import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';
@@ -25,8 +25,8 @@ export class NotificationsService {
     public nbProcess: number = 0;
     public nbDone: number = 0;
     protected tasks: Task[] = [];
-    protected tasksDone: Task[] = [];
-    protected tasksInProgress: Task[] = [];
+    public tasksDone: Task[] = [];
+    public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
 

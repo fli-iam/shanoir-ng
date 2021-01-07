@@ -97,8 +97,8 @@ public abstract class ShanoirCLI {
 	static {
 		OptionBuilder.withArgName("password");
 		OptionBuilder.hasArg();
-		OptionBuilder.isRequired(true);
-		OptionBuilder.withDescription("password for user identitification.");
+		OptionBuilder.isRequired(false);
+		OptionBuilder.withDescription("password for user identitification. Warning: Please ignore this option if possible, as it will be safely asked (and masked) from the console if needed. This option is still available for scripts and backward compatibility.");
 		passwordOption = OptionBuilder.create("password");
 	}
 

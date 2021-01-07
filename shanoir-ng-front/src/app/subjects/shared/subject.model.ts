@@ -11,15 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Id } from '../../shared/models/id.model';
-import { ServiceLocator } from '../../utils/locator.service';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
-import { SubjectService } from './subject.service';
 import { Sex } from './subject.types';
+
 
 export class Subject extends Entity {
 
@@ -43,13 +41,6 @@ export class Subject extends Entity {
         subject.identifier = identifier;
         subject.subjectStudyList = [subjectStudy];
         return subject;
-    }
-
-    service = ServiceLocator.injector.get(SubjectService);
-    
-    // Override
-    public stringify() {
-        return JSON.stringify(new SubjectDTO(this), this.replacer);
     }
 }
 

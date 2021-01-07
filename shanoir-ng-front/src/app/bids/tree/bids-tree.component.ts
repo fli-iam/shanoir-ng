@@ -16,10 +16,9 @@ import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { GlobalService } from '../../shared/services/global.service';
+import { BidsElement } from '../model/bidsElement.model'
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
-import { BidsElement } from '../model/bidsElement.model';
+import { GlobalService } from '../../shared/services/global.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
@@ -35,13 +34,13 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     @Input() studyId: number;
-    protected list: BidsElement[];
-    protected json: JSON;
-    protected tsv: string[][];
-    protected title: string;
-    protected selectedIndex: string;
+    public list: BidsElement[];
+    public json: JSON;
+    public tsv: string[][];
+    public title: string;
+    public selectedIndex: string;
     private globalClickSubscription: Subscription;
-    protected load: string;
+    public load: string;
     private hasDownloadRight: boolean;
 
     constructor(private globalService: GlobalService,
@@ -134,7 +133,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         this.json = null;
     }
 
-    protected download(item: BidsElement): void {
+    public download(item: BidsElement): void {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
         
