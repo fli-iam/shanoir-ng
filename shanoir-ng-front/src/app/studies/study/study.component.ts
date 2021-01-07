@@ -445,8 +445,12 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public attachNewFile(event: any) {
         this.protocolFile = event.target.files[0];
-        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only PDF files are accepted");
+        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
+        &&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
+            this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
+            this.protocolFile = null;
+        } else if (this.protocolFile.size > 50000000) {
+            this.msgBoxService.log("error", "File must be less than 50Mb.");
             this.protocolFile = null;
         } else {
             this.study.protocolFilePaths = [this.protocolFile.name];
@@ -458,7 +462,11 @@ export class StudyComponent extends EntityComponent<Study> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise().then(result => (console.log("file saved sucessfuly")));
+                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise()
+                .then(result => (console.log("file saved sucessfuly")))
+                .catch(error => {
+                    this.protocolFile = null;
+                });
             }
         });
         return prom;
