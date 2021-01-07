@@ -215,7 +215,7 @@ import { ContrastAgentFormComponent }      from './preclinical/contrastAgent/edi
 import { ContrastAgentService }      from './preclinical/contrastAgent/shared/contrastAgent.service';
 import { AnimalExaminationFormComponent }      from './preclinical/examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './preclinical/examination/list/animal-examination-list.component';
-// import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
+import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
 import { ExtraDataListComponent }      from './preclinical/extraData/extraData/list/extradata-list.component';
 import { ExtraDataFormComponent }      from './preclinical/extraData/extraData/edit/extradata-form.component';
 import { ExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
@@ -437,6 +437,7 @@ import { environment } from 'src/environments/environment';
     	ExaminationAnestheticService,
     	ContrastAgentService,
         ExtraDataService,
+        AnimalExaminationService,
         AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
