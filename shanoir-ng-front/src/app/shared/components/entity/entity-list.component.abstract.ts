@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { OnDestroy } from '@angular/core';
+import { Directive, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -26,20 +26,21 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.abstract';
+import { EntityService } from './entity.abstract.service';
 
-
+@Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
     abstract table: TableComponent;  
-    protected columnDefs: any[];
-    protected customActionDefs: any[];
+    columnDefs: any[];
+    customActionDefs: any[];
     protected router: Router;
     protected confirmDialogService: ConfirmDialogService;
     protected keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
     protected msgBoxService: MsgBoxService;
     protected breadcrumbsService: BreadcrumbsService;
-    protected windowService: WindowService;
+    public windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
@@ -50,6 +51,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private delete: boolean = false;
     private new: boolean = false;
     private showId: boolean = true;
+
+    abstract getService(): EntityService<T>;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
@@ -107,7 +110,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    protected onRowClick(entity: T) {
+    public onRowClick(entity: T) {
         this.goToView(entity.id);
     }
 
@@ -119,7 +122,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh().then(() => {
                             this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');

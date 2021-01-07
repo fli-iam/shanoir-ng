@@ -23,6 +23,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Option } from '../../shared/select/select.component';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 
@@ -48,6 +49,9 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     get manufModel(): ManufacturerModel { return this.entity; }
     set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
 
+    getService(): EntityService<ManufacturerModel> {
+        return this.manufModelService;
+    }
 
     initView(): Promise<void> {
         return this.getManufacturerModel();
@@ -84,14 +88,14 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         else return;
     }
 
-    private onModalityChange(modality: string) {
+    onModalityChange(modality: string) {
         if (modality) {
             this.form.get('magneticField').setValidators(this.getMagneticFieldValidators());
             this.reloadRequiredStyles();
         }
     }
     
-    private get isMR(): boolean { 
+    public get isMR(): boolean { 
         return this.manufModel && this.manufModel.datasetModalityType == DatasetModalityType.MR; 
     }
 
@@ -122,7 +126,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewManuf() {
+    openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
             this.subscribtions.push(
