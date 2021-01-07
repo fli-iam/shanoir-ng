@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -65,6 +66,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 	private ExtraDataService<BloodGasData> bloodGasDataService;
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	@Value("${preclinical.uploadExtradataFolder}")
+	private String extraDataPath;
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -344,7 +347,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)
 			throws IOException {
 		// Create corresponding folders
-		Path path = Paths.get(preclinicalConfig.getUploadExtradataFolder() + extradata.getExaminationId() + File.pathSeparator
+		Path path = Paths.get(extraDataPath + extradata.getExaminationId() + File.pathSeparator
 				+ extradata.getClass().getSimpleName());
 		Files.createDirectories(path);
 		// Path to file

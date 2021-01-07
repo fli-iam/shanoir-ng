@@ -15,7 +15,6 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { BidsElement } from '../../bids/model/bidsElement.model';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -37,6 +36,8 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 @Component({
@@ -48,22 +49,23 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 export class StudyComponent extends EntityComponent<Study> {
     
-    @ViewChild('memberTable') table: TableComponent;
-    @ViewChild('input') private fileInput: ElementRef;
+    @ViewChild('memberTable', { static: false }) table: TableComponent;
+    @ViewChild('input', { static: false }) private fileInput: ElementRef;
 
-    private subjects: IdName[];
-    private selectedCenter: IdName;
+    subjects: IdName[];
+    selectedCenter: IdName;
     
     private browserPaging: BrowserPaging<StudyUser>;
-    private columnDefs: any[];
-    private users: User[] = [];
+    columnDefs: any[];
+    users: User[] = [];
     
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
+
+    public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
-    protected selectedDatasetIds: number[];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -86,9 +88,13 @@ export class StudyComponent extends EntityComponent<Study> {
     public get study(): Study { return this.entity; }
     public set study(study: Study) { this.entity = study; }
 
+    getService(): EntityService<Study> {
+        return this.studyService;
+    }
+
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
-            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
         return this.studyService.get(this.id).then(study => {this.study = study}); 
     }
@@ -237,11 +243,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private goToCenter(id: number) {
+    goToCenter(id: number) {
         this.router.navigate(['/center/details/' + id]);
     }
 
-    private onCenterAdd(): void {
+    onCenterAdd(): void {
         if (this.selectedCenter) {
             let studyCenter: StudyCenter = new StudyCenter();
             studyCenter.center = new Center();
@@ -256,7 +262,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private onCenterChange(center: IdName): void {
+    onCenterChange(center: IdName): void {
         this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []
@@ -271,7 +277,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    private removeCenterFromStudy(centerId: number): void {
+    removeCenterFromStudy(centerId: number): void {
         if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         if (this.study.studyCenterList.length < 2) {
@@ -284,12 +290,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
     
-    private enableAddIcon(): boolean {
+    enableAddIcon(): boolean {
         return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
             && (!this.study.monoCenter || !this.study.studyCenterList || this.study.studyCenterList.length == 0);
     }    
 
-    private isCenterAlreadyLinked(centerId: number): boolean {
+    isCenterAlreadyLinked(centerId: number): boolean {
         if (!this.study.studyCenterList) return false;
         for (let studyCenter of this.study.studyCenterList) {
             if (centerId == studyCenter.center.id) {
@@ -354,7 +360,7 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private onUserAdd(selectedUser: User) {
+    public onUserAdd(selectedUser: User) {
         if (!selectedUser) {
             return;
         }
@@ -408,20 +414,20 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private onStudyUserEdit() {
+    onStudyUserEdit() {
         this.form.get('subjectStudyList').markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    private studyStatusStr(studyStatus: string) {
+    studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
-    private click() {
+    public click() {
         this.fileInput.nativeElement.click();
     }
 
-    protected deleteFile(file: any) {
+    public deleteFile() {
         if (this.mode == 'create') { 
             this.study.protocolFilePaths = [];
             this.protocolFile = null;
@@ -433,14 +439,18 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    protected downloadFile() {
+    public downloadFile() {
         this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         this.protocolFile = event.target.files[0];
-        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only PDF files are accepted");
+        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
+        &&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
+            this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
+            this.protocolFile = null;
+        } else if (this.protocolFile.size > 50000000) {
+            this.msgBoxService.log("error", "File must be less than 50Mb.");
             this.protocolFile = null;
         } else {
             this.study.protocolFilePaths = [this.protocolFile.name];
@@ -448,11 +458,15 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.updateValueAndValidity();
     }
 
-    protected save(): Promise<void> {
+    save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise().then(result => (console.log("file saved sucessfuly")));
+                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise()
+                .then(result => (console.log("file saved sucessfuly")))
+                .catch(error => {
+                    this.protocolFile = null;
+                });
             }
         });
         return prom;

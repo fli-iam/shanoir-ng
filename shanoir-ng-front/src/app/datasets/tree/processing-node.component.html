@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="null"
         [hasChildren]="hasChildren()">
 
-    <ng-container *ngIf="node.open && node.datasets && node.datasets != 'UNLOADED'"> 
+    <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')"> 
             <dataset-node
                     node
                     *ngFor="let dataset of node.datasets"

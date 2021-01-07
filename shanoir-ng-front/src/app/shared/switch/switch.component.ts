@@ -39,15 +39,15 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
 
     constructor() {}
 
-    @HostListener('click', ['$event']) 
-    private onClick() {
+    @HostListener('click', []) 
+    onClick() {
         if (this.disabled) return; 
         this.ngModel = !this.ngModel;
         this.ngModelChange.emit(this.ngModel);
     }
 
     @HostListener('keydown', ['$event']) 
-    private onKeyPress(event: any) {
+    onKeyPress(event: any) {
         if (this.disabled) return;
         if (' ' == event.key) {
             this.ngModel = !this.ngModel;
@@ -83,13 +83,13 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
         this.onTouchedCallback = fn;
     }
 
-    @HostListener('focusout', ['$event']) 
-    private onFocusOut() {
+    @HostListener('focusout', []) 
+    onFocusOut() {
         this.onTouchedCallback();
     }
 
     @HostBinding('attr.tabindex')
-    private get tabindex(): number {
+    get tabindex(): number {
         return this.disabled ? undefined : 0;
     } 
 }
