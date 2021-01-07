@@ -70,7 +70,7 @@ export class EegSelectSeriesComponent {
         }
     }
 
-    private showDatasetDetail(datasetToDetail: EegDatasetDTO): void {
+    public showDatasetDetail(datasetToDetail: EegDatasetDTO): void {
         this.datasetDetail = datasetToDetail
     }
 
