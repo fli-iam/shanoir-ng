@@ -63,7 +63,8 @@ public class DatasetSecurityService {
 	@Autowired
 	StudyRightsService commService;
 
-	@Autowired StudyRepository studyRepository;
+	@Autowired
+	StudyRepository studyRepository;
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
