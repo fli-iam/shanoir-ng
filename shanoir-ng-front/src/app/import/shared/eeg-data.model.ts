@@ -14,7 +14,7 @@
 
 import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
-import { EegDataset } from "../../datasets/dataset/eeg/dataset.eeg.model"
+import { EegDatasetDTO } from "../../datasets/dataset/eeg/dataset.eeg.model"
 
 export class EegImportJob {
     workFolder: string;
@@ -22,7 +22,7 @@ export class EegImportJob {
     studyId: number;
     subjectId: number;
     acquisitionEquipmentId: number;
-    datasets: EegDataset[];
+    datasets: EegDatasetDTO[];
     coordinatesSystem: String;
     subjectName: String;
     studyName: String;
