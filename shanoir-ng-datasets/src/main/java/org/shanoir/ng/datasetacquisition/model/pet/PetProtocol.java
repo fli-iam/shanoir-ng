@@ -40,7 +40,7 @@ public class PetProtocol extends AbstractEntity {
 	/** (0054, 1101) Attenuation Correction Method */
 	private String attenuationCorrectionMethod;
 
-	/** Convolution kernel */
+	/** (0018,1210) Convolution kernel */
 	private String convolutionKernel;
 
 	/** (0054, 1102) Decay Correction */
@@ -57,29 +57,29 @@ public class PetProtocol extends AbstractEntity {
 	@NotNull
 	private Integer dimensionY;
 
-	/** Dose calibration factor */
+	/** (0054,1322) Dose calibration factor */
 	private Integer doseCalibrationFactor;
 
 	/**
-	 * Energy window lower limit in KeV. 
+	 * (0054,0014) Energy window lower limit in KeV. 
 	 * The unit of measure of the energy window lower limit must be in KeV.
 	 */
 	private Integer energyWindowLowerLimit;
 
 	/**
-	 * Energy window upper limit in KeV. 
+	 * (0054,0015) Energy window upper limit in KeV. 
 	 * The unit of measure of the energy window upper limit must be in KeV.
 	 */
 	private Integer energyWindowUpperLimit;
 
-	/** number of iterations */
+	/** (0018,9739) number of iterations */
 	private String numberOfIterations;
 
 	/** (0054, 0081) Number of Slices */
 	@NotNull
 	private Integer numberOfSlices;
 
-	/** number of subsets */
+	/** (0018,9740) number of subsets */
 	private String numberOfSubsets;
 
 	/** The PET Dataset acquisition. */
@@ -109,7 +109,7 @@ public class PetProtocol extends AbstractEntity {
 	private String reconstructionMethod;
 
 	/** (0028, 1053) Rescale Slope */
-	private Long rescaleSlope;
+	private Integer rescaleSlope;
 
 	/** (0028, 1054) Rescale Type */
 	private String rescaleType;
@@ -117,7 +117,7 @@ public class PetProtocol extends AbstractEntity {
 	/** (0054, 1105) Scatter Correction Method */
 	private String scatterCorrectionMethod;
 
-	/** Scatter fraction factor */
+	/** (0054,1323) Scatter fraction factor */
 	private Integer scatterFractionFactor;
 
 	/** (0054, 1001) Units */
@@ -417,7 +417,7 @@ public class PetProtocol extends AbstractEntity {
 	/**
 	 * @return the rescaleSlope
 	 */
-	public Long getRescaleSlope() {
+	public Integer getRescaleSlope() {
 		return rescaleSlope;
 	}
 
@@ -425,7 +425,7 @@ public class PetProtocol extends AbstractEntity {
 	 * @param rescaleSlope
 	 *            the rescaleSlope to set
 	 */
-	public void setRescaleSlope(Long rescaleSlope) {
+	public void setRescaleSlope(Integer rescaleSlope) {
 		this.rescaleSlope = rescaleSlope;
 	}
 

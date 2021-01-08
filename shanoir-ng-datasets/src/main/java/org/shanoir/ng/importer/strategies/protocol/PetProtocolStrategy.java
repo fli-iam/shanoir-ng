@@ -70,6 +70,113 @@ public class PetProtocolStrategy {
 		LOG.debug("extractMetadata : voxelSizeZ=" + voxelSizeZ);
 		petProtocol.setVoxelSizeZ(voxelSizeZ);
 		
+		/** (0054, 1101) Attenuation Correction Method */
+		final String attenuationCorrectionMethod = attributes.getString(Tag.AttenuationCorrectionMethod);
+		LOG.debug("extractMetadata : attenuationCorrectionMethod=" + attenuationCorrectionMethod);
+		petProtocol.setAttenuationCorrectionMethod(attenuationCorrectionMethod);
+
+		/** (0018,1210) Convolution kernel */
+		final String convolutionKernel = attributes.getString(Tag.ConvolutionKernel);
+		LOG.debug("extractMetadata : convolutionKernel=" + convolutionKernel);
+		petProtocol.setConvolutionKernel(convolutionKernel);
+
+		/** (0054, 1102) Decay Correction */
+		final String decayCorrection = attributes.getString(Tag.DecayCorrection);
+		LOG.debug("extractMetadata : decayCorrection=" + decayCorrection);
+		petProtocol.setDecayCorrection(decayCorrection);
+
+		/** (0054, 1321) Decay Factor */
+		final Integer decayFactor = attributes.getInt(Tag.DecayFactor, 0);
+		LOG.debug("extractMetadata : decayFactor=" + decayFactor);
+		petProtocol.setDecayFactor(decayFactor);
+		
+		/** (0054,1322) Dose calibration factor */
+		final Integer doseCalibrationFactor = attributes.getInt(Tag.DoseCalibrationFactor, 0);
+		LOG.debug("extractMetadata : doseCalibrationFactor=" + doseCalibrationFactor);
+		petProtocol.setDoseCalibrationFactor(doseCalibrationFactor);
+
+		/**
+		 * (0054,0014) Energy window lower limit in KeV. 
+		 * The unit of measure of the energy window lower limit must be in KeV.
+		 */
+		final Integer energyWindowLowerLimit = attributes.getInt(Tag.EnergyWindowLowerLimit, 0);
+		LOG.debug("extractMetadata : energyWindowLowerLimit=" + energyWindowLowerLimit);
+		petProtocol.setEnergyWindowLowerLimit(energyWindowLowerLimit);
+
+		/**
+		 * (0054,0015) Energy window upper limit in KeV. 
+		 * The unit of measure of the energy window upper limit must be in KeV.
+		 */
+		final Integer energyWindowUpperLimit = attributes.getInt(Tag.EnergyWindowUpperLimit, 0);
+		LOG.debug("extractMetadata : energyWindowUpperLimit=" + energyWindowUpperLimit);
+		petProtocol.setEnergyWindowUpperLimit(energyWindowUpperLimit);
+
+		/** (0018,9739) number of iterations */
+		final String numberOfIterations = attributes.getString(Tag.NumberOfIterations);
+		LOG.debug("extractMetadata : numberOfIterations=" + numberOfIterations);
+		petProtocol.setNumberOfIterations(numberOfIterations);
+		
+		/** (0018,9740) number of subsets */
+		final String numberOfSubsets = attributes.getString(Tag.NumberOfSubsets);
+		LOG.debug("extractMetadata : numberOfSubsets=" + numberOfSubsets);
+		petProtocol.setNumberOfSubsets(numberOfSubsets);
+		
+		/**
+		 * (0018,1075) Radionuclide Half Life in sec. 
+		 * The unit of measure of the radionuclide half life must be in sec.
+		 */
+		final Double radionuclideHalfLife = attributes.getDouble(Tag.RadionuclideHalfLife, 0);
+		LOG.debug("extractMetadata : radionuclideHalfLife=" + radionuclideHalfLife);
+		petProtocol.setRadionuclideHalfLife(radionuclideHalfLife);
+
+		/**
+		 * (0018,1074) Radionuclide Total Dose in bq. 
+		 * The unit of measure of the radionuclide total dose must be in bq.
+		 */
+		final Integer radionuclideTotalDose = attributes.getInt(Tag.RadionuclideTotalDose, 0);
+		LOG.debug("extractMetadata : radionuclideTotalDose=" + radionuclideTotalDose);
+		petProtocol.setRadionuclideTotalDose(radionuclideTotalDose);
+
+		/** Radiopharmaceutical Code */
+		final String radiopharmaceuticalCode = attributes.getString(Tag.Radiopharmaceutical);
+		LOG.debug("extractMetadata : radiopharmaceuticalCode=" + radiopharmaceuticalCode);
+		petProtocol.setRadiopharmaceuticalCode(radiopharmaceuticalCode);
+
+		/** (0054, 1100) Randoms Correction Method */
+		final String randomsCorrectionMethod = attributes.getString(Tag.RandomsCorrectionMethod);
+		LOG.debug("extractMetadata : randomsCorrectionMethod=" + randomsCorrectionMethod);
+		petProtocol.setRandomsCorrectionMethod(randomsCorrectionMethod);
+
+		/** (0054, 1103) Reconstruction Method */
+		final String reconstructionMethod = attributes.getString(Tag.ReconstructionMethod);
+		LOG.debug("extractMetadata : reconstructionMethod=" + reconstructionMethod);
+		petProtocol.setReconstructionMethod(reconstructionMethod);
+
+		/** (0028, 1053) Rescale Slope */
+		final Integer rescaleSlope = attributes.getInt(Tag.RescaleSlope, 0);
+		LOG.debug("extractMetadata : rescaleSlope=" + rescaleSlope);
+		petProtocol.setRescaleSlope(rescaleSlope);
+
+		/** (0028, 1054) Rescale Type */
+		final String rescaleType = attributes.getString(Tag.RescaleType);
+		LOG.debug("extractMetadata : rescaleType=" + rescaleType);
+		petProtocol.setRescaleType(rescaleType);
+
+		/** (0054, 1105) Scatter Correction Method */
+		final String scatterCorrectionMethod = attributes.getString(Tag.ScatterCorrectionMethod);
+		LOG.debug("extractMetadata : scatterCorrectionMethod=" + scatterCorrectionMethod);
+		petProtocol.setScatterCorrectionMethod(scatterCorrectionMethod);
+
+		/** (0054,1323) Scatter fraction factor */
+		final Integer scatterFractionFactor = attributes.getInt(Tag.ScatterFractionFactor, 0);
+		LOG.debug("extractMetadata : scatterFractionFactor=" + scatterFractionFactor);
+		petProtocol.setScatterFractionFactor(scatterFractionFactor);
+
+		/** (0054, 1001) Units */
+		final String units = attributes.getString(Tag.Units);
+		LOG.debug("extractMetadata : units=" + units);
+		petProtocol.setUnits(units);
+		
 		return petProtocol;
 	}
 
