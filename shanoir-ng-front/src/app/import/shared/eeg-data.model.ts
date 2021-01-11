@@ -14,7 +14,7 @@
 
 import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
-import { EegDatasetDTO } from "../../datasets/dataset/eeg/dataset.eeg.model"
+import { EegDatasetDTO } from "../../datasets/shared/dataset.dto"
 
 export class EegImportJob {
     workFolder: string;
