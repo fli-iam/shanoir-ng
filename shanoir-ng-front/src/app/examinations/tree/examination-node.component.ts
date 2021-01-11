@@ -25,9 +25,6 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
 
-
-
-
 @Component({
     selector: 'examination-node',
     templateUrl: 'examination-node.component.html'

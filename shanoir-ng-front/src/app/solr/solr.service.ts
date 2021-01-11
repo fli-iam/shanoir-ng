@@ -37,15 +37,9 @@ export class SolrService {
         if (!solrReq.studyName && !solrReq.subjectName && !solrReq.examinationComment && !solrReq.datasetName
             && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature) {
                 return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
-                .map((solrResultPage: SolrResultPage) => {
-                    return solrResultPage;
-                })
             .toPromise();
         } else {
             return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(solrReq), { 'params': pageable.toParams() })    
-                .map((solrResultPage: SolrResultPage) => {
-                    return solrResultPage;
-                })
             .toPromise();
         }
     }

@@ -28,6 +28,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
@@ -43,13 +44,13 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
 
-    private centers: IdName[];
+    public centers: IdName[];
     public studies: IdName[];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private files: File[] = [];
-    private inImport: boolean; 
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    public inImport: boolean; 
+    public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
     private hasAdministrateRight: boolean = false;
     private hasImportRight: boolean = false;
@@ -67,20 +68,23 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private studyService: StudyService,
             private datasetService: DatasetService,
             private studyRightsService: StudyRightsService,
-            protected breadcrumbsService: BreadcrumbsService,
-            private datasetAcquisitionService: DatasetAcquisitionService) {
+            public breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
     }
-    
-    private setFile() {
+
+    public setFile() {
         this.fileInput.nativeElement.click();
     }
     
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
     
+    getService(): EntityService<Examination> {
+        return this.examinationService;
+    }
+
     set entity(exam: Examination) {
         super.entity = exam;
         this.getSubjects();
@@ -166,11 +170,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
-    private onStudyChange() {
+    onStudyChange() {
         this.getSubjects();
     }
 
-    private instAssessment() {
+    instAssessment() {
     }
 
     public async hasEditRight(): Promise<boolean> {
@@ -182,14 +186,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
-    protected deleteFile(file: any) {
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
@@ -197,7 +201,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {

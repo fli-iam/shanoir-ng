@@ -18,7 +18,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <tool-tip class="larger">
                 Query syntax example: 
                 <b>studyName:test;subjectName:xxxx;datasetName:*restingstate*;</b>
-                <i>Multiple character wildcard searches are allowed by adding * to keyword</i>
+                <i>Multiple character wildcard searches are allowed by adding * to keyword.</i>
+                <b>Special characters</b> like "-" is not yet supported. For "USPIO-6" study, get the data with <b>"studyName:USPIO*;"</b>
             </tool-tip>
         </h2>
         <input type="text" [(ngModel)]="keyword" formControlName="keywords" id="searchBar" placeholder="Search.." (change)="table.refresh()">

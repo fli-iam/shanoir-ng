@@ -68,6 +68,9 @@ public class BrukerApiController implements BrukerApi {
 	@Value("${ms.url.bruker2dicom}")
 	private String bruker2DicomMsUrl;
 
+	@Value("${preclinical.uploadBrukerFolder}")
+	private String brukerFolder;
+
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
@@ -173,7 +176,7 @@ public class BrukerApiController implements BrukerApi {
 	 */
 	private Path createBrukerTempFile(String fileName) throws IOException {
 		int index = 0;
-		String pathFile = preclinicalConfig.getUploadBrukerFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
+		String pathFile = brukerFolder + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
 				+ FOLDER_SEP + fileName;
 		// if the folder exists, create a new folder by adding a figure at the end of
 		// the folder name

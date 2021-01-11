@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class FileUploadReady {
     xhr:XMLHttpRequest;

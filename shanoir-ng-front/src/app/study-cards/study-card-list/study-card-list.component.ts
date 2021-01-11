@@ -22,6 +22,7 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -31,13 +32,17 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private studyCardService: StudyCardService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
                 
         super('study-card');
+    }
+
+    getService(): EntityService<StudyCard> {
+        return this.studyCardService;
     }
 
     getOptions() {
