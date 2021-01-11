@@ -130,7 +130,7 @@ dcm4chee-arc:
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 server:
-  port: 9923
+  port: 9924
 spring:
   profiles: dev
   datasource:
