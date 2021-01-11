@@ -37,14 +37,9 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-<<<<<<< HEAD
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-
-=======
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
->>>>>>> refs/heads/develop
 
 @Component({
     selector: 'study-detail',
