@@ -25,6 +25,7 @@ import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -46,6 +47,10 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     constructor(
         private subjectPathologyService: SubjectPathologyService) {
             super('preclinical-subject-pathology');
+    }
+
+    getService(): EntityService<SubjectPathology> {
+        return this.subjectPathologyService;
     }
 
     public getEntityName() {

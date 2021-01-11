@@ -39,7 +39,7 @@ export class SolrSearchComponent{
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     hasDownloadRight: boolean = true;
     selectedDatasetIds: number[];
     allStudies: FacetResultPage; 
@@ -56,7 +56,7 @@ export class SolrSearchComponent{
     }
     
     buildForm(): FormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'keywords': [this.keyword, Validators.pattern(searchBarRegex)],
             'studyName': [this.solrRequest.studyName],

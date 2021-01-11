@@ -29,6 +29,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationNode } from '../../tree/tree.model';
 
 @Component({
@@ -41,15 +42,16 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
 
-    private centers: IdName[];
+    public centers: IdName[];
     public studies: IdName[];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private files: File[] = [];
-    private inImport: boolean; 
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;  
+    public inImport: boolean; 
+    public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
     private hasAdministrateRight: boolean = false;
+    private hasImportRight: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -58,19 +60,23 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private studyService: StudyService,
             private datasetService: DatasetService,
             private studyRightsService: StudyRightsService,
-            protected breadcrumbsService: BreadcrumbsService) {
+            public breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
     }
-    
-    private setFile() {
+
+    public setFile() {
         this.fileInput.nativeElement.click();
     }
     
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
     
+    getService(): EntityService<Examination> {
+        return this.examinationService;
+    }
+
     set entity(exam: Examination) {
         super.entity = exam;
         this.getSubjects();
@@ -85,10 +91,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.examination = examination;
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
+                this.hasImportRight = true;
                 return;
             } else {
                 return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                 });
             }
         });
@@ -144,25 +152,30 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
-    private onStudyChange() {
+    onStudyChange() {
         this.getSubjects();
     }
 
-    private instAssessment() {
+    instAssessment() {
     }
 
     public async hasEditRight(): Promise<boolean> {
-	   return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
 
-    protected deleteFile(file: any) {
+
+    public async hasDeleteRight(): Promise<boolean> {
+         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
@@ -170,7 +183,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {

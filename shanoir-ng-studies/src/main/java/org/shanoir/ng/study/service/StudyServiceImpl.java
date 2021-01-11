@@ -146,7 +146,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
-		if (study.getName() != studyDb.getName()) {
+		if (!study.getName().equals(studyDb.getName())) {
 			updateStudyName(new IdName(study.getId(), study.getName()));
 		}
 		studyDb.setName(study.getName());
