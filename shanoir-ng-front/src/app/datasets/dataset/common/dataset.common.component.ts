@@ -26,7 +26,7 @@ import { Option } from '../../../shared/select/select.component';
 import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
-
+import { DatasetType } from '../../shared/dataset-type.model';
 
 
 @Component({
@@ -42,7 +42,7 @@ export class CommonDatasetComponent implements OnChanges {
     studies: Study[] = [];
     
     exploredEntityOptions: Option<ExploredEntity>[];
-    datasetModalityTypes: Option<DatasetModalityType>[];
+    datasetModalityTypes: Option<string>[];
     processedDatasetTypeOptions: Option<ProcessedDatasetType>[];
 
     constructor(
@@ -51,7 +51,8 @@ export class CommonDatasetComponent implements OnChanges {
             private formBuilder: FormBuilder) {
 
         this.exploredEntityOptions = ExploredEntity.options;
-        this.datasetModalityTypes = DatasetModalityType.options;
+        this.datasetModalityTypes = ['Calibration' , 'Ct' , 'Eeg' , 'Meg' , 'Mesh' , 'Mr', 'ParameterQuantification' , 'Pet' , 'Registration' , 'Segmentation' , 'Spect'  , 'Statistical' , 'Template']
+            .map(prop => new Option<string>(prop, prop));
         this.processedDatasetTypeOptions = ProcessedDatasetType.options;
     }
 
@@ -59,7 +60,6 @@ export class CommonDatasetComponent implements OnChanges {
         this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subject, [Validators.required]));
         this.parentFormGroup.addControl('study', new FormControl(this.dataset.study, [Validators.required]));
         this.parentFormGroup.addControl('creationDate', new FormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
-        
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -82,7 +82,8 @@ export class CommonDatasetComponent implements OnChanges {
             if (changes['dataset'].firstChange || changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
                 this.fetchOneStudy();
             }
-
+        } else if(changes['dataset'] && this.mode == 'edit') {
+            this.parentFormGroup.updateValueAndValidity();
         }
     }
 

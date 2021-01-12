@@ -17,10 +17,7 @@ package org.shanoir.ng.dataset.service;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
 import javax.persistence.PersistenceContext;
-import javax.persistence.StoredProcedureQuery;
-
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -120,6 +117,10 @@ public class DatasetServiceImpl implements DatasetService {
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
+		if (dataset.getOriginMetadata().getId().equals(dataset.getUpdatedMetadata().getId())) {
+			// Force creation of a new dataset metadata
+			dataset.getUpdatedMetadata().setId(null);
+		}
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
