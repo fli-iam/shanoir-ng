@@ -30,36 +30,6 @@ import org.springframework.web.client.RestTemplate;
 @ConfigurationProperties(prefix = "preclinical")
 public class ShanoirPreclinicalConfiguration {
 
-	private String uploadExtradataFolder;
-	private String separator;
-	private String uploadBrukerFolder;
-
-	public String getUploadExtradataFolder() {
-		if (!uploadExtradataFolder.endsWith(separator))
-			return uploadExtradataFolder.concat(separator);
-		return uploadExtradataFolder;
-	}
-
-	public void setUploadExtradataFolder(String uploadExtradataFolder) {
-		this.uploadExtradataFolder = uploadExtradataFolder;
-	}
-
-	public String getSeparator() {
-		return separator;
-	}
-
-	public void setSeparator(String separator) {
-		this.separator = separator;
-	}
-
-	public String getUploadBrukerFolder() {
-		return uploadBrukerFolder;
-	}
-
-	public void setUploadBrukerFolder(String uploadBrukerFolder) {
-		this.uploadBrukerFolder = uploadBrukerFolder;
-	}
-
 	@Bean
 	public RestTemplate restTemplate(RestTemplateBuilder builder) {
 		return builder.build();

@@ -15,14 +15,10 @@ import { CardinalityOfRelatedSubjects } from '../../enum/cardinality-of-related-
 import { ExploredEntity } from '../../enum/explored-entity.enum';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { Entity } from '../../shared/components/entity/entity.abstract';
+import { DatasetProcessing } from './dataset-processing.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { getDatasetInstance } from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
-import { DatasetDTO } from './dataset.dto';
-import { DatasetService } from './dataset.service';
 
 
 export abstract class Dataset extends Entity {
@@ -42,21 +38,6 @@ export abstract class Dataset extends Entity {
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
     processings: DatasetProcessing[];
-
-    service: DatasetService = ServiceLocator.injector.get(DatasetService);
-
-    public stringify() {
-        return JSON.stringify(new DatasetDTO(this), this.replacer);
-    }
-
-    static getDatasetInstance(type: DatasetType): Dataset {
-        // switch(type) {
-        //     case 'Mr': return new MrDataset();
-        //     //case 'Pet': return new PetDataset();
-        //     default: throw new Error(type + ' is not an implemented dataset type');
-        // }
-        return getDatasetInstance(type); // temporary
-    }
 }
 
 export class DatasetMetadata {

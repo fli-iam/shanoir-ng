@@ -2,7 +2,8 @@
 
 .menu-item { padding: 0; display: block; margin: 0; color: var(--dark-grey); position: relative; text-align: right; white-space: nowrap; height: 20px; }
 
-.menu-item.disabled::after { content: " "; top: 0;bottom: 0; left: 0;  right: 0;  position: absolute; background-color: var(--light-grey); opacity: 0.8; }
+.menu-item.disabled, .menu-item.disabled i { color: var(--grey); }
+.menu-item.disabled::after { content: " "; top: 0;bottom: 0; left: 0;  right: 0; position: absolute; background-color: transparent; }
 
 /* .menu-item.active { color: var(--very-light-grey); background-color: var(--color-a); } */
 /* .menu-item.opened { color: var(--very-light-grey); background-color: var(--color-a); } */

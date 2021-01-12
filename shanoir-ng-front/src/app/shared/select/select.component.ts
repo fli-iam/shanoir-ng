@@ -29,10 +29,8 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-
-import { findLastIndex } from '../../utils/app.utils';
+import { findLastIndex, deepEquals } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
-import { inspect } from 'util';
 
 
 @Component({
@@ -57,27 +55,27 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
     @Input() pipe: PipeTransform;
-    private displayedOptions: Option<any>[] = [];
-    @ViewChild('input') textInput: ElementRef;
-    @ViewChild('hiddenOption') hiddenOption: ElementRef;
+    public displayedOptions: Option<any>[] = [];
+    @ViewChild('input', { static: false }) textInput: ElementRef;
+    @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
     private inputValue: any;
     private _selectedOptionIndex: number;
-    private focusedOptionIndex: number;
+    public focusedOptionIndex: number;
     private _firstScrollOptionIndex: number;
     private filteredOptions: FilteredOptions;
     private globalClickSubscription: Subscription;
     private optionChangeSubscription: Subscription;
-    private way: 'up' | 'down' = 'down';
-    private hideToComputeHeight: boolean = false;
+    public way: 'up' | 'down' = 'down';
+    public hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
-    private inputText: string;
+    public inputText: string;
     private _searchText: string = null;
     @Input() disabled: boolean = false;
     @HostBinding('class.read-only') @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    private maxWidth: number;
-    private noResult: boolean;
+    public maxWidth: number;
+    public noResult: boolean;
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -174,7 +172,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
-    private get selectedOption(): Option<any> {
+    public get selectedOption(): Option<any> {
         return this.options 
             && this.selectedOptionIndex != null 
             && this.selectedOptionIndex != undefined
@@ -272,13 +270,13 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.noResult = this.displayedOptions.length == 0;
     }
     
-    private onUserSelectedOption(option: Option<any>) {
+    public onUserSelectedOption(option: Option<any>) {
         if (option.disabled) return;
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
     }
     
-    private onUserSelectedOptionIndex(index: number) {
+    public onUserSelectedOptionIndex(index: number) {
         this.searchText = null;
         this.element.nativeElement.focus();
         this.selectedOptionIndex = index;
@@ -288,7 +286,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.selectOption.emit(this.selectedOption);
     }
 
-    private isOptionSelected(option: Option<any>) {
+    public isOptionSelected(option: Option<any>) {
         return this.hasSelectedOption() && this.valuesEqual(this.selectedOption.value, option.value);
     }
 
@@ -296,10 +294,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (value1 == value2) return true;
         else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
         else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return inspect(value1) === inspect(value2);
+        else return deepEquals(value1, value2);
     }
 
-    private open() {
+    public open() {
         if (this.isOpen()) return;
         if (this.options) {
             this.subscribeToGlobalClick();
@@ -308,13 +306,13 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }  
     }
 
-    private close() {
+    public close() {
         this.unsubscribeToGlobalClick();
         this.firstScrollOptionIndex = null;
         this.focusedOptionIndex = null;
     }
     
-    private isOpen(): boolean {
+    public isOpen(): boolean {
         return this.firstScrollOptionIndex != undefined && this.firstScrollOptionIndex != null;
     }
 
@@ -375,7 +373,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
       }
 
     @HostListener('keydown', ['$event']) 
-    private onKeyPress(event: any) {
+    public onKeyPress(event: any) {
         if (this.readOnly) return;
         if ('ArrowDown' == event.key) {
             this.scrollDownByOne();
@@ -484,7 +482,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private dragStartOffsetY: number;
-    private dragging: boolean = false;
+    public dragging: boolean = false;
     onDragStart(event) {
         this.dragging = true;
         let img = new Image();
@@ -540,7 +538,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
-    private onTypeText(text: string) {
+    public onTypeText(text: string) {
         this.unSelectOption();
         this.onChangeCallback(null);
         this.userChange.emit(null);
@@ -549,7 +547,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.open();
     }
 
-    private onInputFocus() {
+    public onInputFocus() {
         this.textInput.nativeElement.select();
     }    
     
@@ -562,7 +560,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostListener('focusout', ['$event']) 
-    private onFocusOut(event: FocusEvent) {
+    onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.close();
             this.onTouchedCallback();
@@ -570,19 +568,19 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostBinding('attr.tabindex')
-    private get tabindex(): number {
+    get tabindex(): number {
         return this.disabled ? undefined : 0;
     } 
 
-    private clickView(): void {
+    clickView(): void {
         if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
     }
 
-    private clickNew(): void {
+    clickNew(): void {
         if(!this.newDisabled) this.onNewClick.emit();
     }
 
-    private clickAdd(): void {
+    clickAdd(): void {
         if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
     }
 
