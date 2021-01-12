@@ -16,9 +16,11 @@ import { Router } from '@angular/router';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
-import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
+import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
@@ -35,20 +37,25 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     node: ExaminationNode;
     loading: boolean = false;
+    downloading: boolean = false;
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
+    datasetIds: number[];
 
     constructor(
         private router: Router,
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private examPipe: ExaminationPipe) {
+        private examPipe: ExaminationPipe,
+        private datasetService: DatasetService,
+        private msgService: MsgBoxService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof ExaminationNode) {
                 this.node = this.input;
+                if (this.input.datasetAcquisitions != 'UNLOADED') this.fetchDatasetIds(this.input.datasetAcquisitions);
             } else {
                 this.node = new ExaminationNode(
                         this.input.id, 
@@ -76,24 +83,59 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     firstOpen() {
-        if (this.node.datasetAcquisitions == 'UNLOADED') this.loadDatasetAcquisitions();
+        if (this.node.datasetAcquisitions == 'UNLOADED') this.loadDatasetAcquisitions().then(() => this.node.open = true);
     }
 
-    loadDatasetAcquisitions() {
+    loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
-        this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
-            if (dsAcqs) {
-                this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq)).sort(
-                    function(a, b) {
-                        return a.sortingIndex - b.sortingIndex;
-                    })
-               }
-            this.loading = false;
-            this.node.open = true;
-        }).catch(() => this.loading = false);
+        return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
+            if (!dsAcqs) dsAcqs = [];
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq))
+                .sort((a, b) => a.sortingIndex - b.sortingIndex);
+            this.fetchDatasetIds(this.node.datasetAcquisitions);
+            this.nodeInit.emit(this.node);
+            this.loading = false; 
+        }).catch((reason) => { this.loading = false; });
+    }
+    
+    fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
+        let datasetIds: number[] = [];
+        if (datasetAcquisitions) {
+            datasetAcquisitions.forEach(dsAcq => {
+                if (dsAcq.datasets == 'UNLOADED') {
+                    datasetIds = undefined; // abort
+                    return;
+                } else {
+                    dsAcq.datasets.forEach(ds => {
+                        datasetIds.push(ds.id);                    
+                    });
+                }
+            });
+        }
+        this.datasetIds = datasetIds;
     }
 
-    private mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
+    download(format: string) {
+        if (this.datasetIds && this.datasetIds.length == 0) return;
+        let datasetIdsReady: Promise<void>;
+        if (this.node.datasetAcquisitions == 'UNLOADED') {
+            datasetIdsReady = this.loadDatasetAcquisitions();
+            if (!this.datasetIds || this.datasetIds.length == 0) {
+                this.msgService.log('warn', 'Sorry, no dataset for this examination');
+                return;
+            }
+        } else {
+            datasetIdsReady = Promise.resolve();
+        }
+        datasetIdsReady.then(() => {
+            this.downloading = true;
+            this.datasetService.downloadDatasets(this.datasetIds, format)
+                    .then(() => this.downloading = false).catch(() => this.downloading = false);
+        });
+    }
+
+
+    mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.sortingIndex,
@@ -102,7 +144,7 @@ export class ExaminationNodeComponent implements OnChanges {
         );
     }
     
-    private mapDatasetNode(dataset: Dataset): DatasetNode {
+    mapDatasetNode(dataset: Dataset): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
@@ -111,7 +153,7 @@ export class ExaminationNodeComponent implements OnChanges {
         );
     }
     
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
+    mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
