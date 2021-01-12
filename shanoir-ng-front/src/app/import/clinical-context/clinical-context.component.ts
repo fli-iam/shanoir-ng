@@ -542,7 +542,9 @@ export class ClinicalContextComponent implements OnDestroy {
             newExam.hasStudyCenterData = true;
         }
         newExam.study = new IdName(this.study.id, this.study.name);
-        newExam.center = new IdName(this.center.id, this.center.name);
+        if (this.center) {
+            newExam.center = new IdName(this.center.id, this.center.name);
+        }
         newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
