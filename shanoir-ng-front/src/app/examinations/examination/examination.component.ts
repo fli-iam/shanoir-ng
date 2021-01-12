@@ -47,14 +47,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     public centers: IdName[];
     public studies: IdName[];
     public subjects: SubjectWithSubjectStudy[];
-    private examinationExecutives: Object[];
-    private files: File[] = [];
+    examinationExecutives: Object[];
+    files: File[] = [];
     public inImport: boolean; 
     public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
-    private hasAdministrateRight: boolean = false;
-    private hasImportRight: boolean = false;
-    private hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
+    hasDownloadRight: boolean = false;
     downloading: boolean = false;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
@@ -139,7 +139,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    private download(format: string) {
+    download(format: string) {
         this.downloading = true;
         this.datasetIds.then(ids => {
             this.datasetService.downloadDatasets(ids, format)
@@ -147,7 +147,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    private getCenters(): void {
+    getCenters(): void {
         this.centerService
             .getCentersNames()
             .then(centers => {
@@ -155,7 +155,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             });
     }
 
-    private getStudies(): void {
+    getStudies(): void {
         this.studyService
             .getStudiesNames()
             .then(studies => {
@@ -163,7 +163,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             });
     }
 
-    private getSubjects(): void {
+    getSubjects(): void {
         if (!this.examination || !this.examination.study) return;
         this.studyService
             .findSubjectsByStudyId(this.examination.study.id)

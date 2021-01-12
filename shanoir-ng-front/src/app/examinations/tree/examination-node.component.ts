@@ -98,7 +98,7 @@ export class ExaminationNodeComponent implements OnChanges {
         }).catch((reason) => { this.loading = false; });
     }
     
-    private fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
+    fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
         let datasetIds: number[] = [];
         if (datasetAcquisitions) {
             datasetAcquisitions.forEach(dsAcq => {
@@ -115,7 +115,7 @@ export class ExaminationNodeComponent implements OnChanges {
         this.datasetIds = datasetIds;
     }
 
-    private download(format: string) {
+    download(format: string) {
         if (this.datasetIds && this.datasetIds.length == 0) return;
         let datasetIdsReady: Promise<void>;
         if (this.node.datasetAcquisitions == 'UNLOADED') {
@@ -135,7 +135,7 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
 
-    private mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
+    mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.sortingIndex,
@@ -144,7 +144,7 @@ export class ExaminationNodeComponent implements OnChanges {
         );
     }
     
-    private mapDatasetNode(dataset: Dataset): DatasetNode {
+    mapDatasetNode(dataset: Dataset): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
@@ -153,7 +153,7 @@ export class ExaminationNodeComponent implements OnChanges {
         );
     }
     
-    private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
+    mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
