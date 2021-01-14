@@ -474,7 +474,7 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(url.getPath());
 
-			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 			
 			name.append(subjectName).append("_")
@@ -483,8 +483,12 @@ public class DatasetApiController implements DatasetApi {
 			if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
 				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1));
 			}
-			name.append("_").append(dataset.getDatasetAcquisition().getRank()).append(".")
-			.append(FilenameUtils.getExtension(srcFile.getName()));
+			name.append("_").append(dataset.getDatasetAcquisition().getRank()).append(".");
+			if (srcFile.getName().endsWith(".nii.gz")) {
+				name.append("nii.gz");
+			} else {
+				name.append(FilenameUtils.getExtension(srcFile.getName()));
+			}
 
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

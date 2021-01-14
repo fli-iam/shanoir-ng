@@ -571,7 +571,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		// Have to adapt to generated folders by dicom2nifti converter
 		List<File> niiFiles = new ArrayList<>(FileUtils.listFiles(
 					directory,
-					new RegexFileFilter("^(.*?)\\.(nii|json)"),
+					new RegexFileFilter("^(.*?)\\.(nii|json|nii.gz)"),
 					DirectoryFileFilter.DIRECTORY
 				));
 
