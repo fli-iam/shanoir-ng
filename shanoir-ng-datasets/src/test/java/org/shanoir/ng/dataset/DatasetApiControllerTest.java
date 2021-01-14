@@ -18,8 +18,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -229,13 +229,13 @@ public class DatasetApiControllerTest {
 		// THEN all datasets are exported
 		
 		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		Mockito.verify(eventService, atLeast(1)).publishEvent(eventCatcher.capture());
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
+		assertTrue(event.getMessage().contains(""+dataset.getId()));
 		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, event.getEventType());
 	}
 
 	@Test
@@ -280,13 +280,13 @@ public class DatasetApiControllerTest {
 		// THEN all datasets are exported
 		
 		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		Mockito.verify(eventService, atLeast(1)).publishEvent(eventCatcher.capture());
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
+		assertTrue(event.getMessage().contains(""+dataset.getId()));
 		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASETS_EVENT, event.getEventType());
 	}
 
 	@Test

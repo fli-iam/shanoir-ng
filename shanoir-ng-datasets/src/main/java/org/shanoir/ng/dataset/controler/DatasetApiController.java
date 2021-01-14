@@ -594,8 +594,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * Zip
 	 * 
 	 * @param sourceDirPath
