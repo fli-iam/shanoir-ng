@@ -31,11 +31,11 @@ import { ImportService } from '../../../import/shared/import.service';
 })
 export class BrukerSelectSeriesComponent {
 
-    private patients: PatientDicom[];
+    public patients: PatientDicom[];
     private workFolder: string;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private papayaParams: object[];
+    public detailedPatient: any;
+    public detailedSerie: any;
+    public papayaParams: object[];
 
     constructor(
             private importService: ImportService,
@@ -53,7 +53,7 @@ export class BrukerSelectSeriesComponent {
     }
 
 
-    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
+    public showSerieDetails(nodeParams: any, serie?: SerieDicom): void {
         this.detailedPatient = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
@@ -62,7 +62,7 @@ export class BrukerSelectSeriesComponent {
         }
     }
 
-    private showPatientDetails(nodeParams: any): void {
+    public showPatientDetails(nodeParams: any): void {
         this.detailedSerie = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
             this.detailedPatient = null;
@@ -71,7 +71,7 @@ export class BrukerSelectSeriesComponent {
         }
     }
 
-    private onPatientUpdate(): void {
+    public onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
     }
 
@@ -87,7 +87,7 @@ export class BrukerSelectSeriesComponent {
         return false;
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/context']);
     }
 }

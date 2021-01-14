@@ -13,7 +13,6 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
-import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
@@ -22,6 +21,7 @@ import { ManufacturerModel } from '../../acquisition-equipments/shared/manufactu
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Pageable, Page } from '../../shared/components/table/pageable.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-acquisition-list',
@@ -30,12 +30,16 @@ import { Pageable, Page } from '../../shared/components/table/pageable.model';
 })
 export class DatasetAcquisitionListComponent extends EntityListComponent<DatasetAcquisition> {
     
-    @ViewChild('table') table: TableComponent;
-
+    @ViewChild('table', { static: false }) table: TableComponent;
+    
     constructor(
-            private datasetAcquisitionService: DatasetAcquisitionService) {
-                
-        super('dataset-acquisition');
+        private datasetAcquisitionService: DatasetAcquisitionService) {
+            
+            super('dataset-acquisition');
+        }
+        
+    getService(): EntityService<DatasetAcquisition> {
+        return this.datasetAcquisitionService;
     }
 
     getOptions() {

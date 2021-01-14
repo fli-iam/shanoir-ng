@@ -27,17 +27,19 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
 
     API_URL = PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+
     getEntityInstance() { return new PathologyModel(); }
 
     getPathologyModelsByPathology(pathology:Pathology): Promise<PathologyModel[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL}${pathology.id}/${PreclinicalUtils.PRECLINICAL_MODEL_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<PathologyModel[]>(url)
-            .map(entities => entities.map((entity) => this.toRealObject(entity)))    
-            .toPromise();
+            .toPromise()
+            .then(entities => entities.map((entity) => this.toRealObject(entity)));
     }
 
-    
-    	
     getUploadUrl(model_id: number): string {
         return `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/upload/specs/`+model_id;
     }
@@ -54,7 +56,6 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         formData.append('files', fileToUpload, fileToUpload.name);
         return this.http
             .post(endpoint, formData)
-            .map(response => response);
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){

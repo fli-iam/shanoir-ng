@@ -11,16 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import {
-    Component, Input, Output, ContentChildren, forwardRef, QueryList, ChangeDetectorRef,
-    EventEmitter, ViewChild, ElementRef
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    forwardRef,
+    Input,
+    OnChanges,
+    Output,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
-import { ImagesUrlUtil } from '../../utils/images-url.util';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
+
 
 const noop = () => {
 };
@@ -38,45 +43,50 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR]
 })
 
-export class TreeNodeComponent implements ControlValueAccessor {
+export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
 
     @Input() label: string;
     @Input() pictoUrl: string;
     @Input() awesome: string;
     @Input() deploy: boolean;
     @Input() hasBox: boolean;
-    @Input() nodeParams: any;
     @Input() editable: boolean = false;
     @Input() tooltip: string;
-    @Input() dataRequest: boolean = false;
+    @Input() hasChildren: boolean | 'unknown' = 'unknown';
+    @Input() clickable: boolean;
     @Input() buttonPicto: string;
-    @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
-    @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>;
-    public dataLoading: boolean = false;
-    private isOpen: boolean = false;
-    public loaded: boolean = false;
-    public hasChildren: boolean;
+    @Input() dataLoading: boolean = false;
+    @Input() title: string;
+    public isOpen: boolean = false;
+    @Input() opened: boolean = false;
+    @Output() openedChange: EventEmitter<boolean> = new EventEmitter();
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;
     @Output() labelChange = new EventEmitter();
     @Output() labelClick = new EventEmitter();
     @Output() chkbxChange = new EventEmitter();
-    @Output() openClick = new EventEmitter();
+    @Output() firstOpen = new EventEmitter();
     @Output() buttonClick = new EventEmitter();
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;
 
     constructor(private cdr: ChangeDetectorRef) {
+    }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.opened) {
+            if (!this.opened && this.isOpen) {
+                this.close();
+            } else if (this.opened && !this.isOpen) {
+                this.open();
+            }
+        }
     }
 
     ngAfterViewInit() {
         if (this.deploy) {
             this.deployAll();
         }
-        this.updateChildren();
-        this.loaded = true;
-        this.cdr.detectChanges();
     }
 
     public deployAll() {
@@ -85,7 +95,8 @@ export class TreeNodeComponent implements ControlValueAccessor {
     }
 
     public isClickable(): boolean {
-        if (this.labelClick.observers.length > 0) {
+        if (this.clickable != undefined) return this.clickable;
+        else if (this.labelClick.observers.length > 0) {
             return true;
         }
         return false;
@@ -94,27 +105,20 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public open() {
         this.dataLoading = false;
         this.isOpen = true;
+        this.openedChange.emit(this.isOpen);
+        if (this.hasChildren == 'unknown') this.firstOpen.emit(this);
     }
 
     public close() {
         this.isOpen = false;
+        this.openedChange.emit(this.isOpen);
     }
 
     public toggle() {
         if (this.isOpen) this.close();
-        else {
-            if (!this.hasChildren && this.dataRequest) this.openClick.emit(this);
+        else {     
             this.open();
         }
-    }
-
-    public updateChildren(): void {
-        this.hasChildren = this.childNodes.toArray().length > 1; // TODO : set to 0 when the bug is fixed https://github.com/angular/angular/issues/10098
-        this.childNodes.forEach((child, index) => {
-            if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
-                child.notifyParent = this.updateSelf;
-            }
-        });
     }
 
     get value(): boolean | 'indeterminate' {
@@ -125,44 +129,13 @@ export class TreeNodeComponent implements ControlValueAccessor {
         if (value !== this.checked) {
             this.checked = value;
             this.onChangeCallback(value);
-            this.childNodes.forEach((node, index) => {
-                if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
-                    node.value = value;
-                }
-            });
-            if (this.notifyParent != undefined) this.notifyParent();
         }
-    }
-
-    private notifyParent: () => void;
-
-    private updateSelf = () => {
-        let allOn: boolean = true;
-        let allOff: boolean = true;
-        this.childNodes.forEach((child, index) => {
-            if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
-                if (!child.checked) {
-                    allOn = false;
-                } else {
-                    allOff = false;
-                }
-            }
-        });
-        if (allOff) this.setBox(false);
-        else if (allOn) this.setBox(true);
-        else this.setBox('indeterminate');
-    };
-
-    setBox(value: boolean | 'indeterminate') {
-        if (this.boxElt) this.boxElt.model = value;
-        this.writeValue(value != null && value);
     }
 
     //From ControlValueAccessor interface
     writeValue(value: any) {
         if (value !== this.checked) {
             this.checked = value;
-            if (this.notifyParent != undefined) this.notifyParent();
         }
     }
 

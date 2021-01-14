@@ -24,6 +24,8 @@ import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { DatasetAcquisitionNode } from '../../tree/tree.model';
 
 
 @Component({
@@ -33,8 +35,8 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
-    private studyCards: StudyCard[];
-    private acquisitionEquipments: AcquisitionEquipment[];
+    public studyCards: StudyCard[];
+    public acquisitionEquipments: AcquisitionEquipment[];
     
     
     constructor(
@@ -42,8 +44,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private datasetAcquisitionService: DatasetAcquisitionService,
             private studyCardService: StudyCardService,
             private acqEqService: AcquisitionEquipmentService,
-            private acqEqPipe: AcquisitionEquipmentPipe) {
+            public acqEqPipe: AcquisitionEquipmentPipe) {
         super(route, 'dataset-acquisition');
+    }
+
+    getService(): EntityService<DatasetAcquisition> {
+        return this.datasetAcquisitionService;
     }
     
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
@@ -85,5 +91,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
+    }
+
+    onNodeInit(node: DatasetAcquisitionNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
     }
 }

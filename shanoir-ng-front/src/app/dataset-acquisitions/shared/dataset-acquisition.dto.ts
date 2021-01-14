@@ -18,16 +18,16 @@ import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared
 import { ExaminationDTO, ExaminationDTOService } from '../../examinations/shared/examination.dto';
 import { Examination } from '../../examinations/shared/examination.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { StudyCardDTOService, StudyCardDTO } from '../../study-cards/shared/study-card.dto';
-import { DatasetAcquisition } from './dataset-acquisition.model';
-import { DatasetAcquisitionService } from './dataset-acquisition.service';
+import { StudyCardDTO, StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
-import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
-import { PetProtocol } from '../modality/pet/pet-protocol.model';
-import { MrProtocol } from '../modality/mr/mr-protocol.model';
 import { CtProtocol } from '../modality/ct/ct-protocol.model';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
+import { MrProtocol } from '../modality/mr/mr-protocol.model';
+import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
+import { PetProtocol } from '../modality/pet/pet-protocol.model';
+import { DatasetAcquisition } from './dataset-acquisition.model';
+import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
 
 @Injectable()
 export class DatasetAcquisitionDTOService {
@@ -41,8 +41,8 @@ export class DatasetAcquisitionDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toDatasetAcquisitions instead
      * @param result can be used to get an immediate temporary result without async data
      */
-    public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {        
-        if (!result) result = DatasetAcquisitionService.getNewDAInstance(dto.type);
+    public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {   
+        if (!result) result = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
         DatasetAcquisitionDTOService.mapSyncFields(dto, result);
         return Promise.all([
             this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq), // TODO dto
@@ -59,7 +59,7 @@ export class DatasetAcquisitionDTOService {
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
         for (let dto of dtos) {
-            let entity = DatasetAcquisitionService.getNewDAInstance(dto.type);
+            let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if (dto.acquisitionEquipmentId) {
                 entity.acquisitionEquipment = new AcquisitionEquipment();
@@ -89,8 +89,10 @@ export class DatasetAcquisitionDTOService {
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
-        entity.examination = new Examination();
-        ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
+        if (dto.examination) {
+            entity.examination = new Examination();
+            ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
+        }
         switch(entity.type) {
             case 'Mr': {
                 (entity as MrDatasetAcquisition).protocol = Object.assign(new MrProtocol(), (dto as MrDatasetAcquisitionDTO).protocol);
@@ -150,4 +152,11 @@ export class PetDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 
 export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
     protocol: any;
+}
+
+export class ExaminationDatasetAcquisitionDTO {
+    id: number;
+    name: string;
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
+    datasets: any;
 }

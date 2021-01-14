@@ -19,6 +19,8 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -148,9 +150,11 @@ public interface SubjectService {
 	 * @return updated subject.
 	 * @throws EntityNotFoundException
 	 * @throws MicroServiceCommunicationException
+	 * @throws ShanoirException
+	 * @throws RestServiceException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
-	Subject update(Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException;
+	Subject update(Subject subject) throws ShanoirException;
 
 	/**
 	 * Delete a subject.

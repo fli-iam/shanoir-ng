@@ -29,9 +29,7 @@ import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -74,9 +72,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	
 	@Override
 	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
-		try { 
+		try {
 			getUserService().denyAccountRequest(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,18 +102,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
-
-	@Override
-	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
-		try {
-			getUserService().requestExtension(KeycloakUtil.getTokenUserId(), requestInfo);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-
 	
 	@Override
 	public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {

@@ -15,10 +15,13 @@
 package org.shanoir.ng.study.controler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,8 +29,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -56,8 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -104,9 +108,9 @@ public class StudyApiController implements StudyApi {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	private final HttpServletRequest request;
-	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
+
+	private final HttpServletRequest request;
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public StudyApiController(final HttpServletRequest request) {
@@ -248,41 +252,45 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<ByteArrayResource> downloadProtocolFile(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long examinationId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
-		String filePath = getProtocolFilePath(examinationId, fileName);
+	public void downloadProtocolFile(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+		String filePath = getProtocolFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
-			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+			response.sendError(HttpStatus.NO_CONTENT.value());
+			return;
 		}
 
-		// Try to determine file's content type
-		String contentType = "application/pdf";
+		try (InputStream is = new FileInputStream(fileToDownLoad);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		}
 
-		byte[] data = Files.readAllBytes(fileToDownLoad.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
-
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileToDownLoad.getName())
-				.contentType(MediaType.parseMediaType(contentType))
-				.contentLength(data.length)
-				.body(resource);
 	}
 
 	@Override
 	public ResponseEntity<Void> uploadProtocolFile(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-		if (!file.getOriginalFilename().endsWith(".pdf")) {
-			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-		}
-		String filePath = getProtocolFilePath(studyId, file.getOriginalFilename());
-		File fileToCreate = new File(filePath);
-		fileToCreate.getParentFile().mkdirs();
 		try {
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip")) || file.getSize() > 50000000) {
+				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
+				Study stud = studyService.findById(studyId);
+				if (stud.getProtocolFilePaths() != null) {
+					stud.getProtocolFilePaths().remove(file.getName());
+				}
+				studyService.update(stud);
+				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+			}
+			String filePath = getProtocolFilePath(studyId, file.getOriginalFilename());
+			File fileToCreate = new File(filePath);
+			fileToCreate.getParentFile().mkdirs();
+		
+			LOG.error("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
 		} catch (Exception e) {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
@@ -312,30 +320,45 @@ public class StudyApiController implements StudyApi {
 	}
 
     @Override
-	public ResponseEntity<ByteArrayResource> exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException {
+	public void exportBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId, HttpServletResponse response) throws RestServiceException, IOException {
 		Study study = studyService.findById(studyId);
 		File workFolder = bidsService.exportAsBids(study);
 
-		// Create zip file in /tmp folder
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File zipFile = new File(tmpDir + File.separator + workFolder.getName() + ZIP);
+    	// Copy / zip it (and by the way filter only folder that we are interested in)
+    	String userDir = getUserDir(System.getProperty(JAVA_IO_TMPDIR)).getAbsolutePath();
+
+		// Add timestamp to get a "random" difference
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		File tmpFile = new File(userDir + File.separator + formatter.format(new DateTime().toDate()) + File.separator);
+		tmpFile.mkdirs();
+		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + workFolder.getName() + ZIP);
+		zipFile.createNewFile();
+
 		// Zip it
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
-		// Determine file's content type and return it for download
+		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-		byte[] data = Files.readAllBytes(zipFile.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
 
-		return ResponseEntity.ok()
-				// Content-Disposition
-				.header(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + zipFile.getName())
-				// Content-Type
-				.contentType(MediaType.parseMediaType(contentType)) //
-				// Content-Length
-				.contentLength(data.length) //
-				.body(resource);
+		try (InputStream is = new FileInputStream(zipFile);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setContentType(contentType);
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		} finally {
+			FileUtils.deleteQuietly(zipFile);
+		}
+	}
+
+	public static File getUserDir(String importDir) {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		return userImportDir;
 	}
 
     @Override

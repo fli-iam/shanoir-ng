@@ -17,8 +17,10 @@ package org.shanoir.ng.dataset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -128,6 +130,7 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private SubjectRepository subjectRepository;
+
 	private Subject subject = new Subject(3L, "name");
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
@@ -140,6 +143,7 @@ public class DatasetApiControllerTest {
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		updatedMetadata.setComment("comment");
+		updatedMetadata.setName("test 1");
 	}
 
 	@Test
@@ -223,9 +227,18 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
+
 		// THEN all datasets are exported
+		
+		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		
+		ShanoirEvent event = eventCatcher.getValue();
+		assertNotNull(event);
+		assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
+		assertEquals(dataset.getId().toString(), event.getObjectId());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
 
 	@Test
@@ -260,17 +273,25 @@ public class DatasetApiControllerTest {
 
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
-
+		
 		// WHEN we export all the datasets
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
 
 
 		// THEN all datasets are exported
+		
+		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		
+		ShanoirEvent event = eventCatcher.getValue();
+		assertNotNull(event);
+		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
+		assertEquals(dataset.getId().toString(), event.getObjectId());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
 
 	@Test

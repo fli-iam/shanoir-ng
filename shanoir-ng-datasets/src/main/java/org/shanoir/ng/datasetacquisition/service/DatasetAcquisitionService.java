@@ -34,6 +34,10 @@ public interface DatasetAcquisitionService {
 	List<DatasetAcquisition> findByStudyCard(Long id);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+	List<DatasetAcquisition> findByExamination(Long examinationId);
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
 	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
