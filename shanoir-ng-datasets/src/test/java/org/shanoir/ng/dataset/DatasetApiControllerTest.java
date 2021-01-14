@@ -427,6 +427,9 @@ public class DatasetApiControllerTest {
 		metadata.setName("datasetName");
 		dataset.setOriginMetadata(metadata );
 		dataset.setId(1L);
+		
+		dataset.setSubjectId(3L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
 
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
@@ -448,7 +451,7 @@ public class DatasetApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", format)
 				.param("datasetIds", "1"))
-		.andExpect(status().isPayloadTooLarge());
+		.andExpect(status().is(200));
 
 		// CHECK sent events
 		ArgumentCaptor<ShanoirEvent> eventCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
@@ -473,7 +476,7 @@ public class DatasetApiControllerTest {
 		
 		// WHEN we try to download the dataset data
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/directDownload/")
-				.param("datasetId", null)
+				.param("datasetId", "12351351")
 				.param("pathName", "1"))
 		.andExpect(status().isInternalServerError());
 		// THEN we expect an internal server error
