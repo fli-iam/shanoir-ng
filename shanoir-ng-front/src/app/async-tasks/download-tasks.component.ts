@@ -56,6 +56,10 @@ export class DownloadTasksComponent extends BrowserPaginEntityListComponent<Task
         });
     }
 
+    getService() {
+        return this.taskService;
+    }
+
     // Grid columns definition
     getColumnDefs(): any[] {
         function dateRenderer(date: number) {
