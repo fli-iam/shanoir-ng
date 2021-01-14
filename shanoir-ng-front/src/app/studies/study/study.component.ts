@@ -27,6 +27,7 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { Subject } from '../../subjects/shared/subject.model';
 import { DatasetNode, StudyNode } from '../../tree/tree.model';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
@@ -36,8 +37,8 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 @Component({
@@ -96,7 +97,13 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        return this.studyService.get(this.id).then(study => {this.study = study}); 
+        return this.studyService.get(this.id).then(study => {
+            this.study = study;
+            this.study.subjectStudyList = this.study.subjectStudyList.sort(
+                function(a: SubjectStudy, b:SubjectStudy) {
+                    return a.subject.name.localeCompare(b.subject.name);
+                });
+            }); 
     }
 
     initEdit(): Promise<void> {
@@ -153,10 +160,12 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private fetchUsers(): Promise<User[]> {
         return this.userService.getAll().then(users => {
-            this.users = users;
+            this.users = users.sort(function(a: User, b:User) {
+                return a.username.localeCompare(b.username);
+            })
             this.userOptions = [];
             if (users) {
-                users.forEach(user => this.userOptions.push(new Option<User>(user, user.lastName + ' ' + user.firstName)));
+                users.forEach(user => this.userOptions.push(new Option<User>(user, user.username + ' (' +user.lastName + ' ' + user.firstName + ')')));
             }
             return users;
         });
@@ -231,7 +240,9 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects;
+                this.subjects = subjects.sort(function(a:Subject, b:Subject){
+                    return a.name.localeCompare(b.name);
+                });
         });
     }
     
