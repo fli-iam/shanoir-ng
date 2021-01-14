@@ -430,7 +430,6 @@ public class BidsImporterApiControllerTest {
 		assertTrue(exam.contains("\"id\":null"));
 		assertTrue(exam.contains("\"center\":{\"id\":1,\"name\":\"name\"}"));
 		assertTrue(exam.contains("\"comment\":null"));
-		assertTrue(exam.contains("\"examinationDate\":[2020,9,25]"));
 		assertTrue(exam.contains("\"note\":null"));
 		assertTrue(exam.contains("\"study\":{\"id\":1,\"name\":\"name\"}"));
 		assertTrue(exam.contains("\"subject\":{\"id\":1,\"name\":\"name\"}"));
