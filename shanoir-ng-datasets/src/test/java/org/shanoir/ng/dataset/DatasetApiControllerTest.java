@@ -281,6 +281,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdBidsDataset() throws Exception {
 		// GIVEN a list of datasets to export, with a BIDS Dataset
 		// Create a file with some text
@@ -292,6 +293,7 @@ public class DatasetApiControllerTest {
 		// Link it to datasetExpression in a dataset in a study
 		BidsDataset dataset = new BidsDataset();
 		dataset.setSubjectId(3L);
+		dataset.setId(1L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
@@ -312,7 +314,6 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
 		.andExpect(content().string(containsString("test.nii")));
 
 
