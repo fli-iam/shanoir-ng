@@ -376,8 +376,7 @@ let routes: Routes = [
     {
         path: 'user/edit/:id',
         component: UserComponent,
-        data: { mode: 'edit' },
-        canActivate: [AuthAdminGuard],
+        data: { mode: 'edit' }
     },
     {
         path: 'user/create',
