@@ -11,14 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { Center } from '../../centers/shared/center.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Id } from '../../shared/models/id.model';
-import { ServiceLocator } from '../../utils/locator.service';
 import { CoilType } from './coil-type.enum';
-import { CoilService } from './coil.service';
+
 
 export class Coil extends Entity {
 
@@ -29,13 +27,6 @@ export class Coil extends Entity {
     center: Center;
     manufacturerModel: ManufacturerModel;
     coilType: CoilType;
-
-    service: CoilService = ServiceLocator.injector.get(CoilService);
-
-    // Override
-    public stringify() {
-        return JSON.stringify(new CoilDTO(this), this.replacer);
-    }
 }
 
 export class CoilDTO {

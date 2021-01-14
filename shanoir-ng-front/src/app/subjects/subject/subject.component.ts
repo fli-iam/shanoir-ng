@@ -26,6 +26,7 @@ import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Study } from '../../studies/shared/study.model';
 
 @Component({
@@ -37,12 +38,12 @@ import { Study } from '../../studies/shared/study.model';
 
 export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
 
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[] = [];
-    private isAlreadyAnonymized: boolean;
-    private firstName: string = "";
-    private lastName: string = "";
+    studies: IdName[] = [];
+    isAlreadyAnonymized: boolean;
+    firstName: string = "";
+    lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
     forceStudy: Study = null;
 
@@ -67,6 +68,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) { this.entity = subject; }
+
+    getService(): EntityService<Subject> {
+        return this.subjectService;
+    }
 
     ngOnInit() {
         super.ngOnInit();
@@ -169,14 +174,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return this.getHash(hash);
     }
 
-    private getHash(stringToBeHashed: string): string {
+    getHash(stringToBeHashed: string): string {
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = "";
-        hex = hash.substring(0, this.HASH_LENGTH);
+        let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 
-    private humanSelected(): boolean {
+    humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);

@@ -180,6 +180,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				credential.setType(CredentialRepresentation.PASSWORD);
 				String newPassword = PasswordUtils.generatePassword();
 				credential.setValue(newPassword);
+				credential.setTemporary(true);
 				final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
 				userResource.resetPassword(credential);
 				final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());

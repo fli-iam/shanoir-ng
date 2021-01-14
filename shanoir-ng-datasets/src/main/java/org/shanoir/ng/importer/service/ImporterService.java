@@ -106,7 +106,9 @@ public class ImporterService {
 	private static final String EEG_PREFIX = "eeg";
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+		
+		ShanoirEvent event = importJob.getShanoirEvent();
+		event.setMessage("Starting import...");
 		eventService.publishEvent(event);
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
@@ -122,7 +124,8 @@ public class ImporterService {
 								rank++;
 							}
 							progress += 1f / study.getSeries().size();
-							event.setMessage("Treating serie " + serie.getSequenceName() + " for examination " + importJob.getExaminationId());
+							// This message is important for email service
+							event.setMessage("Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId());
 							event.setProgress(progress);
 							eventService.publishEvent(event);
 						}
@@ -134,6 +137,7 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
+			// This message is important for email service
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
 			+": Successfully created datasets for subject " + importJob.getSubjectName()
 			+ " in examination " + examination.getId());

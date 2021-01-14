@@ -18,11 +18,16 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { User } from './user.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class UserService extends EntityService<User>{
 
     API_URL = AppUtils.BACKEND_API_USER_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new User(); }
 
@@ -40,8 +45,8 @@ export class UserService extends EntityService<User>{
         return this.http.post<User>(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user)).toPromise();
     }
 
-    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable> {
-        return this.http.put<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
+    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable<any>> {
+        return this.http.post<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise();
     }
 }

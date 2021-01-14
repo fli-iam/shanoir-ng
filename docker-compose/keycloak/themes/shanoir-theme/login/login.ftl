@@ -41,6 +41,9 @@
 									<span><a href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
 								</#if>
 							</div>
+							<div>
+							    <a href="${properties.requestExtension!}">Account expired?</a>
+							</div>
 						</div>
 	
 						<div>

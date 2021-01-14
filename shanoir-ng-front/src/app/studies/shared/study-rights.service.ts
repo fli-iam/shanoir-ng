@@ -40,7 +40,8 @@ export class StudyRightsService {
 
     public getMyRightsForStudy(studyId: number): Promise<StudyUserRight[]> {
         return this.http.get<StudyUserRight[]>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/' + studyId)
-            .toPromise();
+            .toPromise()
+            .then(rights => rights ? rights : []);
     }
 
     hasOnStudyToImport(): Promise<boolean> {

@@ -26,7 +26,7 @@ export class TableSearchComponent implements OnChanges {
     @Input() columnDefs: any[];
     @Input() filter: Filter; 
     @Output() filterChange: EventEmitter<Filter> = new EventEmitter<Filter>();
-    private searchableColumns: any[] = [];
+    searchableColumns: any[] = [];
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['columnDefs']) {
@@ -45,7 +45,7 @@ export class TableSearchComponent implements OnChanges {
         this.searchableColumns = cols;
     }
 
-    private search() {
+    public search() {
         this.filterChange.emit(this.filter);
     }
 

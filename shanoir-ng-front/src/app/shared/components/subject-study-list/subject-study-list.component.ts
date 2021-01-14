@@ -39,11 +39,11 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     @Input() subject: Subject;
     @Input() study: Study;
     @Input() selectableList: Subject[] | Study[];
-    private selected: Subject | Study;
+    public selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
 
-    private get legend(): string {
+    get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
     }
     
@@ -74,7 +74,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
     }
 
-    private get compMode(): 'subject' | 'study' { 
+    get compMode(): 'subject' | 'study' { 
         if (this.subject && this.study) throw Error('You cannot set both subject and study');
         if (this.subject) return 'subject';
         if (this.study) return 'study';
