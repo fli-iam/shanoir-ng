@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -126,6 +127,7 @@ public class ExaminationApiController implements ExaminationApi {
 					throws RestServiceException {
 
 		Examination examination = examinationService.findById(examinationId);
+		orderDatasetAcquisitions(examination);
 		if (examination == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -212,7 +214,9 @@ public class ExaminationApiController implements ExaminationApi {
 			}
 			examinations.addAll(examsToKeep);
 		}
-		
+		for (Examination exam : examinations) {
+			orderDatasetAcquisitions(exam);
+		}
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -299,6 +303,18 @@ public class ExaminationApiController implements ExaminationApi {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
+	}
+
+	private void orderDatasetAcquisitions(Examination exam) {
+		if (exam == null || exam.getDatasetAcquisitions() == null || exam.getDatasetAcquisitions().isEmpty()) {
+			return;
+		}
+		exam.getDatasetAcquisitions().sort(new Comparator<DatasetAcquisition>() {
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return o1.getSortingIndex() - o2.getSortingIndex();
+			}
+		});
 	}
 
 }
