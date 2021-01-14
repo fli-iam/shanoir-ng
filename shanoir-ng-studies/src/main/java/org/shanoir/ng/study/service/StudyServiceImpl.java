@@ -146,7 +146,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
-		if (study.getName() != studyDb.getName()) {
+		if (!study.getName().equals(studyDb.getName())) {
 			updateStudyName(new IdName(study.getId(), study.getName()));
 		}
 		studyDb.setName(study.getName());
@@ -168,7 +168,6 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudy.setStudy(studyDb);
 			}
 		}
-		LOG.error("coucou" + study.getProtocolFilePaths());
 		if (study.getProtocolFilePaths() != null) {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
@@ -273,6 +272,6 @@ public class StudyServiceImpl implements StudyService {
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
-		} 
+		}
 	}
 }

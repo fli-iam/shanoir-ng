@@ -1,18 +1,5 @@
-<!--
-Shanoir NG - Import, manage and share neuroimaging data
-Copyright (C) 2009-2019 Inria - https://www.inria.fr/
-Contact us on https://project.inria.fr/shanoir/
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
--->
-
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
     <base href="/shanoir-ng/">
@@ -20,24 +7,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <link href="assets/css/awesome.min.css" rel="stylesheet">
     <script src="/auth/js/keycloak.js"></script>
-    <script defer src="assets/fontawesome-all.min.js"></script>
     <script defer type="text/javascript" src="assets/papaya-nojquery/jquery.min.js"></script>
     <script defer type="text/javascript" src="assets/papaya-nojquery/papaya.js"></script>
     <script defer type="text/javascript" src="assets/jszip.min.js"></script>
 </head>
 
-<!-- 3. Display the application -->
 
+</head>
 <body>
-    <shanoir-ng-app>
-        <div class="loading">
-            <div class="loading-middle">
-                <div class="cat"><img src="assets/images/cat.gif" /></div>
-                <p class="loading-msg">shanoir is loading...</p>
-            </div>
-        </div>
-    </shanoir-ng-app>
+  <app-root></app-root>
 </body>
-
 </html>

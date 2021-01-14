@@ -17,7 +17,9 @@ package org.shanoir.ng.dataset.modality;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -50,6 +52,7 @@ public interface MrDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "standard")
 	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
 	
 	/**
@@ -59,6 +62,17 @@ public interface MrDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "withProcessings")
+	MrDatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);	
+	
+	/**
+	 * Map a @Dataset to a @DatasetDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	@IterableMapping(qualifiedByName = "standard")
 	List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
 
 	/**
@@ -68,6 +82,7 @@ public interface MrDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@IterableMapping(qualifiedByName = "standard")
 	PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page);
 
 	/**

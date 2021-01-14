@@ -11,20 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
+
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
+import { ReverseSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { Option } from '../../shared/select/select.component';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Study } from '../../studies/shared/study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -35,13 +38,14 @@ import { Option } from '../../shared/select/select.component';
 
 export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
 
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[] = [];
-    private isAlreadyAnonymized: boolean;
-    private firstName: string = "";
-    private lastName: string = "";
+    studies: IdName[] = [];
+    isAlreadyAnonymized: boolean;
+    firstName: string = "";
+    lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    forceStudy: Study = null;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -65,11 +69,16 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) { this.entity = subject; }
 
+    getService(): EntityService<Subject> {
+        return this.subjectService;
+    }
+
     ngOnInit() {
         super.ngOnInit();
         if (this.mode == 'create') {
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
+            this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
         }
     }
 
@@ -165,14 +174,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return this.getHash(hash);
     }
 
-    private getHash(stringToBeHashed: string): string {
+    getHash(stringToBeHashed: string): string {
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = "";
-        hex = hash.substring(0, this.HASH_LENGTH);
+        let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 
-    private humanSelected(): boolean {
+    humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
@@ -185,5 +193,15 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    onSubjectNodeInit(node: ReverseSubjectNode) {
+        this.breadcrumbsService.currentStep.data.subjectNode = node;
+    }
+
+    public toggleAnonymised() {
+        if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
+            this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
+        }
     }
 }

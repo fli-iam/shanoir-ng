@@ -15,10 +15,13 @@
 package org.shanoir.ng.examination.controler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -40,12 +43,9 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -72,6 +72,13 @@ public class ExaminationApiController implements ExaminationApi {
 	@Autowired
 	ShanoirEventService eventService;
 
+	private final HttpServletRequest request;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExaminationApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
+
 	@Override
 	public ResponseEntity<Void> deleteExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
@@ -79,15 +86,16 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			// delete bids folder
 			bidsService.deleteExam(examinationId);
-			// Check if user rights needed
-			examinationService.deleteById(examinationId);
-
+			
 			// Delete extra data
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
+
+			examinationService.deleteById(examinationId);
+			
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -138,6 +146,7 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -191,24 +200,25 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public 	ResponseEntity<ByteArrayResource> downloadExtraData(
+	public void downloadExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
-			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+			response.sendError(HttpStatus.NO_CONTENT.value());
+			return;
 		}
 
-		byte[] data = Files.readAllBytes(fileToDownLoad.toPath());
-		ByteArrayResource resource = new ByteArrayResource(data);
+		String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
 
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileToDownLoad.getName())
-				.contentType(MediaType.APPLICATION_PDF)
-				.contentLength(data.length)
-				.body(resource);
+		try (InputStream is = new FileInputStream(fileToDownLoad);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setContentType(contentType);
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		}
 	}
 
 	/**

@@ -156,7 +156,7 @@ public class QueryPACSService {
 			for (int i = 0; i < patientsNbre; i++) {
 				Patient patient = new Patient(attributesPatients.get(i));
 				patients.add(patient);
-				queryStudies(calling, called, patient);
+				queryStudies(calling, called, dicomQuery, patient);
 			}
 			importJob.setPatients(patients);
 		}
@@ -232,11 +232,16 @@ public class QueryPACSService {
 	 * This method queries for studies, creates studies and adds them to patients.
 	 * @param calling
 	 * @param called
+	 * @param dicomQuery 
 	 * @param patient
 	 */
-	private void queryStudies(DicomNode calling, DicomNode called, Patient patient) {
-		DicomParam[] params = { new DicomParam(Tag.PatientID, patient.getPatientID()),
-				new DicomParam(Tag.StudyInstanceUID), new DicomParam(Tag.StudyDate), new DicomParam(Tag.StudyDescription)};
+	private void queryStudies(DicomNode calling, DicomNode called, DicomQuery dicomQuery, Patient patient) {
+		DicomParam[] params = {
+			new DicomParam(Tag.PatientID, patient.getPatientID()),
+			new DicomParam(Tag.StudyInstanceUID),
+			new DicomParam(Tag.StudyDate, dicomQuery.getStudyDate()),
+			new DicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription())
+		};
 		List<Attributes> attributesStudies = queryCFIND(params, QueryRetrieveLevel.STUDY, calling, called);
 		if (attributesStudies != null) {
 			List<Study> studies = new ArrayList<>();
@@ -245,6 +250,7 @@ public class QueryPACSService {
 				studies.add(study);
 				querySeries(calling, called, study);
 			}
+			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
 			patient.setStudies(studies);
 		}
 	}

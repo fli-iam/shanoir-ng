@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="study" 
-                        (change)="onSelectStudy(); onContextChange();" 
+                        (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
                         [options]="studyOptions">
@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="studycard" 
-                        (change)="onSelectStudyCard(); onContextChange();" 
+                        (userChange)="onSelectStudyCard(); onContextChange();" 
                         (onViewClick)="showStudyCardDetails()" 
                         [viewDisabled]="!studycard" 
                         [options]="studycardOptions">
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="!useStudyCard && (!study || !centerOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
-                        (change)="onSelectCenter(); onContextChange();" 
+                        (userChange)="onSelectCenter(); onContextChange();" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
@@ -103,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
-                        (change)="onSelectAcquisitonEquipment(); onContextChange();"
+                        (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions">
@@ -135,45 +135,46 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box 
                         [disabled]="!study || !acquisitionEquipment" 
                         [(ngModel)]="subject" 
-                        (change)="onSelectSubject(); onContextChange();" 
+                        (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
             </span>
         </li>
-        <li *ngIf="subject !== null && subject !== undefined">
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="label-col">Common name</th>
-                            <th class="input-col">Subject identifier for this study</th>
-                            <th class="chkbx-col" title="Physically Involved">PI</th>
-                            <th *ngIf="importMode != 'BRUKER'" class="dropdown-col">Subject Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="label-col">
-                                {{subject.name}}
-                            </td>
-                            <td class="input-col">
-                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                    [ngModelOptions]="{standalone: true}"/>
-                            </td>
-                            <td class="chkbx-col">
-                                <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
-                            </td>
-                            <td *ngIf="importMode != 'BRUKER'" class="dropdown-col">
-                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
-                                </select-box>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </li>
+    </ol>
+    <ol class="subject-study">
+        <legend 
+                class="clickable"
+                [class.disabled]="!subject || !subject.subjectStudy"
+                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
+            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
+        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
+            <li>
+                <label>Common name</label>
+                <span class="right-col">{{subject.name}}</span>
+            </li>
+            <li>
+                <label>Subject identifier for this study</label>
+                <span class="right-col">
+                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                    [ngModelOptions]="{standalone: true}"/>
+                </span>
+            </li>
+            <li>
+                <label>Physically involved</label>
+                <span class="right-col">
+                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+                </span>
+            </li>
+            <li *ngIf="importMode != 'BRUKER'">
+                <label>Subject Type</label>
+                <span class="right-col">
+                    <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
+                    </select-box>
+                </span>
+            </li>
+        </div>
     </ol>
 
     <ol>
@@ -184,7 +185,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (change)="onSelectExam(); onContextChange();"
+                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (userChange)="onSelectExam(); onContextChange();"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>  
@@ -199,7 +200,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || niftiConverter"
                         [(ngModel)]="niftiConverter" 
-                        (change)="onSelectNifti(); onContextChange();" 
+                        (userChange)="onSelectNifti(); onContextChange();" 
                         [optionArr]="niftiConverters"
                         [readOnly]="useStudyCard">
                 </select-box>

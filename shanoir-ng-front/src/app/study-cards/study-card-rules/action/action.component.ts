@@ -17,7 +17,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
 import { StudyCardAssignment } from '../../shared/study-card.model';
-
+import { of } from 'rxjs';
 
 
 @Component({
@@ -163,7 +163,7 @@ export class AssignmentField {
         if (options instanceof Observable) {
             this.options = options;
         } else {
-            this.options = Observable.of(options);
+            this.options = of(options);
         }
     }
 }

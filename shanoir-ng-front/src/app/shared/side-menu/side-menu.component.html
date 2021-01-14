@@ -25,9 +25,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
         <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
     </div>
-    <div class="welcome">{{username}}</div> 
-    <div class="logout">
-        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout<i class="fas fa-sign-out-alt"></i></a>
+    <div class="welcome">{{username}}</div>
+    <div class="user-commands">
+        <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
+        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
@@ -93,6 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
+        <li routerLink="/download-statistics" routerLinkActive="active"><i class="fas fa-table"></i>Download statistics</li>
     </div>
 </ul>
 

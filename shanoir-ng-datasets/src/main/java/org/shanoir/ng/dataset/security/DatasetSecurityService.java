@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -385,7 +386,7 @@ public class DatasetSecurityService {
      * @param rightStr the right
      * @return true or false
      */
-    public boolean checkDatasetPage(Page<Dataset> page, String rightStr) {
+    public boolean checkDatasetPage(Iterable<Dataset> page, String rightStr) {
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((Dataset dataset) -> studyIds.add(dataset.getStudyId()));
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
@@ -491,6 +492,46 @@ public class DatasetSecurityService {
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	list.removeIf((DatasetAcquisition dsa) -> !checkedIds.contains(dsa.getExamination().getStudyId()));
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterDatasetAcquisitionDTOList(List<DatasetAcquisitionDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((DatasetAcquisitionDTO dsa) -> {
+    		studyIds.add(dsa.getExamination().getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((DatasetAcquisitionDTO dsa) -> !checkedIds.contains(dsa.getExamination().getStudyId()));
+    	return true;
+    } 
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((ExaminationDatasetAcquisitionDTO edsa) -> {
+    		studyIds.add(edsa.getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getStudyId()));
     	return true;
     }
     

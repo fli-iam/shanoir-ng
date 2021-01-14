@@ -13,7 +13,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <!-- <header></header>
-<navbar *ngIf="isAuthenticated()"></navbar> -->
+<navbar *ngIf="isAuthenticated()"></navbar>
+<breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
+<div class="main-content">
+    <router-outlet></router-outlet>
+</div> -->
 
 <ng-container *ngIf="isAuthenticated()">
     <side-menu *ngIf="isAuthenticated() && menuOpen" [@slideRight]="menuOpen"></side-menu>

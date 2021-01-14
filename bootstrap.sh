@@ -76,7 +76,6 @@ if [ -z "$clean$force" ] && [ -n "$deploy" ] ; then
 	die "you must provide at least --clean, --force or --no-deploy"
 fi
 
-
 if [ -n "$build" ] ; then
 	#
 	# Build stage
@@ -88,7 +87,7 @@ if [ -n "$build" ] ; then
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" - <<EOF
 FROM debian:stretch
-RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-8-jdk-headless maven bzip2
+RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-8-jdk-headless maven bzip2 git
 EOF
 	# 2. run the maven build
 	mkdir -p /tmp/home
@@ -142,16 +141,25 @@ if [ -n "$deploy" ] ; then
 			' INFO  \[org.jboss.as\] .* Keycloak .* started in [0-9]*ms'	\
 			-- docker-compose logs --no-color --follow keycloak >/dev/null
 
-	# 3. microservices
-	for ms in users studies datasets import preclinical
+	# 3. infrastructure services
+	step "start: infrastructure services"
+	for infra_ms in rabbitmq ldap dcm4chee-database dcm4chee-arc preclinical-bruker2dicom solr
 	do
-		step "init: $ms"
+		step "start: $infra_ms infrastructure microservice"
+		docker-compose up -d "$infra_ms"
+	done
+	
+	# 4. Shanoir-NG microservices
+	step "start: sh-ng microservices"
+	for ms in users studies datasets import preclinical 
+	do
+		step "init: $ms microservice"
 		docker-compose run --rm -e SHANOIR_MIGRATION=init "$ms"
-		step "start: $ms"
+		step "start: $ms microservice"
 		docker-compose up -d "$ms"
 	done
 
-	# 4. nginx
+	# 5. nginx
 	step "start: nginx"
 	docker-compose up -d nginx
 fi

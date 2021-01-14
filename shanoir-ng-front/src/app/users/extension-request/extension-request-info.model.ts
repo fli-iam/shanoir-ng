@@ -15,4 +15,5 @@
 export class ExtensionRequestInfo {
     extensionDate: Date;
     extensionMotivation: string;
+    email: string;
 }

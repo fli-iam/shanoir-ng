@@ -43,7 +43,7 @@ export class StudyTreeComponent {
     private usersIconPath: string = ImagesUrlUtil.USERS_ICON_PATH;
     private xRay1IconPath: string = ImagesUrlUtil.X_RAY_1_ICON_PATH;
     private xRay2IconPath: string = ImagesUrlUtil.X_RAY_2_ICON_PATH;
-    private acquisitionEquipments: AcquisitionEquipment[] = [];
+    acquisitionEquipments: AcquisitionEquipment[] = [];
 
     constructor(private examinationService: ExaminationService, private router: Router,
         private centerService: CenterService) {
@@ -105,7 +105,7 @@ export class StudyTreeComponent {
         this.router.navigate(['/dataset/details/' + datasetId])
     }
 
-    private getStudyUserTypeLabel(studyUserRight: StudyUserRight) {
+    getStudyUserTypeLabel(studyUserRight: StudyUserRight) {
         return StudyUserRight.getLabel(studyUserRight);
     }
 

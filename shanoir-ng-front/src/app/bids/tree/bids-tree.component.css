@@ -1,0 +1,7 @@
+.content { display: inline-block; vertical-align: top; margin-top: 20px; }
+.root-node { display: inline-block; }
+
+table { border-spacing: 0; }
+td { padding: 0 20px; }
+td.first { padding-left: 0; }
+td.last { padding-right: 0; }

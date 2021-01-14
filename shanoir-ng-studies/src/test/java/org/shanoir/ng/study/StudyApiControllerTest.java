@@ -124,7 +124,7 @@ public class StudyApiControllerTest {
 	public static void beforeClass() {
 		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
 
-	    System.setProperty("study-data", tempFolderPath);
+	    System.setProperty("studies-data", tempFolderPath);
 	}
 	
 	@Before
@@ -277,11 +277,17 @@ public class StudyApiControllerTest {
 
 	@Test
 	@WithMockUser
-	public void testDownloadProtocolFileNotPDF() throws IOException {
-		File importZip = new File(tempFolderPath + "test-import-extra-data.zip");
+	public void testDownloadProtocolFileNotPDFNorZip() throws IOException, EntityNotFoundException, MicroServiceCommunicationException {
+		File importZip = new File(tempFolderPath + "test-import-extra-data.txt");
 		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.txt");
+
+		Mockito.when(studyServiceMock.update(Mockito.any())).thenReturn(stud);
+
 		if (saved.exists()) {
 			saved.delete();
+		}
+		if (importZip.exists()) {
+			importZip.delete();
 		}
 
 		try {

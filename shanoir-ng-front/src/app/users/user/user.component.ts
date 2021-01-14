@@ -21,6 +21,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 
 
@@ -32,9 +33,9 @@ import * as AppUtils from '../../utils/app.utils';
 
 export class UserComponent extends EntityComponent<User> {
 
-    private roles: Role[];
-    private denyLoading: boolean = false;
-    private acceptLoading: boolean = false;
+    public roles: Role[];
+    public denyLoading: boolean = false;
+    public acceptLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -46,6 +47,10 @@ export class UserComponent extends EntityComponent<User> {
 
     public get user(): User { return this.entity; }
     public set user(user: User) { this.entity = user; }
+
+    getService(): EntityService<User> {
+        return this.userService;
+    }
 
     initView(): Promise<void> {
         return this.loadUserAndRoles();
@@ -137,6 +142,10 @@ export class UserComponent extends EntityComponent<User> {
 
     public async hasDeleteRight(): Promise<boolean> {
         return false;
+    }
+
+    isUserAdmin(): boolean {
+        return this.keycloakService.isUserAdmin();
     }
 
 }

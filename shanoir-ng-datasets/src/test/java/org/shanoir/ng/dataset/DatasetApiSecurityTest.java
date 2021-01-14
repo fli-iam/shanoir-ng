@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -65,6 +66,8 @@ public class DatasetApiSecurityTest {
 	
 	@MockBean
 	StudyRightsService commService;
+
+	MockHttpServletResponse response;
 	
 	@Before
 	public void setup() {
@@ -81,7 +84,7 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 		assertAccessDenied(api::findDatasetById, 1L);
 		assertAccessDenied(t -> { try { api.findDatasets(t); } catch (RestServiceException e) { fail(e.toString()); }}, new PageRequest(0, 10));
-		assertAccessDenied((t, u) -> { try { api.downloadDatasetById(t, u); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, "dcm");
+		assertAccessDenied((t, u) -> { try { api.downloadDatasetById(t, u, response); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, "dcm");
 		assertAccessDenied((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDataset(1L), mockBindingResult);
 	}
 	
@@ -103,7 +106,7 @@ public class DatasetApiSecurityTest {
 		assertAccessAuthorized(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { }}, 1L);
 		assertAccessAuthorized(api::findDatasetById, 1L);
 		assertAccessAuthorized(t -> { try { api.findDatasets(t); } catch (RestServiceException e) {  }}, new PageRequest(0, 10));
-		assertAccessAuthorized((t, u) -> { try { api.downloadDatasetById(t, u); } catch (IOException | RestServiceException e) { }}, 1L, "dcm");
+		assertAccessAuthorized((t, u) -> { try { api.downloadDatasetById(t, u, response); } catch (IOException | RestServiceException e) { }}, 1L, "dcm");
 		assertAccessAuthorized((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDataset(1L), mockBindingResult);
 	}
 	

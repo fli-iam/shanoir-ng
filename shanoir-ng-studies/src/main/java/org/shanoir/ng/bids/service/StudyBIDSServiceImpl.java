@@ -220,24 +220,6 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 		}
 	}
 
-	@Override
-	public void updateSubjectBids(Long subjectId, Subject subject) {
-		Subject oldsub = subjectService.findById(subjectId);
-		// Do nothing if we can't find the subject or if the name didn't change
-		if (oldsub == null || oldsub.getName().equals(subject.getName())) {
-			return;
-		}
-		// Change folder name to new name for all concerned studies
-		for (SubjectStudy subjStud : oldsub.getSubjectStudyList()) {
-			String studyFolderPath = bidsStorageDir + File.separator
-					+ STUDY_PREFIX + subjStud.getStudy().getId() + "_" + subjStud.getStudy().getName()
-					+ File.separator;
-			File subjectFile = new File(studyFolderPath	+ SUBJECT_PREFIX + oldsub.getId() + "_" + oldsub.getName());
-			// Rename using new name
-			subjectFile.renameTo(new File(studyFolderPath +SUBJECT_PREFIX + oldsub.getId() + "_" + subject.getName()));
-		}
-	}
-
 	/**
 	 * Creates the participants.tsv and participants.json file from the study
 	 */

@@ -15,8 +15,10 @@
 package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.matchers.JUnitMatchers.*;
@@ -32,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -51,10 +54,14 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -115,6 +122,10 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private SubjectRepository subjectRepository;
+
+	@MockBean
+	private ShanoirEventService eventService;
+
 	private Subject subject = new Subject(3L, "name");
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
@@ -127,6 +138,7 @@ public class DatasetApiControllerTest {
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		updatedMetadata.setComment("comment");
+		updatedMetadata.setName("test 1");
 	}
 
 	@Test
@@ -154,6 +166,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNull() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 
@@ -171,6 +184,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
@@ -181,6 +195,7 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setId(1L);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
@@ -202,12 +217,22 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
+
 		// THEN all datasets are exported
+		
+		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		
+		ShanoirEvent event = eventCatcher.getValue();
+		assertNotNull(event);
+		assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
+		assertEquals(dataset.getId().toString(), event.getObjectId());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
@@ -218,6 +243,7 @@ public class DatasetApiControllerTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setId(1L);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findOne(3L)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
@@ -233,17 +259,25 @@ public class DatasetApiControllerTest {
 
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
-
+		
 		// WHEN we export all the datasets
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().contentType(MediaType.MULTIPART_FORM_DATA))
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
 
 
 		// THEN all datasets are exported
+		
+		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
+		
+		ShanoirEvent event = eventCatcher.getValue();
+		assertNotNull(event);
+		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
+		assertEquals(dataset.getId().toString(), event.getObjectId());
+		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
 
 	@Test
@@ -286,6 +320,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdNoIds() {
 		// GIVEN a list of datasets to export
 
@@ -305,6 +340,7 @@ public class DatasetApiControllerTest {
 
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdToMuchIds() {
 		// GIVEN a list of datasets to export
 		StringBuilder strb = new StringBuilder();
@@ -328,6 +364,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyIdTooMuchDatasets() throws Exception {
 		// GIVEN a study with more then 50 datasets to export
 
@@ -349,6 +386,7 @@ public class DatasetApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");

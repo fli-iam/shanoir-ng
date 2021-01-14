@@ -16,6 +16,7 @@ package org.shanoir.ng.datasetacquisition.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.shared.core.model.IdName;
 
 /**
@@ -26,21 +27,41 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 public class ExaminationDatasetAcquisitionDTO extends IdName {
 
-	private List<IdName> datasets;
+	private String type;
+
+	private List<DatasetAndProcessingsDTO> datasets;
+	
+	private Long studyId;
+	
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	/**
 	 * @return the datasets
 	 */
-	public List<IdName> getDatasets() {
+	public List<DatasetAndProcessingsDTO> getDatasets() {
 		return datasets;
 	}
 
 	/**
-	 * @param datasets
-	 *            the datasets to set
+	 * @param datasets the datasets to set
 	 */
-	public void setDatasets(List<IdName> datasets) {
+	public void setDatasets(List<DatasetAndProcessingsDTO> datasets) {
 		this.datasets = datasets;
 	}
 
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+	
 }

@@ -98,8 +98,20 @@ public interface DatasetService {
 	public Page<Dataset> findPage(final Pageable pageable);
 
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	public List<Dataset> findByStudyId(Long studyId);
+
+  
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+	List<Dataset> findByAcquisition(Long acquisitionId);
+  
+  
+	/**
+	 * Get database statistics
+	 * 
+	 * @return statistics
+	 */
+	@PreAuthorize("hasRole('ADMIN')")
+	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 
 }
