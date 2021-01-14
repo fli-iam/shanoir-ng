@@ -14,9 +14,7 @@
  */
 
 import { Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList } from '@angular/core';
-import { Observable } from 'rxjs';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
 @Component({
     selector: 'menu-item',
@@ -31,6 +29,7 @@ export class MenuItemComponent {
     @Input() link: string;
     @Input() boolVar: boolean;
     @Input() awesome: string;
+    @Input() disabled: boolean;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
     public opened: boolean = false;
@@ -55,13 +54,12 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = Observable.timer(0,100).subscribe (t=> {
+        let subscription = setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;
             this.init = true;
-            subscription.unsubscribe();
-        });
+        }, 100);
     }
 
     public open() {

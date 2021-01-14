@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="examination.study" (change)="onStudyChange()" [optionArr]="studies">
+								<select-box formControlName="study" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -176,13 +176,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 			</fieldset>
 			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-                (delete) = "delete()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+				<button *ngIf="mode=='view' && hasDownloadRight" [disabled]="downloading || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight" [disabled]="downloading || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+				<!-- <button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button> -->
+			</form-footer>
 		</div>
 	</form>
 </div>

@@ -14,7 +14,8 @@
 
 import {Injector, ViewContainerRef} from "@angular/core";
 
+// @dynamic
 export class ServiceLocator {
-    static injector: Injector;
+    static injector: Injector = null;
     static rootViewContainerRef: ViewContainerRef;
 }

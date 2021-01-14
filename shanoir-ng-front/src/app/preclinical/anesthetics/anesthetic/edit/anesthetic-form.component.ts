@@ -33,6 +33,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Option } from '../../../../shared/select/select.component';
 
 @Component({
@@ -45,7 +46,7 @@ import { Option } from '../../../../shared/select/select.component';
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    @ViewChild('ingredientsTable') table: TableComponent; 
+    @ViewChild('ingredientsTable', { static: false }) table: TableComponent; 
 
     AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
@@ -55,7 +56,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    private columnDefs: any[];
+    public columnDefs: any[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -68,7 +69,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private anestheticService: AnestheticService,
         private ingredientService: AnestheticIngredientService,
         private referenceService: ReferenceService,
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
         super(route, 'preclinical-anesthetic');
         this.manageSaveEntity();
@@ -77,6 +78,9 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     get anesthetic(): Anesthetic { return this.entity; }
     set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
+    getService(): EntityService<Anesthetic> {
+        return this.anestheticService;
+    }
 
     initView(): Promise<void> {
         this.createColumnDefs();

@@ -193,6 +193,7 @@ public class ImporterServiceTest {
 		importJob.setSubjectName("subjectName");
 		importJob.setStudyName("studyName");
 		importJob.setStudyId(1L);
+		importJob.setShanoirEvent(new ShanoirEvent());
 		
 		Examination examination = new Examination();
 		examination.setId(2L);

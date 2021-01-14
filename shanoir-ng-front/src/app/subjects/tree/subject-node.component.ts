@@ -101,6 +101,7 @@ export class SubjectNodeComponent implements OnChanges {
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
+            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );
@@ -125,7 +126,7 @@ export class SubjectNodeComponent implements OnChanges {
     
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == 'UNLOADED') return 'unknown';
+        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 
@@ -134,6 +135,5 @@ export class SubjectNodeComponent implements OnChanges {
     }
 
     collapseAll() {
-        console.log('collapse');
     }
 }

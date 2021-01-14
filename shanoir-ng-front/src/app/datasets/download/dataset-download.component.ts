@@ -13,11 +13,9 @@
  */
 
 import { Component, ViewChild, Input } from '@angular/core';
-import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { MatDialogRef } from '@angular/material/dialog';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
 
@@ -27,7 +25,7 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
     styleUrls: ['dataset-download.component.css']
 })
 
-/** Button to download datasets. 
+/** Button to download datasets.
     Opens a popup stating:
     - Type of download
     - Use bids format
@@ -35,18 +33,17 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 export class DatasetDownloadComponent {
     
     constructor(private datasetService: DatasetService, private studyService: StudyService) {
-        
     }
 
     @Input() datasetIds: number[] = [];
     @Input() studyId: number;
-    protected useBids: boolean = false;
-    protected type: 'nii' | 'dcm' = 'nii';
-    protected inError: boolean = false;
-    protected errorMessage: string;
-    protected loading: boolean = false;
-    protected readonly ImagesUrlUtil = ImagesUrlUtil;
-    protected mode: 'all' | 'selected';
+    public useBids: boolean = false;
+    public type: 'nii' | 'dcm' = 'nii';
+    public inError: boolean = false;
+    public errorMessage: string;
+    public loading: boolean = false;
+    public readonly ImagesUrlUtil = ImagesUrlUtil;
+    public mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 

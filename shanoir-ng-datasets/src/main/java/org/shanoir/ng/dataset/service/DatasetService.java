@@ -102,7 +102,7 @@ public interface DatasetService {
 	public List<Dataset> findByStudyId(Long studyId);
 
   
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(studyId, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
 	List<Dataset> findByAcquisition(Long acquisitionId);
   
   

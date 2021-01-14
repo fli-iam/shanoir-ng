@@ -17,6 +17,8 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.shanoir.ng.shared.event.ShanoirEvent;
+
 /**
  * @author atouboul
  * @author mkain
@@ -56,6 +58,7 @@ public class ImportJob implements Serializable {
 
 	private String studyName;
 
+	private ShanoirEvent shanoirEvent;
     
 	public String getArchive() {
 		return archive;
@@ -176,6 +179,14 @@ public class ImportJob implements Serializable {
 
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
+	}
+
+	public ShanoirEvent getShanoirEvent() {
+		return shanoirEvent;
+	}
+
+	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+		this.shanoirEvent = shanoirEvent;
 	}
 }
 
