@@ -13,9 +13,16 @@
  */
 package org.shanoir.ng.shared.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+
+import org.shanoir.ng.dataset.model.Dataset;
 
 /**
  * @author yyao
@@ -29,7 +36,25 @@ public class Study {
 	private long id;
 	 
 	private String name;
-	
+
+	@ManyToMany
+	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
+	private List<Dataset> relatedDatasets;
+
+	/**
+	 * @return the relatedDatasets
+	 */
+	public List<Dataset> getRelatedDatasets() {
+		return relatedDatasets;
+	}
+
+	/**
+	 * @param relatedDatasets the relatedDatasets to set
+	 */
+	public void setRelatedDatasets(List<Dataset> relatedDatasets) {
+		this.relatedDatasets = relatedDatasets;
+	}
+
 	public Study() {}
 
 	/**
