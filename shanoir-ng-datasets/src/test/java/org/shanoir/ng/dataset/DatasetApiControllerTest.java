@@ -16,12 +16,10 @@ package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -226,8 +224,7 @@ public class DatasetApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
 				.param("format", "nii")
 				.param("studyId", "1"))
-		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
+		.andExpect(status().isOk());
 
 		// THEN all datasets are exported
 		
@@ -278,9 +275,7 @@ public class DatasetApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
 				.param("datasetIds", "1"))
-		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
-
+		.andExpect(status().isOk());
 
 		// THEN all datasets are exported
 		
