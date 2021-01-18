@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.controler;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -155,6 +156,12 @@ public class SubjectApiController implements SubjectApi {
 		if (simpleSubjectDTOList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		simpleSubjectDTOList.sort(new Comparator<SimpleSubjectDTO>() {
+			@Override
+			public int compare(SimpleSubjectDTO o1, SimpleSubjectDTO o2) {
+				return o1.getName().compareToIgnoreCase(o2.getName());
+			}
+		});
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 
