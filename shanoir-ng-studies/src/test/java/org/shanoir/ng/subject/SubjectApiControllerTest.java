@@ -41,6 +41,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,10 +156,12 @@ public class SubjectApiControllerTest {
 		SimpleSubjectDTO subject = new SimpleSubjectDTO();
 		subject.setName("AA");
 		subject.setId(2L);
+		subject.setSubjectStudy(new SubjectStudyDTO());
 
 		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
 		subject2.setName("BB");
 		subject2.setId(1L);
+		subject2.setSubjectStudy(new SubjectStudyDTO());
 		
 		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
 		list.add(subject2);
@@ -170,7 +173,7 @@ public class SubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":null},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":null}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
 	}
 
 	@Test
@@ -179,10 +182,13 @@ public class SubjectApiControllerTest {
 		SimpleSubjectDTO subject = new SimpleSubjectDTO();
 		subject.setName("AA");
 		subject.setId(2L);
+		subject.setSubjectStudy(new SubjectStudyDTO());
 
 		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
 		subject2.setName("BB");
 		subject2.setId(1L);
+		subject2.setSubjectStudy(new SubjectStudyDTO());
+
 		
 		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
 		list.add(subject2);
@@ -194,7 +200,7 @@ public class SubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":null},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":null}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
 	}
 
 }
