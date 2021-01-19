@@ -312,7 +312,11 @@ public class ExaminationApiController implements ExaminationApi {
 		exam.getDatasetAcquisitions().sort(new Comparator<DatasetAcquisition>() {
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return o1.getSortingIndex() - o2.getSortingIndex();
+				// Rank is never null
+				Integer aIndex = o1.getSortingIndex() != null ? o1.getSortingIndex() : o1.getRank();
+				Integer bIndex = o2.getSortingIndex() != null ? o2.getSortingIndex() : o2.getRank();
+
+				return aIndex - bIndex;
 			}
 		});
 	}
