@@ -16,11 +16,13 @@ package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
+import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -32,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriUtils;
 
 @Component
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
@@ -75,14 +78,33 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 			
 			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
 			outDir.mkdirs();
-			
+			int index = 1;
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 
-				File srcFile = new File(datasetFile.getPath().replace("file:" , ""));
+				File srcFile;
+				try {
+					srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
+				} catch (UnsupportedEncodingException e1) {
+					LOG.error("Could not decode nifti path file");
+					srcFile = new File(datasetFile.getPath().replace("file:" , ""));
+				}
 				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
 				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+				
+				// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+				StringBuilder name = new StringBuilder("");
+				
+				name.append(importJob.getSubjectName()).append("_")
+				.append(serie.getSeriesDescription()).append("_")
+				.append(serie.getSeriesNumber()).append("_")
+				.append(importJob.getProperties().get(ImportJob.INDEX_PROPERTY)).append("_")
+				.append(importJob.getProperties().get(ImportJob.RANK_PROPERTY)).append("_")
+				.append(index)
+				.append(FilenameUtils.getExtension(srcFile.getName()));
+
 				Path niftiFinalLocation = null;
 				try {
+					System.err.println("Copying nifti file: " + srcFile.getPath());
 					niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
 					LOG.error("IOException generating nifti Dataset Expression", e);
@@ -95,6 +117,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 					niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
 					niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
 				}
+				index++;
 			}
 		}
 		return niftiDatasetExpression;
