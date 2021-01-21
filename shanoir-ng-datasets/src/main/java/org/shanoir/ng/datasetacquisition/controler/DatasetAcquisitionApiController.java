@@ -115,7 +115,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		} finally {
 			// if the json could not be parsed, no way to know workFolder
 			// so better to throw the exception, as no possibility to clean
-			//importerService.cleanTempFiles(importJob.getWorkFolder());
+			importerService.cleanTempFiles(importJob.getWorkFolder());
 		}
 	}
 	

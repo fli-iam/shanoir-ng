@@ -85,7 +85,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 				try {
 					srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
 				} catch (UnsupportedEncodingException e1) {
-					LOG.error("Could not decode nifti path file");
+					LOG.error("Could not decode nifti path file: {}", datasetFile.getPath());
 					srcFile = new File(datasetFile.getPath().replace("file:" , ""));
 				}
 				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
@@ -104,7 +104,6 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 				Path niftiFinalLocation = null;
 				try {
-					System.err.println("Copying nifti file: " + srcFile.getPath());
 					niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
 					LOG.error("IOException generating nifti Dataset Expression", e);
