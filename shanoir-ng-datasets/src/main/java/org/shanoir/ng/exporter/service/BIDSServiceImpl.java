@@ -151,7 +151,11 @@ public class BIDSServiceImpl implements BIDSService {
 				for (DatasetFile dataFile : expr.getDatasetFiles()) {
 					if (!dataFile.isPacs()) {
 						// Get FileName path object
-				        Path path = Paths.get(dataFile.getPath());
+						String dataFilePath = dataFile.getPath();
+						if (dataFilePath.startsWith("file://")) {
+							dataFilePath = dataFile.getPath().replace("file://", "");
+						}
+						Path path = Paths.get(dataFilePath);
 				        Path fileName = path.getFileName();
 						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
 
@@ -171,7 +175,6 @@ public class BIDSServiceImpl implements BIDSService {
 					metaDataFile.delete();
 				}
 			}
-			
 		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
 			e.printStackTrace();
