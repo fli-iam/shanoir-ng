@@ -48,6 +48,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { ImportMode } from '../../import/import.component';
 
 @Component({
     selector: 'clinical-context',
@@ -74,7 +75,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public examination: SubjectExamination;
     public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
-    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
+    public importMode: ImportMode;
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),

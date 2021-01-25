@@ -34,6 +34,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { ProcessedDatasetsComponent } from './import/processed-datasets/processed-datasets.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -128,6 +129,10 @@ let routes: Routes = [
                 component: QueryPacsComponent,
                 canActivate: [CanImportFromPACSGuard]
             }, {
+                path: 'processed-datasets',
+                component: ProcessedDatasetsComponent,
+                data: {importMode: 'Processed Dataset'}
+            }, {
                 path: 'series',
                 component: SelectSeriesComponent
             }, {
@@ -142,12 +147,10 @@ let routes: Routes = [
             }, {
                 path: 'finish',
                 component: FinishImportComponent
-            }
-            , {
+            }, {
                 path: 'eegfinish',
                 component: FinishEegImportComponent
-            }
-            , {
+            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent
             }, {

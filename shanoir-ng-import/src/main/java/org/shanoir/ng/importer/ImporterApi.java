@@ -102,6 +102,18 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile) throws RestServiceException;
 
+    @ApiOperation(value = "Upload a NIfTI file or an Analyze data item", notes = "Upload .nii, .nii.gz or .hdr/.img files", response = Void.class, tags={ "Upload .nii, .nii.gz or .hdr/.img files", })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
+        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+    @PostMapping(value = "/upload_processed_dataset/",
+        produces = { "application/json" },
+        consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<String> uploadProcessedDataset(@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, @ApiParam(value = "header detail", required = false) @RequestPart("header") MultipartFile headerFile) throws RestServiceException;
+    
     @ApiOperation(value = "Import one DICOM .zip file", notes = "Import DICOM .zip file already uploaded", response = Void.class, tags = {
 			"Import one DICOM .zip file", })
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "success returns file path", response = Void.class),

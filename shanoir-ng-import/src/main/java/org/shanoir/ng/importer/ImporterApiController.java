@@ -423,6 +423,63 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) {
+		
+		return imageFile;
+	}
+
+	@Override
+	/**
+	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
+	 */
+	public ResponseEntity<String> uploadProcessedDataset(
+		@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
+		@ApiParam(value = "header detail", required = false) @RequestPart("header") MultipartFile headerFile) 
+		throws RestServiceException {
+			
+		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
+		String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
+		Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
+		Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
+
+		if (!isNifti || !isAnalyze) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Wrong content type of file upload.", null));
+		}
+
+		try {
+
+			// 1. Save files to user directory
+			
+			//    - Create user directory
+
+			long n = ImportUtils.createRandomLong();
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId) + File.separator + Long.toString(n);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs();
+			}
+			
+			//    - Save files
+			File destinationImageFile = new File(userImportDir.getAbsolutePath(), imageFileName);
+			imageFile.transferTo(destinationImageFile);
+			if(headerFile != null) {
+				File destinationHeaderFile = new File(userImportDir.getAbsolutePath(), headerFileName);
+				headerFile.transferTo(destinationHeaderFile);
+
+				// Convert Analyze format to nifti format
+				destinationImageFile = convertAnalyzeToNifti(destinationImageFile, destinationHeaderFile);
+			}
+
+			return new ResponseEntity<>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
+		}
+	}
+
 	/**
 	 * Reads a list of .edf files to generate a bunch of datasets.
 	 * 

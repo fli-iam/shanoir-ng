@@ -84,6 +84,7 @@ import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { ProcessedDatasetsComponent } from './import/processed-datasets/processed-datasets.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -305,6 +306,7 @@ import { environment } from 'src/environments/environment';
         EegUploadComponent,
         BidsUploadComponent,
         QueryPacsComponent,
+        ProcessedDatasetsComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
         SubjectStudyListComponent,
