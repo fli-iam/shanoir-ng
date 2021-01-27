@@ -161,8 +161,8 @@ public class ImporterApiControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("\"name\":\"Fp1\"")))
 			.andExpect(content().string(containsString("\"z\":2.5810034")))
-			.andExpect(content().string(containsString(File.separator + File.separator + "brainvision (copy)" + File.separator + File.separator +
-					"ROBEEG_BACGU020_dlpfc_l_0002.vhdr\"")));
+			.andExpect(content().string(containsString("brainvision (copy)")))
+			.andExpect(content().string(containsString("ROBEEG_BACGU020_dlpfc_l_0002.vhdr")));
 		} else {
 			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
 			fail();
