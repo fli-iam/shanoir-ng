@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 
 
 /**

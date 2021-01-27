@@ -69,7 +69,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Study", field: "study.name"},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
+            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
     }

@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
 
-import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 

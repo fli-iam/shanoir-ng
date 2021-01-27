@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.processing;
+package org.shanoir.ng.processing.model;
 
 import java.util.List;
 

@@ -12,23 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto.mapper;
+package org.shanoir.ng.processing.repository;
 
-import org.mapstruct.Mapper;
+import java.util.Optional;
+
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.springframework.data.repository.CrudRepository;
 
-@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
-public interface DatasetProcessingMapper {
+/**
+ * Repository for dataset processings.
+ *
+ * @author msimon
+ */
+public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
 	/**
-	 * Map a @DatasetMetadata to a @DatasetMetadataDTO.
-	 * 
-	 * @param datasets
-	 *            dataset.
-	 * @return dataset DTO.
+	 * Find dataset processing by name.
+	 *
+	 * @param name name.
+	 * @return a dataset processing.
 	 */
-	DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
-
+	Optional<DatasetProcessing> findByName(String name);
 
 }

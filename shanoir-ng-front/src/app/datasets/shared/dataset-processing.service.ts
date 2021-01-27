@@ -17,6 +17,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 import { DatasetProcessing, DatasetProcessingDTO } from './dataset-processing.model';
 import { HttpClient } from '@angular/common/http';
+import { Dataset } from './dataset.model';
 
 @Injectable()
 export class DatasetProcessingService extends EntityService<DatasetProcessing> {
@@ -28,6 +29,18 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     }
 
     getEntityInstance() { return new DatasetProcessing(); }
+
+    createInputDataset(datasetProcessingId: number, inputDataset: Dataset) {
+
+    }
+    
+    deleteInputDataset(datasetProcessingId: number, inputDatasetId: number) {
+
+    }
+
+    deleteOutputDataset(datasetProcessingId: number, outputDatasetId: number) {
+
+    }
 
     public stringify(entity: DatasetProcessing) {
         let dto = new DatasetProcessingDTO(entity);
