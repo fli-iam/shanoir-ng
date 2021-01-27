@@ -58,7 +58,7 @@ a.link { text-decoration: none; color: inherit; }
 
 .cell-button i:hover { color: var(--color-a); }
 
-checkbox { vertical-align: middle; }
+checkbox { height: 13px; width: 13px; margin: 1px 0; }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
 .triangle.up { top: -12px; }
