@@ -22,7 +22,7 @@ export class ExaminationPipe implements PipeTransform {
 
     transform(examination: Examination | SubjectExamination) {
         if (examination) {
-            return new Date(examination.examinationDate).toLocaleDateString()  + " , " + examination.comment + "  ( id = " + (examination.id != null ? examination.id : "external") + " ) ";
+            return new Date(examination.examinationDate).toLocaleDateString()  + " , " + examination.comment + "  ( id = " + examination.id + " ) ";
         }
         return "";
     }

@@ -37,13 +37,11 @@ import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,12 +112,6 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
-
-	@MockBean
-	private StudyRepository studyRepository;
-
-	@MockBean
-	ExaminationRepository examRepo;
 
 	@Before
 	public void setup() throws ShanoirException {
