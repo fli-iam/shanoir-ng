@@ -1,0 +1,131 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="header command-zone">2. Set the clinical context of the processed dataset</div>
+<fieldset class="step" @preventInitialChildAnimations>
+
+    <ol>
+        <legend>
+            Processed dataset details
+        </legend>
+        <li>
+            <label class="required-label">Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetType" (userChange)="onSelectDatasetType(); onContextChange();"
+                        [newDisabled]="true" [optionArr]="datasetTypes" [pipe]="datasetTypeLabelPipe">
+                </select-box>  
+            </span>
+        </li>
+        <li>
+            <label>Comment</label>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDataset.comment"/>
+        </li>
+        <li>
+            <label>Name</label>
+            <input type="text" id="processedDatasetName" [(ngModel)]="processedDataset.name"/>
+        </li>
+    </ol> 
+
+    <ol>
+        <legend>
+            Dataset processing
+            <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
+        </legend>
+        <li>
+            <!-- TODO: USE TABLE INSTEAD -->
+            <label class="required-label">Select a dataset processing</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetProcessing" (userChange)="onSelectDatasetProcessing(); onContextChange();"
+                        (onViewClick)="showDatasetProcessingDetails()" [viewDisabled]="!datasetProcessing"
+                        (onNewClick)="openCreateDatasetProcessing()" [optionArr]="datasetProcessings" [pipe]="datasetProcessingLabelPipe">
+                </select-box>  
+            </span>
+        </li>
+    </ol>
+
+    <ol>
+        <legend>
+            Research study
+            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+        </legend>
+        <li>
+            <label class="required-label">Select a research study</label> 
+            <span class="right-col">
+                <select-box 
+                        [(ngModel)]="study" 
+                        (userChange)="onContextChange();" 
+                        (onViewClick)="showStudyDetails()" 
+                        [viewDisabled]="!study" 
+                        [options]="studyOptions">
+                </select-box>
+            </span>
+        </li>
+        
+    </ol>
+
+    <ol>
+        <legend>
+            Subject
+            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select a subject</label> 
+            <span class="right-col">
+                <select-box 
+                        [disabled]="!study || !acquisitionEquipment" 
+                        [(ngModel)]="subject" 
+                        (userChange)="onSelectSubject(); onContextChange();" 
+                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
+                        [optionArr]="subjects">
+                </select-box>
+            </span>
+        </li>
+    </ol>
+    <ol class="subject-study">
+        <legend 
+                class="clickable"
+                [class.disabled]="!subject || !subject.subjectStudy"
+                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
+            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
+        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
+            <li>
+                <label>Common name</label>
+                <span class="right-col">{{subject.name}}</span>
+            </li>
+            <li>
+                <label>Subject identifier for this study</label>
+                <span class="right-col">
+                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                    [ngModelOptions]="{standalone: true}"/>
+                </span>
+            </li>
+            <li>
+                <label>Physically involved</label>
+                <span class="right-col">
+                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+                </span>
+            </li>
+            <li *ngIf="importMode != 'BRUKER'">
+                <label>Subject Type</label>
+                <span class="right-col">
+                    <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
+                    </select-box>
+                </span>
+            </li>
+        </div>
+    </ol>
+
+</fieldset>
+<button [disabled]="!valid" (click)="import()">Import</button>

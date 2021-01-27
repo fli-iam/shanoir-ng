@@ -1,0 +1,128 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component detail">
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<span [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'">
+				<h2 class="header command-zone"i18n="View datasetProcessing|Title@@datasetProcessingDetailViewTitle">Details on dataset processing</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'edit'">
+				<h2 class="header command-zone"i18n="Edit datasetProcessing|Title@@datasetProcessingDetailEditTitle">Edit dataset processing</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'create'">
+				<h2 class="header command-zone"i18n="Create datasetProcessing|Title@@datasetProcessingDetailCreateTitle">Create dataset processing</h2>
+			</ng-template>
+		</span>
+
+		<fieldset>
+
+			<ol>
+				<legend>
+					Research study
+					<tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+				</legend>
+				<li>
+					<label class="required-label">Research study</label> 
+					<span class="right-col">
+						<select-box 
+								[(ngModel)]="study"
+								[viewDisabled]="true" 
+								[options]="studyOptions">
+						</select-box>
+					</span>
+				</li>
+
+				<li>
+					<label i18n="Processing detail|Processing type label@@processingDetailProcessingType">Processing type</label> 
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'"> 
+							{{processingType}}
+						</ng-template>
+						<ng-template ngSwitchDefault> 
+							<select-box formControlName="processingType" [(ngModel)]="processingType" [options]="datasetProcessingTypes"
+								(userChange)="onProcessingTypeChange($event)">
+							</select-box>
+						</ng-template>
+					</span>
+				</li>
+
+				<li>
+					<label i18n="Processing detail|Processing date label@@processingDetailProcessingDate">Processing date</label>
+											<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{processing?.processingDate | date: 'dd/MM/yyyy'}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<datepicker [disabled]="inImport && processing.processingDate" [(ngModel)]="processing.processingDate" formControlName="processingDate" required></datepicker>
+							<label *ngIf="hasError('processingDate', ['format'])" class="form-validation-alert" i18n="Processing detail|Date valid error@@dateValidError">Invalid date, it must follow the format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('processingDate', ['required'])" class="form-validation-alert" i18n="Processing detail|BirthDate required error@@processingDetailBirthDateRequiredError">Required</label>
+						</ng-template>
+					</span>
+				</li>
+
+				<li>
+					<label i18n="Processing detail|Comment label@@processingDetailComment">Comment</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{processing?.comment}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="comment" formControlName="comment" [(ngModel)]="processing.comment" />
+						</ng-template>
+					</span>
+				</li>
+
+			</ol>
+
+			<ol>
+				<legend>
+					Input datasets
+					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>
+				</legend>
+				<li>
+					<shanoir-table #inputDatasetsTable
+						[getPage]="getInputDatasetsPage.bind(this)" 
+						[columnDefs]="inputDatasetsColumnDefs">
+					</shanoir-table>
+				</li>
+
+			</ol>
+
+			<ol>
+				<legend>
+					Output datasets
+					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
+				</legend>
+				<li>
+					<shanoir-table #inputDatasetsTable
+						[getPage]="getOutputDatasetsPage.bind(this)" 
+						[columnDefs]="outputDatasetsColumnDefs">
+					</shanoir-table>
+				</li>
+
+			</ol>
+
+		</fieldset>
+		
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+            (delete) = "delete()"
+			(cancel)="goToView()"
+			(back)="goBack()"
+		></form-footer>
+	</form>
+</div>

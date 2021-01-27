@@ -423,9 +423,20 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	private File convertAnalyzeToNifti(File imageFile, File headerFile) {
-		
-		return imageFile;
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws IOException, InterruptedException {
+		String imageName = imageFile.getAbsolutePath();
+		String newImageName = imageName.replace(".img", ".nii.gz");
+		File parentFolder = imageFile.getParentFile().getAbsoluteFile();
+		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + imageName + " -o " + newImageName};
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.directory(parentFolder);
+        Process process = processBuilder.start();
+
+        int exitCode = process.waitFor();
+		if(exitCode != 0) {
+			throw new IOException("Impossible to convert Analyze image to nifti.");
+		}
+		return new File(parentFolder, newImageName);
 	}
 
 	@Override
@@ -473,7 +484,7 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			return new ResponseEntity<>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));

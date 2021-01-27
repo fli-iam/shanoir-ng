@@ -715,9 +715,7 @@ let routes: Routes = [
 		component: AnimalSubjectFormComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
-	},
-
-
+	}
 ];
 
 // Angular AOT compilation requires routes to be static, the following code would not work (see below for static routes generation code):
