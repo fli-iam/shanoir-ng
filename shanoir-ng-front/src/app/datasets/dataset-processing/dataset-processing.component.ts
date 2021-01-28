@@ -19,6 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { Dataset } from '../shared/dataset.model';
+import { DatasetService } from '../shared/dataset.service';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { StudyService } from '../../studies/shared/study.service';
@@ -45,15 +46,16 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     private outputDatasetsPromise: Promise<any>;
     private inputDatasetsBrowserPaging: BrowserPaging<Dataset>;
     private outputDatasetsBrowserPaging: BrowserPaging<Dataset>;
-    private inputDatasetsToDelete: Dataset[] = [];
-    private inputDatasetsToCreate: Dataset[] = [];
-    private outputDatasetsToDelete: Dataset[] = [];
+    private inputDatasetsToRemove: Dataset[] = [];
+    private inputDatasetsToAdd: Dataset[] = [];
+    private outputDatasetsToRemove: Dataset[] = [];
     public inputDatasetsColumnDefs: any[];
     public outputDatasetsColumnDefs: any[];
     
     constructor(
             private route: ActivatedRoute,
             private studyService: StudyService,
+            private datasetService: DatasetService,
             private datasetProcessingService: DatasetProcessingService
             ) {
 
@@ -209,7 +211,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         if (index !== -1) {
             this.datasetProcessing.inputDatasets.splice(index, 1);
         }
-        this.inputDatasetsToDelete.push(item);
+        this.inputDatasetsToRemove.push(item);
         this.inputDatasetsBrowserPaging.setItems(this.datasetProcessing.inputDatasets);
         this.inputDatasetsTable.refresh();
     }
@@ -219,7 +221,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         if (index !== -1) {
             this.datasetProcessing.outputDatasets.splice(index, 1);
         }
-        this.outputDatasetsToDelete.push(item);
+        this.outputDatasetsToRemove.push(item);
         this.outputDatasetsBrowserPaging.setItems(this.datasetProcessing.outputDatasets);
         this.outputDatasetsTable.refresh();
     }
@@ -227,19 +229,19 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     manageSaveEntity(): void {
         this.subscribtions.push(
             this.onSave.subscribe(response => {
-                if (this.inputDatasetsToDelete) {
-                    for (let inputDataset of this.inputDatasetsToDelete) {
-                        this.datasetProcessingService.deleteInputDataset(response.id, inputDataset.id);
+                for(let datasets of [this.inputDatasetsToRemove, this.outputDatasetsToRemove]) {
+                    for (let dataset of datasets) {
+                        let index = dataset.processings.indexOf(this.datasetProcessing);
+                        if(index >= 0) {
+                            dataset.processings.splice(index, 1);
+                            this.datasetService.update(dataset.id, dataset);
+                        }
                     }
                 }
-                if (this.inputDatasetsToCreate) {
-                    for (let inputDataset of this.inputDatasetsToCreate) {
-                        this.datasetProcessingService.createInputDataset(response.id, inputDataset).subscribe();
-                    }
-                }
-                if (this.outputDatasetsToDelete) {
-                    for (let outputDataset of this.outputDatasetsToDelete) {
-                        this.datasetProcessingService.deleteOutputDataset(response.id, outputDataset.id);
+                if (this.inputDatasetsToAdd) {
+                    for (let dataset of this.inputDatasetsToAdd) {
+                        dataset.processings.push(this.datasetProcessing);
+                        this.datasetService.update(dataset.id, dataset);
                     }
                 }
             })

@@ -206,7 +206,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
+            }
         });
         return prom;
     }

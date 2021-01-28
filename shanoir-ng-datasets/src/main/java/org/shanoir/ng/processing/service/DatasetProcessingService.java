@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.processing.service;
 
-import java.util.Optional;
+// import java.util.Optional;
 
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * DatasetProcessing service.
@@ -34,7 +34,7 @@ public interface DatasetProcessingService extends BasicEntityService<DatasetProc
 	 * @param name name.
 	 * @return a dataset processing.
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<DatasetProcessing> findByName(String name);
+	// @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	// Optional<DatasetProcessing> findByName(String name);
 
 }

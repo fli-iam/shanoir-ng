@@ -17,7 +17,7 @@ package org.shanoir.ng.processing.service;
 import java.util.Optional;
 
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+// import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +31,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetProcessingServiceImpl extends BasicEntityServiceImpl<DatasetProcessing> implements DatasetProcessingService {
 
-	@Autowired
-	private DatasetProcessingRepository datasetProcessingRepository;
+	// @Autowired
+	// private DatasetProcessingRepository datasetProcessingRepository;
 
 	@Override
 	protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
@@ -45,8 +45,8 @@ public class DatasetProcessingServiceImpl extends BasicEntityServiceImpl<Dataset
 		return to;
 	}
 
-	@Override
-	public Optional<DatasetProcessing> findByName(String name) {
-		return datasetProcessingRepository.findByName(name);
-	}
+	// @Override
+	// public Optional<DatasetProcessing> findByName(String name) {
+	// 	return datasetProcessingRepository.findByName(name);
+	// }
 }

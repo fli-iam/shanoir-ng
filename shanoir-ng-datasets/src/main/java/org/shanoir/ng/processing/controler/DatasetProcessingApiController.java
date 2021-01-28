@@ -23,14 +23,11 @@ import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +47,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Autowired
 	private DatasetProcessingService datasetProcessingService;
 
-	@Autowired
-	private ShanoirEventService eventService;
-
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
 			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
@@ -60,7 +54,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 		try {
 			datasetProcessingService.deleteById(datasetProcessingId);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_COIL_EVENT, datasetProcessingId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
@@ -98,7 +91,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 		/* Save dataset processing in db. */
 		final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_COIL_EVENT, createdDatasetProcessing.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(createdDatasetProcessing), HttpStatus.OK);
 	}
 
@@ -111,7 +103,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 		validate(result);
 		try {
 			datasetProcessingService.update(datasetProcessing);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_COIL_EVENT, datasetProcessingId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		
 		} catch (EntityNotFoundException e) {

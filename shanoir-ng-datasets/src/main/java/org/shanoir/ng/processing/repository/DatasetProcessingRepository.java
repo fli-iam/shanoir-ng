@@ -24,14 +24,14 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
+// public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
-	/**
-	 * Find dataset processing by name.
-	 *
-	 * @param name name.
-	 * @return a dataset processing.
-	 */
-	Optional<DatasetProcessing> findByName(String name);
+// 	/**
+// 	 * Find dataset processing by name.
+// 	 *
+// 	 * @param name name.
+// 	 * @return a dataset processing.
+// 	 */
+// 	Optional<DatasetProcessing> findByName(String name);
 
-}
+// }
