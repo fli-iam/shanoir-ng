@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
@@ -169,16 +168,10 @@ public class ExaminationDTO {
 		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
 	}
 
-	/**
-	 * @return the extraDataFilePathList
-	 */
 	public List<String> getExtraDataFilePathList() {
 		return extraDataFilePathList;
 	}
 
-	/**
-	 * @param extraDataFilePathList the extraDataFilePathList to set
-	 */
 	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
 		this.extraDataFilePathList = extraDataFilePathList;
 	}
