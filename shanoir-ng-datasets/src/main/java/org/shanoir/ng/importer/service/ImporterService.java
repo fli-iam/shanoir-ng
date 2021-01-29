@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -26,8 +27,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.EegDatasetDTO;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -49,8 +64,10 @@ import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -184,6 +201,7 @@ public class ImporterService {
 
 		}
 	}
+
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		if (checkSerieForDicomImages(serie)) {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
@@ -262,6 +280,196 @@ public class ImporterService {
 
 		try {
 			DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
+
+			// Get examination
+			Examination examination = examinationService.findById(importJob.getExaminationId());
+
+			datasetAcquisition.setExamination(examination);
+			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+
+			List<Dataset> datasets = new ArrayList<>();
+			float progress = 0f;
+
+			for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
+				progress += 1f / importJob.getDatasets().size();
+				event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
+				event.setProgress(progress);
+				eventService.publishEvent(event);
+				// Metadata
+				DatasetMetadata originMetadata = new DatasetMetadata();
+				originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
+				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
+				originMetadata.setName(datasetDto.getName());
+				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+
+				// Create the dataset with informations from job
+				EegDataset datasetToCreate = new EegDataset();
+
+				// DatasetExpression with list of files
+				DatasetExpression expression = new DatasetExpression();
+				expression.setCreationDate(LocalDateTime.now());
+				expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
+				expression.setDataset(datasetToCreate);
+
+				List<DatasetFile> files = new ArrayList<>();
+
+				// Set files
+				if (datasetDto.getFiles() != null) {
+
+					// Copy the data somewhere else
+					final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
+					final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
+
+					final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
+					outDir.mkdirs();
+
+					// Move file one by one to the new directory
+					for (String filePath : datasetDto.getFiles()) {
+
+						File srcFile = new File(filePath);
+						String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
+						File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+						Path finalLocation = null;
+						try {
+							finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							LOG.error("IOException generating EEG Dataset Expression", e);
+						}
+
+						// Create datasetExpression => Files
+						if (finalLocation != null) {
+							DatasetFile file = new DatasetFile();
+							file.setDatasetExpression(expression);
+							file.setPath(finalLocation.toUri().toString());
+							file.setPacs(false);
+							files.add(file);
+						}
+					}
+				}
+
+				expression.setDatasetFiles(files);
+				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+
+				// set the dataset_id where needed
+				for (Channel chan : datasetDto.getChannels()) {
+					chan.setDataset(datasetToCreate);
+					chan.setReferenceType(ChannelType.EEG);
+					// Parse channel name to get its type
+					for (ChannelType type : ChannelType.values()) {
+						if (chan.getName().contains(type.name())) {
+							chan.setReferenceType(type);
+						}
+					}
+				}
+				for (Event eventToImport : datasetDto.getEvents()) {
+					eventToImport.setDataset(datasetToCreate);
+				}
+
+				// Fill dataset with informations
+				datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+				datasetToCreate.setChannels(datasetDto.getChannels());
+				datasetToCreate.setEvents(datasetDto.getEvents());
+				datasetToCreate.setCreationDate(LocalDate.now());
+				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
+				datasetToCreate.setOriginMetadata(originMetadata);
+				//datasetToCreate.setStudyId(importJob.getStudyId());
+				datasetToCreate.setSubjectId(importJob.getSubjectId());
+				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
+				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
+
+				datasets.add(datasetToCreate);
+			}
+
+			datasetAcquisition.setDatasets(datasets);
+			datasetAcquisitionService.create(datasetAcquisition);
+
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setMessage("Success");
+			event.setProgress(1f);
+			eventService.publishEvent(event);
+			// Complete BIDS with data
+			try {
+				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
+			} catch (Exception e) {
+				LOG.error("Something went wrong creating the bids data: ", e);
+			}
+		} catch (Exception e) {
+			LOG.error("Error while importing EEG: ", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("An unexpected error occured, please contact an administrator.");
+			event.setProgress(1f);
+			eventService.publishEvent(event);
+			throw e;
+		}
+	}
+
+	/**
+	 * Create a processed dataset dataset associated with a dataset processing.
+	 * @param importJob the import job from importer MS.
+	 */
+	public void createProcessedDataset(final ProcessedDatasetImportJob importJob) {
+
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+		eventService.publishEvent(event);
+
+		if (importJob == null || importJob.getDatasetProcessing() == null) {
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setMessage("Dataset processing missing.");
+			event.setProgress(1f);
+			eventService.publishEvent(event);
+			return;
+		}
+
+		try {
+			
+			DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
+			Dataset dataset = null;
+			
+			switch(importJob.getDatasetType()) {
+				case CalibrationDataset.datasetType:
+					dataset = new CalibrationDataset();
+					break;
+				case CtDataset.datasetType:
+					dataset = new CtDataset();
+					break;
+				case EegDataset.datasetType:
+					dataset = new EegDataset();
+					break;
+				case MegDataset.datasetType:
+					dataset = new MegDataset();
+					break;
+				case MeshDataset.datasetType:
+					dataset = new MeshDataset();
+					break;
+				case MrDataset.datasetType:
+					dataset = new MrDataset();
+					break;
+				case ParameterQuantificationDataset.datasetType:
+					dataset = new ParameterQuantificationDataset();
+					break;
+				case PetDataset.datasetType:
+					dataset = new PetDataset();
+					break;
+				case RegistrationDataset.datasetType:
+					dataset = new RegistrationDataset();
+					break;
+				case SegmentationDataset.datasetType:
+					dataset = new SegmentationDataset();
+					break;
+				case SpectDataset.datasetType:
+					dataset = new SpectDataset();
+					break;
+				case StatisticalDataset.datasetType:
+					dataset = new StatisticalDataset();
+					break;
+				case TemplateDataset.datasetType:
+					dataset = new TemplateDataset();
+					break;
+				default:
+				break;
+			}
+
+			datasetProcessing.addOutputDataset(dataset);
 
 			// Get examination
 			Examination examination = examinationService.findById(importJob.getExaminationId());

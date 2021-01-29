@@ -129,6 +129,13 @@ public class DatasetProcessing extends AbstractEntity {
 	}
 
 	/**
+	 * @param outputDataset the outputDataset to add
+	 */
+	public void addOutputDataset(Dataset outputDataset) {
+		this.outputDatasets.add(outputDataset);
+	}
+
+	/**
 	 * @return the processingDate
 	 */
 	public LocalDate getProcessingDate() {

@@ -15,24 +15,24 @@ import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
-import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
-import { KeycloakService } from '../../../shared/keycloak/keycloak.service';
-import { Option } from '../../../shared/select/select.component';
-import { StudyRightsService } from '../../../studies/shared/study-rights.service';
-import { StudyUserRight } from '../../../studies/shared/study-user-right.enum';
-import { Study } from '../../../studies/shared/study.model';
-import { StudyService } from '../../../studies/shared/study.service';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { SubjectService } from '../../../subjects/shared/subject.service';
-import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { Option } from '../../shared/select/select.component';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { Study } from '../../studies/shared/study.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { Subject } from '../../subjects/shared/subject.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../../shared/import.data-service';
-import { DatasetProcessing } from '../../../datasets/shared/dataset-processing.model'
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model'
 
 @Component({
-    selector: 'clinical-context',
-    templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../../shared/import.step.css'],
+    selector: 'processed-dataset-clinical-context',
+    templateUrl: 'processed-dataset-clinical-context.component.html',
+    styleUrls: ['processed-dataset-clinical-context.component.css', '../../shared/import.step.css'],
     animations: [slideDown, preventInitialChildAnimations]
 })
 export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
@@ -73,12 +73,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createSubjectRoute: string = '/dataset-processing/create';
         this.router.navigate([createSubjectRoute]).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.study;
-            this.subscribtions.push(
-                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.datasetProcessing = entity as DatasetProcessing;
-                })
-            );
+            this.breadcrumbsService.currentStep.entity = this.datasetProcessing;
         });
     }
 
@@ -177,8 +172,8 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         );
     }
 
-    public import() {
-
+    public next() {
+        this.router.navigate(['imports/processed-dataset-finish']);
     }
     
     protected hasAdminRightOn(study: Study): Promise<boolean> {

@@ -59,6 +59,8 @@ import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
+import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
@@ -84,7 +86,7 @@ import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
-import { ProcessedDatasetsComponent } from './import/processed-datasets/processed-datasets.component';
+import { ProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -231,6 +233,7 @@ import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-s
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { environment } from 'src/environments/environment';
+import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 
 @NgModule({
     imports: [
@@ -293,6 +296,8 @@ import { environment } from 'src/environments/environment';
         DatasetComponent,
         EegDatasetComponent,
         DatasetListComponent,
+        DatasetProcessingComponent,
+        DatasetProcessingListComponent,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
@@ -306,7 +311,7 @@ import { environment } from 'src/environments/environment';
         EegUploadComponent,
         BidsUploadComponent,
         QueryPacsComponent,
-        ProcessedDatasetsComponent,
+        ProcessedDatasetComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
         SubjectStudyListComponent,
@@ -318,6 +323,7 @@ import { environment } from 'src/environments/environment';
         SelectBoxComponent,
         FinishImportComponent,
         FinishEegImportComponent,
+        FinishProcessedDatasetImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         AsyncTasksComponent,

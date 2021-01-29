@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -64,21 +65,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({
-		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
-		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
-		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
-		@JsonSubTypes.Type(value = MegDataset.class, name = "Meg"),
-		@JsonSubTypes.Type(value = MeshDataset.class, name = "Mesh"),
-		@JsonSubTypes.Type(value = MrDataset.class, name = "Mr"),
-		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = "ParameterQuantification"),
-		@JsonSubTypes.Type(value = PetDataset.class, name = "Pet"),
-		@JsonSubTypes.Type(value = RegistrationDataset.class, name = "Registration"),
-		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
-		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
-		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
-		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template") })
+		@JsonSubTypes.Type(value = CalibrationDataset.class, name = CalibrationDataset.datasetType),
+		@JsonSubTypes.Type(value = CtDataset.class, name = CtDataset.datasetType),
+		@JsonSubTypes.Type(value = EegDataset.class, name = EegDataset.datasetType),
+		@JsonSubTypes.Type(value = MegDataset.class, name = MegDataset.datasetType),
+		@JsonSubTypes.Type(value = MeshDataset.class, name = MeshDataset.datasetType),
+		@JsonSubTypes.Type(value = MrDataset.class, name = MrDataset.datasetType),
+		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = ParameterQuantificationDataset.datasetType),
+		@JsonSubTypes.Type(value = PetDataset.class, name = PetDataset.datasetType),
+		@JsonSubTypes.Type(value = RegistrationDataset.class, name = RegistrationDataset.datasetType),
+		@JsonSubTypes.Type(value = SegmentationDataset.class, name = SegmentationDataset.datasetType),
+		@JsonSubTypes.Type(value = SpectDataset.class, name = SpectDataset.datasetType),
+		@JsonSubTypes.Type(value = StatisticalDataset.class, name = StatisticalDataset.datasetType),
+		@JsonSubTypes.Type(value = TemplateDataset.class, name = TemplateDataset.datasetType) })
 public abstract class Dataset extends AbstractEntity {
-
+	
 	/**
 	 * UID
 	 */

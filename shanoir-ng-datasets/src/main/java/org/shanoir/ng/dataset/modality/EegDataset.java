@@ -35,6 +35,8 @@ import org.shanoir.ng.eeg.model.Event;
 @Entity
 public class EegDataset extends Dataset {
 
+	public static final String datasetType = "Eeg";
+
 	/**
 	 * UID
 	 */

@@ -23,12 +23,12 @@ import { ImportService } from '../shared/import.service';
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
 @Component({
-    selector: 'processed-datasets',
-    templateUrl: 'processed-datasets.component.html',
-    styleUrls: ['processed-datasets.component.css', '../shared/import.step.css'],
+    selector: 'processed-dataset',
+    templateUrl: 'processed-dataset.component.html',
+    styleUrls: ['processed-dataset.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
-export class ProcessedDatasetsComponent {
+export class ProcessedDatasetComponent {
     
     archiveStatus: Status = 'none';
     extensionError: boolean;
@@ -108,7 +108,7 @@ export class ProcessedDatasetsComponent {
     }
 
     next() {
-        this.router.navigate(['imports/series']);
+        this.router.navigate(['imports/processed-dataset-context']);
     }
 
 }

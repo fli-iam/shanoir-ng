@@ -14,12 +14,12 @@
 
 package org.shanoir.ng.processing.service;
 
-import java.util.Optional;
+// import java.util.Optional;
 
 import org.shanoir.ng.processing.model.DatasetProcessing;
 // import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**

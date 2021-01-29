@@ -22,7 +22,6 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ImportJob, PatientDicom } from './dicom-data.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { EegImportJob } from './eeg-data.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 
 export class ContextData {
     
@@ -35,8 +34,7 @@ export class ContextData {
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
         public niftiConverter: NiftiConverter,
-        public coordinatesSystem: string,
-        public datasetProcessing: DatasetProcessing
+        public coordinatesSystem: string
     ) {}
 }
 
