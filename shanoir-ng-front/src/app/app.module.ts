@@ -229,7 +229,7 @@ import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-uploa
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
-import { environment } from 'src/environments/environment';
+import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 
 @NgModule({
     imports: [
@@ -471,6 +471,7 @@ import { environment } from 'src/environments/environment';
         CenterDTOService,
         LoaderService,
         SubjectStudyPipe,
+        KeycloakSessionService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

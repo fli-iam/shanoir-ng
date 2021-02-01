@@ -21,6 +21,8 @@ import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
 import { slideRight, parent, slideMarginLeft } from './shared/animations/animations';
 import { WindowService } from './shared/services/window.service';
+import { KeycloakSessionService } from './shared/session/keycloak-session.service';
+import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 
 
 @Component({
@@ -40,7 +42,9 @@ export class AppComponent {
             private breadcrumbsService: BreadcrumbsService,
             private globalService: GlobalService,
             private windowService: WindowService,
-            private element: ElementRef) {
+            private element: ElementRef,
+            private keycloakSessionService: KeycloakSessionService,
+            private confirmService: ConfirmDialogService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
@@ -61,6 +65,19 @@ export class AppComponent {
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
+
+        let hasDUA: boolean = true;
+        if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
+            this.keycloakSessionService.hasBeenAskedDUA = true;
+            const title: string = 'Data User Agreement awaiting for signing';
+            const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+                + 'Until you have agreed those terms you cannot access to any data from these studies. '
+                + 'Would you like to review those terms now?';
+            const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+            this.confirmService.confirm(title, text, buttons).then(response => {
+                    console.log('response', response)
+                });
+        }
     }
 
     @HostListener('window:resize', ['$event'])
