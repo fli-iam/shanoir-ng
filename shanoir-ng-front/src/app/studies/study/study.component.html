@@ -108,6 +108,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset>
+				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">Data User Agreement</legend>
+				<ol>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|Attach consent form label@@studyDetailAttachConsentForm">Attach consent form</label>
+						<span  *ngIf="!study.consentFormPaths || !study.consentFormPaths[0]" class="right-col">
+						    <input #input hidden formControlName="consentForm" type="file" (change)="attachConsentForm($event)"/>
+                            <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+						</span>
+                        <span  *ngIf="study.consentFormPaths && study.consentFormPaths[0]" class="right-col">
+                            {{study.consentFormPaths[0]}}
+                            <button (click)="deleteConsentForm()" class="left-icon"><i class="fas fa-trash"></i></button>
+                        </span>
+					</li>
+                    <li *ngIf="mode == 'view'">
+                        <label i18n="Study detail|consent form label@@studyDetailConsentForm">Consent form</label>
+                        <span class="right-col">
+                            <span *ngIf="study.consentFormPaths && study.consentFormPaths[0]">{{study.consentFormPaths[0]}}
+                            	<button (click)="downloadConsentForm()"><i class="fas fa-save"></i></button>
+							</span>
+                            <span *ngIf="!study.consentFormPaths || !study.consentFormPaths[0]">-</span>
+                        </span>
+                    </li>
+				</ol>
+			</fieldset>
+			<fieldset>
 				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
 				<ol>
 					<li>
@@ -183,12 +208,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
 						<span  *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]" class="right-col">
-						    <input #input hidden formControlName="protocolFile" type="file" (change)="attachNewFile($event)"/>
+						    <input #input hidden formControlName="protocolFile" type="file" (change)="attachProtocolFile($event)"/>
                             <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
 						</span>
                         <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
                             {{study.protocolFilePaths[0]}}
-                            <button (click)="deleteFile()" class="left-icon"><i class="fas fa-trash"></i></button>
+                            <button (click)="deleteProtocolFile()" class="left-icon"><i class="fas fa-trash"></i></button>
                         </span>
                         
 					</li>
@@ -196,7 +221,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
-                            	<button (click)="downloadFile()"><i class="fas fa-save"></i></button>
+                            	<button (click)="downloadProtocolFile()"><i class="fas fa-save"></i></button>
 							</span>
                             <span *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-</span>
                         </span>

@@ -78,8 +78,7 @@ public class StudyApiController implements StudyApi {
 
 	@Value("${studies-data}")
 	private String dataDir;
-	private static final String ATTACHMENT_FILENAME = "attachment;filename=";
-
+	
 	private static final String ZIP = ".zip";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
@@ -236,43 +235,6 @@ public class StudyApiController implements StudyApi {
 	}
 	
 	@Override
-	public ResponseEntity<Void> deleteProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
-		Study study = studyService.findById(studyId);
-		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		String filePath = getProtocolFilePath(studyId, study.getProtocolFilePaths().get(0));
-		File fileToDelete = new File(filePath);
-		if (!fileToDelete.exists()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		Files.delete(Paths.get(filePath));
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	@Override
-	public void downloadProtocolFile(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getProtocolFilePath(studyId, fileName);
-		LOG.info("Retrieving file : {}", filePath);
-		File fileToDownLoad = new File(filePath);
-		if (!fileToDownLoad.exists()) {
-			response.sendError(HttpStatus.NO_CONTENT.value());
-			return;
-		}
-
-		try (InputStream is = new FileInputStream(fileToDownLoad);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
-			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-			response.flushBuffer();
-		}
-
-	}
-
-	@Override
 	public ResponseEntity<Void> uploadProtocolFile(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
@@ -298,16 +260,6 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	/**
-	 * Gets the protocol file path
-	 * @param studyId id of the study
-	 * @param fileName name of the file
-	 * @return the file path of the file
-	 */
-	private String getProtocolFilePath(Long studyId, String fileName) {
-		return dataDir + "/study-" + studyId + "/" + fileName;
-	}
-	
 	private void validate(Study study, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()
 				.add(fieldEditionSecurityManager.validate(study))
@@ -402,4 +354,123 @@ public class StudyApiController implements StudyApi {
 		}
 	}
 	
+	@Override
+	public ResponseEntity<Void> deleteProtocolFile(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
+		Study study = studyService.findById(studyId);
+		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		String filePath = getProtocolFilePath(studyId, study.getProtocolFilePaths().get(0));
+		File fileToDelete = new File(filePath);
+		if (!fileToDelete.exists()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		Files.delete(Paths.get(filePath));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@Override
+	public void downloadProtocolFile(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+		String filePath = getProtocolFilePath(studyId, fileName);
+		LOG.info("Retrieving file : {}", filePath);
+		File fileToDownLoad = new File(filePath);
+		if (!fileToDownLoad.exists()) {
+			response.sendError(HttpStatus.NO_CONTENT.value());
+			return;
+		}
+
+		try (InputStream is = new FileInputStream(fileToDownLoad);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		}
+
+	}
+
+	/**
+	 * Gets the protocol file path
+	 * @param studyId id of the study
+	 * @param fileName name of the file
+	 * @return the file path of the file
+	 */
+	private String getProtocolFilePath(Long studyId, String fileName) {
+		return dataDir + "/study-" + studyId + "/" + fileName;
+	}
+
+	@Override
+	public ResponseEntity<Void> uploadConsentForm(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "consent form to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+		try {
+			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
+				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
+				Study study = studyService.findById(studyId);
+				// V1: the consent form is not versioned 
+				if (study.getConsentFormPaths() != null) {
+					study.getConsentFormPaths().remove(file.getName());
+				}
+				studyService.update(study);
+				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+			}
+			String filePath = getConsentFormFilePath(studyId, file.getOriginalFilename());
+			File fileToCreate = new File(filePath);
+			fileToCreate.getParentFile().mkdirs();
+		
+			LOG.error("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			file.transferTo(new File(filePath));
+		} catch (Exception e) {
+			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@Override
+	public void downloadConsentForm (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+		String filePath = getConsentFormFilePath(studyId, fileName);
+		LOG.info("Retrieving file : {}", filePath);
+		File fileToDownLoad = new File(filePath);
+		if (!fileToDownLoad.exists()) {
+			response.sendError(HttpStatus.NO_CONTENT.value());
+			return;
+		}
+
+		try (InputStream is = new FileInputStream(fileToDownLoad);) {
+			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+		}
+	}
+		
+	@Override
+	public ResponseEntity<Void> deleteConsentForm (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
+		Study study = studyService.findById(studyId);
+		if (study.getConsentFormPaths() == null || study.getConsentFormPaths().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		String filePath = getConsentFormFilePath(studyId, study.getConsentFormPaths().get(0));
+		File fileToDelete = new File(filePath);
+		if (!fileToDelete.exists()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		Files.delete(Paths.get(filePath));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	/**
+	 * Gets the consent form file path
+	 * @param studyId id of the study
+	 * @param fileName name of the file
+	 * @return the file path of the file
+	 */
+	private String getConsentFormFilePath(Long studyId, String fileName) {
+		return dataDir + "/study-" + studyId + "/" + "DUA-" + fileName;
+	}
 }

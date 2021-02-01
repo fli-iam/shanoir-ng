@@ -64,6 +64,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
+    protected consentForm: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
@@ -145,6 +146,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.getCenters();
         this.selectedCenter = null;
         this.protocolFile = null;
+        this.consentForm = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -186,7 +188,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
-            'protocolFile': []
+            'protocolFile': [],
+            'consentForm': []
         });
         return formGroup;
     }
@@ -440,23 +443,23 @@ export class StudyComponent extends EntityComponent<Study> {
         this.fileInput.nativeElement.click();
     }
 
-    public deleteFile() {
+    public deleteProtocolFile() {
         if (this.mode == 'create') { 
             this.study.protocolFilePaths = [];
             this.protocolFile = null;
         } else if (this.mode == 'edit') {
             // TODO: API call
-            this.studyService.deleteFile(this.study.id);
+            this.studyService.deleteFile(this.study.id, 'protocol-file');
             this.study.protocolFilePaths = [];
             this.protocolFile = null;           
         }
     }
 
-    public downloadFile() {
-        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
+    public downloadProtocolFile() {
+        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id, 'protocol-file');
     }
 
-    public attachNewFile(event: any) {
+    public attachProtocolFile(event: any) {
         this.protocolFile = event.target.files[0];
         if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
         &&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
@@ -470,15 +473,52 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         this.form.updateValueAndValidity();
     }
+    
+    public deleteConsentForm() {
+        if (this.mode == 'create') { 
+            this.study.consentFormPaths = [];
+            this.consentForm = null;
+        } else if (this.mode == 'edit') {
+            // TODO: API call
+            this.studyService.deleteFile(this.study.id, 'consent-form');
+            this.study.consentFormPaths = [];
+            this.consentForm = null;           
+        }
+    }
+
+    public downloadConsentForm() {
+        this.studyService.downloadFile(this.study.consentFormPaths[0], this.study.id, 'consent-form');
+    }
+
+    public attachConsentForm(event: any) {
+        this.consentForm = event.target.files[0];
+        if (this.consentForm.name.indexOf(".pdf", this.consentForm.name.length - ".pdf".length) == -1) {
+            this.msgBoxService.log("error", "Only .pdf files are accepted");
+            this.consentForm = null;
+        } else if (this.consentForm.size > 50000000) {
+            this.msgBoxService.log("error", "File must be less than 50Mb.");
+            this.consentForm = null;
+        } else {
+            this.study.consentFormPaths = [this.consentForm.name];
+        }
+        this.form.updateValueAndValidity();
+    }
 
     save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise()
-                .then(result => (console.log("file saved sucessfuly")))
+                this.studyService.uploadFile(this.protocolFile, this.entity.id, 'protocol-file').toPromise()
+                .then(result => (console.log("protocol file saved sucessfuly")))
                 .catch(error => {
                     this.protocolFile = null;
+                });
+            }
+            if (this.consentForm) {
+                this.studyService.uploadFile(this.protocolFile, this.entity.id, 'consent-form').toPromise()
+                .then(result => (console.log("consent form saved sucessfuly")))
+                .catch(error => {
+                    this.consentForm = null;
                 });
             }
         });

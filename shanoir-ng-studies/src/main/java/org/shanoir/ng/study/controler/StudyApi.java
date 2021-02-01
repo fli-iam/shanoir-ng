@@ -223,4 +223,46 @@ public interface StudyApi {
 	ResponseEntity<BidsElement> getBIDSStructureByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException;
+	
+	@ApiOperation(value = "", notes = "Add consent form to a study", response = Void.class, tags = {})
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "consent form", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "consent-form-upload/{studyId}", produces = { "application/json" }, consumes = {
+			"multipart/form-data" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> uploadConsentForm(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Download consent form of a study", tags = {})
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "consent form", response = Resource.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "consent-form-download/{studyId}/{fileName:.+}/")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
+	void downloadConsentForm(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+
+
+	@ApiOperation(value = "", notes = "Deletes the consent form of a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "consent form deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "consent-form-delete/{studyId}", produces = {
+			"application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteConsentForm(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws IOException;
 }
