@@ -252,7 +252,7 @@ public class StudyApiController implements StudyApi {
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 		
-			LOG.error("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
 		} catch (Exception e) {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
@@ -420,7 +420,7 @@ public class StudyApiController implements StudyApi {
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 		
-			LOG.error("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
@@ -471,6 +471,6 @@ public class StudyApiController implements StudyApi {
 	 * @return the file path of the file
 	 */
 	private String getConsentFormFilePath(Long studyId, String fileName) {
-		return dataDir + "/study-" + studyId + "/" + "DUA-" + fileName;
+		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 }

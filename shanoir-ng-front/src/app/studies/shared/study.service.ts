@@ -86,7 +86,11 @@ export class StudyService extends EntityService<Study> {
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'consent-form'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
+        if (fileType == 'consent-form') {
+            formData.append('file', fileToUpload, 'DUA-' + fileToUpload.name);
+        } else if (fileType == 'protocol-file') {
+            formData.append('file', fileToUpload, fileToUpload.name);
+        }
         return this.http.post<any>(endpoint, formData);
     }
 

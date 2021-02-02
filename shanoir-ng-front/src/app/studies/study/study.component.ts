@@ -499,7 +499,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.msgBoxService.log("error", "File must be less than 50Mb.");
             this.consentForm = null;
         } else {
-            this.study.consentFormPaths = [this.consentForm.name];
+            this.study.consentFormPaths = ['DUA-' + this.consentForm.name];
         }
         this.form.updateValueAndValidity();
     }
@@ -515,7 +515,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             }
             if (this.consentForm) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id, 'consent-form').toPromise()
+                this.studyService.uploadFile(this.consentForm, this.entity.id, 'consent-form').toPromise()
                 .then(result => (console.log("consent form saved sucessfuly")))
                 .catch(error => {
                     this.consentForm = null;
