@@ -57,6 +57,14 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
+        if (this.user.accountRequestInfo.challenge != null) {
+            // These fields are allowed to be null in case of challenge
+            this.user.accountRequestInfo.contact="";
+            this.user.accountRequestInfo.function="";
+            this.user.accountRequestInfo.work="";
+            this.user.accountRequestInfo.study="";
+        }
+
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;

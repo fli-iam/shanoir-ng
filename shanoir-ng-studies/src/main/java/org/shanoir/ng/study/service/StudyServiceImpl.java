@@ -193,7 +193,8 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
+	@Override
+	public void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
 		if (studyUsers == null) {
 			return;
 		}
@@ -276,5 +277,11 @@ public class StudyServiceImpl implements StudyService {
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
 		}
+	}
+
+	@Override
+	public List<Study> findChallenges() {
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 }

@@ -90,6 +90,11 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
+        data: {isChallenge: false},
+    }, {
+        path: 'challenge-request',
+        component: AccountRequestComponent,
+        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
