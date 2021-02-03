@@ -57,6 +57,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 		}
 
 		for (Dataset dataset : serie.getDatasets()) {
+			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 			PetDataset petDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(petDataset);
 			datasetIndex++;
