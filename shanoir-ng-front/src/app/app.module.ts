@@ -230,6 +230,7 @@ import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-s
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
+import { DUAComponent } from './dua/dua.component';
 
 @NgModule({
     imports: [
@@ -384,7 +385,8 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
         MemberNodeComponent,
         StudyCardNodeComponent,
         ReverseSubjectNodeComponent,
-        ReverseStudyNodeComponent
+        ReverseStudyNodeComponent,
+        DUAComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

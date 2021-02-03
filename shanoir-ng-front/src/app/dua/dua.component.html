@@ -1,0 +1,23 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<h2 class="header command-zone">Data User Agreements signing</h2>
+<h3>[name of the study]</h3>
+<embed class="embed-pdf" src="assets/cd-p650(efs).pdf" width="600" height="500" alt="pdf" pluginspage="http://www.adobe.com/products/acrobat/readstep2.html">
+<div>
+    <checkbox [ngModel]="checked"></checkbox> I have read the data user agreement contract for the study <span class="study-name">[name of the study]</span> and I fully accept it.
+    <div class="buttons">
+        <button class="accept" [disabled]="!checked">Accept</button><button class="refuse">Refuse</button>
+    </div>
+</div>

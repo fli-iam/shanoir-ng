@@ -23,6 +23,7 @@ import { slideRight, parent, slideMarginLeft } from './shared/animations/animati
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -44,7 +45,8 @@ export class AppComponent {
             private windowService: WindowService,
             private element: ElementRef,
             private keycloakSessionService: KeycloakSessionService,
-            private confirmService: ConfirmDialogService) {
+            private confirmService: ConfirmDialogService,
+            protected router: Router) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
@@ -75,7 +77,7 @@ export class AppComponent {
                 + 'Would you like to review those terms now?';
             const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
             this.confirmService.confirm(title, text, buttons).then(response => {
-                    console.log('response', response)
+                    if (response == true) this.router.navigate(['/dua']);
                 });
         }
     }
