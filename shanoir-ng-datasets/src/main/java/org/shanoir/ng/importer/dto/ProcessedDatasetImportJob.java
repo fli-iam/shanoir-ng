@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
@@ -28,72 +29,42 @@ public class ProcessedDatasetImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
 
-	private String workFolder;
-
-	private List<Patient> patients;
-
-	private Long examinationId;
-
 	private Long studyId;
-
-	private String archive;
-
-	private String subjectName;
 
 	private String studyName;
 
+	private Long subjectId;
+
+	private String subjectName;
+
 	private String datasetType;
+
+	private String processedDatasetFilePath;
+
+	private ProcessedDatasetType processedDatasetType;
+
+	private String processedDatasetName;
+
+	private String processedDatasetComment;
 
 	private DatasetProcessing datasetProcessing;
 
 	private ShanoirEvent shanoirEvent;
-
-	public String getArchive() {
-		return archive;
+	
+	public String getProcessedDatasetFilePath() {
+		return processedDatasetFilePath;
 	}
 
-	public void setArchive(final String archive) {
-		this.archive = archive;
-	}
-
-	public List<Patient> getPatients() {
-		return patients;
-	}
-
-	public void setPatients(final List<Patient> patients) {
-		this.patients = patients;
-	}
-
-	public Long getExaminationId() {
-		return examinationId;
-	}
-
-	public void setExaminationId(final Long examinationId) {
-		this.examinationId = examinationId;
-	}
-
-	public String getWorkFolder() {
-		return workFolder;
-	}
-
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
+	public void setProcessedDatasetFilePath(String processedDatasetFilePath) {
+		this.processedDatasetFilePath = processedDatasetFilePath;
 	}
 
 	public Long getStudyId() {
 		return studyId;
 	}
 
-	public void setStudyId(final Long StudyId) {
-		this.studyId = StudyId;
-	}
-
-	public String getSubjectName() {
-		return subjectName;
-	}
-
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
+	public void setStudyId(final Long studyId) {
+		this.studyId = studyId;
 	}
 
 	public String getStudyName() {
@@ -104,12 +75,20 @@ public class ProcessedDatasetImportJob implements Serializable {
 		this.studyName = studyName;
 	}
 
-	public DatasetProcessing getDatasetProcessing() {
-		return this.datasetProcessing;
+	public Long getSubjectId() {
+		return subjectId;
 	}
 
-	public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
-		this.datasetProcessing = datasetProcessing;
+	public void setSubjectId(final Long subjectId) {
+		this.subjectId = subjectId;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
 	}
 
 	public String getDatasetType() {
@@ -118,6 +97,38 @@ public class ProcessedDatasetImportJob implements Serializable {
 
 	public void setDatasetType(String datasetType) {
 		this.datasetType = datasetType;
+	}
+
+	public ProcessedDatasetType getProcessedDatasetType() {
+		return this.processedDatasetType;
+	}
+	
+	public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
+		this.processedDatasetType = processedDatasetType;
+	}
+
+	public String getProcessedDatasetName() {
+		return this.processedDatasetName;
+	}
+
+	public void setProcessedDatasetName(String processedDatasetName) {
+		this.processedDatasetName = processedDatasetName;
+	}
+
+	public String getProcessedDatasetComment() {
+		return this.processedDatasetComment;
+	}
+
+	public void setProcessedDatasetComment(String processedDatasetComment) {
+		this.processedDatasetComment = processedDatasetComment;
+	}
+
+	public DatasetProcessing getDatasetProcessing() {
+		return this.datasetProcessing;
+	}
+
+	public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
+		this.datasetProcessing = datasetProcessing;
 	}
 
 	public ShanoirEvent getShanoirEvent() {

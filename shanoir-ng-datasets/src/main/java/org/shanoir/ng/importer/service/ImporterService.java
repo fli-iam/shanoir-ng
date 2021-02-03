@@ -17,7 +17,6 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -26,13 +25,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -121,6 +117,8 @@ public class ImporterService {
 	private static final String SUBJECT_PREFIX = "sub-";
 
 	private static final String EEG_PREFIX = "eeg";
+
+	private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		
@@ -409,7 +407,7 @@ public class ImporterService {
 	 */
 	public void createProcessedDataset(final ProcessedDatasetImportJob importJob) {
 
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 
 		if (importJob == null || importJob.getDatasetProcessing() == null) {
@@ -470,121 +468,42 @@ public class ImporterService {
 			}
 
 			datasetProcessing.addOutputDataset(dataset);
+			dataset.setDatasetProcessing(datasetProcessing);
 
-			// Get examination
-			Examination examination = examinationService.findById(importJob.getExaminationId());
+			// Metadata
+			DatasetMetadata originMetadata = new DatasetMetadata();
+			originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
+			originMetadata.setName(importJob.getProcessedDatasetName());
 
-			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+			// Copy the data somewhere else
+			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
 
-			List<Dataset> datasets = new ArrayList<>();
-			float progress = 0f;
+			final File outDir = new File(niftiStorageDir + File.separator + PROCESSED_DATASET_PREFIX + File.separator + subLabel + File.separator);
+			outDir.mkdirs();
+			String filePath = importJob.getProcessedDatasetFilePath();
+			File srcFile = new File(filePath);
+			String originalNiftiName = srcFile.getName();
+			File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
-			for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
-				progress += 1f / importJob.getDatasets().size();
-				event.setMessage("Dataset " + datasetDto.getName() + " for examination " + importJob.getExaminationId());
-				event.setProgress(progress);
-				eventService.publishEvent(event);
-				// Metadata
-				DatasetMetadata originMetadata = new DatasetMetadata();
-				originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
-				originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-				originMetadata.setName(datasetDto.getName());
-				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-
-				// Create the dataset with informations from job
-				EegDataset datasetToCreate = new EegDataset();
-
-				// DatasetExpression with list of files
-				DatasetExpression expression = new DatasetExpression();
-				expression.setCreationDate(LocalDateTime.now());
-				expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
-				expression.setDataset(datasetToCreate);
-
-				List<DatasetFile> files = new ArrayList<>();
-
-				// Set files
-				if (datasetDto.getFiles() != null) {
-
-					// Copy the data somewhere else
-					final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-					final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-
-					final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
-					outDir.mkdirs();
-
-					// Move file one by one to the new directory
-					for (String filePath : datasetDto.getFiles()) {
-
-						File srcFile = new File(filePath);
-						String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
-						File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
-						Path finalLocation = null;
-						try {
-							finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-						} catch (IOException e) {
-							LOG.error("IOException generating EEG Dataset Expression", e);
-						}
-
-						// Create datasetExpression => Files
-						if (finalLocation != null) {
-							DatasetFile file = new DatasetFile();
-							file.setDatasetExpression(expression);
-							file.setPath(finalLocation.toUri().toString());
-							file.setPacs(false);
-							files.add(file);
-						}
-					}
-				}
-
-				expression.setDatasetFiles(files);
-				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-
-				// set the dataset_id where needed
-				for (Channel chan : datasetDto.getChannels()) {
-					chan.setDataset(datasetToCreate);
-					chan.setReferenceType(ChannelType.EEG);
-					// Parse channel name to get its type
-					for (ChannelType type : ChannelType.values()) {
-						if (chan.getName().contains(type.name())) {
-							chan.setReferenceType(type);
-						}
-					}
-				}
-				for (Event eventToImport : datasetDto.getEvents()) {
-					eventToImport.setDataset(datasetToCreate);
-				}
-
-				// Fill dataset with informations
-				datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
-				datasetToCreate.setChannels(datasetDto.getChannels());
-				datasetToCreate.setEvents(datasetDto.getEvents());
-				datasetToCreate.setCreationDate(LocalDate.now());
-				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
-				datasetToCreate.setOriginMetadata(originMetadata);
-				//datasetToCreate.setStudyId(importJob.getStudyId());
-				datasetToCreate.setSubjectId(importJob.getSubjectId());
-				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
-				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
-
-				datasets.add(datasetToCreate);
+			try {
+				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				LOG.error("IOException generating Processed Dataset Expression", e);
 			}
 
-			datasetAcquisition.setDatasets(datasets);
-			datasetAcquisitionService.create(datasetAcquisition);
+			// Fill dataset with informations
+			dataset.setCreationDate(LocalDate.now());
+			dataset.setOriginMetadata(originMetadata);
+			dataset.setStudyId(importJob.getStudyId());
+			dataset.setSubjectId(importJob.getSubjectId());
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			// Complete BIDS with data
-			try {
-				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
-			} catch (Exception e) {
-				LOG.error("Something went wrong creating the bids data: ", e);
-			}
+			
 		} catch (Exception e) {
-			LOG.error("Error while importing EEG: ", e);
+			LOG.error("Error while importing processed dataset: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("An unexpected error occured, please contact an administrator.");
 			event.setProgress(1f);

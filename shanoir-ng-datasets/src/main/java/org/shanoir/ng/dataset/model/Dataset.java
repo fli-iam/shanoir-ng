@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -79,7 +78,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = StatisticalDataset.datasetType),
 		@JsonSubTypes.Type(value = TemplateDataset.class, name = TemplateDataset.datasetType) })
 public abstract class Dataset extends AbstractEntity {
-	
+
 	/**
 	 * UID
 	 */
@@ -136,7 +135,7 @@ public abstract class Dataset extends AbstractEntity {
 	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
 	private Long importedStudyId;
 	
-	/** Subject. */
+	/** Study. */
 	private Long studyId;
 
 	/** Subject. */
@@ -318,7 +317,7 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@Transient
 	public Long getStudyId() {
-		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return null;
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return this.studyId;
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
 

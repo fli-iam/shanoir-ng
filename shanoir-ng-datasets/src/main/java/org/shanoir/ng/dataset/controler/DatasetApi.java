@@ -29,6 +29,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -156,6 +157,20 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
+	@ApiOperation(value = "", notes = "Creates a processed dataset", response = Void.class, tags={  })
+	@ApiResponses(value = {
+		@ApiResponse(code = 204, message = "created Processed Dataset", response = Void.class),
+		@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+		@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+		@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/processed-dataset",
+		produces = { "application/json" },
+		consumes = { "application/json" },
+		method = RequestMethod.POST)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+	ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob);
+	
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),

@@ -19,6 +19,7 @@ import { slideDown } from '../../shared/animations/animations';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -32,6 +33,7 @@ export class ProcessedDatasetComponent {
     
     archiveStatus: Status = 'none';
     extensionError: boolean;
+    public errorMessage: string;
 
     constructor(
             private importService: ImportService, 
@@ -87,14 +89,17 @@ export class ProcessedDatasetComponent {
         
         formData.append('image', image, image.name);
         formData.append('header', header, header.name);
-        this.importService.uploadFile(formData)
-            .then((patientDicomList: ImportJob) => {
-                this.importDataService.patientList = patientDicomList;
+        this.importService.uploadProcessedDataset(formData)
+            .then((filePath: string) => {
+                let importJob = new ProcessedDatasetImportJob()
+                importJob.processedDatasetFilePath = filePath;
+                this.importDataService.processedDatasetImportJob = importJob;
                 this.setArchiveStatus('uploaded');
+                this.errorMessage = "";
             }).catch(error => {
                 this.setArchiveStatus('error');
                 if (error && error.error && error.error.message) {
-
+                    this.errorMessage = error.error.message;
                 }
             });
     }

@@ -401,7 +401,7 @@ export class ClinicalContextComponent implements OnDestroy {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter, null);
+            this.subject, this.examination, this.niftiConverter, null, null, null, null, null, null, null);
     }
 
     public openCreateCenter = () => {

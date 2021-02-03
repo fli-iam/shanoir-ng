@@ -64,6 +64,8 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -131,6 +133,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private ExaminationService examinationService;
+
+	@Autowired
+	private ImporterService importerService;
 
 	private final HttpServletRequest request;
 
@@ -338,6 +343,14 @@ public class DatasetApiController implements DatasetApi {
 			FileUtils.deleteQuietly(workFolder);
 			FileUtils.deleteQuietly(zipFile);
 		}
+	}
+
+	@Override
+	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+		importerService.createProcessedDataset(importJob);
+		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
+		importerService.cleanTempFiles(originalNiftiName.getParent());
+		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
 	@Override

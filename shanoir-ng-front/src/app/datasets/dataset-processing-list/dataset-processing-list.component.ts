@@ -17,14 +17,13 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-processing-list',
     templateUrl: 'dataset-processing-list.component.html',
     styleUrls: ['dataset-processing-list.component.css']
 })
-
 export class DatasetProcessingListComponent extends BrowserPaginEntityListComponent<DatasetProcessing> {
 
     @ViewChild('table', { static: false }) table: TableComponent;

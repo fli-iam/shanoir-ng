@@ -15,7 +15,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
+import { Option } from '../../shared/select/select.component';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { Dataset } from '../shared/dataset.model';
@@ -40,8 +40,9 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     @ViewChild('inputDatasetsTable', { static: false }) inputDatasetsTable: TableComponent;
     @ViewChild('outputDatasetsTable', { static: false }) outputDatasetsTable: TableComponent;
 
-    study: Study
-
+    public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
+    public study: Study;
+    public studyOptions: Option<Study>[] = [];
     private inputDatasetsPromise: Promise<any>;
     private outputDatasetsPromise: Promise<any>;
     private inputDatasetsBrowserPaging: BrowserPaging<Dataset>;
@@ -51,7 +52,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     private outputDatasetsToRemove: Dataset[] = [];
     public inputDatasetsColumnDefs: any[];
     public outputDatasetsColumnDefs: any[];
-    
+
     constructor(
             private route: ActivatedRoute,
             private studyService: StudyService,

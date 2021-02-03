@@ -272,7 +272,7 @@ export class EegClinicalContextComponent implements OnInit {
     
     private getContext(): ContextData {
         return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem);
+            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
 
     private getPrefilledCenter(): Center {

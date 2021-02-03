@@ -22,37 +22,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Dataset Type</label> 
             <span class="right-col">
-                <select-box [(ngModel)]="datasetType" (userChange)="onSelectDatasetType(); onContextChange();"
-                        [newDisabled]="true" [optionArr]="datasetTypes" [pipe]="datasetTypeLabelPipe">
+                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [optionArr]="datasetTypes">
                 </select-box>  
             </span>
         </li>
         <li>
-            <label>Comment</label>
-            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDataset.comment"/>
+            <label class="required-label">Processed Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [optionArr]="processedDatasetTypes">
+                </select-box>  
+            </span>
         </li>
         <li>
             <label>Name</label>
-            <input type="text" id="processedDatasetName" [(ngModel)]="processedDataset.name"/>
+            <input type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName"/>
+        </li>
+        <li>
+            <label>Comment</label>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
         </li>
     </ol> 
-
-    <ol>
-        <legend>
-            Dataset processing
-            <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
-        </legend>
-        <li>
-            <!-- TODO: USE TABLE INSTEAD -->
-            <label class="required-label">Select a dataset processing</label> 
-            <span class="right-col">
-                <select-box [(ngModel)]="datasetProcessing" (userChange)="onSelectDatasetProcessing(); onContextChange();"
-                        (onViewClick)="showDatasetProcessingDetails()" [viewDisabled]="!datasetProcessing"
-                        (onNewClick)="openCreateDatasetProcessing()" [optionArr]="datasetProcessings" [pipe]="datasetProcessingLabelPipe">
-                </select-box>  
-            </span>
-        </li>
-    </ol>
 
     <ol>
         <legend>
@@ -64,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="study" 
-                        (userChange)="onContextChange();" 
+                        (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
                         [options]="studyOptions">
@@ -83,11 +74,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
                 <select-box 
-                        [disabled]="!study || !acquisitionEquipment" 
+                        [disabled]="!study" 
                         [(ngModel)]="subject" 
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study"
                         [optionArr]="subjects">
                 </select-box>
             </span>
@@ -127,5 +118,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     </ol>
 
+    <ol>
+        <legend>
+            Dataset processing
+            <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
+        </legend>
+        <li>
+            <!-- TODO: USE TABLE INSTEAD -->
+            <label class="required-label">Select a dataset processing</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetProcessing" (userChange)="onContextChange();"
+                        (onViewClick)="showDatasetProcessingDetails()" [viewDisabled]="!datasetProcessing"
+                        (onNewClick)="openCreateDatasetProcessing()" [optionArr]="datasetProcessings" [pipe]="datasetProcessingLabelPipe">
+                </select-box>  
+            </span>
+        </li>
+    </ol>
+
 </fieldset>
-<button [disabled]="!valid" (click)="import()">Import</button>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

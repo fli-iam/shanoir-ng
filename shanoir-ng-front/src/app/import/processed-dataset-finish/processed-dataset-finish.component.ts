@@ -21,6 +21,7 @@ import { EegImportJob } from '../shared/eeg-data.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
 
 @Component({
     selector: 'processed-dataset-finish-import',
@@ -29,7 +30,7 @@ import { ImportService } from '../shared/import.service';
 })
 export class FinishProcessedDatasetImportComponent {
 
-    private importJob: EegImportJob;
+    private importJob: ProcessedDatasetImportJob;
     private context: ContextData;
     public importing: boolean = false;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
@@ -44,25 +45,25 @@ export class FinishProcessedDatasetImportComponent {
             private importDataService: ImportDataService) {
         
         // Initialize context    
-        if (!importDataService.eegImportJob) {
+        if (!importDataService.processedDatasetImportJob) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         
-        this.importJob = this.importDataService.eegImportJob;
+        this.importJob = this.importDataService.processedDatasetImportJob;
 
         breadcrumbsService.nameStep('4. Finish');
         this.context = this.importDataService.contextData;
     }
     
-    public startEegImportJob(): void {
+    public startImportJob(): void {
         this.subjectService
             .updateSubjectStudyValues(this.context.subject.subjectStudy)
             .then(() => {
                 let that = this;
                 this.importing = true;
                 this.importData()
-                    .then((importJob: EegImportJob) => {
+                    .then((importJob: ProcessedDatasetImportJob) => {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
@@ -80,27 +81,17 @@ export class FinishProcessedDatasetImportComponent {
     }
 
     private importData(): Promise<any> {
-        let importJob = new EegImportJob();
-        importJob.datasets = [];
-
-        for (let dataset of this.importJob.datasets) {
-            let datasetToSet = new EegDatasetDTO();
-            datasetToSet.channels = dataset.channels;
-            datasetToSet.name = dataset.name;
-            datasetToSet.files = dataset.files;
-            datasetToSet.events = dataset.events;
-            datasetToSet.samplingFrequency = dataset.samplingFrequency;
-            datasetToSet.channelCount = dataset.channelCount;
-            datasetToSet.coordinatesSystem = this.context.coordinatesSystem;
-            importJob.datasets.push(datasetToSet);
-        }
+        let importJob = new ProcessedDatasetImportJob();
         importJob.subjectId = this.context.subject.id;
         importJob.subjectName = this.context.subject.name;
         importJob.studyName = this.context.study.name;
-        importJob.workFolder = this.importJob.workFolder;
-        importJob.examinationId = this.context.examination.id;
         importJob.studyId = this.context.study.id;
-        importJob.acquisitionEquipmentId = this.context.acquisitionEquipment.id;
-        return this.importService.startEegImportJob(importJob);
+        importJob.datasetType = this.context.datasetType;
+        importJob.processedDatasetFilePath = this.context.processedDatasetFilePath;
+        importJob.processedDatasetType = this.context.processedDatasetType;
+        importJob.processedDatasetName = this.context.processedDatasetName;
+        importJob.processedDatasetComment = this.context.processedDatasetComment;
+        importJob.datasetProcessing = this.context.datasetProcessing;
+        return this.importService.startProcessedDatasetImportJob(importJob);
     }
 }

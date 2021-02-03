@@ -87,6 +87,8 @@ import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
+import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -233,7 +235,6 @@ import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-s
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { environment } from 'src/environments/environment';
-import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 
 @NgModule({
     imports: [
@@ -314,6 +315,7 @@ import { FinishProcessedDatasetImportComponent } from './import/processed-datase
         ProcessedDatasetComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
+        ProcessedDatasetClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,

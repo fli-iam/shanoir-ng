@@ -22,6 +22,7 @@ import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
