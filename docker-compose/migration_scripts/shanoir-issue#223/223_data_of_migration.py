@@ -5,13 +5,14 @@ import pymysql
 from dbutils import bulk_insert
 
 sourceConn = pymysql.connect(
-        host        = os.environ.get("SRC_HOST")        or "localhost",
-        user        = os.environ.get("SRC_USER")        or "root",
-        password    = os.environ.get("SRC_PASSWORD")    or "",
-        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
-        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+        host        = "qualif-mysql",
+        user        = "dev",
+        password    = "dev",
+        database    = "shanoirdb",
+        charset     = "utf8")
+
 targetConn = pymysql.connect(
-        host        = os.environ.get("TGT_HOST")        or "localhost",
+        host        = os.environ.get("TGT_HOST")        or "qualif-database",
         user        = os.environ.get("TGT_USER")        or "datasets",
         password    = os.environ.get("TGT_PASSWORD")    or "password",
         database    = os.environ.get("TGT_DATABASE")    or "datasets",
@@ -34,7 +35,7 @@ targetConn.commit()
 print("Import related_dataset: start")
 
 sourceCursor.execute("""SELECT STUDY_ID, DATASET_ID FROM REL_STUDY_DATASET""")
-bulk_insert(targetCursor, "related_dataset", """
+bulk_insert(targetCursor, "related_datasets", """
     study_id, dataset_id
     """, sourceCursor)
 targetConn.commit()
