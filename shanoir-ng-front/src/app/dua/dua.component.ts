@@ -15,21 +15,28 @@
 import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'dua',
     templateUrl: 'dua.component.html',
-    styleUrls: ['dua.component.css']
+    styleUrls: ['dua.component.css'] 
 })
 
 export class DUAComponent {
 
     checked: boolean = false;
 
-    constructor(private breadcrumbsService: BreadcrumbsService) {
+    constructor(
+            private breadcrumbsService: BreadcrumbsService,
+            private confirmService: ConfirmDialogService) {
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('DUA');
+    }
+
+    refuse() {
+        this.confirmService.confirm('Warning !', 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.');
     }
 
 }

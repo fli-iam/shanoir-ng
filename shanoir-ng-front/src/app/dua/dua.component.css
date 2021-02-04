@@ -1,8 +1,10 @@
 .embed-pdf { width: 100%; height: 500px; margin-bottom: 20px; }
-checkbox { vertical-align: bottom; }
+checkbox { vertical-align: bottom; margin-right: 5px; }
 .refuse { background-color: var(--color-error); }
-.accept { background-color: green; width: 200px; }
+.accept { background-color: green; width: calc(100% - 65px); }
 .refuse:hover { opacity: 0.7; background-color: var(--color-error); }
 .accept:not(:disabled):hover { opacity: 0.7; background-color: green; }
+.accept:disabled { opacity: 0.5; background-color: green; }
 .buttons { margin: 10px 0 0 0; }
 .study-name { font-weight: bold; color: var(--color-a); }
+.dua-block { margin: 20px 0 30px 0; }
