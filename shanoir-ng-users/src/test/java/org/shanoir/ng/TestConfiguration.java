@@ -1,7 +1,5 @@
 package org.shanoir.ng;
 
-package org.shanoir.ng;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
