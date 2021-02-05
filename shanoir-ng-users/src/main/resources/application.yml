@@ -140,5 +140,7 @@ spring:
     host: localhost
     port: 3025
     protocol: smtp
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
     
     
