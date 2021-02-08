@@ -38,7 +38,10 @@ public enum DatasetModalityType {
 	PET_DATASET(5),
 
 	// EEG Dataset
-	EEG_DATASET(6);
+	EEG_DATASET(6),
+
+	// GENERIC Dataset
+	OTHER_DATASET(7);
 
 	private int id;
 

@@ -54,10 +54,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @DatasetsModalityTypeCheck
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({  
-	@Type(value = CtDatasetAcquisition.class, name = "Ct"),  
+@JsonSubTypes({
+	@Type(value = CtDatasetAcquisition.class, name = "Ct"),
 	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
+	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
