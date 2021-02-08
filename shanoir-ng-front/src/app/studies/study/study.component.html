@@ -191,11 +191,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
                                 <ul>
-                                  <li *ngFor="let file of study.protocolFilePaths"> {{getFileName(file)}}  <button (click)="downloadFile(file)"><i class="fas fa-save"></i></button>
+                                  <li *ngFor="let file of study.protocolFilePaths"> - {{getFileName(file)}}  <button (click)="downloadFile(file)"><i class="fas fa-save"></i></button>
                                   </li>
                                 </ul>
 							</span>
