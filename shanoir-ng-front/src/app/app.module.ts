@@ -231,6 +231,7 @@ import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/b
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
+import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 
 @NgModule({
     imports: [
@@ -386,7 +387,8 @@ import { DUAComponent } from './dua/dua.component';
         StudyCardNodeComponent,
         ReverseSubjectNodeComponent,
         ReverseStudyNodeComponent,
-        DUAComponent
+        DUAComponent,
+        DUASigningComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

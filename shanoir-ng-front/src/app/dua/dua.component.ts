@@ -26,17 +26,10 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 
 export class DUAComponent {
 
-    checked: boolean = false;
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService,
-            private confirmService: ConfirmDialogService) {
+            private breadcrumbsService: BreadcrumbsService) {
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('DUA');
     }
-
-    refuse() {
-        this.confirmService.confirm('Warning !', 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.');
-    }
-
 }

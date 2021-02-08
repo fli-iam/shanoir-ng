@@ -30,7 +30,8 @@ export class HomeComponent {
 
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     
-    private http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    challenge: boolean = true;
+    signed: boolean = false;
 
     constructor(private breadcrumbsService: BreadcrumbsService) {
         //this.breadcrumbsService.nameStep('Home');
