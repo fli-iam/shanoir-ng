@@ -195,6 +195,9 @@ public class UserServiceImpl implements UserService {
 		user.setExtensionRequestDemand(Boolean.TRUE);
 		user.setExtensionRequestInfo(requestInfo);
 		userRepository.save(user);
+
+		// Send email to administrators
+		emailService.notifyAdminAccountExtensionRequest(user);
 	}
 
 	@Override
