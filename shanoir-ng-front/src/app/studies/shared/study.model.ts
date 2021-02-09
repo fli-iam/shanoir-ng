@@ -45,6 +45,7 @@ export class Study extends Entity {
     visibleByDefault: boolean;
     withExamination: boolean;
     studyCardList: StudyCard[];
+    consentFormPaths: string[];
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
@@ -78,6 +79,7 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
+    consentFormPaths: string[];
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -104,5 +106,6 @@ export class StudyDTO {
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
+        this.consentFormPaths = study.consentFormPaths;
     }
 }

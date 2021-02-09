@@ -176,6 +176,9 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getProtocolFilePaths() != null) {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
+		if (study.getConsentFormPaths() != null) {
+			studyDb.setConsentFormPaths(study.getConsentFormPaths());
+		}
 		
 		updateStudyUsers(studyDb, study.getStudyUserList());
 		studyRepository.save(studyDb);
