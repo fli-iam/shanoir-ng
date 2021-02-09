@@ -83,10 +83,10 @@ export class StudyService extends EntityService<Study> {
         return this.findStudiesIcanAdmin().then(studies => studies.map(study => new IdName(study.id, study.name)));
     }
 
-    uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'consent-form'): Observable<any> {
+    uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
-        if (fileType == 'consent-form') {
+        if (fileType == 'dua') {
             formData.append('file', fileToUpload, 'DUA-' + fileToUpload.name);
         } else if (fileType == 'protocol-file') {
             formData.append('file', fileToUpload, fileToUpload.name);
@@ -94,12 +94,12 @@ export class StudyService extends EntityService<Study> {
         return this.http.post<any>(endpoint, formData);
     }
 
-    deleteFile(studyId: number, fileType: 'protocol-file'|'consent-form'): Observable<any> {
+    deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
         return this.http.delete(endpoint);
     }
 
-    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'consent-form'): void {
+    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua'): void {
         const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
         this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
             if (response.status == 200) {

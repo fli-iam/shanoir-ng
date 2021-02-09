@@ -479,15 +479,14 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.consentFormPaths = [];
             this.consentForm = null;
         } else if (this.mode == 'edit') {
-            // TODO: API call
-            this.studyService.deleteFile(this.study.id, 'consent-form');
+            this.studyService.deleteFile(this.study.id, 'dua');
             this.study.consentFormPaths = [];
             this.consentForm = null;           
         }
     }
 
     public downloadConsentForm() {
-        this.studyService.downloadFile(this.study.consentFormPaths[0], this.study.id, 'consent-form');
+        this.studyService.downloadFile(this.study.consentFormPaths[0], this.study.id, 'dua');
     }
 
     public attachConsentForm(event: any) {
@@ -515,8 +514,8 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             }
             if (this.consentForm) {
-                this.studyService.uploadFile(this.consentForm, this.entity.id, 'consent-form').toPromise()
-                .then(result => (console.log("consent form saved sucessfuly")))
+                this.studyService.uploadFile(this.consentForm, this.entity.id, 'dua').toPromise()
+                .then(result => (console.log("consent form saved successfully")))
                 .catch(error => {
                     this.consentForm = null;
                 });
