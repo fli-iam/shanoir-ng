@@ -36,6 +36,7 @@ export class BrukerSelectSeriesComponent {
     public detailedPatient: any;
     public detailedSerie: any;
     public papayaParams: object[];
+    public papayaError: boolean = false;
 
     constructor(
             private importService: ImportService,
@@ -59,6 +60,9 @@ export class BrukerSelectSeriesComponent {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = nodeParams;
+            setTimeout(() => { // so the details display has no delay
+                if (serie && serie.images) this.initPapaya(serie); 
+            });
         }
     }
 
@@ -69,6 +73,29 @@ export class BrukerSelectSeriesComponent {
         } else {
             this.detailedPatient = nodeParams;
         }
+    }
+    
+    private initPapaya(serie: SerieDicom): void {
+        this.papayaError = false;
+        let listOfPromises = serie.images.map((image) => {
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+        });
+        let promiseOfList = Promise.all(listOfPromises);
+        promiseOfList.then((values) => {
+            let params: object[] = [];
+            params['binaryImages'] = [values];
+            this.papayaParams = params;
+        }).catch(reason => {
+            this.papayaError = true;
+            console.error(reason);
+        });
+    }
+
+    onStudyCheckChange(checked: boolean, study) {
+        if (study.series) {
+            study.series.forEach(serie => serie.selected = checked)
+        }
+        this.onPatientUpdate();
     }
 
     public onPatientUpdate(): void {
