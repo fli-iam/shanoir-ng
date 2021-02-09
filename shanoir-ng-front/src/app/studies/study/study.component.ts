@@ -64,7 +64,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFile: File;
-    protected consentForm: File;
+    protected dataUserAgreement: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
@@ -146,7 +146,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.getCenters();
         this.selectedCenter = null;
         this.protocolFile = null;
-        this.consentForm = null;
+        this.dataUserAgreement = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -189,7 +189,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'protocolFile': [],
-            'consentForm': []
+            'dataUserAgreement': []
         });
         return formGroup;
     }
@@ -448,7 +448,6 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.protocolFilePaths = [];
             this.protocolFile = null;
         } else if (this.mode == 'edit') {
-            // TODO: API call
             this.studyService.deleteFile(this.study.id, 'protocol-file');
             this.study.protocolFilePaths = [];
             this.protocolFile = null;           
@@ -474,31 +473,31 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.updateValueAndValidity();
     }
     
-    public deleteConsentForm() {
+    public deleteDataUserAgreement() {
         if (this.mode == 'create') { 
-            this.study.consentFormPaths = [];
-            this.consentForm = null;
+            this.study.dataUserAgreementPaths = [];
+            this.dataUserAgreement = null;
         } else if (this.mode == 'edit') {
             this.studyService.deleteFile(this.study.id, 'dua');
-            this.study.consentFormPaths = [];
-            this.consentForm = null;           
+            this.study.dataUserAgreementPaths = [];
+            this.dataUserAgreement = null;           
         }
     }
 
-    public downloadConsentForm() {
-        this.studyService.downloadFile(this.study.consentFormPaths[0], this.study.id, 'dua');
+    public downloadDataUserAgreement() {
+        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua');
     }
 
-    public attachConsentForm(event: any) {
-        this.consentForm = event.target.files[0];
-        if (this.consentForm.name.indexOf(".pdf", this.consentForm.name.length - ".pdf".length) == -1) {
+    public attachDataUserAgreement(event: any) {
+        this.dataUserAgreement = event.target.files[0];
+        if (this.dataUserAgreement.name.indexOf(".pdf", this.dataUserAgreement.name.length - ".pdf".length) == -1) {
             this.msgBoxService.log("error", "Only .pdf files are accepted");
-            this.consentForm = null;
-        } else if (this.consentForm.size > 50000000) {
+            this.dataUserAgreement = null;
+        } else if (this.dataUserAgreement.size > 50000000) {
             this.msgBoxService.log("error", "File must be less than 50Mb.");
-            this.consentForm = null;
+            this.dataUserAgreement = null;
         } else {
-            this.study.consentFormPaths = ['DUA-' + this.consentForm.name];
+            this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];
         }
         this.form.updateValueAndValidity();
     }
@@ -513,11 +512,11 @@ export class StudyComponent extends EntityComponent<Study> {
                     this.protocolFile = null;
                 });
             }
-            if (this.consentForm) {
-                this.studyService.uploadFile(this.consentForm, this.entity.id, 'dua').toPromise()
-                .then(result => (console.log("consent form saved successfully")))
+            if (this.dataUserAgreement) {
+                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
+                .then(result => (console.log("dua saved successfully")))
                 .catch(error => {
-                    this.consentForm = null;
+                    this.dataUserAgreement = null;
                 });
             }
         });

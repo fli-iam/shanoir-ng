@@ -108,26 +108,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">Data User Agreement</legend>
+				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">Data User Agreement (DUA)</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Attach consent form label@@studyDetailAttachConsentForm">Attach consent form</label>
-						<span  *ngIf="!study.consentFormPaths || !study.consentFormPaths[0]" class="right-col">
-						    <input #input hidden formControlName="consentForm" type="file" (change)="attachConsentForm($event)"/>
+						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+						<span  *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+						    <input #input hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)"/>
                             <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
 						</span>
-                        <span  *ngIf="study.consentFormPaths && study.consentFormPaths[0]" class="right-col">
-                            {{study.consentFormPaths[0]}}
-                            <button (click)="deleteConsentForm()" class="left-icon"><i class="fas fa-trash"></i></button>
+                        <span  *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+                            {{study.dataUserAgreementPaths[0]}}
+                            <button (click)="deleteDataUserAgreement()" class="left-icon"><i class="fas fa-trash"></i></button>
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <label i18n="Study detail|consent form label@@studyDetailConsentForm">Consent form</label>
+                        <label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
                         <span class="right-col">
-                            <span *ngIf="study.consentFormPaths && study.consentFormPaths[0]">{{study.consentFormPaths[0]}}
-                            	<button (click)="downloadConsentForm()"><i class="fas fa-save"></i></button>
+                            <span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">{{study.dataUserAgreementPaths[0]}}
+                            	<button (click)="downloadDataUserAgreement()"><i class="fas fa-save"></i></button>
 							</span>
-                            <span *ngIf="!study.consentFormPaths || !study.consentFormPaths[0]">-</span>
+                            <span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
                         </span>
                     </li>
 				</ol>
