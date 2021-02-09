@@ -1,5 +1,5 @@
 /**
-* * Shanoir NG - Import, manage and share neuroimaging data
+ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -13,10 +13,7 @@
  */
 package org.shanoir.ng.shared.repository;
 
-import java.math.BigInteger;
-import java.util.List;
 import org.shanoir.ng.shared.model.Study;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -25,7 +22,4 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface StudyRepository extends CrudRepository<Study, Long> {
 
-	@Query(value="select rd.study_id from related_datasets rd where dataset_id = ?1",
-			nativeQuery = true)
-	List<BigInteger> findByDatasetId(Long datasetId);
 }

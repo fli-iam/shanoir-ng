@@ -8,4 +8,3 @@
 .data-loading img { height: 20px; vertical-align: bottom; }
 span.disabled { position: relative; }
 span.disabled::before { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: white; opacity: 0.5; }
-dataset-download { margin-left: 5px; }

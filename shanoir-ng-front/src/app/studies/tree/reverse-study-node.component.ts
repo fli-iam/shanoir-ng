@@ -94,6 +94,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
+            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );
