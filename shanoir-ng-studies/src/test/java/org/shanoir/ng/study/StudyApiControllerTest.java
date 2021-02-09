@@ -46,6 +46,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
+import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
@@ -98,6 +99,9 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private StudyUserService studyUserServiceMock;
+	
+	@MockBean
+	private DataUserAgreementService dataUserAgreementServiceMock;
 
 	@MockBean
 	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;

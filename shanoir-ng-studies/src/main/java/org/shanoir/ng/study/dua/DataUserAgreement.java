@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -22,13 +23,12 @@ public class DataUserAgreement extends AbstractEntity {
 	private static final long serialVersionUID = 6095755233940273029L;
 
 	@ManyToOne
-	@NotBlank
+	@NotNull
 	private Study study;
 
-	@NotBlank
+	@NotNull
 	private Long userId;
 	
-	@NotBlank
 	@CreationTimestamp
 	@Column(updatable=false)
 	private Date timestampOfNew;

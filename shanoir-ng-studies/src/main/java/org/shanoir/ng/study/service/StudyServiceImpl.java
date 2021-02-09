@@ -29,6 +29,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -54,6 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Implementation of study service.
  * 
  * @author msimon
+ * @author mkain
  *
  */
 @Component
@@ -69,6 +71,9 @@ public class StudyServiceImpl implements StudyService {
 	
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserCom;
+	
+	@Autowired
+	private DataUserAgreementService dataUserAgreementService;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -184,8 +189,11 @@ public class StudyServiceImpl implements StudyService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return Utils.copyList(studyRepository.findAll());
 		} else {
-			return Utils.copyList(studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
-					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId()));
+			return Utils.copyList(
+				studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true
+				)
+			);
 		}
 	}
 
@@ -237,12 +245,22 @@ public class StudyServiceImpl implements StudyService {
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
 				created.add(su);
+				// create a DUA for user in study, if dua file exists
+				if (study.getProtocolFilePaths() != null) { // to be changed
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());
+				}
 			}
-			//studyUserRepository.save(toBeCreated);
 			study.getStudyUserList().addAll(created);
 		}
-
-		// Remove deleted
+		
+		// Remove deleted: study user + data user agreements
+		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
+			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
+			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
+			if (study.getProtocolFilePaths() != null) { // to be changed
+				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(study, studyUser.getUserId());
+			}
+		}
 		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList());
 		
 		// Send updates via RabbitMQ
@@ -257,9 +275,7 @@ public class StudyServiceImpl implements StudyService {
 			for (StudyUser su : toBeUpdated) {
 				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
 			}
-			
 			studyUserCom.broadcast(commands);
-			
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user update info through RabbitMQ");
 		}
