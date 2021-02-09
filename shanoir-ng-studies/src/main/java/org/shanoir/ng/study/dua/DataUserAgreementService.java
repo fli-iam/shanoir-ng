@@ -1,5 +1,6 @@
 package org.shanoir.ng.study.dua;
 
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
@@ -20,6 +21,12 @@ public class DataUserAgreementService {
 	
 	public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
 		return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
+	}
+	
+	public void acceptDataUserAgreement(Long duaId) {
+		DataUserAgreement dataUserAgreement = repository.findOne(duaId);
+		dataUserAgreement.setTimestampOfAccepted(new Date());
+		repository.save(dataUserAgreement);
 	}
 	
 	public void createDataUserAgreementsForStudy(Study study) {

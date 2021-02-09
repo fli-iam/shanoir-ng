@@ -248,10 +248,9 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@PutMapping(value = "/dua/{duaId}", produces = { "application/json" }, consumes = {"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Void> updateDataUserAgreement(
-			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId,
-			@ApiParam(value = "dua to update", required = true) @RequestBody DataUserAgreement dataUserAgreement,
-			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException;
+	ResponseEntity<Void> acceptDataUserAgreement(
+			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+			throws RestServiceException, MicroServiceCommunicationException;
 
 	@ApiOperation(value = "", notes = "Add DUA to a study", response = Void.class, tags = {})
 	@ApiResponses(value = {

@@ -422,19 +422,13 @@ public class StudyApiController implements StudyApi {
 		}
 	}
 	
-	public ResponseEntity<Void> updateDataUserAgreement(
-			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId,
-			@ApiParam(value = "dua to update", required = true) @RequestBody DataUserAgreement dataUserAgreement,
-			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
-//		try {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//		} catch (EntityNotFoundException e) {
-//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//		} catch (ShanoirException e) {
-//			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
-//		}
+	@Override
+	public ResponseEntity<Void> acceptDataUserAgreement(
+		@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+		throws RestServiceException, MicroServiceCommunicationException {
+		this.dataUserAgreementService.acceptDataUserAgreement(duaId);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
-
 
 	@Override
 	public ResponseEntity<Void> uploadDataUserAgreement(
