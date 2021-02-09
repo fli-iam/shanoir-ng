@@ -129,6 +129,10 @@ public class StudyServiceImpl implements StudyService {
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
+				// create a DUA for user in study, if dua file exists
+				if (study.getProtocolFilePaths() != null) { // to be changed
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, studyUser.getUserId());
+				}
 				commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
 			}
 			try {
