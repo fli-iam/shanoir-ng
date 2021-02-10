@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     (mouseleave)="scrollButtonOff()"
                 ><i class="fas fa-chevron-up"></i></div>
             <div class="scrollzone" (click)="onScrollZoneClick($event)">
-                <div class="lift" [style.top.px]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
+                <div class="lift" [style.top]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
             </div>
             <div class="bottom-scroll-button"
                     (mousedown)="scrollButtonOn('down')" 

@@ -15,15 +15,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="this.menuOpened"
-        [label]="node.label"
-        [clickable] = "this.node.id != null"
+        [label]="node.label" 
         awesome="fas fa-procedures" 
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()">
 
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>   
 
@@ -33,7 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let dsNode of node.datasets" 
                 [input]="dsNode"
-                [related]="node.id == null"
                 (selectedChange)="selectedChange.emit()"
                 [hasBox]="hasBox">
             </dataset-node>

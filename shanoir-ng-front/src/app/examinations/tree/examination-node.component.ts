@@ -88,10 +88,10 @@ export class ExaminationNodeComponent implements OnChanges {
 
     loadDatasetAcquisitions(): Promise<void> {
         this.loading = true;
-
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
-            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
+            this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq))
+                .sort((a, b) => a.sortingIndex - b.sortingIndex);
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
             this.loading = false; 
@@ -138,6 +138,7 @@ export class ExaminationNodeComponent implements OnChanges {
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
+            dsAcq.sortingIndex,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
         );

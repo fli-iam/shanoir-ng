@@ -380,7 +380,8 @@ let routes: Routes = [
     {
         path: 'user/edit/:id',
         component: UserComponent,
-        data: { mode: 'edit' }
+        data: { mode: 'edit' },
+        canActivate: [AuthAdminGuard],
     },
     {
         path: 'user/create',
