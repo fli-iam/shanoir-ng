@@ -53,28 +53,6 @@
                             </#if>
                         </div>
 						<div>
-							<#if displayMessage?has_content && displayMessage && message?has_content>
-								<div class="error">
-									<div class="alert alert-${message.type}">
-										<#if message.type = 'success'></#if>
-										<#if message.type = 'warning'></#if>
-										<#if message.type = 'error'></#if>
-										<#if message.type = 'info'></#if>
-										<span class="kc-feedback-text">${message.summary}</span>
-									</div>
-								</div>
-							</#if>
-							<div id="kc-form-buttons">						
-								<div>
-									<button name="login" id="kc-login" type="submit">${msg("doLogIn")}</button>
-								</div>
-								<div>
-									<a href="${properties.requestAccount!}">Create an account</a>
-								</div>
-								<div>
-                                    <a href="${properties.requestChallenge}">Subscribe to a challenge</a>
-                                </div>
-							</div>
 						    <a href="${properties.requestExtension!}">Account expired?</a>
 						</div>
                   </div>
@@ -86,6 +64,9 @@
 				<div>
 					<a href="${properties.requestAccount!}">Create an account</a>
 				</div>
+			    <div>
+                    <a href="${properties.requestChallenge}">Subscribe to a challenge</a>
+                </div>
             </form>
         </#if>
         </div>
