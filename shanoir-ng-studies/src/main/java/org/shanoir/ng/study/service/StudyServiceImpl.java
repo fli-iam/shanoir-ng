@@ -182,20 +182,12 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
 		
-		Boolean dataUserAgreementPathsAddedOrRemoved = null;
-		if (study.getDataUserAgreementPaths() != null) {
-			if (studyDb.getDataUserAgreementPaths() == null) {
-				dataUserAgreementPathsAddedOrRemoved = new Boolean(true);
-			}
+		updateStudyUsers(studyDb, study);
+		
+		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
-		} else {
-			if (studyDb.getDataUserAgreementPaths() != null) {
-				dataUserAgreementPathsAddedOrRemoved = new Boolean(false);
-			}
-			studyDb.setDataUserAgreementPaths(null);
 		}
 		
-		updateStudyUsers(studyDb, study.getStudyUserList(), dataUserAgreementPathsAddedOrRemoved);
 		studyRepository.save(studyDb);
 
 		return studyDb;
@@ -216,8 +208,8 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study study, List<StudyUser> studyUsers, Boolean dataUserAgreementPathsAddedOrRemoved) {
-		if (studyUsers == null) {
+	private void updateStudyUsers(Study studyDb, Study study) {
+		if (study.getStudyUserList() == null) {
 			return;
 		}
 		// New lists of created / updated to send via RabbitMQ
@@ -226,19 +218,21 @@ public class StudyServiceImpl implements StudyService {
 
 		// Build maps of existing / replacing study users
 		Map<Long, StudyUser> existing = new HashMap<>();
-		for (StudyUser su : study.getStudyUserList()) {
+		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
-			if (dataUserAgreementPathsAddedOrRemoved != null) { //added or removed
-				if (dataUserAgreementPathsAddedOrRemoved) {
-					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());										
-				} else {
-					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(study, su.getUserId());
+			if (study.getDataUserAgreementPaths() != null) {
+				if (studyDb.getDataUserAgreementPaths() == null) {
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
+				}
+			} else {
+				if (studyDb.getDataUserAgreementPaths() != null) {
+					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 				}
 			}
 		}
 		
 		Map<Long, StudyUser> replacing = new HashMap<>();
-		for (StudyUser su : studyUsers) {
+		for (StudyUser su : study.getStudyUserList()) {
 			if (su.getId() == null) {
 				toBeCreated.add(su);
 			} else {
@@ -266,28 +260,28 @@ public class StudyServiceImpl implements StudyService {
 		List<StudyUser> created = new ArrayList<>();
 		if (!toBeCreated.isEmpty()) {
 			for (StudyUser su : toBeCreated) {
-				su.setStudy(study);
+				su.setStudy(studyDb);
 			}
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
 				created.add(su);
 				// add DUA only to newly added StudyUser, not to existing ones
-				if (study.getDataUserAgreementPaths() != null) {
-					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());					
+				if (studyDb.getDataUserAgreementPaths() != null) {
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());					
 				}
 			}
-			study.getStudyUserList().addAll(created);
+			studyDb.getStudyUserList().addAll(created);
 		}
 		
 		// Remove deleted: study user + data user agreements
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
 			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
-			if (study.getDataUserAgreementPaths() != null) {
-				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(study, studyUser.getUserId());
+			if (studyDb.getDataUserAgreementPaths() != null) {
+				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
 			}
 		}
-		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList());
+		Utils.removeIdsFromList(idsToBeDeleted, studyDb.getStudyUserList());
 		
 		// Send updates via RabbitMQ
 		try {

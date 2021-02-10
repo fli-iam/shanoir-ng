@@ -48,7 +48,9 @@ public class DataUserAgreementService {
 	
 	public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
 		DataUserAgreement dataUserAgreement = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, study.getId());
-		repository.delete(dataUserAgreement.getId());
+		if (dataUserAgreement != null) {
+			repository.delete(dataUserAgreement.getId());
+		}
 	}
 
 }
