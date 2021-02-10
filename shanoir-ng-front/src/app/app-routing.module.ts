@@ -259,7 +259,6 @@ let routes: Routes = [
         path: 'examination/edit/:id',
         component: ExaminationComponent,
         data: { mode: 'edit' },
-        canActivate: [AuthAdminOrExpertGuard],
     },
     {
         path: 'examination/create',

@@ -81,6 +81,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		// TODO ATO : implement MrDAtasetAcquisitionHome.createMrDataset (issue by
 		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset dataset : serie.getDatasets()) {
+			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
+
 			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			MrDataset mrDataset = new MrDataset();
 			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);

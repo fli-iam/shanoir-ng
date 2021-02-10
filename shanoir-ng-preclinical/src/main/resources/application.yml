@@ -135,6 +135,8 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
 
 # logging configuration
 logging:

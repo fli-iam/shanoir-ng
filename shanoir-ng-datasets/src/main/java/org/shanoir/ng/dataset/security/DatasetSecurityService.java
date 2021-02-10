@@ -643,6 +643,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
+	if (list == null) return true;
     	Set<Long> studyIds = new HashSet<>();
     	list.forEach((ExaminationDTO exam) -> {
     		if (exam.getStudyId() != null) {
