@@ -85,6 +85,20 @@ export class DatasetService extends EntityService<Dataset> {
             });
     }
 
+    public downloadDatasetsByExamination(examinationId: number, format: string) {
+        let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',
+            { observe: 'response', responseType: 'blob', params: params})
+            .toPromise().then(
+                response => {
+                    this.downloadIntoBrowser(response);
+                }
+            ).catch((error: HttpErrorResponse) => {
+                this.errorService.handleError(error);
+            });
+    }
+
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
                                         .set("studyNameOutRegExp", studyNameOutRegExp)

@@ -137,10 +137,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     private download(format: string) {
         this.downloading = true;
-        this.datasetIds.then(ids => {
-            this.datasetService.downloadDatasets(ids, format)
+        this.datasetService.downloadDatasetsByExamination(this.examination.id, format)
                     .then(() => this.downloading = false);
-        });
     }
 
     private getCenters(): void {
