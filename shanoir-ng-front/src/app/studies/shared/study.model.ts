@@ -35,6 +35,7 @@ export class Study extends Entity {
     nbExaminations: number;
     nbSujects: number;
     protocolFilePaths: string[];
+    dataUserAgreementPaths: string[];
     startDate: Date;
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
@@ -45,7 +46,6 @@ export class Study extends Entity {
     visibleByDefault: boolean;
     withExamination: boolean;
     studyCardList: StudyCard[];
-    dataUserAgreementPaths: string[];
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
@@ -70,6 +70,7 @@ export class StudyDTO {
     monoCenter: boolean;
     name: string;
     protocolFilePaths: string[];
+    dataUserAgreementPaths: string[];
     startDate: Date;
     studyCenterList: StudyCenterDTO[];
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
@@ -79,7 +80,6 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
-    dataUserAgreementPaths: string[];
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -90,6 +90,7 @@ export class StudyDTO {
         this.monoCenter = study.monoCenter;
         this.name = study.name;
         this.protocolFilePaths = study.protocolFilePaths;
+        this.dataUserAgreementPaths = study.dataUserAgreementPaths;
         this.startDate = study.startDate;
         this.studyCenterList = study.studyCenterList ? study.studyCenterList.map(sc => {
             let dto = new StudyCenterDTO(sc);
@@ -106,6 +107,5 @@ export class StudyDTO {
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
-        this.dataUserAgreementPaths = study.dataUserAgreementPaths;
     }
 }

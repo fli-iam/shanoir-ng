@@ -180,8 +180,8 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getProtocolFilePaths() != null) {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
-		if (study.getConsentFormPaths() != null) {
-			studyDb.setConsentFormPaths(study.getConsentFormPaths());
+		if (study.getDataUserAgreementPaths() != null) {
+			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
 		
 		updateStudyUsers(studyDb, study.getStudyUserList());

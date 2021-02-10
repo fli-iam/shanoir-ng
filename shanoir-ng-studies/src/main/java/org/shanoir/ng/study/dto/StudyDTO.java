@@ -55,7 +55,7 @@ public class StudyDTO {
 
 	private List<String> protocolFilePaths;
 	
-	private List<String> consentFormPaths;
+	private List<String> dataUserAgreementPaths;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -385,17 +385,17 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the consentFormPaths
+	 * @return the dataUserAgreementPaths
 	 */
-	public List<String> getConsentFormPaths() {
-		return consentFormPaths;
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
 	}
 
 	/**
-	 * @param consentFormPaths the consentFormPaths to set
+	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
 	 */
-	public void setConsentFormPaths(List<String> consentFormPaths) {
-		this.consentFormPaths = consentFormPaths;
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 
 }

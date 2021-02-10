@@ -110,9 +110,9 @@ public class Study extends HalEntity {
 	
 	/** List of data user agreement form directly attached to the study. */
 	@ElementCollection
-	@CollectionTable(name = "consent_form_path")
+	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
-	private List<String> consentFormPaths;
+	private List<String> dataUserAgreementPaths;
 
 	/** Start date. */
 	@LocalDateAnnotations
@@ -291,17 +291,17 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @return the consentFormPaths
+	 * @return the dataUserAgreementPaths
 	 */
-	public List<String> getConsentFormPaths() {
-		return consentFormPaths;
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
 	}
 
 	/**
-	 * @param consentFormPaths the consentFormPaths to set
+	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
 	 */
-	public void setConsentFormPaths(List<String> consentFormPaths) {
-		this.consentFormPaths = consentFormPaths;
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 
 	/**

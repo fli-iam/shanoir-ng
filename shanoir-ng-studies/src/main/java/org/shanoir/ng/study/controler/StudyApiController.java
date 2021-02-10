@@ -286,11 +286,11 @@ public class StudyApiController implements StudyApi {
 			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip"))
 					|| file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
-				Study stud = studyService.findById(studyId);
-				if (stud.getProtocolFilePaths() != null) {
-					stud.getProtocolFilePaths().remove(file.getName());
+				Study study = studyService.findById(studyId);
+				if (study.getProtocolFilePaths() != null) {
+					study.getProtocolFilePaths().remove(file.getName());
 				}
-				studyService.update(stud);
+				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
 			String filePath = getProtocolFilePath(studyId, file.getOriginalFilename());
@@ -433,14 +433,14 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> uploadDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "consent form to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@ApiParam(value = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		try {
 			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
 				Study study = studyService.findById(studyId);
 				// V1: the consent form is not versioned 
-				if (study.getConsentFormPaths() != null) {
-					study.getConsentFormPaths().remove(file.getName());
+				if (study.getDataUserAgreementPaths() != null) {
+					study.getDataUserAgreementPaths().remove(file.getName());
 				}
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
@@ -480,10 +480,10 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> deleteDataUserAgreement (
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
 		Study study = studyService.findById(studyId);
-		if (study.getConsentFormPaths() == null || study.getConsentFormPaths().isEmpty()) {
+		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = getDataUserAgreementFilePath(studyId, study.getConsentFormPaths().get(0));
+		String filePath = getDataUserAgreementFilePath(studyId, study.getDataUserAgreementPaths().get(0));
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
