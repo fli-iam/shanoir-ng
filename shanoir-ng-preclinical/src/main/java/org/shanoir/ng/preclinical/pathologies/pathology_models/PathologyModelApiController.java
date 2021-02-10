@@ -38,6 +38,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +70,9 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Value("${preclinical.uploadExtradataFolder}")
+	private String extraDataPath;
 
 	@Override
 	public ResponseEntity<PathologyModel> createPathologyModel(
@@ -266,7 +270,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
 		// Create corresponding folders
-		Path path = Paths.get(preclinicalConfig.getUploadExtradataFolder() + "models/" + model.getId());
+		Path path = Paths.get(extraDataPath + "models/" + model.getId());
 		Files.createDirectories(path);
 		// Path to file
 		Path pathToFile = Paths.get(path.toString() + File.separatorChar + file.getOriginalFilename());

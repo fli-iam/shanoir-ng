@@ -39,7 +39,7 @@ export class SolrSearchComponent{
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     hasDownloadRight: boolean = true;
     selectedDatasetIds: number[];
     allStudies: FacetResultPage; 

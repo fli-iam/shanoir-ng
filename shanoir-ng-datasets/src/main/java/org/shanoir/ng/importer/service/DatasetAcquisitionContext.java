@@ -20,6 +20,7 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	@Autowired
 	private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
 	
+	@Autowired
+	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
+	
 	// add other strategies for other modalities here
 	
 	private DatasetAcquisitionStrategy datasetAcquisitionStrategy;
@@ -53,6 +57,8 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			this.datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
 		} else if ("CT".equals(modality)) {
 			this.datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+		} else if ("PT".equals(modality)) {
+			this.datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
 		}
 		// else... add other modalities here
 	}

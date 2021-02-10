@@ -52,6 +52,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String LASTNAME = "lastname";
 
 	private static final String FIRSTNAME = "firstname";
+	
+	private static final String USERNAME = "username";
 
 	private static final String SERVER_ADDRESS = "serverAddress";
 	
@@ -60,6 +62,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String SUBJECT = "subject";
 	
 	private static final String EXAMINATION = "examination";
+	
+	private static final String SERIES = "series";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
@@ -116,6 +120,25 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("user", user);
 			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			final String content = build("notifyAdminAccountRequest", variables);
+			messageHelper.setText(content, true);
+		};
+		mailSender.send(messagePreparator);
+	}
+
+	@Override
+	public void notifyAdminAccountExtensionRequest(User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account extension request from " + shanoirServerAddress);
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put("user", user);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			final String content = build("notifyAdminAccountExtensionRequest", variables);
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
@@ -348,9 +371,8 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerDataImported(ShanoirEvent event) {
+	public void notifyStudyManagerDataImported(ShanoirEvent event, List<String> series) {
 		// Build the message
-
 		String message = event.getMessage();
 		
 		String patternStr = "(.*)\\((\\d+)\\)\\: Successfully created datasets for subject (.*) in examination (\\d+)";
@@ -363,6 +385,9 @@ public class EmailServiceImpl implements EmailService {
         String studyName =matcher.group(1);
         String studyId =matcher.group(2);
         String subjectName =matcher.group(3);
+
+        // Find user that imported
+        User u = userRepository.findOne(event.getUserId());
 
 		// Here call a study microservice (with a cache ? replicated ?)
 		List<Long> admins = this.getStudyAdministrator(studyId);
@@ -378,14 +403,15 @@ public class EmailServiceImpl implements EmailService {
 				final Map<String, Object> variables = new HashMap<>();
 				variables.put(LASTNAME, admin.getLastName());
 				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(USERNAME, u.getUsername());
 				variables.put(STUDY_NAME, studyName);
 				variables.put(SUBJECT, subjectName);
+				variables.put(SERIES, series);
 				variables.put(EXAMINATION, event.getObjectId());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
 				messageHelper.setText(content, true);
 			};
-
 			// Send the message
 			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), studyId);
 			mailSender.send(messagePreparator);

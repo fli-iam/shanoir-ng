@@ -18,7 +18,10 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -65,6 +68,16 @@ public class BrukerApiControllerTest {
 
 	@MockBean
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
+	}
 
 	@Before
 	public void setup() throws ShanoirException {

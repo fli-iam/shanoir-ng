@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.email;
 
+import java.util.List;
+
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.user.model.User;
 
@@ -40,6 +42,14 @@ public interface EmailService {
 	 *            created user.
 	 */
 	void notifyAdminAccountRequest(User user);
+
+	/**
+	 * Send an email to administrators to indicate an account extension request.
+	 * 
+	 * @param user
+	 *            updated user.
+	 */
+	void notifyAdminAccountExtensionRequest(User user);
 
 	/**
 	 * Send an email to the user and all administrators on account request validation.
@@ -106,7 +116,8 @@ public interface EmailService {
 	/**
 	 *  This method notifies a study manager that some data was imported in the study.
 	 * @param event the Shanoir event transporting the information
+	 * @param list the list of imported series
 	 */
-	void notifyStudyManagerDataImported(ShanoirEvent event);
+	void notifyStudyManagerDataImported(ShanoirEvent event, List<String> list);
 
 }

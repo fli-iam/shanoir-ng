@@ -218,7 +218,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							[getPage]="getPage.bind(this)" 
 							[columnDefs]="columnDefs"
 							[editMode]="true"
-							[disableCondition]="disableEdit.bind(this)"
 							(rowEdit)="onStudyUserEdit()">
 						</shanoir-table>
 					</li>
@@ -240,7 +239,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<dataset-download  *ngIf="mode == 'view'" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
 			</form-footer>
 		</form>
 	</div>

@@ -124,6 +124,7 @@ public class ImporterService {
 								rank++;
 							}
 							progress += 1f / study.getSeries().size();
+							// This message is important for email service
 							event.setMessage("Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId());
 							event.setProgress(progress);
 							eventService.publishEvent(event);
@@ -136,6 +137,7 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
+			// This message is important for email service
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
 			+": Successfully created datasets for subject " + importJob.getSubjectName()
 			+ " in examination " + examination.getId());

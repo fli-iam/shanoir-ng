@@ -21,8 +21,8 @@ import { Component } from '@angular/core';
 })
 export class ConfirmDialogComponent {
     
-    private title: string;
-    private message: string;
+    public title: string;
+    public message: string;
     private closeResolve: (value?: boolean | PromiseLike<boolean>) => void;
 
     public open(title: string, message: string): Promise<boolean> {

@@ -43,6 +43,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -151,7 +152,11 @@ public class BIDSServiceImpl implements BIDSService {
 				for (DatasetFile dataFile : expr.getDatasetFiles()) {
 					if (!dataFile.isPacs()) {
 						// Get FileName path object
-				        Path path = Paths.get(dataFile.getPath());
+						String dataFilePath = dataFile.getPath();
+						if (dataFilePath.startsWith("file://")) {
+							dataFilePath = dataFile.getPath().replace("file://", "");
+						}
+						Path path = Paths.get(dataFilePath);
 				        Path fileName = path.getFileName();
 						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
 
@@ -171,7 +176,6 @@ public class BIDSServiceImpl implements BIDSService {
 					metaDataFile.delete();
 				}
 			}
-			
 		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
 			e.printStackTrace();
@@ -406,7 +410,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
+			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			try {
