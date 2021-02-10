@@ -130,7 +130,7 @@ public class StudyServiceImpl implements StudyService {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
 				// create a DUA for user in study, if dua file exists
-				if (study.getProtocolFilePaths() != null) { // to be changed
+				if (study.getDataUserAgreementPaths() != null) {
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, studyUser.getUserId());
 				}
 				commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
@@ -177,14 +177,25 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudy.setStudy(studyDb);
 			}
 		}
+		
 		if (study.getProtocolFilePaths() != null) {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
+		
+		Boolean dataUserAgreementPathsAddedOrRemoved = null;
 		if (study.getDataUserAgreementPaths() != null) {
+			if (studyDb.getDataUserAgreementPaths() == null) {
+				dataUserAgreementPathsAddedOrRemoved = new Boolean(true);
+			}
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
+		} else {
+			if (studyDb.getDataUserAgreementPaths() != null) {
+				dataUserAgreementPathsAddedOrRemoved = new Boolean(false);
+			}
+			studyDb.setDataUserAgreementPaths(null);
 		}
 		
-		updateStudyUsers(studyDb, study.getStudyUserList());
+		updateStudyUsers(studyDb, study.getStudyUserList(), dataUserAgreementPathsAddedOrRemoved);
 		studyRepository.save(studyDb);
 
 		return studyDb;
@@ -205,7 +216,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
+	private void updateStudyUsers(Study study, List<StudyUser> studyUsers, Boolean dataUserAgreementPathsAddedOrRemoved) {
 		if (studyUsers == null) {
 			return;
 		}
@@ -217,7 +228,15 @@ public class StudyServiceImpl implements StudyService {
 		Map<Long, StudyUser> existing = new HashMap<>();
 		for (StudyUser su : study.getStudyUserList()) {
 			existing.put(su.getId(), su);
+			if (dataUserAgreementPathsAddedOrRemoved != null) { //added or removed
+				if (dataUserAgreementPathsAddedOrRemoved) {
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());										
+				} else {
+					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(study, su.getUserId());
+				}
+			}
 		}
+		
 		Map<Long, StudyUser> replacing = new HashMap<>();
 		for (StudyUser su : studyUsers) {
 			if (su.getId() == null) {
@@ -252,9 +271,9 @@ public class StudyServiceImpl implements StudyService {
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
 				created.add(su);
-				// create a DUA for user in study, if dua file exists
-				if (study.getProtocolFilePaths() != null) { // to be changed
-					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());
+				// add DUA only to newly added StudyUser, not to existing ones
+				if (study.getDataUserAgreementPaths() != null) {
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, su.getUserId());					
 				}
 			}
 			study.getStudyUserList().addAll(created);
@@ -264,7 +283,7 @@ public class StudyServiceImpl implements StudyService {
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
 			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
-			if (study.getProtocolFilePaths() != null) { // to be changed
+			if (study.getDataUserAgreementPaths() != null) {
 				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(study, studyUser.getUserId());
 			}
 		}
