@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,9 +14,10 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-@Table(name = "data_user_agreement", uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "userId" }, name = "study_user_idx") })
+@Table(name = "data_user_agreement")
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class DataUserAgreement extends AbstractEntity {
 
@@ -25,6 +25,7 @@ public class DataUserAgreement extends AbstractEntity {
 
 	@ManyToOne
 	@NotNull
+	@JsonProperty("studyId")
 	@JsonIdentityReference(alwaysAsId = true)
 	private Study study;
 
