@@ -27,7 +27,8 @@ import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'extensionRequest',
-    templateUrl: 'extension-request.component.html'
+    templateUrl: 'extension-request.component.html',
+    styleUrls: ['extension-request.component.css']
 })
 
 export class ExtensionRequestComponent implements OnInit, OnDestroy {
