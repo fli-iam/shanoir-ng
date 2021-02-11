@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="info.challenge" 
                         [options]="challengeOptions">
                     </select-box>
-                    <label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Challenge is required!</label>
+                    <label *ngIf="hasError('challenge', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Challenge is required!</label>
                 </ng-container>
                 <span *ngIf="!editMode">{{info.challenge}}</span>
             </span>
