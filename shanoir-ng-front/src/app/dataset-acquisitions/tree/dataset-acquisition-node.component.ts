@@ -49,7 +49,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let label: string = 'Dataset Acquisition n° ' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, this.input.sortingIndex, label, UNLOADED);
+                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED);
             }
         }
     }

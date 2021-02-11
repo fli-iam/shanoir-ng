@@ -90,7 +90,7 @@ form { color: var(--dark-grey); position: relative; }
   form textarea[readonly],
   form select[readonly] { cursor: default; border: none !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
-  form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
+  form input[type='radio'] { vertical-align: top; height: 14px; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
   form button { margin-top: 10px; margin-bottom: 10px; }

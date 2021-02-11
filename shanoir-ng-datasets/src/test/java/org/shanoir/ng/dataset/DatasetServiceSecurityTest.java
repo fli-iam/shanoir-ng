@@ -17,11 +17,15 @@ package org.shanoir.ng.dataset;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.eq;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +40,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -78,11 +83,15 @@ public class DatasetServiceSecurityTest {
 	
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
+
+	@MockBean
+	StudyRepository studyRepository;
 	
 	@Before
 	public void setup() {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(studyRepository.findByDatasetId(anyLong())).willReturn(Collections.emptyList());
 	}
 	
 	@Test
@@ -139,7 +148,8 @@ public class DatasetServiceSecurityTest {
 		given(datasetRepository.findOne(1L)).willReturn(mockDataset(1L));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(datasetRepository.findOne(1L)).willReturn(mockDataset(1L));	
+		given(datasetRepository.findOne(1L)).willReturn(mockDataset(1L));
+		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(Collections.singleton(1L));
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -152,7 +162,7 @@ public class DatasetServiceSecurityTest {
 		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);
 		given(datasetRepository.findAll()).willReturn(dsList);
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
-		assertEquals(3, service.findAll().size());		
+		assertEquals(3, service.findAll().size());
 	}
 	
 	private void testFindPage() throws ShanoirException {
@@ -160,7 +170,7 @@ public class DatasetServiceSecurityTest {
 		MrDataset ds1 = mockDataset(1L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds1);
 		MrDataset ds2 = mockDataset(2L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds2);
 		MrDataset ds3 = mockDataset(3L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds3);
-		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);		
+		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);
 		Pageable pageable = new PageRequest(0, 10);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
@@ -215,8 +225,9 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
+		given(rightsService.hasRightOnStudies(anySet(), eq("CAN_ADMINISTRATE"))).willReturn(new HashSet<Long>());
 		assertAccessDenied(service::deleteById, 1L);
-		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
+		given(rightsService.hasRightOnStudies(anySet(), eq("CAN_ADMINISTRATE"))).willReturn(Collections.singleton(1L));
 		assertAccessAuthorized(service::deleteById, 1L);
 	}
 
