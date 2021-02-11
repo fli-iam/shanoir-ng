@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ public class DataUserAgreementService {
 	@Autowired
 	private DataUserAgreementRepository repository;
 	
+	@Autowired
+	private StudyUserRepository repositoryStudyUser;
+	
 	public List<DataUserAgreement> getDataUserAgreementsByUserId(Long userId) {
 		return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
 	}
@@ -27,6 +31,9 @@ public class DataUserAgreementService {
 		DataUserAgreement dataUserAgreement = repository.findOne(duaId);
 		dataUserAgreement.setTimestampOfAccepted(new Date());
 		repository.save(dataUserAgreement);
+		StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
+		studyUser.setConfirmed(true);
+		repositoryStudyUser.save(studyUser);
 	}
 	
 	public void createDataUserAgreementsForStudy(Study study) {
