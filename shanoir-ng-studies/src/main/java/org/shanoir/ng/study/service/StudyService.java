@@ -70,7 +70,7 @@ public interface StudyService {
 	 * 
 	 * @param study
 	 * @return created Study
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 * @throws ShanoirStudiesException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
@@ -83,11 +83,27 @@ public interface StudyService {
 	 * @param study
 	 * @return updated study
 	 * @throws ShanoirStudiesException
-	 * @throws EntityNotFoundException 
-	 * @throws MicroServiceCommunicationException 
-	 * @throws AccessDeniedException 
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException
+	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
+
+
+	/**
+	 * Links an examination to a study
+	 * @param examinationId an examination ID
+	 * @param studyId the lionked study ID
+	 */
+	void addExaminationToStudy(Long examinationId, Long studyId);
+
+
+	/**
+	 * Deletes an examination from a study
+	 * @param examinationId the examination ID to delete
+	 * @param studyId the linked study ID
+	 */
+	void deleteExamination(Long examinationId, Long studyId);
 
 }

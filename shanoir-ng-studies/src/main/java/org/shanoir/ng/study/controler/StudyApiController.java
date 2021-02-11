@@ -120,6 +120,11 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
+			Study study = studyService.findById(studyId);
+			if (study.getExaminationIds() != null && !study.getExaminationIds().isEmpty()) {
+				// Error => should not be able to do this see #793
+				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
 			this.deleteProtocolFile(studyId);
 			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);

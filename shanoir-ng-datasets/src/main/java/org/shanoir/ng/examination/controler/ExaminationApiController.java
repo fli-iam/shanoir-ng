@@ -85,7 +85,8 @@ public class ExaminationApiController implements ExaminationApi {
 					throws RestServiceException {
 		try {
 			// delete bids folder
-			bidsService.deleteExam(examinationId);
+			Examination exam = this.examinationService.findById(examinationId);
+			bidsService.deleteExam(exam);
 			
 			// Delete extra data
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
@@ -93,10 +94,12 @@ public class ExaminationApiController implements ExaminationApi {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-
+			
+			Long studyId = exam.getStudyId();
+			
 			examinationService.deleteById(examinationId);
 			
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" +studyId, ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -160,7 +163,8 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		// NB: Message as studyID is important in RabbitMQStudiesService
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 

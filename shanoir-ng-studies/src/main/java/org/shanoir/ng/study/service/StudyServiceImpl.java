@@ -274,4 +274,29 @@ public class StudyServiceImpl implements StudyService {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
 		}
 	}
+
+	@Override
+	public void addExaminationToStudy(Long examinationId, Long studyId) {
+		// Update study_examination table
+		Study stud = this.studyRepository.findOne(studyId);
+		Set<Long> exams = stud.getExaminationIds();
+		if (exams == null) {
+			exams = new HashSet<>();
+			stud.setExaminationIds(exams);
+		}
+		exams.add(examinationId);
+		this.studyRepository.save(stud);
+	}
+
+	@Override
+	public void deleteExamination(Long examinationId, Long studyId) {
+		// Update study_examination table
+		Study stud = this.studyRepository.findOne(studyId);
+		Set<Long> exams = stud.getExaminationIds();
+		if (exams == null) {
+			return;
+		}
+		exams.remove(examinationId);
+		this.studyRepository.save(stud);
+	}
 }

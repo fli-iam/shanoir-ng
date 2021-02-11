@@ -21,16 +21,25 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RabbitMQStudiesService {
@@ -39,6 +48,9 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private StudyRepository studyRepo;
+
+	@Autowired
+	StudyService studyService;
 
 	/**
 	 * This methods allow to get the list of amdin users for a given study ID
@@ -64,6 +76,58 @@ public class RabbitMQStudiesService {
 		} catch (Exception e) {
 			LOG.error("Could not get study administrators.", e);
 			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * Receives a shanoirEvent as a json object, concerning an examination creation
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			)
+	@Transactional
+	public void linkExamination(final String eventStr) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+			Long examinationId = Long.valueOf(event.getObjectId());
+			Long studyId = Long.valueOf(event.getMessage());
+			this.studyService.addExaminationToStudy(examinationId, studyId);
+
+		} catch (Exception e) {
+			LOG.error("Could not index examination on given study ", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+		}
+	}
+
+	/**
+	 * Receives a shanoirEvent as a json object, concerning an examination creation
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+			key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			)
+	@Transactional
+	public void deleteExaminationStudy(final String eventStr) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
+			Long examinationId = Long.valueOf(event.getObjectId());
+			Long studyId = Long.valueOf(event.getMessage());
+			this.studyService.deleteExamination(examinationId, studyId);
+
+		} catch (Exception e) {
+			LOG.error("Could not index examination on given study ", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
 		}
 	}
 }

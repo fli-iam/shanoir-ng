@@ -16,6 +16,7 @@ package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -86,7 +87,7 @@ public class Study extends HalEntity {
 	@ElementCollection
 	@CollectionTable(name = "study_examination")
 	@Column(name = "examination_id")
-	private List<Long> examinationIds;
+	private Set<Long> examinationIds;
 
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
@@ -212,7 +213,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the examinationIds
 	 */
-	public List<Long> getExaminationIds() {
+	public Set<Long> getExaminationIds() {
 		return examinationIds;
 	}
 
@@ -220,7 +221,7 @@ public class Study extends HalEntity {
 	 * @param examinationIds
 	 *            the examinationIds to set
 	 */
-	public void setExaminationIds(List<Long> examinationIds) {
+	public void setExaminationIds(Set<Long> examinationIds) {
 		this.examinationIds = examinationIds;
 	}
 
