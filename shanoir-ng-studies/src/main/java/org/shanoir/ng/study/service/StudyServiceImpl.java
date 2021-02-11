@@ -119,6 +119,10 @@ public class StudyServiceImpl implements StudyService {
 		}
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
+				// if dua file exists, set StudyUser to confirmed false
+				if (study.getDataUserAgreementPaths() != null) {
+					studyUser.setConfirmed(false);
+				}
 				studyUser.setStudy(study);
 			}
 		}
@@ -221,11 +225,15 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
 			if (study.getDataUserAgreementPaths() != null) {
+				// new DUA added to study
 				if (studyDb.getDataUserAgreementPaths() == null) {
+					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
 				}
 			} else {
+				// existing DUA removed from study
 				if (studyDb.getDataUserAgreementPaths() != null) {
+					su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false before
 					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 				}
 			}
@@ -264,11 +272,12 @@ public class StudyServiceImpl implements StudyService {
 			}
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
-				created.add(su);
 				// add DUA only to newly added StudyUser, not to existing ones
 				if (studyDb.getDataUserAgreementPaths() != null) {
+					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());					
 				}
+				created.add(su);
 			}
 			studyDb.getStudyUserList().addAll(created);
 		}

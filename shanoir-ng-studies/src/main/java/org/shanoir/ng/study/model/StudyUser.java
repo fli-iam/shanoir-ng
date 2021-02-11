@@ -55,8 +55,9 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	 * With the introduction of a Data User Agreement form, a study
 	 * responsible can add an user to a study, but his StudyUser is
 	 * not confirmed as long, as the user has not validated the DUA.
+	 * The default is true, in case no DUA is existing.
 	 */
-	private boolean confirmed;
+	private boolean confirmed = true;
 
 	/** Study id. */
 	@ManyToOne
