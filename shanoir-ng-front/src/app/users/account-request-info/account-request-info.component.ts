@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
@@ -35,11 +35,12 @@ import { AccountRequestInfo } from './account-request-info.model';
 export class AccountRequestInfoComponent implements ControlValueAccessor {
 
     @Input() editMode: boolean = false;
+    @Output() valid: EventEmitter<boolean> = new EventEmitter();
     public isChallenge: boolean;
     info: AccountRequestInfo = new AccountRequestInfo;
     form: FormGroup;
-    private onChange = (_: any) => {};
-    private onTouch = () => {};
+    onChange = (_: any) => {};
+    onTouch = () => {};
     public challengeOptions:  Option<number>[];
 
     constructor(private formBuilder: FormBuilder,
@@ -63,13 +64,14 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
 
     ngOnInit() {
         if (this.isChallenge) {
-            this.studyService.getChallenges()
-                .then(result => this.challengeOptions = result.map(
-                    element => new Option(element.id, element.name)
-                )).catch(e => {
-                  this.form.disable;
-                  this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
-                });
+            this.studyService.getChallenges().then(result => {
+                if (result) {
+                    this.challengeOptions = result.map(element => new Option(element.id, element.name));
+                } else {
+                    this.challengeOptions = [];
+                    this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
+                }
+            });
         }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
@@ -81,12 +83,12 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
             'challenge': [this.info.challenge, !this.isChallenge ? [] : [Validators.required]]
         });
         this.form.valueChanges.subscribe(() => {
-            if (this.form.valid) {
-                this.onChange(this.info);
-            } else {
-                this.onChange(null);
-            }
+            this.valid.emit(this.form.valid);
         });
+    }
+
+    onInfoChange() {
+        this.onChange(this.info);
     }
 
     formErrors(field: string): any {
