@@ -75,7 +75,6 @@ export class DatasetAcquisitionNode implements ShanoirNode {
 
     constructor(
         public id: number,
-        public sortingIndex: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED
     ) {}

@@ -16,9 +16,12 @@ package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +35,13 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
+import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +106,7 @@ public class SubjectApiControllerTest {
 		doNothing().when(subjectServiceMock).deleteById(1L);
 		given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());
+
 		Subject subject = new Subject();
 		subject.setId(Long.valueOf(123));
 		given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject );
@@ -142,6 +148,59 @@ public class SubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
 				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+	public void testFindSubjectsByStudyId() throws Exception {
+		SimpleSubjectDTO subject = new SimpleSubjectDTO();
+		subject.setName("AA");
+		subject.setId(2L);
+		subject.setSubjectStudy(new SubjectStudyDTO());
+
+		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
+		subject2.setName("BB");
+		subject2.setId(1L);
+		subject2.setSubjectStudy(new SubjectStudyDTO());
+		
+		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
+		list.add(subject2);
+		list.add(subject);
+		
+		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
+
+		
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
+				.andExpect(status().isOk())
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+	public void testFindSubjectsByStudyIdPreclinical() throws Exception {
+		SimpleSubjectDTO subject = new SimpleSubjectDTO();
+		subject.setName("AA");
+		subject.setId(2L);
+		subject.setSubjectStudy(new SubjectStudyDTO());
+
+		SimpleSubjectDTO subject2 = new SimpleSubjectDTO();
+		subject2.setName("BB");
+		subject2.setId(1L);
+		subject2.setSubjectStudy(new SubjectStudyDTO());
+
+		
+		List<SimpleSubjectDTO> list = new ArrayList<SimpleSubjectDTO>();
+		list.add(subject2);
+		list.add(subject);
+		
+		given(subjectServiceMock.findAllSubjectsOfStudy(1L)).willReturn(list);
+
+		
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
+				.andExpect(status().isOk())
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
 	}
 
 }
