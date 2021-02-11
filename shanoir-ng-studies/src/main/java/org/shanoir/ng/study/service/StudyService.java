@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,6 +65,12 @@ public interface StudyService {
 	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Study> findAll();
 
+	/**
+	 * Get all the challenges
+	 * 
+	 * @return a list of challenges
+	 */
+	List<Study> findChallenges();
 
 	/**
 	 * add new study
@@ -105,5 +112,11 @@ public interface StudyService {
 	 * @param studyId the linked study ID
 	 */
 	void deleteExamination(Long examinationId, Long studyId);
+
+	/** Updates studyUsers of a study
+	 * @param study the study to update
+	 * @param studyUsers the studyUsers to set
+	 */
+	void updateStudyUsers(Study study, List<StudyUser> studyUsers);
 
 }

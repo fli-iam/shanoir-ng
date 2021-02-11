@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.study.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +25,9 @@ import javax.transaction.Transactional;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
@@ -37,7 +41,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -50,7 +53,7 @@ public class RabbitMQStudiesService {
 	private StudyRepository studyRepo;
 
 	@Autowired
-	StudyService studyService;
+	private StudyService studyService;
 
 	/**
 	 * This methods allow to get the list of amdin users for a given study ID
@@ -80,6 +83,7 @@ public class RabbitMQStudiesService {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
 	 * @param commandArrStr the task as a json string.
 	 */
@@ -128,6 +132,51 @@ public class RabbitMQStudiesService {
 		} catch (Exception e) {
 			LOG.error("Could not index examination on given study ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+		}
+	}
+
+	/**
+	 * Receives a shanoirEvent as a json object, concerning a challenge subsription
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+			key = ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.CHALLENGE_SUBSCRIPTION_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+			)
+	@Transactional
+	public void challengeSubscribtion(final String studyStr) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
+
+			Long userId = event.getUserId();
+			Long studyId = Long.valueOf(event.getObjectId());
+			
+			// Get the study
+			Study studyToUpdate = studyRepo.findOne(studyId);
+			
+			// Create a new StudyUser
+			StudyUser subscription = new StudyUser();
+			subscription.setStudy(studyToUpdate);
+			subscription.setUserId(userId);
+			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
+			subscription.setUserName(event.getMessage());
+			List<StudyUser> sus = new ArrayList<>();
+			sus.add(subscription);
+			for (StudyUser su : studyToUpdate.getStudyUserList()) {
+				sus.add(su);
+			}
+			
+			// Update the study with the new StudyUser element
+			studyService.updateStudyUsers(studyToUpdate, sus);
+			studyToUpdate.getStudyUserList().add(subscription);
+			studyRepo.save(studyToUpdate);
+		} catch (Exception e) {
+			LOG.error("Could not directly subscribe a user to the challenge: ", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);
 		}
 	}
 }
