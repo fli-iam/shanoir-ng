@@ -24,14 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Service
-public class StudyUserListener {
+public class RabbitMqStudyUserService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyUserListener.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
 	
 	@Autowired
 	private StudyUserUpdateService service;
@@ -52,6 +51,4 @@ public class StudyUserListener {
 			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
 		}
     }
-	
-	
 }

@@ -36,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.service}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="!isChallenge">
             <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Function</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">
@@ -47,7 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.function}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="!isChallenge">
             <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">Concerned study</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">
@@ -58,7 +58,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.study}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="isChallenge">
+            <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">Concerned challenge</label> 
+            <span class="right-col">
+                <ng-container *ngIf="editMode">
+                    <select-box 
+                        formControlName="challenge"
+                        [(ngModel)]="info.challenge" 
+                        [options]="challengeOptions">
+                    </select-box>
+                    <label *ngIf="hasError('challenge', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Challenge is required!</label>
+                </ng-container>
+                <span *ngIf="!editMode">{{info.challenge}}</span>
+            </span>
+        </li>
+        <li *ngIf="!isChallenge">
             <label i18n="Edit user|Contact label@@editUserContact" [class.required-label]="editMode">My contact in Shanoir</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">
@@ -69,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="!editMode">{{info.contact}}</span>
             </span>
         </li>
-        <li>
+        <li *ngIf="!isChallenge">
             <label i18n="Edit user|Work label@@editUserWork" [class.required-label]="editMode">Role in the study</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">

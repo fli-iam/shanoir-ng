@@ -51,6 +51,22 @@ public class AccountRequestInfo extends AbstractEntity {
 	@NotNull
 	private String work;
 
+	private Long challenge;
+
+	/**
+	 * @return the challenge
+	 */
+	public Long getChallenge() {
+		return challenge;
+	}
+
+	/**
+	 * @param challenge the challenge to set
+	 */
+	public void setChallenge(Long challenge) {
+		this.challenge = challenge;
+	}
+
 	/**
 	 * @return the contact
 	 */

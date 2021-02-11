@@ -13,6 +13,11 @@
  */
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { StudyService } from '../../studies/shared/study.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
 
@@ -30,13 +35,19 @@ import { AccountRequestInfo } from './account-request-info.model';
 export class AccountRequestInfoComponent implements ControlValueAccessor {
 
     @Input() editMode: boolean = false;
+    public isChallenge: boolean;
     info: AccountRequestInfo = new AccountRequestInfo;
     form: FormGroup;
     private onChange = (_: any) => {};
     private onTouch = () => {};
+    public challengeOptions:  Option<number>[];
 
-
-    constructor(private formBuilder: FormBuilder) {}
+    constructor(private formBuilder: FormBuilder,
+                private route: ActivatedRoute,
+                private studyService: StudyService,
+                private msgService: MsgBoxService) {
+        this.isChallenge = this.route.snapshot.data['isChallenge'];
+    }
 
     writeValue(obj: any): void {
         this.info = obj;
@@ -51,13 +62,23 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     }
 
     ngOnInit() {
+        if (this.isChallenge) {
+            this.studyService.getChallenges()
+                .then(result => this.challengeOptions = result.map(
+                    element => new Option(element.id, element.name)
+                )).catch(e => {
+                  this.form.disable;
+                  this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
+                });
+        }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
             'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
-            'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
-            'study': [this.info.study, [Validators.required, Validators.maxLength(200)]],
-            'contact': [this.info.contact, [Validators.required, Validators.maxLength(200)]],
-            'work': [this.info.work, [Validators.required, Validators.maxLength(200)]],
+            'function': [this.info.function, this.isChallenge ? [] :[Validators.required, Validators.maxLength(200)]],
+            'study': [this.info.study, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'contact': [this.info.contact, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'work': [this.info.work, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'challenge': [this.info.challenge, !this.isChallenge ? [] : [Validators.required]]
         });
         this.form.valueChanges.subscribe(() => {
             if (this.form.valid) {

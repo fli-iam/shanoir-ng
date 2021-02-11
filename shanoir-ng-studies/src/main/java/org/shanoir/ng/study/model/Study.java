@@ -141,6 +141,8 @@ public class Study extends HalEntity {
 	/** Is with examination. */
 	private boolean withExamination;
 
+	private boolean challenge;
+
 	/**
 	 * Init HATEOAS links
 	 */
@@ -422,5 +424,21 @@ public class Study extends HalEntity {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	/**
+	 * Is the study a challenge.
+	 * @return the challenge
+	 */
+	public boolean isChallenge() {
+		return challenge;
+	}
+
+	/**
+	 * Set the challenge to a study
+	 * @param challenge is the study a challenge
+	 */
+	public void setChallenge(boolean challenge) {
+		this.challenge = challenge;
 	}
 }
