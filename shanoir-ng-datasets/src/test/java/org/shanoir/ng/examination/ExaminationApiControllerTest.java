@@ -145,7 +145,7 @@ public class ExaminationApiControllerTest {
 	public void testDeleteExaminationWithExtraData() throws IOException {
 		Examination exam = new Examination();
 		exam.setStudyId(3L);
-		exam.setId(2L);
+		exam.setId(1L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 
 		// GIVEN an examination to delete with extra data files
@@ -165,9 +165,9 @@ public class ExaminationApiControllerTest {
 			
 			ShanoirEvent event = eventCatcher.getValue();
 			assertNotNull(event);
-			assertEquals(exam.getStudyId(), event.getMessage());
-			assertEquals(exam.getId(), event.getObjectId());
-			assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
+			assertEquals(exam.getStudyId().toString(), event.getMessage());
+			assertEquals(exam.getId().toString(), event.getObjectId());
+			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 
 			// THEN both examination and files are deleted
 			assertFalse(extraData.exists());
@@ -200,7 +200,7 @@ public class ExaminationApiControllerTest {
 		Examination exam = new Examination();
 		exam.setStudyId(3L);
 		exam.setId(2L);
-		given(examinationServiceMock.findById(1L)).willReturn(exam );
+		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
@@ -212,8 +212,8 @@ public class ExaminationApiControllerTest {
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(exam.getStudyId(), event.getMessage());
-		assertEquals(exam.getId(), event.getObjectId());
+		assertEquals(exam.getStudyId().toString(), event.getMessage());
+		assertEquals(exam.getId().toString(), event.getObjectId());
 		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}
 
