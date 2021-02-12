@@ -458,7 +458,7 @@ public class StudySecurityService {
 		if (studyUser == null) {
 			return false;
 		}
-		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight);
+		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight) && studyUser.isConfirmed();
 	}
 
 }
