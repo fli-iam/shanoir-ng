@@ -261,6 +261,7 @@ public class StudyServiceImpl implements StudyService {
 			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
+			existingSu.setConfirmed(replacingSu.isConfirmed());
 			toBeUpdated.add(existingSu);
 		}
 		
