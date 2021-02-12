@@ -120,7 +120,7 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
 				// if dua file exists, set StudyUser to confirmed false
-				if (study.getDataUserAgreementPaths() != null) {
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					studyUser.setConfirmed(false);
 				}
 				studyUser.setStudy(study);
@@ -134,7 +134,7 @@ public class StudyServiceImpl implements StudyService {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
 				// create a DUA for user in study, if dua file exists
-				if (study.getDataUserAgreementPaths() != null) {
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, studyUser.getUserId());
 				}
 				commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
@@ -224,15 +224,15 @@ public class StudyServiceImpl implements StudyService {
 		Map<Long, StudyUser> existing = new HashMap<>();
 		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
-			if (!study.getDataUserAgreementPaths().isEmpty()) {
+			if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 				// new DUA added to study
-				if (studyDb.getDataUserAgreementPaths().isEmpty()) {
+				if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
 				}
 			} else {
 				// existing DUA removed from study
-				if (!studyDb.getDataUserAgreementPaths().isEmpty()) {
+				if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false before
 					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 				}
@@ -273,7 +273,7 @@ public class StudyServiceImpl implements StudyService {
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
 				// add DUA only to newly added StudyUser, not to existing ones
-				if (!study.getDataUserAgreementPaths().isEmpty()) {
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());					
 				}
@@ -286,7 +286,7 @@ public class StudyServiceImpl implements StudyService {
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
 			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
-			if (!studyDb.getDataUserAgreementPaths().isEmpty()) {
+			if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
 			}
 		}
