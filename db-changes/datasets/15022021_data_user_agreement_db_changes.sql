@@ -1,0 +1,1 @@
+ALTER TABLE study_user ADD COLUMN confirmed bit(1) NOT NULL;
