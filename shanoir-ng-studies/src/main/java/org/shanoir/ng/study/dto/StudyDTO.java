@@ -78,6 +78,8 @@ public class StudyDTO {
 	
 	private List<StudyUser> studyUserList;
 
+	private boolean challenge;
+
 	/**
 	 * Default constructor.
 	 */
@@ -396,6 +398,14 @@ public class StudyDTO {
 	 */
 	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
 		this.dataUserAgreementPaths = dataUserAgreementPaths;
+	}
+	
+	public boolean isChallenge() {
+		return challenge;
+	}
+
+	public void setChallenge(boolean challenge) {
+		this.challenge = challenge;
 	}
 
 }

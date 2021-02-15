@@ -30,6 +30,7 @@ export class Study extends Entity {
     endDate: Date;
     experimentalGroupsOfSubjects: IdName[];
     id: number;
+    challenge: boolean;
     monoCenter: boolean;
     name: string;
     nbExaminations: number;
@@ -68,6 +69,7 @@ export class StudyDTO {
     //examinationIds: number[];
     experimentalGroupsOfSubjects: Id[];
     monoCenter: boolean;
+    challenge: boolean;
     name: string;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -89,6 +91,7 @@ export class StudyDTO {
         this.experimentalGroupsOfSubjects = study.experimentalGroupsOfSubjects ? study.experimentalGroupsOfSubjects.map(egos => new Id(egos.id)) : null;
         this.monoCenter = study.monoCenter;
         this.name = study.name;
+        this.challenge = study.challenge;
         this.protocolFilePaths = study.protocolFilePaths;
         this.dataUserAgreementPaths = study.dataUserAgreementPaths;
         this.startDate = study.startDate;

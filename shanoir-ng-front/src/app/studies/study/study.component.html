@@ -93,6 +93,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li *ngIf="keycloakService.isUserAdmin()">
+                        <label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
+                                <span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+                            </ng-template>
+                        </span>
+                    </li>
 					<li>
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">

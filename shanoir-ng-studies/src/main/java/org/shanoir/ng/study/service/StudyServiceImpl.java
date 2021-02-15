@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -77,7 +75,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
@@ -159,6 +157,9 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			studyDb.setChallenge(study.isChallenge());
+		}
 		if (!study.getName().equals(studyDb.getName())) {
 			updateStudyName(new IdName(study.getId(), study.getName()));
 		}
@@ -211,8 +212,8 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
-	@Transactional
-	private void updateStudyUsers(Study studyDb, Study study) {
+	@Override
+	public void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
 			return;
 		}
@@ -319,5 +320,11 @@ public class StudyServiceImpl implements StudyService {
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
 		}
+	}
+
+	@Override
+	public List<Study> findChallenges() {
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 }

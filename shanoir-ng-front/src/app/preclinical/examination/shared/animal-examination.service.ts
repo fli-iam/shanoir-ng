@@ -20,7 +20,7 @@ import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
 import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../../shared/components/table/pageable.model';
-
+import { ExaminationDTO, ExaminationDTOService } from '../../../examinations/shared/examination.dto';
 
 @Injectable()
 export class AnimalExaminationService extends EntityService<Examination>{
@@ -53,4 +53,10 @@ export class AnimalExaminationService extends EntityService<Examination>{
         return this.http.post<any>(endpoint, formData);
     }
 
+    public stringify(entity: Examination) {
+        let dto = new ExaminationDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
+    }
 }

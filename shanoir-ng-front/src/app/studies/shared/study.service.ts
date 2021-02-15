@@ -47,6 +47,13 @@ export class StudyService extends EntityService<Study> {
             .toPromise();
     }
 
+    getChallenges(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
+            .toPromise().then((typeResult: IdName[]) => {
+                return typeResult;
+            });
+    }
+
     getStudyNamesAndCenters(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise();

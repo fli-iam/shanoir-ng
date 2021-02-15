@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -40,7 +39,10 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.service.StudyServiceImpl;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Study service test.
@@ -48,7 +50,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 public class StudyServiceTest {
 
 	private static final Long STUDY_ID = 1L;
@@ -126,6 +129,7 @@ public class StudyServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
 		final Study updatedStudy = studyService.update(createStudy());
 		Assert.assertNotNull(updatedStudy);
@@ -135,6 +139,7 @@ public class StudyServiceTest {
 	}
 	
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void updateStudyUsersTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
@@ -147,8 +152,8 @@ public class StudyServiceTest {
 		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, StudyUserRight.CAN_SEE_ALL));
 		
 		given(studyRepository.findOne(STUDY_ID)).willReturn(existing);
-		given(studyUserRepository.findOne(1L)).willReturn((StudyUser) existing.getStudyUserList().get(0));
-		given(studyUserRepository.findOne(2L)).willReturn((StudyUser) existing.getStudyUserList().get(1));
+		given(studyUserRepository.findOne(1L)).willReturn(existing.getStudyUserList().get(0));
+		given(studyUserRepository.findOne(2L)).willReturn(existing.getStudyUserList().get(1));
 		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
 		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, StudyUserRight.CAN_SEE_ALL));
 		given(studyUserRepository.save(in)).willReturn(out);

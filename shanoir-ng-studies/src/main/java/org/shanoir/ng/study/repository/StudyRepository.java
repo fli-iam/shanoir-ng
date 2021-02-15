@@ -28,8 +28,24 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * 
 	 * @return list of studies.
 	 */
-	List<Study> findAll();	
-	
+	@Override
+	List<Study> findAll();
+
+	/**
+	 * Get all studies with isChallenge flag to true
+	 * @return the liost of challenges
+	 */
+	List<Study> findByChallengeTrue();
+
+	/**
+	 * Get studies linked to an user.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @return list of studies.
+	 */
+	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
+		
 	/**
 	 * Get studies linked to an user.
 	 * 
