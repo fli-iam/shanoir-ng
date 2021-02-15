@@ -117,33 +117,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</tool-tip>
 				</legend>
 				<ol>
-					<li *ngIf="mode != 'view'"><label
-						i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach
-							DUA file</label> <span
-						*ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]"
-						class="right-col"> <input #input hidden
-							formControlName="dataUserAgreement" type="file"
-							(change)="attachDataUserAgreement($event)" />
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+							<input #input hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
 							<button (click)="click()" class="left-icon">
 								<i class="fas fa-upload"></i>Choose file
 							</button>
-					</span> <span
-						*ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]"
-						class="right-col"> {{study.dataUserAgreementPaths[0]}}
+						</span>
+					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+					 		{{study.dataUserAgreementPaths[0]}}
 							<button (click)="deleteDataUserAgreement()" class="left-icon">
 								<i class="fas fa-trash"></i>
 							</button>
-					</span></li>
-					<li *ngIf="mode == 'view'"><label
-						i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA
-							file</label> <span class="right-col"> <span
-							*ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">{{study.dataUserAgreementPaths[0]}}
+						</span>
+					</li>
+					<li *ngIf="mode == 'view'">
+						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+						<span class="right-col">
+							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
+								{{study.dataUserAgreementPaths[0]}}
 								<button (click)="downloadDataUserAgreement()">
 									<i class="fas fa-save"></i>
 								</button>
-						</span> <span
-							*ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
-					</span></li>
+							</span>
+							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
+						</span>
+					</li>
 				</ol>
 			</fieldset>
 			<fieldset>

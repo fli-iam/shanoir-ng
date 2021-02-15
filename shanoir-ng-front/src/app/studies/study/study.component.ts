@@ -507,14 +507,14 @@ export class StudyComponent extends EntityComponent<Study> {
             // Once the study is saved, save associated file if changed
             if (this.protocolFile) {
                 this.studyService.uploadFile(this.protocolFile, this.entity.id, 'protocol-file').toPromise()
-                .then(result => (console.log("protocol file saved sucessfuly")))
+                .then(result => (console.log("protocol file saved successfully")))
                 .catch(error => {
                     this.protocolFile = null;
                 });
             }
             if (this.dataUserAgreement) {
                 this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
-                .then(result => (console.log("dua saved successfully")))
+                .then(result => (console.log("dua file saved successfully")))
                 .catch(error => {
                     this.dataUserAgreement = null;
                 });

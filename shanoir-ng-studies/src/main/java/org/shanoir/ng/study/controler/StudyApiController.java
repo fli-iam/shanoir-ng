@@ -248,7 +248,7 @@ public class StudyApiController implements StudyApi {
 		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = getProtocolFilePath(studyId, study.getProtocolFilePaths().get(0));
+		String filePath = getStudyFilePath(studyId, study.getProtocolFilePaths().get(0));
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -262,7 +262,7 @@ public class StudyApiController implements StudyApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName,
 			HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getProtocolFilePath(studyId, fileName);
+		String filePath = getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -293,7 +293,7 @@ public class StudyApiController implements StudyApi {
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String filePath = getProtocolFilePath(studyId, file.getOriginalFilename());
+			String filePath = getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
@@ -305,7 +305,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	/**
-	 * Gets the protocol file path
+	 * Gets the protocol or data user agreement file path
 	 * 
 	 * @param studyId
 	 *            id of the study
@@ -313,7 +313,7 @@ public class StudyApiController implements StudyApi {
 	 *            name of the file
 	 * @return the file path of the file
 	 */
-	private String getProtocolFilePath(Long studyId, String fileName) {
+	private String getStudyFilePath(Long studyId, String fileName) {
 		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
@@ -437,18 +437,17 @@ public class StudyApiController implements StudyApi {
 		try {
 			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
+				// Clean up: delete from study in case of same file existed before and upload not allowed
 				Study study = studyService.findById(studyId);
-				// V1: the consent form is not versioned 
 				if (study.getDataUserAgreementPaths() != null) {
 					study.getDataUserAgreementPaths().remove(file.getName());
 				}
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String filePath = getDataUserAgreementFilePath(studyId, file.getOriginalFilename());
+			String filePath = getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
-		
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
 		} catch (Exception e) {
@@ -461,7 +460,7 @@ public class StudyApiController implements StudyApi {
 	public void downloadDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getDataUserAgreementFilePath(studyId, fileName);
+		String filePath = getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -483,23 +482,13 @@ public class StudyApiController implements StudyApi {
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = getDataUserAgreementFilePath(studyId, study.getDataUserAgreementPaths().get(0));
+		String filePath = getStudyFilePath(studyId, study.getDataUserAgreementPaths().get(0));
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		Files.delete(Paths.get(filePath));
 		return new ResponseEntity<>(HttpStatus.OK);
-	}
-	
-	/**
-	 * Gets the DUA file path
-	 * @param studyId id of the study
-	 * @param fileName name of the file
-	 * @return the file path of the file
-	 */
-	private String getDataUserAgreementFilePath(Long studyId, String fileName) {
-		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
 }
