@@ -15,4 +15,4 @@ CREATE TABLE `data_user_agreement` (
   CONSTRAINT `FKrt509nksblm8s9f7f9ehfjxd` FOREIGN KEY (`study_id`) REFERENCES `study` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE study_user ADD COLUMN confirmed bit(1) NOT NULL;
+ALTER TABLE study_user ADD COLUMN confirmed bit NOT NULL DEFAULT TRUE;
