@@ -227,19 +227,6 @@ public class StudyServiceImpl implements StudyService {
 		Map<Long, StudyUser> existing = new HashMap<>();
 		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
-			if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
-				// new DUA added to study
-				if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
-					su.setConfirmed(false);
-					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
-				}
-			} else {
-				// existing DUA removed from study
-				if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
-					su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false before
-					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
-				}
-			}
 		}
 		
 		Map<Long, StudyUser> replacing = new HashMap<>();
@@ -248,6 +235,19 @@ public class StudyServiceImpl implements StudyService {
 				toBeCreated.add(su);
 			} else {
 				replacing.put(su.getId(), su);
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					// new DUA added to study
+					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
+						su.setConfirmed(false);
+						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
+					}
+				} else {
+					// existing DUA removed from study
+					if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
+						su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false before
+						dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+					}
+				}
 			}
 		}
 		
