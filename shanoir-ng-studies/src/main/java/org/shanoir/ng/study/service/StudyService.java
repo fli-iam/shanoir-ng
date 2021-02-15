@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -96,12 +97,11 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-
 	/**
-	 * Updates studyUsers of a study
-	 * @param study the study to update
-	 * @param studyUsers the studyUsers to set
+	 * Adds one studyUser to a study.
+	 * @param studyUser
+	 * @param study
 	 */
-	void updateStudyUsers(Study studyDb, Study study);
+	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 }

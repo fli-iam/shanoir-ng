@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -212,8 +214,8 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
-	@Override
-	public void updateStudyUsers(Study studyDb, Study study) {
+	@Transactional
+	private void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
 			return;
 		}
@@ -310,6 +312,19 @@ public class StudyServiceImpl implements StudyService {
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user update info through RabbitMQ");
 		}
+	}
+	
+	@Override
+	public void addStudyUserToStudy(StudyUser studyUser, Study study) {
+		studyUserRepository.save(studyUser);
+		// Send updates via RabbitMQ
+		try {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
+			studyUserCom.broadcast(commands);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not transmit study-user create info through RabbitMQ");
+		}		
 	}
 	
 	private boolean updateStudyName(IdName study) throws MicroServiceCommunicationException{
