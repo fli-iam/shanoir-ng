@@ -20,6 +20,7 @@ import { Option } from '../../shared/select/select.component';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
+import { Study } from '../../studies/shared/study.model';
 
 
 @Component ({
@@ -42,6 +43,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     onChange = (_: any) => {};
     onTouch = () => {};
     public challengeOptions:  Option<number>[];
+    challengeName: string;
 
     constructor(private formBuilder: FormBuilder,
                 private route: ActivatedRoute,
@@ -51,6 +53,10 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     }
 
     writeValue(obj: any): void {
+        this.challengeName = null;
+        if (obj.challenge && obj.challenge != this.info.challenge) {
+            this.getStudyName(obj.challenge).then(name => this.challengeName = name);
+        }
         this.info = obj;
     }
 
@@ -85,6 +91,10 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
         this.form.valueChanges.subscribe(() => {
             this.valid.emit(this.form.valid);
         });
+    }
+
+    getStudyName(id: number): Promise<string> {
+        return this.studyService.get(id).then(study => study ? study.name : null);
     }
 
     onInfoChange() {

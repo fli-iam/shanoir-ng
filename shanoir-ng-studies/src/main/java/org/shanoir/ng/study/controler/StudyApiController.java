@@ -283,8 +283,9 @@ public class StudyApiController implements StudyApi {
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
-			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip"))
-					|| file.getSize() > 50000000) {
+			// TODO: Add check on challenge
+			/*
+			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip")) || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
 				Study study = studyService.findById(studyId);
 				if (study.getProtocolFilePaths() != null) {
@@ -293,6 +294,7 @@ public class StudyApiController implements StudyApi {
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
+			*/
 			String filePath = getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();

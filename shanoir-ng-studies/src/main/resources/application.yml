@@ -57,8 +57,8 @@ spring:
     store-type: none
   http:
     multipart:
-      maxFileSize: 500Mb
-      maxRequestSize: 500Mb
+      maxFileSize: 6000Mb
+      maxRequestSize: 6000Mb
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}

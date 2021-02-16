@@ -83,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         >
         
         <!-- default display -->
-        <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route">{{renderCell(item, col)}}</span>
+        <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col)">{{renderCell(item, col)}}</span>
 
         <!-- link -->
         <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
