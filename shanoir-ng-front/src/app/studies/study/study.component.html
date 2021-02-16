@@ -120,6 +120,45 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset>
+				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
+					Data User Agreement (DUA)
+					<tool-tip class="larger">
+						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
+						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
+						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
+					</tool-tip>
+				</legend>
+				<ol>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+							<input #input hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
+							<button (click)="click()" class="left-icon">
+								<i class="fas fa-upload"></i>Choose file
+							</button>
+						</span>
+					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+					 		{{study.dataUserAgreementPaths[0]}}
+							<button (click)="deleteDataUserAgreement()" class="left-icon">
+								<i class="fas fa-trash"></i>
+							</button>
+						</span>
+					</li>
+					<li *ngIf="mode == 'view'">
+						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+						<span class="right-col">
+							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
+								{{study.dataUserAgreementPaths[0]}}
+								<button (click)="downloadDataUserAgreement()">
+									<i class="fas fa-save"></i>
+								</button>
+							</span>
+							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
 				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
 				<ol>
 					<li>

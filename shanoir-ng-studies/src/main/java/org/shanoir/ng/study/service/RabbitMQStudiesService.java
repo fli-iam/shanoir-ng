@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +40,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,7 +83,7 @@ public class RabbitMQStudiesService {
 	}
 
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a challenge subsription
+	 * Receives a shanoirEvent as a json object, concerning a challenge subscription
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
@@ -93,34 +93,27 @@ public class RabbitMQStudiesService {
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
 	@Transactional
-	public void challengeSubscribtion(final String studyStr) {
+	public void challengeSubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
-
 			Long userId = event.getUserId();
 			Long studyId = Long.valueOf(event.getObjectId());
-			
 			// Get the study
 			Study studyToUpdate = studyRepo.findOne(studyId);
-			
 			// Create a new StudyUser
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);
 			subscription.setUserId(userId);
 			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
 			subscription.setUserName(event.getMessage());
-			List<StudyUser> sus = new ArrayList<>();
-			sus.add(subscription);
-			for (StudyUser su : studyToUpdate.getStudyUserList()) {
-				sus.add(su);
+			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
+				subscription.setConfirmed(false);
+			} else {
+				subscription.setConfirmed(true);
 			}
-			
-			// Update the study with the new StudyUser element
-			studyService.updateStudyUsers(studyToUpdate, sus);
-			studyToUpdate.getStudyUserList().add(subscription);
-			studyRepo.save(studyToUpdate);
+			studyService.addStudyUserToStudy(subscription, studyToUpdate);
 		} catch (Exception e) {
 			LOG.error("Could not directly subscribe a user to the challenge: ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);

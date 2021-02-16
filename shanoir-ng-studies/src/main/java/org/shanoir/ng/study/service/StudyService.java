@@ -97,12 +97,11 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-
 	/**
-	 * Updates studyUsers of a study
-	 * @param study the study to update
-	 * @param studyUsers the studyUsers to set
+	 * Adds one studyUser to a study.
+	 * @param studyUser
+	 * @param study
 	 */
-	void updateStudyUsers(Study study, List<StudyUser> studyUsers);
+	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 }

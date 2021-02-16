@@ -23,10 +23,12 @@ import javax.validation.Valid;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -188,7 +191,6 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
-
 	@ApiOperation(value = "", notes = "Deletes the protocol file of a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study deleted", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -223,4 +225,72 @@ public interface StudyApi {
 	ResponseEntity<BidsElement> getBIDSStructureByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException;
+	
+	@ApiOperation(value = "", notes = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id", response = DataUserAgreement.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found duas", response = DataUserAgreement.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no duas found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/dua/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<DataUserAgreement>> getDataUserAgreementsByUserId(
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+			throws RestServiceException, IOException;
+	
+	@ApiOperation(value = "", notes = "Updates a data user agreement (DUA)", response = Void.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, message = "dua updated", response = DataUserAgreement.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@PutMapping(value = "/dua/{duaId}", produces = { "application/json" }, consumes = {"application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Void> acceptDataUserAgreement(
+			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+			throws RestServiceException, MicroServiceCommunicationException;
+
+	@ApiOperation(value = "", notes = "Add DUA to a study", response = Void.class, tags = {})
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "dua uploaded", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "dua-upload/{studyId}", produces = { "application/json" }, consumes = {
+			"multipart/form-data" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> uploadDataUserAgreement(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Download DUA of a study", tags = {})
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "dua downloaded", response = Resource.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "dua-download/{studyId}/{fileName:.+}/")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	void downloadDataUserAgreement(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+
+	@ApiOperation(value = "", notes = "Deletes the DUA of a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "dua deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "dua-delete/{studyId}", produces = {
+			"application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteDataUserAgreement(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws IOException;
+
 }

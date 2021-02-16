@@ -28,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -80,7 +79,6 @@ public class StudyServiceTest {
 	@Before
 	public void setup() {
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
@@ -98,15 +96,6 @@ public class StudyServiceTest {
 
 		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
-
-//	@Test
-//	public void findAllTest() {
-//		final List<Study> studies = studyService.findAll();
-//		Assert.assertNotNull(studies);
-//		Assert.assertTrue(studies.size() == 1);
-//
-//		Mockito.verify(studyRepository, Mockito.times(1)).findAll();
-//	}
 
 	@Test
 	public void findByIdTest() throws AccessDeniedException {

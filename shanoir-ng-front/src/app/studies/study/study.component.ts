@@ -64,6 +64,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
     protected protocolFiles: File[];
+    protected dataUserAgreement: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
@@ -147,6 +148,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.getCenters();
         this.selectedCenter = null;
         this.protocolFiles = [];
+        this.dataUserAgreement = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -189,7 +191,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'challenge': [this.study.challenge],
-            'protocolFile': []
+            'protocolFile': [],
+            'dataUserAgreement': []
         });
         return formGroup;
     }
@@ -455,7 +458,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadFile(file, this.study.id);
+        this.studyService.downloadFile(file, this.study.id, 'protocol-file');
     }
 
     public attachNewFile(event: any) {
@@ -473,15 +476,51 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
+    
+    public deleteDataUserAgreement() {
+        if (this.mode == 'create') { 
+            this.study.dataUserAgreementPaths = [];
+            this.dataUserAgreement = null;
+        } else if (this.mode == 'edit') {
+            this.studyService.deleteFile(this.study.id, 'dua');
+            this.study.dataUserAgreementPaths = [];
+            this.dataUserAgreement = null;           
+        }
+    }
+
+    public downloadDataUserAgreement() {
+        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua');
+    }
+
+    public attachDataUserAgreement(event: any) {
+        this.dataUserAgreement = event.target.files[0];
+        if (this.dataUserAgreement.name.indexOf(".pdf", this.dataUserAgreement.name.length - ".pdf".length) == -1) {
+            this.msgBoxService.log("error", "Only .pdf files are accepted");
+            this.dataUserAgreement = null;
+        } else if (this.dataUserAgreement.size > 50000000) {
+            this.msgBoxService.log("error", "File must be less than 50Mb.");
+            this.dataUserAgreement = null;
+        } else {
+            this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];
+        }
+        this.form.updateValueAndValidity();
+    }
 
     save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id).toPromise()
-                    .then(result => (console.log("file saved sucessfuly" + result)));
+                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise()
+                    .then(result => (console.log("file saved successfully" + result)));
                 }
+            }
+            if (this.dataUserAgreement) {
+                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
+                .then(result => (console.log("dua file saved successfully")))
+                .catch(error => {
+                    this.dataUserAgreement = null;
+                });
             }
         });
         return prom;
