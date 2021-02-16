@@ -63,7 +63,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
-    protected protocolFile: File;
+    protected protocolFiles: File[];
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
@@ -116,6 +116,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyUsersPromise = studyPromise.then(study => {
             this.browserPaging = new BrowserPaging(study.studyUserList, this.columnDefs);
         });
+        
+        this.protocolFiles = [];
 
         Promise.all([
             studyPromise,
@@ -144,7 +146,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study = this.newStudy();
         this.getCenters();
         this.selectedCenter = null;
-        this.protocolFile = null;
+        this.protocolFiles = [];
         this.getSubjects();
 
         this.createColumnDefs();
@@ -441,46 +443,45 @@ export class StudyComponent extends EntityComponent<Study> {
         this.fileInput.nativeElement.click();
     }
 
-    public deleteFile() {
-        if (this.mode == 'create') { 
-            this.study.protocolFilePaths = [];
-            this.protocolFile = null;
-        } else if (this.mode == 'edit') {
-            // TODO: API call
-            this.studyService.deleteFile(this.study.id);
-            this.study.protocolFilePaths = [];
-            this.protocolFile = null;           
-        }
+    public deleteFile(file: any) {
+        this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
+        this.protocolFiles = this.protocolFiles.filter(fileToKeep => fileToKeep.name != file);
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+    
+    public setFile() {
+        this.fileInput.nativeElement.click();
     }
 
-    public downloadFile() {
-        this.studyService.downloadFile(this.study.protocolFilePaths[0], this.study.id);
+    public downloadFile(file) {
+        this.studyService.downloadFile(file, this.study.id);
     }
 
     public attachNewFile(event: any) {
-        this.protocolFile = event.target.files[0];
-        if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
-        &&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
-            this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
-            this.protocolFile = null;
-        } else if (this.protocolFile.size > 50000000) {
-            this.msgBoxService.log("error", "File must be less than 50Mb.");
-            this.protocolFile = null;
-        } else {
-            this.study.protocolFilePaths = [this.protocolFile.name];
-        }
+        let fileToAdd = event.target.files[0];
+        this.protocolFiles.push(event.target.files[0]);
+        // TODO add check on study.challenge
+        //if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
+        //&&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
+        //    this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
+        //    this.protocolFile = null;
+        // } else if (this.protocolFile.size > 50000000) {
+        //    this.msgBoxService.log("error", "File must be less than 50Mb.");
+        //    this.protocolFile = null;
+        this.study.protocolFilePaths.push(fileToAdd.name);
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
     save(): Promise<void> {
         let prom = super.save().then(result => {
             // Once the study is saved, save associated file if changed
-            if (this.protocolFile) {
-                this.studyService.uploadFile(this.protocolFile, this.entity.id).toPromise()
-                .then(result => (console.log("file saved sucessfuly")))
-                .catch(error => {
-                    this.protocolFile = null;
-                });
+            if (this.protocolFiles.length > 0) {
+                for (let file of this.protocolFiles) {
+                    this.studyService.uploadFile(file, this.entity.id).toPromise()
+                    .then(result => (console.log("file saved sucessfuly" + result)));
+                }
             }
         });
         return prom;
