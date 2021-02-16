@@ -40,7 +40,7 @@ export class SideMenuComponent {
     public eqOpened: boolean = false;
     public uploadOpened: boolean = false;
     public adminOpened: boolean = false;
-    public tasksOpened: boolean = false;
+    public notifOpened: boolean = false;
     public VERSION = VERSION;
 
     constructor(

@@ -15,31 +15,21 @@
 import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
+import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { ImagesUrlUtil } from '../shared/utils/images-url.util';
-import { HttpClient } from '@angular/common/http';
-import { ServiceLocator } from '../utils/locator.service';
 
 @Component({
-    selector: 'home',
-    templateUrl: 'home.component.html',
-    styleUrls: ['home.component.css']
+    selector: 'dua',
+    templateUrl: 'dua.component.html',
+    styleUrls: ['dua.component.css'] 
 })
 
-export class HomeComponent {
+export class DUAComponent {
 
-    shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
-    
-    challenge: boolean = true;
-    signed: boolean = false;
 
-    constructor(private breadcrumbsService: BreadcrumbsService) {
-        //this.breadcrumbsService.nameStep('Home');
+    constructor(
+            private breadcrumbsService: BreadcrumbsService) {
         this.breadcrumbsService.markMilestone();
+        this.breadcrumbsService.nameStep('DUA');
     }
-
-    isAuthenticated(): boolean {
-        return KeycloakService.auth.loggedIn;
-    }
-
 }

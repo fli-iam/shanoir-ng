@@ -12,13 +12,33 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="isAuthenticated()" class="home-component">
+<div *ngIf="!challenge">
     <div class="logo">
         <img [src]="shanoirBigLogoUrl">
-        <hr/>
+        <hr/> 
     </div>
     <p>
     	<strong>Shanoir is a new software</strong> that will allow you to share, upload, manage and download clinical and medical metadata and data.<br/>
 		With Shanoir, it's now easy to share data between medical doctors, researchers and PhD students! 
     </p>
+
+</div>
+<div *ngIf="challenge" class="challenge-welcome">
+    <div class="logo">
+        <img [src]="shanoirBigLogoUrl" />
+        <hr/>
+    </div>
+    <h1>Welcome to Shanoir, challenger!</h1>
+    <div *ngIf="!signed">
+        <h3>Here you will be able to download the datasets for the MICCAI 2021 Challenge.
+        But before that that, we ask you to accept the following Data User Agreement : </h3>
+        <dua-signing (click)="signed = true"></dua-signing>
+    </div>
+    <div *ngIf="signed" class="dl-link">
+        <h3>Congratualtion, you can now click on the following link to download the datasets for the MICCAI 2021 Challenge :</h3>
+        <a href="">
+            <i class="fas fa-download"></i>
+            <h3>MICCAI-2021.zip</h3>
+        </a>
+    </div>
 </div>

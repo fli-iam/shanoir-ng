@@ -11,11 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Injectable } from '@angular/core';
-import { process } from '../../process';
 
 import * as AppUtils from '../../utils/app.utils';
+
 
 
 declare var Keycloak: any;
@@ -49,7 +48,7 @@ export class KeycloakService {
                     KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
                     KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
                         + AppUtils.LOGOUT_REDIRECT_URL;
-                    resolve();
+                    resolve(null);
                 })
                 .error(() => {
                     reject();
