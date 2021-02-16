@@ -1,3 +1,5 @@
+ALTER TABLE study_user ADD COLUMN confirmed bit NOT NULL DEFAULT TRUE;
+
 CREATE TABLE data_user_agreement_file (
   study_id bigint(20) NOT NULL,
   path varchar(255) DEFAULT NULL
@@ -14,5 +16,3 @@ CREATE TABLE data_user_agreement (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE data_user_agreement ADD CONSTRAINT FKrt509nksblm8s9f7f9ehfjxd FOREIGN KEY (study_id) REFERENCES study(id);
-
-ALTER TABLE study_user ADD COLUMN confirmed bit NOT NULL DEFAULT TRUE;
