@@ -259,7 +259,7 @@ public class StudyApiController implements StudyApi {
 	
 	@Override
 	public void downloadProtocolFile(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName,
 			HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = getStudyFilePath(studyId, fileName);

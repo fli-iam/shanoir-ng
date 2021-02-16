@@ -63,8 +63,8 @@ export class StudyComponent extends EntityComponent<Study> {
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
-    protected dataUserAgreement: File;
     protected protocolFiles: File[];
+    protected dataUserAgreement: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
@@ -147,8 +147,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study = this.newStudy();
         this.getCenters();
         this.selectedCenter = null;
-        this.dataUserAgreement = null;
         this.protocolFiles = [];
+        this.dataUserAgreement = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -512,7 +512,7 @@ export class StudyComponent extends EntityComponent<Study> {
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
                     this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise()
-                    .then(result => (console.log("file saved sucessfuly" + result)));
+                    .then(result => (console.log("file saved successfully" + result)));
                 }
             }
             if (this.dataUserAgreement) {
