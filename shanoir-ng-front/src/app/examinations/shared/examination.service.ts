@@ -75,12 +75,6 @@ export class ExaminationService extends EntityService<Examination> {
             }
         });
     }
-    
-    deleteFile(examId: number): Observable<any> {
-        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
-        return this.http.delete(endpoint);
-    }
-
 
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';

@@ -102,7 +102,7 @@ export class StudyService extends EntityService<Study> {
     }
 
     deleteFile(studyId: number, fileType: 'protocol-file'|'dua', file: string): Observable<any> {
-        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
+        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId + (file ? ('/' + file + '/') : "") + "";
         return this.http.delete(endpoint);
     }
 

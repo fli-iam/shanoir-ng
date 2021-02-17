@@ -191,7 +191,7 @@ public class StudyApiControllerTest {
 			pFile.createNewFile();
 
 			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf/").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk());
 
 			// THEN the file is well deleted
@@ -214,36 +214,11 @@ public class StudyApiControllerTest {
 		pFile.getParentFile().mkdirs();
 		try {
 			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf/").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNoContent());
 
 			// THEN the file is not really deleted because it does not exists
 			assertFalse(pFile.exists());
-		} catch (IOException e) {
-			System.err.println(e);
-			fail();
-		} catch (Exception e) {
-			System.err.println(e);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockUser
-	public void testDeleteProtocolFileNotLinked() {
-		// GIVEN a protocol file NOT associated to a study
-		stud.setProtocolFilePaths(Collections.singletonList("test2.pdf"));
-		File pFile = new File(tempFolderPath + "study-1/test.pdf");
-		pFile.getParentFile().mkdirs();
-		try {
-			pFile.createNewFile();
-
-			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNoContent());
-
-			// THEN the file is not deleted
-			assertTrue(pFile.exists());
 		} catch (IOException e) {
 			System.err.println(e);
 			fail();

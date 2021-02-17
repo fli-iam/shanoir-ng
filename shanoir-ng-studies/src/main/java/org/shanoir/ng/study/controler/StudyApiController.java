@@ -122,15 +122,16 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) throws RestServiceException {
+	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			Study studyDeleted = studyService.findById(studyId);
 
 			// Delete all linked files and DUA (?)
-			for (String filename : studyDeleted.getProtocolFilePaths()) {
-				this.deleteLinkedFile(studyId, filename);
+			if (studyDeleted.getProtocolFilePaths() != null && !studyDeleted.getProtocolFilePaths().isEmpty()) {
+				for (String filename : studyDeleted.getProtocolFilePaths()) {
+					this.deleteLinkedFile(studyId, filename);
+				}
 			}
-			this.deleteDataUserAgreement(studyId);
 
 			bidsService.deleteBids(studyDeleted);
 			studyService.deleteById(studyId);
@@ -250,11 +251,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteLinkedFile (
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
-		Study study = studyService.findById(studyId);
-		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws IOException {
 		String filePath = getStudyFilePath(studyId, fileName);
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {

@@ -191,9 +191,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
-        if (this.mode == 'edit') {
-            this.examinationService.d
-        }
     }
 
     public attachNewFile(event: any) {
@@ -209,7 +206,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
+            }
         });
         return prom;
     }

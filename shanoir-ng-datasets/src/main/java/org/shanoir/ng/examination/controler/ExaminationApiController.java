@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -102,7 +104,7 @@ public class ExaminationApiController implements ExaminationApi {
 			// delete bids folder
 			bidsService.deleteExam(examinationId);
 			
-			// Delete extra data
+			// Delete all extra data
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {
@@ -289,14 +291,6 @@ public class ExaminationApiController implements ExaminationApi {
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}
-	}
-
-	@Override
-	public ResponseEntity<Void> deleteExtraDataFile (
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
-		
-		return null;
 	}
 
 	/**

@@ -480,7 +480,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;
         } else if (this.mode == 'edit') {
-            this.studyService.deleteFile(this.study.id, 'dua');
+            this.studyService.deleteFile(this.study.id, 'dua', null);
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;           
         }
@@ -515,7 +515,8 @@ export class StudyComponent extends EntityComponent<Study> {
             }
             if (this.deletedFiles) {
                 for(let file of this.deletedFiles) {
-                    this.studyService.deleteFile(this.entity.id, 'protocol-file', file).
+                    this.studyService.deleteFile(this.entity.id, 'protocol-file', file).toPromise()
+                    .then(result => console.log('deleted' + file + result));
                 }
             }
             if (this.dataUserAgreement) {

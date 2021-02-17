@@ -66,7 +66,7 @@ public interface StudyApi {
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException;
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the studies that the user is allowed to see", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
@@ -202,7 +202,7 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteLinkedFile (
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
+			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws IOException;
 
 
     @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
