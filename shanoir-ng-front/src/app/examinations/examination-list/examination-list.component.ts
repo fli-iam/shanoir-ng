@@ -61,7 +61,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         let colDef: any[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
-                headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
+                headerName: "Subject", field: "subject.name", orderBy: ['subjectId'], cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : '';
                 }
             },{
@@ -69,10 +69,10 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },{
-                headerName: "Research study", field: "study.name",
+                headerName: "Research study", field: "study.name", orderBy: ['studyId'],
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },{
-                headerName: "Center", field: "center.name",
+                headerName: "Center", field: "center.name", orderBy: ['centerId'],
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];

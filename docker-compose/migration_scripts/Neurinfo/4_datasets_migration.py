@@ -725,6 +725,17 @@ targetConn.commit()
 
 print("Import dataset_metadata: end")
 
+print("Import related_dataset: start")
+
+sourceCursor.execute("""SELECT STUDY_ID, DATASET_ID FROM REL_STUDY_DATASET""")
+bulk_insert(targetCursor, "related_dataset", """
+    study_id, dataset_id
+    """, sourceCursor)
+targetConn.commit()
+
+print("Import related_dataset: end")
+
+
 
 print("Import dataset: start")
 sourceCursor.execute("""SELECT DATASET_ID, DATE(DATASET_CREATION_DATE), GROUP_OF_SUBJECTS_ID, STUDY_ID, SUBJECT_ID,

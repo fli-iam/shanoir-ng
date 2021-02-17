@@ -13,7 +13,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-if (window.location.href.endsWith('/account-request') || window.location.href.endsWith('/extension-request')) {
+if (window.location.href.endsWith('/account-request') || window.location.href.endsWith('/extension-request') ||  window.location.href.endsWith('/challenge-request')) {
   // Public URL
   platformBrowserDynamic().bootstrapModule(AppModule);
 } else {

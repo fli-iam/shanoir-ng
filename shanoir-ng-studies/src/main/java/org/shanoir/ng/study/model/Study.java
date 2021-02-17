@@ -107,6 +107,12 @@ public class Study extends HalEntity {
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
+	
+	/** List of data user agreement form directly attached to the study. */
+	@ElementCollection
+	@CollectionTable(name = "data_user_agreement_file")
+	@Column(name = "path")
+	private List<String> dataUserAgreementPaths;
 
 	/** Start date. */
 	@LocalDateAnnotations
@@ -140,6 +146,8 @@ public class Study extends HalEntity {
 
 	/** Is with examination. */
 	private boolean withExamination;
+
+	private boolean challenge;
 
 	/**
 	 * Init HATEOAS links
@@ -285,6 +293,20 @@ public class Study extends HalEntity {
 	}
 
 	/**
+	 * @return the dataUserAgreementPaths
+	 */
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
+	}
+
+	/**
+	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
+	 */
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
+	}
+
+	/**
 	 * @return the startDate
 	 */
 	public LocalDate getStartDate() {
@@ -422,5 +444,21 @@ public class Study extends HalEntity {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	/**
+	 * Is the study a challenge.
+	 * @return the challenge
+	 */
+	public boolean isChallenge() {
+		return challenge;
+	}
+
+	/**
+	 * Set the challenge to a study
+	 * @param challenge is the study a challenge
+	 */
+	public void setChallenge(boolean challenge) {
+		this.challenge = challenge;
 	}
 }

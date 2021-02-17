@@ -90,6 +90,11 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
+        data: {isChallenge: false},
+    }, {
+        path: 'challenge-request',
+        component: AccountRequestComponent,
+        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
@@ -375,8 +380,7 @@ let routes: Routes = [
     {
         path: 'user/edit/:id',
         component: UserComponent,
-        data: { mode: 'edit' },
-        canActivate: [AuthAdminGuard],
+        data: { mode: 'edit' }
     },
     {
         path: 'user/create',
