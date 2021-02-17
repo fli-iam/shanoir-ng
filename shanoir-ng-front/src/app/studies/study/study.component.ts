@@ -68,6 +68,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    
+    protected deletedFiles: string[] = [];
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
@@ -449,6 +451,10 @@ export class StudyComponent extends EntityComponent<Study> {
     public deleteFile(file: any) {
         this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
         this.protocolFiles = this.protocolFiles.filter(fileToKeep => fileToKeep.name != file);
+        if (this.mode == 'edit') {
+            // add to a list of deletions
+            this.deletedFiles.push(file);
+        }
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
@@ -464,14 +470,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];
         this.protocolFiles.push(event.target.files[0]);
-        // TODO add check on study.challenge
-        //if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
-        //&&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
-        //    this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
-        //    this.protocolFile = null;
-        // } else if (this.protocolFile.size > 50000000) {
-        //    this.msgBoxService.log("error", "File must be less than 50Mb.");
-        //    this.protocolFile = null;
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
@@ -513,6 +511,11 @@ export class StudyComponent extends EntityComponent<Study> {
                 for (let file of this.protocolFiles) {
                     this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise()
                     .then(result => (console.log("file saved successfully" + result)));
+                }
+            }
+            if (this.deletedFiles) {
+                for(let file of this.deletedFiles) {
+                    this.studyService.deleteFile(this.entity.id, 'protocol-file', file).
                 }
             }
             if (this.dataUserAgreement) {

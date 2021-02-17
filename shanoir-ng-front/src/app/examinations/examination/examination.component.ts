@@ -191,6 +191,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
+        if (this.mode == 'edit') {
+            this.examinationService.d
+        }
     }
 
     public attachNewFile(event: any) {

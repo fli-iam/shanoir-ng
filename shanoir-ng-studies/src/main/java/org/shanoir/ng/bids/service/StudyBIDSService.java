@@ -13,7 +13,7 @@ public interface StudyBIDSService {
 
 	File exportAsBids(Study studyToExport);
 
-	void deleteBids(Long studyDeletedId);
+	void deleteBids(Study studyDeleted);
 
 	void deleteSubjectBids(Long subjectId);
 

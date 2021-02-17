@@ -191,7 +191,7 @@ public class StudyApiControllerTest {
 			pFile.createNewFile();
 
 			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk());
 
 			// THEN the file is well deleted
@@ -214,7 +214,7 @@ public class StudyApiControllerTest {
 		pFile.getParentFile().mkdirs();
 		try {
 			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNoContent());
 
 			// THEN the file is not really deleted because it does not exists
@@ -239,7 +239,7 @@ public class StudyApiControllerTest {
 			pFile.createNewFile();
 
 			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
+			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1/test.pdf").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNoContent());
 
 			// THEN the file is not deleted

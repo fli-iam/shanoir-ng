@@ -156,8 +156,7 @@ public class StudyBIDSServiceImpl implements StudyBIDSService {
 	}
 
 	@Override
-	public void deleteBids(Long studyDeletedId) {
-		Study studyDeleted = studyService.findById(studyDeletedId);
+	public void deleteBids(Study studyDeleted) {
 		// Try to delete the BIDS folder recursively if possible
 		File bidsDir = getStudyFolder(studyDeleted);
 		if (bidsDir.exists()) {

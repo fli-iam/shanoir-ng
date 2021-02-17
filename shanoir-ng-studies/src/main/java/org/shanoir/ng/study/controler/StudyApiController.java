@@ -122,10 +122,17 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
+	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) throws RestServiceException {
 		try {
-			this.deleteProtocolFile(studyId);
-			bidsService.deleteBids(studyId);
+			Study studyDeleted = studyService.findById(studyId);
+
+			// Delete all linked files and DUA (?)
+			for (String filename : studyDeleted.getProtocolFilePaths()) {
+				this.deleteLinkedFile(studyId, filename);
+			}
+			this.deleteDataUserAgreement(studyId);
+
+			bidsService.deleteBids(studyDeleted);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
 					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -241,14 +248,14 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> deleteProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws IOException {
+	public ResponseEntity<Void> deleteLinkedFile (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
 		Study study = studyService.findById(studyId);
 		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = getStudyFilePath(studyId, study.getProtocolFilePaths().get(0));
+		String filePath = getStudyFilePath(studyId, fileName);
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

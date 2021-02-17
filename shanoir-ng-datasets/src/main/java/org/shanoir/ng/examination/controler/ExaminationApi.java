@@ -179,4 +179,15 @@ public interface ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
+	@ApiOperation(value = "", notes = "Deletes extra data file of an examination", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "study deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@DeleteMapping(value = "extra-data-delete/{examinationId}/{fileName:.+}/")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT')")
+	ResponseEntity<Void> deleteExtraDataFile (
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
 }

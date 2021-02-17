@@ -291,6 +291,14 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 	}
 
+	@Override
+	public ResponseEntity<Void> deleteExtraDataFile (
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@ApiParam(value = "file to delete", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException {
+		
+		return null;
+	}
+
 	/**
 	 * Validate a dataset
 	 * 
