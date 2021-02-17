@@ -52,6 +52,7 @@ export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
+    @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -445,6 +446,10 @@ export class StudyComponent extends EntityComponent<Study> {
     public click() {
         this.fileInput.nativeElement.click();
     }
+    
+    public duaClick() {
+        this.duaFileInput.nativeElement.click();
+    }
 
     public deleteFile(file: any) {
         this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
@@ -455,6 +460,10 @@ export class StudyComponent extends EntityComponent<Study> {
     
     public setFile() {
         this.fileInput.nativeElement.click();
+    }
+    
+    public setDuaFile() {
+        this.duaFileInput.nativeElement.click();
     }
 
     public downloadFile(file) {

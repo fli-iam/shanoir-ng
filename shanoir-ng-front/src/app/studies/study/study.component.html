@@ -132,8 +132,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
 						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
-							<input #input hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
-							<button (click)="click()" class="left-icon">
+							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
+							<button (click)="setDuaFile()" class="left-icon">
 								<i class="fas fa-upload"></i>Choose file
 							</button>
 						</span>
