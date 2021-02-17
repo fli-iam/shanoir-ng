@@ -267,7 +267,6 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
-	
 	@ApiOperation(value = "", notes = "Deletes the DUA of a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "dua deleted", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

@@ -268,7 +268,7 @@ public class StudyServiceImpl implements StudyService {
 					// new DUA added to study
 					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
 						su.setConfirmed(false);
-						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
 					}
 				} else {
 					// existing DUA removed from study

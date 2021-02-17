@@ -68,7 +68,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
-    
+
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
     studyStatusOptions: Option<string>[] = [
@@ -474,7 +474,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;
         } else if (this.mode == 'edit') {
-            this.studyService.deleteFile(this.study.id, 'dua', null);
+            this.studyService.deleteFile(this.study.id, 'dua');
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;           
         }
