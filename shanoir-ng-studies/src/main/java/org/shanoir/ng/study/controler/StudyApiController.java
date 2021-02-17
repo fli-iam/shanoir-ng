@@ -132,7 +132,7 @@ public class StudyApiController implements StudyApi {
 				FileUtils.deleteDirectory(studyFolder);
 			}
 
-			bidsService.deleteBids(studyDeleted);
+			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
 					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

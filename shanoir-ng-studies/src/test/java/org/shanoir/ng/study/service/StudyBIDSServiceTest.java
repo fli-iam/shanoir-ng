@@ -155,7 +155,7 @@ public class StudyBIDSServiceTest {
 		given(studyService.findById(studyToCreate.getId())).willReturn(studyToCreate);
 
 		// WHEN the study is deleted
-		service.deleteBids(studyToCreate);
+		service.deleteBids(studyToCreate.getId());
 		
 		// THEN the associated bids folder is deleted too
 		assertFalse(studyFolder.exists());
