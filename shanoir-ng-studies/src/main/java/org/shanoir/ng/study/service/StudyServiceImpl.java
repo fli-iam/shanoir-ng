@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -46,8 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -77,6 +79,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	
+	@Value("${studies-data}")
+	private String dataDir;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -189,6 +194,16 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 		}
 		
+		if (studyDb.getProtocolFilePaths() != null) {
+			for(String filePath : studyDb.getProtocolFilePaths()) {
+				if (!study.getProtocolFilePaths().contains(filePath)) {
+					// Delete file
+					String filePathToDelete = getStudyFilePath(studyDb.getId(), filePath);
+					FileUtils.deleteQuietly(new File(filePathToDelete));
+				}
+			}
+		}
+		
 		updateStudyUsers(studyDb, study);
 		
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
@@ -198,6 +213,20 @@ public class StudyServiceImpl implements StudyService {
 		studyRepository.save(studyDb);
 
 		return studyDb;
+	}
+
+	/**
+	 * Gets the protocol or data user agreement file path
+	 * 
+	 * @param studyId
+	 *            id of the study
+	 * @param fileName
+	 *            name of the file
+	 * @return the file path of the file
+	 */
+	@Override
+	public String getStudyFilePath(Long studyId, String fileName) {
+		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
 	@Override
@@ -239,7 +268,7 @@ public class StudyServiceImpl implements StudyService {
 					// new DUA added to study
 					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
 						su.setConfirmed(false);
-						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
+						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 					}
 				} else {
 					// existing DUA removed from study
@@ -279,7 +308,7 @@ public class StudyServiceImpl implements StudyService {
 				// add DUA only to newly added StudyUser, not to existing ones
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
-					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());					
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 				}
 				created.add(su);
 			}
@@ -324,7 +353,7 @@ public class StudyServiceImpl implements StudyService {
 			studyUserCom.broadcast(commands);
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user create info through RabbitMQ");
-		}		
+		}
 	}
 	
 	private boolean updateStudyName(IdName study) throws MicroServiceCommunicationException{

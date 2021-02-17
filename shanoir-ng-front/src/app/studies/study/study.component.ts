@@ -69,8 +69,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     
-    protected deletedFiles: string[] = [];
-
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];
     studyStatusOptions: Option<string>[] = [
@@ -451,10 +449,6 @@ export class StudyComponent extends EntityComponent<Study> {
     public deleteFile(file: any) {
         this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
         this.protocolFiles = this.protocolFiles.filter(fileToKeep => fileToKeep.name != file);
-        if (this.mode == 'edit') {
-            // add to a list of deletions
-            this.deletedFiles.push(file);
-        }
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
@@ -511,12 +505,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 for (let file of this.protocolFiles) {
                     this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise()
                     .then(result => (console.log("file saved successfully" + result)));
-                }
-            }
-            if (this.deletedFiles) {
-                for(let file of this.deletedFiles) {
-                    this.studyService.deleteFile(this.entity.id, 'protocol-file', file).toPromise()
-                    .then(result => console.log('deleted' + file + result));
                 }
             }
             if (this.dataUserAgreement) {
