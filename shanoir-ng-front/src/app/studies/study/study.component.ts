@@ -463,7 +463,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];
-        this.protocolFiles.push(event.target.files[0]);
+        this.protocolFiles.push(fileToAdd);
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
