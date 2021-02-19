@@ -17,6 +17,8 @@ import { Component } from '@angular/core';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { StudyService } from '../studies/shared/study.service';
+import { DataUserAgreement } from './shared/dua.model';
 
 @Component({
     selector: 'dua',
@@ -26,10 +28,20 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 
 export class DUAComponent {
 
+    duas: DataUserAgreement[];
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService) {
+            private breadcrumbsService: BreadcrumbsService,
+            private studyService: StudyService) {
+
         this.breadcrumbsService.markMilestone();
-        this.breadcrumbsService.nameStep('DUA');
+        this.breadcrumbsService.nameStep('DUA');    
+        this.loadDua();    
+    }
+
+    loadDua() {
+        this.studyService.getMyDUA().then(duas => {
+            this.duas = duas;
+        });
     }
 }

@@ -12,11 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h3>[name of the study]</h3>
-<embed class="embed-pdf" src="assets/cd-p650(efs).pdf" width="600" height="500" alt="pdf" pluginspage="http://www.adobe.com/products/acrobat/readstep2.html">
+<h3>{{dua.studyName}}</h3>
+<embed *ngIf="pdfUrl" class="embed-pdf" [src]="pdfUrl" alt="pdf" pluginspage="http://www.adobe.com/products/acrobat/readstep2.html">
 <div>
-    <checkbox [(ngModel)]="checked"></checkbox> I have read the data user agreement contract for the study <span class="study-name">[name of the study]</span> and I fully accept it.
+    <checkbox [(ngModel)]="checked"></checkbox> I have read the data user agreement contract for the study <span class="study-name">{{dua.studyName}}</span> and I fully accept it.
     <div class="buttons">
-        <button class="accept" [disabled]="!checked">Accept</button><button class="refuse" (click)="refuse()">Refuse</button>
+        <button class="accept" [disabled]="!checked" (click)="accept()">Accept</button>
+        <!-- <button class="refuse" (click)="refuse()">Refuse</button> -->
     </div>
 </div>

@@ -34,9 +34,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li (click)="notifOpened = !notifOpened"><i class="far fa-flag"></i>Notifications<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="notifOpened" class="sub-menu" [@slideDown]="notifOpened">
-        <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement</li> 
+    <li *ngIf="duasToSign() > 0" (click)="notifOpened = !notifOpened"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign()}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    </li>
+    <div *ngIf="notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="notifOpened">
+        <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
     </div>
     <li routerLink="/task" routerLinkActive="active">
         <i class="fas fa-tasks"></i>Jobs

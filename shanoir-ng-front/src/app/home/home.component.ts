@@ -15,10 +15,11 @@
 import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
+import { DataUserAgreement } from '../dua/shared/dua.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
-import { HttpClient } from '@angular/common/http';
-import { ServiceLocator } from '../utils/locator.service';
+import { Study } from '../studies/shared/study.model';
+import { StudyService } from '../studies/shared/study.service';
 
 @Component({
     selector: 'home',
@@ -30,12 +31,49 @@ export class HomeComponent {
 
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     
-    challenge: boolean = true;
-    signed: boolean = false;
+    challengeDua: DataUserAgreement;
+    challengeStudy: Study;
 
-    constructor(private breadcrumbsService: BreadcrumbsService) {
+    constructor(
+            private breadcrumbsService: BreadcrumbsService,
+            private studyService: StudyService) {
         //this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
+        this.studyService.getMyDUA().then(duas => {
+            if (duas) {
+                for (let dua of duas) {
+                    if (dua.isChallenge) {
+                        this.challengeDua = dua;
+                        return;
+                    }
+                }
+            }
+        }).then(() => {
+            if (!this.challengeDua) {
+                this.fetchChallengeStudy()
+            }
+        });
+    }
+
+    onSign() {
+        this.fetchChallengeStudy();
+    }
+
+    private fetchChallengeStudy() {
+        this.studyService.getAll().then(studies => {
+            if (studies) {
+                for (let study of studies) {
+                    if (study.challenge) {
+                        this.challengeStudy = study;
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
+    downloadFile(filePath: string) {
+        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file');
     }
 
     isAuthenticated(): boolean {

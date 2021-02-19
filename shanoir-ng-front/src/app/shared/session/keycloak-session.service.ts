@@ -22,7 +22,9 @@ export class KeycloakSessionService {
     private _sessionId: string;
 
     constructor() {
-        this.initSession(KeycloakService.auth.authz.sessionId, KeycloakService.auth.authz.refreshTokenParsed.exp);
+        if (this.isAuthenticated()) {
+            this.initSession(KeycloakService.auth.authz.sessionId, KeycloakService.auth.authz.refreshTokenParsed.exp);
+        }
         this.cleanStorage();
     }
 
@@ -31,6 +33,10 @@ export class KeycloakSessionService {
         if (!localStorage.getItem('kcsession-' + this._sessionId)) {
             this.saveSessionObject(new KeycloakSession(sessionId, expirationTS));
         }
+    }
+
+    isAuthenticated(): boolean {
+        return KeycloakService.auth && KeycloakService.auth.authz;
     }
 
     cleanStorage() {
@@ -52,13 +58,16 @@ export class KeycloakSessionService {
     }
 
     get hasBeenAskedDUA(): boolean {
-        return this.getSessionObject().hadDUAAlert;
+        let session = this.getSessionObject();
+        return session ? session.hadDUAAlert : false;
     }
 
     set hasBeenAskedDUA(value: boolean) {
         let session: KeycloakSession = this.getSessionObject();
-        session.hadDUAAlert = value;
-        this.saveSessionObject(session);
+        if (session) {
+            session.hadDUAAlert = value;
+            this.saveSessionObject(session);
+        }
     }
 
 }

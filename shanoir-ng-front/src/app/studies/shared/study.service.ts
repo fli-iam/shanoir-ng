@@ -16,6 +16,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
+import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
@@ -29,6 +30,8 @@ import { Study, StudyDTO } from './study.model';
 export class StudyService extends EntityService<Study> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
+
+    private _duasToSign: number = 0;
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
         super(http)
@@ -107,12 +110,37 @@ export class StudyService extends EntityService<Study> {
     }
 
     downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua'): void {
-        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
+        this.downloadBlob(fileName, studyId, fileType).then(response => {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);
             }
-        });;
+        })
+    }
+
+    downloadBlob(fileName: string, studyId: number, fileType: 'protocol-file'|'dua'): Promise<HttpResponse<Blob>> {
+        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
+        return this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).toPromise();
+    }
+
+    getMyDUA(): Promise<DataUserAgreement[]> {
+        return this.http.get<DataUserAgreement[]>(AppUtils.BACKEND_API_STUDY_URL + '/dua')
+                .toPromise()
+                .then(duas => {
+                    this._duasToSign = duas ? duas.length : 0;
+                    return duas;
+                });
+    }
+
+    get duasToSign(): number {
+        return this._duasToSign;
+    }
+
+    acceptDUA(duaId: number): Promise<void> {
+        return this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/dua/' + duaId, null)
+                .toPromise()
+                .then(() => {
+                    this.getMyDUA();
+                });
     }
 
     private getFilename(response: HttpResponse<any>): string {

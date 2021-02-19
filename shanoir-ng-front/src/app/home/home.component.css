@@ -1,9 +1,17 @@
-.logo {text-align: center; }
+:host() { color: var(--very-dark-grey); }
+
+.logo {text-align: center; opacity: 0.8; }
 
 .challenge-welcome { text-align: center; }
 .dl-link { margin-top: 30px; }
 
-i { font-size: 50px; color: darkblue; }
+i { font-size: 50px; color: var(--color-c); }
 i:hover { opacity: 0.6; }
 
-h3 { color: var(--dark-grey); }
+.dl-block { margin-top: 50px; }
+.dl { margin: 10px 30px; display: inline-block; }
+.dl i, .dl div { cursor: pointer; }
+.dl div { font-size: 18px; margin: 10px; }
+
+.msg { font-size: 14px; }
+.challenge-name { color: var(--color-c); }

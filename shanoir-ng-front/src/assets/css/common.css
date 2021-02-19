@@ -17,8 +17,8 @@
     --color-b: #675682;
     --color-b-light: #E3E0E8;
     --color-b-light2: #827498;
-    --color-c: #498467;
-    --color-c-light: #6A9A82;
+    --color-c: darkgreen;
+    --color-c-light: #67977f;
     --color-error: #BA2D0B;
     --color-important: #BA2D0B;
     --color-light-error: #F2D8D2 ;
@@ -33,7 +33,7 @@ body, option, table, button, select, input, textarea { font-family: "Open Sans",
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
 h2 { margin: 0; font-size: 25px; }
-hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
+hr { margin: 7px 0 !important; border-bottom: 1px solid var(--color-b-light) !important; border: 0; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
 li { list-style: none; } 

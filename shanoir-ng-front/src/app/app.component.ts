@@ -24,6 +24,7 @@ import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { NavigationEnd, Router } from '@angular/router';
+import { StudyService } from './studies/shared/study.service';
 
 
 @Component({
@@ -46,7 +47,8 @@ export class AppComponent {
             private element: ElementRef,
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
-            protected router: Router) {
+            protected router: Router,
+            private studyService: StudyService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
@@ -55,7 +57,7 @@ export class AppComponent {
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        this.duaAlert();        
+        if(this.keycloakSessionService.isAuthenticated()) this.duaAlert();        
     }
 
     @HostListener('window:resize', ['$event'])
@@ -71,25 +73,27 @@ export class AppComponent {
         return KeycloakService.auth.loggedIn;
     }
 
-    duaAlert() {
-        let hasDUA: boolean = true;
-        this.router.events.subscribe(event => {
-            if (event instanceof NavigationEnd) {
-                if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
-                    this.keycloakSessionService.hasBeenAskedDUA = true;
-                    if (event.url != '/dua' && event.url != '/home') {
-                        const title: string = 'Data User Agreement awaiting for signing';
-                        const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
-                            + 'Until you have agreed those terms you cannot access to any data from these studies. '
-                            + 'Would you like to review those terms now?';
-                        const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
-                        this.confirmService.confirm(title, text, buttons).then(response => {
-                                if (response == true) this.router.navigate(['/dua']);
-                            });
-                    }
+    private duaAlert() {
+        this.studyService.getMyDUA().then(dua => {
+            let hasDUA: boolean = dua && dua.length > 0;
+            if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
+                this.keycloakSessionService.hasBeenAskedDUA = true;
+                if (this.router.url != '/dua' && this.router.url != '/home') {
+                    this.askForDuaSigning();
                 }
             }
-          });
+        });
+    }
+
+    private askForDuaSigning() {
+        const title: string = 'Data User Agreement awaiting for signing';
+        const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+            + 'Until you have agreed those terms you cannot access to any data from these studies. '
+            + 'Would you like to review those terms now?';
+        const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+        this.confirmService.confirm(title, text, buttons).then(response => {
+                if (response == true) this.router.navigate(['/dua']);
+            });
     }
 
 }

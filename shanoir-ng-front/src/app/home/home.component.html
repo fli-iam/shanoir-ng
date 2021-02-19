@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="!challenge">
+<div *ngIf="!challengeDua && !challengeStudy">
     <div class="logo">
         <img [src]="shanoirBigLogoUrl">
         <hr/> 
@@ -23,22 +23,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </p>
 
 </div>
-<div *ngIf="challenge" class="challenge-welcome">
+<div *ngIf="challengeDua || challengeStudy" class="challenge-welcome">
     <div class="logo">
         <img [src]="shanoirBigLogoUrl" />
         <hr/>
     </div>
-    <h1>Welcome to Shanoir, challenger!</h1>
-    <div *ngIf="!signed">
-        <h3>Here you will be able to download the datasets for the MICCAI 2021 Challenge.
-        But before that that, we ask you to accept the following Data User Agreement : </h3>
-        <dua-signing (click)="signed = true"></dua-signing>
+    <div *ngIf="!challengeStudy">
+        <h1>Welcome to Shanoir, challenger!</h1>
+        <p class="msg">Here you will be able to download the datasets for the {{challengeDua.studyName}} Challenge.
+        But before that that, we ask you to accept the following Data User Agreement : </p>
+        <dua-signing (sign)="onSign()" [dua]="challengeDua"></dua-signing>
     </div>
-    <div *ngIf="signed" class="dl-link">
-        <h3>Congratualtion, you can now click on the following link to download the datasets for the MICCAI 2021 Challenge :</h3>
-        <a href="">
-            <i class="fas fa-download"></i>
-            <h3>MICCAI-2021.zip</h3>
-        </a>
+    <div *ngIf="challengeStudy" class="dl-link">
+        <p class="msg">Congratulation, you can now download all the ressources you need for the <span class="challenge-name">{{challengeStudy.name}}</span> Challenge :</p>
+        <div class="dl-block">
+            <span *ngFor="let filePath of challengeStudy.protocolFilePaths" class="dl">
+                <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
+                <div (click)="downloadFile(filePath)">{{filePath}}</div>
+            </span>
+        </div>
     </div>
 </div>

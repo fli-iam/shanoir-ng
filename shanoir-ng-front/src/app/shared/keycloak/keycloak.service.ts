@@ -57,7 +57,7 @@ export class KeycloakService {
     }
 
     logout() {
-        KeycloakService.auth.authz.logout();
+        if(KeycloakService.auth && KeycloakService.auth.authz) KeycloakService.auth.authz.logout();
     }
     
     getToken(): Promise<string> {

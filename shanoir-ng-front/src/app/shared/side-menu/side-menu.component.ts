@@ -20,6 +20,7 @@ import { MsgBoxService } from '../msg-box/msg-box.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { VERSION } from '../../../environments/version';
+import { StudyService } from '../../studies/shared/study.service';
 
 
 
@@ -47,7 +48,8 @@ export class SideMenuComponent {
             public keycloakService: KeycloakService, 
             private solrService: SolrService,
             private msgboxService: MsgBoxService,
-            public notificationsService: NotificationsService) {
+            public notificationsService: NotificationsService,
+            private studyService: StudyService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
             this.userId = KeycloakService.auth.userId;
@@ -76,6 +78,10 @@ export class SideMenuComponent {
         this.solrService.indexAll().then(() => {
             this.msgboxService.log('info', 'Indexation launched !');
         });
+    }
+
+    duasToSign(): number {
+        return this.studyService.duasToSign;
     }
 
 }

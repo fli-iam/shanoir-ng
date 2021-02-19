@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2 class="header command-zone">Data User Agreements signing</h2>
-
-<dua-signing></dua-signing>
-<dua-signing></dua-signing>
-<dua-signing></dua-signing>
+<div *ngIf="duas">
+    <dua-signing *ngFor="let dua of duas" [dua]="dua" (sign)="loadDua()"></dua-signing>
+</div>
+<div class="empty" *ngIf="!duas">Currently no data user agreement is to be signed.</div>
