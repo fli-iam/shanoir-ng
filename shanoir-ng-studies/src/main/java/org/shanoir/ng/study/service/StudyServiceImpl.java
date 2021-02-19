@@ -189,21 +189,21 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudy.setStudy(studyDb);
 			}
 		}
-		
-		if (study.getProtocolFilePaths() != null) {
-			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
-		}
-		
+
 		if (studyDb.getProtocolFilePaths() != null) {
 			for(String filePath : studyDb.getProtocolFilePaths()) {
 				if (!study.getProtocolFilePaths().contains(filePath)) {
 					// Delete file
 					String filePathToDelete = getStudyFilePath(studyDb.getId(), filePath);
+					System.err.println("COCUOCUOCUCOCUCUCOUCOCCUO    " + filePathToDelete);
+
 					FileUtils.deleteQuietly(new File(filePathToDelete));
 				}
 			}
 		}
-		
+
+		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
+
 		updateStudyUsers(studyDb, study);
 		
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
@@ -268,7 +268,7 @@ public class StudyServiceImpl implements StudyService {
 					// new DUA added to study
 					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
 						su.setConfirmed(false);
-						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());										
+						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 					}
 				} else {
 					// existing DUA removed from study

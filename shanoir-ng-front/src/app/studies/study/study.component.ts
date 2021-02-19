@@ -446,11 +446,27 @@ export class StudyComponent extends EntityComponent<Study> {
         this.fileInput.nativeElement.click();
     }
 
-    public deleteFile(file: any) {
+    public deleteFileOk(file: any) {
         this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
         this.protocolFiles = this.protocolFiles.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
+    }
+    
+    deleteFile(file: any): void {
+        this.openDeleteConfirmDialogFile(file)
+    }
+
+    openDeleteConfirmDialogFile = (file: string) => {
+        this.confirmDialogService
+            .confirm(
+                'Deleting ' + file, 
+                'Are you sure you want to delete the file' + file
+            ).then(res => {
+                if (res) {
+                   this.deleteFileOk(file);
+                }
+            })
     }
     
     public setFile() {
