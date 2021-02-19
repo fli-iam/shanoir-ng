@@ -189,6 +189,7 @@ CREATE TABLE `study` (
   `study_type` int(11) DEFAULT NULL,
   `visible_by_default` bit(1) NOT NULL,
   `with_examination` bit(1) NOT NULL,
+  `challenge` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_q5qxcb7ermaxmp5f2wx2rj28n` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=179 DEFAULT CHARSET=latin1;

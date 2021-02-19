@@ -29,20 +29,23 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
 public class StudyUser implements StudyUserInterface {
-
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5813071870148636187L;
 	
 	@Id
 	private Long id;
 
-	/** is the anonymization report to be sent to the user. */
+	/** Is the anonymization report to be sent to the user. */
 	private boolean receiveAnonymizationReport;
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
+	
+	/**
+	 * With the introduction of a Data User Agreement form, a study
+	 * responsible can add an user to a study, but his StudyUser is
+	 * not confirmed as long, as the user has not validated the DUA.
+	 * The default is true, in case no DUA is existing.
+	 */
+	private boolean confirmed = true;
 
 	/** Study id. */
 	private Long studyId;
@@ -90,6 +93,14 @@ public class StudyUser implements StudyUserInterface {
 	@Override
 	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
 		this.receiveNewImportReport = receiveNewImportReport;
+	}
+
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
 	}
 
 	/**

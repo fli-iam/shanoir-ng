@@ -50,6 +50,14 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
+	
+	/**
+	 * With the introduction of a Data User Agreement form, a study
+	 * responsible can add an user to a study, but his StudyUser is
+	 * not confirmed as long, as the user has not validated the DUA.
+	 * The default is true, in case no DUA is existing.
+	 */
+	private boolean confirmed = true;
 
 	/** Study id. */
 	@ManyToOne
@@ -100,6 +108,14 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@Override
 	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
 		this.receiveNewImportReport = receiveNewImportReport;
+	}
+
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
 	}
 
 	/**
