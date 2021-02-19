@@ -461,7 +461,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.confirmDialogService
             .confirm(
                 'Deleting ' + file, 
-                'Are you sure you want to delete the file' + file
+                'Are you sure you want to delete the file ' + file + ' ?'
             ).then(res => {
                 if (res) {
                    this.deleteFileOk(file);

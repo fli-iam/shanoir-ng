@@ -195,8 +195,6 @@ public class StudyServiceImpl implements StudyService {
 				if (!study.getProtocolFilePaths().contains(filePath)) {
 					// Delete file
 					String filePathToDelete = getStudyFilePath(studyDb.getId(), filePath);
-					System.err.println("COCUOCUOCUCOCUCUCOUCOCCUO    " + filePathToDelete);
-
 					FileUtils.deleteQuietly(new File(filePathToDelete));
 				}
 			}
