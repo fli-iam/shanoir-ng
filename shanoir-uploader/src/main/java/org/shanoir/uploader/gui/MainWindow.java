@@ -204,7 +204,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle);
+				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, dicomServerClient, ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
 			}
 		});
 

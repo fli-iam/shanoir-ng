@@ -23,7 +23,9 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.action.ImportFromCsvActionListener;
 import org.shanoir.uploader.action.UploadFromCsvActionListener;
+import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.model.CsvImport;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 
 public class ImportFromCSVWindow extends JFrame {
 
@@ -45,10 +47,14 @@ public class ImportFromCSVWindow extends JFrame {
 	
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
+	IDicomServerClient dicomServerClient;
+	ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
-	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle) {
+	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
+		this.dicomServerClient = dicomServerClient;
+		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 
 		// Create the frame.
 		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.csv.title"));
@@ -110,7 +116,7 @@ public class ImportFromCSVWindow extends JFrame {
 		importButton.setEnabled(false);
 		importPanel.add(importButton, gBCImportButton);
 
-		importListener = new ImportFromCsvActionListener(this);
+		importListener = new ImportFromCsvActionListener(this, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 		
 		importButton.addActionListener(importListener);
 
