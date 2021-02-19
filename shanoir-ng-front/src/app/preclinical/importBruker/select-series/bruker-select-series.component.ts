@@ -54,12 +54,12 @@ export class BrukerSelectSeriesComponent {
     }
 
 
-    public showSerieDetails(nodeParams: any, serie?: SerieDicom): void {
+    public showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
-        if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
+        if (serie && this.detailedSerie && serie.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
-            this.detailedSerie = nodeParams;
+            this.detailedSerie = serie;
             setTimeout(() => { // so the details display has no delay
                 if (serie && serie.images) this.initPapaya(serie); 
             });
