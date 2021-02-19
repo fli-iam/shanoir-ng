@@ -44,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             hasBox="true" 
                             [(ngModel)]="serie.selected"  
                             (chkbxChange)="onPatientUpdate()"
-                            (labelClick)="showSerieDetails($event, serie);"
+                            (labelClick)="showSerieDetails(serie);"
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}"
                             buttonPicto="fa fa-eye"
