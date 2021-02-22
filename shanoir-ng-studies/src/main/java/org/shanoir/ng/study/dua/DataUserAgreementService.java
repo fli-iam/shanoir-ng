@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -42,11 +43,14 @@ public class DataUserAgreementService {
 		return repository.findByUserIdAndTimestampOfAcceptedIsNull(userId);
 	}
 	
-	public void acceptDataUserAgreement(Long duaId) {
+	public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
 		DataUserAgreement dataUserAgreement = repository.findOne(duaId);
 		dataUserAgreement.setTimestampOfAccepted(new Date());
 		repository.save(dataUserAgreement);
 		StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
+		if (studyUser == null) {
+			throw new ShanoirException("Could not validate the data user agreement acceptation. The user don't seems to be a member of the study.");
+		}
 		studyUser.setConfirmed(true);
 		repositoryStudyUser.save(studyUser);
 		// Send updates via RabbitMQ

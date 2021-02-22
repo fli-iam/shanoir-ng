@@ -133,13 +133,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
 						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
 							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
-							<button (click)="setDuaFile()" class="left-icon">
+							<button class="left-icon" (click)="setDuaFile()">
 								<i class="fas fa-upload"></i>Choose file
 							</button>
 						</span>
 					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
 					 		{{study.dataUserAgreementPaths[0]}}
-							<button (click)="deleteDataUserAgreement()" class="left-icon">
+							<button class="dl-button" (click)="deleteDataUserAgreement()">
 								<i class="fas fa-trash"></i>
 							</button>
 						</span>
@@ -149,9 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
 								{{study.dataUserAgreementPaths[0]}}
-								<button (click)="downloadDataUserAgreement()">
-									<i class="fas fa-save"></i>
-								</button>
+								<button class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
 							</span>
 							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
@@ -234,9 +232,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
                         <span class="right-col" [ngSwitch]="mode">
                             <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                            <ul>
-                                <li *ngFor="let file of study.protocolFilePaths"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                            <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
+                            <ul class="files">
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
                                 </li>
                             </ul>
                         </span>
@@ -245,7 +243,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
                                 <ul>
-                                  <li *ngFor="let file of study.protocolFilePaths"> - {{getFileName(file)}}  <button (click)="downloadFile(file)"><i class="fas fa-save"></i></button>
+                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
                                   </li>
                                 </ul>
 							</span>

@@ -12,25 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.study.service;
+export class KeycloakSession {
+    
+    public hadDUAAlert: boolean = false;
 
-import java.util.List;
-
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-/**
- * Study service.
- *
- */
-@Service
-public interface StudyUserService {
-
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<StudyUserRight> getRightsForStudy(Long studyId);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	boolean hasOneStudyToImport();
-
+    constructor(
+        public sessionId: string,
+        public expirationTS: number
+    ) {}
+   
 }

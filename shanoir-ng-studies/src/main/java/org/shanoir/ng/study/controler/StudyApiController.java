@@ -48,6 +48,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -380,7 +381,8 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DataUserAgreement>> getDataUserAgreementsByUserId(@PathVariable("userId") Long userId) throws RestServiceException, IOException {
+	public ResponseEntity<List<DataUserAgreement>> getDataUserAgreements() throws RestServiceException, IOException {
+		Long userId = KeycloakUtil.getTokenUserId();
 		List<DataUserAgreement> dataUserAgreements = this.dataUserAgreementService.getDataUserAgreementsByUserId(userId);
 		if (!dataUserAgreements.isEmpty()) {
 			return new ResponseEntity<>(dataUserAgreements, HttpStatus.OK);
@@ -393,7 +395,12 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> acceptDataUserAgreement(
 		@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 		throws RestServiceException, MicroServiceCommunicationException {
-		this.dataUserAgreementService.acceptDataUserAgreement(duaId);
+		try {
+			this.dataUserAgreementService.acceptDataUserAgreement(duaId);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null));
+		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

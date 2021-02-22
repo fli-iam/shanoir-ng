@@ -79,5 +79,10 @@ public class DataUserAgreement extends AbstractEntity {
 	public String getStudyName() {
 		return this.study.getName();
 	}
+	
+	@JsonProperty("isChallenge")
+	public boolean getIsChallenge() {
+		return this.study.isChallenge();
+	}
 
 }

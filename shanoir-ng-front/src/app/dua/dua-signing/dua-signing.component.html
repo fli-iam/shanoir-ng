@@ -12,11 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 class="header command-zone">My jobs</h2>
-
-<shanoir-table #table
-	[getPage]="getPage.bind(this)" 
-	[columnDefs]="columnDefs" 
-	[customActionDefs]="customActionDefs"
-	[browserSearch]="false">
-</shanoir-table>
+<h3>{{dua.studyName}}</h3>
+<embed *ngIf="pdfUrl" class="embed-pdf" [src]="pdfUrl" alt="pdf" pluginspage="http://www.adobe.com/products/acrobat/readstep2.html">
+<div>
+    <checkbox [(ngModel)]="checked"></checkbox> I have read the data user agreement contract for the study <span class="study-name">{{dua.studyName}}</span> and I fully accept it.
+    <div class="buttons">
+        <button class="accept" [disabled]="!checked" (click)="accept()">Accept</button>
+        <!-- <button class="refuse" (click)="refuse()">Refuse</button> -->
+    </div>
+</div>

@@ -148,7 +148,7 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/rights/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<StudyUserRight>> rights(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
@@ -220,10 +220,9 @@ public interface StudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no duas found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/dua/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/dua", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DataUserAgreement>> getDataUserAgreementsByUserId(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+	ResponseEntity<List<DataUserAgreement>> getDataUserAgreements()
 			throws RestServiceException, IOException;
 	
 	@ApiOperation(value = "", notes = "Updates a data user agreement (DUA)", response = Void.class, tags = {})

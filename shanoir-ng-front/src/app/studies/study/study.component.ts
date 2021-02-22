@@ -349,6 +349,7 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Last Name', field: 'user.lastName' },
             { headerName: 'Email', field: 'user.email', width: '200%' },
             { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
+            { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
@@ -528,13 +529,11 @@ export class StudyComponent extends EntityComponent<Study> {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise()
-                    .then(result => (console.log("file saved successfully" + result)));
+                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise();
                 }
             }
             if (this.dataUserAgreement) {
                 this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
-                .then(result => (console.log("dua file saved successfully")))
                 .catch(error => {
                     this.dataUserAgreement = null;
                 });
