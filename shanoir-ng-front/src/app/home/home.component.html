@@ -35,11 +35,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <dua-signing (sign)="onSign()" [dua]="challengeDua"></dua-signing>
     </div>
     <div *ngIf="challengeStudy" class="dl-link">
-        <p class="msg">Congratulation, you can now download all the ressources you need for the <span class="challenge-name">{{challengeStudy.name}}</span> Challenge :</p>
+        <p class="msg">Congratulation, you can now download all the ressources you need for the <span class="challenge-name">{{challengeStudy.name}}</span> challenge and explore its data using the Shanoir interface :</p>
         <div class="dl-block">
             <span *ngFor="let filePath of challengeStudy.protocolFilePaths" class="dl">
                 <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
                 <div (click)="downloadFile(filePath)">{{filePath}}</div>
+            </span>
+            <span class="dl study">
+                <i class="fas fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
+                <div [routerLink]="'/study/details/' + challengeStudy.id">Explore <span class="challenge-name">{{challengeStudy.name}}</span></div>
             </span>
         </div>
     </div>
