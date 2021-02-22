@@ -104,4 +104,15 @@ public interface StudyService {
 	 */
 	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
+	/**
+	 * Gets the protocol or data user agreement file path
+	 * 
+	 * @param studyId
+	 *            id of the study
+	 * @param fileName
+	 *            name of the file
+	 * @return the file path of the file
+	 */
+	String getStudyFilePath(Long studyId, String fileName);
+
 }

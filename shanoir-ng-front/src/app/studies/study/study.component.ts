@@ -452,11 +452,27 @@ export class StudyComponent extends EntityComponent<Study> {
         this.duaFileInput.nativeElement.click();
     }
 
-    public deleteFile(file: any) {
+    public deleteFileOk(file: any) {
         this.study.protocolFilePaths = this.study.protocolFilePaths.filter(fileToKeep => fileToKeep != file);
         this.protocolFiles = this.protocolFiles.filter(fileToKeep => fileToKeep.name != file);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
+    }
+    
+    deleteFile(file: any): void {
+        this.openDeleteConfirmDialogFile(file)
+    }
+
+    openDeleteConfirmDialogFile = (file: string) => {
+        this.confirmDialogService
+            .confirm(
+                'Deleting ' + file, 
+                'Are you sure you want to delete the file ' + file + ' ?'
+            ).then(res => {
+                if (res) {
+                   this.deleteFileOk(file);
+                }
+            })
     }
     
     public setFile() {
@@ -473,15 +489,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public attachNewFile(event: any) {
         let fileToAdd = event.target.files[0];
-        this.protocolFiles.push(event.target.files[0]);
-        // TODO add check on study.challenge
-        //if (this.protocolFile.name.indexOf(".pdf", this.protocolFile.name.length - ".pdf".length) == -1
-        //&&  this.protocolFile.name.indexOf(".zip", this.protocolFile.name.length - ".zip".length) == -1) {
-        //    this.msgBoxService.log("error", "Only .pdf or .zip files are accepted");
-        //    this.protocolFile = null;
-        // } else if (this.protocolFile.size > 50000000) {
-        //    this.msgBoxService.log("error", "File must be less than 50Mb.");
-        //    this.protocolFile = null;
+        this.protocolFiles.push(fileToAdd);
         this.study.protocolFilePaths.push(fileToAdd.name);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
