@@ -948,6 +948,38 @@
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "d90959a3-3544-44c8-9849-42b09f6ff190",
+          "name": "canImportFromPACS",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "false",
+            "user.attribute": "canImportFromPACS",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "canImportFromPACS",
+            "jsonType.label": "boolean"
+          }
+        },
+        {
+          "id": "793a14b0-0725-450f-ad71-332a56eda045",
+          "name": "userId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "false",
+            "user.attribute": "userId",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "userId",
+            "jsonType.label": "long"
+          }
+        }
+      ],
       "defaultClientScopes": [
         "web-origins",
         "role_list",
