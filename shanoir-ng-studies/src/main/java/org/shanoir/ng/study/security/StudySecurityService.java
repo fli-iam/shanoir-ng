@@ -203,7 +203,7 @@ public class StudySecurityService {
 	 */
 	public boolean hasRightOnTrustedSubjectForOneStudy(Subject subject, String rightStr) {
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		if (subject.getSubjectStudyList() != null) {
+		if (subject != null && subject.getSubjectStudyList() != null) {
 			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				if (hasPrivilege(subjectStudy.getStudy(), right)) {
 					return true;

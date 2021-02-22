@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -26,8 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -162,6 +159,7 @@ public class StudyApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteStudyTest() throws Exception {
+		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn("unexistingFile");
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
 	}
@@ -182,81 +180,10 @@ public class StudyApiControllerTest {
 
 	@Test
 	@WithMockUser
-	public void testDeleteProtocolFile() {
-		// GIVEN a protocol file associated to a study
-		stud.setProtocolFilePaths(Collections.singletonList("test.pdf"));
-		File pFile = new File(tempFolderPath + "study-1/test.pdf");
-		pFile.getParentFile().mkdirs();
-		try {
-			pFile.createNewFile();
+	public void testUploadProtocolFile() throws IOException {
+		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
 
-			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk());
-
-			// THEN the file is well deleted
-			assertFalse(pFile.exists());
-		} catch (IOException e) {
-			System.err.println(e);
-			fail();
-		} catch (Exception e) {
-			System.err.println(e);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockUser
-	public void testDeleteProtocolFileNotExisting() {
-		// GIVEN a protocol file not existing associated to a study
-		stud.setProtocolFilePaths(Collections.singletonList("test.pdf"));
-		File pFile = new File(tempFolderPath + "study-1/test.pdf");
-		pFile.getParentFile().mkdirs();
-		try {
-			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNoContent());
-
-			// THEN the file is not really deleted because it does not exists
-			assertFalse(pFile.exists());
-		} catch (IOException e) {
-			System.err.println(e);
-			fail();
-		} catch (Exception e) {
-			System.err.println(e);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockUser
-	public void testDeleteProtocolFileNotLinked() {
-		// GIVEN a protocol file NOT associated to a study
-		stud.setProtocolFilePaths(Collections.singletonList("test2.pdf"));
-		File pFile = new File(tempFolderPath + "study-1/test.pdf");
-		pFile.getParentFile().mkdirs();
-		try {
-			pFile.createNewFile();
-
-			// WHEN the file is deleted
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/protocol-file-delete/1").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNoContent());
-
-			// THEN the file is not deleted
-			assertTrue(pFile.exists());
-		} catch (IOException e) {
-			System.err.println(e);
-			fail();
-		} catch (Exception e) {
-			System.err.println(e);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockUser
-	public void testDownloadProtocolFile() throws IOException {
-		File importZip = new File(tempFolderPath + "test-import-extra-data.zip");
+		File importZip = new File(tempFolderPath + "/test-import-extra-data.zip");
 		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
 
 		if (saved.exists()) {
@@ -264,6 +191,7 @@ public class StudyApiControllerTest {
 		}
 
 		try {
+			new File(tempFolderPath).mkdirs();
 			importZip.createNewFile();
 			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.pdf", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
 
@@ -275,50 +203,21 @@ public class StudyApiControllerTest {
 			// THEN the file is saved
 			assertTrue(saved.exists());
 		} catch (Exception e) {
-			fail();
-		}
-	}
-
-	// TODO: Un-comment this when the challenge test on study has been added ?
-	//@Test
-	//@WithMockUser
-	public void testDownloadProtocolFileNotPDFNorZip() throws IOException, EntityNotFoundException, MicroServiceCommunicationException {
-		File importZip = new File(tempFolderPath + "test-import-extra-data.txt");
-		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.txt");
-
-		Mockito.when(studyServiceMock.update(Mockito.any())).thenReturn(stud);
-
-		if (saved.exists()) {
-			saved.delete();
-		}
-		if (importZip.exists()) {
-			importZip.delete();
-		}
-
-		try {
-			importZip.createNewFile();
-			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
-
-			// WHEN The file is added to the study
-
-			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/protocol-file-upload/1").file(file))
-			.andExpect(status().isNotAcceptable());
-
-			// THEN the file is not saved as it's not a PDF
-			assertFalse(saved.exists());
-		} catch (Exception e) {
+			e.printStackTrace();
 			fail();
 		}
 	}
 
 	@Test
 	@WithMockUser
-	public void testDownloadExtraData() throws IOException {
+	public void testDownloadProtocolFile() throws IOException {
+		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/file.pdf");
+
 		// GIVEN an study with protocol file
 		File todow = new File(tempFolderPath + "study-1/file.pdf");
 		todow.getParentFile().mkdirs();
 
-		// WHEN we download extra-data
+		// WHEN we download protocolFile
 		try {
 			todow.createNewFile();
 			FileUtils.write(todow, "test");
@@ -330,7 +229,7 @@ public class StudyApiControllerTest {
 			assertNotNull(result.getResponse().getContentAsString());
 			System.out.println(result.getResponse().getContentAsString());
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 			fail();
 		}
 	}
