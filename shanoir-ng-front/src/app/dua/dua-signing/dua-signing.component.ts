@@ -17,6 +17,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { StudyService } from '../../studies/shared/study.service';
+import { browserDownloadFile } from '../../utils/app.utils';
 import { DataUserAgreement } from '../shared/dua.model';
 
 
@@ -32,6 +33,7 @@ export class DUASigningComponent implements OnChanges {
     @Output() sign: EventEmitter<void> = new EventEmitter<void>();
     pdfUrl: string;
     checked: boolean = false;
+    duaBlob: Blob;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -44,8 +46,8 @@ export class DUASigningComponent implements OnChanges {
         if (changes['dua']) {
             if (this.dua && this.dua.studyId) {
                 this.studyService.downloadBlob(this.dua.path, this.dua.studyId, 'dua').then(response => {
-                    let pdfBlob: Blob = response.body;
-                    let url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(pdfBlob));
+                    this.duaBlob = response.body;
+                    let url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(this.duaBlob));
                     this.pdfUrl = url as string;
                 });
             } else {
@@ -69,6 +71,10 @@ export class DUASigningComponent implements OnChanges {
 
             }
         });
+    }
+
+    dlDua() {
+        if (this.duaBlob) browserDownloadFile(this.duaBlob, this.dua.path);
     }
 
 }
