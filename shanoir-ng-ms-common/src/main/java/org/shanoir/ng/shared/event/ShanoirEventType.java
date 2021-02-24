@@ -72,4 +72,7 @@ public class ShanoirEventType {
 
 	/** Download dataset. */
 	public static final String DOWNLOAD_DATASET_EVENT = "downloadDataset.event";
+
+	/** User subscribed to a challenge. */
+	public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
 }

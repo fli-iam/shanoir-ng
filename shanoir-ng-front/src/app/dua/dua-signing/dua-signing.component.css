@@ -1,0 +1,12 @@
+.embed-pdf { width: 100%; height: 500px; margin-bottom: 10px; }
+checkbox { vertical-align: bottom; margin-right: 5px; }
+.refuse { background-color: var(--color-error); }
+.accept { background-color: green; width: 100%; /*width: calc(100% - 65px); */}
+.refuse:hover { opacity: 0.7; background-color: var(--color-error); }
+.accept:not(:disabled):hover { opacity: 0.7; background-color: green; }
+.accept:disabled { opacity: 0.5; background-color: green; }
+.buttons { margin: 10px 0 0 0; }
+.study-name { font-weight: bold; color: var(--color-a); }
+:host() { margin: 20px 0 30px 0; max-width: 1000px; display: inline-block; }
+.dl-pdf { margin-bottom: 20px; color: var(--color-b); }
+.dl-pdf i { margin-right: 5px; }

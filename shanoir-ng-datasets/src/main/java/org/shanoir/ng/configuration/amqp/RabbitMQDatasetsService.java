@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.ampq.StudyUserListener;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class RabbitMQDatasetsService {
 	
 	@Autowired
-	private StudyUserListener listener;
+	private RabbitMqStudyUserService listener;
 
 	@Autowired
 	private ExaminationRepository examRepository;
@@ -132,7 +132,7 @@ public class RabbitMQDatasetsService {
 	}
 
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a subject deletion
+	 * Receives a shanoirEvent as a json object, concerning a dataset acquisition to create
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(

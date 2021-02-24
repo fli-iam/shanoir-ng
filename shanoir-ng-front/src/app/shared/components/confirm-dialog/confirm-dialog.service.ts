@@ -11,25 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Injectable, ComponentFactoryResolver, ViewContainerRef, ComponentRef } from '@angular/core';
+import { Injectable, ComponentFactoryResolver, ComponentRef } from '@angular/core';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 import { ServiceLocator } from '../../../utils/locator.service';
 
 
 @Injectable()
 export class ConfirmDialogService {
-
-    private rootViewContainerRef: ViewContainerRef = ServiceLocator.rootViewContainerRef;
-
     
     constructor(private componentFactoryResolver: ComponentFactoryResolver) {
     }
 
-    public confirm(title: string, message: string): Promise<boolean> {
+    public confirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
         const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
-        const ref: ComponentRef<ConfirmDialogComponent> = this.rootViewContainerRef.createComponent(componentFactory);
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
         let dialog: ConfirmDialogComponent = ref.instance;
-        return dialog.open(title, message).then(answer => {
+        return dialog.open(title, message, buttons).then(answer => {
             ref.destroy();
             return answer;
         });

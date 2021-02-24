@@ -11,10 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { StudyService } from '../../studies/shared/study.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
+import { Study } from '../../studies/shared/study.model';
 
 
 @Component ({
@@ -30,15 +36,27 @@ import { AccountRequestInfo } from './account-request-info.model';
 export class AccountRequestInfoComponent implements ControlValueAccessor {
 
     @Input() editMode: boolean = false;
+    @Output() valid: EventEmitter<boolean> = new EventEmitter();
+    public isChallenge: boolean;
     info: AccountRequestInfo = new AccountRequestInfo;
     form: FormGroup;
-    private onChange = (_: any) => {};
-    private onTouch = () => {};
+    onChange = (_: any) => {};
+    onTouch = () => {};
+    public challengeOptions:  Option<number>[];
+    challengeName: string;
 
-
-    constructor(private formBuilder: FormBuilder) {}
+    constructor(private formBuilder: FormBuilder,
+                private route: ActivatedRoute,
+                private studyService: StudyService,
+                private msgService: MsgBoxService) {
+        this.isChallenge = this.route.snapshot.data['isChallenge'];
+    }
 
     writeValue(obj: any): void {
+        this.challengeName = null;
+        if (obj.challenge && obj.challenge != this.info.challenge) {
+            this.getStudyName(obj.challenge).then(name => this.challengeName = name);
+        }
         this.info = obj;
     }
 
@@ -51,21 +69,36 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     }
 
     ngOnInit() {
+        if (this.isChallenge) {
+            this.studyService.getChallenges().then(result => {
+                if (result) {
+                    this.challengeOptions = result.map(element => new Option(element.id, element.name));
+                } else {
+                    this.challengeOptions = [];
+                    this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
+                }
+            });
+        }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
             'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
-            'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
-            'study': [this.info.study, [Validators.required, Validators.maxLength(200)]],
-            'contact': [this.info.contact, [Validators.required, Validators.maxLength(200)]],
-            'work': [this.info.work, [Validators.required, Validators.maxLength(200)]],
+            'function': [this.info.function, this.isChallenge ? [] :[Validators.required, Validators.maxLength(200)]],
+            'study': [this.info.study, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'contact': [this.info.contact, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'work': [this.info.work, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'challenge': [this.info.challenge, !this.isChallenge ? [] : [Validators.required]]
         });
         this.form.valueChanges.subscribe(() => {
-            if (this.form.valid) {
-                this.onChange(this.info);
-            } else {
-                this.onChange(null);
-            }
+            this.valid.emit(this.form.valid);
         });
+    }
+
+    getStudyName(id: number): Promise<string> {
+        return this.studyService.get(id).then(study => study ? study.name : null);
+    }
+
+    onInfoChange() {
+        this.onChange(this.info);
     }
 
     formErrors(field: string): any {

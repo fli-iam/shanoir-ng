@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface StudyUserService {
 
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	List<StudyUserRight> getRightsForStudy(Long studyId);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

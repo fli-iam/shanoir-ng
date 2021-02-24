@@ -81,6 +81,7 @@ import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-
 import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
+import { DUAComponent } from './dua/dua.component';
 
 let routes: Routes = [
     {
@@ -88,8 +89,16 @@ let routes: Routes = [
         redirectTo: '/home',
         pathMatch: 'full'
     }, {
+        path: 'dua',
+        component: DUAComponent,
+    }, {
         path: 'account-request',
         component: AccountRequestComponent,
+        data: {isChallenge: false},
+    }, {
+        path: 'challenge-request',
+        component: AccountRequestComponent,
+        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
