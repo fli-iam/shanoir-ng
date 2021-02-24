@@ -11,7 +11,7 @@ public interface IDicomServerClient {
 
 	/**
 	 * This method echos a DICOM server.
-	 * @return
+	 * @return 
 	 */
 	public boolean echoDicomServer();
 

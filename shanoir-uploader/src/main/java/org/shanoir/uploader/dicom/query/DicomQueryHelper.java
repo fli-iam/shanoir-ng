@@ -3,12 +3,10 @@ package org.shanoir.uploader.dicom.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
@@ -41,26 +39,6 @@ public class DicomQueryHelper {
 		this.wantedModality = wantedModality;
 	}
 
-	/**
-	 * Queries the PACS with patient name
-	 * @param patientNameCriterion the patient name criteria
-	 * @param patientIdCriterion the patient ID criteria
-	 * @return the list of DicomObjects, or an empty list
-	 * @throws Exception
-	 */
-	public Collection<DicomObject> queryDicom(final String patientNameCriterion, final String patientIdCriterion) throws Exception {
-		if (StringUtils.isBlank(patientNameCriterion) && StringUtils.isBlank(patientIdCriterion)) {
-			return Collections.emptyList();
-		}
-		// Query PACS
-		String[] restrictions = buildRestrictions(patientNameCriterion, patientIdCriterion, null,
-				null, null, null, null, null);
-		String[] args = buildCommand("-P", false, restrictions, null, null);
-
-		logger.debug("C_FIND: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
-		final Collection<DicomObject> serieList = dcmqr.query(args);
-		return serieList;
-	}
 
 	/**
 	 *
@@ -74,11 +52,11 @@ public class DicomQueryHelper {
 	public DicomTreeNode populateDicomTree(final String patientNameCriterion, final String studyDescriptionCriterion,
 			final String seriesDescriptionCriterion, final String patientIdCriterion, final Date beforeStudyDate,
 			final Date afterStudyDate, DicomTreeNode media, final String patientBirthDate, final String studyDate)
-					throws Exception {
+			throws Exception {
 
 		if (patientNameCriterion != null && !"".equals(patientNameCriterion)
-				|| patientIdCriterion != null && !"".equals(patientIdCriterion)
-				|| patientBirthDate != null && !"".equals(patientBirthDate)) {
+				|| (patientIdCriterion != null && !"".equals(patientIdCriterion))
+				|| (patientBirthDate != null && !"".equals(patientBirthDate))) {
 			String[] restrictions;
 			if (patientNameCriterion != null && !"".equals(patientNameCriterion)
 					&& (patientNameCriterion.contains("*") || !patientNameCriterion.contains("^"))) {
@@ -97,7 +75,7 @@ public class DicomQueryHelper {
 			}
 
 		} else if (studyDescriptionCriterion != null && !"".equals(studyDescriptionCriterion)
-				|| studyDate != null && !"".equals(studyDate)) {
+				|| (studyDate != null && !"".equals(studyDate))) {
 			String[] restrictions = buildRestrictions(null, null, studyDescriptionCriterion,
 					seriesDescriptionCriterion, beforeStudyDate, afterStudyDate, patientBirthDate, studyDate);
 			String[] args = buildCommand(null, false, restrictions, null, null);
@@ -114,11 +92,11 @@ public class DicomQueryHelper {
 			 * No result found if there is no patient or if no images are
 			 * associated to the patients found
 			 */
-			boolean noResult = media.getFirstTreeNode() == null;
+			boolean noResult = (media.getFirstTreeNode() == null);
 			if (media.getTreeNodes().size() > 1) {
 				for (final Iterator<DicomTreeNode> itePatient = media.getTreeNodes().values().iterator(); itePatient
 						.hasNext();) {
-					final DicomTreeNode patient = itePatient.next();
+					final DicomTreeNode patient = (DicomTreeNode) itePatient.next();
 					if (patient.getFirstTreeNode() != null) {
 						noResult &= false;
 					}
@@ -208,7 +186,7 @@ public class DicomQueryHelper {
 		resultList.add("-rManufacturer");
 		resultList.add("-rManufacturerModelName");
 		resultList.add("-rDeviceSerialNumber");
-
+		
 		// PatientBirthDate A string of characters of the format YYYYMMDD
 		String[] result = new String[resultList.size()];
 		for (int i = 0; i < result.length; i++) {
@@ -247,8 +225,8 @@ public class DicomQueryHelper {
 		//Local Dicom Server AET Calling is not set when not using ShanoirUploader I think
 		//So add this parameter only if had been set
 		//if(configBean.getLocalDicomServerAETCalling() != null && !configBean.getLocalDicomServerAETCalling().equals("")){
-		resultList.add("-device");
-		resultList.add(configBean.getLocalDicomServerAETCalling());
+			resultList.add("-device");
+			resultList.add(configBean.getLocalDicomServerAETCalling());
 		//}
 		if (restrictions != null) {
 			resultList.addAll(Arrays.asList(restrictions));
@@ -326,11 +304,10 @@ public class DicomQueryHelper {
 			final DicomObject patientDicomObject = itePatient.next();
 			// patient name validated on level patient
 			boolean patientNameOkLP;
-			if (isFuzzypatientNameCriterion) {
+			if (isFuzzypatientNameCriterion)
 				patientNameOkLP = checkFuzzyPatientName(patientNameCriterion, patientDicomObject);
-			} else {
+			else
 				patientNameOkLP = checkPatientName(patientNameCriterion, patientDicomObject);
-			}
 
 			if (patientNameOkLP) {
 
@@ -470,9 +447,8 @@ public class DicomQueryHelper {
 				firstName1Criterion = patientNameCriterion;
 			}
 
-		} else {
+		} else
 			lastNameCriterion = patientNameCriterion;
-		}
 
 		/*
 		 * Extract lastNameFound, firstName1Found and firstName2Found from the
@@ -498,9 +474,8 @@ public class DicomQueryHelper {
 				firstName1Found = patientNameFound;
 			}
 
-		} else {
+		} else
 			lastNameFound = patientNameFound;
-		}
 
 		/* Compare the the lastNameCriterion and the lastNameFound */
 
@@ -516,9 +491,8 @@ public class DicomQueryHelper {
 			if (lastNameRegex) {
 				lastNameMatch = lastNameFound.matches(lastNameCriterion);
 			} else {
-				if (lastNameCriterion != null) {
+				if (lastNameCriterion != null)
 					lastNameMatch = lastNameFound.contentEquals(lastNameCriterion);
-				}
 			}
 		}
 		/* Compare the the firstName1Criterion and the firstName1Found */
@@ -535,9 +509,8 @@ public class DicomQueryHelper {
 			if (firstName1Regex) {
 				firstName1Match = firstName1Found.matches(firstName1Criterion);
 			} else {
-				if (firstName1Criterion != null) {
+				if (firstName1Criterion != null)
 					firstName1Match = firstName1Found.contentEquals(firstName1Criterion);
-				}
 			}
 		}
 		/* Compare the the firstName2Criterion and the firstName2Found */
@@ -554,9 +527,8 @@ public class DicomQueryHelper {
 			if (firstName2Regex) {
 				firstName2Match = firstName2Found.matches(firstName2Criterion);
 			} else {
-				if (firstName2Criterion != null) {
+				if (firstName2Criterion != null)
 					firstName2Match = firstName2Found.contentEquals(firstName2Criterion);
-				}
 
 			}
 		}
@@ -618,8 +590,8 @@ public class DicomQueryHelper {
 					logger.debug("populate : match=" + match);
 				}
 				if (match
-						|| studyDescriptionCriterionReplaced == null
-						|| "".equals(studyDescriptionCriterionReplaced)) {
+						|| (studyDescriptionCriterionReplaced == null
+						|| "".equals(studyDescriptionCriterionReplaced))) {
 					final DicomTreeNode study = patient.initChildTreeNode(dicomObject);
 					studyFound = true;
 					boolean atLeastOneWantedModality = false;

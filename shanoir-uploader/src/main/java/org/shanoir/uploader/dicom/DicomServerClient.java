@@ -51,7 +51,6 @@ public class DicomServerClient implements IDicomServerClient {
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#echoDicomServer()
 	 */
-	@Override
 	public boolean echoDicomServer() {
 		Echo echo = new Echo();
 		boolean success = echo.echo(config);
@@ -62,7 +61,6 @@ public class DicomServerClient implements IDicomServerClient {
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#queryDicomServer(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	@Override
 	public Media queryDicomServer(
 			final String patientName,
 			final String patientID,
@@ -79,7 +77,7 @@ public class DicomServerClient implements IDicomServerClient {
 				studyDescription,
 				seriesDescription,
 				patientID,
-				null, null, media,
+				null, null, media, 
 				patientBirthDate,
 				studyDate);
 		return media;
@@ -88,8 +86,7 @@ public class DicomServerClient implements IDicomServerClient {
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#retrieveDicomFiles(java.util.Collection)
 	 */
-	@Override
-	public synchronized List<String> retrieveDicomFiles(final Collection<Serie> selectedSeries, final File uploadFolder) {
+	public synchronized List<String> retrieveDicomFiles(final Collection<Serie> selectedSeries, final File uploadFolder) {		
 		final DcmQR dcmqr = new DcmQR();
 		final DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
 		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
@@ -106,7 +103,6 @@ public class DicomServerClient implements IDicomServerClient {
 				if(noError) {
 					// create file name filter for old files
 					final FilenameFilter oldFileNamesFilter = new FilenameFilter() {
-						@Override
 						public boolean accept(File dir, String name) {
 							for (Iterator iterator = oldFileNames.iterator(); iterator.hasNext();) {
 								String oldFileName = (String) iterator.next();
@@ -151,7 +147,7 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	private boolean getFilesFromServer(DcmQR dcmqr, DicomQueryHelper dQH, final String studyInstanceUID, final String seriesInstanceUID) throws Exception {
 		final List<DicomObject> list;
-		try{
+		try{ 
 			String[] argsArray = dQH.buildCommand("-S", true, null, studyInstanceUID, seriesInstanceUID);
 			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + ShanoirUtil.arrayToString(argsArray)+"\n\n");
 			list = dcmqr.query(argsArray);
@@ -170,7 +166,6 @@ public class DicomServerClient implements IDicomServerClient {
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#getWorkFolder()
 	 */
-	@Override
 	public File getWorkFolder() {
 		return workFolder;
 	}
