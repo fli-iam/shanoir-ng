@@ -9,23 +9,66 @@ package org.shanoir.uploader.model;
  */
 public class CsvImport {
 
+
 	public CsvImport(String[] csvInput) {
 		if (csvInput == null || csvInput.length < 7) {
 			this.error = "Not enough columns in CSV, please check it";
 			return;
 		}
+		// TODO: check fields => date + sex
 		this.rawData = csvInput;
 		this.name = csvInput[0];
 		this.surname = csvInput[1];
 		this.examDate = csvInput[2];
 		this.studyId = csvInput[3];
-		this.studyCardId = csvInput[4];
+		this.studyCardName = csvInput[4];
 		this.commonName = csvInput[5];
 		this.sex = csvInput[6];
-		if (csvInput.length > 7) {
-			this.comment = csvInput[7];
+		this.birthDate = csvInput[7];
+		if (csvInput.length > 8) {
+			this.comment = csvInput[8];
 		}
 	}
+	
+	String[] rawData;
+
+	// First part is research criteria (all mandatory)
+	String name;
+	
+	String surname;
+	
+	String examDate;
+	
+	// Second part is linked to import into sh-NG (all mandatory but comment)
+	String studyId;
+	
+	String studyCardName;
+	
+	String commonName;
+	
+	String sex;
+	
+	String comment;
+	
+	String birthDate;
+	
+	/**
+	 * @return the birthDate
+	 */
+	public String getBirthDate() {
+		return birthDate;
+	}
+
+	/**
+	 * @param birthDate the birthDate to set
+	 */
+	public void setBirthDate(String birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	// Finally a displayed error
+	String error;
+
 	
 	/**
 	 * @return the rawData
@@ -41,28 +84,6 @@ public class CsvImport {
 		this.rawData = rawData;
 	}
 
-	String[] rawData;
-
-	// First part is research criteria (all mandatory)
-	String name;
-	
-	String surname;
-	
-	String examDate;
-	
-	// Second part is linked to import into sh-NG (all mandatory but comment)
-	String studyId;
-	
-	String studyCardId;
-	
-	String commonName;
-	
-	String sex;
-	
-	String comment;
-	
-	// Finally a displayed error
-	String error;
 
 	/**
 	 * @return the name
@@ -121,17 +142,17 @@ public class CsvImport {
 	}
 
 	/**
-	 * @return the studyCardId
+	 * @return the studyCardName
 	 */
-	public String getStudyCardId() {
-		return studyCardId;
+	public String getStudyCardName() {
+		return studyCardName;
 	}
 
 	/**
-	 * @param studyCardId the studyCardId to set
+	 * @param studyCardName the studyCardName to set
 	 */
-	public void setStudyCardId(String studyCardId) {
-		this.studyCardId = studyCardId;
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
 	}
 
 	/**
