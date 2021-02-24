@@ -76,7 +76,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 		genericDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
 
 		// Set the modality from dicom fields
-		genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.OTHER_DATASET);
+		genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (genericDataset.getSubjectId() != null) {

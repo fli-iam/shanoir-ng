@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -35,7 +35,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	private StudyCardProcessingService studyCardProcessingService;
 	
 	@Autowired
-	private DatasetStrategy<CtDataset> datasetStrategy;
+	private DatasetStrategy<GenericDataset> datasetStrategy;
 
 	@Autowired
 	private StudyCardRepository studyCardRepository;
@@ -63,7 +63,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 			LOG.warn("No studycard given for this import");
 		}
 
-		DatasetsWrapper<CtDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetsWrapper<GenericDataset> datasetsWrapper = datasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(datasetAcquisition);

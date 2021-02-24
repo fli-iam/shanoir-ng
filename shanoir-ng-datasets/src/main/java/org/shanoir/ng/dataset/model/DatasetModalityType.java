@@ -41,7 +41,7 @@ public enum DatasetModalityType {
 	EEG_DATASET(6),
 
 	// GENERIC Dataset
-	OTHER_DATASET(7);
+	GENERIC_DATASET(7);
 
 	private int id;
 
