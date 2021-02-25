@@ -25,10 +25,19 @@
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
-
-    --instance-color: #813371;
-    --user-color: #813371;
+    
     --instance-name: "DEV";
+    --instance-color: crimson;
+    --user-color: crimson;
+    
+    /* --instance-name: "QUALIF";
+    --instance-color: teal;
+    --user-color: teal;
+
+    --instance-name: ;
+    --instance-color: transparent;
+    --user-color: #813371; */
+
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }
