@@ -12,6 +12,7 @@ import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,32 +45,28 @@ public class DataUserAgreementService {
 	}
 	
 	public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
+		Long userId = KeycloakUtil.getTokenUserId();
 		DataUserAgreement dataUserAgreement = repository.findOne(duaId);
-		dataUserAgreement.setTimestampOfAccepted(new Date());
-		repository.save(dataUserAgreement);
-		StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
-		if (studyUser == null) {
-			throw new ShanoirException("Could not validate the data user agreement acceptation. The user don't seems to be a member of the study.");
-		}
-		studyUser.setConfirmed(true);
-		repositoryStudyUser.save(studyUser);
-		// Send updates via RabbitMQ
-		try {
-			List<StudyUserCommand> commands = new ArrayList<>();
-			commands.add(new StudyUserCommand(CommandType.UPDATE, studyUser));
-			studyUserCom.broadcast(commands);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user update info through RabbitMQ");
-		}
-	}
-	
-	public void createDataUserAgreementsForStudy(Study study) {
-		List<StudyUser> studyUserList = study.getStudyUserList();
-		for (StudyUser studyUser : studyUserList) {
-			DataUserAgreement dataUserAgreement = new DataUserAgreement();
-			dataUserAgreement.setStudy(study);
-			dataUserAgreement.setUserId(studyUser.getUserId());
+		// assure that only the user itself can accept its DUA
+		if (dataUserAgreement.getUserId().compareTo(userId) == 0) {
+			dataUserAgreement.setTimestampOfAccepted(new Date());
 			repository.save(dataUserAgreement);
+			StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
+			if (studyUser == null) {
+				throw new ShanoirException("Could not validate the data user agreement acceptance. The user does not seem to be a member of the study.");
+			}
+			studyUser.setConfirmed(true);
+			repositoryStudyUser.save(studyUser);
+			// Send updates via RabbitMQ
+			try {
+				List<StudyUserCommand> commands = new ArrayList<>();
+				commands.add(new StudyUserCommand(CommandType.UPDATE, studyUser));
+				studyUserCom.broadcast(commands);
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Could not transmit study-user update info through RabbitMQ");
+			}
+		} else {
+			throw new ShanoirException("Could not validate the data user agreement acceptance. The user of the DUA and the used user for the request do not match.");
 		}
 	}
 	

@@ -125,14 +125,11 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			Study studyDeleted = studyService.findById(studyId);
-
 			// Delete all linked files and DUA
 			File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));
 			if (studyFolder.exists()) {
 				FileUtils.deleteDirectory(studyFolder);
 			}
-
 			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
