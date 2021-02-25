@@ -1,4 +1,4 @@
-:host() { height: 100vh; background-color: var(--color-a); color: white; }
+:host() { height: 100vh; background-color: var(--color-a); color: white; display: block; }
 :host()::-webkit-scrollbar { width: 0 !important }
 
 .logo { margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }
@@ -31,7 +31,7 @@ a:hover, a:active { color: white; }
 .chevron i { margin-top: 7px; }
 .notif { font-size: 10px; }
 
-.user, .logo, .menu-list, .bottom-info { float: right; }
+.instance, .user, .logo, .menu-list, .bottom-info { float: right; }
 
 progress-bar { width: 100px; }
 
@@ -56,7 +56,7 @@ progress-bar { width: 100px; }
     .admin-tag i { margin-right: 4px; }
 .admin-tag-sep { color: var(--color-b-light2); }
 .warning { position: absolute; right: 0; bottom: 7px; font-size: 20px; color: orange; }
-.instance { position: absolute; top: 0; left: 0; right: 0; text-align: center; min-width: 300px; overflow: hidden; font-size: 14px; font-weight: bold; }
+.instance { height: 0px; overflow: visible; text-align: center; min-width: 300px; font-size: 14px; font-weight: bold; }
     .instance-frame { padding: 4px 10px 0; position: relative; z-index: 1; }
     .instance-frame::after { content: ""; position: absolute; left: -15px; right: 15px; top: 0; bottom: 0; 
         display: inline-block; transform: skewX(45deg); z-index: -1; }
