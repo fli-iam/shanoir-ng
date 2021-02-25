@@ -1,5 +1,15 @@
 package org.shanoir.uploader.model;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.uploader.model.rest.Sex;
+
 /**
  * An object that is used to import from a CSV file
  * It contains the necessary fields to be imported from CSV raw data
@@ -10,23 +20,33 @@ package org.shanoir.uploader.model;
 public class CsvImport {
 
 
-	public CsvImport(String[] csvInput) {
-		if (csvInput == null || csvInput.length < 7) {
-			this.error = "Not enough columns in CSV, please check it";
+	public CsvImport(String[] csvInput) throws ShanoirException {
+
+        this.rawData = Arrays.copyOf(csvInput, 8);
+
+        if (csvInput == null || csvInput.length < 7) {
+			this.errorMessage = "Not enough columns in CSV, please check it";
 			return;
 		}
-		// TODO: check fields => date + sex
-		this.rawData = csvInput;
 		this.name = csvInput[0];
 		this.surname = csvInput[1];
-		this.examDate = csvInput[2];
-		this.studyId = csvInput[3];
-		this.studyCardName = csvInput[4];
-		this.commonName = csvInput[5];
-		this.sex = csvInput[6];
-		this.birthDate = csvInput[7];
-		if (csvInput.length > 8) {
-			this.comment = csvInput[8];
+		this.studyId = csvInput[2];
+		this.studyCardName = csvInput[3];
+		this.commonName = csvInput[4];
+		try {
+			this.sex = Sex.valueOf(csvInput[5]);
+		} catch (IllegalArgumentException e) {
+			this.errorMessage = "Wrong pattern for argument: Sex must be M or F";
+			return;
+		}
+		try {
+			this.birthDate = LocalDate.parse(csvInput[6]);
+		} catch (DateTimeParseException e) {
+			this.errorMessage = "Wrong pattern for argument: birthDate format must be YYYY-MM-dd";
+			return;
+		}
+		if (csvInput.length > 7) {
+			this.comment = csvInput[7];
 		}
 	}
 	
@@ -37,7 +57,7 @@ public class CsvImport {
 	
 	String surname;
 	
-	String examDate;
+	Date examDate;
 	
 	// Second part is linked to import into sh-NG (all mandatory but comment)
 	String studyId;
@@ -46,35 +66,49 @@ public class CsvImport {
 	
 	String commonName;
 	
-	String sex;
+	Sex sex;
 	
 	String comment;
 	
-	String birthDate;
+	LocalDate birthDate;
 	
+	String errorMessage;
+	
+	/**
+	 * @return the errorMessage
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * @param errorMessage the errorMessage to set
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	/**
 	 * @return the birthDate
 	 */
-	public String getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
 	/**
 	 * @param birthDate the birthDate to set
 	 */
-	public void setBirthDate(String birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
-
-	// Finally a displayed error
-	String error;
-
 	
 	/**
 	 * @return the rawData
 	 */
 	public String[] getRawData() {
-		return rawData;
+		List<String> raw = new ArrayList<>(Arrays.asList(this.rawData));
+		raw.add(this.errorMessage);
+		return raw.toArray(new String[0]);
 	}
 
 	/**
@@ -116,14 +150,14 @@ public class CsvImport {
 	/**
 	 * @return the examDate
 	 */
-	public String getExamDate() {
+	public Date getExamDate() {
 		return examDate;
 	}
 
 	/**
 	 * @param examDate the examDate to set
 	 */
-	public void setExamDate(String examDate) {
+	public void setExamDate(Date examDate) {
 		this.examDate = examDate;
 	}
 
@@ -172,14 +206,14 @@ public class CsvImport {
 	/**
 	 * @return the sex
 	 */
-	public String getSex() {
+	public Sex getSex() {
 		return sex;
 	}
 
 	/**
 	 * @param sex the sex to set
 	 */
-	public void setSex(String sex) {
+	public void setSex(Sex sex) {
 		this.sex = sex;
 	}
 
@@ -195,20 +229,6 @@ public class CsvImport {
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	/**
-	 * @return the error
-	 */
-	public String getError() {
-		return error;
-	}
-
-	/**
-	 * @param error the error to set
-	 */
-	public void setError(String error) {
-		this.error = error;
 	}
 	
 }

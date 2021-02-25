@@ -43,7 +43,7 @@ public class UploadFromCsvActionListener implements ActionListener {
 		try (BufferedReader csvReader = new BufferedReader(new FileReader(selectedFile))) {
 			String row;
 			while ((row = csvReader.readLine()) != null) {
-			    subjects.add(new CsvImport(row.split(",")));
+				subjects.add(new CsvImport(row.split(",")));
 			}
 		} catch (Exception e) {
 			logger.error("Error while parsing the input file: ", e);

@@ -9,8 +9,6 @@ import java.awt.Point;
 import java.io.File;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -49,12 +47,14 @@ public class ImportFromCSVWindow extends JFrame {
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
 	ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	public JScrollPane scrollPaneUpload;
 
-	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
+		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.
 		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.csv.title"));
@@ -83,7 +83,7 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCOpenButton.gridx = 3;
 		gBCOpenButton.gridy = 2;
 		openButton.setEnabled(true);
-		importPanel.add(openButton, gBCOpenButton);
+		importPanel.add(openButton);
 		
 		uploadListener = new UploadFromCsvActionListener(this);
 		
@@ -95,7 +95,7 @@ public class ImportFromCSVWindow extends JFrame {
 		// CSV display here
         //headers for the table
         String[] columns = new String[] {
-            "Name", "SurName", "ExamDate", "StudyId", "test1", "test2", "test3", "test4"
+            "Name", "SurName", "Study Id", "StudyCard name", "Common name", "Sex", "Birth date", "Comment", "Error"
         };
         //create table with data
         table = new JTable();
@@ -105,6 +105,7 @@ public class ImportFromCSVWindow extends JFrame {
         //add the table to the frame
         importPanel.add(new JScrollPane(table));
         table.getParent().setVisible(false);
+        table.setSize(800, 460);
 		
 		// IMPORT button here when necessary
         importButton = new JButton("Import");
@@ -114,7 +115,7 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCImportButton.gridx = 3;
 		gBCImportButton.gridy = 2;
 		importButton.setEnabled(false);
-		importPanel.add(importButton, gBCImportButton);
+		importPanel.add(importButton);
 
 		importListener = new ImportFromCsvActionListener(this, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 		
@@ -126,7 +127,7 @@ public class ImportFromCSVWindow extends JFrame {
 		// center the frame
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		int windowWidth = 650;
+		int windowWidth = 1200;
 		int windowHeight = 460;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
@@ -141,20 +142,27 @@ public class ImportFromCSVWindow extends JFrame {
 	 */
 	public void displayError(String string) {
 		this.error.setText(string);
+		this.error.setVisible(true);
 	}
 
 	public void displayCsv(List<CsvImport> imports) {
 		this.error.setText("");
-		String[][] data = imports.stream().map(element -> element.getRawData()).collect(Collectors.toList()).toArray(new String[0][]);
         DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-		for (int i = 0; i < data.length; i++) {
-			// TODO: Check data consistency here ?
-			model.addRow(data[i]);
+        boolean inError = false;
+		for (CsvImport importRaw : imports) {
+			model.addRow(importRaw.getRawData());
+			if (importRaw.getErrorMessage() != null) {
+				inError= true;
+				this.error.setText("An error in the CSV keeps you from uploading data, please correct CSV input.");
+				this.error.setVisible(true);
+			}
 		}
+
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);
 		this.importListener.setCsvImports(imports);
-		importButton.setEnabled(true);
+		
+		importButton.setEnabled(!inError);
 	}
 }

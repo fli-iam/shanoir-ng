@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +16,6 @@ import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
-import org.shanoir.util.file.FileUtil;
 
 /**
  * This class downloads the files from the PACS or copies
@@ -98,26 +96,6 @@ public class DownloadOrCopyRunnable implements Runnable {
 		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
 		
 		logger.info(uploadFolder.getName() + ": finished: " + toString());
-	}
-	
-	private void copyFilesToUploadFolderInSeriesFolder(Set<org.shanoir.dicom.importer.Serie> selectedSeries, final File uploadFolder) {
-		final File seriesFolder = new File(uploadFolder, SERIES);
-		seriesFolder.mkdirs();
-		for (org.shanoir.dicom.importer.Serie serie : selectedSeries) {
-			final File serieIdFolder = new File(seriesFolder, serie.getId());
-			serieIdFolder.mkdirs();
-			List<String> newFileNamesOfSerie = new ArrayList<String>();
-			List<String> oldFileNamesOfSerie = serie.getFileNames();
-			for (Iterator iterator = oldFileNamesOfSerie.iterator(); iterator.hasNext();) {
-				String dicomFileName = (String) iterator.next();
-				File sourceFile = new File(filePathDicomDir + File.separator + dicomFileName);
-				dicomFileName = dicomFileName.replace(File.separator, UNDERSCORE);
-				File destFile = new File(serieIdFolder, dicomFileName);
-				FileUtil.copyFile(sourceFile, destFile);
-				newFileNamesOfSerie.add(dicomFileName);
-			}
-			serie.setFileNames(newFileNamesOfSerie);
-		}
 	}
 
 	@Override

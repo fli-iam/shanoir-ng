@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -278,7 +277,7 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 
-	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) throws Exception {
+	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) {
 		if (acquisitionEquipmentId != null) {
 			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
 			int code = response.getStatusLine().getStatusCode();
