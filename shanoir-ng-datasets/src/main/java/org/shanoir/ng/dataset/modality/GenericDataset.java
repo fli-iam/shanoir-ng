@@ -1,7 +1,10 @@
 package org.shanoir.ng.dataset.modality;
 
+import javax.persistence.Entity;
+
 import org.shanoir.ng.dataset.model.Dataset;
 
+@Entity
 public class GenericDataset extends Dataset {
 
 	/**
