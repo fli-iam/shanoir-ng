@@ -262,7 +262,7 @@ public class MainWindow extends JFrame {
 		});
 
 		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
-		menuBar.add(Box.createRigidArea(new Dimension(550,5)));
+		menuBar.add(Box.createRigidArea(new Dimension(400,5)));
 		menuBar.add(profileSelected);
 
 		/**

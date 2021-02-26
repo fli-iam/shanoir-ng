@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.JTabbedPane;
@@ -112,7 +113,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 		for (CsvImport importTodo : this.csvImports) {
 			org.shanoir.uploader.model.rest.Study study = studies.stream().filter(element -> element.getId().toString().equals(importTodo.getStudyId())).findFirst().get();
-			success = success && importData(importTodo, studyCardsByStudy.get(importTodo.getStudyId()), study );
+			success = importData(importTodo, studyCardsByStudy.get(importTodo.getStudyId()), study ) && success;
 		}
 
 		if (success) {
@@ -122,8 +123,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 			this.importFromCSVWindow.frame.setVisible(false);
 			this.importFromCSVWindow.frame.dispose();
 		} else {
-			this.importFromCSVWindow.error.setText("An import line failed, please check data in CSV  list.");
-			this.importFromCSVWindow.error.setVisible(true);
+			this.importFromCSVWindow.displayCsv(csvImports);
 		}
 		
 	}
@@ -138,16 +138,17 @@ public class ImportFromCsvActionListener implements ActionListener {
 	private boolean importData(CsvImport csvImport, List<StudyCard> studyCardsByStudy, org.shanoir.uploader.model.rest.Study study2) {
 
 		// 1. Check existence of study / study card
-		StudyCard sc = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst().get();
-		if (sc == null) {
+		Optional<StudyCard> scOpt = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst();
+		if (!scOpt.isPresent()) {
 			csvImport.setErrorMessage("The study card " +  csvImport.getStudyCardName() + " is not contained in the study " + study2.getId());
 			return false;
 		}
+		StudyCard sc = scOpt.get();
 
 		// 2. Request PACS to check the presence of data
 		Media media;
 		try {
-			media = dicomServerClient.queryDicomServer("DIR OL", "", "", "", null, null);
+			media = dicomServerClient.queryDicomServer(csvImport.getName().toUpperCase() + "*" + csvImport.getSurname().toUpperCase(), "", "", "", null, null);
 		} catch (Exception e) {
 			csvImport.setErrorMessage("The PACS data does not contain any data with such criteria.");
 			return false;
@@ -159,6 +160,10 @@ public class ImportFromCsvActionListener implements ActionListener {
 		Set<Serie> selectedSeries = new HashSet<>();
 		Patient pat = null;
 		Study stud = null;
+		if (media == null || media.getTreeNodes() == null || media.getTreeNodes().isEmpty()) {
+			csvImport.setErrorMessage("The PACS data does not contain any data with such criteria.");
+			return false;
+		}
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (item instanceof Patient) {
 				Patient patient = (Patient) item;
