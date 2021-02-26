@@ -39,11 +39,11 @@ public class ImportFromCSVWindow extends JFrame {
 	public JLabel error = new JLabel();
 	public JLabel csvDetail = new JLabel();
 	JButton importButton;
-	
+
 	final JPanel masterPanel;
-	
+
 	JTable table;
-	
+
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
@@ -85,7 +85,7 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCError.gridx = 0;
 		gBCError.gridy = 1;
 		masterPanel.add(this.error, gBCError);
-		
+
 		// OPEN button here
 		openButton = new JButton("Open");
 		GridBagConstraints gBCOpenButton = new GridBagConstraints();
@@ -94,32 +94,32 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCOpenButton.gridy = 2;
 		openButton.setEnabled(true);
 		masterPanel.add(openButton, gBCOpenButton);
-		
+
 		uploadListener = new UploadFromCsvActionListener(this);
-		
+
 		openButton.addActionListener(uploadListener);
-		
+
 		// CSV display here
-        //headers for the table
-        String[] columns = new String[] {
-            "Name", "SurName", "Study Id", "StudyCard name", "Common name", "Sex", "Birth date", "Comment", "Error"
-        };
-        // Create table with data
-        table = new JTable();
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setColumnIdentifiers(columns);
-        // 1100 to go
-        table.getColumnModel().getColumn(0).setMinWidth(100);
-        table.getColumnModel().getColumn(1).setMinWidth(100);
-        table.getColumnModel().getColumn(2).setMinWidth(5);
-        table.getColumnModel().getColumn(3).setMinWidth(100);
-        table.getColumnModel().getColumn(4).setMinWidth(100);
-        table.getColumnModel().getColumn(5).setMinWidth(5);
-        table.getColumnModel().getColumn(6).setMinWidth(90);
-        table.getColumnModel().getColumn(7).setMinWidth(100);
-        table.getColumnModel().getColumn(8).setMinWidth(350);
-        
-        // Add the table to the frame
+		//headers for the table
+		String[] columns = new String[] {
+				"Name", "SurName", "Study Id", "StudyCard name", "Common name", "Sex", "Birth date", "Comment", "Error"
+		};
+		// Create table with data
+		table = new JTable();
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model.setColumnIdentifiers(columns);
+		// 1100 to go
+		table.getColumnModel().getColumn(0).setMinWidth(100);
+		table.getColumnModel().getColumn(1).setMinWidth(100);
+		table.getColumnModel().getColumn(2).setMinWidth(5);
+		table.getColumnModel().getColumn(3).setMinWidth(100);
+		table.getColumnModel().getColumn(4).setMinWidth(100);
+		table.getColumnModel().getColumn(5).setMinWidth(5);
+		table.getColumnModel().getColumn(6).setMinWidth(90);
+		table.getColumnModel().getColumn(7).setMinWidth(100);
+		table.getColumnModel().getColumn(8).setMinWidth(350);
+
+		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
 		GridBagConstraints gBCTableanchor = new GridBagConstraints();
 		gBCTableanchor.anchor = GridBagConstraints.NORTHWEST;
@@ -131,13 +131,13 @@ public class ImportFromCSVWindow extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setSize(1100, 500);
 		scrollPane.setPreferredSize(new Dimension(1100, 500));
-        table.getParent().setVisible(false);
-        table.setSize(1100, 500);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tablePanel.add(scrollPane);
-		
+		table.getParent().setVisible(false);
+		table.setSize(1100, 500);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tablePanel.add(scrollPane);
+
 		// IMPORT button here when necessary
-        importButton = new JButton("Import");
+		importButton = new JButton("Import");
 		GridBagConstraints gBCImportButton = new GridBagConstraints();
 		gBCImportButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCImportButton.gridx = 0;
@@ -146,7 +146,7 @@ public class ImportFromCSVWindow extends JFrame {
 		masterPanel.add(importButton, gBCImportButton);
 
 		importListener = new ImportFromCsvActionListener(this, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
-		
+
 		importButton.addActionListener(importListener);
 
 		// center the frame
@@ -171,10 +171,10 @@ public class ImportFromCSVWindow extends JFrame {
 	}
 
 	public void displayCsv(List<CsvImport> imports) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.getDataVector().removeAllElements();
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model.getDataVector().removeAllElements();
 
-        boolean inError = false;
+		boolean inError = false;
 		for (CsvImport importRaw : imports) {
 			model.addRow(importRaw.getRawData());
 			if (importRaw.getErrorMessage() != null) {
@@ -187,7 +187,7 @@ public class ImportFromCSVWindow extends JFrame {
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);
 		this.importListener.setCsvImports(imports);
-		
+
 		importButton.setEnabled(!inError);
 	}
 }
