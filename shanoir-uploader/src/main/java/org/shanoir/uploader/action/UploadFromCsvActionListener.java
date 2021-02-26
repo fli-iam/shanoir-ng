@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.swing.JFileChooser;
 
@@ -18,12 +19,14 @@ public class UploadFromCsvActionListener implements ActionListener {
 
 	JFileChooser fileChooser;
 	ImportFromCSVWindow importFromCSVWindow;
+	private ResourceBundle resourceBundle;
 	
 	private static Logger logger = Logger.getLogger(UploadFromCsvActionListener.class);
 	
-	public UploadFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow) {
+	public UploadFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.fileChooser = new JFileChooser();
+		this.resourceBundle = resourceBundle;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class UploadFromCsvActionListener implements ActionListener {
 			}
 		} catch (Exception e) {
 			logger.error("Error while parsing the input file: ", e);
-			this.importFromCSVWindow.displayError("CSV was not correct, please upload a correct CSV file comma separated");
+			this.importFromCSVWindow.displayError(resourceBundle.getString("shanoir.uploader.import.csv.error.csv"));
 			return;
 		}
 		

@@ -84,10 +84,11 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCError.anchor = GridBagConstraints.NORTHWEST;
 		gBCError.gridx = 0;
 		gBCError.gridy = 1;
+		this.error.setForeground(Color.RED);
 		masterPanel.add(this.error, gBCError);
 
 		// OPEN button here
-		openButton = new JButton("Open");
+		openButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.open"));
 		GridBagConstraints gBCOpenButton = new GridBagConstraints();
 		gBCOpenButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCOpenButton.gridx = 0;
@@ -95,14 +96,22 @@ public class ImportFromCSVWindow extends JFrame {
 		openButton.setEnabled(true);
 		masterPanel.add(openButton, gBCOpenButton);
 
-		uploadListener = new UploadFromCsvActionListener(this);
+		uploadListener = new UploadFromCsvActionListener(this, resourceBundle);
 
 		openButton.addActionListener(uploadListener);
 
 		// CSV display here
 		//headers for the table
 		String[] columns = new String[] {
-				"Name", "SurName", "Study Id", "StudyCard name", "Common name", "Sex", "Birth date", "Comment", "Error"
+				resourceBundle.getString("shanoir.uploader.import.csv.column.name"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.surname"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.study.id"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.studycard"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.common.name"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.sex"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.birthdate"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.comment"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.error")
 		};
 		// Create table with data
 		table = new JTable();
@@ -137,7 +146,7 @@ public class ImportFromCSVWindow extends JFrame {
 		tablePanel.add(scrollPane);
 
 		// IMPORT button here when necessary
-		importButton = new JButton("Import");
+		importButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.import"));
 		GridBagConstraints gBCImportButton = new GridBagConstraints();
 		gBCImportButton.anchor = GridBagConstraints.NORTHWEST;
 		gBCImportButton.gridx = 0;
@@ -145,7 +154,7 @@ public class ImportFromCSVWindow extends JFrame {
 		importButton.setEnabled(false);
 		masterPanel.add(importButton, gBCImportButton);
 
-		importListener = new ImportFromCsvActionListener(this, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
+		importListener = new ImportFromCsvActionListener(this, resourceBundle, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 
 		importButton.addActionListener(importListener);
 
@@ -179,7 +188,7 @@ public class ImportFromCSVWindow extends JFrame {
 			model.addRow(importRaw.getRawData());
 			if (importRaw.getErrorMessage() != null) {
 				inError= true;
-				this.error.setText("An error in the CSV keeps you from uploading data, please correct CSV input.");
+				this.error.setText(resourceBundle.getString("shanoir.uploader.import.csv.error.after.import"));
 				this.error.setVisible(true);
 			}
 		}

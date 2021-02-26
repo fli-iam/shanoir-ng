@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.swing.JTabbedPane;
@@ -22,6 +23,7 @@ import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.dicom.importer.UploadJobManager;
 import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -59,14 +61,18 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 	List<CsvImport> csvImports;
 	ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	private ResourceBundle resourceBundle;
+	private IdentifierCalculator identifierCalculator;
 
 	private static Logger logger = Logger.getLogger(ImportFromCsvActionListener.class);
 
-	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
+		this.resourceBundle = resourceBundle;
+		this.identifierCalculator = new IdentifierCalculator();
 	}
 
 	@Override
@@ -90,7 +96,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idealist);
 			
 			if (studyCards == null) {
-				throw new ShanoirException("Could not retrieve study cards linked to given studies, please check data consistency");
+				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
 			
 			// Iterate over study cards to get equipement + fille study => SC map
@@ -98,14 +104,14 @@ public class ImportFromCsvActionListener implements ActionListener {
 				AcquisitionEquipment acquisitionEquipment;
 				acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(studyCard.getAcquisitionEquipmentId());
 				if (acquisitionEquipment == null) {
-					throw new ShanoirException("Could not retrieve acquisition equipement linked to study card " + studyCard.getName() + ", please check data consistency");
+					throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 				}
 				studyCard.setAcquisitionEquipment(acquisitionEquipment);
 				studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
 				studyCardsByStudy.get(studyCard.getStudyId().toString()).add(studyCard);
 			}
 		} catch (Exception e1) {
-			this.importFromCSVWindow.error.setText(e1.getMessage());
+			this.importFromCSVWindow.error.setText(resourceBundle.getString(e1.getMessage()));
 			return;
 		}
 
@@ -140,7 +146,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 		// 1. Check existence of study / study card
 		Optional<StudyCard> scOpt = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst();
 		if (!scOpt.isPresent()) {
-			csvImport.setErrorMessage("The study card " +  csvImport.getStudyCardName() + " is not contained in the study " + study2.getId());
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			return false;
 		}
 		StudyCard sc = scOpt.get();
@@ -150,18 +156,18 @@ public class ImportFromCsvActionListener implements ActionListener {
 		try {
 			media = dicomServerClient.queryDicomServer(csvImport.getName().toUpperCase() + "*" + csvImport.getSurname().toUpperCase(), "", "", "", null, null);
 		} catch (Exception e) {
-			csvImport.setErrorMessage("The PACS data does not contain any data with such criteria.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
 		
-		// 3. Select all series
+		// 3. Select series
 		
 		//TODO here: Faire le tri des données selon un critère ?
 		Set<Serie> selectedSeries = new HashSet<>();
 		Patient pat = null;
 		Study stud = null;
 		if (media == null || media.getTreeNodes() == null || media.getTreeNodes().isEmpty()) {
-			csvImport.setErrorMessage("The PACS data does not contain any data with such criteria.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
@@ -181,17 +187,20 @@ public class ImportFromCsvActionListener implements ActionListener {
 			}
 		}
 		if (selectedSeries.isEmpty()) {
-			csvImport.setErrorMessage("The PACS data does not contain any data with such criteria.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
 
 		// 4. Create DicomDataTransferObject
 		DicomDataTransferObject dicomData = null;
+		String subjectIdentifier = "";
 		try {
 			dicomData = new DicomDataTransferObject(null, pat, stud);
-			dicomData.setSubjectIdentifier(csvImport.getCommonName());
+			// Calculate identifier
+			subjectIdentifier = this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			dicomData.setSubjectIdentifier(subjectIdentifier);
 		} catch (Exception e) {
-			csvImport.setErrorMessage("An unexpected error happend, please contact an administrator");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
 
@@ -215,7 +224,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 		if (allFileNames == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
-			csvImport.setErrorMessage("Copy from PACS failed, please contact the PACS administrator.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.pacs.copy"));
 			return false;
 		}
 		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
@@ -234,10 +243,11 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 		logger.info(uploadFolder.getName() + ": finished: " + toString());
 
-		// 10.  Create subject
+		// 8.  Create subject
 		Subject subject = new Subject();
 		subject.setName(csvImport.getCommonName());
 		subject.setSex(csvImport.getSex());
+		subject.setIdentifier(subjectIdentifier);
 
 		subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
 
@@ -251,11 +261,11 @@ public class ImportFromCsvActionListener implements ActionListener {
 		
 		if (createdSubjet == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
-			csvImport.setErrorMessage("Subject creation failed, please check common name uniqueness and your rights on the study.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.subject"));
 			return false;
 		}
 
-		// 10. Create examination
+		// 9. Create examination
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
@@ -267,12 +277,12 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 		if (createdExam == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
-			csvImport.setErrorMessage("Examination creation failed, please check data consistency and your rights to import on the study.");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.examination"));
 			return false;
 		}
 
 		/**
-		 * 11. Fill import-job.json to prepare the import
+		 * 10. Fill import-job.json to prepare the import
 		 */
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, createdSubjet.getName(), createdSubjet.getId(), createdExam.getId(), study2, sc);
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());

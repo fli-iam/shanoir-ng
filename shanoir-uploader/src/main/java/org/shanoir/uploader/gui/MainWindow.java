@@ -198,7 +198,7 @@ public class MainWindow extends JFrame {
 		JMenu mnImport = new JMenu(resourceBundle.getString("shanoir.uploader.importMenu"));
 		menuBar.add(mnImport);
 		
-		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.excell"));
+		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.csv"));
 		mnImport.add(mnImportExcell);
 		
 		mnImportExcell.addActionListener(new ActionListener() {
