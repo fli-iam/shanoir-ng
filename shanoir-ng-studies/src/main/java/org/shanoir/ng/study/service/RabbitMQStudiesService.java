@@ -86,8 +86,6 @@ public class RabbitMQStudiesService {
 	}
 
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
 	 * @param commandArrStr the task as a json string.
 	 */
