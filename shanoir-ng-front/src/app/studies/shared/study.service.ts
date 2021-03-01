@@ -16,6 +16,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
+import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
@@ -29,6 +30,8 @@ import { Study, StudyDTO } from './study.model';
 export class StudyService extends EntityService<Study> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
+
+    private _duasToSign: number = 0;
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
         super(http)
@@ -90,25 +93,54 @@ export class StudyService extends EntityService<Study> {
         return this.findStudiesIcanAdmin().then(studies => studies.map(study => new IdName(study.id, study.name)));
     }
 
-    uploadFile(fileToUpload: File, studyId: number): Observable<any> {
-        const endpoint = this.API_URL + '/protocol-file-upload/' + studyId;
+    uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
+        const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
-        formData.append('file', fileToUpload, fileToUpload.name);
+        if (fileType == 'dua') {
+            formData.append('file', fileToUpload, 'DUA-' + fileToUpload.name);
+        } else if (fileType == 'protocol-file') {
+            formData.append('file', fileToUpload, fileToUpload.name);
+        }
         return this.http.post<any>(endpoint, formData);
     }
 
-    deleteFile(studyId: number): Observable<any> {
-        const endpoint = this.API_URL + '/protocol-file-delete/' + studyId;
+    deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
+        const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
         return this.http.delete(endpoint);
     }
 
-    downloadFile(fileName: string, studyId: number): void {
-        const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).subscribe(response => {
+    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua'): void {
+        this.downloadBlob(fileName, studyId, fileType).then(response => {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);
             }
-        });;
+        })
+    }
+
+    downloadBlob(fileName: string, studyId: number, fileType: 'protocol-file'|'dua'): Promise<HttpResponse<Blob>> {
+        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
+        return this.http.get(endpoint, { observe: 'response', responseType: 'blob' }).toPromise();
+    }
+
+    getMyDUA(): Promise<DataUserAgreement[]> {
+        return this.http.get<DataUserAgreement[]>(AppUtils.BACKEND_API_STUDY_URL + '/dua')
+                .toPromise()
+                .then(duas => {
+                    this._duasToSign = duas ? duas.length : 0;
+                    return duas;
+                });
+    }
+
+    get duasToSign(): number {
+        return this._duasToSign;
+    }
+
+    acceptDUA(duaId: number): Promise<void> {
+        return this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/dua/' + duaId, null)
+                .toPromise()
+                .then(() => {
+                    this.getMyDUA();
+                });
     }
 
     private getFilename(response: HttpResponse<any>): string {

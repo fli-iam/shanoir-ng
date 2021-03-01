@@ -14,21 +14,29 @@ $ * Shanoir NG - Import, manage and share neuroimaging data
 
 package org.shanoir.ng.study;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -44,6 +52,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Study service test.
@@ -77,10 +86,21 @@ public class StudyServiceTest {
 	@Mock
 	private StudyUserUpdateBroadcastService studyUserCom;
 
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	}
+
 	@Before
 	public void setup() {
+	    ReflectionTestUtils.setField(studyService, "dataDir", this.tempFolderPath);
+
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
@@ -98,15 +118,6 @@ public class StudyServiceTest {
 
 		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
-
-//	@Test
-//	public void findAllTest() {
-//		final List<Study> studies = studyService.findAll();
-//		Assert.assertNotNull(studies);
-//		Assert.assertTrue(studies.size() == 1);
-//
-//		Mockito.verify(studyRepository, Mockito.times(1)).findAll();
-//	}
 
 	@Test
 	public void findByIdTest() throws AccessDeniedException {
@@ -141,11 +152,29 @@ public class StudyServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
-		final Study updatedStudy = studyService.update(createStudy());
-		Assert.assertNotNull(updatedStudy);
-		Assert.assertTrue(UPDATED_STUDY_NAME.equals(updatedStudy.getName()));
+	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException, IOException {
+		// Also test protocol file path
+		File protocol = new File(tempFolderPath + "study-1/old.txt");
 
+		protocol.getParentFile().mkdirs();
+		protocol.createNewFile();
+		Study dbStudy = ModelsUtil.createStudy();
+		dbStudy.setId(1L);
+		dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
+		Study updatedStudy = createStudy();
+		updatedStudy.setId(1L);
+		updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
+
+		given(studyRepository.findOne(STUDY_ID)).willReturn(dbStudy);
+
+		final Study returnedStudy = studyService.update(updatedStudy);
+		Assert.assertNotNull(returnedStudy);
+		Assert.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
+		assertNotNull(returnedStudy.getProtocolFilePaths());
+		assertEquals(1, returnedStudy.getProtocolFilePaths().size());
+		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
+		// Check that the file was deleted
+		assertFalse(protocol.exists());
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 	

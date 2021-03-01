@@ -182,6 +182,7 @@ export class EegDatasetDTO extends DatasetDTO {
     channels: Channel[];
     events: Event[];
     coordinatesSystem: string;
+    selected: boolean;
 }
 
 

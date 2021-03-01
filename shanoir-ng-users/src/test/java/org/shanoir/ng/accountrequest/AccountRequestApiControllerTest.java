@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.accountrequest;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,12 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.ArgumentCaptor;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
@@ -72,9 +68,6 @@ public class AccountRequestApiControllerTest {
 	
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
-
-	@MockBean
-	ShanoirEventService eventService;
 
 	@Before
 	public void setup() throws SecurityException {
@@ -125,12 +118,6 @@ public class AccountRequestApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isNoContent());
 
-		ArgumentCaptor<ShanoirEvent> eventCaptor = new ArgumentCaptor();
-		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
-		ShanoirEvent event = eventCaptor.getValue();
-		assertEquals("1", event.getObjectId());
-		assertEquals("2", ""+event.getUserId());
-		assertEquals(user.getUsername(), event.getMessage());
 	}
 
 }

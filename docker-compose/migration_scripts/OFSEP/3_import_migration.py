@@ -38,7 +38,7 @@ print("Delete study_user: end")
 print("Import study_user: start")    
 sourceCursor.execute("""SELECT rsu.REL_STUDY_USER_ID, rsu.IS_RECEIVE_ANONYMIZATION_REPORT, rsu.IS_RECEIVE_NEW_IMPORT_REPORT, rsu.STUDY_ID, rsu.USER_ID, u.USERNAME 
 	FROM REL_STUDY_USER rsu JOIN USERS u ON rsu.USER_ID = u.USER_ID""")
-query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
+query = "INSERT INTO study_user (id, confirmed, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, 1, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Import study_user: end")

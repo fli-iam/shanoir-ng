@@ -54,6 +54,8 @@ public class StudyDTO {
 	private int nbSujects;
 
 	private List<String> protocolFilePaths;
+	
+	private List<String> dataUserAgreementPaths;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -384,6 +386,20 @@ public class StudyDTO {
 		this.studyUserList = studyUserList;
 	}
 
+	/**
+	 * @return the dataUserAgreementPaths
+	 */
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
+	}
+
+	/**
+	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
+	 */
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
+	}
+	
 	public boolean isChallenge() {
 		return challenge;
 	}

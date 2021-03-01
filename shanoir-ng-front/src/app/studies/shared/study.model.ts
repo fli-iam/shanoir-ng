@@ -36,6 +36,7 @@ export class Study extends Entity {
     nbExaminations: number;
     nbSujects: number;
     protocolFilePaths: string[];
+    dataUserAgreementPaths: string[];
     startDate: Date;
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
@@ -71,6 +72,7 @@ export class StudyDTO {
     challenge: boolean;
     name: string;
     protocolFilePaths: string[];
+    dataUserAgreementPaths: string[];
     startDate: Date;
     studyCenterList: StudyCenterDTO[];
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
@@ -91,6 +93,7 @@ export class StudyDTO {
         this.name = study.name;
         this.challenge = study.challenge;
         this.protocolFilePaths = study.protocolFilePaths;
+        this.dataUserAgreementPaths = study.dataUserAgreementPaths;
         this.startDate = study.startDate;
         this.studyCenterList = study.studyCenterList ? study.studyCenterList.map(sc => {
             let dto = new StudyCenterDTO(sc);

@@ -65,6 +65,7 @@ public class StudyUserUpdateService {
 			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
+			existingSu.setConfirmed(replacingSu.isConfirmed());
         }
         
         if (!toBeCreated.isEmpty()) {
