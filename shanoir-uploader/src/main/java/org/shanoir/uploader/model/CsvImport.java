@@ -25,7 +25,7 @@ public class CsvImport {
         this.rawData = Arrays.copyOf(csvInput, 8);
 
         if (csvInput == null || csvInput.length < 7) {
-			this.errorMessage = "Not enough columns in CSV, please check it";
+			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
 		this.name = csvInput[0];
@@ -36,13 +36,13 @@ public class CsvImport {
 		try {
 			this.sex = Sex.valueOf(csvInput[5]);
 		} catch (IllegalArgumentException e) {
-			this.errorMessage = "Wrong pattern for argument: Sex must be M or F";
+			this.errorMessage = "shanoir.uploader.import.csv.error.sex.pattern";
 			return;
 		}
 		try {
 			this.birthDate = LocalDate.parse(csvInput[6]);
 		} catch (DateTimeParseException e) {
-			this.errorMessage = "Wrong pattern for argument: birthDate format must be YYYY-MM-dd";
+			this.errorMessage = "shanoir.uploader.import.csv.error.date.format";
 			return;
 		}
 		if (csvInput.length > 7) {

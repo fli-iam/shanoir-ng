@@ -20,9 +20,9 @@ public class UploadFromCsvActionListener implements ActionListener {
 	JFileChooser fileChooser;
 	ImportFromCSVWindow importFromCSVWindow;
 	private ResourceBundle resourceBundle;
-	
+
 	private static Logger logger = Logger.getLogger(UploadFromCsvActionListener.class);
-	
+
 	public UploadFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.fileChooser = new JFileChooser();
@@ -46,14 +46,18 @@ public class UploadFromCsvActionListener implements ActionListener {
 		try (BufferedReader csvReader = new BufferedReader(new FileReader(selectedFile))) {
 			String row;
 			while ((row = csvReader.readLine()) != null) {
-				subjects.add(new CsvImport(row.split(",")));
+				CsvImport importRow = new CsvImport(row.split(","));
+				if (importRow.getErrorMessage() != null) {
+					importRow.setErrorMessage(resourceBundle.getString(importRow.getErrorMessage()));
+				}
+				subjects.add(importRow);
 			}
 		} catch (Exception e) {
 			logger.error("Error while parsing the input file: ", e);
 			this.importFromCSVWindow.displayError(resourceBundle.getString("shanoir.uploader.import.csv.error.csv"));
 			return;
 		}
-		
+
 		this.importFromCSVWindow.displayCsv(subjects);
 	}
 
