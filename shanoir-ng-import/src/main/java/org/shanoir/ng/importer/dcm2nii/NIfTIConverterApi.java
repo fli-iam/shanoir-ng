@@ -57,4 +57,14 @@ public interface NIfTIConverterApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<NIfTIConverter>> findNiftiConverters();
+
+	@ApiOperation(value = "", notes = "If exists, returns all the niftiConverters", response = NIfTIConverter.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found nifti converters", response = NIfTIConverter.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = NIfTIConverter.class),
+			@ApiResponse(code = 403, message = "forbidden", response = NIfTIConverter.class),
+			@ApiResponse(code = 404, message = "no nifti converter found", response = NIfTIConverter.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = NIfTIConverter.class) })
+	@GetMapping(value = "", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Boolean> convertData(Long niftiConverterId, String dataPath);
 }

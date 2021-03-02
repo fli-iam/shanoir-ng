@@ -55,4 +55,10 @@ public class NIfTIConverterApiController implements NIfTIConverterApi{
 		}
 		return new ResponseEntity<>(niftiConverters, HttpStatus.OK);
 	}
+
+	@Override
+	public ResponseEntity<Boolean> convertData(Long niftiConverterId, String dataPath) {
+		
+		return null;
+	}
 }

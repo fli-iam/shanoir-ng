@@ -270,9 +270,7 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public void downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@ApiParam(value = "Dowloading nifti, decide the nifti converter id")
-			@Valid
-			@RequestParam(value = "converterId", required = false, defaultValue="")  Long converterId,
+			@ApiParam(value = "Dowloading nifti, decide the nifti converter id") final Long converterId,
 			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM)
 			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
 					throws RestServiceException, IOException {
@@ -312,23 +310,17 @@ public class DatasetApiController implements DatasetApi {
 			} else if (NII.equals(format)) {
 				boolean defaultConverter = true;
 				// Check if the nifti converter is the one configured
-				if (converterId != null) {
-					if (dataset.getDatasetAcquisition().getStudyCard() != null) {
-						// Check converter id
-						if (!dataset.getDatasetAcquisition().getStudyCard().getNiftiConverterId().equals(converterId)) {
+				if (dataset.getDatasetAcquisition().getStudyCard() != null) {
+					// Check converter id
+				} else {
+					// Check every dataset expression
+					for (DatasetExpression exp : dataset.getDatasetExpressions()) {
+						if (!exp.getNiftiConverterId().equals(converterId)) {
 							defaultConverter = false;
-						}
-					} else {
-						// Check every dataset expression
-						for (DatasetExpression exp : dataset.getDatasetExpressions()) {
-							if (DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(exp.getDatasetExpressionFormat()) &&
-									!exp.getNiftiConverterId().equals(converterId)) {
-								defaultConverter = false;
-							}
 						}
 					}
 				}
-
+				
 				// If we use the default converter, just download the dataset
 				if (defaultConverter) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
@@ -354,7 +346,6 @@ public class DatasetApiController implements DatasetApi {
 					tmpFilePath = tmpFile.getAbsolutePath();
 					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
 				}
-
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
