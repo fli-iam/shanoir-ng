@@ -24,6 +24,7 @@ export class StudyUser {
     studyUserRights: StudyUserRight[];
     userName: string;
     user: User;
+    confirmed: boolean = false;
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);

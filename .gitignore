@@ -34,6 +34,7 @@ shanoir-ng-tests/tests/geckodriver.log
 shanoir-ng-users/shanoir-events-log.log
 shanoir-ng-preclinical/nullbruker/
 shanoir-ng-front/node/
+shanoir-ng-front/package-lock.json
 *.class
 *.jar
 *.project

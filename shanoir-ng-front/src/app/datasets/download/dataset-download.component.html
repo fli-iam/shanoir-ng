@@ -4,7 +4,7 @@
 <app-modal #downloadDialog >
     <div class="main">
     <div class="header">Massive download</div>
-    <div *ngIf="inError"> class="body" {{errorMessage}}</div>
+    <div *ngIf="inError" class="body">{{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
         <ng-container *ngIf="mode == 'all'">
             <p>Please select download options</p>
