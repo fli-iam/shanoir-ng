@@ -17,6 +17,7 @@ import java.util.Set;
 
 import javax.swing.JTabbedPane;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
@@ -161,8 +162,6 @@ public class ImportFromCsvActionListener implements ActionListener {
 		}
 		
 		// 3. Select series
-		
-		//TODO here: Faire le tri des données selon un critère ?
 		Set<Serie> selectedSeries = new HashSet<>();
 		Patient pat = null;
 		Study stud = null;
@@ -170,18 +169,34 @@ public class ImportFromCsvActionListener implements ActionListener {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
+		boolean foundPatient = false;
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
+			if (foundPatient) {
+				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
+				break;
+			}
 			if (item instanceof Patient) {
 				Patient patient = (Patient) item;
 				pat = patient;
 				Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+					// Select only one study (not possible otherwise)
+					if (foundPatient) {
+						break;
+					}
 					Study study = (Study) studiesIt.next();
+					if (!study.getDisplayString().contains(csvImport.getStudyFilter())) {
+						continue;
+					}
 					stud = study;
 					Collection<DicomTreeNode> series = study.getTreeNodes().values();
 					for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
+						// Filter on serie
 						Serie serie = (Serie) seriesIt.next();
-						selectedSeries.add(serie);
+						if (StringUtils.isBlank(csvImport.getAcquisitionFilter()) || serie.getDescription().contains(csvImport.getAcquisitionFilter())) {
+							selectedSeries.add(serie);
+							foundPatient = true;
+						}
 					}
 				}
 			}

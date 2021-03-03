@@ -22,9 +22,9 @@ public class CsvImport {
 
 	public CsvImport(String[] csvInput) throws ShanoirException {
 
-        this.rawData = Arrays.copyOf(csvInput, 8);
+        this.rawData = Arrays.copyOf(csvInput, 10);
 
-        if (csvInput == null || csvInput.length < 7) {
+        if (csvInput == null || csvInput.length < 9) {
 			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
@@ -45,8 +45,10 @@ public class CsvImport {
 			this.errorMessage = "shanoir.uploader.import.csv.error.date.format";
 			return;
 		}
-		if (csvInput.length > 7) {
-			this.comment = csvInput[7];
+		this.acquisitionFilter = csvInput[7];
+		this.studyFilter = csvInput[8];
+		if (csvInput.length > 9) {
+			this.comment = csvInput[9];
 		}
 	}
 	
@@ -73,6 +75,10 @@ public class CsvImport {
 	LocalDate birthDate;
 	
 	String errorMessage;
+	
+	String acquisitionFilter;
+	
+	String studyFilter;
 	
 	/**
 	 * @return the errorMessage
@@ -229,6 +235,34 @@ public class CsvImport {
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	/**
+	 * @return the acquisitionFilter
+	 */
+	public String getAcquisitionFilter() {
+		return acquisitionFilter;
+	}
+
+	/**
+	 * @param acquisitionFilter the acquisitionFilter to set
+	 */
+	public void setAcquisitionFilter(String acquisitionFilter) {
+		this.acquisitionFilter = acquisitionFilter;
+	}
+
+	/**
+	 * @return the studyFilter
+	 */
+	public String getStudyFilter() {
+		return studyFilter;
+	}
+
+	/**
+	 * @param studyFilter the studyFilter to set
+	 */
+	public void setStudyFilter(String studyFilter) {
+		this.studyFilter = studyFilter;
 	}
 	
 }
