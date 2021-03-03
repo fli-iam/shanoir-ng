@@ -59,8 +59,8 @@ public class ImportFromCSVWindow extends JFrame {
 
 		// Create the frame.
 		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.csv.title"));
-		frame.setSize(1200, 600);
-		this.setSize(1200, 600);
+		frame.setSize(1600, 600);
+		this.setSize(1600, 600);
 
 		// What happens when the frame closes?
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -110,6 +110,8 @@ public class ImportFromCSVWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.import.csv.column.common.name"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.sex"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.birthdate"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.study.filter"),
+				resourceBundle.getString("shanoir.uploader.import.csv.column.acquisition.filter"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.comment"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.error")
 		};
@@ -126,7 +128,9 @@ public class ImportFromCSVWindow extends JFrame {
 		table.getColumnModel().getColumn(5).setMinWidth(5);
 		table.getColumnModel().getColumn(6).setMinWidth(90);
 		table.getColumnModel().getColumn(7).setMinWidth(100);
-		table.getColumnModel().getColumn(8).setMinWidth(350);
+		table.getColumnModel().getColumn(8).setMinWidth(100);
+		table.getColumnModel().getColumn(9).setMinWidth(100);
+		table.getColumnModel().getColumn(10).setMinWidth(350);
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
@@ -134,14 +138,14 @@ public class ImportFromCSVWindow extends JFrame {
 		gBCTableanchor.anchor = GridBagConstraints.NORTHWEST;
 		gBCTableanchor.gridx = 0;
 		gBCTableanchor.gridy = 3;
-		tablePanel.setSize(1100, 500);
+		tablePanel.setSize(1500, 500);
 		masterPanel.add(tablePanel , gBCTableanchor);
 
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setSize(1100, 500);
-		scrollPane.setPreferredSize(new Dimension(1100, 500));
+		scrollPane.setSize(1500, 500);
+		scrollPane.setPreferredSize(new Dimension(1500, 500));
 		table.getParent().setVisible(false);
-		table.setSize(1100, 500);
+		table.setSize(1500, 500);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		tablePanel.add(scrollPane);
 
@@ -161,7 +165,7 @@ public class ImportFromCSVWindow extends JFrame {
 		// center the frame
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		int windowWidth = 1200;
+		int windowWidth = 1600;
 		int windowHeight = 600;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
