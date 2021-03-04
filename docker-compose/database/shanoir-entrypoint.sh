@@ -22,10 +22,13 @@
 #   manual  -> apply the migrations manually and exit
 #              (to be used when migrating to a newer shanoir version)
 #
-#   auto    -> run the mysqld as pid 1, then intialise or apply migrations in a
-#              background process
-#              (to be used in development mode, *not intended for production*)
+#   never   -> do not apply anything, just run the myslqd server
+#              (to be used for normal operation)
 #
+#   auto    -> do not apply anything, just run the myslqd server
+#              (to be used for development only: in auto mode there is no
+#              migration tracking: migrations are applied automatically by the
+#              microservices)
 
 DB_CHANGES_DIR="/opt/db-changes"
 
@@ -63,19 +66,6 @@ stop_mysqld()
 	kill "$mysqld_pid"
 	wait
 	echo "$HEADER done"
-}
-
-# return true if the migrations table exists
-check_migrations_db()
-{
-	local tbs="`$MYSQL "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
-	if [ -n "$tbs" ] ; then
-		echo "$HEADER migration table exists"
-		return 0
-	else
-		echo "$HEADER migration table does not exist"
-		return 1
-	fi
 }
 
 # list all existing migrations in the DB_CHANGES_DIR
@@ -188,17 +178,10 @@ if [ "$1" = mysqld ] ; then
 		;;
 	auto)
 		# automatic mode
-		# - run mysqld as PID 1
-		# - init db or apply migrations in a backgroung process
-		(
-			wait_mysqld
-			if check_migrations_db ; then
-				apply_migrations
-			else
-				init_migrations
-			fi
-		)&
-		;;
+                #
+                # no migration tracking (migrations applied automatically by
+                # the microservices)
+                ;;
 	manual)
 		# manual mode
 		# - run mysqld in a background process
