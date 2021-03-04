@@ -260,6 +260,11 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyUser su : study.getStudyUserList()) {
 			if (su.getId() == null) {
 				toBeCreated.add(su);
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					su.setConfirmed(false);
+				} else {
+					su.setConfirmed(true);
+				}
 			} else {
 				replacing.put(su.getId(), su);
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
