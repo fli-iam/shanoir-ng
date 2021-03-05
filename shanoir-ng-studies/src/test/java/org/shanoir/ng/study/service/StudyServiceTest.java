@@ -12,13 +12,14 @@ $ * Shanoir NG - Import, manage and share neuroimaging data
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -85,6 +87,9 @@ public class StudyServiceTest {
 
 	@Mock
 	private StudyUserUpdateBroadcastService studyUserCom;
+	
+	@Mock
+	private DataUserAgreementService dataUserAgreementService;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
@@ -183,22 +188,93 @@ public class StudyServiceTest {
 	public void updateStudyUsersTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, StudyUserRight.CAN_ADMINISTRATE));
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
 		
 		Study updated = createStudy();
 		updated.setStudyUserList(new ArrayList<StudyUser>());
-		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, StudyUserRight.CAN_DOWNLOAD));
-		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, StudyUserRight.CAN_SEE_ALL));
+		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
+		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 		
 		given(studyRepository.findOne(STUDY_ID)).willReturn(existing);
 		given(studyUserRepository.findOne(1L)).willReturn(existing.getStudyUserList().get(0));
 		given(studyUserRepository.findOne(2L)).willReturn(existing.getStudyUserList().get(1));
 		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
-		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, StudyUserRight.CAN_SEE_ALL));
+		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 		given(studyUserRepository.save(in)).willReturn(out);
 
 		studyService.update(updated);
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+	public void testUpdateStudyUsersNoDUA() {
+		Study existing = createStudy();
+		existing.setStudyUserList(new ArrayList<StudyUser>());
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, false, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, false, StudyUserRight.CAN_ADMINISTRATE));
+		
+		Study updated = createStudy();
+		updated.setStudyUserList(new ArrayList<StudyUser>());
+		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, false, StudyUserRight.CAN_DOWNLOAD));
+		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
+		updated.getStudyUserList().add(suToBeAdded);
+		
+		given(studyUserRepository.save(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+
+		studyService.updateStudyUsers(existing, updated);
+		for (StudyUser su : updated.getStudyUserList()) {
+			// all are now confirmed
+			assertTrue(su.isConfirmed());
+			if (su.getId() == null) {
+				assertEquals(suToBeAdded, su);
+			}
+			else if (su.getId().equals("1L")) {
+				assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
+				assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
+			}
+			else if (su.getId().equals("2L")) {
+				//This su should have been deleted
+				fail("This study user with id 2 should have been removed");
+			}
+		}
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
+	public void testUpdateStudyUsersAddDUA() {
+		
+		// In this method, a new DUA is added
+		Study existing = createStudy();
+		existing.setStudyUserList(new ArrayList<StudyUser>());
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
+		
+		Study updated = createStudy();
+		updated.setDataUserAgreementPaths(Collections.singletonList("truc"));
+		updated.setStudyUserList(new ArrayList<StudyUser>());
+		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
+		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);
+		updated.getStudyUserList().add(suToBeAdded);
+		
+		given(studyUserRepository.save(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+
+		studyService.updateStudyUsers(existing, updated);
+		for (StudyUser su : updated.getStudyUserList()) {
+			// all are now not confirmed
+			assertFalse(su.isConfirmed());
+			if (su.getId() == null) {
+				assertEquals(suToBeAdded, su);
+			}
+			else if (su.getId().equals(1L)) {
+				assertTrue(su.getStudyUserRights().contains(StudyUserRight.CAN_DOWNLOAD));
+				assertFalse(su.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT));
+			}
+			else if (su.getId().equals(2L)) {
+				//This su should have been deleted
+				fail("This study user with id 2 should have been removed");
+			}
+		}
 	}
 
 	private Study createStudy() {
@@ -209,11 +285,12 @@ public class StudyServiceTest {
 		return study;
 	}
 	
-	private StudyUser createStudyUsers(Long suId, Long userId, Study study, StudyUserRight... rights) {
+	private StudyUser createStudyUsers(Long suId, Long userId, Study study, boolean confirmed, StudyUserRight... rights) {
 		StudyUser studyUser = new StudyUser();
 		studyUser.setId(suId);
 		studyUser.setStudy(study);
 		studyUser.setUserId(userId);
+		studyUser.setConfirmed(true);
 		List<StudyUserRight> studyUserRights = new ArrayList<>();
 		for (StudyUserRight right : rights) {
 			studyUserRights.add(right);

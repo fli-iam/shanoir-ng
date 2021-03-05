@@ -242,7 +242,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study studyDb, Study study) {
+	protected void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
 			return;
 		}
@@ -260,11 +260,6 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyUser su : study.getStudyUserList()) {
 			if (su.getId() == null) {
 				toBeCreated.add(su);
-				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
-					su.setConfirmed(false);
-				} else {
-					su.setConfirmed(true);
-				}
 			} else {
 				replacing.put(su.getId(), su);
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
@@ -312,6 +307,8 @@ public class StudyServiceImpl implements StudyService {
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+				} else {
+					su.setConfirmed(true);
 				}
 				created.add(su);
 			}
