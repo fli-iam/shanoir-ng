@@ -209,20 +209,29 @@ public class StudyServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void testUpdateStudyUsersNoDUA() {
+		// We delete the DUA from the old study
 		Study existing = createStudy();
+		existing.setDataUserAgreementPaths(Collections.singletonList("test"));
 		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, false, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, false, StudyUserRight.CAN_ADMINISTRATE));
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		StudyUser suToBeDeleted = createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE);
+
+		existing.getStudyUserList().add(suToBeDeleted);
 		
 		Study updated = createStudy();
 		updated.setStudyUserList(new ArrayList<StudyUser>());
 		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, false, StudyUserRight.CAN_DOWNLOAD));
 		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, false, StudyUserRight.CAN_SEE_ALL);
+
 		updated.getStudyUserList().add(suToBeAdded);
-		
+				
 		given(studyUserRepository.save(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+		given(studyUserRepository.findOne(2L)).willReturn(suToBeDeleted);
 
 		studyService.updateStudyUsers(existing, updated);
+		
+		Mockito.verify(dataUserAgreementService).deleteIncompleteDataUserAgreementForUserInStudy(existing, 2L);
+		
 		for (StudyUser su : updated.getStudyUserList()) {
 			// all are now confirmed
 			assertTrue(su.isConfirmed());
@@ -243,7 +252,6 @@ public class StudyServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void testUpdateStudyUsersAddDUA() {
-		
 		// In this method, a new DUA is added
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
