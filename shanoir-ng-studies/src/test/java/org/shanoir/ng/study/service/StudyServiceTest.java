@@ -290,7 +290,7 @@ public class StudyServiceTest {
 		studyUser.setId(suId);
 		studyUser.setStudy(study);
 		studyUser.setUserId(userId);
-		studyUser.setConfirmed(true);
+		studyUser.setConfirmed(confirmed);
 		List<StudyUserRight> studyUserRights = new ArrayList<>();
 		for (StudyUserRight right : rights) {
 			studyUserRights.add(right);
