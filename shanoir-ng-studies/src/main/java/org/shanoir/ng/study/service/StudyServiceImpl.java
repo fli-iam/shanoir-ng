@@ -127,6 +127,8 @@ public class StudyServiceImpl implements StudyService {
 				// if dua file exists, set StudyUser to confirmed false
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					studyUser.setConfirmed(false);
+				} else {
+					studyUser.setConfirmed(true);
 				}
 				studyUser.setStudy(study);
 			}
