@@ -18,8 +18,13 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
+import org.shanoir.ng.bids.BidsDeserializer;
+import org.shanoir.ng.bids.model.BidsElement;
+import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +48,12 @@ public class BidsApiController implements BidsApi {
 
 	@Autowired
 	BIDSService bidsService;
+	
+	@Autowired
+	BidsDeserializer bidsDeserializer;
+	
+	@Autowired
+	StudyRepository studyRepo;
 
 	private final HttpServletRequest request;
 
@@ -112,6 +123,20 @@ public class BidsApiController implements BidsApi {
 		return userImportDir;
 	}
 
+	@Override
+	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, IOException {
+
+		BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");
+		Study study = studyRepo.findOne(studyId);
+		if (study != null) {
+			studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+		}
+
+		return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+	}
+	
 	/**
 	 * Zip
 	 * 

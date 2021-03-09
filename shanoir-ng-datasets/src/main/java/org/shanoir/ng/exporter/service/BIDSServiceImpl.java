@@ -1,10 +1,6 @@
 package org.shanoir.ng.exporter.service;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,8 +12,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
@@ -29,6 +23,10 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
+import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
@@ -36,9 +34,18 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +67,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Service
 public class BIDSServiceImpl implements BIDSService {
-	
+
 	private static final String TABULATION = "\t";
 
 	private static final String NEW_LINE = "\n";
@@ -81,14 +88,115 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private static final String README_FILE = "README";
 
+	private static final String NULL = "null";
+
+	private static final String IMAGED_OBJECT_CATEGORY = "imaged_object_category";
+
+	private static final String LANGUAGE_HEMISPHERIC_DOMINANCE = "language_hemispheric_dominance";
+
+	private static final String MANUAL_HEMISPHERIC_DOMINANCE = "manual_hemispheric_dominance";
+
+	private static final String BIRTH_DATE = "birth_date";
+
+	private static final String SEX = "sex";
+
+	private static final String SUBJECT_IDENTIFIER = "subject_identifier";
+
+	private static final String PARTICIPANT_ID = "participant_id";
+
+	private static final String CSV_SEPARATOR = "\t";
+
+	private static final String CSV_SPLITTER = "\n";
+
+	private static final String[] CSV_PARTICIPANTS_HEADER = {
+			PARTICIPANT_ID,
+			SUBJECT_IDENTIFIER
+			//IMAGED_OBJECT_CATEGORY
+			//LANGUAGE_HEMISPHERIC_DOMINANCE
+			//LANGUAGE_HEMISPHERIC_DOMINANCE
+			//BIRTH_DATE
+			//SEX
+	};
+
 	@Value("${bids-data-folder}")
 	private String bidsStorageDir;
 
 	@Autowired
-    private RabbitTemplate rabbitTemplate;
+	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private ExaminationService examService;
+
+	@Autowired
+	private StudyRepository studyRepo;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Override
+	/**
+	 * Receives a shanoirEvent as a json object, concerning a study update => Update BIDS folder too
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(bindings = {
+			@QueueBinding(
+					key = ShanoirEventType.DELETE_STUDY_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.DELETE_DATASET_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.UPDATE_STUDY_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.UPDATE_DATASET_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.UPDATE_EXAMINATION_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
+			@QueueBinding(
+					key = ShanoirEventType.CREATE_DATASET_EVENT,
+					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
+	}
+			)
+	public void deleteBids(String eventAsString) {
+		try {
+			ShanoirEvent event =  objectMapper.readValue(eventAsString, ShanoirEvent.class);
+			Study studyDeleted = studyRepo.findOne(event.getStudyId());
+			// Try to delete the BIDS folder recursively if possible
+			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyDeleted.getId() + '_' + studyDeleted.getName());
+			if (bidsDir.exists()) {
+				FileUtils.deleteDirectory(bidsDir);
+			} else if (ShanoirEventType.UPDATE_STUDY_EVENT.equals(event.getEventType())) {
+				bidsDir = getFileFromId(event.getStudyId().toString(), new File(bidsStorageDir));
+				FileUtils.deleteDirectory(bidsDir);
+			}
+		} catch (Exception e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
+		}
+	}
 
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
@@ -98,162 +206,28 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	@Override
 	public File exportAsBids(final Long studyId, final String studyName) throws IOException {
-		// Create source folder
-		File baseDir = createBaseBidsFolder(studyName, studyId);
-		
+		// Get folder
+		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
+		File workFolder = new File(tmpFilePath);
+		if (workFolder.exists()) {
+			// If the file already exists, just return it
+			return workFolder;
+		}
+
+		// Otherwise, create it from scratch
+		File baseDir = createBaseBidsFolder(workFolder, studyName);
+
 		// Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
 		List<Subject> subjs = getSubjectsForStudy(studyId);
+
+		// Create participants.tsv
+		participantsSerializer(baseDir, subjs);
+
 		for (Subject subj : subjs) {
 			exportAsBids(subj, studyName, baseDir);
 		}
 
 		return baseDir;
-	}
-
-	@Override
-	public File addDataset(Examination exam, String subjectName, String studyName) throws IOException {
-		// 0. If base file does not exist, create it from scratch
-		File baseDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + exam.getStudyId() + "_" + studyName);
-		if (!baseDir.exists()) {
-			return exportAsBids(exam.getStudyId(), studyName);
-		}
-
-		// 1. Create Subject File if not existing
-		File subjDir = createSubjectFolder(subjectName, exam.getSubjectId().toString(), baseDir);
-
-		// 2. Create dataset files
-		exportAsBids(exam, subjDir, studyName, subjectName);
-		return baseDir;
-	}
-
-	@Override
-	public void deleteDataset(Dataset dataset) {
-		try {
-			Long examId = dataset.getDatasetAcquisition().getExamination().getId();
-			Long subjectId = dataset.getSubjectId();
-			Long studyId = dataset.getStudyId();
-	
-			File fileToDelete = null;
-			// Get study folder
-			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
-			// Get subject folder
-			File subjectFolder = getFileFromId(subjectId.toString(), fileToDelete);
-			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), subjectFolder);
-			// Get anat, eeg, [...] folder
-			if (dataset instanceof EegDataset) {
-				fileToDelete = getFileFromId("eeg", fileToDelete);
-			} else if (dataset instanceof MrDataset) {
-				fileToDelete = getFileFromId("anat", fileToDelete);
-			}
-
-			// Now delete only the data files we are interested in
-			for (DatasetExpression expr : dataset.getDatasetExpressions()) {
-				for (DatasetFile dataFile : expr.getDatasetFiles()) {
-					if (!dataFile.isPacs()) {
-						// Get FileName path object
-						String dataFilePath = dataFile.getPath();
-						if (dataFilePath.startsWith("file://")) {
-							dataFilePath = dataFile.getPath().replace("file://", "");
-						}
-						Path path = Paths.get(dataFilePath);
-				        Path fileName = path.getFileName();
-						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
-
-						// Delete from  scans.tsv searching by examination id / file name
-						deleteLineFromFile(getScansFile(subjectFolder), dataset.getDatasetAcquisition().getExamination().getId(), fileName.toString());
-					}
-				}
-			}
-			
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				return;
-			}
-
-			// And delete metadata files created for bids
-			for (File metaDataFile : fileToDelete.listFiles()) {
-				if (metaDataFile.getName() != null && metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
-					metaDataFile.delete();
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void deleteExam(Long examId) {
-		Examination exam = examService.findById(examId);
-		if (exam == null) {
-			// Not found, just get back
-			return;
-		}
-
-		File fileToDelete = null;
-		try {
-			// Get study folder
-			fileToDelete = getFileFromId(exam.getStudyId().toString(), new File(bidsStorageDir));
-
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				LOG.info("Trying to delete a non existing examination folder, file not deleted");
-				return;
-			}
-
-			// Get subject folder
-			fileToDelete = getFileFromId(exam.getSubjectId().toString(), fileToDelete);
-			
-			if (fileToDelete == null || !fileToDelete.exists()) {
-				LOG.info("Trying to delete a non existing exmaination folder, file not deleted");
-				return;
-			}
-
-			// delete from scans.tsv searching by examination ID
-			File scans = getScansFile(fileToDelete);
-			deleteLineFromFile(scans, examId, ".*");
-
-			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
-
-
-			// Delete all the folder
-			FileUtils.deleteDirectory(fileToDelete);
-		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
-		}
-	}
-
-	/**
-	 * Deletes a line with given regex in the given file
-	 * @param fileNameRegex the regex to find the filename to delete
-	 * @param examId the examination ID
-	 * @throws IOException
-	 */
-	private void deleteLineFromFile(File scansFile, Long examId, String fileNameRegex) throws IOException {
-		File tempFile = new File(scansFile.getAbsolutePath() + "_tmp.tsv");
-
-		BufferedReader reader = new BufferedReader(new FileReader(scansFile));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-		String currentLine;
-
-		while((currentLine = reader.readLine()) != null) {
-		    // trim newline when comparing with lineToRemove
-		    String trimmedLine = currentLine.trim();
-		    String[] columns = trimmedLine.split(TABULATION);
-		    if(columns[2].equals(examId.toString())) {
-		    	// Check filename regex
-		        Pattern pattern = Pattern.compile(fileNameRegex);
-		        Matcher matcher = pattern.matcher(columns[0]);
-		    	if (matcher.find()) {
-					continue;
-				}
-			}
-		    writer.write(currentLine + System.getProperty("line.separator"));
-		}
-		writer.close();
-		reader.close();
-		tempFile.renameTo(scansFile);
 	}
 
 	/**
@@ -281,14 +255,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param studyId the study id
 	 * @return the base folder newly created
 	 */
-	private File createBaseBidsFolder(final String studyName, Long studyId) {
-		// 1. Create folder
-		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
-		File workFolder = new File(tmpFilePath);
-		if (workFolder.exists()) {
-			// If the file already exists, just return it
-			return workFolder;
-		}
+	private File createBaseBidsFolder(File workFolder, String studyName) {
 		workFolder.mkdirs();
 
 		// 2. Create dataset_description.json and README
@@ -301,7 +268,7 @@ public class BIDSServiceImpl implements BIDSService {
 		} catch (IOException e) {
 			LOG.error(e.getMessage());
 		}
-		
+
 		return workFolder;
 	}
 
@@ -392,15 +359,44 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @throws IOException when we fail to create a file
 	 */
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
-		File dataFolder;
+		File dataFolder = null;
 
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
 			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
 		} else if (dataset instanceof MrDataset) {
-			// Do something specific about MR dataset
-			dataFolder = createDataFolder("anat", workDir);
+			// Here we want to know whether we have anat/func/dwi/fmap
+			// We base ourselves on SeriesDescription here
+			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
+			if (protocol != null) {
+				MrProtocolSCMetadata metadata = protocol.getUpdatedMetadata();
+				if (metadata != null) {
+					MrSequenceApplication application = metadata.getMrSequenceApplication();
+					if (application != null) {
+						// CALIBRATION(1), --> fieldmap
+						if (application.equals(MrSequenceApplication.CALIBRATION)) {
+							dataFolder = createDataFolder("fmap", workDir);
+						}
+						//MORPHOMETRY(2), ==> anat
+						else if (application.equals(MrSequenceApplication.MORPHOMETRY)) {
+							dataFolder = createDataFolder("anat", workDir);
+						}
+						// DIFFUSION(8), , ==> diffusion
+						else if (application.equals(MrSequenceApplication.DIFFUSION)) {
+							dataFolder = createDataFolder("dwi", workDir);
+						}
+						// BOLD(9), , ==> functional
+						else if (application.equals(MrSequenceApplication.BOLD)) {
+							dataFolder = createDataFolder("func", workDir);
+						}
+					}
+				}
+			}
+			// default case, dataFolder is still null => undefined folder
+			if (dataFolder == null) {
+				dataFolder = createDataFolder("undefined", workDir);
+			}
 		} else {
 			dataFolder = workDir;
 		}
@@ -416,16 +412,15 @@ public class BIDSServiceImpl implements BIDSService {
 			try {
 				// Use link to avoid file duplication
 				Files.createLink(pathToGo, srcFile.toPath());
-				
+
 				// Add the file to the scans.tsv reference
 				File scansTsvFile = getScansFile(workDir.getParentFile());
 				StringBuilder buffer = new StringBuilder();
 				buffer.append(pathToGo.getFileName()).append(TABULATION)
-					.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
-					.append(dataset.getDatasetAcquisition().getExamination().getId())
-					.append(NEW_LINE);
+				.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
+				.append(dataset.getDatasetAcquisition().getExamination().getId())
+				.append(NEW_LINE);
 
-				// TODO: center_id / comment / weigth / other examination things ?
 				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 
 			} catch (IOException exception) {
@@ -440,10 +435,9 @@ public class BIDSServiceImpl implements BIDSService {
 		if (!scansFile.exists()) {
 			StringBuilder buffer = new StringBuilder();
 			buffer.append("filename").append(TABULATION)
-				.append("acq_time").append(TABULATION)
-				.append("session_id")
-				.append(NEW_LINE);
-			// TODO: center_id / comment / weigth / other examination things ?
+			.append("acq_time").append(TABULATION)
+			.append("session_id")
+			.append(NEW_LINE);
 			Files.write(Paths.get(scansFile.getAbsolutePath()), buffer.toString().getBytes());
 		}
 		return scansFile;
@@ -526,7 +520,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_channel.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
-		
+
 		StringBuilder buffer = new StringBuilder();
 		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
 
@@ -540,7 +534,7 @@ public class BIDSServiceImpl implements BIDSService {
 			.append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-		
+
 		// Create events.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
@@ -578,7 +572,7 @@ public class BIDSServiceImpl implements BIDSService {
 			.append(chan.getZ()).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-		
+
 		// Create _coordsystem.json file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
 		destFile = destWorkFolderPath + File.separator + fileName;
@@ -588,7 +582,7 @@ public class BIDSServiceImpl implements BIDSService {
 		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
 		.append("\"EEGCoordinateUnits\": ").append("\"" +CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
 		.append("}");
-		
+
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 	}
 
@@ -604,7 +598,7 @@ public class BIDSServiceImpl implements BIDSService {
 			throw new IOException("ERROR: parent folder does not exist:" + folder.getAbsolutePath());
 		}
 		File[] files = folder.listFiles(new FilenameFilter() {
-			
+
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.startsWith(SUBJECT_PREFIX + id + "_") && !name.endsWith(".zip")  && !name.endsWith(".tsv")
@@ -622,4 +616,37 @@ public class BIDSServiceImpl implements BIDSService {
 		LOG.info("ERROR: no folder containing ID: {} in bids folder. It will probably be created by the BIDS manager. Should not happen", id);
 		return null;
 	}
+
+	/**
+	 * Creates the participants.tsv and participants.json file from the study
+	 */
+	private void participantsSerializer(File parentFolder, List<Subject> subjs) {
+		File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
+
+		if (csvFile.exists()) {
+			// Recreate it everytime
+			FileUtils.deleteQuietly(csvFile);
+		}
+		StringBuilder buffer =  new StringBuilder();
+		// Headers
+		for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
+			buffer.append(columnHeader).append(CSV_SEPARATOR);
+		}
+		buffer.append(CSV_SPLITTER);
+
+		for (Subject stubject : subjs) {
+
+			// Write in the file the values
+			buffer.append(stubject.getName()).append(CSV_SEPARATOR)
+			.append(stubject.getId()).append(CSV_SEPARATOR)
+			.append(CSV_SPLITTER);
+		}
+
+		try {
+			Files.write(Paths.get(csvFile.getAbsolutePath()), buffer.toString().getBytes());
+		} catch (IOException e) {
+			LOG.error("Error while creating particpants.tsv file: {}", e);
+		}
+	}
+
 }

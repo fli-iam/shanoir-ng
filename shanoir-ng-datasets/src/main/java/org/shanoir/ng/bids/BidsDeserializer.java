@@ -1,4 +1,4 @@
-package org.shanoir.ng.bids.utils;
+package org.shanoir.ng.bids;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFile;
 import org.shanoir.ng.bids.model.BidsFolder;
-import org.shanoir.ng.bids.service.StudyBIDSService;
-import org.shanoir.ng.study.model.Study;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,21 +21,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class BidsDeserializer {
 	
-	private static final String STUDY_PREFIX = "stud-";
-
 	@Value("${bids-data-folder}")
 	private String bidsStorageDir;
 
-	@Autowired
-	private StudyBIDSService bidsService;
+	public BidsElement deserialize(File studyFile) throws IOException {
 
-	public BidsElement deserialize(Study study) throws IOException {
-		// Get the parent folder
-		File studyFile = new File(bidsStorageDir + File.separator + STUDY_PREFIX + study.getId() + '_' + study.getName());
-
-		if (!studyFile.exists()) {
-			studyFile = bidsService.createBidsFolderFromScratch(study);
-		}
 		BidsFolder studyElement = new BidsFolder(studyFile.getAbsolutePath());
 
 		// Iterate recursively over studyFile to get the BidsElement

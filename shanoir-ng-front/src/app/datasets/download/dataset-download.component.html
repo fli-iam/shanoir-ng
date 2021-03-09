@@ -7,10 +7,6 @@
     <div *ngIf="inError" class="body">{{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
         <ng-container *ngIf="mode == 'all'">
-            <p>Please select download options</p>
-            <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
-        </ng-container>
-        <ng-container *ngIf="!useBids">
             <p> Please select dataset type (only for DICOM / NIFTI datasets) :</p>
             <select-box [(ngModel)]="type" [options]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]">
             </select-box>

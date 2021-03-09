@@ -9,10 +9,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFile;
 import org.shanoir.ng.bids.model.BidsFolder;
-import org.shanoir.ng.bids.utils.BidsDeserializer;
 
 import com.google.common.base.Charsets;
 
@@ -40,7 +40,6 @@ public class BidsDeserializerTest {
 		File dataFile = new File(sesFile.getAbsolutePath() + File.separator + "data.eeg");
 		FileUtils.write(dataFile, "blabla", Charsets.UTF_8);
 
-		
 		BidsFolder studyElement = new BidsFolder(folder.getRoot().getAbsolutePath());
 		
 		// WHEN we deserialize it

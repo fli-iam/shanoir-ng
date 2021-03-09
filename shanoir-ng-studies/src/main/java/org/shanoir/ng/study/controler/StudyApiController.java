@@ -19,25 +19,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DateTime;
-import org.shanoir.ng.bids.model.BidsElement;
-import org.shanoir.ng.bids.model.BidsFolder;
-import org.shanoir.ng.bids.service.StudyBIDSService;
-import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -82,10 +71,6 @@ public class StudyApiController implements StudyApi {
 	@Value("${studies-data}")
 	private String dataDir;
 
-	private static final String ZIP = ".zip";
-
-	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
 	@Autowired
 	private StudyService studyService;
 
@@ -105,12 +90,6 @@ public class StudyApiController implements StudyApi {
 	private DataUserAgreementService dataUserAgreementService;
 
 	@Autowired
-	private StudyBIDSService bidsService;
-
-	@Autowired
-	private BidsDeserializer bidsDeserializer;
-
-	@Autowired
 	private ShanoirEventService eventService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
@@ -125,18 +104,14 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			Study studyDeleted = studyService.findById(studyId);
-
 			// Delete all linked files and DUA
 			File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));
 			if (studyFolder.exists()) {
 				FileUtils.deleteDirectory(studyFolder);
 			}
-
-			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
-					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -201,7 +176,6 @@ public class StudyApiController implements StudyApi {
 		Study createdStudy;
 		try {
 			createdStudy = studyService.create(study);
-			bidsService.createBidsFolder(createdStudy);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
 					createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (MicroServiceCommunicationException e) {
@@ -218,12 +192,11 @@ public class StudyApiController implements StudyApi {
 		validate(study, result);
 
 		try {
-			bidsService.updateBidsFolder(study);
 			studyService.update(study);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
-					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+					KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
 		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
@@ -295,39 +268,6 @@ public class StudyApiController implements StudyApi {
 		}
 	}
 
-	@Override
-	public void exportBIDSByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			HttpServletResponse response) throws RestServiceException, IOException {
-		Study study = studyService.findById(studyId);
-		File workFolder = bidsService.exportAsBids(study);
-
-		// Copy / zip it (and by the way filter only folder that we are interested in)
-		String userDir = getUserDir(System.getProperty(JAVA_IO_TMPDIR)).getAbsolutePath();
-
-		// Add timestamp to get a "random" difference
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		File tmpFile = new File(userDir + File.separator + formatter.format(new DateTime().toDate()) + File.separator);
-		tmpFile.mkdirs();
-		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + workFolder.getName() + ZIP);
-		zipFile.createNewFile();
-
-		// Zip it
-		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
-
-		// Try to determine file's content type
-		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
-
-		try (InputStream is = new FileInputStream(zipFile);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
-			response.setContentType(contentType);
-			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-			response.flushBuffer();
-		} finally {
-			FileUtils.deleteQuietly(zipFile);
-		}
-	}
-
 	public static File getUserDir(String importDir) {
 		final Long userId = KeycloakUtil.getTokenUserId();
 		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
@@ -336,48 +276,6 @@ public class StudyApiController implements StudyApi {
 			userImportDir.mkdirs(); // create if not yet existing
 		} // else is wanted case, user has already its import directory
 		return userImportDir;
-	}
-
-	@Override
-	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws RestServiceException, IOException {
-
-		BidsElement studyBidsElement = new BidsFolder(
-				"Error while retrieving the study bids structure, please contact an administrator.");
-		Study study = studyService.findById(studyId);
-		if (study != null) {
-			studyBidsElement = bidsDeserializer.deserialize(study);
-		}
-
-		return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
-	}
-
-	/**
-	 * Zip
-	 * 
-	 * @param sourceDirPath
-	 * @param zipFilePath
-	 * @throws IOException
-	 */
-	private void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
-		Path p = Paths.get(zipFilePath);
-		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-			Path pp = Paths.get(sourceDirPath);
-			try (Stream<Path> walker = Files.walk(pp)) {
-				walker.filter(path -> !path.toFile().isDirectory()).forEach(path -> {
-					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-					try {
-						zos.putNextEntry(zipEntry);
-						Files.copy(path, zos);
-						zos.closeEntry();
-					} catch (IOException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				});
-			}
-			zos.finish();
-		}
 	}
 
 	@Override

@@ -20,7 +20,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -190,28 +189,6 @@ public interface StudyApi {
 	void downloadProtocolFile(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
-
-    @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/studyId/{studyId}")
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
-    void exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId, HttpServletResponse response) throws RestServiceException, IOException;
-
-	@ApiOperation(value = "", nickname = "getBids", notes = "If exists, returns a BIDSElement structure corresponding to the given study id", response = BidsElement.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "BidsElement", response = BidsElement.class),
-			@ApiResponse(code = 401, message = "unauthorized"), @ApiResponse(code = 403, message = "forbidden"),
-			@ApiResponse(code = 404, message = "no dataset found"),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/bidsStructure/studyId/{studyId}", produces = { "application/json" })
-	ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws RestServiceException, IOException;
 	
 	@ApiOperation(value = "", notes = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id", response = DataUserAgreement.class, tags = {})
 	@ApiResponses(value = {

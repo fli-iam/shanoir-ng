@@ -111,7 +111,6 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "datasets-data:/var/datasets-data"
       - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:

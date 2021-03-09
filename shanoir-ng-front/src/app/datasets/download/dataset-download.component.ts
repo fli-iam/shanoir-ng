@@ -37,7 +37,6 @@ export class DatasetDownloadComponent {
 
     @Input() datasetIds: number[] = [];
     @Input() studyId: number;
-    public useBids: boolean = false;
     public type: 'nii' | 'dcm' = 'nii';
     public inError: boolean = false;
     public errorMessage: string;
@@ -76,11 +75,7 @@ export class DatasetDownloadComponent {
         if (this.mode == 'selected') {
             this.datasetService.downloadDatasets(this.datasetIds, this.type).then(() => this.loading = false);
         } else if (this.mode == 'all') {
-            if (this.useBids) {
-                this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
-            } else {
-                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
-            }
+            this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
         } 
         this.downloadDialog.hide();
     }
