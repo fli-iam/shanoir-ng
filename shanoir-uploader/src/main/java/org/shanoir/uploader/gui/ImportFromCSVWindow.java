@@ -59,8 +59,8 @@ public class ImportFromCSVWindow extends JFrame {
 
 		// Create the frame.
 		frame = new JFrame(resourceBundle.getString("shanoir.uploader.import.csv.title"));
-		frame.setSize(1600, 600);
-		this.setSize(1600, 600);
+		frame.setSize(1600, 700);
+		this.setSize(1600, 700);
 
 		// What happens when the frame closes?
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -166,7 +166,7 @@ public class ImportFromCSVWindow extends JFrame {
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 		int windowWidth = 1600;
-		int windowHeight = 600;
+		int windowHeight = 700;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
 

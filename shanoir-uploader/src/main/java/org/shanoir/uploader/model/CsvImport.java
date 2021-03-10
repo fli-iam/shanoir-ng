@@ -45,8 +45,8 @@ public class CsvImport {
 			this.errorMessage = "shanoir.uploader.import.csv.error.date.format";
 			return;
 		}
-		this.acquisitionFilter = csvInput[7];
-		this.studyFilter = csvInput[8];
+		this.studyFilter = csvInput[7];
+		this.acquisitionFilter = csvInput[8];
 		if (csvInput.length > 9) {
 			this.comment = csvInput[9];
 		}

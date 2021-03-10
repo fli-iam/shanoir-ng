@@ -145,6 +145,9 @@ public class ImportFromCsvActionListener implements ActionListener {
 	private boolean importData(CsvImport csvImport, List<StudyCard> studyCardsByStudy, org.shanoir.uploader.model.rest.Study study2) {
 
 		// 1. Check existence of study / study card
+		
+		// TODO: Here we actually should test the machines numbers / names  => If one corresponds, keep the study-card
+		
 		Optional<StudyCard> scOpt = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst();
 		if (!scOpt.isPresent()) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
@@ -155,7 +158,12 @@ public class ImportFromCsvActionListener implements ActionListener {
 		// 2. Request PACS to check the presence of data
 		Media media;
 		try {
-			media = dicomServerClient.queryDicomServer(csvImport.getName().toUpperCase() + "*" + csvImport.getSurname().toUpperCase(), "", "", "", null, null);
+			String name = csvImport.getName();
+			if (!StringUtils.isEmpty(csvImport.getSurname().toUpperCase())) {
+				name+="^";
+				name+=csvImport.getSurname().toUpperCase();
+			}
+			media = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
