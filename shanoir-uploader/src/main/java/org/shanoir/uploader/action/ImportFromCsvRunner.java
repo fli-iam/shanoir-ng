@@ -157,8 +157,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("1 Request PACS");
 		Media media;
 		try {
-			String name = csvImport.getName();
-			if (!StringUtils.isEmpty(csvImport.getSurname().toUpperCase())) {
+			String name = csvImport.getName().toUpperCase();
+			if (!StringUtils.isEmpty(csvImport.getSurname())) {
 				name+="^";
 				name+=csvImport.getSurname().toUpperCase();
 			}
