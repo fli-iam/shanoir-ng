@@ -126,6 +126,25 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
+	public void notifyAdminAccountRequestChallenge(final User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("New challenge account request from " + shanoirServerAddress);
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put("user", user);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			final String content = build("notifyAdminAccountRequest", variables);
+			messageHelper.setText(content, true);
+		};
+		mailSender.send(messagePreparator);
+	}
+
+	@Override
 	public void notifyAdminAccountExtensionRequest(User user) {
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();

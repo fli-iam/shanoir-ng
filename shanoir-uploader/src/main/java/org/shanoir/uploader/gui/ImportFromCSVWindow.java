@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -30,6 +31,7 @@ public class ImportFromCSVWindow extends JFrame {
 
 	public JButton uploadButton;
 	public JButton openButton;
+	public JProgressBar progressBar;
 
 	private static Logger logger = Logger.getLogger(ImportFromCSVWindow.class);
 
@@ -38,11 +40,11 @@ public class ImportFromCSVWindow extends JFrame {
 	public JFrame frame;
 	public JLabel error = new JLabel();
 	public JLabel csvDetail = new JLabel();
-	JButton importButton;
 
 	final JPanel masterPanel;
 
 	JTable table;
+	
 
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
@@ -109,7 +111,6 @@ public class ImportFromCSVWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.import.csv.column.studycard"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.common.name"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.sex"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.birthdate"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.study.filter"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.acquisition.filter"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.comment"),
@@ -126,11 +127,10 @@ public class ImportFromCSVWindow extends JFrame {
 		table.getColumnModel().getColumn(3).setMinWidth(100);
 		table.getColumnModel().getColumn(4).setMinWidth(100);
 		table.getColumnModel().getColumn(5).setMinWidth(5);
-		table.getColumnModel().getColumn(6).setMinWidth(90);
+		table.getColumnModel().getColumn(6).setMinWidth(100);
 		table.getColumnModel().getColumn(7).setMinWidth(100);
 		table.getColumnModel().getColumn(8).setMinWidth(100);
-		table.getColumnModel().getColumn(9).setMinWidth(100);
-		table.getColumnModel().getColumn(10).setMinWidth(350);
+		table.getColumnModel().getColumn(9).setMinWidth(350);
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
@@ -150,17 +150,25 @@ public class ImportFromCSVWindow extends JFrame {
 		tablePanel.add(scrollPane);
 
 		// IMPORT button here when necessary
-		importButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.import"));
-		GridBagConstraints gBCImportButton = new GridBagConstraints();
-		gBCImportButton.anchor = GridBagConstraints.NORTHWEST;
-		gBCImportButton.gridx = 0;
-		gBCImportButton.gridy = 4;
-		importButton.setEnabled(false);
-		masterPanel.add(importButton, gBCImportButton);
-
+		uploadButton = new JButton(resourceBundle.getString("shanoir.uploader.import.csv.button.import"));
+		GridBagConstraints gBCuploadButton = new GridBagConstraints();
+		gBCuploadButton.anchor = GridBagConstraints.NORTHWEST;
+		gBCuploadButton.gridx = 0;
+		gBCuploadButton.gridy = 4;
+		uploadButton.setEnabled(false);
+		masterPanel.add(uploadButton, gBCuploadButton);
+		
+		progressBar = new JProgressBar(0);
+		GridBagConstraints gBCProgressBar = new GridBagConstraints();
+		gBCProgressBar.anchor = GridBagConstraints.NORTHWEST;
+		gBCProgressBar.gridx = 0;
+		gBCProgressBar.gridy = 5;
+		progressBar.setVisible(false);
+		masterPanel.add(progressBar, gBCProgressBar);
+	
 		importListener = new ImportFromCsvActionListener(this, resourceBundle, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 
-		importButton.addActionListener(importListener);
+		uploadButton.addActionListener(importListener);
 
 		// center the frame
 		// frame.setLocationRelativeTo( null );
@@ -201,6 +209,6 @@ public class ImportFromCSVWindow extends JFrame {
 		table.getParent().setVisible(true);
 		this.importListener.setCsvImports(imports);
 
-		importButton.setEnabled(!inError);
+		uploadButton.setEnabled(!inError);
 	}
 }

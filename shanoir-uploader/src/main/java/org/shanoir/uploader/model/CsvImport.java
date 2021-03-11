@@ -1,10 +1,7 @@
 package org.shanoir.uploader.model;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -22,9 +19,9 @@ public class CsvImport {
 
 	public CsvImport(String[] csvInput) throws ShanoirException {
 
-        this.rawData = Arrays.copyOf(csvInput, 10);
+        this.rawData = Arrays.copyOf(csvInput, 9);
 
-        if (csvInput == null || csvInput.length < 9) {
+        if (csvInput == null || csvInput.length < 8) {
 			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
@@ -39,16 +36,10 @@ public class CsvImport {
 			this.errorMessage = "shanoir.uploader.import.csv.error.sex.pattern";
 			return;
 		}
-		try {
-			this.birthDate = LocalDate.parse(csvInput[6]);
-		} catch (DateTimeParseException e) {
-			this.errorMessage = "shanoir.uploader.import.csv.error.date.format";
-			return;
-		}
-		this.studyFilter = csvInput[7];
-		this.acquisitionFilter = csvInput[8];
-		if (csvInput.length > 9) {
-			this.comment = csvInput[9];
+		this.studyFilter = csvInput[6];
+		this.acquisitionFilter = csvInput[7];
+		if (csvInput.length > 8) {
+			this.comment = csvInput[7];
 		}
 	}
 	
@@ -58,8 +49,6 @@ public class CsvImport {
 	String name;
 	
 	String surname;
-	
-	Date examDate;
 	
 	// Second part is linked to import into sh-NG (all mandatory but comment)
 	String studyId;
@@ -71,8 +60,6 @@ public class CsvImport {
 	Sex sex;
 	
 	String comment;
-	
-	LocalDate birthDate;
 	
 	String errorMessage;
 	
@@ -92,20 +79,6 @@ public class CsvImport {
 	 */
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
-	}
-
-	/**
-	 * @return the birthDate
-	 */
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
-
-	/**
-	 * @param birthDate the birthDate to set
-	 */
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
 	}
 	
 	/**
@@ -151,20 +124,6 @@ public class CsvImport {
 	 */
 	public void setSurname(String surname) {
 		this.surname = surname;
-	}
-
-	/**
-	 * @return the examDate
-	 */
-	public Date getExamDate() {
-		return examDate;
-	}
-
-	/**
-	 * @param examDate the examDate to set
-	 */
-	public void setExamDate(Date examDate) {
-		this.examDate = examDate;
 	}
 
 	/**
