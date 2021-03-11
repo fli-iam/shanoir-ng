@@ -154,6 +154,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	private boolean importData(CsvImport csvImport, List<StudyCard> studyCardsByStudy, org.shanoir.uploader.model.rest.Study study2) {
 
 		// 1. Request PACS to check the presence of data
+		logger.info("1 Request PACS");
 		Media media;
 		try {
 			String name = csvImport.getName();
@@ -168,6 +169,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 		
 		// 2. Select series
+		logger.info("2 Select series");
+
 		Set<Serie> selectedSeries = new HashSet<>();
 		Patient pat = null;
 		Study stud = null;
@@ -204,6 +207,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 							selectedSeries.add(serie);
 							serialNumber = serie.getMriInformation().getDeviceSerialNumber();
 							foundPatient = true;
+							logger.info("One serie was selected");
 						}
 					}
 				}
@@ -215,6 +219,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 		
 		// 3. Check existence of study / study card
+		logger.info("3 Check study card");
+
 		StudyCard sc = null;
 		for (StudyCard studyc : studyCardsByStudy) {
 			if (serialNumber != null && serialNumber.equals(studyc.getAcquisitionEquipment().getSerialNumber())) {
@@ -235,6 +241,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		// 4. Create DicomDataTransferObject
+		logger.info("4 Complete data");
+
 		DicomDataTransferObject dicomData = null;
 		String subjectIdentifier = "";
 		try {
@@ -265,6 +273,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		 * 5. Fill MRI information into serie from first DICOM file of each serie
 		 * This has already been done for CD/DVD import, but not yet here for PACS
 		 */
+		logger.info("5 Fill MRI info");
+
 		for (Iterator<Serie> iterator = selectedSeries.iterator(); iterator.hasNext();) {
 			Serie serie = iterator.next();
 			Util.processSerieMriInfo(uploadFolder, serie);
@@ -273,6 +283,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		/**
 		 * 6. Write the UploadJob and schedule upload
 		 */
+		logger.info("6 Write upload job");
+
 		UploadJob uploadJob = new UploadJob();
 		ImportUtils.initUploadJob(selectedSeries, dicomData, uploadJob);
 
@@ -287,6 +299,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		/**
 		 * 7. Write the NominativeDataUploadJobManager for displaying the download state
 		 */
+		logger.info("7 Write upload job nominative");
+
 		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
 		ImportUtils.initDataUploadJob(selectedSeries, dicomData, dataJob);
 
@@ -298,6 +312,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info(uploadFolder.getName() + ": finished: " + toString());
 
 		// 8.  Create subject
+		logger.info("8 Create subject");
+
 		Subject subject = new Subject();
 		subject.setName(csvImport.getCommonName());
 		subject.setSex(csvImport.getSex());
@@ -320,6 +336,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		// 9. Create examination
+		logger.info("9 Create exam");
+
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
@@ -338,6 +356,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		/**
 		 * 10. Fill import-job.json to prepare the import
 		 */
+		logger.info("10 Import.json");
+
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, createdSubjet.getName(), createdSubjet.getId(), createdExam.getId(), study2, sc);
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
