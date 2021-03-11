@@ -201,9 +201,9 @@ public class ImportFromCSVWindow extends JFrame {
 			if (importRaw.getErrorMessage() != null) {
 				inError= true;
 				this.error.setText(resourceBundle.getString("shanoir.uploader.import.csv.error.after.import"));
-				this.error.setVisible(true);
 			}
 		}
+		this.error.setVisible(inError);
 
 		model.fireTableDataChanged();
 		table.getParent().setVisible(true);

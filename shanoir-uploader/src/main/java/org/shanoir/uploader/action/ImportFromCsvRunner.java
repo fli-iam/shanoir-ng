@@ -69,7 +69,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 	}
 
-
 	@Override
 	protected Void doInBackground() throws Exception {
 		// Iterate over import to import them one by one
@@ -121,7 +120,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		
 		for (CsvImport importTodo : this.csvImports) {
 			importFromCSVWindow.progressBar.setString("Preparing import " + i + "/" + this.csvImports.size());
-			importFromCSVWindow.progressBar.setValue(100*i/this.csvImports.size());
+			importFromCSVWindow.progressBar.setValue(100*i/this.csvImports.size() + 1);
 
 			org.shanoir.uploader.model.rest.Study study = studies.stream().filter(element -> element.getId().toString().equals(importTodo.getStudyId())).findFirst().get();
 			success = importData(importTodo, studyCardsByStudy.get(importTodo.getStudyId()), study ) && success;
@@ -129,6 +128,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		if (success) {
+			importFromCSVWindow.progressBar.setString("Success !");
+			importFromCSVWindow.progressBar.setValue(100);
+
 			// Open current import tab and close csv import panel
 			((JTabbedPane) this.importFromCSVWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromCSVWindow.scrollPaneUpload.getParent());
 	
