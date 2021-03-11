@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.uploader.model.rest.Sex;
 
 /**
  * An object that is used to import from a CSV file
@@ -17,11 +16,11 @@ import org.shanoir.uploader.model.rest.Sex;
 public class CsvImport {
 
 
-	public CsvImport(String[] csvInput) throws ShanoirException {
+	public CsvImport(String[] csvInput) {
 
-        this.rawData = Arrays.copyOf(csvInput, 9);
+        this.rawData = Arrays.copyOf(csvInput, 8);
 
-        if (csvInput == null || csvInput.length < 8) {
+        if (csvInput == null || csvInput.length < 7) {
 			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
@@ -30,18 +29,13 @@ public class CsvImport {
 		this.studyId = csvInput[2];
 		this.studyCardName = csvInput[3];
 		this.commonName = csvInput[4];
-		try {
-			this.sex = Sex.valueOf(csvInput[5]);
-		} catch (IllegalArgumentException e) {
-			this.errorMessage = "shanoir.uploader.import.csv.error.sex.pattern";
-			return;
-		}
-		this.studyFilter = csvInput[6];
-		this.acquisitionFilter = csvInput[7];
-		if (csvInput.length > 8) {
+		this.studyFilter = csvInput[5];
+		this.acquisitionFilter = csvInput[6];
+		if (csvInput.length > 7) {
 			this.comment = csvInput[7];
 		}
 	}
+	
 	
 	String[] rawData;
 
@@ -56,8 +50,6 @@ public class CsvImport {
 	String studyCardName;
 	
 	String commonName;
-	
-	Sex sex;
 	
 	String comment;
 	
@@ -166,20 +158,6 @@ public class CsvImport {
 	 */
 	public void setCommonName(String commonName) {
 		this.commonName = commonName;
-	}
-
-	/**
-	 * @return the sex
-	 */
-	public Sex getSex() {
-		return sex;
-	}
-
-	/**
-	 * @param sex the sex to set
-	 */
-	public void setSex(Sex sex) {
-		this.sex = sex;
 	}
 
 	/**

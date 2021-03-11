@@ -110,7 +110,6 @@ public class ImportFromCSVWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.import.csv.column.study.id"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.studycard"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.common.name"),
-				resourceBundle.getString("shanoir.uploader.import.csv.column.sex"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.study.filter"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.acquisition.filter"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.comment"),
@@ -126,11 +125,10 @@ public class ImportFromCSVWindow extends JFrame {
 		table.getColumnModel().getColumn(2).setMinWidth(5);
 		table.getColumnModel().getColumn(3).setMinWidth(100);
 		table.getColumnModel().getColumn(4).setMinWidth(100);
-		table.getColumnModel().getColumn(5).setMinWidth(5);
+		table.getColumnModel().getColumn(5).setMinWidth(100);
 		table.getColumnModel().getColumn(6).setMinWidth(100);
 		table.getColumnModel().getColumn(7).setMinWidth(100);
-		table.getColumnModel().getColumn(8).setMinWidth(100);
-		table.getColumnModel().getColumn(9).setMinWidth(350);
+		table.getColumnModel().getColumn(8).setMinWidth(350);
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());

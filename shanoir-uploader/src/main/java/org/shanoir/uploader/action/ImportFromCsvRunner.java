@@ -38,6 +38,7 @@ import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
@@ -180,6 +181,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 		boolean foundPatient = false;
 		String serialNumber = null;
+		String modelName = null;
+
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (foundPatient) {
 				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
@@ -206,6 +209,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 						if (StringUtils.isBlank(csvImport.getAcquisitionFilter()) || serie.getDescription().toUpperCase().contains(csvImport.getAcquisitionFilter().toUpperCase())) {
 							selectedSeries.add(serie);
 							serialNumber = serie.getMriInformation().getDeviceSerialNumber();
+							modelName = serie.getMriInformation().getManufacturersModelName();
 							foundPatient = true;
 							logger.info("One serie was selected");
 						}
@@ -227,9 +231,13 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				sc = studyc;
 				break;
 			}
+			if (modelName != null && modelName.equals(studyc.getAcquisitionEquipment().getManufacturerModel().getName())) {
+				sc = studyc;
+				break;
+			}
 		}
 		
-		// No study card by default => get the one in the file (if existig of course)
+		// No study card by default => get the one in the file (if existing of course)
 		if (sc == null) {
 			Optional<StudyCard> scOpt = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst();
 			if (!scOpt.isPresent()) {
@@ -316,7 +324,12 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		Subject subject = new Subject();
 		subject.setName(csvImport.getCommonName());
-		subject.setSex(csvImport.getSex());
+		if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
+			subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
+		} else {
+			// Force feminine (girl power ?)
+			subject.setSex(Sex.F);
+		}
 		subject.setIdentifier(subjectIdentifier);
 
 		subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
