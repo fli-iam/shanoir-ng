@@ -100,7 +100,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
 			
-			// Iterate over study cards to get equipement + fille study => SC map
+			// Iterate over study cards to get equipement + fill study => SC map
 			for (StudyCard studyCard : studyCards) {
 				AcquisitionEquipment acquisitionEquipment;
 				acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(studyCard.getAcquisitionEquipmentId());
