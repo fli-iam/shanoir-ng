@@ -52,6 +52,8 @@ import org.shanoir.util.ShanoirUtil;
 
 public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
+	private static final String WILDCARD = "*";
+
 	private static Logger logger = Logger.getLogger(ImportFromCsvRunner.class);
 
 	private List<CsvImport> csvImports;
@@ -95,11 +97,11 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			IdList idealist = new IdList();
 			idealist.setIdList(new ArrayList<>(idList));
 			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idealist);
-			
+
 			if (studyCards == null) {
 				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
-			
+
 			// Iterate over study cards to get equipement + fill study => SC map
 			for (StudyCard studyCard : studyCards) {
 				AcquisitionEquipment acquisitionEquipment;
@@ -118,7 +120,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		boolean success = true;
 		int i = 1;
-		
+
 		for (CsvImport importTodo : this.csvImports) {
 			importFromCSVWindow.progressBar.setString("Preparing import " + i + "/" + this.csvImports.size());
 			importFromCSVWindow.progressBar.setValue(100*i/this.csvImports.size() + 1);
@@ -134,7 +136,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 			// Open current import tab and close csv import panel
 			((JTabbedPane) this.importFromCSVWindow.scrollPaneUpload.getParent().getParent()).setSelectedComponent(this.importFromCSVWindow.scrollPaneUpload.getParent());
-	
+
 			this.importFromCSVWindow.frame.setVisible(false);
 			this.importFromCSVWindow.frame.dispose();
 		} else {
@@ -168,7 +170,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
-		
+
 		// 2. Select series
 		logger.info("2 Select series");
 
@@ -198,7 +200,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 						break;
 					}
 					Study study = (Study) studiesIt.next();
-					if (!study.getDisplayString().toUpperCase().contains(csvImport.getStudyFilter().toUpperCase())) {
+					if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {
 						continue;
 					}
 					stud = study;
@@ -206,7 +208,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
 						// Filter on serie
 						Serie serie = (Serie) seriesIt.next();
-						if (StringUtils.isBlank(csvImport.getAcquisitionFilter()) || serie.getDescription().toUpperCase().contains(csvImport.getAcquisitionFilter().toUpperCase())) {
+						if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
 							selectedSeries.add(serie);
 							serialNumber = serie.getMriInformation().getDeviceSerialNumber();
 							modelName = serie.getMriInformation().getManufacturersModelName();
@@ -221,7 +223,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
-		
+
 		// 3. Check existence of study / study card
 		logger.info("3 Check study card");
 
@@ -236,7 +238,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				break;
 			}
 		}
-		
+
 		// No study card by default => get the one in the file (if existing of course)
 		if (sc == null) {
 			Optional<StudyCard> scOpt = studyCardsByStudy.stream().filter(element -> element.getName().equals(csvImport.getStudyCardName())).findFirst();
@@ -341,7 +343,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		// Get center ID from study card
 		Long centerId = sc.getCenterId();
 		Subject createdSubjet = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
-		
+
 		if (createdSubjet == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.subject"));
@@ -375,7 +377,38 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
-		
+
 		return true;
+	}
+
+	/**
+	 * This method allows to check if a filter with potentiel wildcard '*' is contained in the searched element
+	 * @param searchedElement the string that is checked
+	 * @param filter the filter we want to find
+	 * @return true if the filter matches, false otherwise
+	 */
+	private boolean searchField(String searchedElement, String filter) {
+		if (StringUtils.isBlank(searchedElement)) {
+			return false;
+		}
+		if (StringUtils.isBlank(filter) || filter.equals(WILDCARD)) {
+			return true;
+		}
+		// Set all to uppercase
+		searchedElement = searchedElement.toUpperCase();
+		if(filter.endsWith(WILDCARD)) {
+			if(filter.startsWith(WILDCARD)) {
+				// *filter*
+				return searchedElement.contains(filter.substring(1, filter.length() -1).toUpperCase());
+			}
+			// filter*
+			return searchedElement.startsWith(filter.substring(0, filter.length() -1).toUpperCase());
+		}
+		if(filter.startsWith(WILDCARD)) {
+			// *filter
+			return searchedElement.endsWith(filter.substring(1, filter.length()).toUpperCase());
+		}
+		// filter
+		return searchedElement.equalsIgnoreCase(filter);
 	}
 }
