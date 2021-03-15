@@ -21,13 +21,14 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { VERSION } from '../../../environments/version';
 import { StudyService } from '../../studies/shared/study.service';
+import { environment } from '../../../environments/environment';
 
 
 
 @Component({
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
-    styleUrls: ['side-menu.component.css'],
+    styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
     animations: [ slideDown ]
 })
 
@@ -88,7 +89,6 @@ export class SideMenuComponent {
     saveState() {
         sessionStorage.setItem(this.sessionKey, JSON.stringify(this.state));
     }
-
 }
 
 export class SideMenuState {
