@@ -146,7 +146,7 @@ public class ShanoirUploaderServiceClientNG {
 			postBody.append("&grant_type=password");
 			postBody.append("&username=").append(username);
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
-			postBody.append("&scope=openid info offline_access");
+			postBody.append("&scope=offline_access");
 			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
 			String responseEntityString = EntityUtils.toString(response.getEntity());
 			final int statusCode = response.getStatusLine().getStatusCode();
