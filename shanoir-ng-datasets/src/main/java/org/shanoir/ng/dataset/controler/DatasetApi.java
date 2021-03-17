@@ -152,8 +152,12 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     void downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
+    		@ApiParam(value = "Dowloading nifti, decide the nifti converter id")
+    		@Valid
+    		@RequestParam(value = "converterId", required = false, defaultValue="")  Long converterId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
-    			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+    			allowableValues = "dcm, nii", defaultValue = "dcm")
+    		@Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })

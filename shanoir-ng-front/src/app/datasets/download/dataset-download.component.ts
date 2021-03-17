@@ -18,7 +18,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
-
 @Component({
     selector: 'dataset-download',
     templateUrl: 'dataset-download.component.html',
@@ -32,7 +31,9 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
     - nii.gz or .zip */
 export class DatasetDownloadComponent {
     
-    constructor(private datasetService: DatasetService, private studyService: StudyService) {
+    constructor(
+        private datasetService: DatasetService,
+        private studyService: StudyService) {
     }
 
     @Input() datasetIds: number[] = [];
@@ -46,6 +47,14 @@ export class DatasetDownloadComponent {
     public mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
+
+    modalitySelected(value) {
+        if (value === 'nii') {
+            // display converters
+        } else {
+            // Hide converters
+        }
+    }
 
     /** Click on first button */
     prepareDownloadAll() {

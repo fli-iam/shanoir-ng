@@ -94,6 +94,9 @@ public class RabbitMQConfiguration {
 	/** Queue to create a study_user when subscribing to a challenge */
 	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
 
+	/** Queue to re-convert using a different nifti converter */
+	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 
@@ -122,7 +125,6 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
-	
 
 	////////////////// EXCHANGES //////////////////
 
@@ -306,6 +308,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue challengeSubscriptionQueue() {
 		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue niftiConversionQueue() {
+		return new Queue(NIFTI_CONVERSION_QUEUE, true);
 	}
 	
 }

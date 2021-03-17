@@ -108,24 +108,24 @@ export class DatasetService extends EntityService<Dataset> {
         )
     }
 
-    download(dataset: Dataset, format: string): Promise<void> {
+    download(dataset: Dataset, format: string, converterId: number = null): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadFromId(dataset.id, format);
+        return this.downloadFromId(dataset.id, format, converterId);
     }
 
-    downloadFromId(datasetId: number, format: string): Promise<void> {
+    downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format).then(
+        return this.downloadToBlob(datasetId, format, converterId).then(
             response => {
                 this.downloadIntoBrowser(response);
             }
         );
     }
 
-    downloadToBlob(id: number, format: string): Promise<HttpResponse<Blob>> {
+    downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {
         if (!id) throw Error('Cannot download a dataset without an id');
         return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format, 
+            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format + (converterId ? ('&converterId=' + converterId) : ''),
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
     }
