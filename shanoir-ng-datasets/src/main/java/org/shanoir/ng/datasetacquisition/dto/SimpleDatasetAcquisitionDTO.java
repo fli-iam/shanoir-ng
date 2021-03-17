@@ -12,12 +12,30 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { DatasetAcquisition } from "../../dataset-acquisitions/shared/dataset-acquisition.model";
+package org.shanoir.ng.datasetacquisition.dto;
 
-export class SubjectExamination {
-    id: number;
-    comment: string;
-    examinationDate: Date;
-    datasetAcquisitions: DatasetAcquisition[];
-    extraDataFilePathList: string[] = [];
+import java.util.List;
+
+public class SimpleDatasetAcquisitionDTO {
+	
+	private Long id;
+
+	private List<Long> datasetIds;
+
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public List<Long> getDatasetIds() {
+		return datasetIds;
+	}
+
+	public void setDatasetIds(List<Long> datasetIds) {
+		this.datasetIds = datasetIds;
+	}
 }
