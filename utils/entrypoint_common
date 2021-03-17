@@ -66,7 +66,8 @@ require()
             SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
             SHANOIR_MIGRATION)      match "$name" '^(auto|init|never|import|export)$'   ;;
 	    SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
-            SHANOIR_COLORS)         match "$name" '^[A-Za-z0-9-]+:#[0-9a-fA-F]{6}( +[A-Za-z0-9-]+:#[0-9a-fA-F]{6})*$' ;;
+	    SHANOIR_INSTANCE_NAME)  match "$name" '^[^"\\]*$'				;;
+	    SHANOIR_INSTANCE_COLOR) match "$name" '^([A-Za-z]*|#[0-9a-fA-F]{3,6})$'	;;
 
             SHANOIR_ADMIN_EMAIL)    ;;
             SHANOIR_ADMIN_NAME)     ;;
