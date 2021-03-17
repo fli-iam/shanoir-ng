@@ -32,7 +32,7 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	private List<DatasetAndProcessingsDTO> datasets;
 	
 	private Long studyId;
-	
+
 	private Integer sortingIndex;
 
 	public String getType() {
@@ -64,7 +64,7 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-	
+
 	public Integer getSortingIndex() {
 		return sortingIndex;
 	}
