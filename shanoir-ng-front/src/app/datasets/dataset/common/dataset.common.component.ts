@@ -26,7 +26,7 @@ import { Option } from '../../../shared/select/select.component';
 import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
-import { DatasetType } from '../../shared/dataset-type.model';
+import { DatasetType, DatasetTypes } from '../../shared/dataset-type.model';
 
 
 @Component({
@@ -42,7 +42,7 @@ export class CommonDatasetComponent implements OnChanges {
     studies: Study[] = [];
     
     exploredEntityOptions: Option<ExploredEntity>[];
-    datasetModalityTypes: Option<string>[];
+    datasetTypes: Option<DatasetType>[];
     processedDatasetTypeOptions: Option<ProcessedDatasetType>[];
 
     constructor(
@@ -51,8 +51,7 @@ export class CommonDatasetComponent implements OnChanges {
             private formBuilder: FormBuilder) {
 
         this.exploredEntityOptions = ExploredEntity.options;
-        this.datasetModalityTypes = ['Calibration' , 'Ct' , 'Eeg' , 'Meg' , 'Mesh' , 'Mr', 'ParameterQuantification' , 'Pet' , 'Registration' , 'Segmentation' , 'Spect'  , 'Statistical' , 'Template']
-            .map(prop => new Option<string>(prop, prop));
+        this.datasetTypes = DatasetTypes.map(prop => new Option<DatasetType>(prop, prop));
         this.processedDatasetTypeOptions = ProcessedDatasetType.options;
     }
 
