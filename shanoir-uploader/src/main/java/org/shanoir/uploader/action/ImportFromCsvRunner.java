@@ -1,6 +1,8 @@
 package org.shanoir.uploader.action;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -184,6 +186,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		boolean foundPatient = false;
 		String serialNumber = null;
 		String modelName = null;
+		
+		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
+		Study selectedStudy = null;
 
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (foundPatient) {
@@ -194,31 +199,49 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				Patient patient = (Patient) item;
 				pat = patient;
 				Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
+				Date currentDate = new Date();
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-					// Select only one study (not possible otherwise)
-					if (foundPatient) {
-						break;
-					}
+					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
+				// get study date
+					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMdd");
+					Date studyDate = new Date();
+					try {
+						studyDate = format1.parse(study.getDescriptionMap().get("date"));
+					} catch (ParseException e) {
+						// Could not get date => skip the study
+						continue;
+					}
+					if (studyDate.compareTo(currentDate) > 0) {
+						// We take the first valid date, if we are after on valiod date, don't check the data
+						continue;
+					}
 					if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {
 						continue;
 					}
 					stud = study;
+					selectedSeriesByStudy.put(stud, new HashSet<>());
 					Collection<DicomTreeNode> series = study.getTreeNodes().values();
 					for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
 						// Filter on serie
 						Serie serie = (Serie) seriesIt.next();
 						if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
-							selectedSeries.add(serie);
+							selectedSeriesByStudy.get(stud).add(serie);
+							selectedStudy = stud;
 							serialNumber = serie.getMriInformation().getDeviceSerialNumber();
 							modelName = serie.getMriInformation().getManufacturersModelName();
 							foundPatient = true;
-							logger.info("One serie was selected");
+							currentDate = studyDate;
 						}
 					}
 				}
 			}
 		}
+		if (selectedStudy == null) {
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
+			return false;
+		}
+		selectedSeries = selectedSeriesByStudy.get(selectedStudy);
 		if (selectedSeries.isEmpty()) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -255,8 +278,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		DicomDataTransferObject dicomData = null;
 		String subjectIdentifier = "";
+
 		try {
 			dicomData = new DicomDataTransferObject(null, pat, stud);
+
+			// Calculate identifier
+			subjectIdentifier = this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			dicomData.setSubjectIdentifier(subjectIdentifier);
+
 			// Change birth date to first day of year
 			final String dicomBirthDate = pat.getDescriptionMap().get("birthDate");
 			if (!StringUtils.isEmpty(dicomBirthDate)) {
@@ -267,10 +296,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				cal.set(Calendar.DAY_OF_MONTH, 1);
 				dicomData.setBirthDate(cal.getTime());
 			}
-
-			// Calculate identifier
-			subjectIdentifier = this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
-			dicomData.setSubjectIdentifier(subjectIdentifier);
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -321,30 +346,42 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		logger.info(uploadFolder.getName() + ": finished: " + toString());
 
-		// 8.  Create subject
-		logger.info("8 Create subject");
-
-		Subject subject = new Subject();
-		subject.setName(csvImport.getCommonName());
-		if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
-			subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
-		} else {
-			// Force feminine (girl power ?)
-			subject.setSex(Sex.F);
-		}
-		subject.setIdentifier(subjectIdentifier);
-
-		subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
-
-		subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-
-		ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, null);
-
-		// Get center ID from study card
 		Long centerId = sc.getCenterId();
-		Subject createdSubjet = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
 
-		if (createdSubjet == null) {
+		// 8.  Create subject if necessary
+		Subject subjectFound = null;
+		try {
+			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
+		} catch (Exception e) {
+			//Do nothing, if it fails, we'll just create a new subject
+		}
+		Subject subject;
+		if (subjectFound != null) {
+			logger.info("8 Subject exists, just use it");
+			subject = subjectFound;
+		} else {
+			logger.info("8 Creating a new subject");
+	
+			subject = new Subject();
+			subject.setName(csvImport.getCommonName());
+			if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
+				subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
+			} else {
+				// Force feminine (girl power ?)
+				subject.setSex(Sex.F);
+			}
+			subject.setIdentifier(subjectIdentifier);
+	
+			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
+	
+			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+	
+			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, null);
+	
+			// Get center ID from study card
+			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
+		}
+		if (subject == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.subject"));
 			return false;
@@ -359,7 +396,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		examDTO.setExaminationDate(new Date());
 		examDTO.setPreclinical(false);
 		examDTO.setStudyId(Long.valueOf(csvImport.getStudyId()));
-		examDTO.setSubjectId(createdSubjet.getId());
+		examDTO.setSubjectId(subject.getId());
 		Examination createdExam = shanoirUploaderServiceClientNG.createExamination(examDTO);
 
 		if (createdExam == null) {
@@ -373,7 +410,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		 */
 		logger.info("10 Import.json");
 
-		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, createdSubjet.getName(), createdSubjet.getId(), createdExam.getId(), study2, sc);
+		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
@@ -394,19 +431,45 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if (StringUtils.isBlank(filter) || filter.equals(WILDCARD)) {
 			return true;
 		}
+		String[] filters = filter.split(";");
+		boolean valid = false;
+		for (String filterToApply : filters) {
+			// Tips we use here exclusive "OR" with ^
+			// if it start with ! => we want the contrary of filterWildCard
+			// True/True => false
+			// True/False => true
+			// If it does not, we want the result of filterWioldCard
+			// False/False => false
+			// False/True => true
+			// This is the exact definition of exclusive or
+			
+			// Other NB: we choose to use OR instead of AND between filters. This is more convenient.
+			// Maybe we can better this, but not for the moment
+			valid = valid || filterToApply.startsWith("!") ^ filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+		}
+		return valid;
+	}
+
+	/**
+	 * Check if filterd elements contains or not the data sent in argument
+	 * @param searchedElement
+	 * @param filter
+	 * @return
+	 */
+	private boolean filterWildCard(String searchedElement, String filter) {
 		// Set all to uppercase
 		searchedElement = searchedElement.toUpperCase();
 		if(filter.endsWith(WILDCARD)) {
 			if(filter.startsWith(WILDCARD)) {
 				// *filter*
-				return searchedElement.contains(filter.substring(1, filter.length() -1).toUpperCase());
+				return searchedElement.contains(filter.replaceAll(WILDCARD, "").toUpperCase());
 			}
 			// filter*
-			return searchedElement.startsWith(filter.substring(0, filter.length() -1).toUpperCase());
+			return searchedElement.startsWith(filter.replaceAll(WILDCARD, "").toUpperCase());
 		}
 		if(filter.startsWith(WILDCARD)) {
 			// *filter
-			return searchedElement.endsWith(filter.substring(1, filter.length()).toUpperCase());
+			return searchedElement.endsWith(filter.replaceAll(WILDCARD, "").toUpperCase());
 		}
 		// filter
 		return searchedElement.equalsIgnoreCase(filter);
