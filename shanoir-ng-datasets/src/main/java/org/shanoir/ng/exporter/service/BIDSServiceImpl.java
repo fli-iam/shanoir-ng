@@ -320,7 +320,13 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @throws IOException
 	 */
 	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) throws IOException {
-		File examDir = createExaminationFolder(examination, subjDir);
+		// Create session folder only if there is multiple dataset acquisitions
+		File examDir;
+		if (examination.getDatasetAcquisitions() != null && examination.getDatasetAcquisitions().size() > 1 ) {
+			examDir = createExaminationFolder(examination, subjDir);
+		} else {
+			examDir = subjDir;
+		}
 
 		// Iterate over acquisitions/datasets
 		for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {
