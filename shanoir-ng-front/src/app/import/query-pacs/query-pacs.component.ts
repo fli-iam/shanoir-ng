@@ -48,9 +48,9 @@ export class QueryPacsComponent{
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Query';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'PACS';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'PACS';
         this.buildForm();
     }
 

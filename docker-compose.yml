@@ -35,6 +35,7 @@ services:
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_ALLOWED_ADMIN_IPS
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
