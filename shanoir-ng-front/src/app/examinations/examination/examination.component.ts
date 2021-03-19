@@ -11,26 +11,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
-import { StudyService } from '../../studies/shared/study.service';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { Examination } from '../shared/examination.model';
-import { ExaminationService } from '../shared/examination.service';
-import { DatasetService } from '../../datasets/shared/dataset.service'
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { StudyService } from '../../studies/shared/study.service';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationNode } from '../../tree/tree.model';
+import { Examination } from '../shared/examination.model';
+import { ExaminationService } from '../shared/examination.service';
+
 
 @Component({
     selector: 'examination',
@@ -45,13 +47,19 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     public centers: IdName[];
     public studies: IdName[];
     public subjects: SubjectWithSubjectStudy[];
-    private examinationExecutives: Object[];
-    private files: File[] = [];
+    examinationExecutives: Object[];
+    files: File[] = [];
     public inImport: boolean; 
     public readonly ImagesUrlUtil = ImagesUrlUtil;  
     protected bidsLoading: boolean = false;
-    private hasAdministrateRight: boolean = false;
-    private hasImportRight: boolean = false;
+    hasAdministrateRight: boolean = false;
+    hasImportRight: boolean = false;
+    hasDownloadRight: boolean = false;
+    downloading: boolean = false;
+
+    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    datasetIdsLoaded: boolean = false;
+    noDatasets: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -91,12 +99,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.examination = examination;
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
-                this.hasImportRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+        this.hasDownloadRight = true;
+        this.hasImportRight = true;
+        return;
+    } else {
+        return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
+            this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+            this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 });
             }
         });
@@ -129,7 +139,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    private getCenters(): void {
+    download(format: string) {
+        this.downloading = true;
+        this.datasetIds.then(ids => {
+            this.datasetService.downloadDatasets(ids, format)
+                    .then(() => this.downloading = false);
+        });
+    }
+
+    getCenters(): void {
         this.centerService
             .getCentersNames()
             .then(centers => {
@@ -137,7 +155,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             });
     }
 
-    private getStudies(): void {
+    getStudies(): void {
         this.studyService
             .getStudiesNames()
             .then(studies => {
@@ -145,7 +163,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             });
     }
 
-    private getSubjects(): void {
+    getSubjects(): void {
         if (!this.examination || !this.examination.study) return;
         this.studyService
             .findSubjectsByStudyId(this.examination.study.id)
@@ -200,5 +218,33 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     onExaminationNodeInit(node: ExaminationNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.examinationNode = node;
+        this.fetchDatasetIdsFromTree();
+    }
+
+    fetchDatasetIdsFromTree() {
+        if (!this.datasetIdsLoaded) {
+            let node: ExaminationNode = this.breadcrumbsService.currentStep.data.examinationNode;
+            let found: boolean = false;
+            // first look into the tree
+            let datasetIds: number[] = [];
+            if (node && node.datasetAcquisitions != 'UNLOADED') {
+                found = true;
+                node.datasetAcquisitions.forEach(dsAcq => {
+                    if (dsAcq.datasets != 'UNLOADED') {
+                        dsAcq.datasets.forEach(ds => {
+                            datasetIds.push(ds.id);
+                        });
+                    } else {
+                        found = false;  
+                        return;
+                    }
+                });
+            }
+            if (found) {
+                this.datasetIdsLoaded = true;
+                this.datasetIds = Promise.resolve(datasetIds);
+                this.noDatasets = datasetIds.length == 0;
+            }
+        }
     }
 }

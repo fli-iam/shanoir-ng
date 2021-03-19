@@ -44,6 +44,14 @@ public interface EmailService {
 	void notifyAdminAccountRequest(User user);
 
 	/**
+	 * Send an email to administrators to indicate an account extension request.
+	 * 
+	 * @param user
+	 *            updated user.
+	 */
+	void notifyAdminAccountExtensionRequest(User user);
+
+	/**
 	 * Send an email to the user and all administrators on account request validation.
 	 * 
 	 * @param user

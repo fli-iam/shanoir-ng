@@ -40,7 +40,7 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class StudyBIDSServiceImplTest {
+public class StudyBIDSServiceTest {
 	
 	private static final String CSV_SEPARATOR = "\t";
 	

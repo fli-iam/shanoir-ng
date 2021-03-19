@@ -91,6 +91,8 @@ public class RabbitMQConfiguration {
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
 
+	/** Queue to create a study_user when subscribing to a challenge */
+	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -299,6 +301,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue examinationCreationQueue() {
 		return new Queue(EXAMINATION_CREATION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue challengeSubscriptionQueue() {
+		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
 	}
 	
 }

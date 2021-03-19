@@ -12,13 +12,39 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="isAuthenticated()" class="home-component">
+<div *ngIf="!challengeDua && !challengeStudy">
     <div class="logo">
         <img [src]="shanoirBigLogoUrl">
-        <hr/>
+        <hr/> 
     </div>
     <p>
     	<strong>Shanoir is a new software</strong> that will allow you to share, upload, manage and download clinical and medical metadata and data.<br/>
 		With Shanoir, it's now easy to share data between medical doctors, researchers and PhD students! 
     </p>
+
+</div>
+<div *ngIf="challengeDua || challengeStudy" class="challenge-welcome">
+    <div class="logo">
+        <img [src]="shanoirBigLogoUrl" />
+        <hr/>
+    </div>
+    <div *ngIf="!challengeStudy">
+        <h1>Welcome to Shanoir, challenger!</h1>
+        <p class="msg">Here you will be able to download the datasets for the {{challengeDua.studyName}} Challenge.
+        But before that that, we ask you to accept the following Data User Agreement : </p>
+        <dua-signing (sign)="onSign()" [dua]="challengeDua"></dua-signing>
+    </div>
+    <div *ngIf="challengeStudy" class="dl-link">
+        <p class="msg">Congratulation, you can now download all the ressources you need for the <span class="challenge-name">{{challengeStudy.name}}</span> challenge and explore its data using the Shanoir interface :</p>
+        <div class="dl-block">
+            <span *ngFor="let filePath of challengeStudy.protocolFilePaths" class="dl">
+                <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
+                <div (click)="downloadFile(filePath)">{{filePath}}</div>
+            </span>
+            <span class="dl study">
+                <i class="fas fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
+                <div [routerLink]="'/study/details/' + challengeStudy.id">Explore <span class="challenge-name">{{challengeStudy.name}}</span></div>
+            </span>
+        </div>
+    </div>
 </div>

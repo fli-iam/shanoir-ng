@@ -130,7 +130,7 @@ dcm4chee-arc:
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 server:
-  port: 9923
+  port: 9924
 spring:
   profiles: dev
   datasource:
@@ -181,3 +181,4 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
