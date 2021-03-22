@@ -144,7 +144,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     private fetchNiftiConverters() {
         this.niftiConverterService.getAll()
-            .then(converters => this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name)));
+            .then(converters => {
+                this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name));
+                // pre-select dcm2niix
+                this.studyCard.niftiConverter = converters.filter(element => element.name === 'dcm2niix')[0];
+            });
     }
 
     private onStudyChange(study: IdName, form: FormGroup) {
