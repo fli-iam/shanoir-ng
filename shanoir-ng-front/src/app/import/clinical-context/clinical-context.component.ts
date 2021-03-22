@@ -612,7 +612,7 @@ export class ClinicalContextComponent implements OnDestroy {
             && (!context.useStudyCard || context.studyCard)
             && context.center != undefined && context.center != null
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
-            && context.subject != undefined && context.subject != null
+            && context.subject != undefined && context.subject != null && context.subject.subjectStudy.subjectType
             && context.examination != undefined && context.examination != null
             && context.niftiConverter != undefined && context.niftiConverter != null
         );
