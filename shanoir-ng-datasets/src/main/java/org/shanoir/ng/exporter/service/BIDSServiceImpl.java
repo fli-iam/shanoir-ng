@@ -140,22 +140,12 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	@RabbitListener(bindings = {
 			@QueueBinding(
-					key = ShanoirEventType.DELETE_STUDY_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
 					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
 					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.DELETE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
-					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
-			@QueueBinding(
-					key = ShanoirEventType.UPDATE_STUDY_EVENT,
 					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
@@ -182,19 +172,26 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 			)
 	public void deleteBids(String eventAsString) {
+		ShanoirEvent event;
 		try {
-			ShanoirEvent event =  objectMapper.readValue(eventAsString, ShanoirEvent.class);
+			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
 			Study studyDeleted = studyRepo.findOne(event.getStudyId());
+			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
+		} catch (Exception e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
+		}
+	}
+
+	@Override
+	public void deleteBidsFolder(Long studyId, String studyName) {
+		try {
 			// Try to delete the BIDS folder recursively if possible
-			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyDeleted.getId() + '_' + studyDeleted.getName());
+			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName);
 			if (bidsDir.exists()) {
-				FileUtils.deleteDirectory(bidsDir);
-			} else if (ShanoirEventType.UPDATE_STUDY_EVENT.equals(event.getEventType())) {
-				bidsDir = getFileFromId(event.getStudyId().toString(), new File(bidsStorageDir));
 				FileUtils.deleteDirectory(bidsDir);
 			}
 		} catch (Exception e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}, {}", studyId, studyName, e);
 		}
 	}
 

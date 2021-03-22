@@ -30,4 +30,11 @@ public interface BIDSService {
 	 */
 	public void deleteBids(String event);
 
+	/**
+	 * Deletes the folder of a given study to update / delete
+	 * @param studyId the given study ID
+	 * @param studyName the given study name
+	 */
+	void deleteBidsFolder(Long studyId, String studyName);
+
 }
