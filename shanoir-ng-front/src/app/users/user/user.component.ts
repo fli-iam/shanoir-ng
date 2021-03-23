@@ -23,6 +23,7 @@ import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 
 @Component({
@@ -37,10 +38,13 @@ export class UserComponent extends EntityComponent<User> {
     public denyLoading: boolean = false;
     public acceptLoading: boolean = false;
 
+    public studies = [];
+
     constructor(
             private route: ActivatedRoute,
             private userService: UserService,
-            private roleService: RoleService) {
+            private roleService: RoleService,
+            private studyService: StudyService) {
             
         super(route, 'user');
     }
@@ -73,7 +77,10 @@ export class UserComponent extends EntityComponent<User> {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
         });
-        Promise.all([userPromise, this.getRoles()]).then(() => {
+        let getMembershipPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+            this.studies = studies;
+        })
+        Promise.all([userPromise, getMembershipPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);
         });
         return userPromise;
