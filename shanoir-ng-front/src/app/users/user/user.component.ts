@@ -22,6 +22,7 @@ import { DatepickerComponent } from '../../shared/date-picker/date-picker.compon
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import * as AppUtils from '../../utils/app.utils';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 
 @Component({
@@ -32,20 +33,26 @@ import * as AppUtils from '../../utils/app.utils';
 
 export class UserComponent extends EntityComponent<User> {
 
-    private roles: Role[];
-    private denyLoading: boolean = false;
-    private acceptLoading: boolean = false;
+    public roles: Role[];
+    public denyLoading: boolean = false;
+    public acceptLoading: boolean = false;
+    public studies = [];
 
     constructor(
             private route: ActivatedRoute,
             private userService: UserService,
-            private roleService: RoleService) {
+            private roleService: RoleService,
+            private studyService: StudyService) {
             
         super(route, 'user');
     }
 
     public get user(): User { return this.entity; }
     public set user(user: User) { this.entity = user; }
+
+    getService(): EntityService<User> {
+        return this.userService;
+    }
 
     initView(): Promise<void> {
         return this.loadUserAndRoles();
@@ -68,7 +75,10 @@ export class UserComponent extends EntityComponent<User> {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
         });
-        Promise.all([userPromise, this.getRoles()]).then(() => {
+        let getMembershipPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+            this.studies = studies;
+        })
+        Promise.all([userPromise, getMembershipPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);
         });
         return userPromise;
@@ -137,6 +147,10 @@ export class UserComponent extends EntityComponent<User> {
 
     public async hasDeleteRight(): Promise<boolean> {
         return false;
+    }
+
+    isUserAdmin(): boolean {
+        return this.keycloakService.isUserAdmin();
     }
 
 }
