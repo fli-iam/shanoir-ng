@@ -165,7 +165,13 @@ public class SubjectServiceImpl implements SubjectService {
 		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
 		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
 		subject.setName(subjectName);
-		return subjectRepository.save(subject);
+		Subject subjectDb = subjectRepository.save(subject);
+		try {
+			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+		}
+		return subjectDb;
 	}
 
 	@Override
