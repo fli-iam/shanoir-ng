@@ -19,6 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'manufacturer-detail',
@@ -27,6 +28,8 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     
+    isNameUniqueError = null;
+
     constructor (
             private route: ActivatedRoute,
             private manufService: ManufacturerService) {
@@ -34,8 +37,12 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
         super(route, 'manufacturer');
     }
 
-    private get manuf(): Manufacturer { return this.entity; }
-    private set manuf(manuf: Manufacturer) { this.entity = manuf; }
+    get manuf(): Manufacturer { return this.entity; }
+    set manuf(manuf: Manufacturer) { this.entity = manuf; }
+
+    getService(): EntityService<Manufacturer> {
+        return this.manufService;
+    }
 
     initView(): Promise<void> {
         return this.getManufacturer();

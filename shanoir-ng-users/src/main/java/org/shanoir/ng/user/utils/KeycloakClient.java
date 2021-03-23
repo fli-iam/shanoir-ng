@@ -29,6 +29,7 @@ import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
+import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +113,26 @@ public class KeycloakClient {
 		} catch (Exception e) {
 			throw new SecurityException("Could not register the new user into Keycloak.", e);
 		}
+	}
+
+	/**
+	 * This methods resets the password of th given user and sets a temporary password.
+	 * @param keycloakId the keycloak ID of the user to update.
+	 * @return the password newly created
+	 */
+	public String resetPassword(String keycloakId) {
+		// Create new temporary password
+		String newPassword = PasswordUtils.generatePassword();
+
+		final CredentialRepresentation credential = new CredentialRepresentation();
+		credential.setType(CredentialRepresentation.PASSWORD);
+		credential.setTemporary(Boolean.TRUE);
+		credential.setValue(newPassword);
+
+		final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
+		userResource.resetPassword(credential);
+		
+		return newPassword;
 	}
 	
 	/**

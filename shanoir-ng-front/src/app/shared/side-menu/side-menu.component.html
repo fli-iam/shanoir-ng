@@ -25,31 +25,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
         <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
     </div>
-    <div class="welcome">{{username}}</div> 
-    <div class="logout">
-        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout<i class="fas fa-sign-out-alt"></i></a>
+    <div class="welcome">{{username}}</div>
+    <div class="user-commands">
+        <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
+        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li (click)="tasksOpened = !tasksOpened" class="notifications">
-        <i class="fas fa-tasks"></i>Tasks
-        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
-        <!-- <button class="awesome" (click)="notificationsService.refresh()" >
-            <i class="fas fa-sync"></i>
-        </button> -->
-        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="duasToSign() > 0" (click)="notifOpened = !notifOpened"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign()}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
-    <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
-        <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Manage my tasks</li>
-        <li *ngFor="let item of notificationsService.tasksInProgress" class="single-task">
-            <i class="fas fa-circle"></i>
-            {{item.eventType == 'importDataset.event' ? 'Import in progress' : item.message}} - {{item.progress * 100 | number:'0.0-0'}}%
-            <!-- <progress-bar progress="{{item.progress}}"></progress-bar> -->
-        </li>
-        <!-- <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li> -->
+    <div *ngIf="notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="notifOpened">
+        <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
     </div>
+    <li routerLink="/task" routerLinkActive="active">
+        <i class="fas fa-tasks"></i>Jobs
+        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
+    </li>
+    
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fab fa-searchengin"></i>Solr search</li>
     <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="dataOpened" class="sub-menu" [@slideDown]="dataOpened">
@@ -93,6 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>
+        <li routerLink="/download-statistics" routerLinkActive="active"><i class="fas fa-table"></i>Download statistics</li>
     </div>
 </ul>
 

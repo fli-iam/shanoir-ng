@@ -1,0 +1,61 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+<form [formGroup]="form" novalidate>
+    <div class="header command-zone">Download statistics</div>
+    <fieldset class="step">
+        <ol>
+            <legend>
+                Please enter the filters corresponding to the data you would like to download.
+            </legend>
+            <p>The studies will be filtered by name according to the given regular expression. 
+                For example, "Main Cohort.*|Multiple Sclerosis" in the field "Regular expression filtering the studies to include" will return data from all studies which have a name beginning with "Main Cohort" or "Multiple Sclerosis".
+                "Test.*|FakeSubject" in the field "Regular expression filtering the subjects to exclude" will skip data whose subject name begins with "Test" or is "FakeSubject".</p>
+            <li>
+                <label>Regular expression filtering the studies to include</label> 
+                <span class="right-col">
+                    <input type="text" id="studyNameInRegExp" formControlName="studyNameInRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('studyNameInRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameInRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the studies to include by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the studies to exclude</label> 
+                <span class="right-col">
+                    <input type="text" id="studyNameOutRegExp" formControlName="studyNameOutRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('studyNameOutRegExp', ['maxlength'])" [@slideDown]="hasError('studyNameOutRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the studies to exclude by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the subjects to include</label> 
+                <span class="right-col">
+                    <input type="text" id="subjectNameInRegExp" formControlName="subjectNameInRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('subjectNameInRegExp', ['maxlength'])" [@slideDown]="hasError('subjectNameInRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the subjects to include by name.</tool-tip>
+            </li>
+            <li>
+                <label>Regular expression filtering the subjects to exclude</label> 
+                <span class="right-col">
+                    <input type="text" id="subjectNameOutRegExp" formControlName="subjectNameOutRegExp" maxlength="255"/>
+                    <label *ngIf="hasError('subjectNameOutRegExp', ['maxlength'])" [@slideDown]="hasError('subjectNameOutRegExp', ['maxlength'])" class="form-validation-alert">Length must not exceed 255!</label>
+                </span>
+                <tool-tip>Enter the regular expression to select the subjects to exclude by name.</tool-tip>
+            </li>
+        </ol>
+    </fieldset>
+    <button class="next" [disabled]="!form.valid" (click)="downloadStatistics()">Download statistics</button>
+</form>

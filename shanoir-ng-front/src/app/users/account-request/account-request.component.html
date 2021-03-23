@@ -41,11 +41,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
                 </span>
             </li>
+            <li class="info">
+                <i class="fas fa-exclamation-triangle"></i>
+                Please use your professional or institutional email address here. For legal compliance reasons we will not accepted other addresses.
+            </li>
         </ol>
     </fieldset>
 
     <span>
-        <account-request-info formControlName="accountRequestInfo" [(ngModel)]="user.accountRequestInfo" [editMode]="true"></account-request-info>
+        <account-request-info formControlName="accountRequestInfo" [(ngModel)]="user.accountRequestInfo" [editMode]="true" (valid)="onInfoValidityUpdate($event)"></account-request-info>
     </span>
         
     <div class="footer command-zone">

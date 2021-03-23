@@ -37,8 +37,8 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup
 
 export class QueryPacsComponent{
 
-    private dicomQuery: DicomQuery = new DicomQuery();
-    private form: FormGroup;
+    dicomQuery: DicomQuery = new DicomQuery();
+    form: FormGroup;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private router: Router,
@@ -48,9 +48,9 @@ export class QueryPacsComponent{
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Query';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'PACS';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'PACS';
         this.buildForm();
     }
 

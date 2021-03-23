@@ -13,32 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <li #container
-    [class.opened]="init && opened" 
-    [class.closed]="!opened"
-    [class.animate]="overflow">
-    <span 
-        *ngIf="hasChildren && mode == 'top'"
-        class="label"
-        (click)="toggle($event)"
-        >
-        <i *ngIf="awesome" class="{{awesome}}"></i>
-        {{label}}
-        <span class="menu-arrow">&#x25BE;</span>
-    </span> 
-    <span
-        *ngIf="!hasChildren && mode == 'top'"
-        class="label" 
-        (click)="click()"
-        [routerLink]="link? link : null"
-        [routerLinkActive]="link? 'active' : 'unactive'"
-        >{{label}}
-    </span>
-    <span 
-        *ngIf="mode == 'tree'"
-        class="plus"
-        (click)="toggle($event)"
-        ><ng-template [ngIf]="!opened">+</ng-template><ng-template [ngIf]="opened">&#10549;</ng-template></span>
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideDown]="opened" [hidden]="!init">
+        [class.opened]="opened"
+        [class.animate]="overflow">
+    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened"> 
         <div class="sub-sub-content"><ng-content></ng-content></div>
     </ul>
 </li>

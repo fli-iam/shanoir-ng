@@ -14,7 +14,11 @@
 
 package org.shanoir.ng.examination.dto.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;

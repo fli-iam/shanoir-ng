@@ -29,6 +29,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -60,6 +61,10 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
     get ingredient(): AnestheticIngredient { return this.entity; }
     set ingredient(ingredient: AnestheticIngredient) { this.entity = ingredient; }
   
+    getService(): EntityService<AnestheticIngredient> {
+        return this.ingredientsService;
+    }
+
     initView(): Promise<void> {
         this.loadUnits();
         this.loadNames();   

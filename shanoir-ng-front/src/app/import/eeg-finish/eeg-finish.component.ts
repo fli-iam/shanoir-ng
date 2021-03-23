@@ -22,6 +22,7 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model'
+import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 
 @Component({
     selector: 'eeg-finish-import',
@@ -32,8 +33,8 @@ export class FinishEegImportComponent {
 
     private importJob: EegImportJob;
     private context: ContextData;
-    private importing: boolean = false;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    public importing: boolean = false;
+    public readonly ImagesUrlUtil = ImagesUrlUtil;
     private step: Step;
 
     constructor(
@@ -56,7 +57,7 @@ export class FinishEegImportComponent {
         this.context = this.importDataService.contextData;
     }
     
-    private startEegImportJob(): void {
+    public startEegImportJob(): void {
         this.subjectService
             .updateSubjectStudyValues(this.context.subject.subjectStudy)
             .then(() => {
@@ -85,7 +86,7 @@ export class FinishEegImportComponent {
         importJob.datasets = [];
 
         for (let dataset of this.importJob.datasets) {
-            let datasetToSet = new EegDataset();
+            let datasetToSet = new EegDatasetDTO();
             datasetToSet.channels = dataset.channels;
             datasetToSet.name = dataset.name;
             datasetToSet.files = dataset.files;

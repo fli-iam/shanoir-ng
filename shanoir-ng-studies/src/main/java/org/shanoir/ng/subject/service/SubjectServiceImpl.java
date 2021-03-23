@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -163,14 +165,23 @@ public class SubjectServiceImpl implements SubjectService {
 		DecimalFormat formatterSubject = new DecimalFormat(FORMAT_SUBJECT_CODE);
 		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
 		subject.setName(subjectName);
-		return subjectRepository.save(subject);
+		Subject subjectDb = subjectRepository.save(subject);
+		try {
+			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
+		}
+		return subjectDb;
 	}
 
 	@Override
-	public Subject update(final Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException {
+	public Subject update(final Subject subject) throws ShanoirException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
+		}
+		if (!subjectDb.getName().equals(subject.getName())) {
+			throw new ShanoirException("You cannot update subject common name.", HttpStatus.FORBIDDEN.value());
 		}
 		updateSubjectValues(subjectDb, subject);
 		subjectRepository.save(subjectDb);

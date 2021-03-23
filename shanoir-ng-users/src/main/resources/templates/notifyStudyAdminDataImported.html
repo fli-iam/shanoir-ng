@@ -16,16 +16,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
-    <p>Some data has been imported to study <span th:text="${studyName}"></span>.</p>
-    <br/>
-    <p>Study <span th:text="${studyName}"></span></p>
-    <p>Center <span th:text="${center}"></span></p>
-    <p>Equipement <span th:text="${equipement}"></span></p>
-    <p>Subject <span th:text="${subject}"></span></p>
-    <p>Examination ID <span th:text="${examination}"></span></p>
-    <br/>
-    <p> Please feel free to check data consistency. </p> <br/>
+    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>, <br/>
+    User <span th:text="${username}"></span> imported data to study <span th:text="${studyName}"></span>.</p>
+    <p>Subject: <span th:text="${subject}"></span><br/>
+    Examination ID: <span th:text="${examination}"></span></p>
+    <p> Datasets: <br/>
+    <ul>
+    <li th:each="serie : ${series}" th:text="${serie}"></li>
+    </ul>
+    </p>
+    <p> Please feel free to check data consistency. </p>
     <p>Regards,<br/>
     Shanoir administrator</p>
 </body>

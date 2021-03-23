@@ -37,3 +37,16 @@ progress-bar { width: 100px; }
 
 .bottom-info { min-width: 300px; font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
 .bottom-info a { color: inherit; }
+
+.user-commands a + a { margin-left: 20px; }
+.counter { margin: 0 6px;
+    background-color: var(--color-c);
+    border-radius: 21px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    text-align: center;
+    font-size: 10px;
+    vertical-align: middle;
+    padding: 1px 1px 0 0px;
+}

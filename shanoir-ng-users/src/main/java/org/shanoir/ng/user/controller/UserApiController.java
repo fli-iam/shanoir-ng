@@ -22,6 +22,9 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -29,9 +32,8 @@ import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
-import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,6 +44,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
 	
+	@Autowired
+	ShanoirEventService eventService;
+
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
 			@RequestBody final User user, final BindingResult result) throws RestServiceException {
@@ -49,7 +54,20 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		try {
 			validate(user, result);
 
-			getUserService().confirmAccountRequest(user);
+			User userSaved = getUserService().confirmAccountRequest(user);
+			
+			if (userSaved.getAccountRequestInfo() != null && userSaved.getAccountRequestInfo().getChallenge() != null) {
+				// I see that we have a challenger here
+				// Directly create a StudyUser linked to the given study
+				ShanoirEvent subscription = new ShanoirEvent(
+						ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
+						userSaved.getAccountRequestInfo().getChallenge().toString(),
+						userSaved.getId(),
+						userSaved.getUsername(),
+						ShanoirEvent.IN_PROGRESS);
+				eventService.publishEvent(subscription);
+				// So that when the user account request is accepted, it directly has access to the data
+			}
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
@@ -74,9 +92,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	
 	@Override
 	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
-		try { 
+		try {
 			getUserService().denyAccountRequest(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,18 +122,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
-
-	@Override
-	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
-		try {
-			getUserService().requestExtension(KeycloakUtil.getTokenUserId(), requestInfo);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-
 	
 	@Override
 	public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {

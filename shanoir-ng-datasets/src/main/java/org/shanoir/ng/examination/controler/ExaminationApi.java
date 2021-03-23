@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.controler;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -24,7 +25,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -161,19 +161,22 @@ public interface ExaminationApi {
 	@PostMapping(value = "extra-data-upload/{examinationId}",
 	produces = { "application/json" },
     consumes = { "multipart/form-data" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> addExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Download extra data from an examination", response = ByteArrayResource.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = ByteArrayResource.class),
+	@ApiOperation(value = "", notes = "Download extra data from an examination", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, message = "examination updated"),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
-	ResponseEntity<ByteArrayResource> downloadExtraData(
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	void downloadExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

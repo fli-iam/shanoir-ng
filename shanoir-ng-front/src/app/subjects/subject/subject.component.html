@@ -44,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 				<ol>
-					<ng-container *ngIf="humanSelected()" [@slideDown]="humanSelected()">
+					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
 						<li *ngIf="mode == 'create' && humanSelected()">
 							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 							<span class="right-col">
@@ -76,11 +76,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 							</span>
 						</li>
-					</ng-container>
+					</div>
                     <li>
                         <label i18n="Subject detail|Name label@@subjectDetailName">Common name</label>
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
+                                {{subject.name}}
+                            </ng-template>
+                            <ng-template [ngSwitchCase]="'edit'">
                                 {{subject.name}}
                             </ng-template>
                             <ng-template ngSwitchDefault>
@@ -91,7 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ng-template>
                         </span>
 					</li>
-					<ng-container *ngIf="humanSelected()" [@slideDown]="humanSelected()">
+					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
 						<li *ngIf="mode == 'create' || mode == 'view'">
 							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
 							<span [ngSwitch]="mode" class="right-col">
@@ -141,7 +144,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</ng-template>
 							</span>
 						</li>
-					</ng-container>
+					</div>
 				</ol>
 				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
 					<li *ngIf="mode == 'create'">
@@ -165,10 +168,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
-				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-				<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
+				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
+				<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : subject" 
+						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
 			</fieldset>
-			
 			<form-footer
 				[state]="footerState"
 				(save)="save()"

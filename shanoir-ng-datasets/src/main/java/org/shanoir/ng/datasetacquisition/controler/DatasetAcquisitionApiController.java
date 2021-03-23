@@ -15,12 +15,15 @@
 package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.validation.Valid;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
@@ -73,6 +76,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
+	
+	@Autowired
+	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 	
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
@@ -132,6 +138,25 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(daList), HttpStatus.OK);
 		}
 	}
+
+	@Override
+	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
+		
+		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
+		daList.sort(new Comparator<DatasetAcquisition>() {
+
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return o1.getSortingIndex() - o2.getSortingIndex();
+			}
+		});
+		if (daList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
+		}
+	}
 	
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
@@ -166,6 +191,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
 	}
+	
+	
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(

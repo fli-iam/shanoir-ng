@@ -22,13 +22,13 @@ import java.util.Optional;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.UserDeleteEvent;
+import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
@@ -153,6 +153,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public Optional<User> findByEmailForExtension(final String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	@Override
 	public User findById(final Long id) {
 		return userRepository.findOne(id);
 	}
@@ -175,6 +180,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<User> getExpiredUsers() {
+		final LocalDate expirationDate = LocalDate.now();
+		final LocalDate expirationDateLessOneWeek = expirationDate.minusWeeks(1);
+		return userRepository.findByExpirationDateLessThanEqualAndExpirationDateGreaterThan(expirationDate, expirationDateLessOneWeek);
+	}
+
+	@Override
 	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
@@ -183,6 +195,9 @@ public class UserServiceImpl implements UserService {
 		user.setExtensionRequestDemand(Boolean.TRUE);
 		user.setExtensionRequestInfo(requestInfo);
 		userRepository.save(user);
+
+		// Send email to administrators
+		emailService.notifyAdminAccountExtensionRequest(user);
 	}
 
 	@Override

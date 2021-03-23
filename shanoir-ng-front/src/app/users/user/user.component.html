@@ -71,45 +71,45 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 			</ol>
 		</fieldset>
-		<fieldset>
+		<fieldset *ngIf="isUserAdmin()">
 			<ol>
 				<li>
 					<label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
+					<span class="right-col">
+						<ng-container *ngIf="mode == 'view' || !isUserAdmin()">
 							{{user.expirationDate | date: 'dd/MM/yyyy'}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
+						</ng-container>
+						<ng-container *ngIf="mode != 'view' && isUserAdmin()">
 							<datepicker formControlName="expirationDate" [(ngModel)]="user.expirationDate"></datepicker>
-						</ng-template>
-						<label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-						<label *ngIf="hasError('expirationDate', ['future'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateFutureError">This date should be in the future!</label>
+							<label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('expirationDate', ['future'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateFutureError">This date should be in the future!</label>
+						</ng-container>
 					</span>
 				</li>
 				<li class="required">
 					<label i18n="Edit user|Role label@@editUserRole">Role of the user</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
+					<span class="right-col">
+						<ng-container *ngIf="mode == 'view' || !isUserAdmin()">
 							{{user.role.displayName}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
+						</ng-container>
+						<ng-container *ngIf="mode != 'view' && isUserAdmin()">
 							<select id="role" formControlName="role" [(ngModel)]="user.role">
 								<option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
 							</select>
-						</ng-template>
-						<label *ngIf="hasError('role', ['required'])" class="form-validation-alert" i18n="Edit user|Role required error@@editUserRoleRequiredError">Role is required!</label>
+							<label *ngIf="hasError('role', ['required'])" class="form-validation-alert" i18n="Edit user|Role required error@@editUserRoleRequiredError">Role is required!</label>
+						</ng-container>
 					</span>
 				</li>
 				<li>
 					<label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from Neurinfo-PACS</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
+						<ng-container *ngIf="mode == 'view' || !isUserAdmin()">
 							<span *ngIf="user.canAccessToDicomAssociation" class="bool-true"><i class="fas fa-check"></i></span>
 							<span *ngIf="!user.canAccessToDicomAssociation" class="bool-false"><i class="fas fa-times"></i></span>
-						</ng-template>
-						<ng-template ngSwitchDefault>
+						</ng-container>
+						<ng-container *ngIf="mode != 'view' && isUserAdmin()">
 							<checkbox [(ngModel)]="user.canAccessToDicomAssociation" formControlName="canAccessToDicomAssociation"></checkbox>
-						</ng-template>
+						</ng-container>
 					</span>
 				</li>
 			</ol>

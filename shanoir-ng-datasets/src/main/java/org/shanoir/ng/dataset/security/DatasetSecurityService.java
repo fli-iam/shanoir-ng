@@ -14,23 +14,27 @@
 
 package org.shanoir.ng.dataset.security;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
@@ -58,7 +62,9 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	StudyRightsService commService;
-		
+
+	@Autowired
+	StudyRepository studyRepository;
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -177,10 +183,7 @@ public class DatasetSecurityService {
         if (dataset == null) {
 			throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
 		}
-        if (dataset.getStudyId() == null) {
-			return false;
-		}
-        return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
+        return hasRightOnTrustedDataset(dataset, rightStr);
     }
 
     /**
@@ -276,7 +279,15 @@ public class DatasetSecurityService {
         if (dataset.getStudyId() == null) {
 			return false;
 		}
-        return commService.hasRightOnStudy(dataset.getStudyId(), rightStr);
+        Set<Long> studies = new HashSet<>();
+        studies.add(dataset.getStudyId());
+        List<Long> studiesRelated = studyRepository.findByDatasetId(dataset.getId()).stream().map(BigInteger::longValue).collect(Collectors.toList());
+
+        if (studiesRelated != null && !studiesRelated.isEmpty()) {
+        	studies.addAll(studiesRelated);
+        }
+
+        return !commService.hasRightOnStudies(studies, rightStr).isEmpty();
     }
     
     /**
@@ -501,6 +512,46 @@ public class DatasetSecurityService {
      * @param rightStr the right
      * @return true
      */
+    public boolean filterDatasetAcquisitionDTOList(List<DatasetAcquisitionDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((DatasetAcquisitionDTO dsa) -> {
+    		studyIds.add(dsa.getExamination().getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((DatasetAcquisitionDTO dsa) -> !checkedIds.contains(dsa.getExamination().getStudyId()));
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((ExaminationDatasetAcquisitionDTO edsa) -> {
+    		studyIds.add(edsa.getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getStudyId()));
+    	return true;
+    }
+    
+    /**
+     * Filter dataset acquisitions checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
     public boolean checkDatasetAcquisitionDTOPage(Page<DatasetAcquisitionDTO> page, String rightStr) {
     	if (page == null) {
 			return true;
@@ -592,6 +643,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationDTOList(List<ExaminationDTO> list, String rightStr) {
+	if (list == null) return true;
     	Set<Long> studyIds = new HashSet<>();
     	list.forEach((ExaminationDTO exam) -> {
     		if (exam.getStudyId() != null) {

@@ -23,8 +23,10 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -77,7 +79,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{datasetId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-	ResponseEntity<DatasetDTO> findDatasetById(
+	ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
 	@ApiOperation(value = "", notes = "Updates a dataset", response = Void.class, tags = {})
@@ -104,6 +106,16 @@ public interface DatasetApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/acquisition/{acquisitionId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
 
 	@ApiOperation(value = "", notes = "Returns the list of dataset id by subject id and study id", response = Long.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -136,13 +148,13 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden"),
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/download/{datasetId}", produces = { "application/zip" })
+    @GetMapping(value = "/download/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
-    ResponseEntity<ByteArrayResource> downloadDatasetById(
+    void downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
@@ -153,11 +165,11 @@ public interface DatasetApi {
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @PostMapping(value = "/massiveDownload")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
-    ResponseEntity<ByteArrayResource> massiveDownloadByDatasetIds(
+    void massiveDownloadByDatasetIds(
     		@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
 
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByStudyId", notes = "If exists, returns a zip file of the datasets corresponding to the given study ID", response = Resource.class, tags={  })
     @ApiResponses(value = {
@@ -168,10 +180,29 @@ public interface DatasetApi {
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "/massiveDownloadByStudy")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
-    ResponseEntity<ByteArrayResource> massiveDownloadByStudyId(
+    void massiveDownloadByStudyId(
     		@ApiParam(value = "id of the study", required=true) @Valid
     		@RequestParam(value = "studyId", required = true) Long studyId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, EntityNotFoundException, IOException;
+    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
+	@ApiOperation(value = "", nickname = "downloadStatistics", notes = "Download statistics from the entire database", response = Resource.class, tags={  })
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "exported statistics", response = Resource.class),
+		@ApiResponse(code = 401, message = "unauthorized"),
+		@ApiResponse(code = 403, message = "forbidden"),
+		@ApiResponse(code = 404, message = "no dataset found"),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/downloadStatistics", produces = { "application/zip" })
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<ByteArrayResource> downloadStatistics(
+			@ApiParam(value = "Study name including regular expression", required=false) @Valid
+			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
+			@ApiParam(value = "Study name excluding regular expression", required=false) @Valid
+			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
+			@ApiParam(value = "Subject name including regular expression", required=false) @Valid
+			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
+			@ApiParam(value = "Subject name excluding regular expression", required=false) @Valid
+			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException;
+		
 }

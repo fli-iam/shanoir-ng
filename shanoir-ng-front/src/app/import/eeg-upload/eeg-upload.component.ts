@@ -30,10 +30,10 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class EegUploadComponent {
     
-    private archiveStatus: Status = 'none';
+    public archiveStatus: Status = 'none';
     protected extensionError: boolean;
     private modality: string;
-    protected errorMessage: string;
+    public errorMessage: string;
 
 
     constructor(
@@ -45,12 +45,12 @@ export class EegUploadComponent {
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'EEG';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'EEG';
     }
 
-    private uploadArchive(fileEvent: any): void {
+    public uploadArchive(fileEvent: any): void {
         if (fileEvent.target.files.length > 0) {
             this.setArchiveStatus('uploading');
             this.uploadToServer(fileEvent.target.files);
@@ -87,7 +87,7 @@ export class EegUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/eegseries']);
     }
 

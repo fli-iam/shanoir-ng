@@ -13,10 +13,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, forwardRef, Input, QueryList } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList } from '@angular/core';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
 @Component({
     selector: 'menu-item',
@@ -30,7 +28,8 @@ export class MenuItemComponent {
     @Input() label: string;
     @Input() link: string;
     @Input() boolVar: boolean;
-    @Input() icon: string;
+    @Input() awesome: string;
+    @Input() disabled: boolean;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
     public opened: boolean = false;
@@ -39,7 +38,6 @@ export class MenuItemComponent {
     public hasChildren: boolean = true;
     public overflow: boolean = false;
     public init: boolean = false;
-    private notepadIconPath: string = ImagesUrlUtil.NOTEPAD_ICON_PATH;
 
     public closeAll: () => void;
 
@@ -56,13 +54,12 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = Observable.timer(0,100).subscribe (t=> {
+        let subscription = setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;
             this.init = true;
-            subscription.unsubscribe();
-        });
+        }, 100);
     }
 
     public open() {
@@ -115,22 +112,8 @@ export class MenuItemComponent {
         if (this.opened) this.close();
         else this.open();
     }
-
-    public click() {
-        if (this.link != undefined || this.boolVar == undefined) {
-            this.cascadingClose();
-        }
-    }
-
+    
     public cascadingClose() {
         if (this.parent) this.parent.cascadingClose();
-    }
-
-    public getMode(): "top" | "tree" {
-        if (this.parent) {
-            return this.parent.getMode();
-        } else {
-            return "top";
-        }
     }
 }

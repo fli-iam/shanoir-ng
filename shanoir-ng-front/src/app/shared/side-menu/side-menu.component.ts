@@ -20,6 +20,7 @@ import { MsgBoxService } from '../msg-box/msg-box.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { VERSION } from '../../../environments/version';
+import { StudyService } from '../../studies/shared/study.service';
 
 
 
@@ -32,23 +33,26 @@ import { VERSION } from '../../../environments/version';
 
 export class SideMenuComponent {
 
-    private shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
-    private username: string = "";
-    private dataOpened: boolean = false;
-    private precOpened: boolean = false;
-    private eqOpened: boolean = false;
-    private uploadOpened: boolean = false;
-    private adminOpened: boolean = false;
-    private tasksOpened: boolean = false;
+    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
+    public username: string = "";
+    public userId: number = 0;
+    public dataOpened: boolean = false;
+    public precOpened: boolean = false;
+    public eqOpened: boolean = false;
+    public uploadOpened: boolean = false;
+    public adminOpened: boolean = false;
+    public notifOpened: boolean = false;
     public VERSION = VERSION;
 
     constructor(
-            private keycloakService: KeycloakService, 
+            public keycloakService: KeycloakService, 
             private solrService: SolrService,
             private msgboxService: MsgBoxService,
-            public notificationsService: NotificationsService) {
+            public notificationsService: NotificationsService,
+            private studyService: StudyService) {
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
+            this.userId = KeycloakService.auth.userId;
         }
         this.notificationsService.connect();
     }
@@ -74,6 +78,10 @@ export class SideMenuComponent {
         this.solrService.indexAll().then(() => {
             this.msgboxService.log('info', 'Indexation launched !');
         });
+    }
+
+    duasToSign(): number {
+        return this.studyService.duasToSign;
     }
 
 }

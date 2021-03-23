@@ -15,7 +15,11 @@
 package org.shanoir.ng.importer.dto;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
  * @author atouboul
@@ -23,6 +27,10 @@ import java.util.List;
  */
 public class ImportJob implements Serializable {
 
+	public static final String RANK_PROPERTY = "rank";
+	
+	public static final String INDEX_PROPERTY = "index";
+	
 	private static final long serialVersionUID = 8804929608059674037L;
 
 	private boolean fromDicomZip;
@@ -54,6 +62,10 @@ public class ImportJob implements Serializable {
 	private String subjectName;
 
 	private String studyName;
+
+	private ShanoirEvent shanoirEvent;
+
+	private Map<String, String> properties = new HashMap();
 
 	public String getArchive() {
 		return archive;
@@ -175,4 +187,21 @@ public class ImportJob implements Serializable {
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
 	}
+
+	public ShanoirEvent getShanoirEvent() {
+		return shanoirEvent;
+	}
+
+	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+		this.shanoirEvent = shanoirEvent;
+	}
+
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+
 }

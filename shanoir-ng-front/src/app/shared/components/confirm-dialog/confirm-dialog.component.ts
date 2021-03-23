@@ -21,13 +21,15 @@ import { Component } from '@angular/core';
 })
 export class ConfirmDialogComponent {
     
-    private title: string;
-    private message: string;
+    public title: string;
+    public message: string;
+    buttons: {ok: string, cancel: string};
     private closeResolve: (value?: boolean | PromiseLike<boolean>) => void;
 
-    public open(title: string, message: string): Promise<boolean> {
+    public open(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
         this.title = title;
         this.message = message;
+        this.buttons = buttons;
         return new Promise((resolve, reject) => {
             this.closeResolve = resolve;
         });

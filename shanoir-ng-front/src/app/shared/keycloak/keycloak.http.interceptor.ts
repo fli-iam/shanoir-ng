@@ -16,6 +16,8 @@ import { Injectable } from "@angular/core";
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 
 import { KeycloakService } from "./keycloak.service";
 
@@ -32,7 +34,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
-        if (!req.url.endsWith('/accountrequest')) {
+        if (!req.url.endsWith('/accountrequest') && !req.url.endsWith('/extensionrequest') && !req.url.endsWith('/challenges')) {
             authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
@@ -40,7 +42,8 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
             authReq = authReq.clone({ headers: authReq.headers.set('Content-Type', 'application/json') });
         }
         // Pass on the cloned request instead of the original request.
-        return next.handle(authReq).catch((err: any) => {
+        return next.handle(authReq).pipe(catchError((err: HttpErrorResponse): Observable<HttpEvent<any>> => { // return null }
+      // (err: any) => {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {
@@ -51,17 +54,18 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
                         }).catch(() => {
                             this.keycloakService.logout();
                         });                        
-                    }).switchMap(() => {
+                    }).pipe(switchMap(() => {
                         return next.handle(authReq);
-                    })
+                    }))
                 }
-                return Observable.throw(err);
+                throw(err);
             }
-        });
+        }
+        ));
     }
 
     private setAuthHeader(req: HttpRequest<any>): HttpRequest<any> {
-        const authHeader = KeycloakService.auth.authz.token;
+        const authHeader = KeycloakService.auth.authz ? KeycloakService.auth.authz.token : null;
         return req.clone({
             setHeaders: {
                 Authorization: `Bearer ${authHeader}`

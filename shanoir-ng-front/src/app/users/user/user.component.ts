@@ -21,6 +21,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyService } from 'src/app/studies/shared/study.service';
 

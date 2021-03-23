@@ -23,10 +23,12 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { Subscription } from 'rxjs';
+import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'extensionRequest',
-    templateUrl: 'extension-request.component.html'
+    templateUrl: 'extension-request.component.html',
+    styleUrls: ['extension-request.component.css']
 })
 
 export class ExtensionRequestComponent implements OnInit, OnDestroy {
@@ -37,32 +39,37 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     userId: number;
     selectedDateNormal: string = '';
     private infoSubscription: Subscription;
+    requestSent: boolean = false;
+    errorMessage: string;
 
     constructor(private router: Router, private route: ActivatedRoute,
         private userService: UserService, private fb: FormBuilder) {
     }
 
     ngOnInit(): void {
-        this.getUser();
         this.buildForm();
     }
 
-    getUser(): void {
-        this.userService.get(KeycloakService.auth.userId)
-        .then((user: User) => {
-            this.extensionRequestInfo.extensionDate = new Date();
-            if (user.expirationDate) {
-                this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
-            }
-            this.getDateToDatePicker(this.extensionRequestInfo);
-        });
+    cancelExtensionRequest(): void {
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     extensionRequest(): void {
         this.submit();
         this.userService.requestExtension(this.extensionRequestInfo)
-            .then(() => {
-                this.router.navigate(['/home']);
+            .then((res) => {
+                this.requestSent = true;
+                this.errorMessage = null;
+            }).catch(exception => {
+                if (exception.status == 406) {
+                    this.requestSent = true;
+                    this.errorMessage = "This account is not disabled or has already an extension request pending. Please contact an administrator for more information."
+                } else if (exception.status == 400) {
+                    this.errorMessage = "No account associated to this email, please enter a valid email address."
+                } else {
+                    throw exception;
+                }
+                
             });
     }
 
@@ -81,10 +88,10 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
 
     buildForm(): void {
         this.extensionRequestForm = this.fb.group({
+            'email': [this.extensionRequestInfo.email, [Validators.required]],
             'extensionDate': [this.extensionRequestInfo.extensionDate, [Validators.required]],
-            'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]],
-            'extensionRequest': new FormControl('true')
-        });
+            'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]]
+            });
 
         this.infoSubscription = this.extensionRequestForm.valueChanges
             .subscribe(data => this.onValueChanged(data));

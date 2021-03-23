@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{examination.study?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="study" formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects($event)" [compareWith]="compareEntities">
+									<select id="study" formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects()" [compareWith]="compareEntities">
 										<option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
 									</select>
 									<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
@@ -224,9 +224,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			[examination_id]="examination.id">
 		</bloodgas-data-upload-form>
 
-		<fieldset *ngIf="mode=='view'">
+		<fieldset *ngIf="examination && mode=='view'">
 			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-			<examination-tree *ngIf="examination" [examination]="examination"></examination-tree> 
+			<examination-node 
+					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : examination" 
+					(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 		</fieldset>
 		<form-footer
 			[state]="footerState"

@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.importer;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -22,6 +22,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,14 +30,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.zip.ZipOutputStream;
-import org.shanoir.ng.importer.dicom.DicomDirToModelService;
-import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -160,7 +161,8 @@ public class ImporterApiControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("\"name\":\"Fp1\"")))
 			.andExpect(content().string(containsString("\"z\":2.5810034")))
-			.andExpect(content().string(containsString("/brainvision (copy)/ROBEEG_BACGU020_dlpfc_l_0002.vhdr\"")));
+			.andExpect(content().string(containsString("brainvision (copy)")))
+			.andExpect(content().string(containsString("ROBEEG_BACGU020_dlpfc_l_0002.vhdr")));
 		} else {
 			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
 			fail();

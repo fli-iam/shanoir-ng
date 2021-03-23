@@ -41,7 +41,10 @@ import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { AnimalExaminationService } from '../shared/animal-examination.service';
+import { ExaminationNode } from '../../../tree/tree.model';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -52,8 +55,8 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
 @ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
-	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('input') private fileInput: ElementRef;
+	@ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
+    @ViewChild('input', { static: false }) private fileInput: ElementRef;
 
     urlupload: string;
     physioData: PhysiologicalData;
@@ -68,7 +71,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     examinationExtradatas: ExtraData[] = [];
     centers: IdName[] = [];
     studies: IdName[] = [];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
     private inImport: boolean;
     private files: File[] = [];
@@ -76,13 +79,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     constructor(
         private route: ActivatedRoute,
         private examinationService: ExaminationService, 
+        private animalExaminationService: AnimalExaminationService, 
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
         private contrastAgentsService: ContrastAgentService,
         private animalSubjectService: AnimalSubjectService, 
         private centerService: CenterService,
         private studyService: StudyService, 
-        protected breadcrumbsService: BreadcrumbsService) 
+        public breadcrumbsService: BreadcrumbsService) 
     {
 
         super(route, 'preclinical-examination');
@@ -92,6 +96,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     get examination(): Examination { return this.entity; }
     set examination(examination: Examination) { this.entity = examination; }
+
+    getService(): EntityService<Examination> {
+        return this.animalExaminationService;
+    }
 
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then(examination => {
@@ -149,7 +157,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         });
     }
 
-    private instAssessment() {
+    public instAssessment() {
     }
 
     private updateExam(): void{
@@ -179,7 +187,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
     
     
-    private getSubjects(): void {
+    public getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
             .findSubjectsByStudyIdPreclinical(this.examination.study.id, this.examination.preclinical)
@@ -199,7 +207,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
 
-    protected save(): Promise<void> {
+    public save(): Promise<void> {
         return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
@@ -324,6 +332,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
     }
+    
+    public exportBruker() {
+        this.animalExaminationService.getBrukerArchive(this.examination.id)
+            .then(response => {this.downloadIntoBrowser(response);});;
+    }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         if (response.status == 200) {
@@ -362,23 +375,28 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     // Extra data file management
     
-    private setFile() {
+    public setFile() {
         this.fileInput.nativeElement.click();
     }
     
-        getFileName(element: string): string {
+    getFileName(element: string): string {
         return element.split('\\').pop().split('/').pop();
     }
     
-    protected deleteFile(file: any) {
+    public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
     }
 
-    private attachNewFile(event: any) {
+    public attachNewFile(event: any) {
         let newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
-    }    
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
+    }
 
 }

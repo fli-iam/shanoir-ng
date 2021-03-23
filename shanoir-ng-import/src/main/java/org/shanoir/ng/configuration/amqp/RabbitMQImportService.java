@@ -15,7 +15,7 @@
 package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.study.rights.ampq.StudyUserListener;
+import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class RabbitMQImportService {
 	
 	@Autowired
-	private StudyUserListener listener;
+	private RabbitMqStudyUserService listener;
 	
 	@RabbitListener(bindings = @QueueBinding(
 	        value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_IMPORT, durable = "true"),

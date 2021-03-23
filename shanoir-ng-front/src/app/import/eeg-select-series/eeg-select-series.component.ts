@@ -18,6 +18,7 @@ import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
+import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
@@ -31,9 +32,9 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class EegSelectSeriesComponent {
 
     @ViewChild('selectAll') tree: TreeNodeComponent;
-    protected datasets: EegDataset[];
-    protected selectedDatasets: EegDataset[] = [];
-    protected datasetDetail: EegDataset;
+    public datasets: EegDatasetDTO[];
+    protected selectedDatasets: EegDatasetDTO[] = [];
+    public datasetDetail: EegDatasetDTO;
 
     constructor(
             private importService: ImportService,
@@ -52,12 +53,14 @@ export class EegSelectSeriesComponent {
         this.selectedDatasets = [];
     }
 
-    changeDataset(datasetToMove: EegDataset) {
-        let index = this.selectedDatasets.indexOf(datasetToMove);
+    changeDataset(datasetToMove: EegDatasetDTO) {
+      let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
+            datasetToMove.selected = false;
         } else {
             this.selectedDatasets.push(datasetToMove);
+            datasetToMove.selected = true;
         }
     }
 
@@ -65,11 +68,18 @@ export class EegSelectSeriesComponent {
         // Check all or none
         this.selectedDatasets = [];
         if (this.tree.checked) {
-            this.importDataService.eegImportJob.datasets.map(dts => this.selectedDatasets.push(dts));
+            this.importDataService.eegImportJob.datasets.map(dts => {
+               this.selectedDatasets.push(dts);
+               dts.selected = true;
+            });
+        } else {
+            this.importDataService.eegImportJob.datasets.map(dts => {
+               dts.selected = false;
+            });
         }
     }
 
-    private showDatasetDetail(datasetToDetail: EegDataset): void {
+    public showDatasetDetail(datasetToDetail: EegDatasetDTO): void {
         this.datasetDetail = datasetToDetail
     }
 
@@ -77,7 +87,7 @@ export class EegSelectSeriesComponent {
         return (this.selectedDatasets && this.selectedDatasets.length > 0);
     }
 
-    private next() {
+    public next() {
         this.importDataService.eegImportJob.datasets = this.selectedDatasets;
         this.router.navigate(['imports/eegcontext']);
     }
