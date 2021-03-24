@@ -26,24 +26,3 @@ export class DatasetProcessing extends Entity {
 	processingDate: Date;
     studyId: number;
 }
-
-export class DatasetProcessingDTO {
-
-    id: number;
-    comment: string;
-    datasetProcessingType: DatasetProcessingType;
-    inputDatasets: Dataset[];
-    outputDatasets: Dataset[];
-	processingDate: Date;
-    studyId: number;
-
-    constructor(datasetProcessing: DatasetProcessing) {
-        this.id = datasetProcessing.id;
-        this.comment = datasetProcessing.comment;
-        this.datasetProcessingType = datasetProcessing.datasetProcessingType;
-        this.inputDatasets = datasetProcessing.inputDatasets;
-        this.outputDatasets = datasetProcessing.outputDatasets;
-        this.processingDate = datasetProcessing.processingDate;
-        this.studyId = datasetProcessing.studyId;
-    }
-}

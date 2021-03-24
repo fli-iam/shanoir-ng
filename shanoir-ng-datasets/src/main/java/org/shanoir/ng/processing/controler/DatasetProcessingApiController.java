@@ -19,7 +19,10 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -39,6 +42,9 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {
+
+	@Autowired
+	private DatasetMapper datasetMapper;
 
 	@Autowired
 	private DatasetProcessingMapper datasetProcessingMapper;
@@ -78,6 +84,22 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
+			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+		final DatasetProcessing datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
+		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
+			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+		final DatasetProcessing datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
+		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
 	}
 
 	@Override

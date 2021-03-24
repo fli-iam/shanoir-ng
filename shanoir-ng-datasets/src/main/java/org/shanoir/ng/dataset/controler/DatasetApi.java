@@ -30,7 +30,6 @@ import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -170,18 +169,6 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
-	@ApiOperation(value = "", nickname = "getProcessingsFromDataset", notes = "get processings from dataset id", response = Resource.class, tags={  })
-	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "found dataset processings", response = Resource.class),
-		@ApiResponse(code = 401, message = "unauthorized"),
-		@ApiResponse(code = 403, message = "forbidden"),
-		@ApiResponse(code = 404, message = "dataset not found"),
-		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/{datasetId}/processings/")
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DatasetProcessingDTO>> getProcessingsFromDataset(
-			@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws RestServiceException, MalformedURLException, IOException;
-	
 	@ApiOperation(value = "", notes = "Creates a processed dataset", response = Void.class, tags={  })
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "created Processed Dataset", response = Void.class),

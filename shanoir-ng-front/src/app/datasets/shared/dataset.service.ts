@@ -19,7 +19,6 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
@@ -35,10 +34,11 @@ export class DatasetService extends EntityService<Dataset> {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
 
-    constructor(protected http: HttpClient, protected datasetDTOService: DatasetDTOService) {
+    constructor(protected http: HttpClient) {
         super(http)
-        datasetDTOService.setDatasetService(this);
     }
+
+    private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
 
     private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
 
@@ -147,10 +147,6 @@ export class DatasetService extends EntityService<Dataset> {
     getUrls(id: number): Observable<HttpResponse<any>> {
         if (!id) throw Error('Cannot get the urls of a dataset without an id');
         return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
-    }
-
-    getProcessingsFromDataset(datasetId: number): Promise<DatasetProcessing[]> {
-        return this.http.get<DatasetProcessing[]>(this.API_URL + '/' + datasetId + '/processings/').toPromise();
     }
 
     prepareUrl(id: number, url: string, format: string): Observable<any> {

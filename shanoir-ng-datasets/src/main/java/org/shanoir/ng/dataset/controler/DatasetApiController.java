@@ -49,7 +49,6 @@ import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -67,8 +66,6 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -132,9 +129,6 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private EegDatasetMapper eegDatasetMapper;
 
-	@Autowired
-	private DatasetProcessingMapper datasetProcessingMapper;
-	
 	@Autowired
 	private DatasetService datasetService;
 
@@ -370,13 +364,6 @@ public class DatasetApiController implements DatasetApi {
 			FileUtils.deleteQuietly(workFolder);
 			FileUtils.deleteQuietly(zipFile);
 		}
-	}
-
-	@Override
-	public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsFromDataset(@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws RestServiceException, MalformedURLException, IOException {
-		List<DatasetProcessing> datasetProcessings = datasetService.findById(datasetId).getProcessings();
-
-		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
 	}
 
 	@Override

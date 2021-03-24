@@ -62,6 +62,7 @@ import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
 import { DatasetProcessingService } from './datasets/shared/dataset-processing.service';
+import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
 import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
@@ -483,6 +484,7 @@ import { environment } from 'src/environments/environment';
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,
+        DatasetProcessingDTOService,
         SolrService,
         NotificationsService,
         CenterDTOService,
