@@ -77,7 +77,7 @@ export class UserComponent extends EntityComponent<User> {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
         });
-        let getMembershipPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+        this.studyService.findStudiesByUserId().then(studies => {
             this.studies = studies.filter(study =>  {
                 for( var suser of study.studyUserList) {
                     // Admin case, we check that the user is part of the study
@@ -85,7 +85,7 @@ export class UserComponent extends EntityComponent<User> {
                 }
             });
         });
-        Promise.all([userPromise, getMembershipPromise, this.getRoles()]).then(() => {
+        Promise.all([userPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);
         });
         return userPromise;
