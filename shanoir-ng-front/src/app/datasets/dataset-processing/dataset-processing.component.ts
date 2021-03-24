@@ -43,6 +43,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
     public study: Study;
     public studyOptions: Option<Study>[] = [];
+    public inputDatasetOptions: Option<Dataset>[] = [];
     private inputDatasetsPromise: Promise<any>;
     private outputDatasetsPromise: Promise<any>;
     private inputDatasetsBrowserPaging: BrowserPaging<Dataset>;
@@ -61,6 +62,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             ) {
 
         super(route, 'dataset-processing');
+        this.manageSaveEntity();
     }
 
     get datasetProcessing(): DatasetProcessing { return this.entity; }
@@ -83,32 +85,56 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     setDatasetProcessing(datasetProcessing: DatasetProcessing) {
         this.datasetProcessing = datasetProcessing;
         if(this.datasetProcessing.studyId != null) {
-            this.studyService.get(this.datasetProcessing.studyId).then((study)=> this.study = study)
+            this.studyService.get(this.datasetProcessing.studyId).then((study)=> {
+                this.studyOptions = [new Option<Study>(study, study.name)];
+                this.study = study;
+                return this.datasetService.getByStudyId(this.datasetProcessing.studyId);
+            }).then(datasets=> {
+                for(let dataset of datasets) {
+                    this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
+                }   
+            })
         }
     }
 
     initView(): Promise<void> {
         this.initializeTables();
-        return this.datasetProcessingService.get(this.id).then(this.setDatasetProcessing);
+        return this.datasetProcessingService.get(this.id).then((entity)=> this.setDatasetProcessing(entity));
     }
 
     initEdit(): Promise<void> {
         this.initializeTables();
-        return this.datasetProcessingService.get(this.id).then(this.setDatasetProcessing);
+        return this.datasetProcessingService.get(this.id).then((entity)=> this.setDatasetProcessing(entity));
     }
 
     initCreate(): Promise<void> {
         this.initializeTables();
-        this.entity = new DatasetProcessing();
+        this.datasetProcessing = new DatasetProcessing();
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    private prefill() {
+        if (this.breadcrumbsService.currentStep.isPrefilled('study')) {
+            let study = this.breadcrumbsService.currentStep.getPrefilledValue('study');
+            this.studyOptions = [new Option<Study>(study, study.name)];
+            this.study = study;
+            this.datasetProcessing.studyId = this.study.id;
+            this.datasetService.getByStudyId(this.study.id).then(datasets=> {
+                for(let dataset of datasets) {
+                    this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
+                }   
+            })
+        }
+    }
 
+    buildForm(): FormGroup {
+        this.prefill();
         return this.formBuilder.group({
             'study': [this.study ? this.study.name : ''],
             'processingType': [this.datasetProcessing.datasetProcessingType],
             'processingDate': [this.datasetProcessing.processingDate],
+            // 'inputDatasetList': [this.datasetProcessing.inputDatasets],
+            // 'outputDatasetList': [this.datasetProcessing.outputDatasets],
             'comment': [this.datasetProcessing.comment]
         });
     }
@@ -116,7 +142,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
-
 
     getInputDatasetsPage(pageable: FilterablePageable): Promise<Page<Dataset>> {
         return new Promise((resolve) => {
@@ -180,7 +205,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.inputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeInputDataset(item) });
         }
 
-
         this.outputDatasetsColumnDefs = [
             {headerName: "ID", field: "id", type: "reference", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.id);
@@ -201,10 +225,30 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 return dateRenderer(params.data.creationDate);
             }}
         ];
+        
+        this.outputDatasetsColumnDefs.push({
+            title: "Add", awesome: "fa-plus", action: item => this.router.navigate(['dataset-processing/edit-input-datasets/' + this.id])
+        });
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.outputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeOutputDataset(item) });
         }
+    }
+
+    public onAddInputDataset(selectedDataset: Dataset) {
+        if (!selectedDataset) {
+            return;
+        }
+        if (this.datasetProcessing.inputDatasets.filter(dataset => dataset.id == selectedDataset.id).length > 0){
+            return;   
+        }
+        this.inputDatasetsToAdd.push(selectedDataset);
+        this.datasetProcessing.inputDatasets.push(selectedDataset);
+        this.inputDatasetsBrowserPaging.setItems(this.datasetProcessing.inputDatasets);
+        this.inputDatasetsTable.refresh();
+        // this.form.get('inputDatasetList').markAsDirty();
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     removeInputDataset(item: Dataset) {
@@ -232,15 +276,20 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.onSave.subscribe(response => {
                 for(let datasets of [this.inputDatasetsToRemove, this.outputDatasetsToRemove]) {
                     for (let dataset of datasets) {
-                        let index = dataset.processings.indexOf(this.datasetProcessing);
-                        if(index >= 0) {
-                            dataset.processings.splice(index, 1);
-                            this.datasetService.update(dataset.id, dataset);
+                        if(dataset.processings) {
+                            let index = dataset.processings.indexOf(this.datasetProcessing);
+                            if(index >= 0) {
+                                dataset.processings.splice(index, 1);
+                                this.datasetService.update(dataset.id, dataset);
+                            }
                         }
                     }
                 }
                 if (this.inputDatasetsToAdd) {
                     for (let dataset of this.inputDatasetsToAdd) {
+                        if(dataset.processings == null) {
+                            dataset.processings = [];
+                        }
                         dataset.processings.push(this.datasetProcessing);
                         this.datasetService.update(dataset.id, dataset);
                     }

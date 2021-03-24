@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -132,6 +133,9 @@ public class DatasetProcessing extends AbstractEntity {
 	 * @param outputDataset the outputDataset to add
 	 */
 	public void addOutputDataset(Dataset outputDataset) {
+		if(this.outputDatasets == null) {
+			this.outputDatasets = new ArrayList<Dataset>();
+		}
 		this.outputDatasets.add(outputDataset);
 	}
 

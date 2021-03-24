@@ -38,8 +38,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "dataset-processing")
-@RequestMapping("/dataset-processing")
+@Api(value = "datasetProcessing")
+@RequestMapping("/datasetProcessing")
 public interface DatasetProcessingApi {
 
 	@ApiOperation(value = "", notes = "Deletes a dataset processing", response = Void.class, tags = {})

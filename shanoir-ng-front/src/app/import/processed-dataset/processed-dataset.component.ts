@@ -65,10 +65,14 @@ export class ProcessedDatasetComponent {
         // Extract extensions of selected files to check if they are valid
         let extensions = [];
         for(let file of files) {
-            extensions.push(file.name.substring(file.name.lastIndexOf("."), file.name.length));
+            let extension = file.name.substring(file.name.lastIndexOf("."), file.name.length);
+            if(extension == '.gz' && file.name.endsWith('.nii.gz')) {
+                extension = '.nii.gz'
+            }
+            extensions.push(extension);
         }
         if(files.length == 1) {                     // Nifti files
-            this.extensionError = extensions[0] != '.nii' || extensions[0] != '.nii.gz';
+            this.extensionError = extensions[0] != '.nii' && extensions[0] != '.nii.gz';
         }
         else if(files.length == 2) {                // Analyze files: .hdr + .img
             if(extensions.indexOf('.hdr') < 0 || extensions.indexOf('.img') < 0) {
@@ -88,7 +92,9 @@ export class ProcessedDatasetComponent {
         let formData: FormData = new FormData();
         
         formData.append('image', image, image.name);
-        formData.append('header', header, header.name);
+        if(header != null) {
+            formData.append('header', header, header.name);
+        }
         this.importService.uploadProcessedDataset(formData)
             .then((filePath: string) => {
                 let importJob = new ProcessedDatasetImportJob()

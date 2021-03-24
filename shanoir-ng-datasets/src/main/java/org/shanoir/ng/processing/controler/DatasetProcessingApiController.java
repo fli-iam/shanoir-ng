@@ -19,7 +19,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
+import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;

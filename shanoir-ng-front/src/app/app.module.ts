@@ -61,6 +61,8 @@ import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
+import { DatasetProcessingService } from './datasets/shared/dataset-processing.service';
+import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
@@ -174,6 +176,7 @@ import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-nod
 import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
+import { SimpleDatasetNodeComponent } from './datasets/tree/simple-dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
 import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
@@ -299,6 +302,7 @@ import { environment } from 'src/environments/environment';
         DatasetListComponent,
         DatasetProcessingComponent,
         DatasetProcessingListComponent,
+        DatasetProcessingPipe,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
@@ -387,6 +391,7 @@ import { environment } from 'src/environments/environment';
         ExaminationNodeComponent,
         DatasetAcquisitionNodeComponent,
         DatasetNodeComponent,
+        SimpleDatasetNodeComponent,
         ProcessingNodeComponent,
         StudyNodeComponent,
         CenterNodeComponent,
@@ -435,6 +440,8 @@ import { environment } from 'src/environments/environment';
         UserService,
         DicomArchiveService,
         DatasetService,
+        DatasetProcessingService,
+        DatasetProcessingPipe,
         MsgBoxService,
     	PathologyService,
         AnimalSubjectService,

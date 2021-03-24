@@ -37,7 +37,7 @@ export abstract class Dataset extends Entity {
     subject : Subject;
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
-    processings: DatasetProcessing[];
+    processings: DatasetProcessing[] = [];
 }
 
 export class DatasetMetadata {

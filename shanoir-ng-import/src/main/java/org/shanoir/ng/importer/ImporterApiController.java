@@ -448,15 +448,21 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	public ResponseEntity<String> uploadProcessedDataset(
 		@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
-		@ApiParam(value = "header detail", required = false) @RequestPart("header") MultipartFile headerFile) 
+		@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
 		throws RestServiceException {
 			
 		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
 		String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
 		Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
 		Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
-
-		if (!isNifti || !isAnalyze) {
+		
+		System.out.println("uploadProcessedDataset: ");
+		System.out.println(imageFileName);
+		System.out.println(headerFileName);
+		System.out.println(isNifti);
+		System.out.println(isAnalyze);
+		
+		if (!isNifti && !isAnalyze) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload.", null));
 		}
@@ -469,6 +475,9 @@ public class ImporterApiController implements ImporterApi {
 
 			long n = ImportUtils.createRandomLong();
 			final Long userId = KeycloakUtil.getTokenUserId();
+			System.out.println("uploadProcessedDataset2: ");
+			System.out.println(userId);
+			System.out.println(importDir);
 			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId) + File.separator + Long.toString(n);
 			final File userImportDir = new File(userImportDirFilePath);
 			if (!userImportDir.exists()) {
@@ -486,7 +495,7 @@ public class ImporterApiController implements ImporterApi {
 				destinationImageFile = convertAnalyzeToNifti(destinationImageFile, destinationHeaderFile);
 			}
 
-			return new ResponseEntity<>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
+			return new ResponseEntity<String>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
 		} catch (IOException | InterruptedException e) {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(

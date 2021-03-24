@@ -14,23 +14,23 @@
 
 package org.shanoir.ng.processing.repository;
 
-// import java.util.Optional;
-// import org.shanoir.ng.processing.model.DatasetProcessing;
-// import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  * Repository for dataset processings.
  *
  * @author msimon
  */
-// public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
+public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
-// 	/**
-// 	 * Find dataset processing by name.
-// 	 *
-// 	 * @param name name.
-// 	 * @return a dataset processing.
-// 	 */
-// 	Optional<DatasetProcessing> findByName(String name);
+	/**
+	 * Find dataset processing by name.
+	 *
+	 * @param comment comment.
+	 * @return a dataset processing.
+	 */
+	Optional<DatasetProcessing> findByComment(String comment);
 
-// }
+}

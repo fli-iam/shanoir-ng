@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
 import { ImportJob, DicomQuery } from './dicom-data.model';
@@ -38,7 +38,7 @@ export class ImportService {
     }
 
     uploadProcessedDataset(formData: FormData): Promise<string> {
-        return this.http.post<string>(AppUtils.BACKEND_API_UPLOAD_PROCESSED_DATASET_URL, formData)
+        return this.http.post<string>(AppUtils.BACKEND_API_UPLOAD_PROCESSED_DATASET_URL, formData, { responseType: 'text' as 'json'} )
             .toPromise();
     }
 

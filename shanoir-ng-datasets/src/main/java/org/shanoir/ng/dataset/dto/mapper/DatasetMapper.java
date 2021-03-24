@@ -23,6 +23,7 @@ import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;

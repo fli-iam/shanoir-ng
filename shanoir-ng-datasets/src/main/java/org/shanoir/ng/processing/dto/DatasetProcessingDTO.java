@@ -29,6 +29,7 @@ import org.shanoir.ng.processing.model.DatasetProcessingType;
  */
 public class DatasetProcessingDTO {
 
+	private Long id;
 
 	private String comment;
 
@@ -39,6 +40,14 @@ public class DatasetProcessingDTO {
 	private LocalDate processingDate;
 	
 	private Long studyId;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(final Long id) {
+		this.id = id;
+	}
 
 	public String getComment() {
 		return comment;

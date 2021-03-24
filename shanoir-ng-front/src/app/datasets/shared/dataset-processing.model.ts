@@ -21,11 +21,10 @@ export class DatasetProcessing extends Entity {
     id: number;
     comment: string;
     datasetProcessingType: DatasetProcessingType;
-    inputDatasets: Dataset[];
-    outputDatasets: Dataset[];
+    inputDatasets: Dataset[] = [];
+    outputDatasets: Dataset[] = [];
 	processingDate: Date;
     studyId: number;
-    
 }
 
 export class DatasetProcessingDTO {

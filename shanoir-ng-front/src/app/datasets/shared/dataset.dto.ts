@@ -24,6 +24,7 @@ import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, Repet
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
 import { DatasetProcessing } from './dataset-processing.model';
+import { debugPort } from 'process';
 
 @Injectable()
 export class DatasetDTOService {
@@ -44,6 +45,7 @@ export class DatasetDTOService {
         let promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
         if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
+        if (dto.processings) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
         return Promise.all(promises).then(([]) => {
             return result;
         });
@@ -101,7 +103,13 @@ export class DatasetDTOService {
         if (entity.type == 'Eeg') {
             this.mapSyncFieldsEeg(dto as EegDatasetDTO, entity as EegDataset);
         }
-        entity.processings = dto.processings;
+        if(dto.processings) {
+            entity.processings = dto.processings.map((id)=> {
+                let dp = new DatasetProcessing();
+                dp.id = id;
+                return dp;
+            });
+        }
         return entity;
     }
 
@@ -143,7 +151,7 @@ export class DatasetDTO {
     updatedMetadata: DatasetMetadata;
 	name: string;
     type: DatasetType;
-    processings: DatasetProcessing[];
+    processings: number[];
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -156,7 +164,7 @@ export class DatasetDTO {
             this.updatedMetadata = dataset.updatedMetadata;
             this.name = dataset.name;
             this.type = dataset.type;
-            this.processings = dataset.processings;
+            this.processings = dataset.processings.map((datasetProcessing)=> datasetProcessing.id);
         }
     }
 }

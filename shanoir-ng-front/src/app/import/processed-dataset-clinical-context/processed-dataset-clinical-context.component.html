@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Dataset Type</label> 
             <span class="right-col">
                 <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [optionArr]="datasetTypes">
+                        [newDisabled]="true" [options]="DatasetType.options">
                 </select-box>  
             </span>
         </li>
@@ -31,7 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Processed Dataset Type</label> 
             <span class="right-col">
                 <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [optionArr]="processedDatasetTypes">
+                        [newDisabled]="true" [options]="ProcessedDatasetType.options"
+                        >
                 </select-box>  
             </span>
         </li>
@@ -108,23 +109,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
-            <li *ngIf="importMode != 'BRUKER'">
-                <label>Subject Type</label>
-                <span class="right-col">
-                    <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
-                    </select-box>
-                </span>
-            </li>
+            <label>Subject Type</label>
+            <span class="right-col">
+                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" [options]="subjectTypes">
+                </select-box>
+            </span>
         </div>
     </ol>
 
-    <ol>
+    <ol *ngIf="study">
         <legend>
             Dataset processing
             <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
         </legend>
+
         <li>
-            <!-- TODO: USE TABLE INSTEAD -->
+
+
             <label class="required-label">Select a dataset processing</label> 
             <span class="right-col">
                 <select-box [(ngModel)]="datasetProcessing" (userChange)="onContextChange();"
@@ -133,6 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>  
             </span>
         </li>
+
     </ol>
 
 </fieldset>

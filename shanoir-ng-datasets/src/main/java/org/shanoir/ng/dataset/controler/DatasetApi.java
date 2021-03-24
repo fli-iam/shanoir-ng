@@ -30,6 +30,7 @@ import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -129,6 +130,18 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
+	@ApiOperation(value = "", notes = "Returns the list of dataset id by study id", response = Long.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
 	@ApiOperation(value = "", notes = "Returns the list of dataset id by subject id and study id", response = Long.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
@@ -157,6 +170,18 @@ public interface DatasetApi {
     			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
+	@ApiOperation(value = "", nickname = "getProcessingsFromDataset", notes = "get processings from dataset id", response = Resource.class, tags={  })
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "found dataset processings", response = Resource.class),
+		@ApiResponse(code = 401, message = "unauthorized"),
+		@ApiResponse(code = 403, message = "forbidden"),
+		@ApiResponse(code = 404, message = "dataset not found"),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/{datasetId}/processings/")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<DatasetProcessingDTO>> getProcessingsFromDataset(
+			@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws RestServiceException, MalformedURLException, IOException;
+	
 	@ApiOperation(value = "", notes = "Creates a processed dataset", response = Void.class, tags={  })
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "created Processed Dataset", response = Void.class),
@@ -164,12 +189,12 @@ public interface DatasetApi {
 		@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 		@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/processed-dataset",
+	@RequestMapping(value = "/processedDataset",
 		produces = { "application/json" },
 		consumes = { "application/json" },
 		method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-	ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob);
+	ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException;
 	
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {
