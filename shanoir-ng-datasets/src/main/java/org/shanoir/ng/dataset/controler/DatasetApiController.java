@@ -284,7 +284,7 @@ public class DatasetApiController implements DatasetApi {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
 
-		String tmpFilePath = userDir + File.separator + datasetName;
+		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()) + DOWNLOAD);
