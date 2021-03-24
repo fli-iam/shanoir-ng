@@ -77,8 +77,13 @@ export class UserComponent extends EntityComponent<User> {
             }
         });
         let getMembershipPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
-            this.studies = studies;
-        })
+            this.studies = studies.filter(study =>  {
+                for( var suser of study.studyUserList) {
+                    // Admin case, we check that the user is part of the study
+                    return suser.userId === this.entity.id;
+                }
+            });
+        });
         Promise.all([userPromise, getMembershipPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);
         });
