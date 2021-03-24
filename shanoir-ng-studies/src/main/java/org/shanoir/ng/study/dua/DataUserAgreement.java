@@ -70,4 +70,19 @@ public class DataUserAgreement extends AbstractEntity {
 		this.timestampOfAccepted = timestampOfAccepted;
 	}
 	
+	@JsonProperty("path")
+	public String getPath() {
+		return this.study.getDataUserAgreementPaths().get(0);
+	}
+
+	@JsonProperty("studyName")
+	public String getStudyName() {
+		return this.study.getName();
+	}
+	
+	@JsonProperty("isChallenge")
+	public boolean getIsChallenge() {
+		return this.study.isChallenge();
+	}
+
 }

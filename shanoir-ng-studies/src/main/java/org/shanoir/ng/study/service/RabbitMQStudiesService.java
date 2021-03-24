@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -54,6 +55,9 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private StudyService studyService;
+	
+	@Autowired
+	private DataUserAgreementService dataUserAgreementService;
 
 	/**
 	 * This methods allow to get the list of amdin users for a given study ID
@@ -110,6 +114,7 @@ public class RabbitMQStudiesService {
 			subscription.setUserName(event.getMessage());
 			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
 				subscription.setConfirmed(false);
+				dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
 			} else {
 				subscription.setConfirmed(true);
 			}

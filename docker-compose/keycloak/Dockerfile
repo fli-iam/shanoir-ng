@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM jboss/keycloak:12.0.1
+FROM jboss/keycloak:12.0.3
 
 COPY themes/. /opt/jboss/keycloak/themes
 

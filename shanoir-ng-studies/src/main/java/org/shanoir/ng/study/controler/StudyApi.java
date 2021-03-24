@@ -148,7 +148,7 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/rights/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<StudyUserRight>> rights(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
@@ -191,19 +191,6 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
-	@ApiOperation(value = "", notes = "Deletes the protocol file of a study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "study deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "protocol-file-delete/{studyId}", produces = {
-			"application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-	ResponseEntity<Void> deleteProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws IOException;
-
     @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "zip file", response = Resource.class),
@@ -233,10 +220,9 @@ public interface StudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no duas found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/dua/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/dua", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DataUserAgreement>> getDataUserAgreementsByUserId(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+	ResponseEntity<List<DataUserAgreement>> getDataUserAgreements()
 			throws RestServiceException, IOException;
 	
 	@ApiOperation(value = "", notes = "Updates a data user agreement (DUA)", response = Void.class, tags = {})

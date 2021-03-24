@@ -111,7 +111,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 					mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),
 					mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 			// create subject with subject-study filled to avoid access denied exception because of rights check
-			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
+			Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
 			if (subject == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),

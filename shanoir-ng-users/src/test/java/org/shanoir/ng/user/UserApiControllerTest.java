@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.user;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,9 +27,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
@@ -78,10 +83,13 @@ public class UserApiControllerTest {
 	@MockBean
 	private UserRepository userRepository;
 
+	@MockBean
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
 		User mockUser = ModelsUtil.createUser(1L);
-		given(userService.confirmAccountRequest(mockUser)).willReturn(mockUser);
+		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(mockUser);
 		doNothing().when(userService).deleteById(1L);
 		doNothing().when(userService).denyAccountRequest(Mockito.anyLong());
 		given(userService.findAll()).willReturn(Arrays.asList(mockUser));
@@ -98,6 +106,28 @@ public class UserApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void confirmAccountRequestChallengeTest() throws Exception {
+		User user = ModelsUtil.createUser(1L);
+		AccountRequestInfo info = new AccountRequestInfo();
+		info.setChallenge(1L);
+		user.setAccountRequestInfo(info);
+
+		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(user);
+
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
+		
+		ArgumentCaptor<ShanoirEvent> eventCaptor = new ArgumentCaptor();
+		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
+		ShanoirEvent event = eventCaptor.getValue();
+		assertEquals("1", event.getObjectId());
+		assertEquals(user.getId().toString(), event.getUserId().toString());
+		assertEquals(user.getUsername(), event.getMessage());
 	}
 
 	@Test
@@ -161,7 +191,7 @@ public class UserApiControllerTest {
 			user.setRole(expertRole);
 		} else {
 			user.setRole(adminRole);
-		}	
+		}
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isUnprocessableEntity());

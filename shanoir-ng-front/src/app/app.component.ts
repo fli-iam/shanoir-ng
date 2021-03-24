@@ -21,6 +21,10 @@ import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
 import { slideRight, parent, slideMarginLeft } from './shared/animations/animations';
 import { WindowService } from './shared/services/window.service';
+import { KeycloakSessionService } from './shared/session/keycloak-session.service';
+import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
+import { NavigationEnd, Router } from '@angular/router';
+import { StudyService } from './studies/shared/study.service';
 
 
 @Component({
@@ -40,27 +44,20 @@ export class AppComponent {
             private breadcrumbsService: BreadcrumbsService,
             private globalService: GlobalService,
             private windowService: WindowService,
-            private element: ElementRef) {
+            private element: ElementRef,
+            private keycloakSessionService: KeycloakSessionService,
+            private confirmService: ConfirmDialogService,
+            protected router: Router,
+            private studyService: StudyService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
-        ServiceLocator.rootViewContainerRef = this.viewContainerRef;
-
-        // let storedBCStr = sessionStorage.getItem('breadcrumbs');
-        // if (storedBCStr) {
-        //     let storedBC = JSON.parse(storedBCStr);
-        //     this.breadcrumbsService.steps = storedBC.steps.map(step => Step.parse(JSON.stringify(step)));
-        //     this.breadcrumbsService.steps.map(step => {
-        //         step.waitStep = this.breadcrumbsService.steps.find(oneStep => oneStep.id == step.id);
-        //     });
-        //     if (storedBC.savedStep)
-        //         this.breadcrumbsService.savedStep = Step.parse(storedBC.savedStep);
-        // }
-        
+        ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
     }
 
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
+        if(this.keycloakSessionService.isAuthenticated()) this.duaAlert();        
     }
 
     @HostListener('window:resize', ['$event'])
@@ -74,6 +71,29 @@ export class AppComponent {
 
     isAuthenticated(): boolean {
         return KeycloakService.auth.loggedIn;
+    }
+
+    private duaAlert() {
+        this.studyService.getMyDUA().then(dua => {
+            let hasDUA: boolean = dua && dua.length > 0;
+            if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
+                this.keycloakSessionService.hasBeenAskedDUA = true;
+                if (this.router.url != '/dua' && this.router.url != '/home') {
+                    this.askForDuaSigning();
+                }
+            }
+        });
+    }
+
+    private askForDuaSigning() {
+        const title: string = 'Data User Agreement awaiting for signing';
+        const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+            + 'Until you have agreed those terms you cannot access to any data from these studies. '
+            + 'Would you like to review those terms now?';
+        const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+        this.confirmService.confirm(title, text, buttons).then(response => {
+                if (response == true) this.router.navigate(['/dua']);
+            });
     }
 
 }

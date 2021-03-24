@@ -8,7 +8,7 @@ CREATE TABLE data_user_agreement_file (
 ALTER TABLE data_user_agreement_file ADD CONSTRAINT FKnmg0gxlptf2nqktd0jj5hvi64 FOREIGN KEY (study_id) REFERENCES study(id);
 
 CREATE TABLE data_user_agreement (
-  id bigint(20) PRIMARY KEY NOT NULL,
+  id bigint(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   timestamp_of_accepted timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   timestamp_of_new timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   user_id bigint(20) NOT NULL,
