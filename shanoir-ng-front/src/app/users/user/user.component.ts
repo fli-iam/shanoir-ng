@@ -23,6 +23,7 @@ import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 
 @Component({
@@ -36,11 +37,13 @@ export class UserComponent extends EntityComponent<User> {
     public roles: Role[];
     public denyLoading: boolean = false;
     public acceptLoading: boolean = false;
+    public studies = [];
 
     constructor(
             private route: ActivatedRoute,
             private userService: UserService,
-            private roleService: RoleService) {
+            private roleService: RoleService,
+            private studyService: StudyService) {
             
         super(route, 'user');
     }
@@ -72,6 +75,14 @@ export class UserComponent extends EntityComponent<User> {
             if (user.extensionRequestDemand && user.extensionRequestInfo) {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
+        });
+        this.studyService.findStudiesByUserId().then(studies => {
+            this.studies = studies.filter(study =>  {
+                for( var suser of study.studyUserList) {
+                    // Admin case, we check that the user is part of the study
+                    return suser.userId === this.entity.id;
+                }
+            });
         });
         Promise.all([userPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);

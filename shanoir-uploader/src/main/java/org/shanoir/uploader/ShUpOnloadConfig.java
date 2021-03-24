@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.keycloak.adapters.ServerRequest.HttpFailure;
-import org.keycloak.adapters.installed.KeycloakInstalled;
 import org.keycloak.common.VerificationException;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -43,8 +42,6 @@ public class ShUpOnloadConfig {
 	private static CurrentNominativeDataController currentNominativeDataController;
 
 	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
-	
-	private static KeycloakInstalled keycloakInstalled;
 	
 	private static ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
@@ -166,19 +163,11 @@ public class ShUpOnloadConfig {
 	}
 	
 	public static String getTokenString() throws VerificationException, IOException, HttpFailure  {
-		return keycloakInstalled != null ? keycloakInstalled.getTokenString() : tokenString;
+		return tokenString;
 	}
 	
 	public static void setTokenString(String tokenString) {
 		ShUpOnloadConfig.tokenString = tokenString;
-	}
-
-	public static KeycloakInstalled getKeycloakInstalled() {
-		return keycloakInstalled;
-	}
-
-	public static void setKeycloakInstalled(KeycloakInstalled keycloakInstalled) {
-		ShUpOnloadConfig.keycloakInstalled = keycloakInstalled;
 	}
 
 	public static ShanoirUploaderServiceClientNG getShanoirUploaderServiceClientNG() {
