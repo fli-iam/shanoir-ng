@@ -1896,13 +1896,37 @@
       ]
     },
     {
-      "id": "5ca62d8f-e85a-4169-82ff-a7d8d80bbc88",
-      "alias": "browser",
+      "id": "f420be78-87bc-4e3e-b2d6-d9b53bdc468f",
+      "alias": "shanoir-ng browser",
       "description": "browser based authentication",
       "providerId": "basic-flow",
       "topLevel": true,
-      "builtIn": true,
+      "builtIn": false,
       "authenticationExecutions": [
+        {
+          "requirement" : "REQUIRED",
+          "priority" : 10,
+          "flowAlias" : "browser authentication",
+          "userSetupAllowed" : false,
+          "autheticatorFlow" : true
+        },
+        {
+          "authenticator" : "shanoir-ng-post-auth",
+          "requirement" : "REQUIRED",
+          "priority" : 20,
+          "userSetupAllowed" : false,
+          "autheticatorFlow" : false
+        }
+      ]
+    },
+    {
+      "id" : "4bca49fd-2597-41d1-8256-6bcaf1bb371a",
+      "alias" : "browser authentication",
+      "description" : "",
+      "providerId" : "basic-flow",
+      "topLevel" : false,
+      "builtIn" : false,
+      "authenticationExecutions" : [
         {
           "authenticator": "auth-cookie",
           "requirement": "ALTERNATIVE",
@@ -1972,12 +1996,12 @@
       ]
     },
     {
-      "id": "f1142977-f338-4009-9a27-6b86a36d5a11",
-      "alias": "direct grant",
+      "id": "5f7aad0a-5053-4f52-a336-961caba2604a",
+      "alias": "shanoir-ng direct grant",
       "description": "OpenID Connect Resource Owner Grant",
       "providerId": "basic-flow",
       "topLevel": true,
-      "builtIn": true,
+      "builtIn": false,
       "authenticationExecutions": [
         {
           "authenticator": "direct-grant-validate-username",
@@ -1999,6 +2023,13 @@
           "flowAlias": "Direct Grant - Conditional OTP",
           "userSetupAllowed": false,
           "autheticatorFlow": true
+        },
+        {
+          "authenticator": "shanoir-ng-post-auth",
+          "requirement": "REQUIRED",
+          "priority": 40,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
         }
       ]
     },
@@ -2089,6 +2120,13 @@
           "flowAlias": "Authentication Options",
           "userSetupAllowed": false,
           "autheticatorFlow": true
+        },
+        {
+          "authenticator": "shanoir-ng-post-auth",
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
         }
       ]
     },
@@ -2149,17 +2187,24 @@
       ]
     },
     {
-      "id": "417d112a-8e0d-44e0-970e-40192ee34dcf",
-      "alias": "reset credentials",
+      "id": "3c240ba5-3ffe-4c02-b99e-2e1edb75835f",
+      "alias": "shanoir-ng reset credentials",
       "description": "Reset credentials for a user if they forgot their password or something",
       "providerId": "basic-flow",
       "topLevel": true,
-      "builtIn": true,
+      "builtIn": false,
       "authenticationExecutions": [
         {
           "authenticator": "reset-credentials-choose-user",
           "requirement": "REQUIRED",
           "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "shanoir-ng-post-auth",
+          "requirement": "REQUIRED",
+          "priority": 15,
           "userSetupAllowed": false,
           "autheticatorFlow": false
         },
@@ -2205,15 +2250,6 @@
     }
   ],
   "authenticatorConfig": [
-  	{
-      "id": "d5c04d9c-6723-4188-ab81-2a1104e64996",
-  	  "alias": "CheckExpirationDateConfig",
-  	  "config": {
-  	  	  "scriptName": "CheckExpirationDate",
-  	  	  "scriptCode": "/*\n * Template for JavaScript based authenticator's.\n * See org.keycloak.authentication.authenticators.browser.ScriptBasedAuthenticatorFactory\n */\n\n// import enum for error lookup\n//AuthenticationFlowError = Java.type(\"org.keycloak.authentication.AuthenticationFlowError\");\n\n/**\n * An example authenticate function.\n *\n * The following variables are available for convenience:\n * user - current user {@see org.keycloak.models.UserModel}\n * realm - current realm {@see org.keycloak.models.RealmModel}\n * session - current KeycloakSession {@see org.keycloak.models.KeycloakSession}\n * httpRequest - current HttpRequest {@see org.jboss.resteasy.spi.HttpRequest}\n * script - current script {@see org.keycloak.models.ScriptModel}\n * LOG - current logger {@see org.jboss.logging.Logger}\n *\n * You one can extract current http request headers via:\n * httpRequest.getHttpHeaders().getHeaderString(\"Forwarded\")\n *\n * @param context {@see org.keycloak.authentication.AuthenticationFlowContext}\n */\nfunction authenticate(context) {\n\n    var username = user ? user.username : \"anonymous\";\n    LOG.info(script.name + \" trace auth for: \" + username);\n\n    var authShouldFail = false;\n    if (authShouldFail) {\n        context.failure(\"INVALID_USER\");\n        return;\n    }\n    \n    if (user.attributes['expirationDate'] !== null && new Date().getTime() > user.attributes['expirationDate'][0]) {\n        user.enabled = false;\n        context.failure(\"USER_DISABLED\");\n        return;\n    }\n\n    context.success();\n}",
-  	  	  "scriptDescription": "Check expiration date on login"
-  	  }
-  	},
     {
       "id": "d5c04d9c-2491-4188-ab81-2a1104e64986",
       "alias": "create unique user config",
@@ -2237,15 +2273,6 @@
       "enabled": true,
       "defaultAction": false,
       "priority": 10,
-      "config": {}
-    },
-    {
-      "alias": "record-login-date-action",
-      "name": "Record Login Date Action",
-      "providerId": "record-login-date-action",
-      "enabled": true,
-      "defaultAction": false,
-      "priority": 20,
       "config": {}
     },
     {
@@ -2303,10 +2330,10 @@
       "config": {}
     }
   ],
-  "browserFlow": "browser",
+  "browserFlow": "shanoir-ng browser",
   "registrationFlow": "registration",
-  "directGrantFlow": "direct grant",
-  "resetCredentialsFlow": "reset credentials",
+  "directGrantFlow": "shanoir-ng direct grant",
+  "resetCredentialsFlow": "shanoir-ng reset credentials",
   "clientAuthenticationFlow": "clients",
   "dockerAuthenticationFlow": "docker auth",
   "attributes": {

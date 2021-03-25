@@ -36,6 +36,8 @@ public class SubjectExaminationDTO {
 	private LocalDate examinationDate;
 
 	private Long id;
+	
+	private List<String> extraDataFilePathList;
 
 	/**
 	 * @return the comment
@@ -95,6 +97,14 @@ public class SubjectExaminationDTO {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public List<String> getExtraDataFilePathList() {
+		return extraDataFilePathList;
+	}
+
+	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+		this.extraDataFilePathList = extraDataFilePathList;
 	}
 
 }
