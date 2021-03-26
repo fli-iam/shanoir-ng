@@ -33,6 +33,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SHANOIR_URL_HOST: localhost
+          SHANOIR_URL_SCHEME: http
+          SHANOIR_PREFIX: github
+          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
+          SHANOIR_KEYCLOAK_USER: admin
+          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
         run: mvn -f ./shanoir-ng-parent/pom.xml verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
 
