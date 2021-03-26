@@ -45,6 +45,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>    <sonar.moduleKey>
         		${project.groupId}:${project.artifactId}
    		</sonar.moduleKey>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 
 	<build>
