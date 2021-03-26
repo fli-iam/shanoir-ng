@@ -15,7 +15,8 @@
 package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
-import org.shanoir.ng.dataset.DatasetDTO;
+
+import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
@@ -31,6 +32,10 @@ public class MrDatasetDTO extends DatasetDTO {
     private List<InversionTime> inversionTime;
     
     private List<RepetitionTime> repetitionTime;
+    
+	private MrDatasetMetadata originMrMetadata;
+    
+	private MrDatasetMetadata updatedMrMetadata;
 
 
     public List<EchoTime> getEchoTime() {
@@ -64,4 +69,20 @@ public class MrDatasetDTO extends DatasetDTO {
     public void setRepetitionTime(List<RepetitionTime> repetitionTime) {
         this.repetitionTime = repetitionTime;
     }
+
+	public MrDatasetMetadata getOriginMrMetadata() {
+		return originMrMetadata;
+	}
+
+	public void setOriginMrMetadata(MrDatasetMetadata originMrMetadata) {
+		this.originMrMetadata = originMrMetadata;
+	}
+
+	public MrDatasetMetadata getUpdatedMrMetadata() {
+		return updatedMrMetadata;
+	}
+
+	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
+		this.updatedMrMetadata = updatedMrMetadata;
+	}
 }

@@ -25,6 +25,8 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'coil',
@@ -34,22 +36,27 @@ import { CoilService } from '../shared/coil.service';
 export class CoilComponent extends EntityComponent<Coil> {
    
     @Input() acqEquip: AcquisitionEquipment;
-    private centers: Center[] = [];
-    private manufModels: ManufacturerModel[] = [];
-    private coilTypes: CoilType[] = CoilType.all();
+    centers: Center[] = [];
+    manufModels: ManufacturerModel[] = [];
+    coilTypes: CoilType[] = CoilType.all();
     private prefilledCenter: Center;
     private prefilledManuf: ManufacturerModel;
 
     constructor(
             private route: ActivatedRoute,
             private coilService: CoilService, 
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            public manufModelPipe: ManufacturerModelPipe) {
         super(route, 'coil');
     }
 
     get coil(): Coil { return this.entity; }
     set coil(coil: Coil) { this.entity = coil; }
 
+    getService(): EntityService<Coil> {
+        return this.coilService;
+    }
+    
     initView(): Promise<void> {
         return this.coilService.get(this.id).then(coil => {
             this.coil = coil;
@@ -67,9 +74,9 @@ export class CoilComponent extends EntityComponent<Coil> {
                 coil.center = this.acqEquip.center;
                 coil.manufacturerModel = this.acqEquip.manufacturerModel;
             }
-            this.coil.center = this.centers.find(center => center.id == this.coil.center.id);
+            this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
             this.updateManufList(this.coil.center);
-            this.coil.manufacturerModel = this.manufModels.find(manuf => manuf.id == this.entity.manufacturerModel.id);
+            this.coil.manufacturerModel = this.manufModels.filter(manuf => manuf.id == this.entity.manufacturerModel.id)[0];
         });
     }
 
@@ -93,7 +100,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     buildForm(): FormGroup {
-        return this.formBuilder.group({
+        let form: FormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
@@ -101,32 +108,49 @@ export class CoilComponent extends EntityComponent<Coil> {
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
+        form.valueChanges.subscribe(() => {
+            if (this.coil.center && !this.prefilledManuf) this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
+            else this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+        })
+        return form;
     }
 
-    private updateManufList(center: Center): void {
+    updateManufList(center: Center): void {
+        this.coil.center = center;
+        this.coil.manufacturerModel = null;
+        if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
         this.manufModels = [];
         if (center && center.acquisitionEquipments) {
             for (let acqEqu of center.acquisitionEquipments) {
                 this.manufModels.push(acqEqu.manufacturerModel);
             }
+            if (this.manufModels[0]) this.coil.manufacturerModel = this.manufModels[0];
         }
     }
 
-    private openNewCenter() {
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as Coil).center = entity as Center;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as Coil).center = entity as Center;
+                })
+            );
         });
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
+                })
+            );
         });
     }
 

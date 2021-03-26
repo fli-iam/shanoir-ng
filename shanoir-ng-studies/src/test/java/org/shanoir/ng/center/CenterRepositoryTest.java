@@ -16,15 +16,15 @@ package org.shanoir.ng.center;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -76,23 +76,15 @@ public class CenterRepositoryTest {
 	}
 	
 	@Test
-	public void findByTest() throws Exception {
-		List<Center> centersDb = repository.findBy("name", CENTER_TEST_1_NAME);
-		assertNotNull(centersDb);
-		assertThat(centersDb.size()).isEqualTo(1);
-		assertThat(centersDb.get(0).getId()).isEqualTo(CENTER_TEST_1_ID);
-	}
-	
-	@Test
 	public void findByNameTest() throws Exception {
-		Optional<Center> centerDb = repository.findByName(CENTER_TEST_1_NAME);
-		assertTrue(centerDb.isPresent());
-		assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
+		Center centerDb = repository.findByName(CENTER_TEST_1_NAME);
+		assertNotNull(centerDb);
+		assertThat(centerDb.getId()).isEqualTo(CENTER_TEST_1_ID);
 	}
 	
 	@Test
 	public void findIdsAndNamesTest() throws Exception {
-		List<IdNameDTO> centersDb = repository.findIdsAndNames();
+		List<IdName> centersDb = repository.findIdsAndNames();
 		assertNotNull(centersDb);
 		assertThat(centersDb.size()).isEqualTo(2);
 	}
@@ -101,6 +93,13 @@ public class CenterRepositoryTest {
 	public void findOneTest() throws Exception {
 		Center centerDb = repository.findOne(CENTER_TEST_1_ID);
 		assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
+	}
+	
+	@Test
+	public void findNamesByStudyIdTest() throws Exception {
+		List<IdName> centersDb = repository.findIdsAndNames(1L);
+		assertNotNull(centersDb);
+		assertThat(centersDb.size()).isEqualTo(2);
 	}
 	
 }

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+. /bin/entrypoint_common
+
+optional SHANOIR_PREFIX
+require  SHANOIR_MIGRATION
+require  SHANOIR_URL_HOST
+require  SHANOIR_URL_SCHEME
+
+handle_microservice_migration
+
+abort_if_error
+
+run_microservice "$@"

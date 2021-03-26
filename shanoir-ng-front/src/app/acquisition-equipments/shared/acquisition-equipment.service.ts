@@ -11,17 +11,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Injectable } from '@angular/core';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 
+import { HttpClient } from '@angular/common/http';
+
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
 
-    API_URL = AppUtils.BACKEND_API_ACQ_EQUIP_URL ;
+    API_URL = AppUtils.BACKEND_API_ACQ_EQUIP_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new AcquisitionEquipment(); }
+
+    getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
+            .toPromise()
+            .then(this.mapEntityList);
+    }
+
+    getAllByStudy(studyId: number): Promise<AcquisitionEquipment[]> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byStudy/' + studyId)
+            .toPromise()
+            .then(this.mapEntityList);
+    }
 }

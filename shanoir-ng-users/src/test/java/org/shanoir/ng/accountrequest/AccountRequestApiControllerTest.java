@@ -21,11 +21,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.accountrequest.AccountRequestApiController;
-import org.shanoir.ng.accountrequest.AccountRequestInfo;
-import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserService;
+import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
+import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
+import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,9 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for user controller.
@@ -52,19 +54,25 @@ public class AccountRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/accountrequest";
 
-	private Gson gson;
-
 	@Autowired
 	private MockMvc mvc;
 
 	@MockBean
 	private UserService userServiceMock;
+	
+	@MockBean
+	private UserRepository userRepositoryMock;
+	
+	@MockBean
+	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@MockBean
+	private UserUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
-	public void setup() throws ShanoirUsersException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
-		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
+	public void setup() throws SecurityException {
+		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
+		given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test
@@ -80,10 +88,36 @@ public class AccountRequestApiControllerTest {
 		info.setStudy("study");
 		info.setWork("work");
 		user.setAccountRequestInfo(info);
+		
+		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(user)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	public void saveNewAccountRequestChallengeTest() throws Exception {
+		final User user = ModelsUtil.createUser(null);
+		user.setEmail("test@te.st");
+		user.setUsername("test");
+		user.setId(2L);
+		final AccountRequestInfo info = new AccountRequestInfo();
+		info.setContact("contact");
+		info.setFunction("function");
+		info.setInstitution("institution");
+		info.setChallenge(1L);
+		info.setService("service");
+		info.setStudy("study");
+		info.setWork("work");
+		user.setAccountRequestInfo(info);
+
+		given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+		
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+				.andExpect(status().isNoContent());
+
 	}
 
 }

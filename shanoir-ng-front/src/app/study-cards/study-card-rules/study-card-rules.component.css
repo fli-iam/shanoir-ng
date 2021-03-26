@@ -1,0 +1,26 @@
+study-card-rule { text-align: center; padding: 10px 0; border-radius: 2px; transition: visibility 5s, opacity 5s linear;}
+
+.add-container { width: 100%; text-align: center; }
+.add { color: var(--color-b); cursor: pointer; display: inline-block; padding: 1px 8px; margin-top: 10px; border: 1px dashed var(--color-c); border-radius: 10px; width: 200px; text-align: center; }
+.add i { margin-right: 7px; color: var(--grey); color: var(--color-c); }
+.add:hover { background-color: var(--color-b); color: white; }
+
+.add-container { color: var(--color-b); margin-top: 20px; }
+.add-container span { display: inline-block; margin: 0 35px; }
+.add-container span:hover { cursor: pointer; color: var(--color-b-light2); }
+
+.add-container i { font-size: 35px; }
+
+study-card-rule.select-mode:hover { cursor: pointer; background-color: var(--color-b-light); }
+study-card-rule.selected { background-color: var(--color-b-light); }
+study-card-rule.appear { animation: 1s ease-out 0s 1 slideInFromLeft; }
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
+  

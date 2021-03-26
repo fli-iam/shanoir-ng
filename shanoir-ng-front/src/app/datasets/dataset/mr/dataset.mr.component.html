@@ -51,9 +51,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<legend>Mr Dataset Metadata</legend>
 	<ol>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Nature</label>
-			<span class="right-col">
-				<ng-template>{{dataset.nature}}</ng-template><!-- TODO -->
+			<label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Mr Dataset Nature</label>
+			<span [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{natureLabel}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<select-box [(ngModel)]="dataset.updatedMrMetadata.mrDatasetNature" [options]="natureOptions">
+					</select-box>
+				</ng-template>
 			</span>
 		</li>
 	</ol>

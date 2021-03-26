@@ -12,27 +12,126 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { query, style, state, animate, transition, trigger } from '@angular/animations';
+import { animate, query, style, transition, trigger, state } from '@angular/animations';
+
+export const parent = trigger('parent', [
+    transition(':enter', [])
+]);
 
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
-            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
+            style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '*', 'min-height': '*','padding-bottom': '*', overflow: 'hidden'}))
         ]
     ),
     transition(
         ':leave', [
-            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
+            style({height: '*', 'min-height': '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}))
         ]
     )
 ]);
+
+export const slideRight = trigger('slideRight', [
+    transition(
+        ':enter', [
+            style({width: 0}),
+            animate('500ms ease-in-out', style({width: '*'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({width: '*'}),
+            animate('500ms ease-in-out', style({width: 0}))
+        ]
+    )
+]);
+
+export const slideMarginLeft = trigger('slideMarginLeft', [
+    transition(
+        'margin => nomargin', [
+            style({'margin-left': 300}),
+            animate('500ms ease-in-out', style({'margin-left': 0}))
+        ]
+    ),
+    transition(
+        'nomargin => margin', [
+            style({'margin-left': 0}),
+            animate('500ms ease-in-out', style({'margin-left': 300}))
+        ]
+    )
+]);
+
+export const menuAnimDur = 100;
+export const menuSlideDown = trigger('menuSlideDown', [
+    transition(
+        ':enter', [
+            style({ height: 0 }),
+            animate(menuAnimDur + 'ms ease-in-out', style({ height: '*', 'padding-bottom': '*' }))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({ height: '*' }),
+            animate(menuAnimDur + 'ms ease-in-out', style({ height: 0, 'padding-bottom': '0' }))
+        ]
+    )
+]);
+
+export const menuSlideRight = trigger('menuSlideRight', [
+    transition(
+        ':enter', [
+            style({width: 0}),
+            animate(menuAnimDur+'ms ease-in-out', style({width: '*'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({width: '*'}),
+            animate(menuAnimDur+'ms ease-in-out', style({width: 0}))
+        ]
+    )
+]);
+    
 
 export const preventInitialChildAnimations = trigger('preventInitialChildAnimations', [
     transition(
         ':enter', [
             query(':enter', [], {optional: true})
+        ]
+    )
+]);
+
+
+const moveDur = 1000;
+export const moveDown = trigger('moveDown', [
+    transition(
+        ':enter', [
+            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);
+
+
+export const moveUp = trigger('moveUp', [
+    transition(
+        ':enter', [
+            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate(moveDur + 'ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
         ]
     )
 ]);

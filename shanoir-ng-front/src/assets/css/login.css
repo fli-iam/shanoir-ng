@@ -1,15 +1,36 @@
-body { background-color: var(--color-a); }
 
-#kc-container { height: 100%; }
+html { display: table;  width: 100%; height: 100%; }
+body { background-color: var(--color-a); display: table-cell; vertical-align: middle; }
+
+#kc-content{ margin-bottom: 200px; color: var(--color-b-light); text-align: center; }
 
 .logo {	text-align: center; }
 	.logo img { margin: 20px; }
 
-.login-main { text-align: center; background-color: var(--color-a); width: 100%; height: 100%; }
-	.login-main form { margin: auto; text-align: center; }
-		.login-main form a { text-decoration: none; color: var(--color-b-light); }
-	.login-main .header { padding: 20px 0; color: var(--color-b-light); } 
-	.login-main .footer { text-align: center; padding: 0; } 
-	.login-main .error { color: orangered; } 
+	form { margin: auto; text-align: center; }
+	.header { padding: 20px 0; color: var(--color-b-light); }
+	header { text-align: center; }
+	.footer { text-align: center; padding: 0; } 
+	.error { color: var(--color-error); } 
+	select,
+	input { border: none; border-bottom: 1px solid var(--grey); background-color: transparent; color: var(--color-b-light); margin: 5px 0; }
+	input:focus, select:focus, select-box:focus, datepicker:focus {
+		outline: none; border-bottom: 2px solid var(--color-b-light) !important;
+	}
+	.instructions { color: var(--color-b-light); line-height: 1.3; }
+	#kc-form-buttons { margin: 10px 0; }
+	#kc-form-options a { text-decoration: none; color: var(--color-b-light); }
 
-.instructions { line-height: 1.3; color: var(--color-b-light); }
+	.alert { margin-bottom: 15px; color: #FF6565; display: inline-block; }
+	.info { margin-top: 15px; color: #51A3FF; display: inline-block; }
+
+@-webkit-keyframes autofill {
+	to {
+		color: var(--color-b-light);
+		background: transparent;
+	}
+}
+input:-webkit-autofill {
+	-webkit-animation-name: autofill;
+	-webkit-animation-fill-mode: both;
+}

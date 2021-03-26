@@ -21,7 +21,7 @@ server:
 ##### Database #####
 spring:
   datasource:
-    url: jdbc:mysql://database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: import
     password: password
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
@@ -49,22 +49,24 @@ spring:
   jooq:
     sql-dialect: Mysql
   rabbitmq:
-    host: rabbitmq
+    host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
   http:
     multipart:
-      maxFileSize: 500Mb
-      maxRequestSize: 500Mb
+      maxFileSize: 5000Mb
+      maxRequestSize: 5000Mb
 front.server:
-  address: http://shanoir-ng-nginx/shanoir-ng/
-  url: http://shanoir-ng-nginx
+  address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
+  url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: http://shanoir-ng-nginx/auth
+  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-import
@@ -81,13 +83,20 @@ keycloak:
         - /*
 # microservices url
 ms.url:
-  shanoir-ng-datasets: http://datasets:9904/datasetacquisition
+  shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition_eeg
+  dicom2nifti: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/dicom2nifti
+  shanoir-ng-studies-name: http://${SHANOIR_PREFIX}studies:9902/studies/names
+  shanoir-ng-studies-subjects-names: http://${SHANOIR_PREFIX}studies:9902/subjects/names
+  shanoir-ng-create-examination: http://${SHANOIR_PREFIX}datasets:9904/examinations
+  shanoir-ng-studies-commons: http://${SHANOIR_PREFIX}studies:9902/common
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-import.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+    org.shanoir: INFO
 # Shanoir configurations
 shanoir:
   import:
@@ -97,49 +106,45 @@ shanoir:
       query:
         aet.calling:
           name: SHANOIR-SCU
-          host: import
+          host: "0.0.0.0"
+          #host: ${SHANOIR_PREFIX}import
           port: 11115
         aet.called:
           name: DCM4CHEE
-          host: dcm4chee-arc
+          host: ${SHANOIR_PREFIX}dcm4chee-arc
           port: 11112
+        maxPatients: 10
       store:
         aet.called:
           name: SHANOIR-SCP
-          host: import
+          host: "0.0.0.0"
+          #host: ${SHANOIR_PREFIX}import
           port: 44105
         folder: /tmp/shanoir-dcmrcv
     # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
     series:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
-      donotseparatedatasetsinserie: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*Relaxo*;
+      # Also during the nifti conversion, it will be reconstructed as 4D volumes.
+      seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;
       # If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
       isspectroscopy: seriesDescription==*CSI*
   conversion:
-    dcm2nii:
-      converters:
-        path:
-          linux: /usr/local/dcm2niix-efd36a02e2a8e21acfbc62f41beeacf6731d67ac/build/bin/
-          windows: 
-        default: dcm2niix
+    converters:
+      path: /opt/nifti-converters/
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
-        convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
+      convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
-        convertas4d: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*; 
-        clidcm:
-          path:
-            linux: /opt/clidcm/libx64/clidcm
-            windows: C:/Dev/workspace/Shanoir_Dev/external/clidcm/bin/windows/clidcm.exe
-            lib: /opt/clidcm/libx64/
-
 ---
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9923
 spring:
   profiles: dev
   datasource:
+    url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     initialize: true
   jpa:
     hibernate:
@@ -147,7 +152,21 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-
+  rabbitmq:
+    host: localhost
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+keycloak:
+  auth-server-url: https://shanoir-ng-nginx/auth
+ms.url:
+  shanoir-ng-datasets: http://localhost:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
+  dicom2nifti: http://localhost:5000/dicom2nifti
+  shanoir-ng-studies-name: http://localhost:9902/studies/names
+  shanoir-ng-studies-subjects-names: http://localhost:9902/subjects/names
+  shanoir-ng-create-examination: http://localhost:9904/examinations
+  shanoir-ng-studies-commons: http://localhost:9902/common
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-import.log
@@ -155,3 +174,63 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
+shanoir:
+  import:
+    directory: /tmp
+    # Import from PACS configuration
+    pacs:
+      query:
+        aet.calling:
+          name: SHANOIR-SCU
+          host: localhost
+          port: 11115
+        aet.called:
+          name: DCM4CHEE
+          host: localhost
+          port: 11112
+        maxPatients: 10
+      store:
+        aet.called:
+          name: SHANOIR-SCP
+          host: localhost
+          port: 44125
+        folder: /tmp/shanoir-dcmrcv
+
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    data: classpath:/scripts/test-data-h2.sql
+    initialize: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+logging:
+  file: /tmp/shanoir-ng-import.log
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: qualif
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth

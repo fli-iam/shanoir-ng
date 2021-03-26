@@ -1,0 +1,155 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component">
+    <form *ngIf="form && examinationAnesthetic" [formGroup]="form" class="max-content" novalidate>
+	<span *ngIf="isStandalone"  [ngSwitch]="mode">
+		<ng-template [ngSwitchCase]="'view'">
+			<h2 class="header command-zone"i18n="View examAnesthetic|Title@@examinationDetailViewTitle">Details on examination anesthetic</h2>
+		</ng-template>
+		<ng-template [ngSwitchCase]="'edit'">
+			<h2 class="header command-zone"i18n="Edit examAnesthetic|Title@@examinationDetailEditTitle">Edit examination anesthetic</h2>
+		</ng-template>
+		<ng-template [ngSwitchCase]="'create'">
+			<h2 class="header command-zone"i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">Create examination anesthetic</h2>
+		</ng-template>
+	</span>
+	
+
+	<fieldset>
+		<legend *ngIf="!isStandalone">Examination anesthetic</legend>
+		<ol>
+			<li >
+				<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.anesthetic?.name}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examinationAnesthetic.anesthetic" (ngModelChange)="eaChange()">
+							<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
+						</select>
+						<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
+							<i class="fas fa-plus-square"></i>
+							new anesthetic
+						</button>
+					</ng-template>
+				</span>
+			</li>
+			<li >
+				<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{enumUtils.getEnumValue(intervals,examinationAnesthetic?.injection_interval)}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examinationAnesthetic.injection_interval" (ngModelChange)="eaChange()">
+							<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
+						</select>
+					</ng-template>
+				</span>
+			</li>
+			<li >
+				<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{enumUtils.getEnumValue(sites,examinationAnesthetic?.injection_site)}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examinationAnesthetic.injection_site" (ngModelChange)="eaChange()">
+							<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
+						</select>
+					</ng-template>
+				</span>
+			</li>
+			<li>
+				<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'">
+							{{enumUtils.getEnumValue(injtypes,examinationAnesthetic?.injection_type)}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<select id="injectionType" formControlName="injectionType" [(ngModel)]="examinationAnesthetic.injection_type" (ngModelChange)="eaChange()">
+							<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
+						</select>
+					</ng-template>
+				</span>
+			</li>
+			<li>
+				<label i18n="Edit examAnesthetic|Dose label">Dose</label>
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.dose}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<input type="text" id="dose" formControlName="dose" [(ngModel)]="examinationAnesthetic.dose" (ngModelChange)="eaChange()"/>
+					</ng-template>
+				</span> 
+			</li>
+			<li>
+				<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.dose_unit?.value}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examinationAnesthetic.dose_unit" (ngModelChange)="eaChange()">
+							<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
+						</select>
+					</ng-template>
+				</span> 							
+			</li>
+			<!-- 
+			<li>
+				<label i18n="Edit examAnesthetic|startDate label">Start date</label> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.startDate}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examinationAnesthetic.startDate" (ngModelChange)="eaChange()" 
+							(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
+						</my-date-picker>
+					</ng-template>
+					<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+				</span>
+			</li>
+			<li>
+				<label i18n="Edit examAnesthetic|endDate label">End date</label> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.endDate}}
+					</ng-template>
+					<ng-template ngSwitchDefault>
+						<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examinationAnesthetic.endDate"  (ngModelChange)="eaChange()"
+							(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
+						</my-date-picker>
+					</ng-template>
+					<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+				</span>
+			</li>
+				-->
+		</ol>
+	</fieldset>
+    
+	<div *ngIf="isStandalone">
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+		</form-footer>
+	</div> 
+	</form>   
+</div>

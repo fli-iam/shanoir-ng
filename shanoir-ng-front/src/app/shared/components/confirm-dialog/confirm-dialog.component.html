@@ -12,15 +12,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="main">
-    <div class="header">{{ title }}</div>
-    <div class="body">
-        <p>{{ message }}</p>
-    </div>
-    <div class="footer">
-        <button type="button"
-            (click)="dialogRef.close(true)">OK</button>
-        <button type="button"
-            (click)="dialogRef.close()">Cancel</button>
+<div class="overlay">
+    <div class="main">
+        <div class="header">{{ title }}</div>
+        <div class="body">
+            <p>{{ message }}</p>
+        </div>
+        <div class="footer">
+            <button type="button"
+                (click)="close(true)">{{buttons && buttons.ok ? buttons.ok : 'OK'}}</button>
+            <button type="button"
+                (click)="close(false)">{{buttons && buttons.cancel ? buttons.cancel : 'Cancel'}}</button>
+        </div>
     </div>
 </div>

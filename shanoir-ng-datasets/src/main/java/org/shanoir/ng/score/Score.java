@@ -16,24 +16,28 @@ package org.shanoir.ng.score;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 
-import org.shanoir.ng.examination.VariableAssessment;
+import org.shanoir.ng.examination.model.VariableAssessment;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Score.
  * 
- * @author ifakhfakh
+ * @author ifakhfakh, JCome
  *
  */
 @Entity
 @JsonPropertyOrder({ "_links", "id", "variableAssessment" })
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Score extends HalEntity {
 
 	/**
@@ -43,6 +47,7 @@ public class Score extends HalEntity {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
+	@JsonIgnore
 	private VariableAssessment variableAssessment;
 
 	/**

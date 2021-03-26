@@ -16,10 +16,8 @@ import { AccountRequestInfo } from '../account-request-info/account-request-info
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { Role } from '../../roles/role.model';
-import { ServiceLocator } from '../../utils/locator.service';
-import { UserService } from './user.service';
 
-export class User extends Entity{
+export class User extends Entity {
     id: number;
     accountRequestDemand: boolean;
     accountRequestInfo: AccountRequestInfo;
@@ -39,6 +37,4 @@ export class User extends Entity{
     username: string;
     valid: boolean;
     selected: boolean = false;
-
-    service: UserService = ServiceLocator.injector.get(UserService);
 }

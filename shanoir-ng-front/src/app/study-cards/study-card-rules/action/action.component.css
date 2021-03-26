@@ -1,0 +1,18 @@
+:host() { white-space: nowrap; color: purple; }
+
+select-box, input { border: none !important; }
+input { box-sizing: border-box; width: auto; padding: 0 1px; }
+
+.var { color: blue; }
+.value { color: chocolate; }
+
+:host():hover .delete, .delete:hover { opacity: 1; }
+.delete { opacity: 0; transition: opacity 0.3s; color: var(--grey); position: absolute; right: -17px; top: 4px; bottom: 4px; z-index: 1; }
+.delete:hover { color: var(--color-error); cursor: pointer; }
+
+.error { color: white !important; background-color: var(--color-error) !important; border-radius: 4px !important; }
+.error::ng-deep ::placeholder { color: white !important; }
+
+.error-msg { color: var(--color-error); font-weight: bold; }
+.error-msg i { margin-right: 7px; }
+.hint { color: var(--dark-grey); font-weight: normal; }

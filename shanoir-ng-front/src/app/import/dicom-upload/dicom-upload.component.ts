@@ -14,57 +14,50 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../dicom-archive.service';
-import { ImportJob } from '../dicom-data.model';
-import { ImportDataService } from '../import.data-service';
-import { ImportService } from '../import.service';
-
+import { ImportJob } from '../shared/dicom-data.model';
+import { ImportDataService } from '../shared/import.data-service';
+import { ImportService } from '../shared/import.service';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
 @Component({
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
-    styleUrls: ['dicom-upload.component.css', '../import.step.css'],
+    styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class DicomUploadComponent {
     
-    private archiveStatus: Status = 'none';
-    private extensionError: boolean;
-    private dicomDirMissingError: boolean;
-    private modality: string;
+    archiveStatus: Status = 'none';
+    extensionError: boolean;
+    dicomDirMissingError: boolean;
+    modality: string;
 
 
     constructor(
             private importService: ImportService, 
-            private dicomArchiveService: DicomArchiveService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'DICOM';
+        });
     }
     
-    private uploadArchive(fileEvent: any): void {
-        this.setArchiveStatus('uploading');
-        this.loadInMemory(fileEvent);   
-        this.uploadToServer(fileEvent.target.files);
-    }
-
-    private loadInMemory(fileEvent: any) {
-    	this.dicomArchiveService.clearFileInMemory();
-    	this.dicomArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
-                this.dicomArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
-                    this.importDataService.inMemoryExtracted = response;
-                });
-            });
+    public uploadArchive(fileEvent: any): void {
+        if (fileEvent.target.files.length > 0) {
+            this.setArchiveStatus('uploading');
+            this.uploadToServer(fileEvent.target.files);
+        } else {
+            this.setArchiveStatus('none');
+            this.modality = null;
+        }
     }
 
     private uploadToServer(file: any) {
@@ -77,7 +70,7 @@ export class DicomUploadComponent {
         this.importService.uploadFile(formData)
             .then((patientDicomList: ImportJob) => {
                 this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                this.importDataService.archiveUploaded = patientDicomList;
+                this.importDataService.patientList = patientDicomList;
                 this.setArchiveStatus('uploaded');
             }).catch(error => {
                 this.setArchiveStatus('error');
@@ -88,14 +81,13 @@ export class DicomUploadComponent {
 
     private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
-        //this.updateValidity();
     }
 
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
     }
 
-    private next() {
+    next() {
         this.router.navigate(['imports/series']);
     }
 

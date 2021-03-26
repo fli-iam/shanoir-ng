@@ -20,7 +20,7 @@ import { Component, Input } from '@angular/core';
   <div class="modal fade" tabindex="-1" [ngClass]="{'out': !visible}">
     <div id={{modalDialogId}} class="modal-dialog" (click)="onContainerClicked($event)">
       <div class="content" [ngClass]="{'preout': !visibleAnimate}">
-        <ng-content select=".app-modal-body"></ng-content>
+        <ng-content select=".main"></ng-content>
       </div>
     </div>
   </div>
@@ -46,7 +46,8 @@ export class ModalComponent {
   }
 
   public onContainerClicked(event: MouseEvent): void {
-    if ((<HTMLElement>event.target).parentElement.classList.contains('modal')) {
+    let elt = (<HTMLElement>event.target).parentElement;
+    if (elt && elt.classList.contains('modal')) {
       this.hide();
     } 
  /*   TODO (or not): Instead we should at least close only the current popup, not every opened popup */

@@ -14,25 +14,27 @@
 
 package org.shanoir.ng;
 
+import org.shanoir.ng.shared.paging.PageSerializer;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import org.shanoir.ng.shared.paging.PageSerializer;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.PageImpl;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Shanoir application.
- *
- * @author msimon
- *
+ * Shanoir-NG microservice datasets application.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@EnableSpringDataWebSupport
+@EnableScheduling
 @EnableSwagger2
 public class ShanoirDatasetApplication {
 

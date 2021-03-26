@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response;
 
@@ -27,8 +28,8 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserRepository;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
@@ -72,7 +73,10 @@ import groovyjarjarcommonscli.MissingArgumentException;
  *
  */
 @Component
+//@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
+
+	private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
 
 	/**
 	 * Logger
@@ -94,10 +98,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${kc.admin.client.username}")
+	@Value("${SHANOIR_KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${kc.admin.client.password}")
+	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
 	@Value("${keycloak.realm}")
@@ -113,7 +117,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	
 	@Override
-	public void run(ApplicationArguments args) throws Exception {
+	public void run(final ApplicationArguments args) throws Exception {
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
@@ -122,10 +126,27 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				/**
 				 * @ToDo: implement initial admin Shanoir creation here, in database users and in keycloak, check if dbs are really empty.
 				 */
-			} else if (args.containsOption("syncAllUsersToKeycloak")
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0) != null
-					&& args.getOptionValues("syncAllUsersToKeycloak").get(0).equals("true")) {
-				createUsersIfNotExisting();
+			} else if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0) != null
+					&& args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0).equals("true")) {
+				
+				int tries = 0;
+				boolean success = false;
+				while (!success && tries < 50) {
+					try {
+						createUsersIfNotExisting();
+						success = true;
+					} catch (Exception e) {
+						tries++;
+						String msg = "Try " + tries + " failed for updating keycloak users on startup (" + e.getMessage() + ")";
+						LOG.error(msg); // users logs
+						System.out.println(msg); // docker compose console
+						TimeUnit.SECONDS.sleep(5);
+					}
+				}
+				if (!success) {
+					throw new IllegalStateException("Could not export users to Keycloak.");
+				}
 			}
 		}
 	}
@@ -139,8 +160,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				kcAdminClientClientId);
 	}
 
+	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
-		LOG.info("syncAllUsersToKeycloak");
+		LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
 		final Iterable<User> users = userRepository.findAll();
 		for (final User user : users) {
 			final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
@@ -158,6 +180,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				credential.setType(CredentialRepresentation.PASSWORD);
 				String newPassword = PasswordUtils.generatePassword();
 				credential.setValue(newPassword);
+				credential.setTemporary(true);
 				final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
 				userResource.resetPassword(credential);
 				final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
@@ -169,8 +192,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	}
 
 	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+		final Map<String, List<String>> attributes = new HashMap<>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
+		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {
 			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
 		}

@@ -11,90 +11,111 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { StudyService } from '../../studies/shared/study.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { Option } from '../../shared/select/select.component';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
+import { Study } from '../../studies/shared/study.model';
+
 
 @Component ({
     selector: 'account-request-info',
-    templateUrl: 'account-request-info.component.html'
+    templateUrl: 'account-request-info.component.html',
+    providers: [
+        {
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => AccountRequestInfoComponent),
+          multi: true,
+        }]  
 })
-export class AccountRequestInfoComponent implements OnInit {
-    @Input() userAccountRequestInfo: AccountRequestInfo;
-    @Input() accountRequestDemand: boolean;
-    @Input() requestAccountMode: boolean;
-    @Output() accountRequestInfo: EventEmitter<AccountRequestInfo> = new EventEmitter<AccountRequestInfo>();
-    @Output() isValid: EventEmitter<boolean> = new EventEmitter<boolean>();
-    public accountRequestInfoForm: FormGroup;
-    ari: AccountRequestInfo = new AccountRequestInfo();
+export class AccountRequestInfoComponent implements ControlValueAccessor {
 
-    constructor(private formBuilder: FormBuilder) { 
+    @Input() editMode: boolean = false;
+    @Output() valid: EventEmitter<boolean> = new EventEmitter();
+    public isChallenge: boolean;
+    info: AccountRequestInfo = new AccountRequestInfo;
+    form: FormGroup;
+    onChange = (_: any) => {};
+    onTouch = () => {};
+    public challengeOptions:  Option<number>[];
+    challengeName: string;
+
+    constructor(private formBuilder: FormBuilder,
+                private route: ActivatedRoute,
+                private studyService: StudyService,
+                private msgService: MsgBoxService) {
+        this.isChallenge = this.route.snapshot.data['isChallenge'];
+    }
+
+    writeValue(obj: any): void {
+        this.challengeName = null;
+        if (obj.challenge && obj.challenge != this.info.challenge) {
+            this.getStudyName(obj.challenge).then(name => this.challengeName = name);
+        }
+        this.info = obj;
+    }
+
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.onTouch = fn;
     }
 
     ngOnInit() {
-        let contactFC, functionFC, institutionFC, serviceFC, studyFC, workFC: FormControl;
-        if (this.requestAccountMode) {
-            contactFC = new FormControl('', [Validators.required, Validators.maxLength(200)]);
-            functionFC = new FormControl('', [Validators.required, Validators.maxLength(200)]); 
-            institutionFC = new FormControl('', [Validators.required, Validators.maxLength(200)]);
-            serviceFC = new FormControl('', [Validators.required, Validators.maxLength(200)]);
-            studyFC = new FormControl('', [Validators.required, Validators.maxLength(200)]);
-            workFC = new FormControl('', [Validators.required, Validators.maxLength(200)]);
-        } else {
-            contactFC = new FormControl('');
-            functionFC = new FormControl(''); 
-            institutionFC = new FormControl('');
-            serviceFC = new FormControl('');
-            studyFC = new FormControl('');
-            workFC = new FormControl('');
-        }
-        this.accountRequestInfoForm = this.formBuilder.group({
-            'contact': contactFC,
-            'function': functionFC,
-            'institution': institutionFC,
-            'service': serviceFC,
-            'study':studyFC,
-            'work': workFC
-    });
-    this.accountRequestInfoForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-    this.onValueChanged(); // (re)set validation messages now
-    }
-
-    onValueChanged(data?: any) {
-        if (!this.accountRequestInfoForm) { return; }
-        const form = this.accountRequestInfoForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
+        if (this.isChallenge) {
+            this.studyService.getChallenges().then(result => {
+                if (result) {
+                    this.challengeOptions = result.map(element => new Option(element.id, element.name));
+                } else {
+                    this.challengeOptions = [];
+                    this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
                 }
-            }
+            });
         }
+        this.form = this.formBuilder.group({
+            'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
+            'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
+            'function': [this.info.function, this.isChallenge ? [] :[Validators.required, Validators.maxLength(200)]],
+            'study': [this.info.study, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'contact': [this.info.contact, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'work': [this.info.work, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
+            'challenge': [this.info.challenge, !this.isChallenge ? [] : [Validators.required]]
+        });
+        this.form.valueChanges.subscribe(() => {
+            this.valid.emit(this.form.valid);
+        });
+    }
 
-        if(this.userAccountRequestInfo !== null) {
-            this.ari = this.accountRequestInfoForm.value;
-            this.accountRequestInfo.emit(this.ari);
-        
-            if (this.accountRequestInfoForm.valid) {
-                this.isValid.emit(true);
-            } else {
-                this.isValid.emit(false);
-            }
+    getStudyName(id: number): Promise<string> {
+        return this.studyService.get(id).then(study => study ? study.name : null);
+    }
+
+    onInfoChange() {
+        this.onChange(this.info);
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && control.touched && !control.valid) {
+            return control.errors;
         }
     }
 
-    formErrors = {
-        'contact': '',
-        'function': '',
-        'institution': '',
-        'service': '',
-        'study': '',
-        'work': ''
-    };
+    hasError(fieldName: string, errors: string[]) {
+        let formError = this.formErrors(fieldName);
+        if (formError) {
+            for(let errorName of errors) {
+                if(formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
 }

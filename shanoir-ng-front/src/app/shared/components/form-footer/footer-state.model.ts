@@ -16,7 +16,10 @@ export class FooterState {
 
     constructor(
         public mode: "view" | "edit" | "create",
-        public canModify: boolean,
+        public canEdit: boolean = true,
+        public canDelete: boolean = true,
         public valid: boolean = false,
+        public dirty: boolean = false,
+        public loading: boolean = false
     ) {}
 }

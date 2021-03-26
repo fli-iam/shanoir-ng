@@ -13,7 +13,6 @@
  */
 
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
     selector: 'confirm-dialog',
@@ -24,7 +23,20 @@ export class ConfirmDialogComponent {
     
     public title: string;
     public message: string;
+    buttons: {ok: string, cancel: string};
+    private closeResolve: (value?: boolean | PromiseLike<boolean>) => void;
 
-    constructor(public dialogRef: MatDialogRef<ConfirmDialogComponent>) { }
+    public open(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
+        this.title = title;
+        this.message = message;
+        this.buttons = buttons;
+        return new Promise((resolve, reject) => {
+            this.closeResolve = resolve;
+        });
+    }
+
+    public close(answer: boolean) {
+        this.closeResolve(answer == true); // forces boolean to be returned
+    }
 
 }

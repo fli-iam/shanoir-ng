@@ -12,63 +12,113 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">3. Set the clinical context</div>
-<fieldset class="step">
+<div class="header command-zone">3. Set the clinical context {{importMode}}</div>
+<fieldset class="step" @preventInitialChildAnimations>
 
     <ol>
         <legend>
             Research study
             <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
         </legend>
-        <li class="required">
-            <label class="required-label">Select an existing research study</label> 
+        <li>
+            <label class="required-label">Select a research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities"
-                        [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">
-                    <option *ngFor="let study of studies" [ngValue]="study"
-                            [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</option>
-                </select>
-                <button i18n="Import|StudyDetails label" [disabled]="!study" (click)="showStudyDetails()">details</button>
+                <select-box 
+                        [(ngModel)]="study" 
+                        (userChange)="onSelectStudy(); onContextChange();" 
+                        (onViewClick)="showStudyDetails()" 
+                        [viewDisabled]="!study" 
+                        [options]="studyOptions">
+                </select-box>
             </span>
         </li>
-        <li class="required">
-            <label class="required-label">Select a center</label> 
+        <!-- <li>
+            <label>Use a study card</label> 
             <span class="right-col">
-                <select [disabled]="!study || !centers" [(ngModel)]="center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
-                        [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">
-                    <option *ngFor="let center of centers" [ngValue]="center"
-                            [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
-                </select>
-                <button i18n="Import|CenterDetails label" [disabled]="!center" (click)="showCenterDetails()">details</button>
-                <button [disabled]="!center || center?.compatible" (click)="openCreateCenter()">add</button>
+                <checkbox [(ngModel)]="useStudyCard" (ngModelChange)="onToggleUseStudyCard($event); onContextChange();" [ngModelOptions]="{standalone: true}"></checkbox>
+            </span>
+        </li> -->
+        <li *ngIf="useStudyCard" @slideDown>
+            <label>Select a study card</label> 
+            <span class="right-col">
+                <select-box 
+                        [(ngModel)]="studycard" 
+                        (userChange)="onSelectStudyCard(); onContextChange();" 
+                        (onViewClick)="showStudyCardDetails()" 
+                        [viewDisabled]="!studycard" 
+                        [options]="studycardOptions">
+                </select-box>
             </span>
         </li>
-        <li class="info" *ngIf="center && !center?.compatible">
+        <li class="info" *ngIf="study && scHasCoilToUpdate">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>That study card contains coil references that need to be precised.</strong>
+            <br/>If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank. 
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+            </ng-container>
+        </li>
+        <li class="info" *ngIf="scHasDifferentModality && study">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>That study card would set a different modality than detected in your data.</strong>
+            <br/>Your data says <strong>{{modality}}</strong> while the study card would set <strong>{{scHasDifferentModality}}</strong> in the imported metadata.
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to update the studycard {{studycard?.name}}.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="editStudyCard(studycard)">Click here to edit the study card and fix this</a>
+            </ng-container>
+        </li>
+        <li>
+            <label [class.required-label]="!useStudyCard">Select a center</label> 
+            <span class="right-col">
+                <select-box *ngIf="!useStudyCard || center"
+                        [disabled]="!useStudyCard && (!study || !centerOptions)"
+                        [readOnly]="useStudyCard"
+                        [(ngModel)]="center" 
+                        (userChange)="onSelectCenter(); onContextChange();" 
+                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
+                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
+                        [options]="centerOptions">
+                </select-box>
+            </span>
+        </li>
+        <li class="info" *ngIf="center && !centerCompatible(center)">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
-            <br/>Your archive contains this data : <code>{{patient.studies[0].series[0].institution.institutionName}}, {{patient.studies[0].series[0].institution.institutionAddress}}.</code>
-            <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
-        </li>
-        <li class="required">
-            <label class="required-label">Select an acquisition equipment</label> 
-            <span class="right-col">
-                <select [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
-                        [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">
-                    <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" 
-                            [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
-                </select>
-                <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
-                <button [disabled]="acquisitionEquipment?.compatible || hasCompatibleEquipments || !center" (click)="openCreateAcqEqt()">add</button>
-            </span>
-        </li>
-        <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
-            <i class="fas fa-exclamation-triangle"></i>
-            <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
             <br/>Your archive contains this data : 
             <code>
-                {{patient.studies[0].series[0].equipment.manufacturer}} - 
-                {{patient.studies[0].series[0].equipment.manufacturerModelName}} - 
-                {{patient.studies[0].series[0].equipment.deviceSerialNumber}}
+                {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
+                {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
+            </code>
+            <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+        </li>
+        <li>
+            <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
+            <span class="right-col">
+                <select-box *ngIf="!useStudyCard || acquisitionEquipment"
+                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
+                        [readOnly]="useStudyCard"
+                        [(ngModel)]="acquisitionEquipment" 
+                        (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
+                        (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
+                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
+                        [options]="acquisitionEquipmentOptions">
+                </select-box>
+            </span>
+        </li>
+        <li class="info" *ngIf="acquisitionEquipment && !acqEqCompatible(acquisitionEquipment)">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
+            <strong>selected : {{acquisitionEquipment.serialNumber}}</strong>
+            <br/>Your archive contains this data : 
+            <code>
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturer}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber}}
             </code>
             <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
         </li>
@@ -82,50 +132,57 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
-                </select>
-                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !acquisitionEquipment" (click)="openCreateSubject()">add</button>
+                <select-box 
+                        [disabled]="!study || !acquisitionEquipment" 
+                        [(ngModel)]="subject" 
+                        (userChange)="onSelectSubject(); onContextChange();" 
+                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
+                        [optionArr]="subjects">
+                </select-box>
             </span>
         </li>
-        <li *ngIf="subject !== null && subject !== undefined">
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="label-col">Common name</th>
-                            <th class="input-col">Subject identifier for this study</th>
-                            <th class="chkbx-col" title="Physically Involved">PI</th>
-                            <th class="dropdown-col">Subject Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="label-col">
-                                {{subject.name}}
-                            </td>
-                            <td class="input-col">
-                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                    [ngModelOptions]="{standalone: true}"/>
-                            </td>
-                            <td class="chkbx-col">
-                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                    [ngModelOptions]="{standalone: true}"/>
-                            </td>
-                            <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                    [ngModelOptions]="{standalone: true}">
-                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <li *ngIf="importMode != 'BRUKER'" class="required">
+            <label class="required-label">Subject Type</label>
+            <span class="right-col">
+                <select-box 
+                    *ngIf="subject && subject.subjectStudy"
+                    [(ngModel)]="subject.subjectStudy.subjectType"
+                    [ngModelOptions]="{standalone: true}" 
+                    [options]="subjectTypes">
+                </select-box>
+                <select-box 
+                    *ngIf="!subject || !subject.subjectStudy"
+                    [disabled]="true">
+                </select-box>
+            </span>
         </li>
+    </ol>
+    <ol class="subject-study">
+        <legend 
+                class="clickable"
+                [class.disabled]="!subject || !subject.subjectStudy"
+                (click)="subject && subject.subjectStudy ? openSubjectStudy = !openSubjectStudy : null">
+            <i class="fas fa-chevron-down"></i>Subject data relative to this study <span class="optional">(optional)</span></legend>
+        <div *ngIf="subject && subject.subjectStudy && openSubjectStudy" @slideDown>
+            <li>
+                <label>Common name</label>
+                <span class="right-col">{{subject.name}}</span>
+            </li>
+            <li>
+                <label>Subject identifier for this study</label>
+                <span class="right-col">
+                    <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                    [ngModelOptions]="{standalone: true}"/>
+                </span>
+            </li>
+            <li>
+                <label>Physically involved</label>
+                <span class="right-col">
+                    <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+                </span>
+            </li>
+        </div>
     </ol>
 
     <ol>
@@ -133,28 +190,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             Examination
             <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
         </legend>
-        <li class="required">
+        <li>
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!study || !subject" [(ngModel)]="examination" (ngModelChange)="onSelectExam($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
-                </select>
-                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!study || !subject" (click)="openCreateExam()">add</button>
+                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (userChange)="onSelectExam(); onContextChange();"
+                        (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
+                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
+                </select-box>  
             </span>
         </li>
     </ol>
 
     <ol>
         <legend>Nifti Converter</legend>
-        <li class="required">
-            <label label class="required-label">Select a Nifti converter</label> 
+        <li>
+            <label label [class.required-label]="!useStudyCard">Select a Nifti converter</label> 
             <span class="right-col">
-                <select [disabled]="!examination" [(ngModel)]="niftiConverter" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let niftiConverter of niftiConverters" [ngValue]="niftiConverter">{{niftiConverter?.name}}</option>
-                </select>
-                <!-- TODO when nifti converters page is done -->
-                <button i18n="Import|NiftiConverterDetails label" [disabled]="true">details</button>
+                <select-box *ngIf="!useStudyCard || niftiConverter"
+                        [(ngModel)]="niftiConverter" 
+                        (userChange)="onSelectNifti(); onContextChange();" 
+                        [optionArr]="niftiConverters"
+                        [readOnly]="useStudyCard">
+                </select-box>
             </span>
         </li>
     </ol>

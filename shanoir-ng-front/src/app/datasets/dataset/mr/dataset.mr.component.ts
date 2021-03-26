@@ -12,22 +12,32 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
-
+import { Component, Input, OnInit } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { Dataset } from '../../shared/dataset.model';
-
+import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
+import { Option } from '../../../shared/select/select.component';
 
 @Component({
     selector: 'mr-dataset-details',
     templateUrl: 'dataset.mr.component.html'
 })
 
-export class MrDatasetComponent {
+export class MrDatasetComponent implements OnInit{
 
-    @Input() private mode: Mode;
-    @Input() private dataset: Dataset;
+    @Input() mode: Mode;
+    @Input() dataset: MrDataset;
+    // allMrDatasetNatures: any[];
+    public natureOptions: Option<MrDatasetNature>[];
     
-    constructor() {}
+    constructor() {
+        this.natureOptions = MrDatasetNature.options;
+    }
+    
+    ngOnInit() {
+        if (!this.dataset.updatedMrMetadata) this.dataset.updatedMrMetadata = new MrDatasetMetadata();
+    }
 
+    get natureLabel(): string {
+        return this.dataset.updatedMrMetadata ? MrDatasetNature.getLabel(this.dataset.updatedMrMetadata.mrDatasetNature) : null;
+    }
 }

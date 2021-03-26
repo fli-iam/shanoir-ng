@@ -11,14 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 
 @Component({
     selector: 'study-list',
@@ -28,12 +30,16 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
-            private studyService: StudyService) {
-        
+        private studyService: StudyService) {
+            
         super('study');
+    }
+    
+    getService(): EntityService<Study> {
+        return this.studyService;
     }
 
     getEntities(): Promise<Study[]> {
@@ -41,27 +47,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getColumnDefs(): any[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
             {
-                headerName: "Start date", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.startDate);
+                headerName: "Start date", field: "startDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.startDate);
                 }
             },
             {
-                headerName: "End date", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.endDate);
+                headerName: "End date", field: "endDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.endDate);
                 }
             },
             {
@@ -76,5 +76,25 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    getOptions() {
+        return {
+            new: this.keycloakService.isUserAdminOrExpert(),
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canEdit(study: Study): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            study.studyUserList && 
+            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
+        );
+    }
+
+    canDelete(study: Study): boolean {
+        return this.canEdit(study);
     }
 }

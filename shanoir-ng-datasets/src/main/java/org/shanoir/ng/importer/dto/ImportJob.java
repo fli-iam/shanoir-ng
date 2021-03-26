@@ -14,53 +14,72 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
  * @author atouboul
  *
  */
-public class ImportJob {
+public class ImportJob implements Serializable {
 
-    @JsonProperty("subjects")
-    private List<Subject> subjects;
+	public static final String RANK_PROPERTY = "rank";
+	
+	public static final String INDEX_PROPERTY = "index";
+	
+	private static final long serialVersionUID = 8804929608059674037L;
 
-    @JsonProperty("fromDicomZip")
-    private boolean fromDicomZip;
+	private boolean fromDicomZip;
 
-    @JsonProperty("fromShanoirUploader")
-    private boolean fromShanoirUploader;
+	private boolean fromShanoirUploader;
 
-    @JsonProperty("fromPacs")
-    private boolean fromPacs;
+	private boolean fromPacs;
 
-    @JsonProperty("patients")
-    private List<Patient> patients;
-    
-    @JsonProperty("examinationId")
-    private Long examinationId;
-    
-    @JsonProperty("frontStudyId")
-    private Long frontStudyId;
+	private String workFolder;
 
-    @JsonProperty("frontAcquisitionEquipmentId")
-    private Long frontAcquisitionEquipmentId;
-    
-	public List<Subject> getSubjects() {
-		return subjects;
+	private List<Patient> patients;
+
+	private Long examinationId;
+
+	private Long studyCardId;
+
+	private Long studyId;
+
+	private String studyCardName;
+
+	private Long acquisitionEquipmentId;
+
+	private String anonymisationProfileToUse;
+
+	private Long converterId;
+
+	private String archive;
+
+	private String subjectName;
+
+	private String studyName;
+
+	private ShanoirEvent shanoirEvent;
+
+	private Map<String, String> properties = new HashMap();
+
+	public String getArchive() {
+		return archive;
 	}
 
-	public void setSubjects(List<Subject> subjects) {
-		this.subjects = subjects;
+	public void setArchive(final String archive) {
+		this.archive = archive;
 	}
 
 	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
-	public void setFromDicomZip(boolean fromDicomZip) {
+	public void setFromDicomZip(final boolean fromDicomZip) {
 		this.fromDicomZip = fromDicomZip;
 	}
 
@@ -68,7 +87,7 @@ public class ImportJob {
 		return fromShanoirUploader;
 	}
 
-	public void setFromShanoirUploader(boolean fromShanoirUploader) {
+	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
 		this.fromShanoirUploader = fromShanoirUploader;
 	}
 
@@ -76,15 +95,16 @@ public class ImportJob {
 		return fromPacs;
 	}
 
-	public void setFromPacs(boolean fromPacs) {
+	public void setFromPacs(final boolean fromPacs) {
 		this.fromPacs = fromPacs;
+
 	}
 
 	public List<Patient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(List<Patient> patients) {
+	public void setPatients(final List<Patient> patients) {
 		this.patients = patients;
 	}
 
@@ -92,23 +112,96 @@ public class ImportJob {
 		return examinationId;
 	}
 
-	public void setExaminationId(Long examinationId) {
+	public void setExaminationId(final Long examinationId) {
 		this.examinationId = examinationId;
 	}
 
-	public Long getFrontStudyId() {
-		return frontStudyId;
+	public String getWorkFolder() {
+		return workFolder;
 	}
 
-	public void setFrontStudyId(Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
+	public void setWorkFolder(String workFolder) {
+		this.workFolder = workFolder;
 	}
 
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
+	public Long getStudyCardId() {
+		return studyCardId;
 	}
 
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	public void setStudyCardId(Long studyCardId) {
+		this.studyCardId = studyCardId;
 	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(final Long StudyId) {
+		this.studyId = StudyId;
+	}
+
+	public String getStudyCardName() {
+		return studyCardName;
+	}
+
+	public void setStudyCardName(String studyCardName) {
+		this.studyCardName = studyCardName;
+	}
+
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
+	}
+
+	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
+	}
+
+	public Long getConverterId() {
+		return converterId;
+	}
+
+	public void setConverterId(Long ConverterId) {
+		this.converterId = ConverterId;
+	}
+
+	public String getAnonymisationProfileToUse() {
+		return anonymisationProfileToUse;
+	}
+
+	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+		this.anonymisationProfileToUse = anonymisationProfileToUse;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+
+	public ShanoirEvent getShanoirEvent() {
+		return shanoirEvent;
+	}
+
+	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+		this.shanoirEvent = shanoirEvent;
+	}
+
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+
 }

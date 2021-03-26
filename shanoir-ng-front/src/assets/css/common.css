@@ -13,11 +13,12 @@
     --color-overlay: rgba(70, 70, 70, 0.8); 
 
     --color-a: #5f0f4e;
+    --color-a-light: #6C1C5B;
     --color-b: #675682;
     --color-b-light: #E3E0E8;
     --color-b-light2: #827498;
-    --color-c: #498467;
-    --color-c-light: #6A9A82;
+    --color-c: darkgreen;
+    --color-c-light: #67977f;
     --color-error: #BA2D0B;
     --color-important: #BA2D0B;
     --color-light-error: #F2D8D2 ;
@@ -28,18 +29,32 @@
 
 body { margin: 0; background-color: var(--very-light-grey); }
   body.outsilde { background-color: var(--color-a); }
-body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
+body, option, table, button, select, input, textarea { font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
 h2 { margin: 0; font-size: 25px; }
-hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
-input { padding: 1px 5px; }
+hr { margin: 7px 0 !important; border-bottom: 1px solid var(--color-b-light) !important; border: 0; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
 li { list-style: none; } 
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
-svg { vertical-align: -1; }
+a:link, a:visited { color: inherit; text-decoration: none; }
+a:hover, a:active { color: var(--color-a); text-decoration: none; }
+a:hover { cursor: pointer; }
+
+
+@-webkit-keyframes autofill {
+  to {
+      color: var(--dark-grey);
+      background: transparent;
+  }
+}
+
+input:-webkit-autofill {
+  -webkit-animation-name: autofill;
+  -webkit-animation-fill-mode: both;
+}
 
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
@@ -49,102 +64,113 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
   button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
-  button svg { vertical-align: inherit; }
+button + button { margin-left: 5px; }
 
 input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 h2 + shanoir-table { margin-top: 20px; }
 
-form { color: var(--dark-grey); }
-  form input:not([type='file']),
-  form textarea,
-  form select,
-  form datepicker { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
+input, select, select-box, datepicker { 
+  border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
+}
+input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
+  outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
+}
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+select-box.ng-invalid.ng-touched,
+datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); padding-bottom: 0; }
+
+textarea { outline: none !important; border: 1px solid var(--grey); border-radius: 2px; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;}
+textarea:focus { border: 2px inset var(--color-a) !important; padding: 1px; }
+textarea.ng-invalid.ng-touched { border: 2px solid var(--color-error); padding: 1px; }
+
+form { color: var(--dark-grey); position: relative; }
   form input[readonly],
   form textarea[readonly],
-  form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
-    form input.ng-invalid.ng-touched,
-    form textarea.ng-invalid.ng-touched,
-    form select.ng-invalid.ng-touched,
-    form datepicker.ng-invalid.ng-touched { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
+  form select[readonly] { cursor: default; border: none !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
-  form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
+  form input[type='radio'] { vertical-align: top; height: 14px; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
-  form button { margin: 10px 0; }
-  form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 220px; }
-  form fieldset { border: 0; padding: 0; margin: 20px 15px; display: inline-block; vertical-align: top; min-width: 504px; }
+  form button { margin-top: 10px; margin-bottom: 10px; }
+  form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
+  form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
+  form fieldset.disabled { color: var(--grey); }
+  form fieldset ~ fieldset { margin-right: 20px; } 
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
     form fieldset fieldset label { margin-left: 183px; }
-  form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; border-bottom: 1px solid var(--color-b-light); }
-  form li > label { display: inline-block; vertical-align: sub; width: 250px; }
+  form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; }
+  form li > label { display: inline-block; width: 250px; vertical-align: top; }
   form fieldset ol { margin: 0; padding: 0; }
-  form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 21px; }
+  form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
     form fieldset li input,
     form fieldset li select,
     form fieldset li button { height: 21px; }
     form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 473px; border-radius: 2px; }
-      form li.info svg { margin-right: 6px; vertical-align: -3; color: var(--color-b); font-size: 16px; }
+      form li.info i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
-  form .header, form .footer { padding: 6px 15px; }
-  form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
+  form .header, form .footer { }
+  form .header { padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
-  form .right-col { display: inline-block; vertical-align: top; min-width: 250px; line-height: 20px; }
+  form .right-col { display: inline-block; min-width: 250px; line-height: 20px; vertical-align: top; }
   form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button:hover { background-color: inherit; color: inherit; }
     form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
+    form .right-col button i { color: var(--color-a); }
+
+  form.disabled::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: var(--very-light-grey); opacity: 0.5; }
 
   /* Date picker style overriding */
-  form my-date-picker input.selection { border: none !important; height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; }
-  form my-date-picker .selectiongroup { background-color: transparent !important; }
-  form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
-  form my-date-picker input.selection { text-align: left !important; padding: 0 5px !important; }
-  form my-date-picker button.btnpicker,
-  form my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
+  my-date-picker input.selection { height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; border-radius: 0 !important; }
+  my-date-picker .selectiongroup { background-color: transparent !important; }
+  my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
+  my-date-picker input.selection { text-align: left !important; padding: 0 !important; }
+  my-date-picker button.btnpicker,
+  my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
   /* form my-date-picker button.btnpicker:hover,
   form my-date-picker button.btnclear:hover { color: var(--color-a) !important; background-color: transparent !important; } */
-    form my-date-picker button.btnpicker span,
-    form my-date-picker button.btnclear span { font-size: 12px !important; }
-  form my-date-picker .icon-calendar { line-height: 17px !important; }
-  form my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
-  form my-date-picker .mydp .caltable,
-  form my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
-  form my-date-picker .mydp .daycell { height: 23px !important; }
-  form my-date-picker .mydp .selector { width: auto !important; position: absolute; }
-  form my-date-picker .mydp td + td { border-left: none; }
-  form my-date-picker .mydp .daycell,
-  form my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
-  form my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
-  form my-date-picker .mydp .icon-left,
-  form my-date-picker .mydp .icon-right { font-size: 12px !important; }
-  form my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
-  form my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
-  form my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
-  form my-date-picker .mydp .caltable, 
-  form my-date-picker .mydp .daycell, 
-  form my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
-  form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
+    my-date-picker button.btnpicker span,
+    my-date-picker button.btnclear span { font-size: 12px !important; }
+  my-date-picker .icon-calendar { line-height: 17px !important; }
+  my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
+  my-date-picker .mydp .caltable,
+  my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
+  my-date-picker .mydp .daycell { height: 23px !important; }
+  my-date-picker .mydp .selector { width: auto !important; position: absolute; }
+  my-date-picker .mydp td + td { border-left: none; }
+  my-date-picker .mydp .daycell,
+  my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
+  my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
+  my-date-picker .mydp .icon-left,
+  my-date-picker .mydp .icon-right { font-size: 12px !important; }
+  my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
+  my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
+  my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
+  my-date-picker .mydp .caltable, 
+  my-date-picker .mydp .daycell, 
+  my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
+  my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
-.left-icon svg { margin-right: 7px; vertical-align: -2; }
-.right-icon svg { margin-left: 7px; vertical-align: -2; }
+.left-icon i { margin-right: 7px; }
+.right-icon i { margin-left: 7px; }
 
 .content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
-.main-content { padding: 0 20px 10px 20px; position: relative; }
 .max-content { display: inline-block; }
+.main-offline { padding: 10px 20px; }
 
 .error-message label { color: var(--color-error); }
 .error-message li { color: var(--color-error); }
 
-.bool-true { color: green; font-weight: bold }
-.bool-false { color: darkred; font-weight: bold }
+.bool-true { color: var(--color-c); font-size: 14px; }
+.bool-false { color: var(--color-error); font-size: 14px; }
 
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
@@ -155,10 +181,10 @@ form { color: var(--dark-grey); }
 .detail .left { float: left; }
 .detail .right { float: right; -webkit-margin-start: 2px; }
 
-.svg-inline--fa { vertical-align: baseline; }
-
-.loading-msg { text-align: center; margin: 0; }
-.cat { text-align: center; width: 100%; }
+.loading { display: table; width: 100%; height: 100%;}
+.loading-middle { display: table-cell; width: 100%; height: 100%; vertical-align: middle; text-align: center; }
+.loading-msg { margin: 0; margin-bottom: 170px; }
+.cat { width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 
-.mat-dialog-container { background: var(--color-overlay); position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: none !important; }
+node node { margin-left: 18px; }

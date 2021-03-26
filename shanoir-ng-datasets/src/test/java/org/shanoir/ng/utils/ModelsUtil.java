@@ -14,15 +14,21 @@
 
 package org.shanoir.ng.utils;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 
-import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
-import org.shanoir.ng.dataset.DatasetMetadata;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.examination.Examination;
-import org.shanoir.ng.studycard.StudyCard;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.studycard.model.StudyCard;
 
 /**
  * Utility class for test. Generates models.
@@ -54,6 +60,9 @@ public final class ModelsUtil {
 	public CtDataset createCtDataset() {
 		final CtDataset dataset = new CtDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		DatasetAcquisition dsa = new CtDatasetAcquisition();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 
@@ -64,8 +73,10 @@ public final class ModelsUtil {
 	 */
 	public static MrDataset createMrDataset() {
 		final MrDataset dataset = new MrDataset();
-		dataset.setStudyId(EXAMINATION_STUDY_ID);
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		DatasetAcquisition dsa = createDatasetAcq();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 
@@ -77,6 +88,9 @@ public final class ModelsUtil {
 	public static PetDataset createPetDataset() {
 		final PetDataset dataset = new PetDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		DatasetAcquisition dsa = new PetDatasetAcquisition();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 
@@ -89,13 +103,32 @@ public final class ModelsUtil {
 		final Examination examination = new Examination();
 		examination.setCenterId(EXAMINATION_CENTER_ID);
 		examination.setComment(EXAMINATION_COMMENT);
-		examination.setExaminationDate(LocalDate.now());
+		//examination.setExaminationDate(LocalDate.now());
 		examination.setInvestigatorExternal(false);
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
 		examination.setPreclinical(false);
 		return examination;
+	}
+	
+	/**
+	 * Create an examination.
+	 * 
+	 * @return examination.
+	 */
+	public static DatasetAcquisition createDatasetAcq() {
+		final DatasetAcquisition dsAcq = new MrDatasetAcquisition();
+		dsAcq.setAcquisitionEquipmentId(1L);
+		dsAcq.setDatasets(new ArrayList<Dataset>());
+		dsAcq.setExamination(createExamination());
+		dsAcq.getExamination().setId(1L);
+		dsAcq.setRank(1);
+		dsAcq.setSoftwareRelease("v1.0");
+		dsAcq.setSortingIndex(1);
+		dsAcq.setStudyCard(createStudyCard());
+		dsAcq.getStudyCard().setId(1L);
+		return dsAcq;
 	}
 
 	/**
@@ -105,8 +138,9 @@ public final class ModelsUtil {
 	 */
 	public static StudyCard createStudyCard() {
 		final StudyCard studyCard = new StudyCard();
-		studyCard.setName(STUDY_CARD_NAME);
+		studyCard.setName(STUDY_CARD_NAME + "_" + RandomStringUtils.randomAlphanumeric(5));
 		studyCard.setDisabled(STUDY_CARD_DISABLED);
+		studyCard.setStudyId(1L);
 		return studyCard;
 	}
 	

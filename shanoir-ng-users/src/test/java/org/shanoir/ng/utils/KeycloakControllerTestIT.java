@@ -14,8 +14,14 @@
 
 package org.shanoir.ng.utils;
 
+import java.security.GeneralSecurityException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
+import org.shanoir.ng.utils.tests.TestTrustManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -50,13 +56,13 @@ public abstract class KeycloakControllerTestIT {
 	 * 
 	 * @return headers.
 	 */
-	protected HttpHeaders getHeadersWithToken(final boolean admin) {
+	protected HttpHeaders getHeadersWithToken(final boolean admin) throws GeneralSecurityException {
 		if (admin) {
 			login = "admin";
 		} else {
 			login = "guest";
 		}
-		password = "&a1A&a1A";
+		password = "11&&AAaa";
 		final AccessTokenResponse tokenResponse = getToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -66,16 +72,17 @@ public abstract class KeycloakControllerTestIT {
 
 	/*
 	 * Obtain a token on behalf of shanoir-ng-users. Send credentials through
-	 * direct access api:
-	 * http://docs.jboss.org/keycloak/docs/1.2.0.CR1/userguide/html/direct-
-	 * access-grants.html Make sure the realm has the Direct Grant API switch ON
+	 * direct access api. Make sure the realm has the Direct Grant API switch ON
 	 * (it can be found on Settings/Login page!)
 	 * 
-	 * @return response with Keycloak token.
+	 * @return response with Keycloak token.q
 	 */
-	private AccessTokenResponse getToken() {
-		Keycloak keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRealm, login, password,
-				keycloakResource, keycloakCredentialsSecret);
+	private AccessTokenResponse getToken() throws GeneralSecurityException { 
+		// Install the all-trusting trust manager
+		SSLContext sslContext = SSLContext.getInstance("SSL");
+		sslContext.init(null, new TrustManager[] { new TestTrustManager() }, new java.security.SecureRandom());
+		
+		Keycloak keycloak = Keycloak.getInstance (keycloakAuthServerUrl, keycloakRealm, login, password, keycloakResource, keycloakCredentialsSecret, sslContext);
 		return keycloak.tokenManager().getAccessToken();
 	}
 

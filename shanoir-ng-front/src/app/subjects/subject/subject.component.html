@@ -12,8 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component detail" [@preventInitialChildAnimations]>
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -30,114 +30,121 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
 					<li>
-						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
+						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{subject.imagedObjectCategory}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()">
-									<option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat"
-										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Human cadaver</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
-											<ng-template ngSwitchDefault>{{cat}}</ng-template>
-									</option>
-								</select>
+								<select-box formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" [options]="catOptions">
+								</select-box>
 								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
 					</li>
 				</ol>
-				<ol *ngIf="humanSelected()" [@slideDown]="humanSelected()">
-					<li *ngIf="mode == 'create' && humanSelected()">
-						<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
-						<span class="right-col">
-							<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="true" [checked]="isAlreadyAnonymized == true"
-							/>Yes
-							<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
-							/>No
-						</span>
+				<ol>
+					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
+						<li *ngIf="mode == 'create' && humanSelected()">
+							<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
+							<span class="right-col">
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="true" [checked]="isAlreadyAnonymized == true"
+								/>Yes
+								<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" (ngModelChange)="toggleAnonymised()" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "
+								/>No
+							</span>
+						</li>
+						<li class="info" *ngIf="!isAlreadyAnonymized && mode == 'create'" [@slideDown]="!isAlreadyAnonymized && mode == 'create'">
+							<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
+							This can help you to identify a subject that has already been inserted into the database.
+							<br/>To ensure anonymity, the first name and the last name will not be saved.
+							<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
+						</li>
+						<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
+							<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First Name</label>
+							<span class="right-col">
+								<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
+								<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
+								<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+							</span>
+						</li>
+						<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
+							<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last Name</label>
+							<span class="right-col">
+								<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
+								<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
+								<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+							</span>
+						</li>
+					</div>
+                    <li>
+                        <label i18n="Subject detail|Name label@@subjectDetailName">Common name</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                {{subject.name}}
+                            </ng-template>
+                            <ng-template [ngSwitchCase]="'edit'">
+                                {{subject.name}}
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="text" id="name" formControlName="name" [(ngModel)]="subject.name"/>
+                                <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
+                                <label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
+                                <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
+                            </ng-template>
+                        </span>
 					</li>
-					<li class="info" *ngIf="!isAlreadyAnonymized && mode == 'create'" [@slideDown]="!isAlreadyAnonymized && mode == 'create'">
-						<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
-						This can help you to identify a subject that has already been inserted into the database.
-						<br/>To ensure anonymity, the first name and the last name will not be saved.
-						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
-					</li>
-					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First Name</label>
-						<span class="right-col">
-							<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
-							<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
-							<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
-						</span>
-					</li>
-					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last Name</label>
-						<span class="right-col">
-							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
-							<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
-							<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
-						</span>
-					</li>
-					<li *ngIf="mode == 'create'">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
-						<span [ngSwitch]="mode" class="right-col">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.birthDate | date: 'dd/MM/yyyy'}}
-							</ng-template>
-							<ng-template [ngSwitchCase]="'create'">
-								<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
-								<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-								<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.sex}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select id="sex" formControlName="sex" [(ngModel)]="subject.sex">
-									<option [value]="'F'">Female</option>
-									<option [value]="'M'">Male</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.manualHemisphericDominance}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select id="manualHemisphericDominance" formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<option [value]="'Left'">Left</option>
-									<option [value]="'Right'">Right</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.languageHemisphericDominance}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select id="languageHemisphericDominance" formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<option [value]="'Left'">Left</option>
-									<option [value]="'Right'">Right</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
+					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
+						<li *ngIf="mode == 'create' || mode == 'view'">
+							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
+							<span [ngSwitch]="mode" class="right-col">
+								<ng-template [ngSwitchCase]="'view'">
+									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="'create'">
+									<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
+									<label *ngIf="hasError('birthDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+									<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									{{subject.sex}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select-box formControlName="sex" [(ngModel)]="subject.sex" [options]="genderOptions">
+									</select-box>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									{{subject.manualHemisphericDominance}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select-box formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance" [optionArr]="['Left', 'Right']">
+									</select-box>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									{{subject.languageHemisphericDominance}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select-box formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance" [optionArr]="['Left','Right']">
+									</select-box>
+								</ng-template>
+							</span>
+						</li>
+					</div>
 				</ol>
 				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
 					<li *ngIf="mode == 'create'">
@@ -148,49 +155,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ol>
-				<ol>
-					<li>
-						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name"/>
-								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
-								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
-								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-								<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
-									This subject already exists and his common name is {{existingSubjectError}}
-								</label>
-							</ng-template>
-						</span>
-					</li>
-					<!-- <li>
-						<label i18n="Subject detail|Personal Comments label@@subjectDetailPersonalComments">Personal Comments</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-									{{}} 
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="personalComments"  formControlName="personalComments" [(ngModel)]=""  />
-							</ng-template>
-						</span>
-					</li> -->
-				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view'">
+			<fieldset *ngIf="mode !== 'view' && !forceStudy">
 				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
-			<fieldset *ngIf="mode=='view'">
-				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
-				<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
+			<fieldset *ngIf="mode !== 'view' && forceStudy">
+				<ol>
+					<li>
+						<label>Study</label>
+						<span class="right-col">{{forceStudy.name}}</span>
+					</li>
+				</ol>
 			</fieldset>
-			
+			<fieldset *ngIf="mode=='view'">
+				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
+				<reverse-subject-node [input]="breadcrumbsService.currentStep.data.subjectNode ? breadcrumbsService.currentStep.data.subjectNode : subject" 
+						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
+			</fieldset>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
+                (delete) = "delete()"
 				(edit)="goToEdit()"
+				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 		</div>

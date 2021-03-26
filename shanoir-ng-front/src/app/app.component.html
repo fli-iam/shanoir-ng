@@ -12,10 +12,29 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<header></header>
+<!-- <header></header>
 <navbar *ngIf="isAuthenticated()"></navbar>
 <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
 <div class="main-content">
     <router-outlet></router-outlet>
-</div>
+</div> -->
+
+<ng-container *ngIf="isAuthenticated()">
+    <side-menu *ngIf="isAuthenticated() && menuOpen" [@slideRight]="menuOpen"></side-menu>
+    <div class="main-content" [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
+        <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
+        <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
+        <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
+        <router-outlet></router-outlet>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="!isAuthenticated()">
+    <header></header>
+    <div class="main-offline">
+        <router-outlet></router-outlet>
+    </div>
+</ng-container>
+
 <msg-box></msg-box>
+<loader></loader>

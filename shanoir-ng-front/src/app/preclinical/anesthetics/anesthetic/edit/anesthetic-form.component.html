@@ -1,0 +1,108 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="AnestheticFormComponent content-component">
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+						<div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'"> 
+						<div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'"> 
+						<div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="!isAnestheticUnique" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
+						<li class="required">
+							<label i18n="Edit anesthetic|Name label" >Name</label> 
+							<!-- <input type="text" id="name" formControlName="name" [(ngModel)]="anesthetic.name"/> -->
+							<label class="label_light" *ngIf="anesthetic.name == undefined || anesthetic.name == ''">Name is automatically generated</label>
+							<label id="name" *ngIf="anesthetic.name">{{anesthetic.name}}</label> 
+						</li>
+						<li class="required">
+							<label i18n="Edit anesthetic|AnestheticType label">Type</label> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+									{{AnestheticType.getLabel(anesthetic.anestheticType)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+                                    <select-box formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (userChange)="onChangeType()" [options]="AnestheticType.options">
+                                    </select-box>
+									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit anesthetic|Comment label">Comment</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{anesthetic?.comment}}
+								</ng-template>
+								<ng-template ngSwitchDefault>							
+									<textarea rows="4"  id="comment" formControlName="comment" [(ngModel)]="anesthetic.comment"></textarea>
+								</ng-template>							
+							</span>
+						</li>
+						<li>
+							<legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">Ingredients</legend>
+							
+							<div [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'edit'">
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
+										<i class="fas fa-plus-square"></i>
+										new ingredient
+									</button>
+								</ng-template>
+								<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
+										<i class="fas fa-plus-square"></i>
+										new ingredient
+									</button>
+								</ng-template>
+							</div>
+							<div>
+								<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"  
+											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+							</div>
+							<shanoir-table #ingredientsTable
+								[getPage]="getPage.bind(this)" 
+								[columnDefs]="columnDefs">
+							</shanoir-table>
+							
+						</li>
+					</ol>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+	   	<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+                (delete) = "delete()"
+				(cancel)="goToView()"
+				(back)="goBack()">
+		</form-footer>
+	</form>
+    
+</div>

@@ -1,0 +1,41 @@
+:host() {
+    position: relative;
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    border-radius: 2px;
+    border: 1px solid var(--grey);
+    font-size: 15px;
+}
+
+:host().disabled {
+    opacity: 0.5;
+}
+
+:host():focus {
+    outline: none;
+}
+
+:host():focus::after {
+    content: "";
+    position: absolute;
+    top: -2px; right: -2px; bottom: -2px; left: -2px;
+    border: 2px solid var(--color-a);
+    border-radius: 3px;
+}
+
+div {
+    color: var(--color-c);
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    text-align: center;
+    padding: 1px;
+}
+
+div i {
+    vertical-align: super;
+    text-align: center;
+}

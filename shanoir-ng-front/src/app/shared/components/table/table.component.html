@@ -15,16 +15,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
-        <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
-        <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
+        <!-- <button (click)="selectAll()" title="select all"> -->
+            <!-- <img [src]="checkAllImageUrl"/> -->
+        <!-- </button> -->
+        <button (click)="unSelectAll()" title="unselect all">
+            <!-- <img [src]="uncheckAllImageUrl"/> -->
+        </button>
+        <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
     <!-- Text search -->
     <span *ngIf="browserSearch" class="text-search">
-        <shanoir-table-search [columnDefs]="columnDefs" (onChange)="onSearchChange($event)"></shanoir-table-search>
+        <shanoir-table-search #search [columnDefs]="columnDefs" [(filter)]="filter" (filterChange)="onSearchChange($event)"></shanoir-table-search>
     </span>
     <!-- User defined buttons -->
     <span *ngFor="let command of customActionDefs">
-        <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
+        <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>
@@ -46,68 +51,70 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         class="{{getColTypeStr(col)}}"
         [class.sortable]="!col.suppressSorting && col.type!='button'"
         [class.active]="lastSortedCol==col"
-        [attr.title]="col.tip != undefined ? col.tip : null"
+        [attr.title]="col.tip != undefined ? col.tip : col.headerName"
         [style.width]="col.width"
-        >{{col.headerName}}
-            <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
-                <span *ngIf="lastSortedCol==col && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
-                <span *ngIf="lastSortedCol==col && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
+        >
+            <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="$any(lastSortedCol)?.field==$any(col).field && !col.suppressSorting && col.type!='button'">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
+                    <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
+                </svg>
             </span>
+            <span class="col-title">{{col.headerName}}</span>
     </th>
 </tr>
 </thead>
 <!-- Table content -->
-<tbody>
+<tbody *ngIf="items?.length > 0">
 <tr
     *ngFor="let item of items; let i = index" 
     [class.odd]="i%2!=0" 
-    [class.even]="i%2==0">
-    <td *ngIf="selectionAllowed" class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
+    [class.even]="i%2==0"
+    [class.disabled]="rowDisabled(item)"
+    [class.edit]="editMode">
+    <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <td 
         *ngFor="let col of columnDefs" 
-        class="cell cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
+        class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
         [class.bool]="isFieldBoolean(col)"
         [attr.title]="col.tip != undefined ? col.tip : null"
         (click)="col.type == 'button' ? null : onRowClick(item)"
         >
         
         <!-- default display -->
-        <span *ngIf="!editMode || !col.editable">{{renderCell(item, col)}}</span>
+        <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col)">{{renderCell(item, col)}}</span>
+
+        <!-- link -->
+        <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
+            [routerLink]="col.route(item)" routerLinkActive="active">{{renderCell(item, col)}}<i class="fas fa-external-link-alt"></i></a>
 
         <!-- editable text / number -->
-        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
-            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" />
+        <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
         </span>
 
         <!-- editable text / number with dropdown -->
-        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);">
+        <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                 <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
             </select>
         </span>
 
         <!-- display a boolean -->
-        <span *ngIf="isFieldBoolean(col) && (!editMode || !col.editable)">
-            <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
-            <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
+        <span *ngIf="isFieldBoolean(col) && (!editMode || !cellEditable(item, col))">
+            <span *ngIf="getCellValue(item, col)" class="bool-true"><i class="fas fa-check"></i></span>
+            <span *ngIf="!getCellValue(item, col)" class="bool-false"><i class="fas fa-times"></i></span>
         </span>
 
         <!-- editable boolean -->
-        <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
-            <input type="checkbox" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" /> 
+        <span *ngIf="isFieldBoolean(col) && editMode && cellEditable(item, col)">
+            <checkbox [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
         </span>
-
-        <!-- add a link -->
-        <a class="link"
-            *ngIf="col.type == 'link'"
-            (click)="col.action(item)">
-            <i class="fas fa-external-link-alt"></i>
-        </a>
         
         <!-- display a button -->
-        <span class="button" *ngIf="col.type == 'button'">
-            <span *ngIf="col.action" (click)="col.action(item)">
+        <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
+            <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
             </span>
@@ -128,22 +135,44 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
         <!-- Nb results per page input -->
         <span class="options">
-            <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
-            <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
-            <span *ngIf="page">Total : {{page?.totalElements}}</span>
-            <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-            <span class="loader" *ngIf="isLoading">Loading
-                <img [src]="loaderImageUrl" />
-            </span>
+            <ng-container>
+                <span class="clickable bottom-refresh" (click)="refresh()">
+                    <span *ngIf="!isLoading">
+                        <i class="fas fa-sync-alt"></i>
+                    </span>
+                    <span *ngIf="isLoading">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                    </span>
+                </span>
+                <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
+                <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
+                <span *ngIf="page">Total : {{page?.totalElements}}</span>
+                <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+            </ng-container>
         </span>
     </th>
 </tr>
 </tbody>
 <!-- Empty table msg -->
-<tbody *ngIf="!isLoading && items?.length == 0">
+<tbody *ngIf="!items || items.length == 0">
 <tr>
-    <td [attr.colspan]="columnDefs?.length + 1" class="empty">
-        No results
+    <td *ngIf="!firstLoading" [attr.colspan]="columnDefs?.length + 1" class="empty">
+        <span *ngIf="!isError">No results</span>
+        <span *ngIf="isError" class="error">Error<i class="fas fa-exclamation-circle"></i></span>
+        <br/><span class="clickable refresh" (click)="!isLoading ? refresh() : null">
+            Refresh
+            <span *ngIf="!isLoading">
+                <i class="fas fa-sync-alt"></i>
+            </span>
+            <span *ngIf="isLoading">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </span>
+        </span>
+    </td>
+
+    <td  *ngIf="firstLoading && isLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
+        The data is loading
+        <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
     </td>
 </tr>
 </tbody>

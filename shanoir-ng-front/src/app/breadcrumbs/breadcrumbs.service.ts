@@ -14,11 +14,9 @@
 
 import { LocationStrategy } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-
-import { Entity } from '../shared/components/entity/entity.abstract';
 import { Title } from '@angular/platform-browser';
+import { Event, NavigationEnd, Router } from '@angular/router';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class BreadcrumbsService {
@@ -30,12 +28,13 @@ export class BreadcrumbsService {
     public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
+    private ignoreNavigationEnd: boolean = false;
 
     constructor(
             private router: Router, 
             private locationStrategy: LocationStrategy,
             private titleService: Title) {
-                
+        
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
             for (let i=this.steps.length-1; i>=0; i--) {
@@ -44,10 +43,15 @@ export class BreadcrumbsService {
                     break;
                 }
             }
+            // this.saveSession();
         });
 
         router.events.subscribe( (event: Event) => {
             if (event instanceof NavigationEnd) {
+                if(this.ignoreNavigationEnd) {
+                    this.ignoreNavigationEnd = false;
+                    return;
+                }
                 const timestamp: number = new Date().getTime();
                 if (this.replace) this.steps.pop();
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
@@ -66,9 +70,10 @@ export class BreadcrumbsService {
                 this.nextLabel = null;
                 this.popFoundedStepIndex = null;
                 this.currentStep.waitStep = null;
+                // this.saveSession();
             }
         });
-
+        // this.loadSession();
     }
 
     private focusStep(index: number) {
@@ -83,10 +88,20 @@ export class BreadcrumbsService {
 
     public nameStep(label: string) {
         this.nextLabel = label;
+        // this.saveSession();
     }
 
     public markMilestone() {
         this.nextMilestone = true;
+        // this.saveSession();
+    }
+
+    public resetMilestone() {
+        this.nextMilestone = false;
+    }
+
+    public currentStepAsMilestone() {
+        this.processMilestone();
     }
     
     private processMilestone() {
@@ -108,8 +123,10 @@ export class BreadcrumbsService {
         }
     }
 
-    public goBack() {
-        history.go(-1);
+    public goBack(nb?: number) {
+        if (nb == undefined) nb = 1;
+        else if (nb == null || nb <= 0) return;
+        history.go(-1 * nb);
     }
 
     public get currentStep(): Step {
@@ -133,6 +150,47 @@ export class BreadcrumbsService {
         return false;
     }
 
+    // public saveSession() {
+    //     let stepsJSON = [];
+    //     for(let step of this.steps) {
+    //         stepsJSON.push(step.save())
+    //     }
+
+    //     sessionStorage.setItem('breadcrumbsData', JSON.stringify({ 
+    //         steps: stepsJSON, 
+    //         popFoundedStepIndex: this.popFoundedStepIndex,
+    //         replace: this.replace,
+    //         currentStepIndex: this.currentStepIndex,
+    //         nextLabel: this.nextLabel,
+    //         nextMilestone: this.nextMilestone }));
+    // }
+
+    // public loadSession() {
+    //     let json = JSON.parse(sessionStorage.getItem('breadcrumbsData'));
+    //     if(json == null) {
+    //         return;
+    //     }
+    //     this.popFoundedStepIndex = json.popFoundedStepIndex;
+    //     this.replace = json.replace;
+    //     this.currentStepIndex = json.currentStepIndex;
+    //     this.nextLabel = json.nextLabel;
+    //     this.nextMilestone = json.nextMilestone;
+    //     this.steps = [];
+    //     for(let step of json.steps) {
+    //         this.steps.push(Step.load(step));
+    //     }
+
+    //     this.titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
+    //     this.ignoreNavigationEnd = true;
+    // }
+
+    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return this.steps[i].importMode;
+        }
+        return null;
+    }
+
 }
 
 export class Step {
@@ -143,46 +201,25 @@ export class Step {
             public timestamp: number) {
     }
 
-    // static parse(str: string): Step {
-    //     let json: Step = JSON.parse(str);
-    //     let step: Step = new Step(json.label, json.route, json.entity);
-    //     step.id = step.id;
-    //     step.subscribers = step.subscribers;
-    //     step.disabled = step.disabled;
-    //     step.displayWaitStatus = step.displayWaitStatus;
-    //     step.prefilled = step.prefilled;
-    //     return step;
-    // }
-
-    // stringify(): string {
-    //     console.log('stringify')
-    //     let ignoreList: string[] = ['onSaveSubject'];
-    //     let replacer = (key, value) => {
-    //         if (ignoreList.indexOf(key) > -1) return undefined;
-    //         else if (key == 'entity') return (value as Entity).stringify();
-    //         else return value;
-    //     }
-    //     return JSON.stringify(this, replacer);
-    // }
-
     public id = new Date().getTime();
     public subscribers: number = 0;
     public disabled: boolean = false;
     public displayWaitStatus: boolean = true;
     public prefilled: any[] = [];
     public waitStep: Step;
-    private onSaveSubject: Subject<Entity> = new Subject<Entity>();
+    private onSaveSubject: Subject<any> = new Subject<any>();
     public milestone: boolean = false;
-    public entity: Entity;
+    public entity: any;
     public data: any = {};
     public importStart: boolean = false;
+    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
 
-    private onSave(): Subject<Entity> {
+    private onSave(): Subject<any> {
         this.subscribers++;
         return this.onSaveSubject;
     }
 
-    public notifySave(entity: Entity) {
+    public notifySave(entity: any) {
         this.onSaveSubject.next(entity);
         this.subscribers = 0;
     }
@@ -195,7 +232,7 @@ export class Step {
         return this.waitStep && step.route == this.waitStep.route;
     }
 
-    public waitFor(step: Step, displayWaitStatus: boolean = true): Subject<Entity> {
+    public waitFor(step: Step, displayWaitStatus: boolean = true): Subject<any> {
         if (displayWaitStatus != undefined) this.displayWaitStatus = displayWaitStatus;
         this.waitStep = step;
         return step.onSave();

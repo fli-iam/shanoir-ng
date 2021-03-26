@@ -17,6 +17,7 @@ import { Component, ViewChildren, QueryList } from '@angular/core';
 import { DropdownMenuComponent } from '../components/dropdown-menu/dropdown-menu.component'
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { process } from '../../process';
 
 @Component({
     selector: 'navbar',
@@ -52,8 +53,12 @@ export class NavbarComponent {
         return this.keycloakService.isUserAdmin();
     }
 
-    isUserGuest(): boolean {
-        return this.keycloakService.isUserGuest();
+    isUserAdminOrExpert(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+    
+    canUserImportFromPACS(): boolean {
+        return this.keycloakService.canUserImportFromPACS();
     }
 
     togglePink() {

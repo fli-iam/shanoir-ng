@@ -20,7 +20,7 @@ import javax.persistence.Entity;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.validation.EditableOnlyBy;
+import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -90,24 +90,29 @@ public class NIfTIConverter extends HalEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (name == null ? 0 : name.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		NIfTIConverter other = (NIfTIConverter) obj;
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 
@@ -118,8 +123,7 @@ public class NIfTIConverter extends HalEntity {
 	 */
 	@Override
 	public String toString() {
-		String displayString = this.name;
-		return displayString;
+		return this.name;
 	}
 
 	/**
@@ -144,35 +148,23 @@ public class NIfTIConverter extends HalEntity {
 	}
 
 	public boolean isDcm2Nii() {
-		if (this.getNIfTIConverterType().equals(NIfTIConverterType.DCM2NII)) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.DCM2NII);
 	}
 
 	public boolean isMcverter() {
-		if (this.getNIfTIConverterType().equals(NIfTIConverterType.MCVERTER)) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.MCVERTER);
 	}
 
 	public boolean isClidcm() {
-		if (this.getNIfTIConverterType().equals(NIfTIConverterType.CLIDCM)) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.CLIDCM);
 	}
 
 	public boolean isDicom2Nifti() {
-		if (this.getNIfTIConverterType().equals(NIfTIConverterType.DICOM2NIFTI)) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOM2NIFTI);
+	}
+
+	public boolean isDicomifier() {
+		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOMIFIER);
 	}
 
 }

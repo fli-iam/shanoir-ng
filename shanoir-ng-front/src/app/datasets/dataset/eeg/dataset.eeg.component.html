@@ -1,0 +1,50 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<fieldset *ngIf="dataset">
+    <ol>
+        <legend> EEG Dataset data</legend>
+            <li>
+                <label>Name</label>
+                <span class="right-col">
+                    {{dataset.name}}
+                </span>
+            </li>
+            <li>
+                <label>Sampling frequency (Hz)</label>
+                <span class="right-col">
+                    {{dataset.samplingFrequency}}
+                </span>
+            </li>
+            <li>
+                <label>Channel count</label>
+                <span class="right-col">
+                    {{dataset.channelCount}}
+                </span>
+            </li>
+            <li>
+                <label>Coordinates system</label>
+                <span class="right-col">
+                    {{dataset.coordinatesSystem}}
+                </span>
+            </li>
+        <li>
+            <legend> Channels </legend>
+            <shanoir-table #channelsTable
+                [getPage]="getPage.bind(this)" 
+                [columnDefs]="columnDefs">
+            </shanoir-table>
+        </li>
+    </ol>
+</fieldset>

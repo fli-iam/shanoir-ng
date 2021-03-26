@@ -35,8 +35,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<springfox-version>2.5.0</springfox-version>
 		<spring.active.profile></spring.active.profile>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
-		<dcm4che.version>5.10.6</dcm4che.version> 
+		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
+        <dcm4che.version>5.14.1</dcm4che.version>
 		<docker.image.name>shanoir-ng/datasets</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 		<powermock.version>1.7.1</powermock.version>
@@ -46,6 +46,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -131,6 +137,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Solr -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-solr</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -213,6 +224,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
 									tofile="${basedir}/../docker-compose/datasets/${project.artifactId}.jar" />
+								<copy file="../utils/entrypoint_common"
+									tofile="${basedir}/../docker-compose/datasets/entrypoint_common" />
+								<copy file="../utils/oneshot"
+									tofile="${basedir}/../docker-compose/datasets/oneshot" />
+								<chmod perm="+x" file="${basedir}/../docker-compose/datasets/oneshot" />
 							</target>
 						</configuration>
 						<goals>
@@ -237,7 +253,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</resources>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 

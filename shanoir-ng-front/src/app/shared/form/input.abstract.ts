@@ -12,22 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Input } from '@angular/core';
+import { Input, Directive } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { Mode } from '../components/entity/entity.component.abstract';
 
+@Directive()
 export abstract class AbstractInput implements ControlValueAccessor {
 
-    @Input() protected mode: Mode;
-    protected model: any;
-    private disabled: boolean = false;
+    @Input() mode: Mode;
+    model: any;
+    disabled: boolean = false;
     propagateChange = (_: any) => {};
+    protected propagateTouched = () => {};
     
     constructor() {}
-    
-    onChange() {
-        this.propagateChange(this.model);
-    }
 
     writeValue(obj: any): void {
         if (obj) this.model = obj;
@@ -37,7 +35,9 @@ export abstract class AbstractInput implements ControlValueAccessor {
         this.propagateChange = fn;
     }
 
-    registerOnTouched(fn: any): void {}
+    registerOnTouched(fn: any): void {
+        this.propagateTouched = fn;
+    }
 
     setDisabledState(isDisabled: boolean): void {
         this.disabled = isDisabled;

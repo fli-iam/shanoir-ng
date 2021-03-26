@@ -1,0 +1,183 @@
+#!/bin/bash
+
+#############################################################################
+# Error management
+#
+#  - use the 'error' function to report an error (possibly multiple times)
+#  - call 'abort_if_error' to abort the script if any error was reported
+#
+#############################################################################
+
+_have_errors=
+# display an error and set the error flag
+error() {
+	echo -e "\\e[31merror: $*\\e[0m" >&2
+        _have_errors=1
+}
+
+# exit 1 if the error flag is set
+abort_if_error()
+{
+    if [ -n "$_have_errors" ] ; then
+	echo "aborting because of errors"
+	exit 1
+    fi
+}
+
+# create a temporary fifo
+# 
+# usage: fifo="`tmp_fifo`"
+tmp_fifo()
+{
+	local fifo="`mktemp -u`"
+	mkfifo "$fifo"
+	echo "$fifo"
+}
+
+# Ensure that an environment variable matches a regexp pattern (and report a
+# detailed error if not)
+#
+# usage: match VARNAME PATTERN
+match()
+{
+	[[ "${!1}" =~ $2 ]] || error "env var '$1' must match '$2' (got: '${!1}')"
+}
+
+# Ensure that the listed environment variables are set and ensure that their
+# value is well-formatted.
+# 
+# usage:  require VARNAME [VARNAME...]
+require()
+{
+    local name
+    for name in "$@"
+    do
+        local value="${!name}"
+
+        if [ -z "$value" ] ; then
+            error "env var '$name' must not be blank"
+            return
+        fi
+
+        case "$name" in
+            SHANOIR_URL_SCHEME)     match "$name" '^(http|https)$'                      ;;
+            SHANOIR_URL_HOST)       match "$name" '^([a-z0-9.-]+)$'                     ;;
+            SHANOIR_PREFIX)         match "$name" '^([a-zA-Z0-9][a-zA-Z0-9_.-]*)$'      ;;
+            SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
+            SHANOIR_MIGRATION)      match "$name" '^(auto|init|never|import|export)$'   ;;
+	    SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
+            SHANOIR_COLORS)         match "$name" '^[A-Za-z0-9-]+:#[0-9a-fA-F]{6}( +[A-Za-z0-9-]+:#[0-9a-fA-F]{6})*$' ;;
+
+            SHANOIR_ADMIN_EMAIL)    ;;
+            SHANOIR_ADMIN_NAME)     ;;
+            SHANOIR_SMTP_HOST)      ;;
+            *)
+                error "unknown var: $name"
+                ;;
+        esac
+    done
+}
+
+# Ensure that the value of the listed environment variables is well-formatted
+# or blank.
+# 
+# usage:  require VARNAME [VARNAME...]
+optional()
+{
+    local name
+    for name in "$@"
+    do
+        [ -z "${!name}" ] || require "$name"
+    done
+}
+
+#############################################################################
+# Environment variables override
+#
+# We use the 'env' array to store the environment variables that need to be
+# overriden at runtime when launching the service, and we use the /usr/bin/env
+# command to apply them:
+#	env=("NAME1=VALUE1" "NAME_1=VALUE2" ...)
+#	/usr/bin/env ${env[@]} ARG0 ARG1 ...
+#
+# We are forced to use this strategy because many variable used by springboot
+# contain dots in their names (which is not allowed by the shell).
+#
+#############################################################################
+
+env=()
+
+
+# Set the default value for an environment variable
+# 
+# usage: env_setdefault NAME VALUE
+#
+# If the 'NAME' environment variable is blank, then this function adds a
+# 'NAME=VALUE' entry in the 'env' array. Otherwise it does nothing.
+#
+# The VALUE set by this command is to be considered the default (as provided by
+# the docker image). It can be overriden at runtime by overriding the env var
+# value in the container configuration.
+env_setdefault()
+{
+	local override="`printenv "$1"`"
+	if [ -z "$override" ] ; then
+		env+=("$1=$2")
+		echo "using default: $1='$2'"
+	else
+		echo "overriden var: $1='$override'  (default would be '$2')"
+	fi
+}
+
+# Process the 'SHANOIR_MIGRATION' env var and adjust the spring config
+# accordingly. 
+_ms_oneshot=
+handle_microservice_migration()
+{
+	case "$SHANOIR_MIGRATION" in
+		auto)
+			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.jpa.hibernate.ddl-auto	update
+			;;
+		init)
+			env_setdefault	spring.datasource.initialize	true
+			env_setdefault	spring.jpa.hibernate.ddl-auto	create
+
+			_ms_oneshot=1
+			env_setdefault	"SHANOIR_CONSOLE_LOG_LEVEL"			INFO
+			env_setdefault	"logging.level.root"				WARN
+			env_setdefault	"logging.level.org.springframework.jdbc"	INFO
+			env_setdefault	"logging.level.org.springframework.orm"		INFO
+			env_setdefault	"logging.level.org.shanoir"			INFO
+			;;
+		never)
+			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.jpa.hibernate.ddl-auto	validate
+			;;
+		manual)
+			error "SHANOIR_MIGRATION=manual not yet supported"
+			;;
+	esac
+}
+
+# run the microservice
+#
+# usage: run_microservice ARG0 [ARG1...]
+#
+# set the env vars in the 'env' array and execute the provided command
+#
+# If _ms_oneshot is set (in case of migrations), the execution stops as soon as
+# the service startup is complete.
+run_microservice()
+{
+	cmd=(env "${env[@]}" "$@")
+	if [ -n "$_ms_oneshot" ] ; then
+		# 'oneshot' run
+		# (launch the server and kill it once it is started)
+		exec oneshot 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
+			-- ${cmd[@]}
+	else
+		# 'normal' run
+		exec ${cmd[@]}
+	fi
+}

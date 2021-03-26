@@ -11,13 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 
 @Component({
     selector: 'subject-list',
@@ -27,14 +32,24 @@ import { SubjectService } from '../shared/subject.service';
 
 export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
+    private studiesICanAdmin: number[];
 
-    constructor(private subjectService: SubjectService) {       
+    constructor(
+            private subjectService: SubjectService, 
+            private datasetService: DatasetService,
+            private studyService: StudyService) {       
+                
         super('subject');
+        this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+    }
+    
+    getService(): EntityService<Subject> {
+        return this.subjectService;
     }
 
     getEntities(): Promise<Subject[]> {
-        return this.subjectService.getAll();
+        return this.subjectService.getAll().then(result => result.filter(subj => !subj.preclinical));
     }
 
     // Grid columns definition
@@ -63,5 +78,21 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canDelete(subject: Subject): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            subject.subjectStudyList &&
+            subject.subjectStudyList.filter(ss => this.studiesICanAdmin.includes(ss.study.id)).length > 0
+        );
     }
 }

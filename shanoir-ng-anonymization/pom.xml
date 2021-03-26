@@ -26,7 +26,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<dcm4che.version>5.10.6</dcm4che.version>
+        <dcm4che.version>5.14.1</dcm4che.version>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
 
 
@@ -34,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- Commons -->

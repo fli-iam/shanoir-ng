@@ -1,0 +1,170 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="ContrastAgentFormComponent content-component">
+	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>validate> 
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+						<div class="header command-zone" i18n="View contrastagent|Title">View contrast agent</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'"> 
+						<div class="header command-zone" i18n="Edit contrastagent|Title">Edit contrast agent</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'"> 
+						<div class="header command-zone" i18n="Create contrastagent|Title">Add contrast agent</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit contrastagent|Name label">Name</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.name?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="name" formControlName="name" [(ngModel)]="agent.name" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
+									</select>
+									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">
+										<i class="fas fa-plus-square"></i>
+										new contrast agent name
+									</button>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit ContrastAgent|Name required error@@constrastAgentDetailNameRequiredError">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|ManufacturedName label">Manufactured Name</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.manufactured_name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="manufactured_name" formControlName="manufactured_name" [(ngModel)]="agent.manufactured_name" (ngModelChange)="onAgentChange()"/>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|Dose label">Dose</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.dose}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="dose" formControlName="dose" [(ngModel)]="agent.dose" (ngModelChange)="onAgentChange()"/>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|DoseUnit label">Dose Unit</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.dose_unit?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="agent.dose_unit" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let unit of dose_units" [ngValue]="unit">{{unit?.value}}</option>
+									</select>
+								</ng-template>
+							</span>							
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|Concentration label">Concentration</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.concentration}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="concentration" formControlName="concentration" [(ngModel)]="agent.concentration" (ngModelChange)="onAgentChange()"/>
+								</ng-template>
+							</span> 							
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|ConcentrationUnit label">Concentration Unit</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{agent?.concentration_unit?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="concentration_unit" formControlName="concentration_unit" [(ngModel)]="agent.concentration_unit" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let unit of concentration_units" [ngValue]="unit">{{unit?.value}}</option>
+									</select>
+								</ng-template>
+							</span>							
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{enumUtils.getEnumValue(intervals,agent.injection_interval)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="agent.injection_interval" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let interval of intervals" [value]="interval.key">{{interval?.value}}</option>
+									</select>
+								</ng-template>
+							</span>	
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{enumUtils.getEnumValue(sites,agent.injection_site)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="agent.injection_site" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let site of sites" [value]="site.key">{{site?.value}}</option>
+									</select>
+								</ng-template>
+							</span>	
+						</li>
+						<li>
+							<label i18n="Edit contrastagent|InjectionType label">Injection type</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{enumUtils.getEnumValue(injtypes,agent.injection_type)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="injectionType" formControlName="injectionType" [(ngModel)]="agent.injection_type" (ngModelChange)="onAgentChange()">
+										<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype?.value}}</option>
+									</select>
+								</ng-template>
+							</span>	
+						</li>						
+					</ol>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+		
+		
+    <div *ngIf="isStandalone">
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+		</form-footer>
+   	</div>
+   	
+     </form> 
+    
+    
+</div>

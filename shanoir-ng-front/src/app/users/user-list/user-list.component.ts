@@ -11,11 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 import { Component, ViewChild } from '@angular/core';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -29,6 +31,19 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
 
     constructor(private userService: UserService) {
            super('user');
+    }
+    
+    getService(): EntityService<User> {
+        return this.userService;
+    }
+
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: true, 
+            delete: true
+        };
     }
 
     getEntities(): Promise<User[]> {
@@ -51,6 +66,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             {headerName: "O.D.", tip: "On Demand", field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                 return params.data.accountRequestDemand || params.data.extensionRequestDemand;
             }},
+            {headerName: "Challenge", field: "accountRequestInfo.challenge", type: "boolean", defaultSortCol: true},
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);

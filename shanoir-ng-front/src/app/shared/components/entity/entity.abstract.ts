@@ -12,45 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { EntityService } from "./entity.abstract.service";
-
 export abstract class Entity {
-
-    abstract id: number;
     
-    abstract service: EntityService<Entity>;
-
-    create(): Promise<Entity> {
-        return this.service.create(this);
-    }
-
-    update(): Promise<void> {
-        return this.service.update(this.id, this);
-    }
-
-    delete(): Promise<void> {
-        return this.service.delete(this.id);
-    }
-
-    protected getIgnoreList() { return ['service']; }
-
-    private replacer = (key, value) => {
-        if (this.getIgnoreList().indexOf(key) > -1) return undefined;
-        else if (this[key] instanceof Date) return this.datePattern(this[key]);
-        else return value;
-    }
-
-    public stringify() {
-        return JSON.stringify(this, this.replacer);
-    }
-
-    private datePattern(date: Date): string {
-         return date.getFullYear()
-         + '-' 
-         + ('0' + (date.getMonth() + 1)).slice(-2)
-         + '-' 
-         + ('0' + date.getDate()).slice(-2);
-    }
+    abstract id: number;
 }
 
 export class EntityRoutes {

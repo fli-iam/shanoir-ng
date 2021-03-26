@@ -30,6 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-keycloak-auth</module>
 		<module>../shanoir-ng-back</module>
 		<module>../shanoir-ng-front</module>
+		<module>../shanoir-uploader</module>
 	</modules>
 
 	<properties>
@@ -38,6 +39,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
+		
+	    <sonar.projectKey>jcomedouteau_shanoir-ng</sonar.projectKey>
+        <sonar.organization>jcomedouteau</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<build>
@@ -45,6 +50,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader><!-- due to a bug with openJDK -->
+				</configuration>
 				<version>2.18.1</version>
 			</plugin>
 			<plugin>

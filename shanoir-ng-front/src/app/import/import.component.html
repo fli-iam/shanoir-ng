@@ -12,7 +12,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2>Import from DICOM</h2>
 <form>
-    <router-outlet></router-outlet>
+    <h2>Import from {{importMode}}</h2>
+    <router-outlet *ngIf="hasOneStudy"></router-outlet>
+    <div *ngIf="!hasOneStudy">
+        <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i>Sorry, you don't have the right to import in any Study for the moment.</strong></p>
+        <p>You should contact the administrator of the study you want to import in and ask him/her to add you as a study member with the appropriate import right.</p>
+    </div>
 </form>

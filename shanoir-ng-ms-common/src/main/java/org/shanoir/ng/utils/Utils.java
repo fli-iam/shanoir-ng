@@ -14,10 +14,13 @@
 
 package org.shanoir.ng.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class
@@ -25,6 +28,8 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * @author jlouis
  */
 public class Utils {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 	/**
 	 * Convert Iterable to List
@@ -50,11 +55,73 @@ public class Utils {
 			return o2 == null;
 		if (o2 == null)
 			return o1 == null;
-		if (o1 instanceof AbstractGenericItem && o2 instanceof AbstractGenericItem) {
-			return ((AbstractGenericItem) o1).getId().equals(((AbstractGenericItem) o2).getId());
+		if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
+			return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
 		}
 		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
+	}
+	
+
+	/**
+	 * Deletes all files and subdirectories under dir. Returns true if all
+	 * deletions were successful. If a deletion fails, the method stops
+	 * attempting to delete and returns false.
+	 *
+	 * @param tempFolder the temp folder
+	 *
+	 * @return true, if delete folder
+	 */
+	public static boolean deleteFolder(final File tempFolder) {
+		if (tempFolder.isDirectory()) {
+			String[] children = tempFolder.list();
+
+			for (int i = 0; i < children.length; i++) {
+				boolean success = deleteFolder(new File(tempFolder, children[i]));
+
+				if (!success) {
+					LOG.error("deleteFolder : the removing of " + tempFolder.getAbsolutePath() + " failed");
+					return false;
+				}
+			}
+		}
+
+		// The directory is now empty so delete it
+		return tempFolder.delete();
+	}
+		
+	public static <T> List<T> copyList(List<T> list) {
+    	List<T> copy = new ArrayList<T>();
+    	for (T item : list) copy.add(item);
+    	return copy;
+    }
+
+	
+	public static void removeIdsFromList(Iterable<Long> ids, List<? extends AbstractEntity> list) {
+		for (Long id : ids) {
+			int deletedIndex = -1;
+			int i = 0;
+			for (AbstractEntity entity : list) {
+				if (id.equals(entity.getId())) {
+					deletedIndex = i;
+					break;
+				}
+				i++;
+			}
+			if (deletedIndex > -1) list.remove(deletedIndex);
+		}
+	}
+	
+	
+	public static boolean haveOneInCommon(final Iterable<String> roles, final Iterable<String> authorities) {
+		for (final String role : roles) {
+			for (final String authority : authorities) {
+				if (role != null && role.equals(authority)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

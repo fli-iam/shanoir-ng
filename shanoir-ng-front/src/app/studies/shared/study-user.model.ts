@@ -13,16 +13,18 @@
  */
 
 import { User } from "../../users/shared/user.model";
-import { StudyUserType } from "./study-user-type.enum";
+import { StudyUserRight} from "./study-user-right.enum";
+import { Study } from "./study.model";
 
 export class StudyUser {
-    studyId: number;
+    study: Study;
     userId: number;
     receiveAnonymizationReport: boolean;
     receiveNewImportReport: boolean;
-    studyUserType: StudyUserType;
+    studyUserRights: StudyUserRight[];
     userName: string;
     user: User;
+    confirmed: boolean = false;
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);

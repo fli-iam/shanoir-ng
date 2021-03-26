@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 		    <groupId>mysql</groupId>
 		    <artifactId>mysql-connector-java</artifactId>
-		    <version>5.1.39</version>
+		    <version>8.0.16</version>
 		</dependency>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.jaxrs</groupId>

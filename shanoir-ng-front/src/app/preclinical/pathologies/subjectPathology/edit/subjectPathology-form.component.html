@@ -1,0 +1,124 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+<div #formContainer *ngIf="toggleForm" class="SubjectPathologyFormComponent content-component">
+		<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'">
+						<div class="header command-zone" i18n="View pathology|Title">View pathology details</div>
+					</ng-template>
+					<ng-template ngSwitchDefault> 
+						<div *ngIf="!createSPMode" class="header command-zone" i18n="Edit pathology|Title">Edit pathology</div>
+						<div *ngIf="createSPMode"  class="header command-zone" i18n="Create pathology|Title">Add pathology</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit subPatho|Pathology label">Pathology</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{subjectPathology?.pathology?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="pathology" formControlName="pathology" [(ngModel)]="subjectPathology.pathology" (change)="refreshModelsByPathology()">
+										<option *ngFor="let pathology of pathologies" [ngValue]="pathology">{{pathology.name}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology" (click)="goToAddPathology()">
+										<i class="fas fa-plus-square"></i>
+										new pathology
+									</button>
+									<label *ngIf="hasError('pathology', ['required'])" [@slideDown]="hasError('pathology', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|Pathology required error@@subjectPathologyDetailPathologyRequiredError">Pathology is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit subPatho|PathologyModel label">Model</label> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{subjectPathology?.pathologyModel?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="pathologyModel" formControlName="pathologyModel" [(ngModel)]="subjectPathology.pathologyModel">
+										<option *ngFor="let model of modelsDisplay" [ngValue]="model">{{model.name}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology model" (click)="goToAddPathologyModel()">
+										<i class="fas fa-plus-square"></i>
+										new model
+									</button>
+									<label *ngIf="hasError('pathologyModel', ['required'])" [@slideDown]="hasError('pathologyModel', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|PathologyModel required error@@subjectPathologyDetailPathologyModelRequiredError">Pathology model is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit subPatho|Location label">Location</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{subjectPathology?.location?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="location" formControlName="location" [(ngModel)]="subjectPathology.location">
+										<option *ngFor="let location1 of locations" [ngValue]="location1">{{location1.value}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new location" (click)="goToAddLocation()">
+										<i class="fas fa-plus-square"></i>
+										new location
+									</button>
+									<label *ngIf="hasError('location', ['required'])" [@slideDown]="hasError('location', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|Location required error@@subjectPathologyDetailLocationRequiredError">Location is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit subjectTherapy|startDate label">Start date</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{subjectPathology?.startDate}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<datepicker id="startDate"  [(ngModel)]="subjectPathology.startDate" formControlName="startDate" ></datepicker>
+									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: dd/mm/yyyy</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit subjectTherapy|endDate label">End date</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
+										{{subjectPathology?.startDate}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<datepicker id="endDate"  [(ngModel)]="subjectPathology.endDate" formControlName="endDate" ></datepicker>
+									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectPathology detail|Date valid error@@dateValidError">End Date should be valid ! Date format: dd/mm/yyyy</label>
+								</ng-template>
+							</span>
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<button type="button" i18n="Edit pathology|CancelButton label" class="Button" (click)="cancelPathology()">Cancel</button>
+				<button type="button" *ngIf="canUpdatePathology()" (click)="updatePathology()" i18n="Edit pathology|SaveButton label" class="Button" [disabled]="!form.valid">Update</button>
+				<button type="button" *ngIf="canAddPathology()" i18n="Edit pathology|CreateButton label" (click)="addPathology()" class="Button" [disabled]="!form.valid">Create</button>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

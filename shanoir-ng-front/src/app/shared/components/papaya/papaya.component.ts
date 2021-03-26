@@ -13,7 +13,6 @@
  */
 
 import { Component, OnInit, SimpleChange, Input } from "@angular/core";
-import { ImagesUrlUtil } from "../../utils/images-url.util";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -26,9 +25,8 @@ declare var papayaContainers: any[];
 export class PapayaComponent implements OnInit {
     @Input() params: any[];
     @Input() autoLoading: boolean = false;
-    private loaded: boolean = false;
+    loaded: boolean = false;
     private static loading: boolean = false;
-    private ImagesUrlUtil = ImagesUrlUtil;
 
     constructor() {}
 
@@ -52,7 +50,7 @@ export class PapayaComponent implements OnInit {
         }
     }
 
-    private load() {
+    load() {
         if (!PapayaComponent.loading) {
             this.loaded = true; 
             PapayaComponent.loading = true;
