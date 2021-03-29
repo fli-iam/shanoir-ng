@@ -93,10 +93,13 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create a study_user when subscribing to a challenge */
 	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
+	
+	/** Queue used to get information for study_examination relationship.*/
+	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
-
+	
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
 
 	private static final String COIL_QUEUE_NAME_OUT = "coil_queue_from_ng";
@@ -307,5 +310,9 @@ public class RabbitMQConfiguration {
 	public static Queue challengeSubscriptionQueue() {
 		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
 	}
-	
+
+	@Bean
+	public static Queue examinationStudyQueue() {
+		return new Queue(EXAMINATION_STUDY_QUEUE, true);
+	}
 }

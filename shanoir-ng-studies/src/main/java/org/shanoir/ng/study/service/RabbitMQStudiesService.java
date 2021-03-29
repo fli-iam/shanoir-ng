@@ -91,7 +91,7 @@ public class RabbitMQStudiesService {
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
+			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
@@ -117,7 +117,7 @@ public class RabbitMQStudiesService {
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, durable = "true"),
+			value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
