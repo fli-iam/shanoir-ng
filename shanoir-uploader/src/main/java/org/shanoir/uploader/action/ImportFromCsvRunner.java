@@ -440,15 +440,16 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			return true;
 		}
 		String[] filters = filter.split(";");
-		boolean valid = false;
+		boolean valid = true;
 		for (String filterToApply : filters) {
-			// NB: we choose to use OR instead of AND between filters. This is more convenient.
-			// Maybe we can better this, but not for the moment
+			// NB: we choose to use AND instead of OF between filters.
+			// This way we are more restrictive
+			// If you want more acquisitions, you have to duplicate the line in the CSV with other filters
 
 			if (filterToApply.startsWith("!")) {
-				valid =  valid || !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				valid =  valid && !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
 			} else {
-				valid =  valid || filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				valid =  valid && filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
 			}
 		}
 		return valid;
