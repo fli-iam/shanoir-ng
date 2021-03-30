@@ -350,8 +350,13 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		// 8.  Create subject if necessary
 		Subject subjectFound = null;
+		String subjectStudyIdentifier = null;
 		try {
 			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
+			if (!subjectFound.getName().equals(csvImport.getCommonName())) {
+				// If the name does not match, change the subjectStudyIdentifier for this study
+				subjectStudyIdentifier = csvImport.getName();
+			}
 		} catch (Exception e) {
 			//Do nothing, if it fails, we'll just create a new subject
 		}
@@ -359,6 +364,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if (subjectFound != null) {
 			logger.info("8 Subject exists, just use it");
 			subject = subjectFound;
+			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
 		} else {
 			logger.info("8 Creating a new subject");
 	

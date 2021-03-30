@@ -56,11 +56,18 @@ public class ImportUtils {
 		}
 		subjectStudy.setSubjectType(sType);
 		subjectStudy.setPhysicallyInvolved(physicallyInvolved);
-		
 		if (subject.getSubjectStudyList() == null) {
 			subject.setSubjectStudyList(new ArrayList<>());
+		} else {
+			// Check that this subjectStudy does not exist yet
+			for (SubjectStudy sustu : subject.getSubjectStudyList()) {
+				if (sustu.getStudy().getId().equals(study.getId())) {
+					// Do not add a new subject study if it already exists
+					return;
+				}
+			}
 		}
-		
+
 		subject.getSubjectStudyList().add(subjectStudy);
 	}
 
