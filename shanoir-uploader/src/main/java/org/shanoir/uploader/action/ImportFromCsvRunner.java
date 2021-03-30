@@ -55,6 +55,7 @@ import org.shanoir.util.ShanoirUtil;
 public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 	private static final String WILDCARD = "*";
+	private static final String WILDCARD_REPLACE = "\\*";
 
 	private static Logger logger = Logger.getLogger(ImportFromCsvRunner.class);
 
@@ -431,7 +432,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	 * @param filter the filter we want to find
 	 * @return true if the filter matches, false otherwise
 	 */
-	private boolean searchField(String searchedElement, String filter) {
+	protected boolean searchField(String searchedElement, String filter) {
 		if (StringUtils.isBlank(searchedElement)) {
 			return false;
 		}
@@ -441,18 +442,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		String[] filters = filter.split(";");
 		boolean valid = false;
 		for (String filterToApply : filters) {
-			// Tips we use here exclusive "OR" with ^
-			// if it start with ! => we want the contrary of filterWildCard
-			// True/True => false
-			// True/False => true
-			// If it does not, we want the result of filterWioldCard
-			// False/False => false
-			// False/True => true
-			// This is the exact definition of exclusive or
-			
-			// Other NB: we choose to use OR instead of AND between filters. This is more convenient.
+			// NB: we choose to use OR instead of AND between filters. This is more convenient.
 			// Maybe we can better this, but not for the moment
-			valid = valid || filterToApply.startsWith("!") ^ filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+
+			if (filterToApply.startsWith("!")) {
+				valid =  valid || !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+			} else {
+				valid =  valid || filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+			}
 		}
 		return valid;
 	}
@@ -469,14 +466,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if(filter.endsWith(WILDCARD)) {
 			if(filter.startsWith(WILDCARD)) {
 				// *filter*
-				return searchedElement.contains(filter.replaceAll(WILDCARD, "").toUpperCase());
+				return searchedElement.contains(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 			}
 			// filter*
-			return searchedElement.startsWith(filter.replaceAll(WILDCARD, "").toUpperCase());
+			return searchedElement.startsWith(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 		}
 		if(filter.startsWith(WILDCARD)) {
 			// *filter
-			return searchedElement.endsWith(filter.replaceAll(WILDCARD, "").toUpperCase());
+			return searchedElement.endsWith(filter.replaceAll(WILDCARD_REPLACE, "").toUpperCase());
 		}
 		// filter
 		return searchedElement.equalsIgnoreCase(filter);
