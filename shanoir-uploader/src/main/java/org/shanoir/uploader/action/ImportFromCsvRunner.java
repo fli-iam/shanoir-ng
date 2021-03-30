@@ -365,6 +365,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			logger.info("8 Subject exists, just use it");
 			subject = subjectFound;
 			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
 		} else {
 			logger.info("8 Creating a new subject");
 	
@@ -382,7 +383,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	
 			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 	
-			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, null);
+			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
 	
 			// Get center ID from study card
 			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
