@@ -355,7 +355,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
 			if (!subjectFound.getName().equals(csvImport.getCommonName())) {
 				// If the name does not match, change the subjectStudyIdentifier for this study
-				subjectStudyIdentifier = csvImport.getName();
+				subjectStudyIdentifier = csvImport.getCommonName();
 			}
 		} catch (Exception e) {
 			//Do nothing, if it fails, we'll just create a new subject
