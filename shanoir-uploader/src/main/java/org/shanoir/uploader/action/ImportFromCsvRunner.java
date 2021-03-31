@@ -193,9 +193,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		Calendar calendar = Calendar.getInstance();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
-			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 1, 1);
+			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 0, 1);
 		} else {
-			calendar.set(1000, 1, 1);
+			calendar.set(1000, 0, 1);
 		}
 		Date minDate = calendar.getTime();
 
@@ -221,7 +221,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 						// Could not get date => skip the study
 						continue;
 					}
-					if (studyDate.compareTo(currentDate) > 0 || studyDate.compareTo(minDate) < 0) {
+					if (studyDate.after(currentDate) || studyDate.before(minDate)) {
 						// We take the first valid date, if we are after on valid date, don't check the data
 						continue;
 					}
