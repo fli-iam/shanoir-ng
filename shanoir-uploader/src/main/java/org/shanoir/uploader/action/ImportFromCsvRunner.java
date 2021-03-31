@@ -192,7 +192,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Study selectedStudy = null;
 
 		Calendar calendar = Calendar.getInstance();
-		if (csvImport.getMinDateFilter() != null) {
+		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
 			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 1, 1);
 		} else {
 			calendar.set(1000, 1, 1);
