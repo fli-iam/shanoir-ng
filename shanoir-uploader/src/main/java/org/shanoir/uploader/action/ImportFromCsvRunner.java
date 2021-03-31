@@ -191,6 +191,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
 		Study selectedStudy = null;
 
+		Calendar calendar = Calendar.getInstance();
+		if (csvImport.getMinDateFilter() != null) {
+			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 1, 1);
+		} else {
+			calendar.set(1000, 1, 1);
+		}
+		Date minDate = calendar.getTime();
+
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (foundPatient) {
 				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
@@ -213,8 +221,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 						// Could not get date => skip the study
 						continue;
 					}
-					if (studyDate.compareTo(currentDate) > 0) {
-						// We take the first valid date, if we are after on valiod date, don't check the data
+					if (studyDate.compareTo(currentDate) > 0 || studyDate.compareTo(minDate) < 0) {
+						// We take the first valid date, if we are after on valid date, don't check the data
 						continue;
 					}
 					if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {

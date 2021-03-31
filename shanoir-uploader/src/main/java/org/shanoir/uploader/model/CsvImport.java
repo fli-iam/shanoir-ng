@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirException;
-
 /**
  * An object that is used to import from a CSV file
  * It contains the necessary fields to be imported from CSV raw data
@@ -16,11 +14,12 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 public class CsvImport {
 
 
+
 	public CsvImport(String[] csvInput) {
 
-        this.rawData = Arrays.copyOf(csvInput, 8);
+        this.rawData = Arrays.copyOf(csvInput, 9);
 
-        if (csvInput == null || csvInput.length < 7) {
+        if (csvInput == null || csvInput.length < 8) {
 			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
@@ -32,7 +31,10 @@ public class CsvImport {
 		this.studyFilter = csvInput[5];
 		this.acquisitionFilter = csvInput[6];
 		if (csvInput.length > 7) {
-			this.comment = csvInput[7];
+			this.minDateFilter = csvInput[7];
+		}
+		if (csvInput.length > 8) {
+			this.comment = csvInput[8];
 		}
 	}
 	
@@ -59,6 +61,23 @@ public class CsvImport {
 	
 	String studyFilter;
 	
+	/**
+	 * @return the minDateFilter
+	 */
+	public String getMinDateFilter() {
+		return minDateFilter;
+	}
+
+	/**
+	 * @param minDateFilter the minDateFilter to set
+	 */
+	public void setMinDateFilter(String minDateFilter) {
+		this.minDateFilter = minDateFilter;
+	}
+
+
+	String minDateFilter;
+
 	/**
 	 * @return the errorMessage
 	 */
