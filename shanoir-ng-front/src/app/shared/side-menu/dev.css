@@ -1,0 +1,5 @@
+:host() {  
+    --instance-name: "DEV";
+    --instance-color: darkgreen;
+    --user-color: darkgreen;
+}
