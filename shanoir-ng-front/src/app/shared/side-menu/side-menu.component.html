@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
     </li>
     
-    <li routerLink="/solr-search" routerLinkActive="active"><i class="fab fa-searchengin"></i>Solr search</li>
+    <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Solr search</li>
     <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
         <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>

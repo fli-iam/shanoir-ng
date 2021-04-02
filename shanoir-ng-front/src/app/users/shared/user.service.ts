@@ -49,4 +49,10 @@ export class UserService extends EntityService<User>{
         return this.http.post<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise();
     }
+
+    getAllAccountRequests(): Promise<User[]> {
+        return this.http.get<any[]>(this.API_URL + '/accountRequests')
+            .toPromise()
+            .then(this.mapEntityList);
+    }
 }

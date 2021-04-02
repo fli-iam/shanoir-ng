@@ -5,14 +5,69 @@
 .challenge-welcome { text-align: center; }
 .dl-link { margin-top: 30px; }
 
-i { font-size: 50px; color: var(--color-c); }
+.challenge-welcome i { font-size: 50px; color: var(--color-c); }
 .study i, .study .challenge-name { color: var(--color-a); }
-i:hover { opacity: 0.6; }
+.challenge-welcome i:hover { opacity: 0.6; }
 
-.dl-block { margin-top: 50px; }
-.dl { margin: 10px 30px; display: inline-block; }
-.dl i, .dl div { cursor: pointer; }
-.dl div { font-size: 18px; margin: 10px; }
+.block { border: 1px solid black; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 30px ;}
+.block table { border-collapse: collapse; }
+.block .icon, .block .pannel, .block-title { width: 180px; padding: 0 10px; vertical-align: middle; }
+.block .icon, .block { height: 200px; }
+.block .pannel { text-align: left; }
+.block, .block table, .block input { font-size: 12px; }
+.block-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: var(--color-b-light); }
+.icon { color: black; }
+.icon i { font-size: 120px; display: block; height: 136px; margin-top: 10px; opacity: 0.7; }
+.block td { position: relative; height: 200px; }
+.block .pannel table { width: 100%; }
+.block .pannel td { height: auto; }
 
-.msg { font-size: 14px; }
-.challenge-name { color: var(--color-c); }
+.challenge { width: 866px; border-color: blue; }
+.challenge .block-title { width: auto; margin-top: 15px; margin-bottom: 30px; font-size: 30px; }
+.challenge-files, .msg { height: 200px; }
+.challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; }
+.challenge-files li { line-height: 26px; cursor: pointer; }
+.challenge-files li:hover { color: blue; }
+.challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
+.challenge .left-cell { background-color: blue; color: white; }
+.msg { font-size: 16px;  width: 412px; color: white; padding: 0 10px; }
+.challenge-name { color: midnightblue; }
+
+.account-requests { border-color: blueviolet; }
+.account-requests .icon { background-color: blueviolet; }
+.account-request-list div:hover { color: blueviolet; }
+.pending { font-size: 16px; margin-bottom: 10px; }
+.pending em { font-style: normal; font-size: 20px; color: var(--color-a); font-weight: bold; }
+
+.solr { border-color: darkorange; }
+.solr .icon { background-color: darkorange; }
+.solr .pannel { font-size: 20px; text-align: center; }
+.solr .pannel i { margin-right: 7px; }
+.solr input { margin-bottom: 10px; text-align: center; }
+
+.jobs { border-color: seagreen; }
+.jobs .icon { background-color: seagreen; }
+ 
+.notifications { border-color: crimson; }
+.notifications .icon { background-color: crimson; }
+.notification-list:hover { color: crimson; }
+.notification-list th { width: 73px; }
+.notification-list td { max-width: 102px; overflow: hidden; }
+
+.studies { border-color: blue; }
+.studies .icon { background-color: blue; }
+.study-list:hover { color: blue; }
+
+.import { width: 422px; text-align: left; border: none; border-radius: 0; }
+.import-link { display: inline-grid; border-radius: 10px; height: 80px; width: 122px; padding: 5px; margin: 4px; text-align: center; }
+.import-link { color: white; background-color: black; font-size: 14px; }
+.import-link i { color: black; font-size: 40px; display: block; height: 37px; margin-top: 7px; opacity: 0.7; }
+.import-link .title { font-size: 15px; font-weight: bold; display: contents; color: var(--color-b-light); }
+
+.dicom { background-color: blue; }
+.bruker { background-color: seagreen; }
+.eeg { background-color: crimson; }
+.bids { background-color: darkorange; }
+.pacs { background-color: blueviolet; }
+
+h2 { margin-bottom: 30px; }

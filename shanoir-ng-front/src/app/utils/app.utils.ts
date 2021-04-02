@@ -28,7 +28,7 @@ export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoi
 
 
 // Users http api
-const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
+export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
