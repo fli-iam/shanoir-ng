@@ -42,6 +42,7 @@ export class HomeComponent {
     jobs: Task[];
     solrInput: string;
     notifications: any[];
+    loaded: boolean = false;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -59,7 +60,7 @@ export class HomeComponent {
             this.challengeDua = null;
             this.notifications = null;
             if (duas) {
-                this.notifications = duas.slice(0, 5);;
+                this.notifications = duas.slice(0, 10);
                 for (let dua of duas) {
                     if (dua.isChallenge) {
                         this.challengeDua = dua;
@@ -68,6 +69,7 @@ export class HomeComponent {
                 }
             }
         }).then(() => {
+            this.loaded = true;
             if (this.admin || !this.challengeDua) {
                 this.fetchChallengeStudy()
                 if (this.admin) {
@@ -85,7 +87,7 @@ export class HomeComponent {
     private fetchChallengeStudy() {
         this.studyService.getAll().then(studies => {
             if (studies) {
-                this.studies = studies.slice(0, 5);
+                this.studies = studies.slice(0, 8);
                 for (let study of studies) {
                     if (study.challenge) {
                         this.challengeStudy = study;
@@ -110,12 +112,12 @@ export class HomeComponent {
 
     fetchAccountRequests() {
         this.userService.getAllAccountRequests()
-            .then(ar => this.accountRequests = ar.slice(0, 5));
+            .then(ar => this.accountRequests = ar.slice(0, 8));
     }
 
     fetchJobs() {
         this.taskService.getAll()
-            .then(tasks => this.jobs = tasks.slice(0, 5));
+            .then(tasks => this.jobs = tasks.slice(0, 10));
     }
 
     canUserImportFromPACS(): boolean {
