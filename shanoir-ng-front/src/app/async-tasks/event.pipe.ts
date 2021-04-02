@@ -12,12 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SubjectStudy } from "./subject-study.model";
+import { Pipe, PipeTransform } from '@angular/core';
 
-export class SubjectWithSubjectStudy {
-    id: number;
-    name: string;
-    identifier: string;
-    subjectStudy: SubjectStudy;
-    birthDate: Date;
+
+@Pipe({ name: "eventType", pure: false })
+export class EventTypePipe implements PipeTransform {
+
+    transform(type: string): string {
+        if (type) {
+            type = type.charAt(0).toUpperCase() + type.slice(1)
+            return type.split('.')[0].match(/[A-Z][a-z]+/g).join(' ').toLowerCase(); // importDataset.event
+        }
+        return '';
+    }
+
 }

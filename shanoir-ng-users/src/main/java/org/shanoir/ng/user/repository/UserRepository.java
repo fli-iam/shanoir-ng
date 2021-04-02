@@ -94,5 +94,11 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	 * @return a user or null
 	 */
 	Optional<User> findByUsername(String username);
+	
+	
+	/**
+	 * Find users on account request
+	 */
+	List<User> findByAccountRequestDemandTrue();
 
 }

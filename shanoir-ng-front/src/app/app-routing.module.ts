@@ -14,8 +14,7 @@
 
 
 import { NgModule } from '@angular/core';
-import { ModuleWithProviders } from '@angular/core';
-import { RouterModule, Routes, CanActivate } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
