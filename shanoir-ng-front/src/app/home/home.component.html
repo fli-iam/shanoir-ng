@@ -12,9 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 *ngIf="admin || !challengeDua" class="header command-zone">Shanoir Home Page</h2>
+<h2 *ngIf="admin || !challengeDua" class="header command-zone">Shanoir Home</h2>
 
-<div *ngIf="!admin && challengeDua" class="challenge-welcome">
+<div *ngIf="loaded && !admin && challengeDua" class="challenge-welcome">
     <div>
         <h1>Welcome to Shanoir, challenger!</h1>
         <p>Here you will be able to download the datasets for the {{challengeDua.studyName}} Challenge.
@@ -23,11 +23,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
 </div>
 
-<div *ngIf="admin || !challengeDua">
+<div *ngIf="loaded && (admin || !challengeDua)">
     <div *ngIf="challengeStudy" class="block challenge">
         <table><tr>
             <td class="left-cell">
-                <div class="block-title">Challenge <span class="challenge-name">{{challengeStudy.name}}</span></div>
+                <div class="block-title">
+                    <span class="challenge-title">
+                        <i class="fas fa-trophy"></i>
+                        Challenge
+                        <i class="fas fa-trophy"></i>
+                    </span>
+                </div>
+                <p class="challenge-name">{{challengeStudy.name}}</p>
                 <p class="msg">Here you can now download all the ressources you need for the challenge and explore its data using Shanoir</p>
             </td>
             <td>
@@ -38,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
                     <li class="study">
                         <i class="fas fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
-                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore <span class="challenge-name">{{challengeStudy.name}}</span></span>
+                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
                     </li>
                 </ul>
             </td>
@@ -50,9 +57,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fas fa-users"></i>
                 <div class="block-title">Manage Users</div>
             </td>
-            <td>
+            <td *ngIf="accountRequests && accountRequests.length > 0">
                 <div class="pannel">
-                    <div class="pending link" routerLink="/user/list"><em>4</em> users on demand</div>
+                    <div class="pending link" routerLink="/user/list"><em>{{accountRequests.length}}</em> pending demands</div>
                     <div class="account-request-list">
                         <div *ngFor="let ar of accountRequests" [routerLink]="'/user/details/' + ar.id" class="link">
                             {{ar.firstName}} {{ar.lastName}} - {{ar.creationDate | date: 'dd/MM'}}
