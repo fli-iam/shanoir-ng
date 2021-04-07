@@ -36,10 +36,14 @@
 
 .account-requests { border-color: blueviolet; }
 .account-requests .icon { background-color: blueviolet; }
-.account-request-list div:hover { color: blueviolet; }
-.pending { font-size: 16px; margin-bottom: 10px; }
+.account-requests .pannel table { margin-top: 10px; }
+.account-request-list:hover { color: blueviolet; }
+.account-request-list td {  overflow: hidden; }
+.account-request-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
+.account-request-list .narrow { max-width: 30px; }
+.account-request-list i { color: var(--color-a-light); }
+.pending { font-size: 16px; }
 .pending em { font-style: normal; font-size: 20px; color: var(--color-a); font-weight: bold; }
-
 .solr { border-color: darkorange; }
 .solr .icon { background-color: darkorange; }
 .solr .pannel { font-size: 20px; text-align: center; }

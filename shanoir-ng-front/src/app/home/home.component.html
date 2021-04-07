@@ -59,12 +59,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td>
             <td *ngIf="accountRequests && accountRequests.length > 0">
                 <div class="pannel">
-                    <div class="pending link" routerLink="/user/list"><em>{{accountRequests.length}}</em> pending demands</div>
-                    <div class="account-request-list">
-                        <div *ngFor="let ar of accountRequests" [routerLink]="'/user/details/' + ar.id" class="link">
-                            {{ar.firstName}} {{ar.lastName}} - {{ar.creationDate | date: 'dd/MM'}}
-                        </div>
-                    </div>
+                    <div class="pending link" routerLink="/user/list"><em>{{nbAccountRequests}}</em> account requests</div>
+                    <div class="pending link" routerLink="/user/list"><em>{{nbExtensionRequests}}</em> extension requests</div>
+                    <table>
+                        <tr *ngFor="let ar of accountRequests"  [routerLink]="'/user/details/' + ar.id" class="account-request-list link">
+                            <td class="name">{{ar.firstName}} {{ar.lastName}}</td>
+                            <ng-container *ngIf="ar.accountRequestDemand">
+                                <td class="narrow"><i class="fas fa-plus"></i></td>
+                                <td class="narrow">{{ar.creationDate | date: 'dd/MM'}}</td>
+                            </ng-container>
+                            <ng-container *ngIf="ar.extensionRequestDemand">
+                                <td class="narrow"><i class="fas fa-clock"></i></td>
+                                <td class="narrow"></td>
+                            </ng-container>
+                        </tr>
+                    </table>
                 </div>
             </td>
         </tr></table>
@@ -75,14 +84,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fas fa-sun"></i>
                 <div class="block-title">Solr Search</div>
             </td>
-            <td>
+            <!-- <td>
                 <div class="pannel">
                     <input type="text" [(ngModel)]="solrInput" placeholder="Search in Shanoir..." />
                     <div routerLink="/solr-search" [state]="{ input: solrInput }" class="link">
                         <i class="fas fa-search"></i>Go
                     </div>
                 </div>
-            </td>
+            </td> -->
         </tr></table>
     </div>
     <div class="block notifications" *ngIf="notifications && notifications.length > 0">
@@ -132,7 +141,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <div class="title">Import Bruker</div>
         </div>
         <div class="import-link link eeg" routerLink="/imports/eeg">
-            <i class="fas fa-hat-wizard"></i>
+            <i class="fas fa-bolt"></i>
             <div class="title">Import EEG</div>
         </div>
         <div class="import-link link bids" routerLink="/imports/bids">
@@ -156,8 +165,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <table>
                         <tr>
                             <th></th>
-                            <th>sub</th>
-                            <th>exa</th>
+                            <th title="subjects"><i class="fas fa-user-injured"></i></th>
+                            <th title="examinations"><i class="fas fa-stethoscope"></i></th>
                         </tr>
                         <tr *ngFor="let study of studies" [routerLink]="'/study/details/' + study.id" class="link study-list">
                             <td>{{study.name}}</td>

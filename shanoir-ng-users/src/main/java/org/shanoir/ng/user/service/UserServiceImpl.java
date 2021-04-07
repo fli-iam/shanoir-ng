@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findAccountRequests() {
-		return Utils.toList(userRepository.findByAccountRequestDemandTrue());
+		return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
 	}
 
 	@Override

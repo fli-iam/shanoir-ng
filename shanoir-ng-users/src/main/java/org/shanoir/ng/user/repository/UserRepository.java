@@ -99,6 +99,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	/**
 	 * Find users on account request
 	 */
-	List<User> findByAccountRequestDemandTrue();
+	List<User> findByAccountRequestDemandTrueOrExtensionRequestDemandTrue();
 
 }
