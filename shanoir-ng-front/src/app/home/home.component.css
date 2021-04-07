@@ -24,8 +24,8 @@
 
 .challenge { width: 866px; border-color: blue; }
 .challenge .block-title { width: auto; margin-top: 15px; margin-bottom: 0; font-size: 30px; }
-.challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; }
-.challenge-files li { line-height: 26px; cursor: pointer; }
+.challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; width: 405px; white-space: nowrap; overflow: hidden; }
+.challenge-files li { line-height: 26px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
 .challenge-files li:hover { color: blue; }
 .challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
 .challenge .left-cell { background-color: blue; color: white; }
@@ -36,7 +36,7 @@
 
 .account-requests { border-color: blueviolet; }
 .account-requests .icon { background-color: blueviolet; }
-.account-requests .pannel table { margin-top: 10px; }
+.account-requests .pannel table { margin-top: 8px; }
 .account-request-list:hover { color: blueviolet; }
 .account-request-list td {  overflow: hidden; }
 .account-request-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
@@ -60,6 +60,7 @@
 .notification-list td { max-width: 102px; overflow: hidden; }
 
 .studies { border-color: blue; }
+.studies th { line-height: 30px; }
 .studies .icon { background-color: blue; }
 .study-list:hover { color: blue; }
 

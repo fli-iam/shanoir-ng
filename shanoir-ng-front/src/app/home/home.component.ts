@@ -117,7 +117,7 @@ export class HomeComponent {
             .then(ars => {
                 this.nbAccountRequests = ars.filter(user => !!user.accountRequestDemand).length;
                 this.nbExtensionRequests = ars.filter(user => !!user.extensionRequestDemand).length;
-                this.accountRequests = ars.slice(0, 8);
+                this.accountRequests = ars.slice(0, 7);
             });
     }
 
