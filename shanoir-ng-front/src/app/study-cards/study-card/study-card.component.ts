@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { IdName } from '../../shared/models/id-name.model';
