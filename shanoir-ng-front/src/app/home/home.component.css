@@ -76,3 +76,9 @@
 .pacs { background-color: blueviolet; }
 
 h2 { margin-bottom: 30px; }
+
+.doc { border-color: darkorange; }
+.doc .icon { background-color: darkorange; }
+.doc li { line-height: 20px; }
+.doc li i { color: var(--color-a-light); margin-right: 7px; }
+a { text-decoration: underline; }
