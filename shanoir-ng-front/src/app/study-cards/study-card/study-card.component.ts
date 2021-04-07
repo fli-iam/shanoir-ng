@@ -30,7 +30,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { NiftiConverter } from 'bin/src/app/niftiConverters/nifti.converter.model';
 
 @Component({
     selector: 'study-card',
