@@ -30,6 +30,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import { NiftiConverter } from 'bin/src/app/niftiConverters/nifti.converter.model';
 
 @Component({
     selector: 'study-card',
@@ -72,11 +73,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initView(): Promise<void> {
         let scFetchPromise: Promise<void> = this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
-        });   
+        });
         this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy());
         return scFetchPromise;
     }
-    
+
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
@@ -89,8 +90,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initCreate(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        this.fetchNiftiConverters();
         this.studyCard = new StudyCard();
+        this.fetchNiftiConverters().then(result => {
+            // pre-select dcm2niix
+            this.studyCard.niftiConverter = result.filter(element => element.name === 'dcm2niix')[0];
+        });
         return Promise.resolve();
     }
 
@@ -142,12 +146,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
     }
 
-    private fetchNiftiConverters() {
-        this.niftiConverterService.getAll()
+    private fetchNiftiConverters(): Promise<NiftiConverter[]> {
+        return this.niftiConverterService.getAll()
             .then(converters => {
                 this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name));
-                // pre-select dcm2niix
-                this.studyCard.niftiConverter = converters.filter(element => element.name === 'dcm2niix')[0];
+                return converters;
             });
     }
 
