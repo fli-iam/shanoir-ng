@@ -43,6 +43,8 @@ export class HomeComponent {
     solrInput: string;
     notifications: any[];
     loaded: boolean = false;
+    nbAccountRequests: number;
+    nbExtensionRequests: number;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -112,7 +114,11 @@ export class HomeComponent {
 
     fetchAccountRequests() {
         this.userService.getAllAccountRequests()
-            .then(ar => this.accountRequests = ar.slice(0, 8));
+            .then(ars => {
+                this.nbAccountRequests = ars.filter(user => !!user.accountRequestDemand).length;
+                this.nbExtensionRequests = ars.filter(user => !!user.extensionRequestDemand).length;
+                this.accountRequests = ars.slice(0, 8);
+            });
     }
 
     fetchJobs() {
