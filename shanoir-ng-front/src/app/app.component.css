@@ -1,10 +1,10 @@
 .main-content { padding: 1px 20px 10px 20px; position: relative; margin-left: 0; }
 .main-content.open { margin-left: 300px; }
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
-.side-menu { width: 300px; position: fixed; top: 0; }
+.side-menu { width: 300px; position: fixed; top: 0; z-index: 1; }
 
 .close-button, 
-.open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); }
+.open-button { width: 14px; height: 27px; position: fixed; top: 0; left: 0; cursor: pointer; color: var(--very-light-grey); z-index: 2; }
 
 .open-button { border-radius: 0 2px 2px 0; background-color: var(--color-a); }
 
