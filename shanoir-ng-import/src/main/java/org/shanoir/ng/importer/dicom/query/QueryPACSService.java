@@ -156,7 +156,7 @@ public class QueryPACSService {
 			for (int i = 0; i < patientsNbre; i++) {
 				Patient patient = new Patient(attributesPatients.get(i));
 				patients.add(patient);
-				//queryStudies(calling, called, dicomQuery, patient);
+				queryStudies(calling, called, dicomQuery, patient);
 			}
 			importJob.setPatients(patients);
 		}
