@@ -20,8 +20,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,6 +109,8 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName) throws IOException, MessagingException {
+		Map<String, Integer> paths = new HashMap<>();
+
 		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
@@ -127,7 +132,16 @@ public class WADODownloaderService {
 					ByteArrayInputStream bIS = null;
 					try {
 						bIS = new ByteArrayInputStream(responseBody);
-						Files.copy(bIS, extractedDicomFile.toPath());
+						Path path = extractedDicomFile.toPath();
+						Path pathToSet = path;
+						if (paths.containsKey(path.toString())) {
+							pathToSet = new File(path.getParent().toString() + File.separatorChar + paths.get(path.toString()) + File.separatorChar + path.getFileName()).toPath();
+							paths.put(path.toString(), paths.get(path.toString()) + 1);
+							pathToSet.getParent().toFile().mkdirs();
+						} else {
+							paths.put(path.toString(), 1);
+						}
+						Files.copy(bIS, pathToSet);
 					} finally {
 						if (bIS != null) {
 							bIS.close();
