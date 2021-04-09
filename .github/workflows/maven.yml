@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out Git repository
+      uses: actions/checkout@v2
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -31,6 +32,16 @@ jobs:
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
-    - name: Lint Action
-      uses: wearerequired/lint-action@v1.9.0
-        
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - name: Install Node.js dependencies
+      run: npm ci
+    - name: Run linters
+      uses: wearerequired/lint-action@v1
+      with:
+        eslint: true
+        prettier: true
+      
