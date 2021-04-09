@@ -28,9 +28,9 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "allowedCommonJsDependencies": [ 
+            "allowedCommonJsDependencies": [
               "sha.js"
-           ]
+            ]
           },
           "configurations": {
             "production": {
@@ -98,15 +98,11 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "tsconfig.app.json",
-              "tsconfig.spec.json",
-              "e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         },
