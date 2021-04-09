@@ -24,8 +24,6 @@ jobs:
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
     - name: Build with Maven
       run: mvn -f ./shanoir-ng-parent/pom.xml install
-    - name: Lint Action
-      uses: wearerequired/lint-action@v1.9.0
       env:
         SHANOIR_URL_HOST: localhost
         SHANOIR_URL_SCHEME: http
@@ -33,4 +31,6 @@ jobs:
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+    - name: Lint Action
+      uses: wearerequired/lint-action@v1.9.0
         
