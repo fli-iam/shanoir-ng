@@ -38,7 +38,7 @@ jobs:
       with:
         node-version: 12
     - name: Install Node.js dependencies
-      run: npm ci
+      run: npm ci --prefix ./shanoir-ng-front/
     - name: Run linters
       uses: wearerequired/lint-action@v1
       with:
