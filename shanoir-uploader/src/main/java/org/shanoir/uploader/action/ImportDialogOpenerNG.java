@@ -3,6 +3,7 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -111,53 +112,69 @@ public class ImportDialogOpenerNG {
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesNamesAndCenters();
 		if (studies != null) {
-			for (Iterator iterator = studies.iterator(); iterator.hasNext();) {
+			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
+			List<StudyCard> studyCards = getAllStudyCards(studies);
+			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 				Study study = (Study) iterator.next();
 				study.setCompatible(new Boolean(false));
-				Long studyId = study.getId();
-				IdList idList = new IdList();
-				idList.getIdList().add(studyId);
-				List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
-				// fill missing infos coming from other microservice studies here:
 				Boolean compatibleStudyCard = false;
 				if (studyCards != null) {
-					for (Iterator itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
+					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
-						AcquisitionEquipment acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(acquisitionEquipmentId);
-						studyCard.setAcquisitionEquipment(acquisitionEquipment);
-						if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
-								&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
-							if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
-								String manufacturerSC = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-								String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
-								if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
-										&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
-										&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
-									studyCard.setCompatible(true);
-									compatibleStudyCard = true;
-								} else {
-									studyCard.setCompatible(false);
+						if (study.getId() == studyCard.getStudyId()) {
+							studyCardsStudy.add(studyCard);
+							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
+							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
+								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
+								if (acquisitionEquipment.getId() == acquisitionEquipmentId) {
+									studyCard.setAcquisitionEquipment(acquisitionEquipment);
+									if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
+											&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
+										if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
+											String manufacturerSC = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
+											String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
+											if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
+													&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
+													&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
+												studyCard.setCompatible(true);
+												compatibleStudyCard = true;
+											} else {
+												studyCard.setCompatible(false);
+											}
+										} else {
+											studyCard.setCompatible(false);
+										}
+									} else {
+										studyCard.setCompatible(false);
+									}								
+									break;
 								}
-							} else {
-								studyCard.setCompatible(false);
 							}
-						} else {
-							studyCard.setCompatible(false);
 						}
 					}
+					if (compatibleStudyCard) {
+						study.setCompatible(true);
+					} else {
+						study.setCompatible(false);
+					}
+					study.setStudyCards(studyCardsStudy);
 				}
-				if (compatibleStudyCard) {
-					study.setCompatible(true);
-				} else {
-					study.setCompatible(false);
-				}
-				study.setStudyCards(studyCards);
 			}
 			return studies;
 		} else {
 			return null;
 		}
+	}
+
+	private List<StudyCard> getAllStudyCards(List<Study> studies) {
+		IdList idList = new IdList();
+		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
+			Study study = (Study) iterator.next();
+			idList.getIdList().add(study.getId());
+		}
+		List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
+		return studyCards;
 	}
 
 	/**
