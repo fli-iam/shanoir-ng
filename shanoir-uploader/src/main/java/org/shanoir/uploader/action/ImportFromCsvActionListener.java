@@ -49,7 +49,6 @@ public class ImportFromCsvActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		ImportFromCsvRunner importer = new ImportFromCsvRunner(csvImports, resourceBundle, importFromCSVWindow, dicomServerClient, shanoirUploaderServiceClientNG);
 		importer.execute();
-		
 	}
 
 	/**
@@ -65,6 +64,5 @@ public class ImportFromCsvActionListener implements ActionListener {
 	public void setCsvImports(List<CsvImport> csvImports) {
 		this.csvImports = csvImports;
 	}
-
 
 }
