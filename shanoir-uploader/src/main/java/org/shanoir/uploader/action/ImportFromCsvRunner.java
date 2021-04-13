@@ -114,7 +114,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				Long acquisitionEquipmentIdSC = studyCard.getAcquisitionEquipmentId();
 				for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
 					AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
-					if (acquisitionEquipment.getId() == acquisitionEquipmentIdSC) {
+					if (acquisitionEquipment.getId().equals(acquisitionEquipmentIdSC)) {
 						studyCard.setAcquisitionEquipment(acquisitionEquipment);
 						studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
 						break;

@@ -125,12 +125,12 @@ public class ImportDialogOpenerNG {
 					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
 					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						if (study.getId() == studyCard.getStudyId()) {
+						if (study.getId().equals(studyCard.getStudyId())) {
 							studyCardsStudy.add(studyCard);
 							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
 							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
 								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
-								if (acquisitionEquipment.getId() == acquisitionEquipmentId) {
+								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
 									studyCard.setAcquisitionEquipment(acquisitionEquipment);
 									if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
 											&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
