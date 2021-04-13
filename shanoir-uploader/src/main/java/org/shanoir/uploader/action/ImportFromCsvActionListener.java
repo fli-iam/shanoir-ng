@@ -21,7 +21,7 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
 
 /**
- * Thsi class is used after 'import' button from CSV importer.
+ * This class is used after 'import' button from CSV importer.
  * It loads the list of imports to do, then imports them one by one
  * Managing errors and displays
  * @author fli
