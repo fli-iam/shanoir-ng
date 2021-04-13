@@ -111,9 +111,12 @@ public class ImportDialogOpenerNG {
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesNamesAndCenters();
+		logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 		if (studies != null) {
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
+			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = getAllStudyCards(studies);
+			logger.info("getAllStudyCards: " + studyCards.size() + " studycards found.");
 			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 				Study study = (Study) iterator.next();
 				study.setCompatible(new Boolean(false));
