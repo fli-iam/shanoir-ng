@@ -88,7 +88,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		importFromCSVWindow.progressBar.setString("Preparing import...");
 		importFromCSVWindow.progressBar.setVisible(true);
 
-		// Get the list of studies, study card, center, equipements to check their existence
+		// Get the list of studies, study card, center, equipments to check their existence
 		for (CsvImport importTodo : this.csvImports) {
 			idList.add(Long.valueOf(importTodo.getStudyId()));
 			studyCardsByStudy.put(importTodo.getStudyId(), new ArrayList<StudyCard>());
