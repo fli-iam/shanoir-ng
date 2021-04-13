@@ -100,20 +100,26 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			IdList idealist = new IdList();
 			idealist.setIdList(new ArrayList<>(idList));
 			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idealist);
-
 			if (studyCards == null) {
 				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
 
-			// Iterate over study cards to get equipement + fill study => SC map
+			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
+			if (acquisitionEquipments == null) {
+				throw new ShanoirException("Error while retrieving acquisition equipments");
+			}
+
+			// Iterate over study cards to get equipment + fill study => SC map
 			for (StudyCard studyCard : studyCards) {
-				AcquisitionEquipment acquisitionEquipment;
-				acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(studyCard.getAcquisitionEquipmentId());
-				if (acquisitionEquipment == null) {
-					throw new ShanoirException("Error while retrieving study cards");
+				Long acquisitionEquipmentIdSC = studyCard.getAcquisitionEquipmentId();
+				for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
+					AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
+					if (acquisitionEquipment.getId().equals(acquisitionEquipmentIdSC)) {
+						studyCard.setAcquisitionEquipment(acquisitionEquipment);
+						studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
+						break;
+					}
 				}
-				studyCard.setAcquisitionEquipment(acquisitionEquipment);
-				studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
 				studyCardsByStudy.get(studyCard.getStudyId().toString()).add(studyCard);
 			}
 		} catch (Exception e1) {
