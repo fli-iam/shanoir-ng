@@ -319,7 +319,7 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 
-	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) throws Exception {
+	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) {
 		if (acquisitionEquipmentId != null) {
 			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
 			int code = response.getStatusLine().getStatusCode();

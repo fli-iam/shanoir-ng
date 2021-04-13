@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
@@ -55,8 +56,8 @@ public class DicomQueryHelper {
 			throws Exception {
 
 		if (patientNameCriterion != null && !"".equals(patientNameCriterion)
-				|| (patientIdCriterion != null && !"".equals(patientIdCriterion))
-				|| (patientBirthDate != null && !"".equals(patientBirthDate))) {
+				|| patientIdCriterion != null && !"".equals(patientIdCriterion)
+				|| patientBirthDate != null && !"".equals(patientBirthDate)) {
 			String[] restrictions;
 			if (patientNameCriterion != null && !"".equals(patientNameCriterion)
 					&& (patientNameCriterion.contains("*") || !patientNameCriterion.contains("^"))) {
@@ -75,7 +76,7 @@ public class DicomQueryHelper {
 			}
 
 		} else if (studyDescriptionCriterion != null && !"".equals(studyDescriptionCriterion)
-				|| (studyDate != null && !"".equals(studyDate))) {
+				|| studyDate != null && !"".equals(studyDate)) {
 			String[] restrictions = buildRestrictions(null, null, studyDescriptionCriterion,
 					seriesDescriptionCriterion, beforeStudyDate, afterStudyDate, patientBirthDate, studyDate);
 			String[] args = buildCommand(null, false, restrictions, null, null);
@@ -92,11 +93,11 @@ public class DicomQueryHelper {
 			 * No result found if there is no patient or if no images are
 			 * associated to the patients found
 			 */
-			boolean noResult = (media.getFirstTreeNode() == null);
+			boolean noResult = media.getFirstTreeNode() == null;
 			if (media.getTreeNodes().size() > 1) {
 				for (final Iterator<DicomTreeNode> itePatient = media.getTreeNodes().values().iterator(); itePatient
 						.hasNext();) {
-					final DicomTreeNode patient = (DicomTreeNode) itePatient.next();
+					final DicomTreeNode patient = itePatient.next();
 					if (patient.getFirstTreeNode() != null) {
 						noResult &= false;
 					}
@@ -211,7 +212,7 @@ public class DicomQueryHelper {
 	 */
 	public String[] buildCommand(final String level, final boolean cmove, final String[] restrictions, final String studyInstanceUID, final String seriesInstanceUID) {
 		logger.debug("buildCommand : Begin");
-		List<String> resultList = new ArrayList<String>();
+		List<String> resultList = new ArrayList<>();
 		if (level != null) {
 			resultList.add(level);
 		}
@@ -231,7 +232,7 @@ public class DicomQueryHelper {
 		if (restrictions != null) {
 			resultList.addAll(Arrays.asList(restrictions));
 		}
-		if (wantedModality != null && !"".equals(wantedModality)) {
+		if (!StringUtils.isBlank(wantedModality)) {
 			// do different treatment here for level == -I
 			if (!"-I".equals(level)) {
 				resultList.add("-qModality=" + wantedModality);
@@ -304,10 +305,11 @@ public class DicomQueryHelper {
 			final DicomObject patientDicomObject = itePatient.next();
 			// patient name validated on level patient
 			boolean patientNameOkLP;
-			if (isFuzzypatientNameCriterion)
+			if (isFuzzypatientNameCriterion) {
 				patientNameOkLP = checkFuzzyPatientName(patientNameCriterion, patientDicomObject);
-			else
+			} else {
 				patientNameOkLP = checkPatientName(patientNameCriterion, patientDicomObject);
+			}
 
 			if (patientNameOkLP) {
 
@@ -447,8 +449,9 @@ public class DicomQueryHelper {
 				firstName1Criterion = patientNameCriterion;
 			}
 
-		} else
+		} else {
 			lastNameCriterion = patientNameCriterion;
+		}
 
 		/*
 		 * Extract lastNameFound, firstName1Found and firstName2Found from the
@@ -474,8 +477,9 @@ public class DicomQueryHelper {
 				firstName1Found = patientNameFound;
 			}
 
-		} else
+		} else {
 			lastNameFound = patientNameFound;
+		}
 
 		/* Compare the the lastNameCriterion and the lastNameFound */
 
@@ -491,8 +495,9 @@ public class DicomQueryHelper {
 			if (lastNameRegex) {
 				lastNameMatch = lastNameFound.matches(lastNameCriterion);
 			} else {
-				if (lastNameCriterion != null)
+				if (lastNameCriterion != null) {
 					lastNameMatch = lastNameFound.contentEquals(lastNameCriterion);
+				}
 			}
 		}
 		/* Compare the the firstName1Criterion and the firstName1Found */
@@ -509,8 +514,9 @@ public class DicomQueryHelper {
 			if (firstName1Regex) {
 				firstName1Match = firstName1Found.matches(firstName1Criterion);
 			} else {
-				if (firstName1Criterion != null)
+				if (firstName1Criterion != null) {
 					firstName1Match = firstName1Found.contentEquals(firstName1Criterion);
+				}
 			}
 		}
 		/* Compare the the firstName2Criterion and the firstName2Found */
@@ -527,8 +533,9 @@ public class DicomQueryHelper {
 			if (firstName2Regex) {
 				firstName2Match = firstName2Found.matches(firstName2Criterion);
 			} else {
-				if (firstName2Criterion != null)
+				if (firstName2Criterion != null) {
 					firstName2Match = firstName2Found.contentEquals(firstName2Criterion);
+				}
 
 			}
 		}
@@ -590,8 +597,8 @@ public class DicomQueryHelper {
 					logger.debug("populate : match=" + match);
 				}
 				if (match
-						|| (studyDescriptionCriterionReplaced == null
-						|| "".equals(studyDescriptionCriterionReplaced))) {
+						|| studyDescriptionCriterionReplaced == null
+						|| "".equals(studyDescriptionCriterionReplaced)) {
 					final DicomTreeNode study = patient.initChildTreeNode(dicomObject);
 					studyFound = true;
 					boolean atLeastOneWantedModality = false;
@@ -633,7 +640,7 @@ public class DicomQueryHelper {
 			final DicomTreeNode serie = study.initChildTreeNode(dicomObject);
 			final String modality = serie.getDescriptionMap().get("modality");
 			if (modality != null) {
-				if (wantedModality.equalsIgnoreCase(modality)) {
+				if (StringUtils.isBlank(wantedModality) || wantedModality.equalsIgnoreCase(modality)) {
 					atLeastOneWantedModality = true;
 				}
 				// Don't add serie of modality PR
