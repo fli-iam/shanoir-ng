@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
         <menu-item label="Details..." awesome="fas fa-eye" (click)="showExaminationDetails()"></menu-item>
         <menu-item [disabled]="datasetIds && datasetIds.length == 0" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item [disabled]="datasetIds && datasetIds.length == 0" label="Download as Niftii" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item [disabled]="datasetIds && datasetIds.length == 0" label="Download as Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
     </dropdown-menu>   
 
     <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')"> 
