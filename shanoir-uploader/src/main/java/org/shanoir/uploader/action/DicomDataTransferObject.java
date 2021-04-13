@@ -110,7 +110,7 @@ public class DicomDataTransferObject {
 		String dicomStudyDate = study.getDescriptionMap().get(DATE);
 		if (dicomStudyDate != null && !"".equals(dicomStudyDate)) {
 			studyDate = ShanoirUtil.convertStringDicomDateToDate(dicomStudyDate);
-		} else {
+		} else if (mainWindow != null) {
 			logger.error("Study date could not be used for import.");
 			JOptionPane.showMessageDialog(mainWindow.frame,
 				    "Study date could not be used for import.",
