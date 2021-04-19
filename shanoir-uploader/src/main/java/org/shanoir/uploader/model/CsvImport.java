@@ -13,28 +13,27 @@ import java.util.List;
  */
 public class CsvImport {
 
-
-
 	public CsvImport(String[] csvInput) {
 
-        this.rawData = Arrays.copyOf(csvInput, 9);
+        this.rawData = Arrays.copyOf(csvInput, 10);
 
-        if (csvInput == null || csvInput.length < 8) {
+        if (csvInput == null || csvInput.length < 9) {
 			this.errorMessage = "shanoir.uploader.import.csv.error.column";
 			return;
 		}
-		this.name = csvInput[0];
-		this.surname = csvInput[1];
-		this.studyId = csvInput[2];
-		this.studyCardName = csvInput[3];
-		this.commonName = csvInput[4];
-		this.studyFilter = csvInput[5];
-		this.acquisitionFilter = csvInput[6];
-		if (csvInput.length > 7) {
-			this.minDateFilter = csvInput[7];
-		}
+        this.ipp = csvInput[0];
+		this.name = csvInput[1];
+		this.surname = csvInput[2];
+		this.studyId = csvInput[3];
+		this.studyCardName = csvInput[4];
+		this.commonName = csvInput[5];
+		this.studyFilter = csvInput[6];
+		this.acquisitionFilter = csvInput[7];
 		if (csvInput.length > 8) {
-			this.comment = csvInput[8];
+			this.minDateFilter = csvInput[8];
+		}
+		if (csvInput.length > 9) {
+			this.comment = csvInput[9];
 		}
 	}
 	
@@ -42,6 +41,9 @@ public class CsvImport {
 	String[] rawData;
 
 	// First part is research criteria (all mandatory)
+
+	String ipp;
+
 	String name;
 	
 	String surname;
@@ -219,6 +221,20 @@ public class CsvImport {
 	 */
 	public void setStudyFilter(String studyFilter) {
 		this.studyFilter = studyFilter;
+	}
+
+	/**
+	 * @return the ipp
+	 */
+	public String getIpp() {
+		return ipp;
+	}
+
+	/**
+	 * @param ipp the ipp to set
+	 */
+	public void setIpp(String ipp) {
+		this.ipp = ipp;
 	}
 	
 }
