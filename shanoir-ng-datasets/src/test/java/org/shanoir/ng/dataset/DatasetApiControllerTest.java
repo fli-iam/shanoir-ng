@@ -126,6 +126,9 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
+	@MockBean
+	private RabbitTemplate rabbitTemplate;
+
 	private Subject subject = new Subject(3L, "name");
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();

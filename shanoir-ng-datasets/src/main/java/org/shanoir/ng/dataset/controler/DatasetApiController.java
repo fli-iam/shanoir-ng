@@ -152,7 +152,6 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	ShanoirEventService eventService;
 
-
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
@@ -308,26 +307,9 @@ public class DatasetApiController implements DatasetApi {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
 			} else if (NII.equals(format)) {
-				boolean defaultConverter = true;
-				// Check if the nifti converter is the one configured
-				if (dataset.getDatasetAcquisition().getStudyCard() != null) {
-					// Check converter id
-				} else {
-					// Check every dataset expression
-					for (DatasetExpression exp : dataset.getDatasetExpressions()) {
-						if (!exp.getNiftiConverterId().equals(converterId)) {
-							defaultConverter = false;
-						}
-					}
-				}
-				
-				// If we use the default converter, just download the dataset
-				if (defaultConverter) {
-					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
-				} else {
-					// Otherwise, redo a conversion
-
+				// Check if we want a specific converter
+				if (converterId != null) {
+					// If converter ID is set, redo a conversion
 					// Create a temporary folder
 					// Add timestamp to get a difference
 					File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
@@ -345,6 +327,9 @@ public class DatasetApiController implements DatasetApi {
 					}
 					tmpFilePath = tmpFile.getAbsolutePath();
 					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
+				} else  {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
 				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
