@@ -1,0 +1,51 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+<div class="header command-zone">Migrate shanoir's study</div>
+<fieldset>
+    <ol>
+        <legend>
+            Please select a study to migrate to another shanoir's instance.
+        </legend>
+        <li>
+            <label>Study</label> 
+            <span class="right-col">
+                <select-box id="study" [options]="studyOptions"> [(ngModel)]="study"</select-box>
+            </span>
+        </li>
+        <li>
+            <label>Distant Shanoir URL</label> 
+            <span class="right-col">
+                <input type="text" id="url" [(ngModel)]="url" />
+            </span>
+        </li>
+        <li>
+            <label>Username</label> 
+            <span class="right-col">
+                <input type="text" id="username" [(ngModel)]="username"/>
+            </span>
+        </li>
+        <li>
+            <label>password</label> 
+            <span class="right-col">
+                <input type="password" id="password" [(ngModel)]="password"/>
+            </span>
+            <span>
+                <button (click)="connect()">Connect !</button>
+            </span>
+        </li>
+    </ol>
+</fieldset>
+<button class="next" (click)="migrateStudy()">Migrate study</button>

@@ -63,6 +63,8 @@ import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.componen
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { MigrateStudyComponent } from './studies/migration/migrate-study.component';
+import { MigrationService } from './studies/migration/migration.service'
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
@@ -296,6 +298,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         DatasetListComponent,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
+        MigrateStudyComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,
@@ -424,6 +427,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         RoleService,
         StudyService,
         CoilService,
+        MigrationService,
         // ToolService,
         SubjectService,
         UserService,
@@ -467,6 +471,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         WindowService,
         DicomService,
         ManufacturerModelPipe,
+        MigrationService,
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,
