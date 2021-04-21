@@ -13,60 +13,62 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { Option } from '../../shared/select/select.component';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { MigrationService } from './migration.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'download-statistics',
     templateUrl: 'migrate-study.component.html'
 })
-
 export class MigrateStudyComponent implements OnInit {
 
     public form: FormGroup;
     public studyOptions: Option<Study>[] = [];
-    public username: string;
-    public url: string;
-    public password: string;
-    public study: Study;
+    public error: string;
 
     constructor(private studyService: StudyService,
             private datasetService: DatasetService,
             private breadcrumbsService: BreadcrumbsService, 
             private formBuilder: FormBuilder,
             private migrationService: MigrationService) {
+                setTimeout(() => {
+                    this.breadcrumbsService.currentStepAsMilestone();
+                    this.breadcrumbsService.currentStep.label = 'Migrate study';
+                });
+                this.buildForm();
     }
 
     ngOnInit() {
-        setTimeout(() => {
-            this.breadcrumbsService.currentStepAsMilestone();
-            this.breadcrumbsService.currentStep.label = 'Migrate study';
-        });
         this.studyService.findStudiesByUserId().then(studies => {
             this.studyOptions = studies.map(study => new Option(study, study.name));
-            this.buildForm();
         });
-    }
-
-    migrateStudy(): void {
-        console.log('oucou');
     }
 
     connect(): void {
-       this.migrationService.connect(this.url, this.username, this.password);
-    }
+       this.migrationService.connect(this.form.get('url').value, this.form.get('username').value, this.form.get('password').value, this.form.get('study').value.id)
+       .then(() => {
+            this.error = "";
+        }).catch(exception => {
+        if (exception.error.message.indexOf('401') != -1) {
+            this.error = "Authentication failed, please check username and password";
+        } else {
+            this.error = "An unexpected error occured, please check distant URL";
+        }
+       }
+    )};
 
     buildForm(): void {
         this.form = this.formBuilder.group({
-            'study': ['', []],
-            'username': ['', []],
-            'password': ['', []],
-            'url': ['', []]
+            'study': ['', [Validators.maxLength(255)]],
+            'username': ['', [Validators.maxLength(255)]],
+            'password': ['', [Validators.maxLength(255)]],
+            'url': ['', [Validators.maxLength(255)]]
         });
     }
 

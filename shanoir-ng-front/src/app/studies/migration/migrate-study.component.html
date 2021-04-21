@@ -13,8 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 
+<form [formGroup]="form" novalidate>
 <div class="header command-zone">Migrate shanoir's study</div>
-<fieldset>
+<fieldset class="step">
     <ol>
         <legend>
             Please select a study to migrate to another shanoir's instance.
@@ -22,30 +23,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label>Study</label> 
             <span class="right-col">
-                <select-box id="study" [options]="studyOptions"> [(ngModel)]="study"</select-box>
+                <select-box id="study" [options]="studyOptions" formControlName="study"></select-box>
             </span>
         </li>
+        <legend>
+            Please connect to a distant shanoir instance.
+        </legend>
         <li>
             <label>Distant Shanoir URL</label> 
             <span class="right-col">
-                <input type="text" id="url" [(ngModel)]="url" />
+                <input type="text" id="url" formControlName="url" maxlength="255" />
             </span>
         </li>
         <li>
             <label>Username</label> 
             <span class="right-col">
-                <input type="text" id="username" [(ngModel)]="username"/>
+                <input type="text" id="username" formControlName="username" maxlength="255" />
             </span>
         </li>
         <li>
-            <label>password</label> 
+            <label>Password</label> 
             <span class="right-col">
-                <input type="password" id="password" [(ngModel)]="password"/>
+                <input type="password" id="password" formControlName="password" maxlength="255" />
             </span>
+        </li>
+        <li>
             <span>
                 <button (click)="connect()">Connect !</button>
             </span>
+            <label *ngIf="error" class="form-validation-alert">{{error}}</label>
         </li>
     </ol>
 </fieldset>
-<button class="next" (click)="migrateStudy()">Migrate study</button>

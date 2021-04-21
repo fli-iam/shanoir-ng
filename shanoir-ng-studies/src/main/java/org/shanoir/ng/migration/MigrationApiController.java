@@ -3,18 +3,18 @@ package org.shanoir.ng.migration;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.ParseException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,20 +27,14 @@ public class MigrationApiController implements MigrationApi {
 	RestTemplate restTemplate;
 
 	@Override
-	public ResponseEntity<Void> migrateStudy (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "url of distant shanoir", required = true) @RequestBody String shanoirUrl)
-					throws RestServiceException {
-		throw new NotImplementedException("Not implemented yet !");
-	}
-
-	@Override
-	public ResponseEntity<Void> connect (
+	public ResponseEntity<String> migrateStudy (
 					@ApiParam(value = "Url of distant shanoir") @RequestParam("shanoirUrl") String shanoirUrl,
 					@ApiParam(value = "Username of user") @RequestParam("username") String username,
-					@ApiParam(value = "Password of user") @RequestParam("userPassword") String userPassword)
+					@ApiParam(value = "Password of user") @RequestParam("userPassword") String userPassword,
+					@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId)
 		throws RestServiceException {
 
+		// Connect to keycloak and keep connection alive
 		String keycloakURL = shanoirUrl + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();
@@ -49,9 +43,16 @@ public class MigrationApiController implements MigrationApi {
 			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(userPassword, "UTF-8"));
 			postBody.append("&scope=offline_access");
+			
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			headers.set("Content-type", "application/x-www-form-urlencoded");
 
-			ResponseEntity<String> response = restTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody), String.class);
-			String responseEntityString = response.getBody();
+			ResponseEntity<String> response = restTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody.toString(), headers), String.class);
+
+			// Migrate study
+
+			return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
@@ -59,6 +60,6 @@ public class MigrationApiController implements MigrationApi {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new ResponseEntity<>(HttpStatus.OK);
+		return null;
 	}
 }
