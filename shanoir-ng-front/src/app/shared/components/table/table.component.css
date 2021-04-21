@@ -58,11 +58,11 @@ a.link { text-decoration: none; color: inherit; }
 
 .cell-button i:hover { color: var(--color-a); }
 
-checkbox { height: 13px; width: 13px; margin: 1px 0; }
+checkbox { vertical-align: middle; }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
-.triangle.up { bottom: 100%; }
-.triangle.down { top: 100%; }
+.triangle.up { top: -12px; }
+.triangle.down { bottom: -8px; }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
 .col-title { z-index: 1; }

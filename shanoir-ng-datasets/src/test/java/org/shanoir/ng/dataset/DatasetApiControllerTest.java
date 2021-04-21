@@ -137,6 +137,7 @@ public class DatasetApiControllerTest {
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		updatedMetadata.setComment("comment");
+		updatedMetadata.setName("test 1");
 	}
 
 	@Test
@@ -215,7 +216,7 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
 
 		// THEN all datasets are exported
 		
@@ -263,7 +264,7 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
 
 
 		// THEN all datasets are exported

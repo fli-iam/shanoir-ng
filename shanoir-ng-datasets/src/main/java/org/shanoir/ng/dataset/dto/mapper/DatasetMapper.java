@@ -23,6 +23,7 @@ import org.mapstruct.Named;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class }) 
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class }) 
 @DecoratedWith(DatasetDecorator.class)
 public interface DatasetMapper {
 

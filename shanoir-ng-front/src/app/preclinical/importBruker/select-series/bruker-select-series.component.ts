@@ -31,11 +31,12 @@ import { ImportService } from '../../../import/shared/import.service';
 })
 export class BrukerSelectSeriesComponent {
 
-    private patients: PatientDicom[];
+    public patients: PatientDicom[];
     private workFolder: string;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private papayaParams: object[];
+    public detailedPatient: any;
+    public detailedSerie: any;
+    public papayaParams: object[];
+    public papayaError: boolean = false;
 
     constructor(
             private importService: ImportService,
@@ -53,16 +54,19 @@ export class BrukerSelectSeriesComponent {
     }
 
 
-    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
+    public showSerieDetails(serie: SerieDicom): void {
         this.detailedPatient = null;
-        if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
+        if (serie && this.detailedSerie && serie.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
-            this.detailedSerie = nodeParams;
+            this.detailedSerie = serie;
+            setTimeout(() => { // so the details display has no delay
+                if (serie && serie.images) this.initPapaya(serie); 
+            });
         }
     }
 
-    private showPatientDetails(nodeParams: any): void {
+    public showPatientDetails(nodeParams: any): void {
         this.detailedSerie = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
             this.detailedPatient = null;
@@ -70,8 +74,31 @@ export class BrukerSelectSeriesComponent {
             this.detailedPatient = nodeParams;
         }
     }
+    
+    private initPapaya(serie: SerieDicom): void {
+        this.papayaError = false;
+        let listOfPromises = serie.images.map((image) => {
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+        });
+        let promiseOfList = Promise.all(listOfPromises);
+        promiseOfList.then((values) => {
+            let params: object[] = [];
+            params['binaryImages'] = [values];
+            this.papayaParams = params;
+        }).catch(reason => {
+            this.papayaError = true;
+            console.error(reason);
+        });
+    }
 
-    private onPatientUpdate(): void {
+    onStudyCheckChange(checked: boolean, study) {
+        if (study.series) {
+            study.series.forEach(serie => serie.selected = checked)
+        }
+        this.onPatientUpdate();
+    }
+
+    public onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
     }
 
@@ -87,7 +114,7 @@ export class BrukerSelectSeriesComponent {
         return false;
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/context']);
     }
 }

@@ -14,11 +14,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ng-template #recursiveList let-datas let-id="id">
     <node *ngFor="let item of datas; let i = index" 
-        [label]="getFileName(item.path) + id + i" 
+        [label]="getFileName(item.path)" 
         [deploy]="false"
         [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
         (labelClick)="getContent(item, id + i)"
-        [buttonPicto]="'fas fa-save'"
+        [buttonPicto]="hasDownloadRights() ? 'fas fa-save' : undefined"
         (buttonClick)="download(item)"
         (openClick)="getDetail($event)"
         [hasChildren]="item.elements && item.elements.length > 0"

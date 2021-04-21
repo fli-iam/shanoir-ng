@@ -18,6 +18,10 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 
 @Component({
     selector: 'examination-list',
@@ -26,7 +30,7 @@ import { ExaminationService } from '../shared/examination.service';
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(
@@ -35,6 +39,10 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
+    }
+
+    getService(): EntityService<Examination> {
+        return this.examinationService;
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
@@ -53,7 +61,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         let colDef: any[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
-                headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
+                headerName: "Subject", field: "subject.name", orderBy: ['subjectId'], cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : '';
                 }
             },{
@@ -61,10 +69,10 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },{
-                headerName: "Research study", field: "study.name",
+                headerName: "Research study", field: "study.name", orderBy: ['studyId'],
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },{
-                headerName: "Center", field: "center.name",
+                headerName: "Center", field: "center.name", orderBy: ['centerId'],
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];

@@ -129,9 +129,12 @@ dcm4chee-arc:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9924
 spring:
   profiles: dev
   datasource:
+    url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     initialize: true
   jpa:
     hibernate:
@@ -139,7 +142,23 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-
+  rabbitmq:
+    host: localhost
+front.server:
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
+keycloak:
+  auth-server-url: https://shanoir-ng-nginx/auth
+dcm4chee-arc:
+  host: dcm4chee-arc
+# Solr
+spring.data.solr.host: http://solr:8983/solr/shanoir/
+# microservices url
+ms.url:
+  shanoir-ng-studies: http://studies:9902/
+# Data folder configuration
+datasets-data: /var/datasets-data
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
@@ -162,3 +181,4 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration

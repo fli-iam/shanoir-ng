@@ -21,7 +21,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
@@ -81,6 +84,16 @@ public class PathologyModelApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+	}
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -139,8 +152,7 @@ public class PathologyModelApiControllerTest {
 	@Test
 	@WithMockUser
 	public void uploadSpecificationsTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
-				"some xml".getBytes());
+		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain", "some xml".getBytes());
 		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD_SPECS).file(firstFile))
 				.andExpect(status().isOk());
 	}

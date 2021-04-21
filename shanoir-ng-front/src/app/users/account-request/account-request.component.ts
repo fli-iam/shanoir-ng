@@ -16,11 +16,10 @@ import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Component({
     selector: 'accountRequest',
@@ -29,16 +28,17 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 export class AccountRequestComponent {
     
-    private user: User;
-    private form: FormGroup;
+    public user: User;
+    public form: FormGroup;
 
-    private requestSent: boolean = false;
-    private errorOnRequest: boolean = false;
+    public requestSent: boolean = false;
+    public errorOnRequest: boolean = false;
+    infoValid: boolean = false;
 
     
     constructor(
             private fb: FormBuilder, 
-            private userService: UserService,
+            public userService: UserService,
             private location: Location) {}
 
     ngOnInit(): void {
@@ -53,11 +53,31 @@ export class AccountRequestComponent {
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': [this.user.accountRequestInfo, [Validators.required]]
+            'accountRequestInfo': [this.user.accountRequestInfo, [this.validateARInfo]]
         });
     }
 
+    onInfoValidityUpdate(valid: boolean) {
+        this.infoValid = valid;
+        this.form.get('accountRequestInfo').updateValueAndValidity();
+    }
+
+    private validateARInfo = (control: AbstractControl): ValidationErrors | null => {
+        if (!this.infoValid) {
+            return { invalid: true}
+        }
+        return null;
+    }
+
     accountRequest(): void {
+        if (this.user.accountRequestInfo.challenge != null) {
+            // These fields are allowed to be null in case of challenge
+            this.user.accountRequestInfo.contact="";
+            this.user.accountRequestInfo.function="";
+            this.user.accountRequestInfo.work="";
+            this.user.accountRequestInfo.study="";
+        }
+
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;

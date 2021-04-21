@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<>();
+
+	Random rand = new Random();
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
@@ -577,11 +580,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 		// Get subject folder to delete it after
 		File subjectFolder = diff(existingFiles, directory.getPath()).get(0);
-
 		for (File file : niiFiles) {
 			try {
 				// Copy all nifti files
-				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + rand.nextInt() + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				LOG.error("Error while copying files", e);
 			}
@@ -690,7 +692,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			for (Image image : serie.getImages()) {
 				final int acquisitionNumber = image.getAcquisitionNumber();
 				Set<EchoTime> echoTimes = image.getEchoTimes();
-				double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
+				double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null : image.getImageOrientationPatient().stream().mapToDouble(i->i).toArray();
 				SerieToDatasetsSeparator seriesToDatasetsSeparator =
 						new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
 				boolean found = false;
@@ -835,14 +837,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		int[] ret = new int[integers.size()];
 		for (int i = 0; i < ret.length; i++) {
 			ret[i] = integers.get(i).intValue();
-		}
-		return ret;
-	}
-
-	public static double[] convertDoubles(List<Double> doubles) {
-		double[] ret = new double[doubles.size()];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = doubles.get(i).doubleValue();
 		}
 		return ret;
 	}

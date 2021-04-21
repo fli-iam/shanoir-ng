@@ -127,15 +127,6 @@
 			<artifactId>xmlbeans</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<!-- ********************************************************** Dependency 
-			to KeycloakInstalled, to connect desktop apps (e.g. Swing or JavaFX) with 
-			Keycloak, see https://www.keycloak.org/docs/latest/securing_apps/index.html#_installed_adapter 
-			********************************************************** -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-installed-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
 		<!-- ********************************************************** ** DCM4CHE 
 			dependencies ********************************** ********************************************************** -->
 		<!-- dependency DCM4CHE core -->
@@ -237,6 +228,7 @@
 				<target> and </target> in a build.xml. -->
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<phase>install</phase>

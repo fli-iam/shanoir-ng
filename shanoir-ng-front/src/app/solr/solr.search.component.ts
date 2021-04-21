@@ -39,7 +39,7 @@ export class SolrSearchComponent{
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     hasDownloadRight: boolean = true;
     selectedDatasetIds: number[];
     allStudies: FacetResultPage; 
@@ -53,10 +53,15 @@ export class SolrSearchComponent{
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
+        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        if (input) {
+            this.keyword = input;
+            this.form.get('keywords').markAsTouched();
+        }
     }
     
     buildForm(): FormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'keywords': [this.keyword, Validators.pattern(searchBarRegex)],
             'studyName': [this.solrRequest.studyName],
@@ -158,6 +163,8 @@ export class SolrSearchComponent{
                     })} 
                 return solrResultPage;
             });
+        } else {
+            return Promise.resolve(new SolrResultPage());
         }
     }
 

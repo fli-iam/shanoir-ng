@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
+import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
@@ -37,7 +38,6 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.service.UserService;
@@ -213,7 +213,7 @@ public class UserServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_USER" })
-	public void findByIdTest() {		
+	public void findByIdTest() {
 		final User user = userService.findById(USER_ID);
 		Assert.assertNotNull(user);
 		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
@@ -263,6 +263,7 @@ public class UserServiceTest {
 		userService.requestExtension(USER_ID, requestInfo);
 
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+		Mockito.verify(emailService, Mockito.times(1)).notifyAdminAccountExtensionRequest(Mockito.any(User.class));
 	}
 
 	@Test

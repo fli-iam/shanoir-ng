@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
- * A shanoir event is an event allowing to keep some history during CRUD events of shanoir elementcs
+ * A shanoir event is an event allowing to keep some history during CRUD events of shanoir elements
  * @author JComeD
  *
  */

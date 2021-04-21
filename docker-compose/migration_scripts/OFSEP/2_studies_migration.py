@@ -24,12 +24,12 @@ targetCursor = targetConn.cursor()
 print("######## CLEANING OF SOURCE DB SHANOIR_OLD_OFSEP: START ###################")
 ######## REL_STUDY_SUBJECT ###################
 print("Delete duplicate entries (study_id, subject_id) in rel_study_subject: start")
-query = """DELETE FROM rel_subject_study WHERE rel_subject_study_id IN (
-	SELECT rel_subject_study_id FROM (
-		SELECT a.rel_subject_study_id FROM rel_subject_study a JOIN (
-			SELECT study_id, subject_id, COUNT(*) FROM rel_subject_study GROUP BY study_id, subject_id HAVING COUNT(*) > 1
-		) b ON a.study_id = b.study_id AND a.subject_id = b.subject_id ORDER BY a.rel_subject_study_id
-	) AS c
+query = """DELETE FROM REL_SUBJECT_STUDY WHERE REL_SUBJECT_STUDY_ID IN (
+	SELECT REL_SUBJECT_STUDY_ID FROM (
+		SELECT A.REL_SUBJECT_STUDY_ID FROM REL_SUBJECT_STUDY A JOIN (
+			SELECT STUDY_ID, SUBJECT_ID, COUNT(*) FROM REL_SUBJECT_STUDY GROUP BY STUDY_ID, SUBJECT_ID HAVING COUNT(*) > 1
+		) B ON A.STUDY_ID = B.STUDY_ID AND A.SUBJECT_ID = B.SUBJECT_ID ORDER BY A.REL_SUBJECT_STUDY_ID
+	) AS C
 )"""
 sourceCursor.execute(query)
 sourceConn.commit()
@@ -214,8 +214,8 @@ print("Reimport studies: start")
 sourceCursor.execute("""SELECT STUDY_ID, IS_CLINICAL, COORDINATOR_ID, IS_DOWNLOADABLE_BY_DEFAULT, END_DATE, IS_MONO_CENTER, NAME,
     START_DATE, REF_STUDY_STATUS_ID, REF_STUDY_TYPE_ID, IS_VISIBLE_BY_DEFAULT, IS_WITH_EXAMINATION FROM STUDY""")
 query = """INSERT INTO study
-    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)"""
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Reimport studies: end")
@@ -231,7 +231,7 @@ print("Reimport study_center: end")
 
 print("Reimport study_user: start")    
 sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, u.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
-query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
+query = "INSERT INTO study_user (id, confirmed, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, 1, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Reimport study_user: end")

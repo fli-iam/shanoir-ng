@@ -19,6 +19,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { DatasetType } from './dataset-type.model';
 import { Dataset, DatasetMetadata } from './dataset.model';
+import { DatasetUtils } from './dataset.utils';
 import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
@@ -38,7 +39,7 @@ export class DatasetDTOService {
      * @param result can be used to get an immediate temporary result without waiting async data
      */
     public toEntity(dto: DatasetDTO, result?: Dataset): Promise<Dataset> {      
-        if (!result) result = Dataset.getDatasetInstance(dto.type);
+        if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
@@ -56,7 +57,7 @@ export class DatasetDTOService {
         if (!result) result = [];
         if (dtos) {
             for (let dto of dtos) {
-                let entity = Dataset.getDatasetInstance(dto.type);
+                let entity = DatasetUtils.getDatasetInstance(dto.type);
                 DatasetDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -181,6 +182,7 @@ export class EegDatasetDTO extends DatasetDTO {
     channels: Channel[];
     events: Event[];
     coordinatesSystem: string;
+    selected: boolean;
 }
 
 

@@ -21,7 +21,9 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 
 @Component({
@@ -32,20 +34,26 @@ import * as AppUtils from '../../utils/app.utils';
 
 export class UserComponent extends EntityComponent<User> {
 
-    private roles: Role[];
-    private denyLoading: boolean = false;
-    private acceptLoading: boolean = false;
+    public roles: Role[];
+    public denyLoading: boolean = false;
+    public acceptLoading: boolean = false;
+    public studies = [];
 
     constructor(
             private route: ActivatedRoute,
             private userService: UserService,
-            private roleService: RoleService) {
+            private roleService: RoleService,
+            private studyService: StudyService) {
             
         super(route, 'user');
     }
 
     public get user(): User { return this.entity; }
     public set user(user: User) { this.entity = user; }
+
+    getService(): EntityService<User> {
+        return this.userService;
+    }
 
     initView(): Promise<void> {
         return this.loadUserAndRoles();
@@ -67,6 +75,17 @@ export class UserComponent extends EntityComponent<User> {
             if (user.extensionRequestDemand && user.extensionRequestInfo) {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
+        });
+        this.studyService.findStudiesByUserId().then(studies => {
+            this.studies = studies.filter(study =>  {
+                for( var suser of study.studyUserList) {
+                    // Admin case, we check that the user is part of the study
+                    if (suser.userId === this.entity.id) {
+                        return true;
+                    }
+                }
+                return false;
+            });
         });
         Promise.all([userPromise, this.getRoles()]).then(() => {
             this.user.role = this.getRoleById(this.user.role.id);

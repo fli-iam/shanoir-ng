@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- <menu-item label="Collapse all" awesome="far fa-minus-square" (click)="collapseAll()"></menu-item> -->
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.examinations && node.examinations != 'UNLOADED'">        
+    <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">        
         <examination-node
                 node
                 *ngFor="let examinationNode of node.examinations"

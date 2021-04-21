@@ -94,7 +94,7 @@ export class SubjectNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            []
+            exam.extraDataFilePathList
         );
     }
     
@@ -102,7 +102,7 @@ export class SubjectNodeComponent implements OnChanges {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : [],
         );
     }
     
@@ -125,7 +125,7 @@ export class SubjectNodeComponent implements OnChanges {
     
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
-        else if (this.node.examinations == 'UNLOADED') return 'unknown';
+        else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
         else return this.node.examinations.length > 0;
     }
 

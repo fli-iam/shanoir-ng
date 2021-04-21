@@ -1,7 +1,7 @@
 /**********/
 /* Common */
 /**********/
-:root{
+:root {
     --very-light-grey: #fdfdfd;
     --lighter-grey: #fafafa;
     --light-grey: #f1f1f1;
@@ -17,23 +17,32 @@
     --color-b: #675682;
     --color-b-light: #E3E0E8;
     --color-b-light2: #827498;
-    --color-c: #498467;
-    --color-c-light: #6A9A82;
+    --color-c: darkgreen;
+    --color-c-light: #67977f;
     --color-error: #BA2D0B;
     --color-important: #BA2D0B;
     --color-light-error: #F2D8D2 ;
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
+    
+    /* --instance-name: "QUALIF";
+    --instance-color: teal;
+    --user-color: teal; */
+
+    --instance-name: ;
+    --instance-color: transparent;
+    --user-color: #813371;
+
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }
   body.outsilde { background-color: var(--color-a); }
-body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
+body, option, table, button, select, input, textarea { font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
 h2 { margin: 0; font-size: 25px; }
-hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
+hr { margin: 7px 0 !important; border-bottom: 1px solid var(--color-b-light) !important; border: 0; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
 li { list-style: none; } 
@@ -64,32 +73,36 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
   button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+button + button { margin-left: 5px; }
 
 input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 h2 + shanoir-table { margin-top: 20px; }
 
-textarea, input, select, select-box, datepicker { 
+input, select, select-box, datepicker { 
   border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
 }
-textarea:focus, input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
+input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
-textarea.ng-invalid.ng-touched,
 input.ng-invalid.ng-touched,
 select.ng-invalid.ng-touched,
 select-box.ng-invalid.ng-touched,
 datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); padding-bottom: 0; }
+
+textarea { outline: none !important; border: 1px solid var(--grey); border-radius: 2px; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;}
+textarea:focus { border: 2px inset var(--color-a) !important; padding: 1px; }
+textarea.ng-invalid.ng-touched { border: 2px solid var(--color-error); padding: 1px; }
 
 form { color: var(--dark-grey); position: relative; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { cursor: default; border: none !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
-  form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
+  form input[type='radio'] { vertical-align: top; height: 14px; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
-  form button { margin: 10px 0; }
+  form button { margin-top: 10px; margin-bottom: 10px; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
   form fieldset.disabled { color: var(--grey); }
@@ -184,3 +197,5 @@ form { color: var(--dark-grey); position: relative; }
     .cat img { display:inline-block; height: 100px; }
 
 node node { margin-left: 18px; }
+
+.link { cursor: pointer; }

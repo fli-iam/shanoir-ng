@@ -24,12 +24,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         label="EEG dataset list"
         [deploy]="true"
         [hasBox]="true"
-        (chkbxChange)="changeDatasets($event);"
+        (chkbxChange)="changeDatasets();"
         [hasChildren]="datasets && datasets.length > 0">
             <node  
                 *ngFor="let dataset of datasets" 
                 [label]="dataset.name" 
-                awesome="fa fa-hat-wizard" 
+                [(ngModel)]="dataset.selected"
+                awesome="fa fa-bolt" 
                 (labelClick)="showDatasetDetail(dataset)"
                 [class.selected]="datasetDetail == dataset"
                 [deploy]="false"

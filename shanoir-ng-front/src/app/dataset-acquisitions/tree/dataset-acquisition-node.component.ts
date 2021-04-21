@@ -67,7 +67,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds))
+                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds)).sort();
             });
         }
     }

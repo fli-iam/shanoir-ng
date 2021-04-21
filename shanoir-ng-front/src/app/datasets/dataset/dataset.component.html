@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="dataset" class="max-content" [formGroup]="form" [class.disabled]="footerState.loading">
+	<form *ngIf="form" class="max-content" [formGroup]="form" [class.disabled]="footerState && footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">

@@ -63,7 +63,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Nifti converter</label>
+						<label>Nifti converter
+						<tool-tip class="larger">
+							If you don't know what to choose, please select dcm2niix.
+						</tool-tip>
+						</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyCard.niftiConverter.name}}

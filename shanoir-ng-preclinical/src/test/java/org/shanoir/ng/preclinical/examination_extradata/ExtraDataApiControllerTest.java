@@ -21,7 +21,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
@@ -87,6 +90,16 @@ public class ExtraDataApiControllerTest {
 	private ExtraDataService<ExaminationExtraData> extraDataServiceMock;
 	@MockBean
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+
+	@ClassRule
+	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	
+	public static String tempFolderPath;
+	@BeforeClass
+	public static void beforeClass() {
+		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+	}
 
 	@Before
 	public void setup() throws ShanoirException {
