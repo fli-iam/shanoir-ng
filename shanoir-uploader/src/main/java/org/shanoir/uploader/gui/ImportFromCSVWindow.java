@@ -105,6 +105,7 @@ public class ImportFromCSVWindow extends JFrame {
 		// CSV display here
 		//headers for the table
 		String[] columns = new String[] {
+				resourceBundle.getString("shanoir.uploader.import.csv.column.ipp"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.name"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.surname"),
 				resourceBundle.getString("shanoir.uploader.import.csv.column.study.id"),
@@ -121,16 +122,17 @@ public class ImportFromCSVWindow extends JFrame {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		model.setColumnIdentifiers(columns);
 		// 1100 to go
-		table.getColumnModel().getColumn(0).setMinWidth(100);
-		table.getColumnModel().getColumn(1).setMinWidth(100);
-		table.getColumnModel().getColumn(2).setMinWidth(5);
-		table.getColumnModel().getColumn(3).setMinWidth(100);
-		table.getColumnModel().getColumn(4).setMinWidth(100);
-		table.getColumnModel().getColumn(5).setMinWidth(90);
+		table.getColumnModel().getColumn(0).setMinWidth(30);
+		table.getColumnModel().getColumn(1).setMinWidth(90);
+		table.getColumnModel().getColumn(2).setMinWidth(90);
+		table.getColumnModel().getColumn(3).setMinWidth(5);
+		table.getColumnModel().getColumn(4).setMinWidth(90);
+		table.getColumnModel().getColumn(5).setMinWidth(100);
 		table.getColumnModel().getColumn(6).setMinWidth(90);
-		table.getColumnModel().getColumn(7).setMinWidth(30);
-		table.getColumnModel().getColumn(8).setMinWidth(90);
-		table.getColumnModel().getColumn(9).setMinWidth(350);
+		table.getColumnModel().getColumn(7).setMinWidth(90);
+		table.getColumnModel().getColumn(8).setMinWidth(30);
+		table.getColumnModel().getColumn(9).setMinWidth(90);
+		table.getColumnModel().getColumn(10).setMinWidth(350);
 
 		// Add the table to the frame
 		JPanel tablePanel = new JPanel(new BorderLayout());
