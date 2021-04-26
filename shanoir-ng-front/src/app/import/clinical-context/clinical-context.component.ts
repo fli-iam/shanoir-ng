@@ -46,7 +46,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
+import { EquipmentDicom, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 
 @Component({
@@ -176,9 +176,9 @@ export class ClinicalContextComponent implements OnDestroy {
 
     setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
-        this.modality = this.patient.studies[0].series[0].modality.toString();
+        this.modality = this.getFirstSelectedSerie().modality.toString();
         this.useStudyCard = this.modality.toUpperCase() != 'CT' && this.modality.toUpperCase() != 'PT';
-        return this.completeStudiesCompatibilities(this.patient.studies[0].series[0].equipment)
+        return this.completeStudiesCompatibilities(this.getFirstSelectedSerie().equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
@@ -219,13 +219,11 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
-        return eq1.serialNumber === eq2.deviceSerialNumber
-        && eq1.manufacturerModel.name === eq2.manufacturerModelName
-        && eq1.manufacturerModel.manufacturer.name === eq2.manufacturer;
+        return eq2.deviceSerialNumber != null && (eq1.serialNumber === eq2.deviceSerialNumber)
     }
 
     public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
-        return this.equipmentsEquals(acquisitionEquipment, this.patient.studies[0].series[0].equipment);
+        return this.equipmentsEquals(acquisitionEquipment, this.getFirstSelectedSerie().equipment);
     }
     
     public centerCompatible(center: Center): boolean {
@@ -445,7 +443,7 @@ export class ClinicalContextComponent implements OnDestroy {
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
-        acqEpt.serialNumber = this.patient.studies[0].series[0].equipment.deviceSerialNumber;
+        acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
         return acqEpt;
     }
 
@@ -549,8 +547,8 @@ export class ClinicalContextComponent implements OnDestroy {
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
-        newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
-        newExam.comment = this.patient.studies[0].studyDescription;
+        newExam.examinationDate = this.getFirstSelectedSerie().seriesDate;
+        newExam.comment = this.getFirstSelectedStudy().studyDescription;
         return newExam;
     }
     
@@ -612,7 +610,7 @@ export class ClinicalContextComponent implements OnDestroy {
             && (!context.useStudyCard || context.studyCard)
             && context.center != undefined && context.center != null
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
-            && context.subject != undefined && context.subject != null
+            && context.subject != undefined && context.subject != null && context.subject.subjectStudy.subjectType
             && context.examination != undefined && context.examination != null
             && context.niftiConverter != undefined && context.niftiConverter != null
         );
@@ -670,6 +668,24 @@ export class ClinicalContextComponent implements OnDestroy {
                 })
             );
         });
+    }
+
+    private getFirstSelectedSerie(): SerieDicom {
+        for (let study of this.patient.studies) {
+            for (let serie of study.series) {
+                if (serie.selected) return serie;
+            }
+        }
+       return null;
+    }
+
+    private getFirstSelectedStudy(): StudyDicom {
+        for (let study of this.patient.studies) {
+            for (let serie of study.series) {
+                if (serie.selected) return study;
+            }
+        }
+       return null;
     }
 
     ngOnDestroy() {

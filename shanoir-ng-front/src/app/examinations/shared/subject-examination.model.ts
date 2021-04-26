@@ -19,4 +19,5 @@ export class SubjectExamination {
     comment: string;
     examinationDate: Date;
     datasetAcquisitions: DatasetAcquisition[];
+    extraDataFilePathList: string[] = [];
 }

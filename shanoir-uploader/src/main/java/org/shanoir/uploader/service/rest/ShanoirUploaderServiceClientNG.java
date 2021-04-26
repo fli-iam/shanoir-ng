@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
@@ -21,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
@@ -144,14 +147,16 @@ public class ShanoirUploaderServiceClientNG {
 			final StringBuilder postBody = new StringBuilder();
 			postBody.append("client_id=shanoir-uploader");
 			postBody.append("&grant_type=password");
-			postBody.append("&username=").append(username);
+			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
-			postBody.append("&scope=openid info offline_access");
+			postBody.append("&scope=offline_access");
 			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
 			String responseEntityString = EntityUtils.toString(response.getEntity());
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {
 				JSONObject responseEntityJson = new JSONObject(responseEntityString);
+				String refreshToken = responseEntityJson.getString("refresh_token");
+				refreshToken(keycloakURL, refreshToken);
 				return responseEntityJson.getString("access_token");
 			}
 		} catch (UnsupportedEncodingException e) {
@@ -162,6 +167,42 @@ public class ShanoirUploaderServiceClientNG {
 			logger.error(e.getMessage(), e);
 		}
 		return null;
+	}
+	
+	/**
+	 * Start job, that refreshes the access token every 240 seconds.
+	 * The default access token lifetime of Keycloak is 5 min (300 secs),
+	 * we update after 4 min (240 secs) to use the time frame, but not to
+	 * be to close to the end.
+	 */
+	private void refreshToken(String keycloakURL, String refreshToken) {
+		final StringBuilder postBody = new StringBuilder();
+		postBody.append("client_id=shanoir-uploader");
+		postBody.append("&grant_type=refresh_token");
+		postBody.append("&refresh_token=").append(refreshToken);
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+		Runnable task = () -> {
+			try {
+				HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+				String responseEntityString = EntityUtils.toString(response.getEntity());
+				final int statusCode = response.getStatusLine().getStatusCode();
+				if (HttpStatus.SC_OK == statusCode) {
+					JSONObject responseEntityJson = new JSONObject(responseEntityString);
+					String newAccessToken = responseEntityJson.getString("access_token");
+					if (newAccessToken != null) {
+						ShUpOnloadConfig.setTokenString(newAccessToken);
+					} else {
+						logger.info("ERROR: with access token refresh.");
+					}
+					logger.info("Access token has been refreshed.");
+				} else {
+					logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		};
+		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
 	}
 	
 	public List<Study> findStudiesNamesAndCenters() {
@@ -278,7 +319,7 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 
-	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) throws Exception {
+	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) {
 		if (acquisitionEquipmentId != null) {
 			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
 			int code = response.getStatusLine().getStatusCode();

@@ -1,7 +1,7 @@
 /**********/
 /* Common */
 /**********/
-:root{
+:root {
     --very-light-grey: #fdfdfd;
     --lighter-grey: #fafafa;
     --light-grey: #f1f1f1;
@@ -25,6 +25,15 @@
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
+    
+    /* --instance-name: "QUALIF";
+    --instance-color: teal;
+    --user-color: teal; */
+
+    --instance-name: ;
+    --instance-color: transparent;
+    --user-color: #813371;
+
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }
@@ -188,3 +197,5 @@ form { color: var(--dark-grey); position: relative; }
     .cat img { display:inline-block; height: 100px; }
 
 node node { margin-left: 18px; }
+
+.link { cursor: pointer; }

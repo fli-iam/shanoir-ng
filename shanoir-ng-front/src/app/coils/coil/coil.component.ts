@@ -39,8 +39,8 @@ export class CoilComponent extends EntityComponent<Coil> {
     centers: Center[] = [];
     manufModels: ManufacturerModel[] = [];
     coilTypes: CoilType[] = CoilType.all();
-    private prefilledCenter: Center;
-    private prefilledManuf: ManufacturerModel;
+    prefilledCenter: Center;
+    prefilledManuf: ManufacturerModel;
 
     constructor(
             private route: ActivatedRoute,
@@ -108,9 +108,13 @@ export class CoilComponent extends EntityComponent<Coil> {
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
-        form.valueChanges.subscribe(() => {
-            if (this.coil.center && !this.prefilledManuf) this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
-            else this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+        form.valueChanges.subscribe((newValue: Coil) => {
+            if (newValue.center && !this.prefilledManuf) {
+                this.form.get('acquiEquipModel').enable({onlySelf: true, emitEvent:false});
+            }
+            else {
+                this.form.get('acquiEquipModel').disable({onlySelf: true, emitEvent:false});
+            }
         })
         return form;
     }

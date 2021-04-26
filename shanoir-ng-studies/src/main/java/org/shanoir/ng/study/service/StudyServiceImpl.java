@@ -127,6 +127,8 @@ public class StudyServiceImpl implements StudyService {
 				// if dua file exists, set StudyUser to confirmed false
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					studyUser.setConfirmed(false);
+				} else {
+					studyUser.setConfirmed(true);
 				}
 				studyUser.setStudy(study);
 			}
@@ -242,7 +244,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study studyDb, Study study) {
+	protected void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
 			return;
 		}
@@ -307,6 +309,8 @@ public class StudyServiceImpl implements StudyService {
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
 					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+				} else {
+					su.setConfirmed(true);
 				}
 				created.add(su);
 			}

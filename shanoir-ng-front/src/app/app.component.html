@@ -20,7 +20,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div> -->
 
 <ng-container *ngIf="isAuthenticated()">
-    <side-menu *ngIf="isAuthenticated() && menuOpen" [@slideRight]="menuOpen"></side-menu>
+    <div class="side-menu" *ngIf="menuOpen" @slideRight>
+        <side-menu></side-menu> 
+    </div>
     <div class="main-content" [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>

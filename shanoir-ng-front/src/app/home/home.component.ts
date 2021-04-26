@@ -13,6 +13,8 @@
  */
 
 import { Component } from '@angular/core';
+import { Task } from '../async-tasks/task.model';
+import { TaskService } from '../async-tasks/task.service';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
@@ -20,6 +22,8 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
+import { User } from '../users/shared/user.model';
+import { UserService } from '../users/shared/user.service';
 
 @Component({
     selector: 'home',
@@ -33,14 +37,32 @@ export class HomeComponent {
     
     challengeDua: DataUserAgreement;
     challengeStudy: Study;
+    studies: Study[];
+    accountRequests: User[];
+    jobs: Task[];
+    solrInput: string;
+    notifications: any[];
+    loaded: boolean = false;
+    nbAccountRequests: number;
+    nbExtensionRequests: number;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private keycloakService: KeycloakService,
+            private userService: UserService,
+            private taskService: TaskService) {
         //this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
+        this.load();
+    }
+
+    load() {
         this.studyService.getMyDUA().then(duas => {
+            this.challengeDua = null;
+            this.notifications = null;
             if (duas) {
+                this.notifications = duas.slice(0, 10);
                 for (let dua of duas) {
                     if (dua.isChallenge) {
                         this.challengeDua = dua;
@@ -49,19 +71,25 @@ export class HomeComponent {
                 }
             }
         }).then(() => {
-            if (!this.challengeDua) {
+            this.loaded = true;
+            if (this.admin || !this.challengeDua) {
                 this.fetchChallengeStudy()
+                if (this.admin) {
+                    this.fetchAccountRequests();
+                }
+                this.fetchJobs();
             }
         });
     }
 
     onSign() {
-        this.fetchChallengeStudy();
+        this.load();
     }
 
     private fetchChallengeStudy() {
         this.studyService.getAll().then(studies => {
             if (studies) {
+                this.studies = studies.slice(0, 8);
                 for (let study of studies) {
                     if (study.challenge) {
                         this.challengeStudy = study;
@@ -78,6 +106,28 @@ export class HomeComponent {
 
     isAuthenticated(): boolean {
         return KeycloakService.auth.loggedIn;
+    }
+
+    get admin(): boolean {
+        return this.keycloakService.isUserAdmin();
+    }
+
+    fetchAccountRequests() {
+        this.userService.getAllAccountRequests()
+            .then(ars => {
+                this.nbAccountRequests = ars.filter(user => !!user.accountRequestDemand).length;
+                this.nbExtensionRequests = ars.filter(user => !!user.extensionRequestDemand).length;
+                this.accountRequests = ars.slice(0, 7);
+            });
+    }
+
+    fetchJobs() {
+        this.taskService.getAll()
+            .then(tasks => this.jobs = tasks.slice(0, 10));
+    }
+
+    canUserImportFromPACS(): boolean {
+        return this.keycloakService.canUserImportFromPACS();
     }
 
 }
