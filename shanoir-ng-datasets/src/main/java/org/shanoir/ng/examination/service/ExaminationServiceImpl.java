@@ -81,7 +81,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 		}
 
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 		// Delete examination
 		examinationRepository.delete(id);
 	}
