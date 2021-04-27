@@ -167,14 +167,19 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		// 1. Request PACS to check the presence of data
 		logger.info("1 Request PACS");
-		Media media;
+		Media media = null;
 		try {
-			String name = csvImport.getName().toUpperCase();
-			if (!StringUtils.isEmpty(csvImport.getSurname())) {
-				name+="^";
-				name+=csvImport.getSurname().toUpperCase();
+			if (!StringUtils.isEmpty(csvImport.getIpp())) {
+				media = dicomServerClient.queryDicomServer("", csvImport.getIpp(), "", "", null, null);
 			}
-			media = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
+			if (media == null) {
+				String name = csvImport.getName().toUpperCase();
+				if (!StringUtils.isEmpty(csvImport.getSurname())) {
+					name+="^";
+					name+=csvImport.getSurname().toUpperCase();
+				}
+				media = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
+			}
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
