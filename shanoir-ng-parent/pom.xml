@@ -39,10 +39,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
-		
-	    <sonar.projectKey>jcomedouteau_shanoir-ng</sonar.projectKey>
-        <sonar.organization>jcomedouteau</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<build>
