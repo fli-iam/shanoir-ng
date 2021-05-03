@@ -80,8 +80,11 @@ export class UserComponent extends EntityComponent<User> {
             this.studies = studies.filter(study =>  {
                 for( var suser of study.studyUserList) {
                     // Admin case, we check that the user is part of the study
-                    return suser.userId === this.entity.id;
+                    if (suser.userId === this.entity.id) {
+                        return true;
+                    }
                 }
+                return false;
             });
         });
         let getMembershipPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
