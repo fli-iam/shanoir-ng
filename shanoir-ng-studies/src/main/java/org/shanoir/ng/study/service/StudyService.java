@@ -97,12 +97,22 @@ public interface StudyService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
 
+	/**
+	 * Adds one studyUser to a study.
+	 * @param studyUser
+	 * @param study
+	 */
+	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 	/**
-	 * Updates studyUsers of a study
-	 * @param study the study to update
-	 * @param studyUsers the studyUsers to set
+	 * Gets the protocol or data user agreement file path
+	 * 
+	 * @param studyId
+	 *            id of the study
+	 * @param fileName
+	 *            name of the file
+	 * @return the file path of the file
 	 */
-	void updateStudyUsers(Study study, List<StudyUser> studyUsers);
+	String getStudyFilePath(Long studyId, String fileName);
 
 }

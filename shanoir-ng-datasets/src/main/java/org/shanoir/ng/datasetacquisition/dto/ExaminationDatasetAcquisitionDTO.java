@@ -72,5 +72,4 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
 	}
-	
 }

@@ -19,4 +19,5 @@ export class SubjectWithSubjectStudy {
     name: string;
     identifier: string;
     subjectStudy: SubjectStudy;
+    birthDate: Date;
 }

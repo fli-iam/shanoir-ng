@@ -38,6 +38,6 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
 	
-	@Query("select s.id from StudyUser su inner join su.study as s where su.userId = :userId and :right in elements(su.studyUserRights)")
+	@Query("select s.id from StudyUser su inner join su.study as s where su.userId = :userId and su.confirmed = true and :right in elements(su.studyUserRights)")
 	List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") int right);
 }

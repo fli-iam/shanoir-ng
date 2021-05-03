@@ -53,6 +53,11 @@ export class SolrSearchComponent{
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
+        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        if (input) {
+            this.keyword = input;
+            this.form.get('keywords').markAsTouched();
+        }
     }
     
     buildForm(): FormGroup {
@@ -158,6 +163,8 @@ export class SolrSearchComponent{
                     })} 
                 return solrResultPage;
             });
+        } else {
+            return Promise.resolve(new SolrResultPage());
         }
     }
 

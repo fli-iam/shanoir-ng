@@ -11,8 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
 
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
@@ -38,6 +36,7 @@ import { ManufacturerService } from './acquisition-equipments/shared/manufacture
 import { AppComponent } from './app.component';
 // import { routing } from './app.routing';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { EventTypePipe } from './async-tasks/event.pipe';
 import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -229,7 +228,9 @@ import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-uploa
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
-import { environment } from 'src/environments/environment';
+import { KeycloakSessionService } from './shared/session/keycloak-session.service';
+import { DUAComponent } from './dua/dua.component';
+import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 
 @NgModule({
     imports: [
@@ -384,7 +385,10 @@ import { environment } from 'src/environments/environment';
         MemberNodeComponent,
         StudyCardNodeComponent,
         ReverseSubjectNodeComponent,
-        ReverseStudyNodeComponent
+        ReverseStudyNodeComponent,
+        DUAComponent,
+        DUASigningComponent,
+        EventTypePipe
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -471,6 +475,7 @@ import { environment } from 'src/environments/environment';
         CenterDTOService,
         LoaderService,
         SubjectStudyPipe,
+        KeycloakSessionService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

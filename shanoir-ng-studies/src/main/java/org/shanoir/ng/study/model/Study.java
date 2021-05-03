@@ -107,6 +107,12 @@ public class Study extends HalEntity {
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
+	
+	/** List of data user agreement form directly attached to the study. */
+	@ElementCollection
+	@CollectionTable(name = "data_user_agreement_file")
+	@Column(name = "path")
+	private List<String> dataUserAgreementPaths;
 
 	/** Start date. */
 	@LocalDateAnnotations
@@ -284,6 +290,20 @@ public class Study extends HalEntity {
 	 */
 	public void setProtocolFilePaths(List<String> protocolFilePaths) {
 		this.protocolFilePaths = protocolFilePaths;
+	}
+
+	/**
+	 * @return the dataUserAgreementPaths
+	 */
+	public List<String> getDataUserAgreementPaths() {
+		return dataUserAgreementPaths;
+	}
+
+	/**
+	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
+	 */
+	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 
 	/**
