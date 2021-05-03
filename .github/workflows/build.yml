@@ -39,6 +39,6 @@ jobs:
           SHANOIR_ADMIN_EMAIL: nobody@inria.fr
           SHANOIR_KEYCLOAK_USER: admin
           SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
-        run: mvn -f ./shanoir-ng-parent/pom.xml -DskipTests -Dsonar.projectKey=jcomedouteau_shanoir-ng verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        run: mvn -f ./shanoir-ng-parent/pom.xml -DskipTests verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
 
