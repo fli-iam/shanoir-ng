@@ -63,11 +63,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
 						<label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
 					</span>
-				</li> 
-				<label>Studies</label>
-				<li *ngFor="let study of studies; let index = index">
-					<label></label>
-					<span class="right-col">{{study.name + '(' + study.id + ')'}}</span>
 				</li>
 			</ol>
 		</fieldset>
