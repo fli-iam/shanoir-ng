@@ -20,4 +20,5 @@ export class AccountRequestInfo {
     service: string;
     study: string;
     work: string;
+    challenge: number;
 }

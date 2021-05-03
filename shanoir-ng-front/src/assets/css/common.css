@@ -29,7 +29,7 @@
 
 body { margin: 0; background-color: var(--very-light-grey); }
   body.outsilde { background-color: var(--color-a); }
-body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
+body, option, table, button, select, input, textarea { font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
 h2 { margin: 0; font-size: 25px; }
@@ -70,24 +70,27 @@ input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 h2 + shanoir-table { margin-top: 20px; }
 
-textarea, input, select, select-box, datepicker { 
+input, select, select-box, datepicker { 
   border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
 }
-textarea:focus, input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
+input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
-textarea.ng-invalid.ng-touched,
 input.ng-invalid.ng-touched,
 select.ng-invalid.ng-touched,
 select-box.ng-invalid.ng-touched,
 datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); padding-bottom: 0; }
+
+textarea { outline: none !important; border: 1px solid var(--grey); border-radius: 2px; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;}
+textarea:focus { border: 2px inset var(--color-a) !important; padding: 1px; }
+textarea.ng-invalid.ng-touched { border: 2px solid var(--color-error); padding: 1px; }
 
 form { color: var(--dark-grey); position: relative; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { cursor: default; border: none !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
-  form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
+  form input[type='radio'] { vertical-align: top; height: 14px; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
   form button { margin-top: 10px; margin-bottom: 10px; }

@@ -203,7 +203,7 @@ services:
   #
   preclinical-bruker2dicom:
     container_name: "${SHANOIR_PREFIX}preclinical-bruker2dicom"
-    image: jcomedouteau/dicomifier.ws:1.1
+    image: jcomedouteau/dicomifier.ws:1.3
     command: ["python3", "/opt/dicomifier.ws/run.py"]
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
