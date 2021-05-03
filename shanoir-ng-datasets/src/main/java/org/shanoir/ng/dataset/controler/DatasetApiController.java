@@ -485,7 +485,7 @@ public class DatasetApiController implements DatasetApi {
 			if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
 				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
 			}
-			name.append(dataset.getDatasetAcquisition().getRank())
+			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
 			.append(index)
 			.append(".");
 			if (srcFile.getName().endsWith(".nii.gz")) {
