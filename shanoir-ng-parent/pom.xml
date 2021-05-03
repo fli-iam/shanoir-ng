@@ -30,6 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-keycloak-auth</module>
 		<module>../shanoir-ng-back</module>
 		<module>../shanoir-ng-front</module>
+		<module>../shanoir-uploader</module>
 	</modules>
 
 	<properties>
