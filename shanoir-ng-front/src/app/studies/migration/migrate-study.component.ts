@@ -51,7 +51,7 @@ export class MigrateStudyComponent implements OnInit {
     }
 
     connect(): void {
-       this.migrationService.connect(this.form.get('url').value, this.form.get('username').value, this.form.get('password').value, this.form.get('study').value.id)
+       this.migrationService.connect(this.form.get('url').value, this.form.get('username').value, this.form.get('password').value, this.form.get('study').value.id, this.form.get('userId').value)
        .then(() => {
             this.error = "";
         }).catch(exception => {
@@ -67,6 +67,7 @@ export class MigrateStudyComponent implements OnInit {
         this.form = this.formBuilder.group({
             'study': ['', [Validators.maxLength(255)]],
             'username': ['', [Validators.maxLength(255)]],
+            'userId': ['', [Validators.maxLength(255)]],
             'password': ['', [Validators.maxLength(255)]],
             'url': ['', [Validators.maxLength(255)]]
         });

@@ -32,10 +32,10 @@ export class MigrationService {
 
     }
 
-    connect(url: string, username: string, password: string, studyId: number): Promise<any> {
+    connect(url: string, username: string, password: string, studyId: number, userId: number): Promise<any> {
         const endpoint = this.API_URL + "/migrate";
 
-        let params = new HttpParams().append('shanoirUrl', url).append('username', username).append('userPassword', password).append('studyId', '' + studyId);
+        let params = new HttpParams().append('shanoirUrl', url).append('username', username).append('userPassword', password).append('studyId', '' + studyId).append('userId', '' + userId);
 
         return this.http.get<any>(endpoint, {params: params}).toPromise();
     }

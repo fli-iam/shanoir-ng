@@ -41,7 +41,8 @@ public interface MigrationApi {
 			@ApiParam(value = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") String shanoirUrl,
 			@ApiParam(value = "Username of user", required = true) @RequestParam("username") String username,
 			@ApiParam(value = "Password of user", required = true) @RequestParam("userPassword") String userPassword,
-			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId)
+			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId,
+			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 			throws RestServiceException;
 
 }

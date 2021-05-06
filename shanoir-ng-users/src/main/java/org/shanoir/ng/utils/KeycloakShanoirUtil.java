@@ -15,7 +15,6 @@
 package org.shanoir.ng.utils;
 
 import java.net.URI;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
