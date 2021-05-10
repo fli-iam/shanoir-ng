@@ -182,7 +182,25 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		super(opts, DESCRIPTION, EXAMPLE, USAGE);
 	}
 
+	/**
+	 * Initialize personal properties folder of ShanoirUploader.
+	 */
+	private void initShanoirUploaderFolder() {
+		final String userHomeFolderPath = System.getProperty(ShUpConfig.USER_HOME);
+		final String shanoirUploaderFolderPath = userHomeFolderPath
+				+ File.separator + ShUpConfig.SU + "_" + ShUpConfig.SHANOIR_UPLOADER_VERSION;
+		final File shanoirUploaderFolder = new File(shanoirUploaderFolderPath);
+		boolean shanoirUploaderFolderExists = shanoirUploaderFolder.exists();
+		if (shanoirUploaderFolderExists) {
+			// do nothing
+		} else {
+			shanoirUploaderFolder.mkdirs();
+		}
+		ShUpConfig.shanoirUploaderFolder = shanoirUploaderFolder;
+	}
+	
 	public void initialize() {
+		initShanoirUploaderFolder();
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
 		// setup proxy on using proxy.properties in .su_v7.0.1 normally, if not from .jar
 		initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
