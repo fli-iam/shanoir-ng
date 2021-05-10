@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -56,7 +55,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	private static Option destDirOption;
 
 	/** The Constant EXAMPLE. */
-	private static final String EXAMPLE = "downloadDataset -destDir /tmp/dataset123 -host shanoir-qualif.irisa.fr -datasetId 123\n"
+	private static final String EXAMPLE = "downloadDataset -destDir /tmp/dataset123 -profile OFSEP-NG -datasetId 123\n"
 			+ "=> download the dataset 123 to the destination directory /tmp/dataset123.";
 	/**
 	 * -refDatasetExpressionFormatId to set the id of the ref dataset expression
@@ -67,9 +66,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	/** -h used to request help on command line options. */
 	private static Option helpOption;
 	/** The Constant USAGE. */
-	private static final String USAGE = "downloadDataset [Options] -datasetId <ID> -host <HOST>";
-
-	private static final String NG_PROFILE = "dev-NG";
+	private static final String USAGE = "downloadDataset [Options] -datasetId <ID> -profile <PROFILE>";
 
 	/** -v returns the version of the application. */
 	private static Option versionOption;
@@ -198,16 +195,15 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 		ShUpConfig.shanoirUploaderFolder = shanoirUploaderFolder;
 	}
-	
+
 	public void initialize() {
 		initShanoirUploaderFolder();
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
 		// setup proxy on using proxy.properties in .su_v7.0.1 normally, if not from .jar
 		initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
 		ProxyUtil.initializeSystemProxy();
-		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES,
+		initProperties(ShUpConfig.PROFILE_DIR + profile + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
-		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());
 	}
 
 	/**

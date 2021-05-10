@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
@@ -72,14 +70,14 @@ public abstract class ShanoirCLI {
 		}
 	}
 
-	/** -host to set the host. Can be defined in the user property file. */
-	private static Option hostOption;
+	/** -profile option to set the profile properties file. */
+	private static Option profileOption;
 	static {
-		OptionBuilder.withArgName("host");
+		OptionBuilder.withArgName("profile");
 		OptionBuilder.hasArg();
 		OptionBuilder.isRequired(true);
-		OptionBuilder.withDescription("host of the shanoir server.");
-		hostOption = OptionBuilder.create("host");
+		OptionBuilder.withDescription("Profile (properties file).");
+		profileOption = OptionBuilder.create("profile");
 	}
 
 	/** -user to set the user. Can be defined in the user property file. */
@@ -203,8 +201,8 @@ public abstract class ShanoirCLI {
 	/** The example: tip displayed in the help manual of the Command. */
 	private String example;
 
-	/** The host we are connecting to. */
-	protected String host;
+	/** The profile name (property file). */
+	protected String profile;
 
 	/** The collection of Option used by the Command Line */
 	protected Options options;
@@ -243,19 +241,10 @@ public abstract class ShanoirCLI {
 		}
 		opts.addOption(helpOption);
 		opts.addOption(versionOption);
-		opts.addOption(hostOption);
+		opts.addOption(profileOption);
 		opts.addOption(userOption);
 		opts.addOption(passwordOption);
 		options = opts;
-	}
-
-	/**
-	 * Gets the host. Can be defined in the user property file.
-	 *
-	 * @return the host
-	 */
-	public String getHost() {
-		return host;
 	}
 
 	/**
@@ -306,7 +295,7 @@ public abstract class ShanoirCLI {
 
 	/**
 	 * This method parses the different options given as argument. It checks whether
-	 * username, password, host and truststore options are given in argument
+	 * username, password, profile and truststore options are given in argument
 	 * and initialise the matching attributes. If an option above is not given, then
 	 * it checks if the value is present is the user property file. If no value is
 	 * present, it throws a MissingArgumentException.
@@ -346,12 +335,8 @@ public abstract class ShanoirCLI {
 			System.exit(0);
 		}
 
-		if (cl.hasOption("host")) {
-			setHost(cl.getOptionValue("host"));
-		} else if (properties.containsKey("host")) {
-			this.setHost(properties.getProperty("host"));
-		} else {
-			exitAndHelp("ShanoirTkCLI ERROR: no host provided. The host parameter is required.");
+		if (cl.hasOption("profile")) {
+			profile = cl.getOptionValue("profile");
 		}
 
 		postParse();
@@ -367,15 +352,4 @@ public abstract class ShanoirCLI {
 	 */
 	protected abstract void postParse()
 			throws MissingArgumentException, java.text.ParseException, DatatypeConfigurationException;
-
-	/**
-	 * Sets the host.
-	 *
-	 * @param host
-	 *            the host to set
-	 */
-	public void setHost(final String host) {
-		String finalHost = host.startsWith("http://") ? host.replace("http://", "https://") : host.startsWith("https://") ? host : "https://" + host;
-		this.host = finalHost.endsWith("/") ? finalHost.substring(0, finalHost.length()-1) : finalHost;
-	}
 }
