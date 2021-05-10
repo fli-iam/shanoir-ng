@@ -102,6 +102,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
     <div class="right">
         <h2>Results</h2>
+        <div [hidden]="progressBar.progress == 0">
+            <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+        </div>
         <shanoir-table #table
             [getPage]="getPage.bind(this)" 
             [maxResults]="50"
