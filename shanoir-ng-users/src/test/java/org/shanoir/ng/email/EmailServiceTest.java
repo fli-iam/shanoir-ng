@@ -16,13 +16,8 @@ package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
-
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -32,8 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -148,27 +141,19 @@ public class EmailServiceTest {
 	@Test
 	public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
 		// GIVEN a list of administrators to contact
-		ShanoirEvent event = new ShanoirEvent();
-		User value = new User();
-		value.setUsername("username");
-		Mockito.when(userRepositoryMock.findOne(anyLong())).thenReturn(value);
-
-		event.setMessage("StudyName(12)"
-		+": Successfully created datasets for subject SubjectName"
-		+ " in examination 23");
-		
-		List<Long> admins = Collections.singletonList(Long.valueOf(13));
+		User user = new User();
+		user.setUsername("username");
+		user.setEmail("email@email.com");
+		Mockito.when(userRepositoryMock.findOne(Mockito.anyLong())).thenReturn(user);
+		//Mockito.given(userRepositoryMock.findAll(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
 
 		// send back a list of administrators
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, "12")).thenReturn(admins );
-		User admin = new User();
-		admin.setLastName("lastname");
-		admin.setFirstName("firstName");
-		admin.setEmail("admin@test.shanoir.fr");
-		given(userRepositoryMock.findOne(13L)).willReturn(admin );
-
+		DatasetImportEmail mail = new DatasetImportEmail();
+		mail.setStudyName("StudyName");
+		mail.setStudyId("12");
+		
 		// WHEN we receive an event with elements stating that data was imported successfuly
-		emailService.notifyStudyManagerDataImported(event, null);
+		emailService.notifyStudyManagerDataImported(mail);
 		
 		// THEN an email is sent to the administrators
 		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
