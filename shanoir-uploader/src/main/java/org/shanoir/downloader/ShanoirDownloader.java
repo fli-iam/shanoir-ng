@@ -2,6 +2,8 @@ package org.shanoir.downloader;
 
 import java.io.Console;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.apache.http.HttpResponse;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.utils.ProxyUtil;
 import org.shanoir.uploader.utils.Util;
 import org.springframework.http.HttpHeaders;
 
@@ -181,11 +184,12 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	public void initialize() {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
-
+		// setup proxy on using proxy.properties in .su_v7.0.1 normally, if not from .jar
+		initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
+		ProxyUtil.initializeSystemProxy();
 		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
 		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());
-		ShUpOnloadConfig.setShanoirNg(true);
 	}
 
 	/**
@@ -193,14 +197,24 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	 * existing.
 	 */
 	private void initProperties(final String fileName, final Properties properties) {
+		final File propertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + fileName);
+		if (propertiesFile.exists()) {
+			// do nothing
+		} else {
+			Util.copyFileFromJar(fileName, propertiesFile);
+		}
+		loadPropertiesFromFile(properties, propertiesFile);
+	}
+	
+	private void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
 		try {
-			InputStream iS = Util.class.getResourceAsStream("/" + fileName);
-			if (iS != null) {
-				properties.load(iS);
-				iS.close();
-			}
+			final FileInputStream fIS = new FileInputStream(propertiesFile);
+			properties.load(fIS);
+			fIS.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 	}
 
