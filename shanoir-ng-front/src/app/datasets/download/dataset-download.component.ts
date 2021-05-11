@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild, Input } from '@angular/core';
+import { Component, ViewChild, Input} from '@angular/core';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 @Component({
     selector: 'dataset-download',
@@ -38,11 +39,11 @@ export class DatasetDownloadComponent {
 
     @Input() datasetIds: number[] = [];
     @Input() studyId: number;
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
     public useBids: boolean = false;
     public type: 'nii' | 'dcm' = 'nii';
     public inError: boolean = false;
     public errorMessage: string;
-    public loading: boolean = false;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
     public mode: 'all' | 'selected';
 
@@ -81,16 +82,15 @@ export class DatasetDownloadComponent {
     /** Download the data */
     public download() {
         // Call service method to download datasets
-        this.loading = true;
         if (this.mode == 'selected') {
-            this.datasetService.downloadDatasets(this.datasetIds, this.type).then(() => this.loading = false);
+            this.datasetService.downloadDatasets(this.datasetIds, this.type, this.progressBar);
         } else if (this.mode == 'all') {
             if (this.useBids) {
-                this.studyService.exportBIDSByStudyId(this.studyId).then(() => this.loading = false);
+                this.studyService.exportBIDSByStudyId(this.studyId, this.progressBar);
             } else {
-                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type).then(() => this.loading = false);
+                this.datasetService.downloadDatasetsByStudy(this.studyId, this.type, this.progressBar);
             }
-        } 
+        }
         this.downloadDialog.hide();
     }
 

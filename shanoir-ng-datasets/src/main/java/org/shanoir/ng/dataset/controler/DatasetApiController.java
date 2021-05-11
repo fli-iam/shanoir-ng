@@ -383,6 +383,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -502,12 +503,13 @@ public class DatasetApiController implements DatasetApi {
 		eventService.publishEvent(event);
 
 		try (InputStream is = new FileInputStream(zipFile);) {
-			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
-			response.setContentType(contentType);
-			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-			response.flushBuffer();
-			event.setStatus(ShanoirEvent.SUCCESS);
-			eventService.publishEvent(event);
+		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+		    response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
+		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+		    response.flushBuffer();
+		    event.setStatus(ShanoirEvent.SUCCESS);
+		    eventService.publishEvent(event);
 		} finally {
 			FileUtils.deleteQuietly(tmpFile);
 			FileUtils.deleteQuietly(zipFile);

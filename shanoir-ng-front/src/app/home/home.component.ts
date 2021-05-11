@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Task } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
 
@@ -24,6 +24,7 @@ import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 @Component({
     selector: 'home',
@@ -32,6 +33,8 @@ import { UserService } from '../users/shared/user.service';
 })
 
 export class HomeComponent {
+
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     
@@ -101,7 +104,7 @@ export class HomeComponent {
     }
 
     downloadFile(filePath: string) {
-        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file');
+        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file', this.progressBar);
     }
 
     isAuthenticated(): boolean {
