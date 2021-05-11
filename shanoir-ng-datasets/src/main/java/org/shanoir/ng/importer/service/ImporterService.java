@@ -245,6 +245,10 @@ public class ImporterService {
 				recipients.add(user.getUserId());
 			}
 		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recpients
+			return;
+		}
 		generatedMail.setRecipients(recipients);
 
 		try {

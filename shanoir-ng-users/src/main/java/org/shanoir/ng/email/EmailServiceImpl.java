@@ -388,7 +388,7 @@ public class EmailServiceImpl implements EmailService {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
 				messageHelper.setTo(admin.getEmail());
-				messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getRecipients());
+				messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
 				variables.put(LASTNAME, admin.getLastName());
 				variables.put(FIRSTNAME, admin.getFirstName());

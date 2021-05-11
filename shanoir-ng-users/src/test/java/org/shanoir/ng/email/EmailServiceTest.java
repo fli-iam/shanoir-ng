@@ -18,6 +18,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -145,12 +149,15 @@ public class EmailServiceTest {
 		user.setUsername("username");
 		user.setEmail("email@email.com");
 		Mockito.when(userRepositoryMock.findOne(Mockito.anyLong())).thenReturn(user);
-		//Mockito.given(userRepositoryMock.findAll(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
+		Mockito.when(userRepositoryMock.findAll(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
 
 		// send back a list of administrators
 		DatasetImportEmail mail = new DatasetImportEmail();
 		mail.setStudyName("StudyName");
 		mail.setStudyId("12");
+		Map<Long, String> datasets = new HashMap<>();
+		datasets.put(1L, "test");
+		mail.setDatasets(datasets);
 		
 		// WHEN we receive an event with elements stating that data was imported successfuly
 		emailService.notifyStudyManagerDataImported(mail);
