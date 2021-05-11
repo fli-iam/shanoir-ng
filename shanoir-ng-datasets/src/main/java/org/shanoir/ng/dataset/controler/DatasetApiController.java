@@ -284,7 +284,7 @@ public class DatasetApiController implements DatasetApi {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
 
-		String tmpFilePath = userDir + File.separator + datasetName;
+		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()) + DOWNLOAD);
@@ -331,6 +331,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -481,6 +482,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 		    response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
 		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 		    response.flushBuffer();
 		    event.setStatus(ShanoirEvent.SUCCESS);

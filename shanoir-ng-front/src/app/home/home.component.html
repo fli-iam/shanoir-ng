@@ -12,13 +12,193 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngIf="isAuthenticated()" class="home-component">
-    <div class="logo">
-        <img [src]="shanoirBigLogoUrl">
-        <hr/>
+<h2 *ngIf="admin || !challengeDua" class="header command-zone">Shanoir Home</h2>
+
+<div *ngIf="loaded && !admin && challengeDua" class="challenge-welcome">
+    <div>
+        <h1>Welcome to Shanoir, challenger!</h1>
+        <p>Here you will be able to download the datasets for the {{challengeDua.studyName}} Challenge.
+        But before that that, we ask you to accept the following Data User Agreement : </p>
+        <dua-signing (sign)="onSign()" [dua]="challengeDua"></dua-signing>
     </div>
-    <p>
-    	<strong>Shanoir is a new software</strong> that will allow you to share, upload, manage and download clinical and medical metadata and data.<br/>
-		With Shanoir, it's now easy to share data between medical doctors, researchers and PhD students! 
-    </p>
+</div>
+
+<div *ngIf="loaded && (admin || !challengeDua)">
+    <div *ngIf="challengeStudy" class="block challenge">
+        <table><tr>
+            <td class="left-cell">
+                <div class="block-title">
+                    <span class="challenge-title">
+                        <i class="fas fa-trophy"></i>
+                        Challenge
+                        <i class="fas fa-trophy"></i>
+                    </span>
+                </div>
+                <p class="challenge-name">{{challengeStudy.name}}</p>
+                <p class="msg">Here you can now download all the ressources you need for the challenge and explore its data using Shanoir</p>
+            </td>
+            <td>
+                <ul class="challenge-files">
+                    <div [hidden]="progressBar.progress == 0">
+                        <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+                    </div>
+                    <li *ngFor="let filePath of challengeStudy.protocolFilePaths">
+                        <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
+                        <span (click)="downloadFile(filePath)">{{filePath}}</span>
+                    </li>
+                    <li class="study">
+                        <i class="fas fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
+                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
+                    </li>
+                </ul>
+            </td>
+        </tr></table>
+    </div>
+    <div class="block account-requests" *ngIf="admin">
+        <table><tr>
+            <td class="icon link" routerLink="/user/list">
+                <i class="fas fa-users"></i>
+                <div class="block-title">Manage Users</div>
+            </td>
+            <td *ngIf="accountRequests && accountRequests.length > 0">
+                <div class="pannel">
+                    <div class="pending link" routerLink="/user/list"><em>{{nbAccountRequests}}</em> account requests</div>
+                    <div class="pending link" routerLink="/user/list"><em>{{nbExtensionRequests}}</em> extension requests</div>
+                    <table>
+                        <tr *ngFor="let ar of accountRequests"  [routerLink]="'/user/details/' + ar.id" class="account-request-list link">
+                            <td class="name">{{ar.firstName}} {{ar.lastName}}</td>
+                            <ng-container *ngIf="ar.accountRequestDemand">
+                                <td class="narrow"><i class="fas fa-plus"></i></td>
+                                <td class="narrow">{{ar.creationDate | date: 'dd/MM'}}</td>
+                            </ng-container>
+                            <ng-container *ngIf="ar.extensionRequestDemand">
+                                <td class="narrow"><i class="fas fa-clock"></i></td>
+                                <td class="narrow"></td>
+                            </ng-container>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr></table>
+    </div>
+    <div class="block solr">
+        <table><tr>
+            <td class="icon link" routerLink="/solr-search">
+                <i class="fas fa-sun"></i>
+                <div class="block-title">Solr Search</div>
+            </td>
+            <!-- <td>
+                <div class="pannel">
+                    <input type="text" [(ngModel)]="solrInput" placeholder="Search in Shanoir..." />
+                    <div routerLink="/solr-search" [state]="{ input: solrInput }" class="link">
+                        <i class="fas fa-search"></i>Go
+                    </div>
+                </div>
+            </td> -->
+        </tr></table>
+    </div>
+    <div class="block notifications" *ngIf="notifications && notifications.length > 0">
+        <table><tr>
+            <td class="icon">
+                <i class="far fa-flag"></i>
+                <div class="block-title">Notifications</div>
+            </td>
+            <td>
+                <div class="pannel">
+                    <table>
+                        <tr *ngFor="let notif of notifications" routerLink="/dua" class="notification-list link">
+                            <th>DUA to sign</th>
+                            <td>{{notif.studyName}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr></table>        
+    </div>
+    <div class="block jobs" *ngIf="jobs && jobs.length > 0">
+        <table><tr>
+            <td class="icon link" routerLink="/task">
+                <i class="fas fa-tasks"></i>
+                <div class="block-title">My Jobs</div>
+            </td>
+            <td>
+                <div class="pannel">
+                    <table>
+                        <tr *ngFor="let job of jobs">
+                            <td>{{job.eventType | eventType}}</td>
+                            <td>{{job.creationDate | date: 'dd/MM'}}</td>
+                            <td>{{job.progress * 100 | number:'1.0-0'}}%</td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr></table>        
+    </div>
+    <div class="block import">
+        <div class="import-link link dicom" routerLink="/imports/upload">
+            <i class="fas fa-compact-disc"></i>
+            <div class="title">Import Dicom</div> 
+        </div>
+        <div class="import-link link bruker" routerLink="/imports/bruker">
+            <i class="fas fa-atom"></i>
+            <div class="title">Import Bruker</div>
+        </div>
+        <div class="import-link link eeg" routerLink="/imports/eeg">
+            <i class="fas fa-bolt"></i>
+            <div class="title">Import EEG</div>
+        </div>
+        <div class="import-link link bids" routerLink="/imports/bids">
+            <i class="fas fa-brain"></i>
+            <div class="title">Import BIDS</div>
+        </div>
+        <div class="import-link link pacs" routerLink="/imports/pacs" *ngIf="canUserImportFromPACS()">
+            <i class="fas fa-server"></i>
+            <div class="title">Import from Neurinfo PACS</div>
+        </div>
+    </div>
+
+    <div class="block studies">
+        <table><tr>
+            <td class="icon link" routerLink="/study/list">
+                <i class="fas fa-folder-open"></i>
+                <div class="block-title">My Studies</div>
+            </td>
+            <td>
+                <div class="pannel">
+                    <table>
+                        <tr>
+                            <th></th>
+                            <th title="subjects"><i class="fas fa-user-injured"></i></th>
+                            <th title="examinations"><i class="fas fa-stethoscope"></i></th>
+                        </tr>
+                        <tr *ngFor="let study of studies" [routerLink]="'/study/details/' + study.id" class="link study-list">
+                            <td>{{study.name}}</td>
+                            <td>{{study.nbSujects}}</td>
+                            <td>{{study.nbExaminations}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr></table>        
+    </div>
+
+    <div class="block doc">
+        <table><tr>
+            <td class="icon">
+                <i class="fas fa-book"></i>
+                <div class="block-title">Ressources</div>
+            </td>
+            <td>
+                <ul class="pannel">
+                    <li><a href="https://docs.google.com/document/d/1kfsYJXxm3Ts0_qxCxDIPeSdwZnvjh2qhzb9jQbpobt4/edit?ts=5f745be6#" target="_blank"><i class="fas fa-graduation-cap"></i>Tutoriel Shanoir</a></li>
+                    <li><a href="https://github.com/fli-iam/shanoir-ng" target="_blank"><i class="fab fa-github"></i>Shanoir GitHub</a></li>
+                    <li><a href="https://github.com/fli-iam/shanoir-ng/wiki" target="_blank"><i class="fab fa-wikipedia-w"></i>Shanoir GitHub wiki</a></li>
+                    <li><a href="https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui.html" target="_blank"><i class="fas fa-cog"></i>Studies MS REST API</a></li>
+                    <li><a href="https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui.html" target="_blank"><i class="fas fa-cog"></i>Import MS REST API</a></li>
+                    <li><a href="https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui.html" target="_blank"><i class="fas fa-cog"></i>Datasets MS REST API</a></li>
+                    <li><a href="https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html" target="_blank"><i class="fas fa-cog"></i>Preclinical MS REST API</a></li>
+                </ul>
+            </td>
+        </tr></table>        
+    </div>
 </div>

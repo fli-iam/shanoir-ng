@@ -238,6 +238,7 @@ public class QueryPACSService {
 	private void queryStudies(DicomNode calling, DicomNode called, DicomQuery dicomQuery, Patient patient) {
 		DicomParam[] params = {
 			new DicomParam(Tag.PatientID, patient.getPatientID()),
+			new DicomParam(Tag.PatientName, patient.getPatientName()),
 			new DicomParam(Tag.StudyInstanceUID),
 			new DicomParam(Tag.StudyDate, dicomQuery.getStudyDate()),
 			new DicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription())

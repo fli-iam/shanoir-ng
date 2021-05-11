@@ -32,6 +32,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 
 @Component({
@@ -43,6 +44,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     public centers: IdName[];
     public studies: IdName[];
@@ -55,7 +57,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    downloading: boolean = false;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -140,9 +141,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     download(format: string) {
-        this.downloading = true;
-        this.datasetService.downloadDatasetsByExamination(this.examination.id, format)
-                    .then(() => this.downloading = false);
+        this.datasetIds.then(ids => {
+            this.datasetService.downloadDatasets(ids, format, this.progressBar);
+        });
     }
 
     getCenters(): void {

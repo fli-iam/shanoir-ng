@@ -101,7 +101,7 @@ public class StudyCard {
 			displayString = displayString + " (missing equipment)";
 		}
 		if (compatible != null && compatible) {
-			return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + displayString;
+			return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + displayString;
 		} else {
 			return displayString;
 		}

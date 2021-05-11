@@ -48,6 +48,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -124,7 +125,14 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			this.deleteProtocolFile(studyId);
+			Study studyDeleted = studyService.findById(studyId);
+
+			// Delete all linked files and DUA
+			File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));
+			if (studyFolder.exists()) {
+				FileUtils.deleteDirectory(studyFolder);
+			}
+
 			bidsService.deleteBids(studyId);
 			studyService.deleteById(studyId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
@@ -239,30 +247,13 @@ public class StudyApiController implements StudyApi {
 		boolean hasOneStudy = this.studyUserService.hasOneStudyToImport();
 		return new ResponseEntity<>(hasOneStudy, HttpStatus.OK);
 	}
-
-	@Override
-	public ResponseEntity<Void> deleteProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws IOException {
-		Study study = studyService.findById(studyId);
-		if (study.getProtocolFilePaths() == null || study.getProtocolFilePaths().isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		String filePath = getStudyFilePath(studyId, study.getProtocolFilePaths().get(0));
-		File fileToDelete = new File(filePath);
-		if (!fileToDelete.exists()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		Files.delete(Paths.get(filePath));
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
 	
 	@Override
 	public void downloadProtocolFile(
 		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 		@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName,
 		HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getStudyFilePath(studyId, fileName);
+		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -271,7 +262,8 @@ public class StudyApiController implements StudyApi {
 		}
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
-			response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+			response.setContentType(request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath()));
+		    response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}
@@ -283,19 +275,7 @@ public class StudyApiController implements StudyApi {
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
-			// TODO: Add check on challenge
-			/*
-			if (!(file.getOriginalFilename().endsWith(".pdf") || file.getOriginalFilename().endsWith(".zip")) || file.getSize() > 50000000) {
-				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
-				Study study = studyService.findById(studyId);
-				if (study.getProtocolFilePaths() != null) {
-					study.getProtocolFilePaths().remove(file.getName());
-				}
-				studyService.update(study);
-				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-			}
-			*/
-			String filePath = getStudyFilePath(studyId, file.getOriginalFilename());
+			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
@@ -304,19 +284,6 @@ public class StudyApiController implements StudyApi {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the protocol or data user agreement file path
-	 * 
-	 * @param studyId
-	 *            id of the study
-	 * @param fileName
-	 *            name of the file
-	 * @return the file path of the file
-	 */
-	private String getStudyFilePath(Long studyId, String fileName) {
-		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
 	private void validate(Study study, BindingResult result) throws RestServiceException {
@@ -415,7 +382,8 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DataUserAgreement>> getDataUserAgreementsByUserId(@PathVariable("userId") Long userId) throws RestServiceException, IOException {
+	public ResponseEntity<List<DataUserAgreement>> getDataUserAgreements() throws RestServiceException, IOException {
+		Long userId = KeycloakUtil.getTokenUserId();
 		List<DataUserAgreement> dataUserAgreements = this.dataUserAgreementService.getDataUserAgreementsByUserId(userId);
 		if (!dataUserAgreements.isEmpty()) {
 			return new ResponseEntity<>(dataUserAgreements, HttpStatus.OK);
@@ -428,7 +396,12 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> acceptDataUserAgreement(
 		@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 		throws RestServiceException, MicroServiceCommunicationException {
-		this.dataUserAgreementService.acceptDataUserAgreement(duaId);
+		try {
+			this.dataUserAgreementService.acceptDataUserAgreement(duaId);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null));
+		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
@@ -447,7 +420,7 @@ public class StudyApiController implements StudyApi {
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String filePath = getStudyFilePath(studyId, file.getOriginalFilename());
+			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
@@ -462,7 +435,7 @@ public class StudyApiController implements StudyApi {
 	public void downloadDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-		String filePath = getStudyFilePath(studyId, fileName);
+		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
 		if (!fileToDownLoad.exists()) {
@@ -484,7 +457,7 @@ public class StudyApiController implements StudyApi {
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = getStudyFilePath(studyId, study.getDataUserAgreementPaths().get(0));
+		String filePath = studyService.getStudyFilePath(studyId, study.getDataUserAgreementPaths().get(0));
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

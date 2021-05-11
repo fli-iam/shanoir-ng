@@ -17,15 +17,11 @@ package org.shanoir.ng.accountrequest.controller;
 import java.time.LocalDate;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,9 +32,6 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
-	
-	@Autowired
-	ShanoirEventService eventService;
 	
 	@Override
 	public ResponseEntity<Void> saveNewAccountRequest(
@@ -59,21 +52,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 
 		/* Save user in db. */
 		try {
-			User userSaved = getUserService().createAccountRequest(user);
-			
-			if (user.getAccountRequestInfo().getChallenge() != null) {
-				// I see that we have a challenger here
-				// Directly create a StudyUser linked to the given study
-				ShanoirEvent subscription = new ShanoirEvent(
-						ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
-						userSaved.getAccountRequestInfo().getChallenge().toString(),
-						userSaved.getId(),
-						userSaved.getUsername(),
-						ShanoirEvent.IN_PROGRESS);
-				eventService.publishEvent(subscription);
-				// So that when the user account request is accepted, it directly has access to the data
-			}
-			
+			getUserService().createAccountRequest(user);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));

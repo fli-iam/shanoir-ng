@@ -23,6 +23,7 @@ import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 @Component({
     selector: 'solr-search',
@@ -32,6 +33,9 @@ import { SolrService } from "./solr.service";
 })
 
 export class SolrSearchComponent{
+
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+
     facetResultPages: FacetResultPage[] = [];
     solrRequest: SolrRequest = new SolrRequest();
     keyword: string;
@@ -53,6 +57,11 @@ export class SolrSearchComponent{
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
+        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
+        if (input) {
+            this.keyword = input;
+            this.form.get('keywords').markAsTouched();
+        }
     }
     
     buildForm(): FormGroup {
@@ -158,6 +167,8 @@ export class SolrSearchComponent{
                     })} 
                 return solrResultPage;
             });
+        } else {
+            return Promise.resolve(new SolrResultPage());
         }
     }
 
@@ -196,7 +207,7 @@ export class SolrSearchComponent{
     }
 
     massiveDownload(type: string) {
-        this.datasetService.downloadDatasets(this.selectedDatasetIds, type);
+        this.datasetService.downloadDatasets(this.selectedDatasetIds, type, this.progressBar);
     }
 
     onSelectionChange (selection) {
