@@ -390,35 +390,6 @@ public class DatasetApiController implements DatasetApi {
 
 		massiveDownload(format, datasets, response);
 	}
-	
-    @Override
-	public void massiveDownloadByExaminationId(
-    		@ApiParam(value = "id of the examination", required=true) @Valid
-    		@RequestParam(value = "examinationId", required = true) Long examinationId,
-    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
-    	
-		// STEP 0: Check data integrity
-		if (examinationId == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination ID."));
-		}
-		
-		// Load Examination
-		Examination exam = examinationService.findById(examinationId);
-		// STEP 1: Retrieve all datasets all in one with only the one we can see
-		List<Dataset> datasets = new ArrayList<Dataset>();
-		for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-			datasets.addAll(acq.getDatasets());
-		}
-
-		if (datasets.size() > DATASET_LIMIT) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has more than " + DATASET_LIMIT + " datasets, that is the limit. Please download them from solr search." ));
-		}
-
-		massiveDownload(format, datasets, response);
-    }
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 2: Check rights => Also filters datasets on rights

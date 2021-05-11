@@ -186,21 +186,6 @@ public interface DatasetApi {
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
-    @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByExaminationId", notes = "If exists, returns a zip file of the datasets corresponding to the given examination ID", response = Resource.class, tags={  })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/massiveDownloadByExamination")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
-    void massiveDownloadByExaminationId(
-    		@ApiParam(value = "id of the examination", required=true) @Valid
-    		@RequestParam(value = "examinationId", required = true) Long examinationId,
-    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
-
 	@ApiOperation(value = "", nickname = "downloadStatistics", notes = "Download statistics from the entire database", response = Resource.class, tags={  })
 	@ApiResponses(value = {
 		@ApiResponse(code = 200, message = "exported statistics", response = Resource.class),
