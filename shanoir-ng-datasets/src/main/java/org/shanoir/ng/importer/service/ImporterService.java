@@ -75,6 +75,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -96,7 +97,7 @@ public class ImporterService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-	
+
 	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
@@ -125,7 +126,7 @@ public class ImporterService {
 	private static final String EEG_PREFIX = "eeg";
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-		
+
 		ShanoirEvent event = importJob.getShanoirEvent();
 		event.setMessage("Starting import...");
 		eventService.publishEvent(event);
@@ -162,10 +163,10 @@ public class ImporterService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			// This message is important for email service
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-			+": Successfully created datasets for subject " + importJob.getSubjectName()
-			+ " in examination " + examination.getId());
+					+": Successfully created datasets for subject " + importJob.getSubjectName()
+					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
-			
+
 			// Send mail
 			sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
@@ -188,7 +189,7 @@ public class ImporterService {
 				return;
 			}
 			MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
-			
+
 			// Add bruker archive as extra data
 			String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
 			if (fileName != null) {
@@ -209,7 +210,7 @@ public class ImporterService {
 			throw new ShanoirException(event.getMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * Sens the import email through rabbitMQ to user MS
 	 * @param importJob the import job
@@ -228,16 +229,21 @@ public class ImporterService {
 		generatedMail.setStudyCard(importJob.getStudyCardName());
 
 		Map<Long, String> datasets = new HashMap<>();
-		
+		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
+			return;
+		}
+
 		for (DatasetAcquisition acq : generatedAcquisitions) {
-			for (Dataset dataset : acq.getDatasets()) {
-				datasets.put(dataset.getId(), dataset.getName());
+			if (!CollectionUtils.isEmpty(acq.getDatasets())) {
+				for (Dataset dataset : acq.getDatasets()) {
+					datasets.put(dataset.getId(), dataset.getName());
+				}
 			}
 		}
 
 		generatedMail.setDatasets(datasets);
 		List<Long> recipients = new ArrayList<>();
-		
+
 		// Get all recpients
 		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
 		for (StudyUser user : users) {
@@ -283,7 +289,7 @@ public class ImporterService {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 	 * 
@@ -292,12 +298,12 @@ public class ImporterService {
 	 */
 	private boolean checkSerieForDicomImages(Serie serie) {
 		return serie.getModality() != null
-			&& serie.getDatasets() != null
-			&& !serie.getDatasets().isEmpty()
-			&& serie.getDatasets().get(0).getExpressionFormats() != null
-			&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
-			&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
-			&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
+				&& serie.getDatasets() != null
+				&& !serie.getDatasets().isEmpty()
+				&& serie.getDatasets().get(0).getExpressionFormats() != null
+				&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
+				&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
+				&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
 	}
 
 
