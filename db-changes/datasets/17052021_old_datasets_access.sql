@@ -1,5 +1,2 @@
-# Update all mr_protocol  where origin_metadata_id is null but not origin_metadata
-UPDATE mr_protocol SET origin_metadata_id = updated_metadata_id WHERE origin_metadata_id IS NULL and updated_metadata_id IS NOT NULL;
-
-# Remove updated_metadata_id where they are equal with origin_metadata_id (when they are different it's not a problem)
-UPDATE mr_protocol SET updated_metadata_id = NULL WHERE origin_metadata_id IS NOT NULL and updated_metadata_id IS NOT NULL AND origin_metadata_id = updated_metadata_id;
+# Update all protocol metadata that are "updated" to dtype = 1
+UPDATE mr_protocol_metadata SET dtype = 2 WHERE id IN (SELECT updated_metadata_id FROM mr_protocol WHERE updated_metadata IS NOT NULL);
