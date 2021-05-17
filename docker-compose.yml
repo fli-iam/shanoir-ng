@@ -298,7 +298,8 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_X_FORWARDED
-      - SHANOIR_COLORS
+      - SHANOIR_INSTANCE_NAME
+      - SHANOIR_INSTANCE_COLOR
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
