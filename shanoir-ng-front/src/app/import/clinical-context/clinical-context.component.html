@@ -149,7 +149,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     *ngIf="subject && subject.subjectStudy"
                     [(ngModel)]="subject.subjectStudy.subjectType"
                     [ngModelOptions]="{standalone: true}" 
-                    [options]="subjectTypes">
+                    [options]="subjectTypes"
+                    (userChange)="onContextChange();">
                 </select-box>
                 <select-box 
                     *ngIf="!subject || !subject.subjectStudy"
