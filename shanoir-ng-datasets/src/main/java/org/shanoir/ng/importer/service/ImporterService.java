@@ -24,7 +24,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
@@ -51,21 +55,31 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.utils.DatasetImportEmail;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Scope("prototype")
@@ -83,7 +97,7 @@ public class ImporterService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-	
+
 	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 
@@ -99,6 +113,12 @@ public class ImporterService {
 	@Autowired
 	private ShanoirEventService eventService;
 
+	@Autowired
+	StudyUserRightsRepository studyUserRightRepo;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
+
 	private static final String SESSION_PREFIX = "ses-";
 
 	private static final String SUBJECT_PREFIX = "sub-";
@@ -106,13 +126,14 @@ public class ImporterService {
 	private static final String EEG_PREFIX = "eeg";
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-		
+
 		ShanoirEvent event = importJob.getShanoirEvent();
 		event.setMessage("Starting import...");
 		eventService.publishEvent(event);
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
+			Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
 			if (examination != null) {
 				int rank = 0;
 				for (Patient patient : importJob.getPatients()) {
@@ -120,7 +141,10 @@ public class ImporterService {
 						float progress = 0f;
 						for (Serie serie : study.getSeries() ) {
 							if (serie.getSelected() != null && serie.getSelected()) {
-								createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
+								DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
+								if (acquisition != null) {
+									generatedAcquisitions.add(acquisition);
+								}
 								rank++;
 							}
 							progress += 1f / study.getSeries().size();
@@ -139,9 +163,12 @@ public class ImporterService {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			// This message is important for email service
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-			+": Successfully created datasets for subject " + importJob.getSubjectName()
-			+ " in examination " + examination.getId());
+					+": Successfully created datasets for subject " + importJob.getSubjectName()
+					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
+
+			// Send mail
+			sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
 			// Create BIDS folder
 			try {
@@ -162,7 +189,7 @@ public class ImporterService {
 				return;
 			}
 			MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
-			
+
 			// Add bruker archive as extra data
 			String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
 			if (fileName != null) {
@@ -181,10 +208,63 @@ public class ImporterService {
 			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
 			throw new ShanoirException(event.getMessage(), e);
-
 		}
 	}
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
+
+	/**
+	 * Sens the import email through rabbitMQ to user MS
+	 * @param importJob the import job
+	 * @param userId the userID
+	 * @param examination the exam ID
+	 * @param generatedAcquisitions
+	 */
+	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
+		DatasetImportEmail generatedMail = new DatasetImportEmail();
+		generatedMail.setExamDate(examination.getExaminationDate().toString());
+		generatedMail.setExaminationId(examination.getId().toString());
+		generatedMail.setStudyId(importJob.getStudyId().toString());
+		generatedMail.setSubjectName(importJob.getSubjectName());
+		generatedMail.setStudyName(importJob.getStudyName());
+		generatedMail.setUserId(userId);
+		generatedMail.setStudyCard(importJob.getStudyCardName());
+
+		Map<Long, String> datasets = new HashMap<>();
+		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
+			return;
+		}
+
+		for (DatasetAcquisition acq : generatedAcquisitions) {
+			if (!CollectionUtils.isEmpty(acq.getDatasets())) {
+				for (Dataset dataset : acq.getDatasets()) {
+					datasets.put(dataset.getId(), dataset.getName());
+				}
+			}
+		}
+
+		generatedMail.setDatasets(datasets);
+		List<Long> recipients = new ArrayList<>();
+
+		// Get all recpients
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
+		for (StudyUser user : users) {
+			if (user.isReceiveNewImportReport()) {
+				recipients.add(user.getUserId());
+			}
+		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recpients
+			return;
+		}
+		generatedMail.setRecipients(recipients);
+
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(generatedMail));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send email for this import. ", e);
+		}
+	}
+
+	public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		if (checkSerieForDicomImages(serie)) {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
@@ -203,11 +283,13 @@ public class ImporterService {
 			LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
 					+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
 					+ "(" + serie.getSeriesDescription() + ")");
+			return datasetAcquisition;
 		} else {
 			LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");
 		}
+		return null;
 	}
-	
+
 	/**
 	 * Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 	 * 
@@ -216,12 +298,12 @@ public class ImporterService {
 	 */
 	private boolean checkSerieForDicomImages(Serie serie) {
 		return serie.getModality() != null
-			&& serie.getDatasets() != null
-			&& !serie.getDatasets().isEmpty()
-			&& serie.getDatasets().get(0).getExpressionFormats() != null
-			&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
-			&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
-			&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
+				&& serie.getDatasets() != null
+				&& !serie.getDatasets().isEmpty()
+				&& serie.getDatasets().get(0).getExpressionFormats() != null
+				&& !serie.getDatasets().get(0).getExpressionFormats().isEmpty()
+				&& serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() != null
+				&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
 	}
 
 
