@@ -94,7 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<name>Dcm4Che Snapshots</name>
 			<url>http://www.dcm4che.org/maven2/</url>
 			<snapshots>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
