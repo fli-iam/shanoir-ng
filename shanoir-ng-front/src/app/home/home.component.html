@@ -39,6 +39,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td>
             <td>
                 <ul class="challenge-files">
+                    <div [hidden]="progressBar.progress == 0">
+                        <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+                    </div>
                     <li *ngFor="let filePath of challengeStudy.protocolFilePaths">
                         <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
                         <span (click)="downloadFile(filePath)">{{filePath}}</span>

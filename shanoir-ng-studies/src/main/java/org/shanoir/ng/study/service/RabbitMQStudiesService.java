@@ -15,10 +15,6 @@
 package org.shanoir.ng.study.service;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -37,12 +33,10 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -58,32 +52,6 @@ public class RabbitMQStudiesService {
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
-
-	/**
-	 * This methods allow to get the list of amdin users for a given study ID
-	 * @param studyId the study ID
-	 * @return a liost of ID of the users administrating the study
-	 * @throws JsonProcessingException
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public List<Long> manageAdminsStudy(String studyId) {
-		try {
-			Study study = studyRepo.findOne(Long.valueOf(studyId));
-			if (study == null) {
-				return Collections.emptyList();
-			}
-			// Filter administrators and map to get only IDs
-			return study.getStudyUserList().stream()
-					.filter(studyUser -> studyUser.isReceiveNewImportReport())
-					.map(studyUser -> studyUser.getUserId())
-					.collect(Collectors.toList());
-		} catch (Exception e) {
-			LOG.error("Could not get study administrators.", e);
-			return Collections.emptyList();
-		}
-	}
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation

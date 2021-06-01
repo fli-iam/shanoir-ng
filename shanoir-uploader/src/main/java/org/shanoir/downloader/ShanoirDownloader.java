@@ -165,6 +165,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			exit(e.getMessage());
 		}
 
+		System.exit(0);
 	}
 
 	/** Our business Service. */
@@ -180,6 +181,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	public void initialize() {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
+
 		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
 		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());

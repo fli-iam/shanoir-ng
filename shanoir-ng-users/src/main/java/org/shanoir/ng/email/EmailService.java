@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.email;
 
-import java.util.List;
-
-import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.user.model.User;
 
 /**
@@ -115,9 +112,8 @@ public interface EmailService {
 
 	/**
 	 *  This method notifies a study manager that some data was imported in the study.
-	 * @param event the Shanoir event transporting the information
-	 * @param list the list of imported series
+	 * @param generatedMail: The object containing all the mail informations
 	 */
-	void notifyStudyManagerDataImported(ShanoirEvent event, List<String> list);
+	void notifyStudyManagerDataImported(DatasetImportEmail generatedMail);
 
 }

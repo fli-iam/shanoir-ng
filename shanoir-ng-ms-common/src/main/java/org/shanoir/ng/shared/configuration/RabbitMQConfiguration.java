@@ -70,9 +70,6 @@ public class RabbitMQConfiguration {
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
 
-	/** Get the list of administrator for a given study */
-	public static final String USER_ADMIN_STUDY_QUEUE = "user-admin-study-queue";
-
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
@@ -96,6 +93,9 @@ public class RabbitMQConfiguration {
 	
 	/** Queue used to get information for study_examination relationship.*/
 	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
+
+	/** Send a mail from dataset microservice to study users */
+	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -282,11 +282,6 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue userAdminStudyQueue() {
-		return new Queue(USER_ADMIN_STUDY_QUEUE, true);
-	}
-
-	@Bean
 	public static Queue createDatasetAcquisitionQueue() {
 		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
@@ -314,5 +309,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue examinationStudyQueue() {
 		return new Queue(EXAMINATION_STUDY_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importDatasetMail() {
+		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
 }

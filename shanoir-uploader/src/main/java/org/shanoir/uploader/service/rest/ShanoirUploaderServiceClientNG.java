@@ -53,7 +53,7 @@ public class ShanoirUploaderServiceClientNG {
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
-	private static final String SERVICE_ACQUISITION_EQUIPMENT_BY_ID = "service.acquisition.equipment.find.by.id";
+	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
@@ -81,7 +81,7 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private String serviceURLStudyCardsByStudyIds;
 	
-	private String serviceURLAcquisitionEquipmentById;
+	private String serviceURLAcquisitionEquipments;
 	
 	private String serviceURLSubjectsFindByIdentifier;
 	
@@ -118,8 +118,8 @@ public class ShanoirUploaderServiceClientNG {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
-		this.serviceURLAcquisitionEquipmentById = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
+		this.serviceURLAcquisitionEquipments = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
 			+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLDatasets = this.serverURL
@@ -150,7 +150,12 @@ public class ShanoirUploaderServiceClientNG {
 			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
 			postBody.append("&scope=offline_access");
+
 			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+			if(response == null) {
+				logger.error("Error while asking authentification token from: " + keycloakURL);
+				return null;
+			}
 			String responseEntityString = EntityUtils.toString(response.getEntity());
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {
@@ -206,7 +211,11 @@ public class ShanoirUploaderServiceClientNG {
 	}
 	
 	public List<Study> findStudiesNamesAndCenters() {
+		long startTime = System.currentTimeMillis();
 		HttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    logger.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
 		int code = response.getStatusLine().getStatusCode();
 		if (code == HttpStatus.SC_OK) {
 			List<Study> studies = Util.getMappedList(response, Study.class);
@@ -220,7 +229,11 @@ public class ShanoirUploaderServiceClientNG {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
+			long startTime = System.currentTimeMillis();
 			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false);
+			long stopTime = System.currentTimeMillis();
+		    long elapsedTime = stopTime - startTime;
+		    logger.info("findStudyCardsByStudyIds: " + elapsedTime + "ms");
 			int code = response.getStatusLine().getStatusCode();
 			if (code == HttpStatus.SC_OK) {
 				List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
@@ -319,14 +332,16 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 
-	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) {
-		if (acquisitionEquipmentId != null) {
-			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
-			int code = response.getStatusLine().getStatusCode();
-			if (code == HttpStatus.SC_OK) {
-				AcquisitionEquipment acquisitionEquipment = Util.getMappedObject(response, AcquisitionEquipment.class);
-				return acquisitionEquipment;
-			}
+	public List<AcquisitionEquipment> findAcquisitionEquipments() throws Exception {
+		long startTime = System.currentTimeMillis();
+		HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipments);
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    logger.info("findAcquisitionEquipments: " + elapsedTime + "ms");
+		int code = response.getStatusLine().getStatusCode();
+		if (code == HttpStatus.SC_OK) {
+			List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response, AcquisitionEquipment.class);
+			return acquisitionEquipments;
 		}
 		return null;
 	}

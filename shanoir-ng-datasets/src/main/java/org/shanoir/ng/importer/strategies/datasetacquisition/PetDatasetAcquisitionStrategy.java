@@ -87,6 +87,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		if (importJob.getStudyCardId() != null) {
 			studyCard = getStudyCard(importJob.getStudyCardId());
 			datasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+			importJob.setStudyCardName(studyCard.getName());
 		} else {
 			LOG.warn("No studycard given for this import");
 		}
