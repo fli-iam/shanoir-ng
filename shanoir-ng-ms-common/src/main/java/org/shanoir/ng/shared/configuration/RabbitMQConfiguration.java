@@ -94,6 +94,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to get information for study_examination relationship.*/
 	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
 
+	/** Queue used to get information for study_examination deletion relationship.*/
+	public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
+
 	/** Send a mail from dataset microservice to study users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
@@ -310,6 +313,12 @@ public class RabbitMQConfiguration {
 	public static Queue examinationStudyQueue() {
 		return new Queue(EXAMINATION_STUDY_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue examinationStudyDeleteQueue() {
+		return new Queue(EXAMINATION_STUDY_DELETE_QUEUE, true);
+	}
+
 
 	@Bean
 	public static Queue importDatasetMail() {

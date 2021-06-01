@@ -387,9 +387,11 @@ public class StudyServiceImpl implements StudyService {
 		Study stud = this.studyRepository.findOne(studyId);
 		Set<Long> exams = stud.getExaminationIds();
 		if (exams == null) {
-			return;
+			exams = new HashSet<>();
+		} else {
+			exams.remove(examinationId);
 		}
-		exams.remove(examinationId);
+		stud.setExaminationIds(exams);
 		this.studyRepository.save(stud);
 	}
 
