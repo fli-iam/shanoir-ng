@@ -1,0 +1,1 @@
+ALTER TABLE dataset_acquisition ADD COLUMN creation_date date;
