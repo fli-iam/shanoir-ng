@@ -411,8 +411,13 @@ public class DatasetApiController implements DatasetApi {
 				String studyName = studyRepo.findOne(dataset.getStudyId()).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();
-
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment());
+				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();
+				datasetFilePath = datasetFilePath. replaceAll("[^a-zA-Z0-9_\\-]", "_");
+				if(datasetFilePath.length() > 255 ){
+					datasetFilePath = datasetFilePath.substring(0, 254);
+				}
+				datasetFilePath = tmpFile.getAbsolutePath() + File.separator + datasetFilePath;
+				File datasetFile = new File(datasetFilePath);
 				if (!datasetFile.exists()) {
 					datasetFile.mkdir();
 				}
