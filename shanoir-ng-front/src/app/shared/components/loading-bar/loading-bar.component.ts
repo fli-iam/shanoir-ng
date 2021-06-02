@@ -24,10 +24,14 @@ import { Component, Input } from '@angular/core';
 export class LoadingBarComponent {
 
     @Input() progress: number = 0;
+    @Input() text: string = "";
     width: number = 200;
 
     getProgressText(): string {
-        return Math.round(this.progress * 100) + "%";
+        if (this.progress === -1 && this.text) {
+            return this.text;
+        }
+        return Math.floor(this.progress * 100) + "%";
     }
 
     onResized(event) {

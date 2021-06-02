@@ -26,14 +26,9 @@
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
     
-    /* --instance-name: "QUALIF";
-    --instance-color: teal;
-    --user-color: teal; */
-
-    --instance-name: ;
-    --instance-color: transparent;
-    --user-color: #813371;
-
+    --instance-name: "SHANOIR_INSTANCE_NAME";
+    --instance-color: SHANOIR_INSTANCE_COLOR;
+    --user-color:     SHANOIR_USER_COLOR;
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }

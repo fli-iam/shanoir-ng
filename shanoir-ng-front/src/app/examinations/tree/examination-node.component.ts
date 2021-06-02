@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
@@ -24,6 +24,8 @@ import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } 
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+
 
 @Component({
     selector: 'examination-node',
@@ -35,9 +37,10 @@ export class ExaminationNodeComponent implements OnChanges {
     @Input() input: ExaminationNode | Examination;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+
     node: ExaminationNode;
     loading: boolean = false;
-    downloading: boolean = false;
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
@@ -79,7 +82,7 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     downloadFile(file) {
-        this.examinationService.downloadFile(file, this.node.id);
+        this.examinationService.downloadFile(file, this.node.id, this.progressBar);
     }
 
     firstOpen() {
@@ -128,9 +131,7 @@ export class ExaminationNodeComponent implements OnChanges {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            this.downloading = true;
-            this.datasetService.downloadDatasets(this.datasetIds, format)
-                    .then(() => this.downloading = false).catch(() => this.downloading = false);
+            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
         });
     }
 

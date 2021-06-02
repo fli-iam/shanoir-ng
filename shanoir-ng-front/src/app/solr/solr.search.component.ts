@@ -23,6 +23,7 @@ import { TableComponent } from "../shared/components/table/table.component";
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 
 @Component({
     selector: 'solr-search',
@@ -32,6 +33,9 @@ import { SolrService } from "./solr.service";
 })
 
 export class SolrSearchComponent{
+
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+
     facetResultPages: FacetResultPage[] = [];
     solrRequest: SolrRequest = new SolrRequest();
     keyword: string;
@@ -203,7 +207,7 @@ export class SolrSearchComponent{
     }
 
     massiveDownload(type: string) {
-        this.datasetService.downloadDatasets(this.selectedDatasetIds, type);
+        this.datasetService.downloadDatasets(this.selectedDatasetIds, type, this.progressBar);
     }
 
     onSelectionChange (selection) {

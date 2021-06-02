@@ -45,7 +45,7 @@ export class DUASigningComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes['dua']) {
             if (this.dua && this.dua.studyId) {
-                this.studyService.downloadBlob(this.dua.path, this.dua.studyId, 'dua').then(response => {
+                this.studyService.downloadFile(this.dua.path, this.dua.studyId, 'dua', null).then(response => {
                     this.duaBlob = response.body;
                     let url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(this.duaBlob));
                     this.pdfUrl = url as string;
