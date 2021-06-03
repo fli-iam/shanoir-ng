@@ -77,10 +77,10 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
               break;
             case HttpEventType.Response:
                 progressBar.progress = 0;
-                saveAs(event.body);
+                saveAs(event.body, this.getFilename(event));
         }
     }
-
+ 
     public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));

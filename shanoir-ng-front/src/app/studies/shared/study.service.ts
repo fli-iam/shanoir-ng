@@ -169,7 +169,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
               progressBar.progress = (event.loaded / event.total);
               break;
             case HttpEventType.Response:
-                saveAs(event.body);
+                saveAs(event.body, this.getFilename(event));
                 progressBar.progress = 0;
         }
     }
