@@ -148,6 +148,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<User> findAccountRequests() {
+		return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
+	}
+
+	@Override
 	public Optional<User> findByEmail(final String email) {
 		return userRepository.findByEmail(email);
 	}

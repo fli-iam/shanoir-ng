@@ -148,7 +148,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return o1.getSortingIndex() - o2.getSortingIndex();
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
 			}
 		});
 		if (daList.isEmpty()) {

@@ -12,22 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto;
-
-import java.util.List;
-
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import { Pipe, PipeTransform } from '@angular/core';
 
 
-public interface DatasetAndProcessingsDTOInterface {
+@Pipe({ name: "eventType", pure: false })
+export class EventTypePipe implements PipeTransform {
 
-	public List<DatasetProcessingDTO> getProcessings();
+    transform(type: string): string {
+        if (type) {
+            type = type.charAt(0).toUpperCase() + type.slice(1)
+            return type.split('.')[0].match(/[A-Z][a-z]+/g).join(' ').toLowerCase(); // importDataset.event
+        }
+        return '';
+    }
 
-	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings);
-    
-
-	public DatasetAcquisitionDTO getDatasetAcquisition();
-
-	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 }
