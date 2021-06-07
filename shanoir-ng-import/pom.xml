@@ -19,22 +19,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.shanoir-ng</groupId>
-		<artifactId>shanoir-ng-back</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../shanoir-ng-back</relativePath>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.4.5</version>
+		<relativePath/>
 	</parent>
 
+	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-import</artifactId>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-import</name>
-	<description>Import project for Shanoir NG</description>
+	<description>Import microservice of Shanoir-NG</description>
 
 	<properties>
-		<springfox-version>2.5.0</springfox-version>
-		<spring-active-profile></spring-active-profile>
-		<resteasy.version>3.1.0.Final</resteasy.version>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dcm4che.version>5.14.1</dcm4che.version>
 		<weasis.version>5.14.1</weasis.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
@@ -43,46 +44,99 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</properties>
 
 	<dependencies>
+		<!-- Spring Boot dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-properties-migrator</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		
+		<!-- Shanoir-NG dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-tomcat8-adapter</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-admin-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<!-- Anonymizer Shanoir -->
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
-		<!-- dependency Shanoir-NG exchange -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-	
-		<!-- Database connector -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
 
-		<!-- AMQP -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-kotlin</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
 		<!-- DICOM Weasis Tools, based on dcm4che3 -->
@@ -140,10 +194,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.apache.httpcomponents</groupId> 
 			<artifactId>httpmime</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
 		<!-- Tests -->
 		<dependency>
 			<groupId>org.powermock</groupId>
@@ -171,6 +221,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</dependency>
 	</dependencies>
 
+	<dependencyManagement>
+	    <dependencies>
+	        <dependency>
+	            <groupId>org.keycloak.bom</groupId>
+	            <artifactId>keycloak-adapter-bom</artifactId>
+	            <version>13.0.1</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+	    </dependencies>
+	</dependencyManagement>
+
 	<build>
 		<plugins>
 			<!--
@@ -180,7 +242,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		   <plugin>
 		        <groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-surefire-plugin</artifactId>
-		        <version>3.0.0-M4</version>
 		        <configuration>
 		          <classpathDependencyExcludes>
                      <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
@@ -207,7 +268,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
