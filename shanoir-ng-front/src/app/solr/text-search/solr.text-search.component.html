@@ -1,0 +1,31 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="input-frame">
+    <input type="text" placeholder="search ..." [(ngModel)]="searchText" (change)="onChangeSearch()" [class.error]="syntaxError" [class.expert]="expertMode"/>
+    <span class="left-icon clickable clear" (click)="clear(); this.onChangeSearch();"><i class="fas fa-times"></i>clear</span>
+</div>
+<div class="syntax-error" *ngIf="syntaxError">syntax error</div>
+<div class="expert-mode">
+    <div>
+        <checkbox [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()"></checkbox>Expert mode
+        <span class="info right-icon clickable" (click)="showInfo = !showInfo">( info<i *ngIf="!showInfo" class="fas fa-caret-down"></i><i *ngIf="showInfo" class="fas fa-caret-up"></i> )</span>
+    </div>
+    <div class="info-txt" *ngIf="showInfo" @slideDown>
+        Query syntax example: 
+        <b>studyName:test; subjectName:xxxx; datasetName:*restingstate*;</b>
+        <br/>Multiple character wildcard searches are allowed by adding * to keyword.
+        <br/><b>Special characters</b> like "-" is not yet supported. For "USPIO-6" study, get the data with <b>"studyName:USPIO*;"</b>
+    </div>
+</div>

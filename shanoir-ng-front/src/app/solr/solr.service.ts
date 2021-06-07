@@ -14,7 +14,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Pageable } from '../shared/components/table/pageable.model';
+import { Order, Pageable, Sort } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
 import { SolrRequest, SolrResultPage } from './solr.document.model';
@@ -35,13 +35,20 @@ export class SolrService {
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
         if (!solrReq.studyName && !solrReq.subjectName && !solrReq.examinationComment && !solrReq.datasetName
-            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature) {
+            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature 
+            && !solrReq.searchText) {
                 return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
             .toPromise();
         } else {
             return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(solrReq), { 'params': pageable.toParams() })    
             .toPromise();
         }
+    }
+
+    public getFacets(): Promise<SolrResultPage> {
+        let pageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
+        return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
+            .toPromise();
     }
 
 }

@@ -1,0 +1,12 @@
+:host() { display: block; }
+.input-frame { display: inline-block; width: 100%; position: relative; }
+.clear { position: absolute; top: 2px; right: 0px; color: #757575; }
+.expert-mode { margin-top: 10px; }
+.input-frame input { width: calc(100% - 65px); padding-right: 65px; }
+.input-frame input.error { border-color: var(--color-error); }
+checkbox { vertical-align: -5px; margin-right: 7px; }
+.clickable { cursor: pointer; }
+.info { color: var(--color-b); }
+.info-txt { margin-top: 5px; padding: 2px 5px; background-color: var(--color-b-light); border-radius: 2px; }
+.syntax-error { color: var(--color-error); }
+input.expert { color: navy; }

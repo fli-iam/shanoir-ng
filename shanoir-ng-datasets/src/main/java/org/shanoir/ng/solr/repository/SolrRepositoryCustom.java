@@ -15,6 +15,7 @@ import org.springframework.data.solr.core.query.result.SolrResultPage;
  *
  */
 public interface SolrRepositoryCustom {
+	
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrFacet facet,Pageable pageable);
 	
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds, ShanoirSolrFacet facet,Pageable pageable);
