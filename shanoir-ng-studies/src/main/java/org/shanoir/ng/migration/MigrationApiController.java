@@ -1,6 +1,8 @@
 package org.shanoir.ng.migration;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,8 @@ public class MigrationApiController implements MigrationApi {
 	@Autowired
 	DistantKeycloakConfigurationService keycloakService;
 
+	private static final Logger LOG = LoggerFactory.getLogger(MigrationApiController.class);
+
 	@Override
 	public synchronized ResponseEntity<String> migrateStudy (
 			@ApiParam(value = "Url of distant shanoir") @RequestParam("shanoirUrl") String shanoirUrl,
@@ -25,12 +29,18 @@ public class MigrationApiController implements MigrationApi {
 			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 					throws RestServiceException {
 
-		// Connect to keycloak and keep connection alive
-		keycloakService.connectToDistantKeycloak(shanoirUrl, username, userPassword);
+		try {
 
-		// Migrate study
-		this.migrationService.migrateStudy(studyId, userId, username);
-		keycloakService.stop();
+			// Connect to keycloak and keep connection alive
+			keycloakService.connectToDistantKeycloak(shanoirUrl, username, userPassword);
+
+			// Migrate study
+			this.migrationService.migrateStudy(studyId, userId, username);
+		} catch (Exception e) {
+			LOG.error("Something went wrong while migrating study...", e);
+		} finally {
+			keycloakService.stop();
+		}
 		return null;
 	}
 

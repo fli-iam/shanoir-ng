@@ -37,7 +37,7 @@ public class DistantKeycloakConfigurationService {
 	private String server;
 
 	private ScheduledExecutorService executor;
-
+	
 	/**
 	 * Connects to a distant keycloak and keeps the connection alive
 	 * @param shanoirUrl
@@ -65,12 +65,21 @@ public class DistantKeycloakConfigurationService {
 			final int statusCode = response.getStatusCodeValue();
 			if (HttpStatus.SC_OK == statusCode) {
 				JSONObject responseEntityJson = new JSONObject(response.getBody());
+				// Access token
+				String newAccessToken = responseEntityJson.getString("access_token");
+				if (newAccessToken != null) {
+					token = newAccessToken;
+				} else {
+					LOG.error("ERROR: with access token refresh.");
+				}
+				// Refresh token
 				String refreshToken = responseEntityJson.getString("refresh_token");
 				this.refreshToken(keycloakURL, refreshToken);
+			} else {
+				LOG.error("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.getBody());
 			}
 		} catch (Exception e) {
-			System.err.println("Could not connect to keycloak");
-			e.printStackTrace();
+			LOG.error("Could not connect to distant keycloak", e);
 		}
 	}
 
@@ -103,14 +112,14 @@ public class DistantKeycloakConfigurationService {
 					if (newAccessToken != null) {
 						token = newAccessToken;
 					} else {
-						LOG.info("ERROR: with access token refresh.");
+						LOG.error("ERROR: with access token refresh.");
 					}
-					LOG.info("Access token has been refreshed.");
+					LOG.error("Access token has been refreshed.");
 				} else {
-					LOG.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
+					LOG.error("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
 				}
 			} catch (Exception e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("Could not refresh distant keycloak token", e);
 			}
 		};
 		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
