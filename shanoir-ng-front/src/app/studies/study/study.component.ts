@@ -232,6 +232,7 @@ export class StudyComponent extends EntityComponent<Study> {
         study.studyCenterList = [];
         study.timepoints = [];
         study.withExamination = true;
+        study.protocolFilePaths = [];
         return study;
     }
 

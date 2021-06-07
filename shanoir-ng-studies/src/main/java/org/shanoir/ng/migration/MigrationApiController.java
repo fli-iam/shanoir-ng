@@ -29,8 +29,8 @@ public class MigrationApiController implements MigrationApi {
 		keycloakService.connectToDistantKeycloak(shanoirUrl, username, userPassword);
 
 		// Migrate study
-		this.migrationService.migrateStudy(studyId, userId);
-
+		this.migrationService.migrateStudy(studyId, userId, username);
+		keycloakService.stop();
 		return null;
 	}
 

@@ -34,6 +34,8 @@ public class DistantKeycloakConfigurationService {
 	
 	private String token;
 
+	private String server;
+
 	private ScheduledExecutorService executor;
 
 	/**
@@ -44,6 +46,7 @@ public class DistantKeycloakConfigurationService {
 	 */
 	public void connectToDistantKeycloak(String shanoirUrl, String username, String userPassword) {
 		// Connect
+		this.setServer(shanoirUrl);
 		String keycloakURL = shanoirUrl + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();
@@ -61,7 +64,7 @@ public class DistantKeycloakConfigurationService {
 			// Keep connection alive
 			final int statusCode = response.getStatusCodeValue();
 			if (HttpStatus.SC_OK == statusCode) {
-				JSONObject responseEntityJson = new JSONObject(response);
+				JSONObject responseEntityJson = new JSONObject(response.getBody());
 				String refreshToken = responseEntityJson.getString("refresh_token");
 				this.refreshToken(keycloakURL, refreshToken);
 			}
@@ -95,7 +98,7 @@ public class DistantKeycloakConfigurationService {
 				// Keep connection alive
 				final int statusCode = response.getStatusCodeValue();
 				if (HttpStatus.SC_OK == statusCode) {
-					JSONObject responseEntityJson = new JSONObject(response);
+					JSONObject responseEntityJson = new JSONObject(response.getBody());
 					String newAccessToken = responseEntityJson.getString("access_token");
 					if (newAccessToken != null) {
 						token = newAccessToken;
@@ -121,10 +124,19 @@ public class DistantKeycloakConfigurationService {
 		return this.token;
 	}
 
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+	
 	/**
 	 * Stop the distant keycloak connection
 	 */
 	public void stop() {
 		this.executor.shutdown();
 	}
+
 }

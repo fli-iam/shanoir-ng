@@ -12,13 +12,14 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class MigrationService {
 	 * This method is synchronized to avoid multiple threads running the same
 	 * @param studyId the study to migrate
 	 */
-	public synchronized void migrateStudy(Long studyId, Long userId) {
+	public synchronized void migrateStudy(Long studyId, Long userId, String username) {
 		Study study = this.studyService.findById(studyId);
 		
 		Map<Long,Long> subjectMap = new HashMap<>();
@@ -58,7 +59,7 @@ public class MigrationService {
 			subj.setId(null);
 			subj.setSubjectStudyList(Collections.emptyList());
 			Subject sub = distantShanoir.createSubject(subj);
-
+			subj.setId(oldId);
 			// Keep updated a map of oldSubjectId => distantSubjectId
 			subjectMap.put(oldId, sub.getId());
 		}
@@ -76,32 +77,36 @@ public class MigrationService {
 		// Reset SubjectStudy to update with subjects
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			subjectStudy.setId(null);
-			// Replace subject Id
-			subjectStudy.getSubject().setId(subjectMap.get(subjectStudy.getId()));
+			subjectStudy.setStudy(null);
+			Subject newSubject = new Subject();
+			newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()));
+			subjectStudy.setSubject(newSubject);
 		}
 		// Reset studyExaminations
 		study.setExaminationIds(Collections.emptyList());
 		
-		StudyUser su = new StudyUser();
-		
-		for (StudyUser sUser : study.getStudyUserList()) {
-			if (sUser.getUserId().equals(KeycloakUtil.getTokenUserId())) {
-				su = sUser;
-				break;
-			}
-		}
 		// Set StudyUser to only current user
-		su.setStudy(study);
+		List<StudyUser> suList = new ArrayList<>();
+		StudyUser su = new StudyUser();
 		su.setUserId(userId);
-		
-		study.setStudyUserList(Collections.singletonList(su));
-		
-		distantShanoir.createStudy(study);
+		su.setConfirmed(true);
+		List<StudyUserRight> rights = new ArrayList<>();
+		rights.add(StudyUserRight.CAN_SEE_ALL);
+		rights.add(StudyUserRight.CAN_IMPORT);
+		rights.add(StudyUserRight.CAN_DOWNLOAD);
+		rights.add(StudyUserRight.CAN_ADMINISTRATE);
+		su.setStudyUserRights(rights);
+		su.setStudy(new Study());
+		su.setUserName(username);
+		suList.add(su);
+		study.setStudyUserList(suList);
+
+		StudyDTO newStudy = distantShanoir.createStudy(study);
 		
 		// Add protocol/ DUA files
 		for (String file : study.getProtocolFilePaths()) {
 			File fileAsFile = new File(studyService.getStudyFilePath(oldStudyId, file));
-			distantShanoir.addProtocoleFile(fileAsFile);
+			distantShanoir.addProtocoleFile(fileAsFile, newStudy.getId().toString());
 		}
 
 		// Reset lists
@@ -138,12 +143,19 @@ public class MigrationService {
 			// Otherwise create a new one
 			if (!found) {
 				center.setId(null);
-				center.setAcquisitionEquipments(Collections.emptyList());
+				center.setStudyCenterList(null);
+				List<AcquisitionEquipment> oldEquipments = center.getAcquisitionEquipments();
+				center.setAcquisitionEquipments(null);
 				Center newCenter = distantShanoir.createCenter(center);
-				List<AcquisitionEquipment> equipements = moveAcquisitionEquipements(center.getAcquisitionEquipments(), newCenter);
-				studyCenter.getCenter().setId(newCenter.getId());
-				studyCenter.getCenter().setAcquisitionEquipments(equipements);
+				List<AcquisitionEquipment> equipements = moveAcquisitionEquipements(oldEquipments, newCenter);
+				Center newCenterToSet = new Center();
+				newCenterToSet.setId(newCenter.getId());
+				newCenterToSet.setAcquisitionEquipments(equipements);
+				studyCenter.setCenter(newCenterToSet);
 			}
+			studyCenter.setId(null);
+			studyCenter.getCenter().setStudyCenterList(null);
+			studyCenter.setStudy(null);
 			toSet.add(studyCenter);
 		}
 		return toSet;
@@ -162,7 +174,7 @@ public class MigrationService {
 			boolean found = false;
 			for (AcquisitionEquipment distantEquipement : distantEquipements) {
 				// If equipement already exists, use it.
-				if (distantEquipement.getSerialNumber().equals(equipement.getSerialNumber())) {
+				if (distantEquipement.getSerialNumber() != null && distantEquipement.getSerialNumber().equals(equipement.getSerialNumber())) {
 					equipement.setId(distantEquipement.getId());
 					found = true;
 					break;
@@ -174,10 +186,10 @@ public class MigrationService {
 				ManufacturerModel model = this.moveManufacturerModel(equipement.getManufacturerModel());
 				equipement.setId(null);
 				equipement.setManufacturerModel(model);
+				equipement.setCenter(center);
 				equipement = distantShanoir.createEquipement(equipement);
 				this.distantEquipements.add(equipement);
 			}
-			equipement.setCenter(center);
 			toSet.add(equipement);
 		}
 		return toSet;
@@ -206,6 +218,7 @@ public class MigrationService {
 			Manufacturer manufToSet = moveManufacturer(manufacturerModel.getManufacturer());
 			manufacturerModel.setManufacturer(manufToSet);
 			manufacturerModel = distantShanoir.createManufacturerModel(manufacturerModel);
+			this.distantModels.add(manufacturerModel);
 		}
 		return manufacturerModel;
 	}
