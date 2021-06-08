@@ -23,6 +23,7 @@ parser.add_argument('-sb', '--subjectId', default='', help='The subject id to do
 parser.add_argument('-dd', '--destDir', required=True, help='The destination directory where files will be downloaded.')
 parser.add_argument('-c', '--configurationFolder', required=False, help='Path to the configuration folder containing proxy.properties (Tries to use ~/.su_vX.X.X/ by default). You can also use --proxy_url to configure the proxy (in which case the proxy.properties file will be ignored).')
 parser.add_argument('-p', '--proxyUrl', required=False, help='The proxy url in the format "user@host:port". The proxy password will be asked in the terminal. See --configuration_folder.')
+parser.add_argument('-ca', '--certificate', default='', required=False, help='Path to the CA bundle to use.')
 parser.add_argument('-v', '--verbose', default=False, action='store_true', help='Print log messages.')
 
 args = parser.parse_args()
@@ -39,6 +40,8 @@ study_id = args.studyId
 subject_id = args.subjectId
 dest_dir = Path(args.destDir)
 dest_dir.mkdir(parents=True, exist_ok=True)
+
+verify = args.certificate if args.certificate != '' else True
 
 proxy_url = None # 'user:pass@host:port'
 
@@ -121,7 +124,7 @@ def ask_access_token():
     }
     headers = {'content-type': 'application/x-www-form-urlencoded'}
     print('get keycloak token...', end=' ')
-    response = requests.post(url, data=payload, headers=headers, proxies=proxies)
+    response = requests.post(url, data=payload, headers=headers, proxies=proxies, verify=verify)
     print('response status :', response.status_code, responses[response.status_code])
     response_json = json.loads(response.text)
     if 'error_description' in response_json and response_json['error_description'] == 'Invalid user credentials':
@@ -168,7 +171,7 @@ def refresh_access_token():
     }
     headers = {'content-type': 'application/x-www-form-urlencoded'}
     print('refresh keycloak token...', end=' ')
-    response = requests.post(url, data=payload, headers=headers, proxies=proxies)
+    response = requests.post(url, data=payload, headers=headers, proxies=proxies, verify=verify)
     print('response status :', response.status_code, responses[response.status_code])
     response_json = json.loads(response.text)
     return response_json['access_token']
@@ -178,9 +181,9 @@ def perform_rest_request(rtype, url, headers=None, params=None, files=None, stre
     # if verbose:
     #     print(dict(url=url, headers=headers, params=params, files=files, stream=stream))
     if rtype == 'get':
-        response = requests.get(url, headers=headers, params=params, stream=stream, proxies=proxies)
+        response = requests.get(url, headers=headers, params=params, stream=stream, proxies=proxies, verify=verify)
     elif rtype == 'post':
-        response = requests.post(url, headers=headers, params=params, files=files, stream=stream, proxies=proxies)
+        response = requests.post(url, headers=headers, params=params, files=files, stream=stream, proxies=proxies, verify=verify)
     else:
         print('Error: unimplemented request type')
 
