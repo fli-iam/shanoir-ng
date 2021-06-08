@@ -47,11 +47,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="dates">
             <div class="title">Dataset Creation Date</div>
             <div class="date-from">
-                <span class="left-title">from :</span> <datepicker [(ngModel)]="datasetStartDate" formControlName="startDate"></datepicker>
+                <span class="left-title">from :</span> <datepicker [(ngModel)]="datasetStartDate" (ngModelChange)="onDateChange($event)" formControlName="startDate"></datepicker>
                 <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
             </div>
             <div class="date-to">
-                <span class="left-title">to :</span> <datepicker [(ngModel)]="datasetEndDate" formControlName="endDate"></datepicker>
+                <span class="left-title">to :</span> <datepicker [(ngModel)]="datasetEndDate" (ngModelChange)="onDateChange($event)" formControlName="endDate"></datepicker>
                 <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
                 <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
             </div>
@@ -84,11 +84,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <solr-text-search (onChange)="onSearchTextChange($event)" [registerResetCallback]="registerTextResetCallback.bind(this)"></solr-text-search>
 
         <div *ngIf="selections" class="selections">
-            <span class="selection" *ngFor="let item of selections">
-                <span class="clickable" (click)="removeSelection(item); table.refresh();">
+            <span class="selection" *ngFor="let sel of selections; let i = index">
+                <span class="clickable" (click)="removeSelection(i); table.refresh();">
                     <i class="fas fa-times"></i>
                 </span>
-                {{item.value}}
+                {{sel.label}}
             </span>
         </div>
 

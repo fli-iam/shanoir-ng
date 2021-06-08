@@ -114,7 +114,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 							.append("(")
 							.append(field)
 							.append(":")
+							.append(Criteria.WILDCARD)
 							.append(term)
+							.append(Criteria.WILDCARD)
 							.append(")");
 					termInFieldFormattedStrList.add(termInField.toString());
 				}

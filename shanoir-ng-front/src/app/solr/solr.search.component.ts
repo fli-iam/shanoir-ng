@@ -24,12 +24,14 @@ import { DatepickerComponent } from "../shared/date-picker/date-picker.component
 import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
 import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
+import { DatePipe } from "@angular/common";
 
 @Component({
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    providers: [DatePipe]
 })
 
 export class SolrSearchComponent{
@@ -39,7 +41,7 @@ export class SolrSearchComponent{
     facetResultPages: FacetResultPage[] = [];
     keyword: string;
     expertMode: boolean = false;
-    selections: FacetField[] = [];
+    selections: SelectionBlock[] = [];
     columnDefs: any[];
     customActionDefs: any[];
     form: FormGroup;
@@ -49,8 +51,8 @@ export class SolrSearchComponent{
     allFacetResultPages: FacetResultPage[] = [];
     clearTextSearch: () => void = () => {};
 
-    datasetStartDate: Date;
-    datasetEndDate: Date;
+    datasetStartDate: Date | 'invalid';
+    datasetEndDate: Date | 'invalid'; 
 
     private requestKeys: string[] = [
         'studyName',
@@ -62,8 +64,8 @@ export class SolrSearchComponent{
     ];
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
-            private solrService: SolrService, private router: Router, private datasetService:DatasetService) {
+            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
+            private solrService: SolrService, private router: Router, private datasetService: DatasetService) {
         
         this.getFacets();
 
@@ -130,36 +132,61 @@ export class SolrSearchComponent{
                 }
             });
         });
+        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
+            solrRequest.datasetStartDate = this.datasetStartDate;
+        }
+        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
+            solrRequest.datasetEndDate = this.datasetEndDate;
+        }
         return solrRequest;
     }
     
     updateSelections() {
         this.selections = [];
+        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
+            this.selections.push(new DateSelectionBlock(
+                    'from: ' + this.datePipe.transform(this.datasetStartDate, 'dd/MM/yyy'),
+                    () => this.datasetStartDate = null
+            ));
+        }
+        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
+            this.selections.push(new DateSelectionBlock(
+                    'to: ' + this.datePipe.transform(this.datasetEndDate, 'dd/MM/yyy'),
+                    () => this.datasetEndDate = null 
+            ));
+        }
         this.allFacetResultPages.forEach(facetRes => {
-            this.selections = this.selections.concat(facetRes.content.filter(facetField => facetField.checked));
+            this.selections = this.selections.concat(
+                facetRes.content
+                    .filter(facetField => facetField.checked)
+                    .map(facetField => new FacetSelectionBlock(facetField))
+            );
         })
     }
 
+    onDateChange(date: Date | 'invalid') {
+        if (date && date != 'invalid') {
+            this.updateSelections();
+            this.table.refresh();
+        }
+    }
+
     removeAllFacets() {
-        this.selections.forEach(item => item.checked = false);
+        this.selections.forEach(selection => selection.remove());
         this.selections = [];
         this.clearTextSearch();
     }
 
-    removeSelection(item: FacetField) {
-        item.checked = false;
-        console.log('a', this.selections.length)
-        this.selections = this.selections.filter(field => field.value != item.value || field.key.name != item.key.name);
-        console.log('b', this.selections.length)
+    removeSelection(index: number) {
+        this.selections[index].remove();
+        this.selections.splice(index, 1);
     }
 
     getPage(pageable: Pageable): Promise<SolrResultPage> {
         if (this.form.valid) {
             let solrRequest: SolrRequest = new SolrRequest();
-            console.log('keyword', this.keyword)
             if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
             solrRequest = this.updateWithFields(solrRequest);
-            console.log(solrRequest)
 
             return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 
@@ -238,5 +265,33 @@ export class SolrSearchComponent{
 
     registerTextResetCallback(resetTextCallback: () => void) {
         this.clearTextSearch = resetTextCallback;
+    }
+
+}
+
+export interface SelectionBlock {
+    label: string;
+    remove(): void;
+}
+
+export class FacetSelectionBlock implements SelectionBlock {
+
+    constructor(private facetField: FacetField) {}
+
+    get label(): string {
+        return this.facetField.value;
+    }
+
+    remove(): void {
+        this.facetField.checked = false;
+    }
+}
+
+export class DateSelectionBlock implements SelectionBlock {
+
+    constructor(private formattedLabel: string, public remove: () => void) {}
+
+    get label(): string {
+        return this.formattedLabel;
     }
 }

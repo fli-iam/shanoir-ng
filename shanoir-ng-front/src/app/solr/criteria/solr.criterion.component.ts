@@ -41,6 +41,7 @@ export class SolrCriterionComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.allFacetPage && this.allFacetPage) {
+            this.sortAllAlphabetically();
             this.loaded = true;
         }
         if (changes.currentFacetPage && this.currentFacetPage && this.allFacetPage) {
@@ -93,12 +94,18 @@ export class SolrCriterionComponent implements OnChanges {
         this.updateHasChecked();
     }
 
-    sortAll() {
+    sortAllByNumber() {
         this.allFacetPage.content.sort((a, b) => {
             if (a.valueCount == 0 && b.valueCount == 0) return 0;
             else if (a.valueCount > 0 && b.valueCount == 0) return -1;
             else if (a.valueCount == 0 && b.valueCount > 0) return 1;
             else if (a.valueCount > 0 && b.valueCount > 0) return 0;
+        });
+    }
+
+    sortAllAlphabetically() {
+        this.allFacetPage.content.sort((a, b) => {
+            return a.value.localeCompare(b.value);
         });
     }
 
