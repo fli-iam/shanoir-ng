@@ -2,12 +2,12 @@
 /* tslint:disable */
 export const VERSION = {
     "dirty": true,
-    "raw": "NG_v1.0.0rc19-29-g15c955b4a-dirty",
-    "hash": "g15c955b4a",
-    "distance": 29,
+    "raw": "NG_v1.0.0rc19-30-gb24cb1af0-dirty",
+    "hash": "gb24cb1af0",
+    "distance": 30,
     "tag": "NG_v1.0.0rc19",
     "semver": null,
-    "suffix": "29-g15c955b4a-dirty",
+    "suffix": "30-gb24cb1af0-dirty",
     "semverString": "",
     "version": "0.0.0"
 };

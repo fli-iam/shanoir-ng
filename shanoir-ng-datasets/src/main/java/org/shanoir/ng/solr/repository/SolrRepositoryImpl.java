@@ -10,9 +10,14 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.UncategorizedSolrException;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.FacetOptions;
@@ -21,6 +26,7 @@ import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author yyao
@@ -37,14 +43,14 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 	private SolrTemplate solrTemplate;
 
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrFacet facet, Pageable pageable) {
+	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		Criteria criteria = new Criteria(Criteria.WILDCARD).expression(Criteria.WILDCARD);
 		return getSearchResultsWithFacets(criteria, facet, pageable);
 	}
 
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds,
-			ShanoirSolrFacet facet, Pageable pageable) {
+			ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		Criteria criteria = new Criteria("studyId").in(studyIds);
 		return getSearchResultsWithFacets(criteria, facet, pageable);
 
@@ -56,7 +62,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 		}
 	}
 
-	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) {
+	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		addAndPredicateToCriteria(criteria, "studyName", facet.getStudyName());
 		addAndPredicateToCriteria(criteria, "subjectName", facet.getSubjectName());
 		addAndPredicateToCriteria(criteria, "examinationComment", facet.getExaminationComment());
@@ -92,8 +98,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 						.addFacetOnField(DATASET_NATURE_FACET)
 						.setFacetLimit(-1));
 
-		FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
-		return (SolrResultPage<ShanoirSolrDocument>) result;
+		try {
+			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);			
+			return (SolrResultPage<ShanoirSolrDocument>) result;
+		} catch (UncategorizedSolrException e) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			throw new RestServiceException(error);
+		}
 	}
 	
 	private void addExpertClause(Criteria criteria, String searchStr) {

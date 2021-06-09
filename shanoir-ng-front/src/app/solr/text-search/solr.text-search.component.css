@@ -6,7 +6,15 @@
 .input-frame input.error { border-color: var(--color-error); }
 checkbox { vertical-align: -5px; margin-right: 7px; }
 .clickable { cursor: pointer; }
-.info { color: var(--color-b); }
-.info-txt { margin-top: 5px; padding: 2px 5px; background-color: var(--color-b-light); border-radius: 2px; }
+.info { color: var(--color-b); margin-left: 7px; }
+.info-txt { margin-top: 5px; padding: 10px 12px 1px; background-color: var(--color-b-light); border-radius: 2px; }
 .syntax-error { color: var(--color-error); }
 input.expert { color: navy; }
+toggle-switch { margin-right: 7px; }
+span > i { color: var(--grey); }
+span.enabled > i { color: darkgreen; }
+.italic { font-style: italic; }
+code { color: navy; }
+.info-txt a:link { text-decoration: underline; }
+.info-txt a { color: blue; }
+.info-txt a:visited { color: purple; }

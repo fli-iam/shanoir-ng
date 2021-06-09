@@ -50,7 +50,7 @@ export class SolrSearchComponent{
     selectedDatasetIds: number[];
     allFacetResultPages: FacetResultPage[] = [];
     clearTextSearch: () => void = () => {};
-
+    syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid'; 
 
@@ -194,6 +194,12 @@ export class SolrSearchComponent{
                     this.facetResultPages = solrResultPage.facetResultPages;
                 }
                 return solrResultPage;
+            }).catch(reason => {
+                console.log(reason.error.code, reason.error.message, reason.error.code == 422 && reason.error.message == 'solr query failed')
+                if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
+                    this.syntaxError = true;
+                    return new SolrResultPage();
+                } else throw reason;
             });
         } else {
             return Promise.resolve(new SolrResultPage());
@@ -227,8 +233,8 @@ export class SolrSearchComponent{
         let customActionDefs:any = [];
         if (this.hasDownloadRight) {
             customActionDefs.push(
-                {title: "dcm",awesome: "fa-download", action: () => this.massiveDownload('dcm')},
-                {title: "nii",awesome: "fa-download", action: () => this.massiveDownload('nii')}
+                {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
+                {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true}
             );
         }
         return customActionDefs;

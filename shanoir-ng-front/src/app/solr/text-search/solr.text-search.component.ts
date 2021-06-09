@@ -28,13 +28,11 @@ export class SolrTextSearchComponent implements OnChanges {
     searchText: string = "";
     @Input() registerResetCallback : (reset:() => void) => void;
     @Output() onChange: EventEmitter<{searchTxt: string, expertMode: boolean}> = new EventEmitter();
-    syntaxError: boolean = false;
+    @Output() onType: EventEmitter<void> = new EventEmitter();
+    @Input() syntaxError: boolean = false;
     expertMode: boolean = false;
 
-    private searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
-
     onChangeSearch() {
-        this.checkSyntax();
         if (this.expertMode) {
             if (!this.syntaxError) {
                 this.onChange.emit({searchTxt: this.searchText, expertMode: true});        
@@ -61,13 +59,5 @@ export class SolrTextSearchComponent implements OnChanges {
             this.searchText = "";
             // this.onChangeSearch();
         }
-    }
-
-    checkSyntax() {
-        this.syntaxError = false;
-            // this.searchText
-            // && this.searchText.trim().length > 0
-            // && this.expertMode 
-            // && !this.searchText.match(this.searchBarRegex);
     }
 }

@@ -15,12 +15,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
-        <!-- <button (click)="selectAll()" title="select all"> -->
-            <!-- <img [src]="checkAllImageUrl"/> -->
-        <!-- </button> -->
-        <button (click)="unSelectAll()" title="unselect all">
-            <!-- <img [src]="uncheckAllImageUrl"/> -->
-        </button>
         <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
     <!-- Text search -->
@@ -28,13 +22,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <shanoir-table-search #search [columnDefs]="columnDefs" [(filter)]="filter" (filterChange)="onSearchChange($event)"></shanoir-table-search>
     </span>
     <!-- User defined buttons -->
-    <span *ngFor="let command of customActionDefs">
-        <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active">
+    <span *ngFor="let command of customActionDefs" class="command-block">
+        <button type="button" *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active" [disabled]="command.disabledIfNoSelected ? selection.size == 0 : false">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>
         </button>
-        <button *ngIf="command.action != undefined" (click)="command.action()">
+        <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="command.disabledIfNoSelected ? selection.size == 0 : false">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>
@@ -78,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngFor="let col of columnDefs" 
         class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
         [class.bool]="isFieldBoolean(col)"
-        [attr.title]="col.tip != undefined ? col.tip : null"
+        [attr.title]="col.tip != undefined ? col.tip : renderCell(item, col)"
         (click)="col.type == 'button' ? null : onRowClick(item)"
         >
         

@@ -81,7 +81,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
     <div class="right">
 
-        <solr-text-search (onChange)="onSearchTextChange($event)" [registerResetCallback]="registerTextResetCallback.bind(this)"></solr-text-search>
+        <solr-text-search 
+                (onChange)="onSearchTextChange($event)" 
+                (onType)="syntaxError = false" 
+                [registerResetCallback]="registerTextResetCallback.bind(this)"
+                [syntaxError]="syntaxError">
+        </solr-text-search>
 
         <div *ngIf="selections" class="selections">
             <span class="selection" *ngFor="let sel of selections; let i = index">
