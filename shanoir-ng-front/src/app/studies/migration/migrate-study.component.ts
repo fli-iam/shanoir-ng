@@ -51,14 +51,14 @@ export class MigrateStudyComponent implements OnInit {
     }
 
     connect(): void {
-       this.migrationService.connect(this.form.get('url').value, this.form.get('username').value, this.form.get('password').value, this.form.get('study').value.id, this.form.get('userId').value)
+       this.migrationService.migrate(this.form.get('url').value, this.form.get('username').value, this.form.get('password').value, this.form.get('study').value.id, this.form.get('userId').value)
        .then(() => {
             this.error = "";
         }).catch(exception => {
         if (exception.error.message.indexOf('401') != -1) {
             this.error = "Authentication failed, please check username and password";
-        } else {
-            this.error = "An unexpected error occured, please check distant URL";
+        } else if (exception.error.message.indexOf('500') != -1) {
+            this.error = "An unexpected error occured, please contact an administrator";
         }
        }
     )};

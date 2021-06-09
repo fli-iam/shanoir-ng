@@ -12,6 +12,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
@@ -74,43 +75,42 @@ public class DistantShanoirService {
 	/**
 	 * Creates a subject in the distant shanoir instance
 	 * @param subject the subject to create
+	 * @throws ShanoirException
 	 */
-	public Subject createSubject(Subject subject) {
+	public Subject createSubject(Subject subject) throws ShanoirException {
 		try {
 			ResponseEntity<Subject> response = this.restTemplate.exchange(getURI(SERVICE_SUBJECTS_CREATE), HttpMethod.POST, new HttpEntity<>(subject, getHeader()), Subject.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant subject {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant subject {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant subject: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant subject: ", e);
 		}
 	}
 
 	/**
 	 * Creates a study in the distant shanoir instance
 	 * @param study the study to create
+	 * @throws ShanoirException
 	 */
-	public StudyDTO createStudy(Study study) {
+	public StudyDTO createStudy(Study study) throws ShanoirException {
 		try {
 			StudyDTO dto = mapper.studyToStudyDTO(study);
 			ResponseEntity<StudyDTO> response = this.restTemplate.exchange(getURI(SERVICE_STUDY_CREATE), HttpMethod.POST, new HttpEntity<>(dto, getHeader()), StudyDTO.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant study  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant study  {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant study: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant study: ", e);
+
 		}
 	}
 
-	public Study updateStudy(Study study) {
+	public Study updateStudy(Study study) throws ShanoirException {
 		try {
 			Study newStudy = new Study();
 			for (StudyCenter studyCenter : study.getStudyCenterList()) {
@@ -125,12 +125,11 @@ public class DistantShanoirService {
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant study  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant study  {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant study: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant study: ", e);
+
 		}
 	}
 
@@ -139,30 +138,10 @@ public class DistantShanoirService {
 	 * @param studyId the old study ID where to create the new file
 	 * @param file the file to send
 	 * @param studyId the study Id
+	 * @throws ShanoirException
 	 */
-	public void addProtocoleFile(File file, String studyId) {
+	public void addProtocoleFile(File file, String studyId) throws ShanoirException {
 		try {
-			/*
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-	        // This nested HttpEntiy is important to create the correct
-	        // Content-Disposition entry with metadata "name" and "filename"
-	        MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
-	        ContentDisposition contentDisposition = ContentDisposition
-	                .builder("form-data")
-	                .name("file")
-	                .filename(filename)
-	                .build();
-	        fileMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
-	        HttpEntity<byte[]> fileEntity = new HttpEntity<>(someByteArray, fileMap);
-
-	        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-	        body.add("file", fileEntity);
-
-	        HttpEntity<MultiValueMap<String, Object>>
-	        */
-			
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
@@ -174,134 +153,128 @@ public class DistantShanoirService {
 
 			restTemplate.postForEntity(getURI(ADD_PROTOCOL_FILE_PATH + studyId), requestEntity, Void.class);
 		} catch (Exception e) {
-			LOG.error("Could not add protocol file on study: ", e);
+			throw new ShanoirException("Could not add protocol file on study: ", e);
 		}
 	}
 
 	/**
 	 * Get the IdName list of all centers.
+	 * @throws ShanoirException
 	 */
-	public List<IdName> getAllCenters() {
+	public List<IdName> getAllCenters() throws ShanoirException {
 		try {
 			ResponseEntity<IdName[]> response = this.restTemplate.exchange(getURI(GET_CENTERS), HttpMethod.GET, new HttpEntity<>(getHeader()), IdName[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
-				LOG.error("Could not retrieve distant centers {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not retrieve distant centers {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not retrieve distant centers: ", e);
-			return null;
+			throw new ShanoirException("Could not retrieve distant centers: ", e);
+
 		}
 	}
 
 	/**
 	 * Create a new center
 	 * @param center
+	 * @throws ShanoirException
 	 */
-	public Center createCenter(Center center) {
+	public Center createCenter(Center center) throws ShanoirException {
 		try {
 			ResponseEntity<Center> response = this.restTemplate.exchange(getURI(CREATE_CENTER), HttpMethod.POST, new HttpEntity<Center>(center, getHeader()), Center.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant center  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant center  {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant center: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant center: ", e);
+
 		}
 	}
 
-	public List<AcquisitionEquipment> getAcquisitionEquipements() {
+	public List<AcquisitionEquipment> getAcquisitionEquipements() throws ShanoirException {
 		try {
 			ResponseEntity<AcquisitionEquipment[]> response = this.restTemplate.exchange(getURI(GET_EQUIPEMENTS), HttpMethod.GET, new HttpEntity<>(getHeader()), AcquisitionEquipment[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
-				LOG.error("Could not retrieve distant equipements {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not retrieve distant equipements {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not retrieve distant equipements: ", e);
-			return null;
+			throw new ShanoirException("Could not retrieve distant equipements: ", e);
+
 		}
 	}
 
-	public List<ManufacturerModel> getModels() {
+	public List<ManufacturerModel> getModels() throws ShanoirException {
 		try {
 			ResponseEntity<ManufacturerModel[]> response = this.restTemplate.exchange(getURI(GET_MODELS), HttpMethod.GET, new HttpEntity<>(getHeader()), ManufacturerModel[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
-				LOG.error("Could not retrieve distant models {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not retrieve distant models {} {}" + response.getStatusCode() + response.getBody());
+
 			}
 		} catch (Exception e) {
-			LOG.error("Could not retrieve distant models: ", e);
-			return null;
+			throw new ShanoirException("Could not retrieve distant models: ", e);
+
 		}
 	}
 
-	public List<Manufacturer> getManufacturers() {
+	public List<Manufacturer> getManufacturers() throws ShanoirException {
 		try {
 			ResponseEntity<Manufacturer[]> response = this.restTemplate.exchange(getURI(GET_MANUFACTURERS), HttpMethod.GET, new HttpEntity<>(getHeader()), Manufacturer[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
-				LOG.error("Could not retrieve distant manufacturers {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not retrieve distant manufacturers {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not retrieve distant manufacturers: ", e);
-			return null;
+			throw new ShanoirException("Could not retrieve distant manufacturers: ", e);
+
 		}
 	}
 
-	public AcquisitionEquipment createEquipement(AcquisitionEquipment equipement) {
+	public AcquisitionEquipment createEquipement(AcquisitionEquipment equipement) throws ShanoirException {
 		try {
 			ResponseEntity<AcquisitionEquipment> response = this.restTemplate.exchange(getURI(CREATE_EQUIPEMENT), HttpMethod.POST, new HttpEntity<AcquisitionEquipment>(equipement, getHeader()), AcquisitionEquipment.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant equipement  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant equipement  {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant equipement: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant equipement: ", e);
 		}
 	}
 
-	public Manufacturer createManufacturer(Manufacturer manufacturer) {
+	public Manufacturer createManufacturer(Manufacturer manufacturer) throws ShanoirException {
 		try {
 			ResponseEntity<Manufacturer> response = this.restTemplate.exchange(getURI(CREATE_MANUFACTURER), HttpMethod.POST, new HttpEntity<Manufacturer>(manufacturer, getHeader()), Manufacturer.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant manufacturer  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant manufacturer  {} {}" + response.getStatusCode() + response.getBody());
+
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant manufacturer: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant manufacturer: ", e);
 		}
 	}
 
-	public ManufacturerModel createManufacturerModel(ManufacturerModel manufacturerModel) {
+	public ManufacturerModel createManufacturerModel(ManufacturerModel manufacturerModel) throws ShanoirException {
 		try {
 			ResponseEntity<ManufacturerModel> response = this.restTemplate.exchange(getURI(CREATE_MODEL), HttpMethod.POST, new HttpEntity<ManufacturerModel>(manufacturerModel, getHeader()), ManufacturerModel.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				LOG.error("Could not create a new distant model  {} {}", response.getStatusCode(), response.getBody());
-				return null;
+				throw new ShanoirException("Could not create a new distant model  {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not create a new distant model: ", e);
-			return null;
+			throw new ShanoirException("Could not create a new distant model: ", e);
+
 		}
 	}
 

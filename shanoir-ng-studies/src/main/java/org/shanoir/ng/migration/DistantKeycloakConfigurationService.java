@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class DistantKeycloakConfigurationService {
 	 * @param username
 	 * @param userPassword
 	 */
-	public void connectToDistantKeycloak(String shanoirUrl, String username, String userPassword) {
+	public void connectToDistantKeycloak(String shanoirUrl, String username, String userPassword) throws ShanoirException {
 		// Connect
 		this.setServer(shanoirUrl);
 		String keycloakURL = shanoirUrl + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
@@ -76,10 +77,10 @@ public class DistantKeycloakConfigurationService {
 				String refreshToken = responseEntityJson.getString("refresh_token");
 				this.refreshToken(keycloakURL, refreshToken);
 			} else {
-				LOG.error("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.getBody());
+				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.getBody());
 			}
 		} catch (Exception e) {
-			LOG.error("Could not connect to distant keycloak", e);
+			throw new ShanoirException("ERROR: Could not connect to distant keycloak", e);
 		}
 	}
 
@@ -145,7 +146,9 @@ public class DistantKeycloakConfigurationService {
 	 * Stop the distant keycloak connection
 	 */
 	public void stop() {
-		this.executor.shutdown();
+		if (this.executor != null) {
+			this.executor.shutdown();
+		}
 	}
 
 }

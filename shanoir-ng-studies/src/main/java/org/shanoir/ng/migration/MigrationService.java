@@ -11,6 +11,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
@@ -26,8 +27,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MigrationService {
-
-	private static final Logger LOG = LoggerFactory.getLogger(MigrationService.class);
 
 	@Autowired
 	private StudyService studyService;
@@ -46,7 +45,7 @@ public class MigrationService {
 	 * This method is synchronized to avoid multiple threads running the same
 	 * @param studyId the study to migrate
 	 */
-	public synchronized void migrateStudy(Long studyId, Long userId, String username) {
+	public synchronized void migrateStudy(Long studyId, Long userId, String username) throws ShanoirException {
 		Study study = this.studyService.findById(studyId);
 		
 		Map<Long,Long> subjectMap = new HashMap<>();
@@ -130,8 +129,9 @@ public class MigrationService {
 	 * Migrate all centers
 	 * @param centers
 	 * @return the list of new centers
+	 * @throws ShanoirException
 	 */
-	private List<StudyCenter> moveCenters(List<StudyCenter> centers) {
+	private List<StudyCenter> moveCenters(List<StudyCenter> centers) throws ShanoirException {
 		// 1 Get all distant centers
 		List<IdName> distantCenters = distantShanoir.getAllCenters();
 		List<StudyCenter> toSet = new ArrayList<>();
@@ -174,8 +174,9 @@ public class MigrationService {
 	 * @param acquisitionEquipments
 	 * @param centerId the center ID
 	 * @return
+	 * @throws ShanoirException
 	 */
-	private List<AcquisitionEquipment> moveAcquisitionEquipements(List<AcquisitionEquipment> acquisitionEquipments, Center center) {
+	private List<AcquisitionEquipment> moveAcquisitionEquipements(List<AcquisitionEquipment> acquisitionEquipments, Center center) throws ShanoirException {
 		distantEquipements = distantEquipements != null? distantEquipements : distantShanoir.getAcquisitionEquipements();
 		List<AcquisitionEquipment> toSet = new ArrayList<>();
 		for (AcquisitionEquipment equipement : acquisitionEquipments) {
@@ -207,8 +208,9 @@ public class MigrationService {
 	 * Moves a manufaturer's model
 	 * @param manufacturerModel
 	 * @return
+	 * @throws ShanoirException
 	 */
-	private ManufacturerModel moveManufacturerModel(ManufacturerModel manufacturerModel) {
+	private ManufacturerModel moveManufacturerModel(ManufacturerModel manufacturerModel) throws ShanoirException {
 		distantModels = distantModels != null ? distantModels : distantShanoir.getModels();
 		boolean found = false;
 		for (ManufacturerModel distantModel : distantModels) {
@@ -235,8 +237,9 @@ public class MigrationService {
 	 * Moves a manufacturer
 	 * @param manufacturer the manufacturer to move
 	 * @return the moved manufacturer
+	 * @throws ShanoirException
 	 */
-	private Manufacturer moveManufacturer(Manufacturer manufacturer) {
+	private Manufacturer moveManufacturer(Manufacturer manufacturer) throws ShanoirException {
 		distantManufacturers = distantManufacturers != null ? distantManufacturers : this.distantShanoir.getManufacturers();
 		
 		boolean found = false;
