@@ -31,7 +31,8 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
-import { DatasetProcessingPipe } from 'bin/src/app/datasets/dataset-processing/dataset-processing.pipe';
+import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
+import { ImportMode } from '../../import/import.component';
 
 @Component({
     selector: 'processed-dataset-clinical-context',
@@ -61,6 +62,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         new Option<string>('PATIENT', 'Patient'),
         new Option<string>('PHANTOM', 'Phantom')
     ];
+    public importMode: ImportMode;
 
     public isAdminOfStudy: boolean[] = [];
     openSubjectStudy: boolean = false;
@@ -77,6 +79,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             private keycloakService: KeycloakService) {
         
         breadcrumbsService.nameStep('2. Context'); 
+        this.importMode = this.breadcrumbsService.findImportMode();
         this.processedDatasetFilePath = importDataService.processedDatasetImportJob.processedDatasetFilePath;
         this.getStudiesAndDatasetProcessings();
     }
