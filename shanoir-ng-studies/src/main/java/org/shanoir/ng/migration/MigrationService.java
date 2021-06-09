@@ -1,6 +1,5 @@
 package org.shanoir.ng.migration;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,11 +19,15 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MigrationService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MigrationService.class);
 
 	@Autowired
 	private StudyService studyService;
@@ -104,10 +107,15 @@ public class MigrationService {
 		StudyDTO newStudy = distantShanoir.createStudy(study);
 		
 		// Add protocol/ DUA files
+		// TODO: commented as it does not work for the moment.
+		// Can easily be done manually
+		/*
 		for (String file : study.getProtocolFilePaths()) {
 			File fileAsFile = new File(studyService.getStudyFilePath(oldStudyId, file));
+			LOG.error(fileAsFile.getAbsolutePath() + " " + fileAsFile.exists());
 			distantShanoir.addProtocoleFile(fileAsFile, newStudy.getId().toString());
 		}
+		*/
 
 		// Reset lists
 		distantModels = null;

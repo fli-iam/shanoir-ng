@@ -281,7 +281,7 @@ public class StudyApiController implements StudyApi {
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
 		} catch (Exception e) {
-			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
+			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

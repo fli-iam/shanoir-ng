@@ -41,7 +41,7 @@ public class DistantShanoirService {
 
 	private static final String SERVICE_STUDY_CREATE = "/shanoir-ng/studies/studies";
 
-	private static final String ADD_PROTOCOL_FILE_PATH = "/shanoir-ng/studies/protocol-file-upload/";
+	private static final String ADD_PROTOCOL_FILE_PATH = "/shanoir-ng/studies/studies/protocol-file-upload/";
 
 	private static final String GET_CENTERS = "/shanoir-ng/studies/centers/names";
 
@@ -312,6 +312,6 @@ public class DistantShanoirService {
 	}
 
 	public URI getURI(String apiHeader) throws URISyntaxException {
-		return new URI(distantKeycloak.getServer() + "/" + apiHeader);
+		return new URI(distantKeycloak.getServer() + apiHeader);
 	}
 }
