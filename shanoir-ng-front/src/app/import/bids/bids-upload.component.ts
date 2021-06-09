@@ -44,9 +44,9 @@ export class BidsUploadComponent {
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'BIDS';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'BIDS';
     }
 
     public uploadArchive(fileEvent: any): void {

@@ -71,7 +71,6 @@ public class AccountRequestApiControllerTest {
 
 	@Before
 	public void setup() throws SecurityException {
-		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
 	}
@@ -89,10 +88,36 @@ public class AccountRequestApiControllerTest {
 		info.setStudy("study");
 		info.setWork("work");
 		user.setAccountRequestInfo(info);
+		
+		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	public void saveNewAccountRequestChallengeTest() throws Exception {
+		final User user = ModelsUtil.createUser(null);
+		user.setEmail("test@te.st");
+		user.setUsername("test");
+		user.setId(2L);
+		final AccountRequestInfo info = new AccountRequestInfo();
+		info.setContact("contact");
+		info.setFunction("function");
+		info.setInstitution("institution");
+		info.setChallenge(1L);
+		info.setService("service");
+		info.setStudy("study");
+		info.setWork("work");
+		user.setAccountRequestInfo(info);
+
+		given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
+		
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+				.andExpect(status().isNoContent());
+
 	}
 
 }

@@ -29,7 +29,12 @@ public enum Sex {
 	/**
 	 * Female.
 	 */
-	F(2);
+	F(2),
+
+	/**
+	 * Other.
+	 */
+	O(3);
 
 	private int id;
 

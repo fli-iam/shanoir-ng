@@ -55,7 +55,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	@Autowired
 	private PetProtocolStrategy protocolStrategy;
 	
-	@Autowired 
+	@Autowired
 	private DatasetStrategy<PetDataset> datasetStrategy;
 	
 	@Autowired
@@ -79,12 +79,15 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
 		}
 		datasetAcquisition.setRank(rank);
+		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
+
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
 		StudyCard studyCard = null;
 		if (importJob.getStudyCardId() != null) {
 			studyCard = getStudyCard(importJob.getStudyCardId());
-			datasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());			
+			datasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+			importJob.setStudyCardName(studyCard.getName());
 		} else {
 			LOG.warn("No studycard given for this import");
 		}
@@ -101,7 +104,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		datasetAcquisition.setDatasets(genericizedList);
 		
 		if (studyCard != null) {
-			studyCardProcessingService.applyStudyCard(datasetAcquisition, studyCard, dicomAttributes);			
+			studyCardProcessingService.applyStudyCard(datasetAcquisition, studyCard, dicomAttributes);
 		}
 		
 		return datasetAcquisition;
@@ -109,8 +112,12 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	
 	private StudyCard getStudyCard(Long studyCardId) {
 		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
-		if (studyCard == null) throw new IllegalArgumentException("No study card found with id " + studyCardId);
-		if (studyCard.getAcquisitionEquipmentId() == null) throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+		if (studyCard == null) {
+			throw new IllegalArgumentException("No study card found with id " + studyCardId);
+		}
+		if (studyCard.getAcquisitionEquipmentId() == null) {
+			throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+		}
 		return studyCard;
 	}
 

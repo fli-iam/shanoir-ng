@@ -49,12 +49,16 @@ RUN apt-get update -qq \
     python
 
 # Compile DCM2NIIX from source
-ENV DCMCOMMIT=efd36a02e2a8e21acfbc62f41beeacf6731d67ac
-RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/$DCMCOMMIT.zip | bsdtar -xf- -C /usr/local
+ENV DCMCOMMIT_VERSION=v1.0.20201102
+ENV DCMCOMMIT=1.0.20201102
+
+WORKDIR /usr/local/
+RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
+WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
+RUN mkdir build
 WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
-RUN cmake -DUSE_OPENJPEG=ON ../ && \
-    make && \
-    make install
+RUN cmake ..
+RUN make install
 
 WORKDIR /
 

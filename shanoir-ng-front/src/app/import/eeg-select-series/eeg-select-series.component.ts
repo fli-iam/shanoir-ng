@@ -54,12 +54,13 @@ export class EegSelectSeriesComponent {
     }
 
     changeDataset(datasetToMove: EegDatasetDTO) {
-
       let index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
+            datasetToMove.selected = false;
         } else {
             this.selectedDatasets.push(datasetToMove);
+            datasetToMove.selected = true;
         }
     }
 
@@ -67,7 +68,14 @@ export class EegSelectSeriesComponent {
         // Check all or none
         this.selectedDatasets = [];
         if (this.tree.checked) {
-            this.importDataService.eegImportJob.datasets.map(dts => this.selectedDatasets.push(dts));
+            this.importDataService.eegImportJob.datasets.map(dts => {
+               this.selectedDatasets.push(dts);
+               dts.selected = true;
+            });
+        } else {
+            this.importDataService.eegImportJob.datasets.map(dts => {
+               dts.selected = false;
+            });
         }
     }
 

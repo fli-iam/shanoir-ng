@@ -13,19 +13,19 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, mono_center, study_type)
+	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, mono_center, study_type, challenge)
 VALUES 
-	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 1),
-	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 1),
-	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1);
+	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 1, 0),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 1, 0),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1, 0);
 
 INSERT INTO study_user
-	(id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name)
+	(id, receive_anonymization_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
 VALUES
-	(1, 0, 1, 1, 1, 'admin'),
-	(2, 0, 1, 3, 1, 'admin'),
-	(3, 0, 0, 1, 2, 'jlouis'),
-	(4, 0, 1, 2, 1, 'admin');
+	(1, 0, 1, 1, 1, 1, 'admin'),
+	(2, 0, 1, 1, 3, 1, 'admin'),
+	(3, 0, 0, 1, 1, 2, 'jlouis'),
+	(4, 0, 1, 1, 2, 1, 'admin');
 
 INSERT INTO study_user_study_user_rights
 	(study_user_id, study_user_rights)

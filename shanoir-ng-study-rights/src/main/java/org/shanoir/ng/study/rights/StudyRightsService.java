@@ -44,7 +44,8 @@ public class StudyRightsService {
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
 		return
 				founded.getStudyUserRights() != null
-				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
+				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
+				&& founded.isConfirmed();
     }
     
     /**
@@ -60,7 +61,7 @@ public class StudyRightsService {
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
 		if (founded.getStudyUserRights() != null) {
 			for (String rightStr : rightStrs) {
-				if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) return true;
+				if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.isConfirmed()) return true;
 			}
 		}
 		return false;
@@ -81,7 +82,7 @@ public class StudyRightsService {
 		Iterable<StudyUser> founded = repo.findByUserIdAndStudyIdIn(userId, studyIds);
 		Set<Long> validIds = new HashSet<>();
 		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) {
+			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 				validIds.add(su.getStudyId());
 			}
 		}
@@ -101,7 +102,7 @@ public class StudyRightsService {
 		}
 		Iterable<StudyUser> founded = repo.findByUserId(userId);
 		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) {
+			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 				return true;
 			}
 		}

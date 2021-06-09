@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
@@ -25,4 +26,8 @@ public interface DatasetAndProcessingsDTOInterface {
 
 	public void setProcessings(List<DatasetProcessingDTO> datasetProcessings);
     
+
+	public DatasetAcquisitionDTO getDatasetAcquisition();
+
+	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 }

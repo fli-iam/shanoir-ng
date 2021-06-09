@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +35,6 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -83,9 +82,6 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	StudyRepository studyRepository;
-	
-	@Autowired
-	ExaminationRepository examinationRepository;
 
 	private final HttpServletRequest request;
 
@@ -179,7 +175,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 			// Load examinations linked to the study of the datasets
 			for (Long relatedStudyId : studyIds) {
-				relatedExams.addAll(examinationRepository.findBySubjectIdAndStudyId(subjectId, relatedStudyId));
+				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
 			}
 			
 			Set<Examination> examsToKeep = new HashSet<>();
@@ -286,6 +282,7 @@ public class ExaminationApiController implements ExaminationApi {
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
 			response.setContentType(contentType);
+			response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}

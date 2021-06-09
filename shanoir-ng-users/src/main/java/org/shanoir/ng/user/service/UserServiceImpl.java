@@ -148,6 +148,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<User> findAccountRequests() {
+		return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
+	}
+
+	@Override
 	public Optional<User> findByEmail(final String email) {
 		return userRepository.findByEmail(email);
 	}
@@ -195,6 +200,9 @@ public class UserServiceImpl implements UserService {
 		user.setExtensionRequestDemand(Boolean.TRUE);
 		user.setExtensionRequestInfo(requestInfo);
 		userRepository.save(user);
+
+		// Send email to administrators
+		emailService.notifyAdminAccountExtensionRequest(user);
 	}
 
 	@Override

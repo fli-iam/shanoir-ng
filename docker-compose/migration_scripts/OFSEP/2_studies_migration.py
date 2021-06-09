@@ -214,8 +214,8 @@ print("Reimport studies: start")
 sourceCursor.execute("""SELECT STUDY_ID, IS_CLINICAL, COORDINATOR_ID, IS_DOWNLOADABLE_BY_DEFAULT, END_DATE, IS_MONO_CENTER, NAME,
     START_DATE, REF_STUDY_STATUS_ID, REF_STUDY_TYPE_ID, IS_VISIBLE_BY_DEFAULT, IS_WITH_EXAMINATION FROM STUDY""")
 query = """INSERT INTO study
-    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)"""
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Reimport studies: end")
@@ -231,7 +231,7 @@ print("Reimport study_center: end")
 
 print("Reimport study_user: start")    
 sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, u.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
-query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
+query = "INSERT INTO study_user (id, confirmed, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, 1, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Reimport study_user: end")

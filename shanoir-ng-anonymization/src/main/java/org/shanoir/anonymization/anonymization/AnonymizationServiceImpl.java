@@ -97,6 +97,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
+
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
@@ -123,6 +124,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			String patientBirthDate) {
 		anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
+
 		// patient birth date
 		if (patientBirthDate != null && patientBirthDate.length() != 0) {
 			String newDate = patientBirthDate.substring(0, 4) + "01" + "01";
@@ -444,7 +446,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 */
 	private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
 		VR vr = attributes.getVR(tag);
-		if (vr == null) return;		
+		if (vr == null) {
+			return;
+		}
 		// VR.AT = Attribute Tag
 		// VR.SL = Signed Long || VR.UL = Unsigned Long
 		// VR.SS = Signed Short || VR.US = Unsigned Short
