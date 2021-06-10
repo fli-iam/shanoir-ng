@@ -123,10 +123,10 @@ VALUES
 	(3);
 	
 INSERT INTO study_user
-	(id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name)
+	(id, confirmed, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name)
 VALUES
-	(1, 0, 1, 1, 1, 'admin'),
-	(2, 0, 1, 3, 1, 'admin'),
-	(3, 0, 0, 1, 2, 'jlouis'),
-	(4, 0, 1, 2, 1, 'admin');
+	(1, 1, 0, 1, 1, 1, 'admin'),
+	(2, 1, 0, 1, 3, 1, 'admin'),
+	(3, 1, 0, 0, 1, 2, 'jlouis'),
+	(4, 1, 0, 1, 2, 1, 'admin');
 

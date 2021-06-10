@@ -45,9 +45,9 @@ export class DicomUploadComponent {
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'DICOM';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'DICOM';
     }
     
     public uploadArchive(fileEvent: any): void {

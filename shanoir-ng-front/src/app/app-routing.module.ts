@@ -14,8 +14,7 @@
 
 
 import { NgModule } from '@angular/core';
-import { ModuleWithProviders } from '@angular/core';
-import { RouterModule, Routes, CanActivate } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
@@ -86,8 +85,7 @@ import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acqu
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
-
-
+import { DUAComponent } from './dua/dua.component';
 
 let routes: Routes = [
     {
@@ -95,8 +93,16 @@ let routes: Routes = [
         redirectTo: '/home',
         pathMatch: 'full'
     }, {
+        path: 'dua',
+        component: DUAComponent,
+    }, {
         path: 'account-request',
         component: AccountRequestComponent,
+        data: {isChallenge: false},
+    }, {
+        path: 'challenge-request',
+        component: AccountRequestComponent,
+        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
@@ -599,7 +605,6 @@ let routes: Routes = [
 		path: 'preclinical-examination/create',
 		component: AnimalExaminationFormComponent,
 		data: { mode: 'create' },
-		canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
 		path: 'preclinical-therapy',
@@ -748,96 +753,11 @@ let routes: Routes = [
 	{
 		path: 'preclinical-subject/create',
 		component: AnimalSubjectFormComponent,
-		data: { mode: 'create' },
-		canActivate: [AuthAdminOrExpertGuard],
-	}
+		data: { mode: 'create' }
+	},
+
+
 ];
-
-// Angular AOT compilation requires routes to be static, the following code would not work (see below for static routes generation code):
-
-// routes = routes.concat(
-//     getRoutesFor('study', StudyComponent, StudyListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('subject', SubjectComponent, SubjectListComponent, {update: AuthAdminGuard}),
-//     getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, {update: AuthAdminGuard}),
-//     // getRoutesFor('dataset', DatasetComponent, DatasetListComponent, {update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('center', CenterComponent, CenterListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('coil', CoilComponent, CoilListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('user', UserComponent, UserListComponent, {create: AuthAdminGuard, update: AuthAdminGuard}),
-//     getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-//     getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
-// );
-
-
-// function getRoutesFor(entityName: string, entityComponent:any, listComponent:any, 
-//         auth: {read?: any, create?: any, update?: any} ): any {
-
-//     return [
-//         {
-//             path: entityName,
-//             redirectTo: entityName + '/list',
-//             pathMatch: 'full',
-//         }, {
-//             path: entityName + '/list',
-//             component: listComponent,
-//             canActivate: auth.read ? [auth.read] : undefined,
-//         }, {
-//             path: entityName+'/details/:id',
-//             component: entityComponent,
-//             data: { mode: 'view' },
-//             canActivate: auth.read ? [auth.read] : undefined,
-//         }, {
-//             path: entityName+'/edit/:id',
-//             component: entityComponent,
-//             data: { mode: 'edit' },
-//             canActivate: auth.update ? [auth.update] : undefined,
-//         }, {
-//             path: entityName+'/create',
-//             component: entityComponent,
-//             data: { mode: 'create' },
-//             canActivate: auth.create ? [auth.create] : undefined,
-//         }
-//     ];
-// };
-
-// Code to generated the routes statically
-//  (the function getRoutesFor does not change)
-
-// let routes: any[] = [];
-
-// routes = routes.concat(
-//     getRoutesFor('study', 'StudyComponent', 'StudyListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('subject', 'SubjectComponent', 'SubjectListComponent', {update: 'AuthAdminGuard'}),
-//     getRoutesFor('examination', 'ExaminationComponent', 'ExaminationListComponent', {update: 'AuthAdminGuard'}),
-//     getRoutesFor('dataset', 'DatasetComponent', 'DatasetListComponent', {update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('center', 'CenterComponent', 'CenterListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('acquisition-equipment', 'AcquisitionEquipmentComponent', 'AcquisitionEquipmentListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('coil', 'CoilComponent', 'CoilListComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('user', 'UserComponent', 'UserListComponent', {create: 'AuthAdminGuard', update: 'AuthAdminGuard'}),
-//     getRoutesFor('manufacturer', 'ManufacturerComponent', 'HomeComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'}),
-//     getRoutesFor('manufacturer-model', 'ManufacturerModelComponent', 'HomeComponent', {create: 'AuthAdminOrExpertGuard', update: 'AuthAdminOrExpertGuard'})
-// );
-
-// console.log(routes)
-
-// let output = '[\n';
-// for (let route of routes) {
-//     output += '\t{\n'
-//     output += '\t\tpath: \'' + route.path + '\',\n';
-//     if (route.redirectTo) {
-//         output += '\t\tredirectTo: \'' + route.redirectTo + '\',\n';
-//     }
-//     if (route.component) {
-//         output += '\t\tcomponent: ' + route.component + ',\n';
-//     }
-//     if (route.data) {
-//         output += '\t\tdata: { mode: \'' + route.data.mode + '\' },\n';
-//     }
-//     if (route.canActivate) {
-//        output += '\t\tcanActivate: [' + route.canActivate[0] + '],\n';
-//     }
-//     output += '\t},\n'
-// }
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

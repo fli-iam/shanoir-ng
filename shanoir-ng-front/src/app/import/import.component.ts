@@ -28,6 +28,7 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
 export class ImportComponent {
 
     hasOneStudy: boolean = true;
+    importMode: ImportMode | '';
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
@@ -35,9 +36,12 @@ export class ImportComponent {
             private route: ActivatedRoute) {
 
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
+        setTimeout(()=> {
+            this.importMode = this.getImportMode();
+        });
     }
 
-    get importMode(): ImportMode | '' {
+    getImportMode(): ImportMode | '' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;

@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
+<div class="instance"><span class="instance-frame"><span class="instance-name"></span></span></div>
 <div class="logo">
     <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
         <img [src]="shanoirLogoUrl" />
@@ -20,12 +21,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <div *ngIf="isAuthenticated()" class="user">
-    <div class="user-logo">
+    <div class="user-logo" [class.admin]="keycloakService.isUserAdmin()">
         <i *ngIf="!keycloakService.isUserAdminOrExpert()" class="fas fa-user"></i>
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
-        <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
+        <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-cog"></i>
     </div>
-    <div class="welcome">{{username}}</div>
+    <div class="welcome">
+        {{username}}
+        <span class="admin-tag-sep" *ngIf="keycloakService.isUserAdmin()">- </span>
+        <span class="admin-tag" *ngIf="keycloakService.isUserAdmin()"><i class="fas fa-shield-alt"></i>Administrator</span>
+    </div>
     <div class="user-commands">
         <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
         <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -34,26 +39,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li (click)="tasksOpened = !tasksOpened" class="notifications">
-        <i class="fas fa-tasks"></i>Tasks
-        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
-        <!-- <button class="awesome" (click)="notificationsService.refresh()" >
-            <i class="fas fa-sync"></i>
-        </button> -->
-        <span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="duasToSign() > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign()}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
-    <div *ngIf="tasksOpened" class="sub-menu" [@slideDown]="dataOpened">
-        <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Manage my tasks</li>
-        <li *ngFor="let item of notificationsService.tasksInProgress" class="single-task">
-            <i class="fas fa-circle"></i>
-            {{item.eventType == 'importDataset.event' ? 'Import in progress' : item.message}} - {{item.progress * 100 | number:'0.0-0'}}%
-            <!-- <progress-bar progress="{{item.progress}}"></progress-bar> -->
-        </li>
-        <!-- <li *ngFor="let item of notificationsService.tasksDone">{{item.eventType == 'importDataset.event' ? 'Import finished for exam ' + item.objectId: item.message}}</li> -->
+    <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
+        <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
     </div>
-    <li routerLink="/solr-search" routerLinkActive="active"><i class="fab fa-searchengin"></i>Solr search</li>
-    <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="dataOpened" class="sub-menu" [@slideDown]="dataOpened">
+    <li routerLink="/task" routerLinkActive="active">
+        <i class="fas fa-tasks"></i>Jobs
+        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
+    </li>
+    
+    <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Solr search</li>
+    <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
         <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>
         <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
         <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Examinations</li>
@@ -61,16 +60,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>      
     </div>
 
-    <li (click)="eqOpened = !eqOpened"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="eqOpened" class="sub-menu" [@slideDown]="eqOpened">
+    <li (click)="state.eqOpened = !state.eqOpened; saveState();"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="state.eqOpened" class="sub-menu" [@slideDown]="state.eqOpened">
         <li routerLink="/center/list" routerLinkActive="active"><i class="fas fa-hospital"></i>Centers</li>
         <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fab fa-accusoft"></i>Study Cards</li>
     </div>
 
-    <li (click)="precOpened = !precOpened"><i class="fas fa-cat"></i>Preclinical<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="precOpened" class="sub-menu" [@slideDown]="precOpened">
+    <li (click)="state.precOpened = !state.precOpened; saveState();"><i class="fas fa-cat"></i>Preclinical<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="state.precOpened" class="sub-menu" [@slideDown]="state.precOpened">
         <li routerLink="/preclinical-subject/list" routerLinkActive="active"><i class="fas fa-hippo"></i>Preclinical subjects</li>
         <li routerLink="/preclinical-examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Preclinical examinations</li>
         <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active"><i class="fas fa-virus"></i>Pathology models</li>
@@ -78,19 +77,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>        
     </div>
 
-    <li (click)="uploadOpened = !uploadOpened"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="uploadOpened" class="sub-menu" [@slideDown]="uploadOpened">
+    <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="state.uploadOpened" class="sub-menu" [@slideDown]="state.uploadOpened">
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
         <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
-        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-hat-wizard"></i>From EEG archives</li>
+        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>From EEG archives</li>
         <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li>
         <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
         <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets</li>
         <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
         <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
     </div>
-    <li (click)="adminOpened = !adminOpened" *ngIf="isUserAdmin()"><i class="fas fa-cogs"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
-    <div *ngIf="isUserAdmin() && adminOpened" class="sub-menu" [@slideDown]="adminOpened">
+    <li (click)="state.adminOpened = !state.adminOpened; saveState();" *ngIf="isUserAdmin()"><i class="fas fa-cogs"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="isUserAdmin() && state.adminOpened" class="sub-menu" [@slideDown]="state.adminOpened">
         <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
         <li (click)="indexToSolr()"><i class="fas fa-list-ol"></i>Index to Solr</li>
         <li routerLink="/preclinical-reference" routerLinkActive="active"><i class="fas fa-book"></i>Preclinical References</li>

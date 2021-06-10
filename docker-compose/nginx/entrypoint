@@ -28,25 +28,24 @@ dst="/etc/nginx/server.conf"
 sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
 
 
-# change theme colors
-override_colors()
+configure_instance()
 {
-	local spec
-	for spec in $SHANOIR_COLORS ; do
-		if [[ "$spec" =~ ^([A-Za-z0-9-]+):(#[0-9A-Fa-f]{3,6})$ ]] ; then
-			local name="${BASH_REMATCH[1]}"
-			local value="${BASH_REMATCH[2]}"
+	local user_color="${SHANOIR_INSTANCE_COLOR:-#813371}"
 
-			sed -i "s/^\( *--color-$name *:\).*/\1 $value;/" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles.*.css
-		else
-			error "malformatted color spec in SHANOIR_COLORS: '$spec'  (expected: name:#xxxxxx)"
-		fi
+	local instance_color="transparent"
+	if [ -n "$SHANOIR_INSTANCE_NAME" ] ; then
+		instance_color="$user_color"
+	fi
 
-	done
+	sed -i "s\"SHANOIR_INSTANCE_NAME\"$SHANOIR_INSTANCE_NAME\"g
+		s/SHANOIR_INSTANCE_COLOR/$instance_color/g
+		s/SHANOIR_USER_COLOR/$user_color/g
+		" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles.*.css
 }
 
-optional SHANOIR_COLORS
-override_colors
+optional SHANOIR_INSTANCE_COLOR
+optional SHANOIR_INSTANCE_NAME
+configure_instance
 
 abort_if_error
 

@@ -40,6 +40,10 @@ public interface StudyUserInterface {
 	 */
 	public void setReceiveNewImportReport(boolean receiveNewImportReport);
 
+	public boolean isConfirmed();
+
+	public void setConfirmed(boolean confirmed);
+	
 	/**
 	 * @return the studyId
 	 */

@@ -6,15 +6,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -32,9 +28,8 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
-import org.shanoir.uploader.model.rest.importer.Instance;
-import org.shanoir.uploader.model.rest.importer.Patient;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 
 /**
@@ -73,6 +68,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 	 * This method contains all the logic which is performed when the start import
 	 * button is clicked.
 	 */
+	@Override
 	public void actionPerformed(final ActionEvent event) {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
 		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
@@ -82,8 +78,8 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
 			// minimal length for subject common name is 2, same for subject study identifier
 			if (mainWindow.importDialog.subjectTextField.getText().length() < 2
-				|| (!mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
-						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2)) {
+				|| !mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()
+						&& mainWindow.importDialog.subjectStudyIdentifierTF.getText().length() < 2) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
 						"Error", JOptionPane.ERROR_MESSAGE);
@@ -110,9 +106,13 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
-			addSubjectStudy(study, subject);
+			ImportUtils.addSubjectStudy(study, subject,
+					(SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem(),
+					mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),
+					mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 			// create subject with subject-study filled to avoid access denied exception because of rights check
-			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), studyCard.getCenterId());
+			Long centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
+			subject = shanoirUploaderServiceClientNG.createSubject(subject, ShUpConfig.isModeSubjectCommonNameManual(), centerId);
 			if (subject == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -126,7 +126,10 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		} else {
 			// if rel-subject-study does not exist for existing subject, create one
 			if (importStudyAndStudyCardCBILNG.getSubjectStudy() == null) {
-				addSubjectStudy(study, subject);
+				ImportUtils.addSubjectStudy(study, subject,
+						(SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem(),
+						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected(),
+						mainWindow.importDialog.subjectStudyIdentifierTF.getText());
 				if (shanoirUploaderServiceClientNG.createSubjectStudy(subject) == null) {
 					JOptionPane.showMessageDialog(mainWindow.frame,
 							mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
@@ -178,7 +181,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		 * 3. Fill import-job.json
 		 */
 		//Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
-		ImportJob importJob = prepareImportJob(mainWindow.importDialog, uploadJob, subject.getName(), subject.getId(), examinationId);
+		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
@@ -194,72 +197,7 @@ public class ImportFinishActionListenerNG implements ActionListener {
 				"Import", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
-	private ImportJob prepareImportJob(ImportDialog importDialog, UploadJob uploadJob, String subjectName, Long subjectId, Long examinationId) {
-		ImportJob importJob = new ImportJob();
-		importJob.setFromShanoirUploader(true);
-		// handle study and study card, using ImportDialog
-		Study studyShanoir = (Study) importDialog.studyCB.getSelectedItem();
-		importJob.setStudyId(studyShanoir.getId());
-		importJob.setStudyName(studyShanoir.getName());
-		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
-		// MS Datasets does only return StudyCard DTOs without IDs, as name is unique
-		// see: /shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
-		importJob.setStudyCardName(studyCard.getName());
-		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-		importJob.setConverterId(studyCard.getNiftiConverterId());
-		// handle patient and subject
-		Patient patient = new Patient();
-		patient.setPatientID(uploadJob.getSubjectIdentifier());
-		Subject subject = new Subject();
-		subject.setId(subjectId);
-		subject.setName(subjectName);
-		importJob.setSubjectName(subjectName);
-		patient.setSubject(subject);
-		List<Patient> patients = new ArrayList<Patient>();
-		patients.add(patient);
-		importJob.setPatients(patients);
-		// handle study dicom == examination in Shanoir
-		List<org.shanoir.uploader.model.rest.importer.Study> studiesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Study>();
-		org.shanoir.uploader.model.rest.importer.Study studyImportJob = new org.shanoir.uploader.model.rest.importer.Study();
-		studiesImportJob.add(studyImportJob);
-		patient.setStudies(studiesImportJob);
-		importJob.setExaminationId(examinationId);
-		// handle series for study
-		final Collection<Serie> seriesShUp = uploadJob.getSeries();
-		final List<org.shanoir.uploader.model.rest.importer.Serie> seriesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Serie>();
-		for (org.shanoir.dicom.importer.Serie serieShUp : seriesShUp){
-			org.shanoir.uploader.model.rest.importer.Serie serieImportJob = new org.shanoir.uploader.model.rest.importer.Serie();
-			serieImportJob.setSelected(true);
-			serieImportJob.setSeriesInstanceUID(serieShUp.getId());
-			serieImportJob.setSeriesNumber(serieShUp.getSeriesNumber());
-			serieImportJob.setModality(serieShUp.getModality());
-			serieImportJob.setProtocolName(serieShUp.getProtocol());
-			seriesImportJob.add(serieImportJob);
-			List<Instance> instancesImportJob = new ArrayList<Instance>();
-			for (String filename : serieShUp.getFileNames()){
-				Instance instance = new Instance();
-				String[] myStringArray = {filename};
-				instance.setReferencedFileID(myStringArray);
-				instancesImportJob.add(instance);
-			}
-			serieImportJob.setInstances(instancesImportJob);
-			serieImportJob.setImagesNumber(serieShUp.getFileNames().size());
-		}
-		studyImportJob.setSeries(seriesImportJob);
-		return importJob;
-	}
 
-	private void addSubjectStudy(final Study study, final Subject subject) {
-		SubjectStudy subjectStudy = new SubjectStudy();
-		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
-		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
-		if (! mainWindow.importDialog.subjectStudyIdentifierTF.getText().isEmpty()) {
-			subjectStudy.setSubjectStudyIdentifier(mainWindow.importDialog.subjectStudyIdentifierTF.getText());
-		}
-		subjectStudy.setSubjectType((SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem());
-		subjectStudy.setPhysicallyInvolved(mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected());
-		subject.getSubjectStudyList().add(subjectStudy);
-	}
 
 	private Subject fillSubject(final ImportDialog importDialog, final UploadJob uploadJob) throws ParseException {
 		final Subject subjectDTO = new Subject();
@@ -314,36 +252,5 @@ public class ImportFinishActionListenerNG implements ActionListener {
 		pseudonymusHashValues.setBirthDateHash(uploadJob.getBirthDateHash());
 		subjectDTO.setPseudonymusHashValues(pseudonymusHashValues);
 	}
-
-//	private Exchange prepareExchange(ImportDialog importDialog, String subjectName, Long subjectId, Long examinationId) {
-//		Exchange exchange = new Exchange();
-//		// Study
-//		Study study = (Study) importDialog.studyCB.getSelectedItem();
-//		ExStudy exStudy = new ExStudy();
-//		exStudy.setStudyName(study.getName());
-//		exStudy.setStudyId(study.getId());
-//		exchange.setExStudy(exStudy);
-//		// StudyCard
-//		StudyCard studyCard = (StudyCard) importDialog.studyCardCB.getSelectedItem();
-//		ExStudyCard exStudyCard = new ExStudyCard();
-//		exStudyCard.setName(studyCard.getName());
-//		ArrayList<ExStudyCard> exStudyCards = new ArrayList<ExStudyCard>();
-//		exStudyCards.add(exStudyCard);
-//		exStudy.setExStudyCards(exStudyCards);
-//		// Subject
-//		ExSubject exSubject = new ExSubject();
-//		exSubject.setSubjectName(subjectName);
-//		exSubject.setSubjectId(subjectId);
-//		ArrayList<ExSubject> exSubjects = new ArrayList<ExSubject>();
-//		exSubjects.add(exSubject);
-//		exStudy.setExSubjects(exSubjects);
-//		// Examination
-//		ExExamination exExamination = new ExExamination();
-//		exExamination.setId(examinationId);
-//		ArrayList<ExExamination> exExaminations = new ArrayList<ExExamination>();
-//		exExaminations.add(exExamination);
-//		exSubject.setExExaminations(exExaminations);
-//		return exchange;
-//	}
 
 }

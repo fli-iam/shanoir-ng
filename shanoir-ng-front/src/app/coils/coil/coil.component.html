@@ -84,9 +84,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template ngSwitchDefault>
 								<select-box
 										(onNewClick)="openNewCenter()" 
-										[newDisabled]="form.get('center').disabled"
+										[newDisabled]="!prefilledCenter"
 										formControlName="center" 
-										[ngModel]="coil.center"  
+										[(ngModel)]="coil.center"  
 										(ngModelChange)="updateManufList($event)"
 										[optionArr]="centers">
 								</select-box>
@@ -103,7 +103,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" (onNewClick)="openNewManufModel()" [newDisabled]="form.get('acquiEquipModel').disabled" [optionArr]="manufModels" [pipe]="manufModelPipe">
+								<select-box 
+										formControlName="acquiEquipModel" 
+										[(ngModel)]="coil.manufacturerModel" 
+										(onNewClick)="openNewManufModel()" 
+										[newDisabled]="!coil.center || prefilledManuf" 
+										[optionArr]="manufModels" 
+										[pipe]="manufModelPipe">
 								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
 							</ng-template>

@@ -28,7 +28,7 @@ export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoi
 
 
 // Users http api
-const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
+export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
@@ -50,6 +50,10 @@ export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_BIDS_EXPORT_URL: string = BACKEND_API_STUDY_URL + '/exportBIDS';
 export const BACKEND_API_STUDY_BIDS_STRUCTURE_URL: string = BACKEND_API_STUDY_URL + '/bidsStructure';
+
+// Challenge API
+export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';
+
 
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';

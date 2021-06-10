@@ -89,7 +89,7 @@ public abstract class Dataset extends AbstractEntity {
 	private LocalDate creationDate;
 
 	/** Dataset Acquisition. */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "dataset_acquisition_id")
 	private DatasetAcquisition datasetAcquisition;
 

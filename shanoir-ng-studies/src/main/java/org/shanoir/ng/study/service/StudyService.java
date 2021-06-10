@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,13 +65,19 @@ public interface StudyService {
 	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Study> findAll();
 
+	/**
+	 * Get all the challenges
+	 * 
+	 * @return a list of challenges
+	 */
+	List<Study> findChallenges();
 
 	/**
 	 * add new study
 	 * 
 	 * @param study
 	 * @return created Study
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 * @throws ShanoirStudiesException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
@@ -83,11 +90,29 @@ public interface StudyService {
 	 * @param study
 	 * @return updated study
 	 * @throws ShanoirStudiesException
-	 * @throws EntityNotFoundException 
-	 * @throws MicroServiceCommunicationException 
-	 * @throws AccessDeniedException 
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException
+	 * @throws AccessDeniedException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException;
+
+	/**
+	 * Adds one studyUser to a study.
+	 * @param studyUser
+	 * @param study
+	 */
+	void addStudyUserToStudy(StudyUser studyUser, Study study);
+
+	/**
+	 * Gets the protocol or data user agreement file path
+	 * 
+	 * @param studyId
+	 *            id of the study
+	 * @param fileName
+	 *            name of the file
+	 * @return the file path of the file
+	 */
+	String getStudyFilePath(Long studyId, String fileName);
 
 }
