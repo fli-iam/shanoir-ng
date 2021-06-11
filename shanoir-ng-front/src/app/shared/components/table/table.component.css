@@ -1,7 +1,8 @@
  :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
-caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
+caption { overflow: hidden; }
 th { width: 100%; white-space: normal; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
 		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
@@ -74,5 +75,15 @@ td checkbox { transform: scale(0.8); }
 .refresh { color: var(--greyer); }
 .refresh i, .error i { margin-left: 7px; }
 .bottom-refresh { padding: 0 !important; }
-
 .error { color: var(--color-error); font-weight: bold; }
+
+tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;} 
+.col-set-button-wrapper { position: relative; }
+.col-settings-button { display: block; opacity: 0; position: absolute; left: -27px; top: -11px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
+
+app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
+app-modal .header, app-modal .footer { text-align: center; padding: 10px 0; }
+app-modal .header { font-size: 16px; }
+app-modal .body { margin: 15px 10px; }
+app-modal input { width: 37px; }
+app-modal table td { padding: 1 5px; }
