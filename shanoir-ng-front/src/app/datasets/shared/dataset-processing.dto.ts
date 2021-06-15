@@ -24,8 +24,10 @@ import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, Repet
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
 import { DatasetProcessing } from './dataset-processing.model';
-import { DatasetProcessingType } from 'src/app/enum/dataset-processing-type.enum';
+import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { DatasetProcessingService } from './dataset-processing.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { DatasetDTO } from './dataset.dto';
 
 @Injectable()
 export class DatasetProcessingDTOService {
@@ -47,10 +49,10 @@ export class DatasetProcessingDTOService {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.inputDatasetIds && dto.inputDatasetIds.length > 0) {
+        if (dto.inputDatasets && dto.inputDatasets.length > 0) {
             promises.push(this.datasetProcessingService.getInputDatasets(dto.id).then(inputDatasets => result.inputDatasets = inputDatasets));
         }
-        if (dto.outputDatasetIds && dto.outputDatasetIds.length > 0) {
+        if (dto.outputDatasets && dto.outputDatasets.length > 0) {
             promises.push(this.datasetProcessingService.getOutputDatasets(dto.id).then(outputDatasets => result.outputDatasets = outputDatasets));
         }
         return Promise.all(promises).then(([]) => {
@@ -81,17 +83,19 @@ export class DatasetProcessingDTOService {
         entity.id = dto.id;
         entity.comment = dto.comment;
         entity.datasetProcessingType = dto.datasetProcessingType;
-        if(dto.inputDatasetIds) {
-            entity.inputDatasets = dto.inputDatasetIds.map((datasetId)=> {
+        if(dto.inputDatasets) {
+            entity.inputDatasets = dto.inputDatasets.map((datasetIdName)=> {
                 let dataset = new MrDataset();
-                dataset.id = datasetId;
+                dataset.id = datasetIdName.id;
+                dataset.name = datasetIdName.name;
                 return dataset;
             })
         }
-        if(dto.outputDatasetIds) {
-            entity.outputDatasets = dto.outputDatasetIds.map((datasetId)=> {
+        if(dto.outputDatasets) {
+            entity.outputDatasets = dto.outputDatasets.map((datasetIdName)=> {
                 let dataset = new MrDataset();
-                dataset.id = datasetId;
+                dataset.id = datasetIdName.id;
+                dataset.name = datasetIdName.name;
                 return dataset;
             })
         }
@@ -107,8 +111,8 @@ export class DatasetProcessingDTO {
     id: number;
     comment: string;
     datasetProcessingType: DatasetProcessingType;
-    inputDatasetIds: number[];
-    outputDatasetIds: number[];
+    inputDatasets: DatasetDTO[];
+    outputDatasets: DatasetDTO[];
 	processingDate: Date;
     studyId: number;
 
@@ -116,8 +120,16 @@ export class DatasetProcessingDTO {
         this.id = datasetProcessing.id;
         this.comment = datasetProcessing.comment;
         this.datasetProcessingType = datasetProcessing.datasetProcessingType;
-        this.inputDatasetIds = datasetProcessing.inputDatasets.map((dataset)=> dataset.id);
-        this.outputDatasetIds = datasetProcessing.outputDatasets.map((dataset)=> dataset.id);
+        this.inputDatasets = datasetProcessing.inputDatasets.map((dataset)=> {
+            let datasetDTO = new DatasetDTO(dataset);
+            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
+            return datasetDTO;
+        });
+        this.outputDatasets = datasetProcessing.outputDatasets.map((dataset)=> {
+            let datasetDTO = new DatasetDTO(dataset);
+            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
+            return datasetDTO;
+        });
         this.processingDate = datasetProcessing.processingDate;
         this.studyId = datasetProcessing.studyId;
     }

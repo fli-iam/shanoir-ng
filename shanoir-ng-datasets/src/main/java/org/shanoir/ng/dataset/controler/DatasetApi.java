@@ -94,7 +94,7 @@ public interface DatasetApi {
 	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
+			@ApiParam(value = "dataset to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
 	
 	@ApiOperation(value = "", notes = "Returns a datasets page", response = Page.class, tags = {})

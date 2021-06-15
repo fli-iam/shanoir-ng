@@ -113,7 +113,7 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
 		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
-		//datasetDb.setProcessings(dataset.getProcessings());
+		datasetDb.setProcessings(dataset.getProcessings());
 		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());

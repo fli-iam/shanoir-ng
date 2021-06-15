@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -24,13 +24,15 @@ import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, Repet
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
 import { DatasetProcessing } from './dataset-processing.model';
+import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 
 @Injectable()
 export class DatasetDTOService {
-
+    private datasetProcessingService: DatasetProcessingService;
     constructor(
         private studyService: StudyService,
         private subjectService: SubjectService,
+        private injector: Injector
     ) {}
 
     /**
@@ -38,12 +40,22 @@ export class DatasetDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: DatasetDTO, result?: Dataset): Promise<Dataset> {      
+    public toEntity(dto: DatasetDTO, result?: Dataset): Promise<Dataset> {   
+        if(!this.datasetProcessingService) {
+            this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
+        }   
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
         if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
+        if (dto.processings) {
+            for(let p of dto.processings) {
+                promises.push(this.datasetProcessingService.get(p.id).then(
+                    processing => result.processings.push(processing))
+                );
+            }
+        }
         return Promise.all(promises).then(([]) => {
             return result;
         });
@@ -62,7 +74,7 @@ export class DatasetDTOService {
                 result.push(entity);
             }
         }
-        return Promise.all([
+        let promises = [
             this.studyService.getStudiesNames().then(studies => {
                 for (let entity of result) {
                     if (entity.study) 
@@ -75,7 +87,17 @@ export class DatasetDTOService {
                         entity.subject.name = subjects.find(subject => subject.id == entity.subject.id).name;
                 }
             })
-        ]).then(() => {
+        ];
+        // for (let entity of result) {
+        //     let processingIds = entity.processings.map(p=> p.id);
+        //     entity.processings = [];
+        //     for (let processingId of processingIds) {
+        //         promises.push(this.datasetProcessingService.get(processingId).then(
+        //             p => entity.processings.push(p) as any
+        //         ));
+        //     }
+        // }
+        return Promise.all(promises).then(() => {
             return result;
         })
     }
@@ -101,7 +123,13 @@ export class DatasetDTOService {
         if (entity.type == 'Eeg') {
             this.mapSyncFieldsEeg(dto as EegDatasetDTO, entity as EegDataset);
         }
-        entity.processings = dto.processings;
+        if(dto.processings) {
+            for(let p of dto.processings) {
+                let processing = new DatasetProcessing();
+                processing.id = p.id;
+                entity.processings.push(processing);
+            }
+        }
         return entity;
     }
 
@@ -143,7 +171,7 @@ export class DatasetDTO {
     updatedMetadata: DatasetMetadata;
 	name: string;
     type: DatasetType;
-    processings: DatasetProcessing[];
+    processings: {id: number}[];
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -156,7 +184,7 @@ export class DatasetDTO {
             this.updatedMetadata = dataset.updatedMetadata;
             this.name = dataset.name;
             this.type = dataset.type;
-            this.processings = dataset.processings;
+            this.processings = dataset.processings.map( (p: DatasetProcessing) => { return { id: p.id } } );
         }
     }
 }
