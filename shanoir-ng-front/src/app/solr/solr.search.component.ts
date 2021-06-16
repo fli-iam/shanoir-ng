@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from "@angular/core";
+import { AfterViewChecked, Component, ViewChild } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { BreadcrumbsService } from "../breadcrumbs/breadcrumbs.service";
@@ -34,7 +34,7 @@ import { DatePipe } from "@angular/common";
     providers: [DatePipe]
 })
 
-export class SolrSearchComponent{
+export class SolrSearchComponent implements AfterViewChecked{
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
@@ -49,10 +49,12 @@ export class SolrSearchComponent{
     hasDownloadRight: boolean = true;
     selectedDatasetIds: number[];
     allFacetResultPages: FacetResultPage[] = [];
-    clearTextSearch: () => void = () => {};
+    clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
-    datasetEndDate: Date | 'invalid'; 
+    datasetEndDate: Date | 'invalid';
+    loaded: boolean = false;
+    viewChecked: boolean = false;
 
     private requestKeys: string[] = [
         'studyName',
@@ -66,12 +68,24 @@ export class SolrSearchComponent{
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService) {
-        
-        this.getFacets();
-
-        this.form = this.buildForm();
+                
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
+        
+
+        this.getFacets().then(() => {
+            if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+                let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+                this.loadState(savedRequest);
+                this.updateSelections();
+            }
+            setTimeout(() => {
+                this.loaded = true;
+
+            }, 5000)
+        });
+
+        this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
 
@@ -79,6 +93,11 @@ export class SolrSearchComponent{
         if (input) {
             // TODO
         }
+    }
+    ngAfterViewChecked(): void {
+        setTimeout(() => {
+            this.viewChecked = true;
+        });
     }
     
     buildForm(): FormGroup {
@@ -140,6 +159,28 @@ export class SolrSearchComponent{
         }
         return solrRequest;
     }
+
+    private saveState(solrRequest: SolrRequest) {
+        this.breadcrumbsService.currentStep.data.solrRequest = solrRequest;
+    }
+
+    private loadState(solrRequest: SolrRequest) {
+        if (solrRequest && Object.keys(solrRequest).length != 0) {
+            this.allFacetResultPages.forEach(facetResult => {
+                if (facetResult.content.length > 0) {
+                    let key: string = facetResult.content[0].field.name.replace('_str', '');
+                    facetResult.content.forEach(field => {
+                        field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
+                    })
+                }
+            });
+            if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
+            if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
+            this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
+            this.keyword = solrRequest.searchText;
+            this.expertMode = solrRequest.expertMode;
+        }
+    }
     
     updateSelections() {
         this.selections = [];
@@ -165,7 +206,7 @@ export class SolrSearchComponent{
     }
 
     onDateChange(date: Date | 'invalid') {
-        if (date && date != 'invalid') {
+        if (this.loaded && (date === null || (date && ('invalid' != date)))) {
             this.updateSelections();
             this.table.refresh();
         }
@@ -187,6 +228,7 @@ export class SolrSearchComponent{
             let solrRequest: SolrRequest = new SolrRequest();
             if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
             solrRequest = this.updateWithFields(solrRequest);
+            this.saveState(solrRequest);
 
             return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 
@@ -195,7 +237,6 @@ export class SolrSearchComponent{
                 }
                 return solrResultPage;
             }).catch(reason => {
-                console.log(reason.error.code, reason.error.message, reason.error.code == 422 && reason.error.message == 'solr query failed')
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
