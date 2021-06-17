@@ -51,6 +51,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -114,6 +115,9 @@ public class ImporterService {
 
 	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
+
+	@Autowired
+	private DatasetService datasetService;
 
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
@@ -551,7 +555,7 @@ public class ImporterService {
 
 			datasetProcessing.addOutputDataset(dataset);
 			dataset.setDatasetProcessing(datasetProcessing);
-
+			
 			// Metadata
 			DatasetMetadata originMetadata = new DatasetMetadata();
 			originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
@@ -578,6 +582,8 @@ public class ImporterService {
 			dataset.setOriginMetadata(originMetadata);
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
+
+			datasetService.create(dataset);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");

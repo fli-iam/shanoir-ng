@@ -13,6 +13,19 @@
 version: '3'
 services:
 
+  datasets:
+    volumes:
+      - tmp3:/tmp
+      - "datasets-data2:/var/datasets-data"
+  
+  studies:
+    volumes:
+      - "datasets-data2:/var/datasets-data"
+
+  import:
+    volumes:
+      - tmp3:/tmp
+  
   nginx:
     environment: 
       - SHANOIR_DEV=TRUE
@@ -34,3 +47,17 @@ services:
 networks:
   shanoir_ng_network:
       
+volumes:
+  tmp3:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /tmp/
+  
+  datasets-data2:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /var/datasets-data/
