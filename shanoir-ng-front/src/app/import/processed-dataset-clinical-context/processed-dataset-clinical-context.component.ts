@@ -32,11 +32,7 @@ import { DatasetProcessingService } from '../../datasets/shared/dataset-processi
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
-<<<<<<< HEAD
 import { ImportMode } from '../../import/import.component';
-=======
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
->>>>>>> c4f96947fe2fdc3b0c4229ed42f450dbfb853cdb
 
 @Component({
     selector: 'processed-dataset-clinical-context',
