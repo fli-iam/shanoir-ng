@@ -37,8 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label class="required-label">Research study</label> 
 					<span class="right-col">
 						<select-box 
-								[(ngModel)]="study"
-								[viewDisabled]="true">
+								formControlName="study" [(ngModel)]="study" [options]="studyOptions">
 						</select-box>
 					</span>
 				</li>
@@ -63,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{datasetProcessing.processingDate | date: 'dd/MM/yyyy'}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<datepicker [(ngModel)]="datasetProcessing.processingDate" formControlName="processingDate" required></datepicker>
+							<datepicker formControlName="processingDate" [(ngModel)]="datasetProcessing.processingDate" required></datepicker>
 							<label *ngIf="hasError('processingDate', ['format'])" class="form-validation-alert" i18n="Processing detail|Date valid error@@dateValidError">Invalid date, it must follow the format: dd/mm/yyyy</label>
 							<label *ngIf="hasError('processingDate', ['required'])" class="form-validation-alert" i18n="Processing detail|BirthDate required error@@processingDetailBirthDateRequiredError">Required</label>
 						</ng-template>
@@ -89,11 +88,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					Input datasets
 					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>
 				</legend>
+				<li *ngIf="mode!='view'">
+					<span class="right-col">
+						<select-box placeholder="Add a dataset..." (onAddClick)="onAddInputDataset($event)" [options]="inputDatasetOptions">
+						</select-box>
+					</span>
+				</li>
 				<li>
 					<shanoir-table #inputDatasetsTable
 						[getPage]="getInputDatasetsPage.bind(this)" 
+						[editMode]="mode != 'view'"
 						[columnDefs]="inputDatasetsColumnDefs">
 					</shanoir-table>
+				
 				</li>
 
 			</ol>

@@ -32,7 +32,11 @@ import { DatasetProcessingService } from '../../datasets/shared/dataset-processi
 import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
+<<<<<<< HEAD
 import { ImportMode } from '../../import/import.component';
+=======
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+>>>>>>> c4f96947fe2fdc3b0c4229ed42f450dbfb853cdb
 
 @Component({
     selector: 'processed-dataset-clinical-context',
@@ -41,10 +45,9 @@ import { ImportMode } from '../../import/import.component';
     animations: [slideDown, preventInitialChildAnimations]
 })
 export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
+    DatasetType = DatasetType;
+    ProcessedDatasetType = ProcessedDatasetType;
     public datasetType: DatasetType;
-    public datasetTypes: Option<DatasetType>[] = DatasetType.options;
-    public processedDatasetTypes: Option<ProcessedDatasetType>[] = ProcessedDatasetType.options;
-
     public processedDatasetType: ProcessedDatasetType;
     private processedDatasetFilePath: string;
     public processedDatasetName: string;
@@ -54,7 +57,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     public study: Study;
     public subject: SubjectWithSubjectStudy;
     public datasetProcessing: DatasetProcessing;
-    public datasetProcessings: DatasetProcessing[];
+    public datasetProcessings: DatasetProcessing[] = [];
     
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
@@ -64,7 +67,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     ];
     public importMode: ImportMode;
 
-    public isAdminOfStudy: boolean[] = [];
+    // public isAdminOfStudy: boolean[] = [];
     openSubjectStudy: boolean = false;
     
     constructor(
@@ -76,11 +79,14 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public studyRightsService: StudyRightsService,
-            private keycloakService: KeycloakService) {
-        
+            private keycloakService: KeycloakService
+            ) {
+
         breadcrumbsService.nameStep('2. Context'); 
         this.importMode = this.breadcrumbsService.findImportMode();
-        this.processedDatasetFilePath = importDataService.processedDatasetImportJob.processedDatasetFilePath;
+        if(importDataService.processedDatasetImportJob != null) {
+            this.processedDatasetFilePath = importDataService.processedDatasetImportJob.processedDatasetFilePath;
+        }
         this.getStudiesAndDatasetProcessings();
     }
 
@@ -88,6 +94,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createDatasetProcessingRoute: string = '/dataset-processing/create';
         this.router.navigate([createDatasetProcessingRoute]).then(success => {
+            this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
@@ -99,6 +106,30 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
 
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
+            let processedDatasetFilePath = this.importDataService.contextBackup.processedDatasetFilePath;
+            let datasetType = this.importDataService.contextBackup.datasetType;
+            let processedDatasetType = this.importDataService.contextBackup.processedDatasetType;
+            let processedDatasetName = this.importDataService.contextBackup.processedDatasetName
+            let processedDatasetComment = this.importDataService.contextBackup.processedDatasetComment;
+            let datasetProcessing = this.importDataService.contextBackup.datasetProcessing;
+            if(processedDatasetFilePath) {
+                this.processedDatasetFilePath = processedDatasetFilePath;
+            }
+            if(datasetType) {
+                this.datasetType = datasetType;
+            }
+            if(processedDatasetType) {
+                this.processedDatasetType = processedDatasetType;
+            }
+            if(processedDatasetName) {
+                this.processedDatasetName = processedDatasetName;
+            }
+            if(processedDatasetComment) {
+                this.processedDatasetComment = processedDatasetComment;
+            }
+            if(datasetProcessing) {
+                this.datasetProcessing = datasetProcessing;
+            }
             let study = this.importDataService.contextBackup.study;
             let subject = this.importDataService.contextBackup.subject;
             if (study) {
@@ -111,8 +142,8 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                     this.subject = subject;
                     this.onSelectSubject();
                 }
+                this.onSelectStudy();
             }
-            this.processedDatasetFilePath = this.importDataService.contextBackup.processedDatasetFilePath;
         }
     }
 
@@ -139,8 +170,10 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     
     public onSelectStudy(): void {
         this.subjects = [];
-        this.studyService.findSubjectsByStudyId(this.study.id)
-        .then(subjects => this.subjects = subjects);
+        if(this.study != null && this.study.id != null) {
+            this.studyService.findSubjectsByStudyId(this.study.id)
+                .then(subjects => this.subjects = subjects);
+        }
     }
 
     public onSelectSubject(): void {
@@ -183,6 +216,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     
     public subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
         if (!subject) return;
+        
         let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
         subjectWithSubjectStudy.id = subject.id;
         subjectWithSubjectStudy.name = subject.name;
@@ -192,15 +226,15 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     }
 
     public showDatasetProcessingDetails() {
-        window.open('dataset-processing/details/' + this.datasetProcessing.id, '_blank');
+        this.router.navigate(['dataset-processing/details/' + this.datasetProcessing.id]);
     }
 
     public showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
+        this.router.navigate(['study/details/' + this.study.id]);
     }
 
     public showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
+        this.router.navigate(['subject/details/' + this.subject.id]);
     }
 
     get valid(): boolean {

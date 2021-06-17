@@ -21,11 +21,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')"> 
-            <dataset-node
+            <simple-dataset-node
                     node
                     *ngFor="let dataset of node.datasets"
                     [input]="dataset">
-            </dataset-node>
+            </simple-dataset-node>
 
     </ng-container>
 </node>

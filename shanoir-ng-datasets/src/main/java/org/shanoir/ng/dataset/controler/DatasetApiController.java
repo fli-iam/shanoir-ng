@@ -250,6 +250,26 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		
+		final List<Examination> examinations = examinationService.findByStudyId(studyId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		List<Dataset> datasets = new ArrayList<Dataset>();
+		for(Examination examination : examinations) {
+			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+				for(Dataset dataset : datasetAcquisition.getDatasets()) {
+					datasets.add(dataset);
+				}
+			}
+		}
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {

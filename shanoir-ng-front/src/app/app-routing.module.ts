@@ -85,8 +85,6 @@ import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acqu
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
-
-
 import { DUAComponent } from './dua/dua.component';
 
 let routes: Routes = [

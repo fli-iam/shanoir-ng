@@ -28,7 +28,7 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
 export class ImportComponent {
 
     hasOneStudy: boolean = true;
-    importMode: ImportMode;
+    importMode: ImportMode | '';
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
@@ -41,7 +41,7 @@ export class ImportComponent {
         });
     }
 
-    getImportMode(): ImportMode {
+    getImportMode(): ImportMode | '' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;

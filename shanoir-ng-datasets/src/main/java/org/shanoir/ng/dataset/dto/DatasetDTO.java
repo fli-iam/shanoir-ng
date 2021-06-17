@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
@@ -46,6 +47,7 @@ public class DatasetDTO {
 	
 	private String type;
 
+	private List<Long> processingIds;
 
 	/**
 	 * @return the creationDate

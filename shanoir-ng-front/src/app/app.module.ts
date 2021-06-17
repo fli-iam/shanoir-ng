@@ -60,6 +60,9 @@ import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
+import { DatasetProcessingService } from './datasets/shared/dataset-processing.service';
+import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
+import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
@@ -173,6 +176,7 @@ import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-nod
 import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
+import { SimpleDatasetNodeComponent } from './datasets/tree/simple-dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
 import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
@@ -300,6 +304,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         DatasetListComponent,
         DatasetProcessingComponent,
         DatasetProcessingListComponent,
+        DatasetProcessingPipe,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
@@ -388,6 +393,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         ExaminationNodeComponent,
         DatasetAcquisitionNodeComponent,
         DatasetNodeComponent,
+        SimpleDatasetNodeComponent,
         ProcessingNodeComponent,
         StudyNodeComponent,
         CenterNodeComponent,
@@ -439,6 +445,8 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         UserService,
         DicomArchiveService,
         DatasetService,
+        DatasetProcessingService,
+        DatasetProcessingPipe,
         MsgBoxService,
     	PathologyService,
         AnimalSubjectService,
@@ -480,6 +488,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,
+        DatasetProcessingDTOService,
         SolrService,
         NotificationsService,
         CenterDTOService,

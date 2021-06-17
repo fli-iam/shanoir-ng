@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -38,8 +39,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "dataset-processing")
-@RequestMapping("/dataset-processing")
+@Api(value = "datasetProcessing")
+@RequestMapping("/datasetProcessing")
 public interface DatasetProcessingApi {
 
 	@ApiOperation(value = "", notes = "Deletes a dataset processing", response = Void.class, tags = {})
@@ -75,6 +76,28 @@ public interface DatasetProcessingApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings();
+
+	@ApiOperation(value = "", notes = "Returns the input datasets of a processing", response = DatasetDTO.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/{datasetProcessingId}/inputDatasets/", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<DatasetDTO>> getInputDatasets(@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+
+	@ApiOperation(value = "", notes = "Returns the output datasets of a processing", response = DatasetDTO.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/{datasetProcessingId}/outputDatasets/", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<DatasetDTO>> getOutputDatasets(@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
 	@ApiOperation(value = "", notes = "Saves a new dataset processing", response = DatasetProcessingDTO.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created dataset processing", response = DatasetProcessingDTO.class),

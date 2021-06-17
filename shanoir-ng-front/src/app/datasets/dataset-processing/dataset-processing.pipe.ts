@@ -20,9 +20,9 @@ export class DatasetProcessingPipe implements PipeTransform {
 
     transform(datasetProcessing: DatasetProcessing) {
         if (datasetProcessing) {
-            return datasetProcessing.datasetProcessingType
-                + ", " + datasetProcessing.comment 
-                + ", " + new Date(datasetProcessing.processingDate).toLocaleDateString()
+            return ( datasetProcessing.datasetProcessingType != null ? datasetProcessing.datasetProcessingType + ", " : "" )
+                + (datasetProcessing.comment != null ? datasetProcessing.comment + ", ": "" )
+                + new Date(datasetProcessing.processingDate).toLocaleDateString()
                 + " ( id = " + datasetProcessing.id + " ) ";
         }
         return "";

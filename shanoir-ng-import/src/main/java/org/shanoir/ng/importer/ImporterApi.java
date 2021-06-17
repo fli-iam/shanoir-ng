@@ -22,7 +22,6 @@ import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -98,7 +97,6 @@ public interface ImporterApi {
 		@ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
 		@ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
     @PostMapping(value = "/upload_eeg/",
-	    produces = { "application/json" },
 	    consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile) throws RestServiceException;
@@ -110,10 +108,12 @@ public interface ImporterApi {
         @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
     @PostMapping(value = "/upload_processed_dataset/",
-        produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<String> uploadProcessedDataset(@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, @ApiParam(value = "header detail", required = false) @RequestPart("header") MultipartFile headerFile) throws RestServiceException;
+    ResponseEntity<String> uploadProcessedDataset(
+        @ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
+        @ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+        throws RestServiceException;
     
     @ApiOperation(value = "Import one DICOM .zip file", notes = "Import DICOM .zip file already uploaded", response = Void.class, tags = {
 			"Import one DICOM .zip file", })

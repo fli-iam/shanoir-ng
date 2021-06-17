@@ -29,7 +29,7 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
     @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(private datasetProcessingService: DatasetProcessingService) {
-        super('datasetProcessing');
+        super('dataset-processing');
     }
     
     getService(): EntityService<DatasetProcessing> {
