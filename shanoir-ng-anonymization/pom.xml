@@ -1,18 +1,13 @@
-<!--
-Shanoir NG - Import, manage and share neuroimaging data
-Copyright (C) 2009-2019 Inria - https://www.inria.fr/
-Contact us on https://project.inria.fr/shanoir/
+<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C) 
+	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/ 
+	This program is free software: you can redistribute it and/or modify it under 
+	the terms of the GNU General Public License as published by the Free Software 
+	Foundation, either version 3 of the License, or (at your option) any later 
+	version. You should have received a copy of the GNU General Public License 
+	along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html -->
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
--->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -26,11 +21,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dcm4che.version>5.14.1</dcm4che.version>
+		<dcm4che.version>5.14.1</dcm4che.version>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
-
 
 	<dependencies>
 		<dependency>
@@ -61,7 +55,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-dcmr</artifactId>
 			<version>${dcm4che.version}</version>
-
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che.tool</groupId>
@@ -74,7 +67,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -90,33 +82,34 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<repositories>
 		<repository>
-			<id>dcm4che-snapshots</id>
-			<name>Dcm4Che Snapshots</name>
-			<url>http://www.dcm4che.org/maven2/</url>
+			<id>dcm4che</id>
+			<name>dcm4che</name>
+			<url>https://www.dcm4che.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
