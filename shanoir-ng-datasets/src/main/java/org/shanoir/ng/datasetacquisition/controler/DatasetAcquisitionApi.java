@@ -61,7 +61,7 @@ public interface DatasetAcquisitionApi {
     @PostMapping(value = "",
         produces = { "application/json" },
         consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasAnyRole('EXPERT', 'USER')")
     ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody DatasetAcquisition acquisition) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
