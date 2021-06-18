@@ -112,12 +112,38 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<groupId>org.keycloak</groupId>
 					<artifactId>keycloak-admin-client</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.session</groupId>
+					<artifactId>spring-session</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-redis</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-tomcat8-adapter</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-admin-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.session</groupId>
+					<artifactId>spring-session</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-redis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
@@ -325,9 +351,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</snapshots>
 		</repository>
 		<repository>
-			<id>dcm4che-snapshots</id>
-			<name>Dcm4Che Snapshots</name>
-			<url>http://maven.dcm4che.org</url>
+			<id>dcm4che</id>
+			<name>dcm4che</name>
+			<url>https://www.dcm4che.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
