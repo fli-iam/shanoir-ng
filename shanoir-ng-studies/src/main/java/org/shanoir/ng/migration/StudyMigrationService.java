@@ -10,8 +10,14 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
+import org.shanoir.ng.shared.migration.MigrationJob;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
@@ -20,19 +26,21 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
-public class MigrationService {
+public class StudyMigrationService {
 
 	@Autowired
 	private StudyService studyService;
 
 	@Autowired
-	private DistantShanoirService distantShanoir;
+	private DistantStudiesShanoirService distantShanoir;
 
 	private List<ManufacturerModel> distantModels = null;
 	
@@ -40,12 +48,31 @@ public class MigrationService {
 	
 	private List<Manufacturer> distantManufacturers = null;
 
+	private Map <Long, Long> equipmentMap = new HashMap<>();
+
+	private Map <Long, Long> centerMap = new HashMap<>();
+
+	@Autowired
+	ShanoirEventService eventService;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	DistantKeycloakConfigurationService distantKeycloak;
+	
+	@Autowired ObjectMapper objectMapper;
+
 	/**
 	 * Migrates a given study and all its elements
 	 * This method is synchronized to avoid multiple threads running the same
 	 * @param studyId the study to migrate
 	 */
-	public synchronized void migrateStudy(Long studyId, Long userId, String username) throws ShanoirException {
+	public synchronized void migrateStudy(Long studyId, Long userId, String username, String url) throws ShanoirException {
+		Long currentUserId = KeycloakUtil.getTokenUserId();
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.MIGRATE_STUDY_EVENT, ""+studyId, currentUserId, "Starting migration...", ShanoirEvent.IN_PROGRESS, 0f);
+		eventService.publishEvent(event);
+
 		Study study = this.studyService.findById(studyId);
 		
 		Map<Long,Long> subjectMap = new HashMap<>();
@@ -53,6 +80,10 @@ public class MigrationService {
 		// Remove all groupsOfSubjects
 		study.setExperimentalGroupsOfSubjects(null);
 		
+		event.setMessage("Migrating subjects...");
+		event.setProgress(0.01f);
+		eventService.publishEvent(event);
+
 		// Move all concerned subjects
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			Subject subj = subjectStudy.getSubject();
@@ -66,9 +97,17 @@ public class MigrationService {
 			subjectMap.put(oldId, sub.getId());
 		}
 		
+		event.setMessage("Migrating centers...");
+		event.setProgress(0.02f);
+		eventService.publishEvent(event);
+		
 		// Move all centers
 		List<StudyCenter> centers = moveCenters(study.getStudyCenterList());
 		study.setStudyCenterList(centers);
+		
+		event.setMessage("Migrating study...");
+		event.setProgress(0.03f);
+		eventService.publishEvent(event);
 
 		// Migrate study
 		Long oldStudyId = study.getId();
@@ -116,13 +155,31 @@ public class MigrationService {
 		}
 		*/
 
+		// Send a message over rabbitMQ to move all other microservices
+		// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
+		MigrationJob job = new MigrationJob();
+		job.setOldStudyId(oldStudyId);
+		job.setStudy(new IdName(newStudy.getId(), newStudy.getName()));
+		job.setCentersMap(centerMap);
+		job.setEquipmentMap(equipmentMap);
+		job.setSubjectsMap(subjectMap);
+		job.setEvent(event);
+		job.setShanoirUrl(url);
+		job.setAccessToken(distantKeycloak.getAccessToken());
+		job.setRefreshToken(this.distantKeycloak.getRefreshToken());
+		
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_QUEUE, objectMapper.writeValueAsString(job));
+		} catch (Exception e) {
+			throw new ShanoirException("Error while communicating with datasets", e);
+		}
+		
 		// Reset lists
 		distantModels = null;
 		distantEquipements = null;
 		distantManufacturers = null;
-		
-		// Send a message over rabbitMQ to move all other microservices
-		// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
+		equipmentMap = new HashMap<>();
+		centerMap = new HashMap<>();
 	}
 
 	/**
@@ -139,12 +196,14 @@ public class MigrationService {
 		for (StudyCenter studyCenter : centers) {
 			boolean found = false;
 			Center center = studyCenter.getCenter();
+			Long oldId = center.getId();
 			
 			for (IdName distantCenter : distantCenters) {
 				// If center already exists, use it.
 				if (distantCenter.getName().equals(center.getName())) {
 					studyCenter.getCenter().setId(distantCenter.getId());
 					found = true;
+					moveAcquisitionEquipements(center.getAcquisitionEquipments(), distantCenter.getId());
 					break;
 				}
 			}
@@ -155,16 +214,16 @@ public class MigrationService {
 				List<AcquisitionEquipment> oldEquipments = center.getAcquisitionEquipments();
 				center.setAcquisitionEquipments(null);
 				Center newCenter = distantShanoir.createCenter(center);
-				List<AcquisitionEquipment> equipements = moveAcquisitionEquipements(oldEquipments, newCenter);
+				moveAcquisitionEquipements(oldEquipments, newCenter.getId());
 				Center newCenterToSet = new Center();
 				newCenterToSet.setId(newCenter.getId());
-				newCenterToSet.setAcquisitionEquipments(equipements);
 				studyCenter.setCenter(newCenterToSet);
 			}
 			studyCenter.setId(null);
 			studyCenter.getCenter().setStudyCenterList(null);
 			studyCenter.setStudy(null);
 			toSet.add(studyCenter);
+			centerMap.put(oldId, studyCenter.getCenter().getId());
 		}
 		return toSet;
 	}
@@ -176,16 +235,19 @@ public class MigrationService {
 	 * @return
 	 * @throws ShanoirException
 	 */
-	private List<AcquisitionEquipment> moveAcquisitionEquipements(List<AcquisitionEquipment> acquisitionEquipments, Center center) throws ShanoirException {
+	private void moveAcquisitionEquipements(List<AcquisitionEquipment> acquisitionEquipments, Long centerId) throws ShanoirException {
 		distantEquipements = distantEquipements != null? distantEquipements : distantShanoir.getAcquisitionEquipements();
 		List<AcquisitionEquipment> toSet = new ArrayList<>();
 		for (AcquisitionEquipment equipement : acquisitionEquipments) {
+			Long oldId = equipement.getId();
 			boolean found = false;
 			for (AcquisitionEquipment distantEquipement : distantEquipements) {
 				// If equipement already exists, use it.
 				if (distantEquipement.getSerialNumber() != null && distantEquipement.getSerialNumber().equals(equipement.getSerialNumber())) {
 					equipement.setId(distantEquipement.getId());
 					found = true;
+					// No need to move manufacturer and model here is acquisition equipment already exist,
+					// then we consider it has adapted references
 					break;
 				}
 			}
@@ -195,13 +257,14 @@ public class MigrationService {
 				ManufacturerModel model = this.moveManufacturerModel(equipement.getManufacturerModel());
 				equipement.setId(null);
 				equipement.setManufacturerModel(model);
-				equipement.setCenter(center);
+				Center dtoCenter = new Center();
+				dtoCenter.setId(centerId);
+				equipement.setCenter(dtoCenter );
 				equipement = distantShanoir.createEquipement(equipement);
 				this.distantEquipements.add(equipement);
 			}
-			toSet.add(equipement);
+			this.equipmentMap.put(oldId, equipement.getId());
 		}
-		return toSet;
 	}
 
 	/**

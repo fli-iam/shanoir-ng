@@ -94,6 +94,9 @@ public class RabbitMQConfiguration {
 	/** Send a mail from dataset microservice to study users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
+	/** Migrate a study, communication between services. */
+	public static final String STUDY_MIGRATION_QUEUE = "study-migration-queue";
+	
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 
@@ -306,5 +309,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue importDatasetMail() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue studyMigrationQueue() {
+		return new Queue(STUDY_MIGRATION_QUEUE, true);
 	}
 }

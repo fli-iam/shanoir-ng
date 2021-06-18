@@ -91,6 +91,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import io.swagger.annotations.ApiParam;
@@ -725,4 +726,54 @@ public class DatasetApiController implements DatasetApi {
 				.contentLength(data.length)
 				.body(resource);
 	}
+
+	@Override
+	public ResponseEntity<Dataset> addDatasetFile (
+			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
+			@ApiParam(value = "Linked file", required = true) MultipartFile multipartFile)
+			throws RestServiceException {
+		// Load dataset file
+		Dataset dataset = datasetService.findById(datasetId);
+		DatasetFile dsFile = null;
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			for (DatasetFile dsFileIt : expression.getDatasetFiles()) {
+				if (dsFileIt.getId().equals(datasetFileId)) {
+					dsFile = dsFileIt;
+					// Move the file to the adapted path
+					if (dsFile.isPacs()) {
+						
+						// MOVE TO PACS
+					} else {
+						// MOVE on disc
+						// Files.copy(multipartFile.get, target, options)
+					}
+					// reference file from dataset
+					break;
+				}
+			}
+		}
+		
+		
+		
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

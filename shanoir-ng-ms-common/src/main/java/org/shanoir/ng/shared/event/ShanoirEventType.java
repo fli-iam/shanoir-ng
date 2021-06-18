@@ -75,4 +75,6 @@ public class ShanoirEventType {
 
 	/** User subscribed to a challenge. */
 	public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
+
+	public static final String MIGRATE_STUDY_EVENT = "migrateStudy.event";
 }

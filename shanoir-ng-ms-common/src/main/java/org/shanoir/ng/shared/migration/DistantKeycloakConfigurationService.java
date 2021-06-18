@@ -1,22 +1,32 @@
-package org.shanoir.ng.migration;
+package org.shanoir.ng.shared.migration;
 
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.HttpStatus;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONObject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,14 +40,41 @@ public class DistantKeycloakConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DistantKeycloakConfigurationService.class);
 	
-	@Autowired
 	RestTemplate restTemplate;
 	
-	private String token;
+	private String refreshToken;
+	
+	private String accessToken;
 
 	private String server;
 
 	private ScheduledExecutorService executor;
+	
+	
+	public DistantKeycloakConfigurationService() {
+		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+		SSLContext sslContext;
+		try {
+			sslContext = org.apache.http.ssl.SSLContexts.custom()
+					.loadTrustMaterial(null, acceptingTrustStrategy)
+					.build();
+
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+			CloseableHttpClient httpClient = HttpClients.custom()
+					.setSSLSocketFactory(csf)
+					.build();
+
+			HttpComponentsClientHttpRequestFactory requestFactory =
+					new HttpComponentsClientHttpRequestFactory();
+
+			requestFactory.setHttpClient(httpClient);
+			restTemplate = new RestTemplate(requestFactory);
+		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+			LOG.error("Could not get a valid rest template.");
+		}
+	}
 	
 	/**
 	 * Connects to a distant keycloak and keeps the connection alive
@@ -69,13 +106,13 @@ public class DistantKeycloakConfigurationService {
 				// Access token
 				String newAccessToken = responseEntityJson.getString("access_token");
 				if (newAccessToken != null) {
-					token = newAccessToken;
+					accessToken = newAccessToken;
 				} else {
 					LOG.error("ERROR: with access token refresh.");
 				}
 				// Refresh token
-				String refreshToken = responseEntityJson.getString("refresh_token");
-				this.refreshToken(keycloakURL, refreshToken);
+				refreshToken = responseEntityJson.getString("refresh_token");
+				this.refreshToken(keycloakURL);
 			} else {
 				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.getBody());
 			}
@@ -91,7 +128,7 @@ public class DistantKeycloakConfigurationService {
 	 * we update after 4 min (240 secs) to use the time frame, but not to
 	 * be to close to the end.
 	 */
-	private void refreshToken(String keycloakURL, String refreshToken) {
+	public void refreshToken(String keycloakURL) {
 		final StringBuilder postBody = new StringBuilder();
 		postBody.append("client_id=shanoir-uploader");
 		postBody.append("&grant_type=refresh_token");
@@ -111,7 +148,7 @@ public class DistantKeycloakConfigurationService {
 					JSONObject responseEntityJson = new JSONObject(response.getBody());
 					String newAccessToken = responseEntityJson.getString("access_token");
 					if (newAccessToken != null) {
-						token = newAccessToken;
+						accessToken = newAccessToken;
 					} else {
 						LOG.error("ERROR: with access token refresh.");
 					}
@@ -126,14 +163,6 @@ public class DistantKeycloakConfigurationService {
 		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
 	}
 
-	/**
-	 * Get the access token
-	 * @return the access token
-	 */
-	public String getAccessToken() {
-		return this.token;
-	}
-
 	public String getServer() {
 		return server;
 	}
@@ -142,6 +171,30 @@ public class DistantKeycloakConfigurationService {
 		this.server = server;
 	}
 	
+	
+	
+	/**
+	 * @return the refreshToken
+	 */
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+	
+	/**
+	 * @param refreshToken the refreshToken to set
+	 */
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	/**
+	 * @return the accessToken
+	 */
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+
 	/**
 	 * Stop the distant keycloak connection
 	 */
@@ -149,6 +202,10 @@ public class DistantKeycloakConfigurationService {
 		if (this.executor != null) {
 			this.executor.shutdown();
 		}
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
 
 }

@@ -84,17 +84,17 @@ public class WADODownloaderService {
 	private static final String DCM = ".dcm";
 
 	private static final String UNDER_SCORE = "_";
-	
+
 	/** Mime type */
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
-	
+
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
 	private static final String CONTENT_TYPE = "&contentType";
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
@@ -138,6 +138,40 @@ public class WADODownloaderService {
 				}
 			}
 		}
+	}
+
+	public String downloadDicomFilesForURL(String url, final File workFolder, String subjectName) throws IOException, MessagingException {
+		String instanceUID = null;
+		// handle and check at first for WADO-RS URLs by "/instances/"
+		int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+		if (indexInstanceUID > 0) {
+			instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+			byte[] responseBody = downloadFileFromPACS(url);
+			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
+		} else {
+			// handle and check secondly for WADO-URI URLs by "objectUID="
+			// instanceUID == objectUID
+			indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+			if (indexInstanceUID > 0) {
+				instanceUID = extractInstanceUID(url, instanceUID);
+				byte[] responseBody = downloadFileFromPACS(url);
+				String name = subjectName + "_" + instanceUID;
+				File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
+				ByteArrayInputStream bIS = null;
+				try {
+					bIS = new ByteArrayInputStream(responseBody);
+					Files.copy(bIS, extractedDicomFile.toPath());
+					return extractedDicomFile.getAbsolutePath();
+				} finally {
+					if (bIS != null) {
+						bIS.close();
+					}
+				}
+			} else {
+				throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+			}
+		}
+		return null;
 	}
 
 	/**

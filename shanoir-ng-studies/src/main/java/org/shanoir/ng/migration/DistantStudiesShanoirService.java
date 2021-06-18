@@ -3,16 +3,29 @@ package org.shanoir.ng.migration;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
@@ -28,15 +41,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class DistantShanoirService {
+public class DistantStudiesShanoirService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DistantShanoirService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DistantStudiesShanoirService.class);
 
 	private static final String SERVICE_SUBJECTS_CREATE = "/shanoir-ng/studies/subjects";
 
@@ -60,17 +74,55 @@ public class DistantShanoirService {
 
 	private static final String GET_MANUFACTURERS = "/shanoir-ng/studies/manufacturers";
 
-	@Autowired
 	RestTemplate restTemplate;
 
 	@Autowired
 	StudyService studyService;
 
 	@Autowired
-	DistantKeycloakConfigurationService distantKeycloak;
+	StudyMapper mapper;
 
 	@Autowired
-	StudyMapper mapper;
+	DistantKeycloakConfigurationService distantKeycloak;
+
+	private static final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
+			new X509TrustManager() {
+				@Override
+				public java.security.cert.X509Certificate[] getAcceptedIssuers(){
+					return null;
+				}
+				@Override
+				public void checkClientTrusted( X509Certificate[] certs, String authType ){}
+				@Override
+				public void checkServerTrusted( X509Certificate[] certs, String authType ){}
+			}
+	};
+
+	public DistantStudiesShanoirService() {
+		// Instanciate a "weak" rest template.
+		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+		SSLContext sslContext;
+		try {
+			sslContext = org.apache.http.ssl.SSLContexts.custom()
+					.loadTrustMaterial(null, acceptingTrustStrategy)
+					.build();
+
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+			CloseableHttpClient httpClient = HttpClients.custom()
+					.setSSLSocketFactory(csf)
+					.build();
+
+			HttpComponentsClientHttpRequestFactory requestFactory =
+					new HttpComponentsClientHttpRequestFactory();
+
+			requestFactory.setHttpClient(httpClient);
+			restTemplate = new RestTemplate(requestFactory);
+		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+			// POUTOU
+		}
+	}
 
 	/**
 	 * Creates a subject in the distant shanoir instance
@@ -106,7 +158,6 @@ public class DistantShanoirService {
 			}
 		} catch (Exception e) {
 			throw new ShanoirException("Could not create a new distant study: ", e);
-
 		}
 	}
 

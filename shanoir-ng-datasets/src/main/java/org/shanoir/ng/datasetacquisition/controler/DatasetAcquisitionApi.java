@@ -37,6 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,6 +51,19 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "datasetacquisition", description = "the datasetacquisition API")
 public interface DatasetAcquisitionApi {
 	
+	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "created Dataset Acquitistion", response = Void.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+        @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @PostMapping(value = "",
+        produces = { "application/json" },
+        consumes = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#acquisition.getStudyId(), 'CAN_IMPORT'))")
+    ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody DatasetAcquisition acquisition) throws RestServiceException;
+
 	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "created Dataset Acquitistion", response = Void.class),

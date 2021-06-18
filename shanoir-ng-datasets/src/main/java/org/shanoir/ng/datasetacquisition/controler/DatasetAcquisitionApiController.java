@@ -90,14 +90,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			throw new RestServiceException(error);
 		}
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
 		importerService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
@@ -148,7 +148,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0)
 						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
 			}
 		});
@@ -219,4 +219,10 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			throw new RestServiceException(error);
 		}
 	}
+
+    @Override
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true)  @Valid @RequestBody DatasetAcquisition acquisition) throws RestServiceException {
+    	DatasetAcquisition result = datasetAcquisitionService.create(acquisition);
+    	return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }
