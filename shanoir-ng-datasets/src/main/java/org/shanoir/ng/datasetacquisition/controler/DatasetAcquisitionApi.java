@@ -61,7 +61,7 @@ public interface DatasetAcquisitionApi {
     @PostMapping(value = "",
         produces = { "application/json" },
         consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#acquisition.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#acquisition.getExamination().getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody DatasetAcquisition acquisition) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
