@@ -66,6 +66,12 @@ export class TableComponent implements OnInit {
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
+            this.columnDefs.forEach(col => {
+                if (savedState.columns && savedState.columns[col.field]) {
+                    col.width = savedState.columns[col.field].width;
+                    col.hidden = savedState.columns[col.field].hidden;
+                }
+            })
             this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
                 .then(() => this.firstLoading = false);
         } else {
@@ -259,16 +265,7 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
-        let currentStep = this.breadcrumbsService.currentStep
-        if(currentStep) {
-            this.breadcrumbsService.currentStep.data.tableState = {
-                lastSortedCol: this.lastSortedCol,
-                lastSortedAsc: this.lastSortedAsc,
-                filter: this.filter,
-                currentPage: this.currentPage,
-                maxResults: this.maxResults
-            };
-        }
+        this.saveState();
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -293,6 +290,28 @@ export class TableComponent implements OnInit {
                 new Sort(orders)
             );
         }
+    }
+
+    private saveState() {
+        let currentStep = this.breadcrumbsService.currentStep
+        if(currentStep) {
+            this.breadcrumbsService.currentStep.data.tableState = {
+                lastSortedCol: this.lastSortedCol,
+                lastSortedAsc: this.lastSortedAsc,
+                filter: this.filter,
+                currentPage: this.currentPage,
+                maxResults: this.maxResults,
+                columns: []
+            };
+            this.saveSettings();
+        }
+    }
+
+    saveSettings() {
+        this.breadcrumbsService.currentStep.data.tableState.columns = this.columnDefs.reduce((result, col) => {
+            result[col.field] = { width: col.width, hidden: col.hidden };
+            return result;
+        }, {});
     }
 
     updateMaxResults(): void {

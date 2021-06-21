@@ -189,8 +189,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <table>
                 <tr *ngFor="let col of columnDefs">
                     <td>{{col.headerName}}</td>
-                    <td><checkbox [(ngModel)]="col.hidden" [inverse]=true></checkbox></td>
-                    <td><input type="text" [(ngModel)]="col.width"></td>
+                    <td><checkbox [(ngModel)]="col.hidden" [inverse]=true (ngModelChange)="saveSettings()"></checkbox></td>
+                    <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()"></td>
                 </tr>
             </table>
         </div>
