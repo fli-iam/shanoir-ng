@@ -22,6 +22,8 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,10 +37,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class DistantDatasetShanoirService {
 
-	
+	private static final Logger LOG = LoggerFactory.getLogger(DistantDatasetShanoirService.class);
+
 
 	private static final String CREATE_EXAMINATION = "/shanoir-ng/datasets/examinations/";
 	
@@ -46,12 +51,15 @@ public class DistantDatasetShanoirService {
 
 	private static final String CREATE_STUDY_CARD = "/shanoir-ng/datasets/studycards/";
 	
-	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/";
+	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/new";
 
 	private static final String ADD_FILE = "/shanoir-ng/datasets/datasets/";
 
 	RestTemplate restTemplate;
 
+	@Autowired
+	ObjectMapper mapper;
+	
 	@Autowired
 	DistantKeycloakConfigurationService distantKeycloak;
 
@@ -90,7 +98,6 @@ public class DistantDatasetShanoirService {
 			requestFactory.setHttpClient(httpClient);
 			restTemplate = new RestTemplate(requestFactory);
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-			// POUTOU
 		}
 	}
 
@@ -139,7 +146,7 @@ public class DistantDatasetShanoirService {
 	}
 
 	public DatasetAcquisition createAcquisition(DatasetAcquisition acq) throws ShanoirException {
-		try {
+		try {LOG.error("Creating new acquisition: " + mapper.writeValueAsString(acq));
 			ResponseEntity<DatasetAcquisition> response = this.restTemplate.exchange(getURI(CREATE_DATASET_ACQUISITION), HttpMethod.POST, new HttpEntity<>(acq, getHeader()), DatasetAcquisition.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();

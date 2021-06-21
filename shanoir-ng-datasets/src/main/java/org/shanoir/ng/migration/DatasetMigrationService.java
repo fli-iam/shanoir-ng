@@ -87,6 +87,8 @@ public class DatasetMigrationService {
 			distantKeycloakConfigurationService.setServer(job.getShanoirUrl());
 			distantKeycloakConfigurationService.setAccessToken(job.getAccessToken());
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
+			
+			LOG.error("receiving job " + job);
 
 			this.migrateStudy(job);
 		} catch (Exception e) {
@@ -118,6 +120,8 @@ public class DatasetMigrationService {
 	}
 
 	private StudyCard moveStudyCard(StudyCard sc, MigrationJob job) throws ShanoirException {
+		LOG.error("StudyCard " + job);
+
 		sc.setId(null);
 		sc.setStudyId(job.getStudy().getId());
 		if (sc.getAcquisitionEquipmentId() != null) {
@@ -160,6 +164,7 @@ public class DatasetMigrationService {
 		exam.setDatasetAcquisitions(null);
 
 		// Move examination
+		LOG.error("Exam " + exam);
 		exam = distantShanoir.createExamination(exam);
 
 		// Migrate datasetAcquisition
@@ -232,6 +237,7 @@ public class DatasetMigrationService {
 		}
 
 		//  Migrate acquisition
+		LOG.error("Acq " + acq);
 		distantShanoir.createAcquisition(acq);
 
 		// Migrate files

@@ -58,11 +58,10 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(code = 403, message = "forbidden", response = Void.class),
         @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @PostMapping(value = "",
+    @PostMapping(value = "/datasetacquisition/new",
         produces = { "application/json" },
         consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(acquisition.getExamination().getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<DatasetAcquisition> saveNewDatasetAcquisition(
+    ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(
     		@ApiParam(value = "DatasetAcquisition to create", required=true) @RequestBody DatasetAcquisition acquisition,
     		final BindingResult result) throws RestServiceException;
 

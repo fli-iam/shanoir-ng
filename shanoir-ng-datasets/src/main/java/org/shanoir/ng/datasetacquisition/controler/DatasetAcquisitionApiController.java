@@ -222,8 +222,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
     @Override
-	public ResponseEntity<DatasetAcquisition> saveNewDatasetAcquisition(
-			@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition, final BindingResult result) throws RestServiceException {
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition, final BindingResult result) throws RestServiceException {
     	try {
 			LOG.error("Creating a new acqusition: " + objectMapper.writeValueAsString(acquisition));
 		} catch (JsonProcessingException e) {

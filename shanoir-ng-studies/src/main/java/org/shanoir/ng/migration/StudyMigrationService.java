@@ -27,6 +27,8 @@ import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StudyMigrationService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(StudyMigrationService.class);
 
 	@Autowired
 	private StudyService studyService;
@@ -69,10 +73,13 @@ public class StudyMigrationService {
 	 * @param studyId the study to migrate
 	 */
 	public synchronized void migrateStudy(Long studyId, Long userId, String username, String url) throws ShanoirException {
+		int i = 0;
+		LOG.error("Migration " + i++);
 		Long currentUserId = KeycloakUtil.getTokenUserId();
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.MIGRATE_STUDY_EVENT, ""+studyId, currentUserId, "Starting migration...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 
+		LOG.error("Migration " + i++);
 		Study study = this.studyService.findById(studyId);
 		
 		Map<Long,Long> subjectMap = new HashMap<>();
@@ -84,6 +91,7 @@ public class StudyMigrationService {
 		event.setProgress(0.01f);
 		eventService.publishEvent(event);
 
+		LOG.error("Migration " + i++);
 		// Move all concerned subjects
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			Subject subj = subjectStudy.getSubject();
@@ -96,7 +104,8 @@ public class StudyMigrationService {
 			// Keep updated a map of oldSubjectId => distantSubjectId
 			subjectMap.put(oldId, sub.getId());
 		}
-		
+
+		LOG.error("Migration " + i++);
 		event.setMessage("Migrating centers...");
 		event.setProgress(0.02f);
 		eventService.publishEvent(event);
@@ -108,7 +117,8 @@ public class StudyMigrationService {
 		event.setMessage("Migrating study...");
 		event.setProgress(0.03f);
 		eventService.publishEvent(event);
-
+		
+		LOG.error("Migration " + i++);
 		// Migrate study
 		Long oldStudyId = study.getId();
 		
@@ -126,6 +136,7 @@ public class StudyMigrationService {
 		// Reset studyExaminations
 		study.setExaminationIds(Collections.emptyList());
 		
+		LOG.error("Migration " + i++);
 		// Set StudyUser to only current user
 		List<StudyUser> suList = new ArrayList<>();
 		StudyUser su = new StudyUser();
@@ -142,6 +153,8 @@ public class StudyMigrationService {
 		suList.add(su);
 		study.setStudyUserList(suList);
 
+		LOG.error("Migration " + i++);
+
 		StudyDTO newStudy = distantShanoir.createStudy(study);
 		
 		// Add protocol/ DUA files
@@ -154,6 +167,8 @@ public class StudyMigrationService {
 			distantShanoir.addProtocoleFile(fileAsFile, newStudy.getId().toString());
 		}
 		*/
+		LOG.error("Migration " + i++);
+
 
 		// Send a message over rabbitMQ to move all other microservices
 		// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
@@ -192,6 +207,8 @@ public class StudyMigrationService {
 		// 1 Get all distant centers
 		List<IdName> distantCenters = distantShanoir.getAllCenters();
 		List<StudyCenter> toSet = new ArrayList<>();
+		LOG.error("Migration Center" + centers);
+
 
 		for (StudyCenter studyCenter : centers) {
 			boolean found = false;
@@ -236,6 +253,8 @@ public class StudyMigrationService {
 	 * @throws ShanoirException
 	 */
 	private void moveAcquisitionEquipements(List<AcquisitionEquipment> acquisitionEquipments, Long centerId) throws ShanoirException {
+		LOG.error("Migration Acq" + acquisitionEquipments);
+
 		distantEquipements = distantEquipements != null? distantEquipements : distantShanoir.getAcquisitionEquipements();
 		List<AcquisitionEquipment> toSet = new ArrayList<>();
 		for (AcquisitionEquipment equipement : acquisitionEquipments) {
@@ -274,6 +293,8 @@ public class StudyMigrationService {
 	 * @throws ShanoirException
 	 */
 	private ManufacturerModel moveManufacturerModel(ManufacturerModel manufacturerModel) throws ShanoirException {
+		LOG.error("Migration Model" + manufacturerModel);
+
 		distantModels = distantModels != null ? distantModels : distantShanoir.getModels();
 		boolean found = false;
 		for (ManufacturerModel distantModel : distantModels) {
@@ -303,6 +324,8 @@ public class StudyMigrationService {
 	 * @throws ShanoirException
 	 */
 	private Manufacturer moveManufacturer(Manufacturer manufacturer) throws ShanoirException {
+		LOG.error("Migration manuf" + manufacturer);
+
 		distantManufacturers = distantManufacturers != null ? distantManufacturers : this.distantShanoir.getManufacturers();
 		
 		boolean found = false;
