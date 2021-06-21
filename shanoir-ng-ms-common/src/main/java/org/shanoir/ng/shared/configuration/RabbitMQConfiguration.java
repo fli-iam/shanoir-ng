@@ -64,6 +64,9 @@ public class RabbitMQConfiguration {
 	/** Subject name updated => notify dataset MS to change database. */
 	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
 	
+	/** Subject name updated => notify dataset MS to change database. */
+	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
+	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 	
@@ -278,6 +281,10 @@ public class RabbitMQConfiguration {
 		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue centerNameUpdateQueue() {
+		return new Queue(CENTER_NAME_UPDATE_QUEUE, true);
+	}
 	@Bean
 	public static Queue userAdminStudyQueue() {
 		return new Queue(USER_ADMIN_STUDY_QUEUE, true);

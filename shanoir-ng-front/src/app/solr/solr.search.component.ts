@@ -79,10 +79,7 @@ export class SolrSearchComponent implements AfterViewChecked{
                 this.loadState(savedRequest);
                 this.updateSelections();
             }
-            setTimeout(() => {
-                this.loaded = true;
-
-            }, 5000)
+            this.loaded = true;
         });
 
         this.form = this.buildForm();

@@ -39,6 +39,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 	private static final String EXAMINATION_COMMENT_FACET = "examinationComment_str";
 	private static final String SUBJECT_NAME_FACET = "subjectName_str";
 	private static final String STUDY_NAME_FACET = "studyName_str";
+	private static final String CENTER_NAME_FACET = "centerName_str";
 	@Resource
 	private SolrTemplate solrTemplate;
 
@@ -96,6 +97,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 						.addFacetOnField(EXAMINATION_COMMENT_FACET)
 						.addFacetOnField(DATASET_TYPE_FACET)
 						.addFacetOnField(DATASET_NATURE_FACET)
+						.addFacetOnField(CENTER_NAME_FACET)
 						.setFacetLimit(-1));
 
 		try {
@@ -114,8 +116,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 	
 	private void addSearchInAllClause(Criteria criteria, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] fields = {"studyName", "subjectName", "datasetName", "examinationComment", "datasetType", "datasetNature"};
-			String[] searchTerms = searchStr.replace(Criteria.WILDCARD, " ").trim().split(" ");
+			String[] fields = {"studyName", "subjectName", "datasetName", "examinationComment", "datasetType", "datasetNature", "centerName"};
+			String[] specialChars = {"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
+			String escapedSearchStr = searchStr;
+			for (String specialChar : specialChars) {
+				escapedSearchStr = escapedSearchStr.replace(specialChar, '\\' + specialChar);
+			}
+			String[] searchTerms = escapedSearchStr.trim().split(" "); 
 			
 			List<String> termInAnyFieldFormattedStrList = new ArrayList<>();
 			for (String term : searchTerms) {

@@ -59,6 +59,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-criterion
                 label="Examination"
+                [currentFacetPage]="facetResultPages[4]"
+                [allFacetPage]="allFacetResultPages[4]"
+                (onChange)="updateSelections(); table.refresh()">
+        </solr-criterion>
+
+        <solr-criterion
+                label="Center"
                 [currentFacetPage]="facetResultPages[3]"
                 [allFacetPage]="allFacetResultPages[3]"
                 (onChange)="updateSelections(); table.refresh()">
@@ -66,15 +73,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-criterion
                 label="Dataset Modality Type"
-                [currentFacetPage]="facetResultPages[4]"
-                [allFacetPage]="allFacetResultPages[4]"
+                [currentFacetPage]="facetResultPages[5]"
+                [allFacetPage]="allFacetResultPages[5]"
                 (onChange)="updateSelections(); table.refresh()">
         </solr-criterion>
 
         <solr-criterion
                 label="Mr Dataset Nature"
-                [currentFacetPage]="facetResultPages[5]"
-                [allFacetPage]="allFacetResultPages[5]"
+                [currentFacetPage]="facetResultPages[6]"
+                [allFacetPage]="allFacetResultPages[6]"
                 (onChange)="updateSelections(); table.refresh()">
         </solr-criterion>
 
@@ -112,6 +119,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (selectionChange)="onSelectionChange($event)"
             [enableSettings]="true">
         </shanoir-table>
-        <div *ngId="!loaded">Loading ...</div>
+        <div *ngIf="!loaded">Loading ...</div>
     </div>
 </form>
