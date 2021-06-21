@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -221,8 +222,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
     @Override
-	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition) throws RestServiceException {
-    	DatasetAcquisition result = datasetAcquisitionService.create(acquisition);
-    	return new ResponseEntity<>(result, HttpStatus.OK);
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition, final BindingResult result) throws RestServiceException {
+    	try {
+			LOG.error("Creating a new acqusition: " + objectMapper.writeValueAsString(acquisition));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+    	validate(result);
+    	DatasetAcquisition acq = datasetAcquisitionService.create(acquisition);
+    	return new ResponseEntity<>(acq, HttpStatus.OK);
     }
 }

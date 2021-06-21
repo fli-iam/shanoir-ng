@@ -41,7 +41,6 @@ public interface DatasetAcquisitionService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
 	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
-	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#entity.getExamination().getStudyId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#entity, 'CAN_ADMINISTRATE')")
