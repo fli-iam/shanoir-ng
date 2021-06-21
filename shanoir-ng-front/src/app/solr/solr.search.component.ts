@@ -165,7 +165,7 @@ export class SolrSearchComponent{
     }
 
     onDateChange(date: Date | 'invalid') {
-        if (date && date != 'invalid') {
+        if (date !== undefined && (date === null || date != 'invalid')) {
             this.updateSelections();
             this.table.refresh();
         }
