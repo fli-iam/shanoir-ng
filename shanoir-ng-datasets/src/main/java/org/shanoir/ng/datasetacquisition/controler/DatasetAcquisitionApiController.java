@@ -221,7 +221,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
     @Override
-	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true)  @Valid @RequestBody DatasetAcquisition acquisition) throws RestServiceException {
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition) throws RestServiceException {
     	DatasetAcquisition result = datasetAcquisitionService.create(acquisition);
     	return new ResponseEntity<>(result, HttpStatus.OK);
     }
