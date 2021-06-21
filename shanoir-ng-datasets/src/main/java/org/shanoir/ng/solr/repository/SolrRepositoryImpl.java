@@ -103,7 +103,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 			return (SolrResultPage<ShanoirSolrDocument>) result;
 		} catch (UncategorizedSolrException e) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
-			throw new RestServiceException(error);
+			throw new RestServiceException(e, error);
 		}
 	}
 	
