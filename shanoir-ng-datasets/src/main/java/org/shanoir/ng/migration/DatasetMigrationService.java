@@ -186,6 +186,7 @@ public class DatasetMigrationService {
 		}
 		Examination examDto = new Examination();
 		examDto.setId(examId);
+		examDto.setStudyId(job.getStudy().getId());
 		acq.setExamination(examDto);
 		if (acq.getStudyCard() != null) {
 			StudyCard scDto = new StudyCard();

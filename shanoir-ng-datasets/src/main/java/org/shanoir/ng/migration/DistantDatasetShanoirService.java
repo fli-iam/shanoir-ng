@@ -46,7 +46,7 @@ public class DistantDatasetShanoirService {
 
 	private static final String CREATE_STUDY_CARD = "/shanoir-ng/datasets/studycards/";
 	
-	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisitions/";
+	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/";
 
 	private static final String ADD_FILE = "/shanoir-ng/datasets/datasets/";
 
