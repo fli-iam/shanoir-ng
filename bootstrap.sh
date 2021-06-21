@@ -5,7 +5,7 @@ print_help()
 	cat <<EOF
 Build and deploy Shanoir NG
 usage:
-	$0 --clean|--force|--no-deploy [--no-build] [-h|--help]
+	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [-h|--help]
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
@@ -13,13 +13,14 @@ docker-compose.yml (note: as a safety precaution, the command will fail if
 '--clean' or '--force' option is not used).
 
 Options:
--h|--help	print this help
---no-build	skip the build stage
+--clean		perform a clean deployment (will run 'docker-compose down -v' to destroy all existing volumes)
+--force		force deploying over the existing volumes (might be a little faster, use it in dev only)
 --no-deploy	skip the deployment stage
---clean		perform a clean deployment (will run 'docker-compose down -v'
-		to destroy all existing volumes)
---force		force deploying over the existing volumes (might be a little
-		faster, use it in dev only)
+
+--no-build	skip the build stage
+--no-keycloak do not run Keycloak (used if Keycloak is external)
+-h|--help	print this help
+
 EOF
 	exit 0
 }
@@ -58,6 +59,7 @@ set -e
 
 build=1
 deploy=1
+keycloak=1
 clean=
 force=
 while [ $# -ne 0 ] ; do
@@ -66,6 +68,7 @@ while [ $# -ne 0 ] ; do
 		--clean)	clean=1		;;
 		--force)	force=1		;;
 		--no-build)	build=		;;
+		--no-keycloak)	keycloak=		;;
 		--no-deploy)	deploy=		;;
 		*)		die "unknown option '$1'"
 	esac
@@ -80,7 +83,6 @@ if [ -n "$build" ] ; then
 	#
 	# Build stage
 	#
-
 	step "build shanoir"
 
 	# 1. build a docker image with the java toolchain
@@ -125,21 +127,26 @@ if [ -n "$deploy" ] ; then
 	# Deploy stage
 	#
 
-	# 1. databases
-	step "init: database keycloak-database"
-	docker-compose up -d database keycloak-database
-	wait_tcp_ready database          3306
-	wait_tcp_ready keycloak-database 3306
+	# 1. database
+	step "init: database"
+	docker-compose up -d database
+	wait_tcp_ready database 3306
 
-	# 2. keycloak
-	step "init: keycloak"
-	docker-compose run --rm -e SHANOIR_MIGRATION=init keycloak
+	# 2. keycloak-database + keycloak
+	if [ -n "$keycloak" ] ; then
+		step "init: keycloak-database"
+		docker-compose up -d keycloak-database
+		wait_tcp_ready keycloak-database 3306
+		
+		step "init: keycloak"
+		docker-compose run --rm -e SHANOIR_MIGRATION=init keycloak
 
-	step "start: keycloak"
-	docker-compose up -d keycloak
-	utils/oneshot	'\| *JBoss Bootstrap Environment'				\
-			' INFO  \[org.jboss.as\] .* Keycloak .* started in [0-9]*ms'	\
-			-- docker-compose logs --no-color --follow keycloak >/dev/null
+		step "start: keycloak"
+		docker-compose up -d keycloak
+		utils/oneshot	'\| *JBoss Bootstrap Environment'				\
+				' INFO  \[org.jboss.as\] .* Keycloak .* started in [0-9]*ms'	\
+				-- docker-compose logs --no-color --follow keycloak >/dev/null
+	fi
 
 	# 3. infrastructure services
 	step "start: infrastructure services"
@@ -163,4 +170,3 @@ if [ -n "$deploy" ] ; then
 	step "start: nginx"
 	docker-compose up -d nginx
 fi
-
