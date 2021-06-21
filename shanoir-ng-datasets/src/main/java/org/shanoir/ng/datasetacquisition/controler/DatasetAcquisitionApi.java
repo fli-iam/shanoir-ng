@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -63,6 +64,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" })
     ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(
     		@ApiParam(value = "DatasetAcquisition to create", required=true) @RequestBody DatasetAcquisition acquisition,
+    		@ApiParam(value = "Datasets to add to acquisition", required=true) @RequestBody List<Dataset> datasets,
     		final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })

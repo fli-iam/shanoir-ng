@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
@@ -65,22 +66,22 @@ import io.swagger.annotations.ApiParam;
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
-	
+
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
 	private ImporterService importerService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
-	
+
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
+
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
@@ -119,7 +120,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			importerService.cleanTempFiles(importJob.getWorkFolder());
 		}
 	}
-	
+
 	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
 		long startTime = System.currentTimeMillis();
 		importerService.createAllDatasetAcquisition(importJob, userId);
@@ -127,11 +128,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		long duration = endTime - startTime;
 		LOG.info("Creation of dataset acquisition required " + duration + " millis.");
 	}
-	
+
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
-		
+
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
 		if (daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -143,7 +144,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
-		
+
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
 
@@ -159,16 +160,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
-			throws RestServiceException {
+					throws RestServiceException {
 
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -177,7 +178,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
-		
+
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -193,8 +194,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
 	}
-	
-	
+
+
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
@@ -206,13 +207,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
@@ -221,15 +222,18 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 	}
 
-    @Override
-	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition, final BindingResult result) throws RestServiceException {
-    	try {
+	@Override
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(
+			@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition,
+			@ApiParam(value = "Datasets to add to acquisition", required=true) @RequestBody List<Dataset> datasets,
+			final BindingResult result) throws RestServiceException {
+		try {
 			LOG.error("Creating a new acqusition: " + objectMapper.writeValueAsString(acquisition));
+			validate(result);
+			DatasetAcquisition acq = datasetAcquisitionService.create(acquisition);
+			return new ResponseEntity<>(acq, HttpStatus.OK);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-    	validate(result);
-    	DatasetAcquisition acq = datasetAcquisitionService.create(acquisition);
-    	return new ResponseEntity<>(acq, HttpStatus.OK);
-    }
+	}
 }
