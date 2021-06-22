@@ -742,7 +742,6 @@ public class DatasetApiController implements DatasetApi {
 					dsFile = dsFileIt;
 					// Move the file to the adapted path
 					if (dsFile.isPacs()) {
-						
 						// MOVE TO PACS
 					} else {
 						// MOVE on disc
@@ -760,6 +759,12 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Dataset> createNewDatasets(
     		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
     		final BindingResult result) throws RestServiceException {
+    	for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+    		expression.setDataset(dataset);
+    		for (DatasetFile file : expression.getDatasetFiles()) {
+    			file.setDatasetExpression(expression);
+    		}
+    	}
     	Dataset created = datasetService.create(dataset);
     	return new ResponseEntity<>(created, HttpStatus.OK);
     }
