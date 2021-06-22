@@ -67,7 +67,7 @@ public interface DatasetApi {
         @ApiResponse(code = 403, message = "forbidden", response = Void.class),
         @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @PostMapping(value = "",
+    @PostMapping(value = "new",
         produces = { "application/json" },
         consumes = { "application/json" })
     ResponseEntity<Dataset> createNewDatasets(
