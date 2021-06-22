@@ -59,6 +59,20 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "dataset")
 @RequestMapping("/datasets")
 public interface DatasetApi {
+	
+	@ApiOperation(value = "", notes = "Creates new dataset", response = Void.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "created Datasets", response = Void.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+        @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @PostMapping(value = "",
+        produces = { "application/json" },
+        consumes = { "application/json" })
+    ResponseEntity<Dataset> createNewDatasets(
+    		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
+    		final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Add a new datasetFile on a dataset", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset deleted", response = Void.class),
