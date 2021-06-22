@@ -759,6 +759,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Dataset> createNewDatasets(
     		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
     		final BindingResult result) throws RestServiceException {
+    	// Principally used by migration API
     	for (DatasetExpression expression : dataset.getDatasetExpressions()) {
     		expression.setDataset(dataset);
     		for (DatasetFile file : expression.getDatasetFiles()) {
@@ -766,6 +767,13 @@ public class DatasetApiController implements DatasetApi {
     		}
     	}
     	Dataset created = datasetService.create(dataset);
+    	
+    	for (DatasetExpression expression : created.getDatasetExpressions()) {
+    		expression.setDataset(null);
+    		for (DatasetFile file : expression.getDatasetFiles()) {
+    			file.setDatasetExpression(null);
+    		}
+    	}
     	return new ResponseEntity<>(created, HttpStatus.OK);
     }
 }
