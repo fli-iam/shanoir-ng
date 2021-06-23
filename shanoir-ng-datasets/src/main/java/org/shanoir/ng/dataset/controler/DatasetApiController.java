@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -74,6 +75,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.service.CStoreDicomService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,6 +157,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	ShanoirEventService eventService;
 	
+	@Autowired
+	CStoreDicomService dicomService;
+
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
 
@@ -237,10 +242,10 @@ public class DatasetApiController implements DatasetApi {
 		}
 		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
-		
+
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
@@ -249,7 +254,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		
+
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -326,17 +331,17 @@ public class DatasetApiController implements DatasetApi {
 		zipFile.createNewFile();
 
 		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
-		
+
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
 
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.IN_PROGRESS);
 		eventService.publishEvent(event);
-		
+
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
-		    response.setContentLengthLong(zipFile.length());
+			response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -358,12 +363,12 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
-		
+
 		if (datasetIds.size() > DATASET_LIMIT) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
-		
+
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
@@ -398,7 +403,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		File userDir = getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));
-		
+
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
@@ -463,16 +468,16 @@ public class DatasetApiController implements DatasetApi {
 		eventService.publishEvent(event);
 
 		try (InputStream is = new FileInputStream(zipFile);) {
-		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
-		    response.setContentType(contentType);
-		    response.setContentLengthLong(zipFile.length());
-		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-		    response.flushBuffer();
-		    event.setStatus(ShanoirEvent.SUCCESS);
-		    eventService.publishEvent(event);
+			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setContentType(contentType);
+			response.setContentLengthLong(zipFile.length());
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
 		} finally {
-		    FileUtils.deleteQuietly(tmpFile);
-		    FileUtils.deleteQuietly(zipFile);
+			FileUtils.deleteQuietly(tmpFile);
+			FileUtils.deleteQuietly(zipFile);
 		}
 	}
 
@@ -492,7 +497,7 @@ public class DatasetApiController implements DatasetApi {
 
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 			StringBuilder name = new StringBuilder("");
-			
+
 			name.append(subjectName).append("_")
 			.append(dataset.getUpdatedMetadata().getComment()).append("_")
 			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
@@ -541,11 +546,11 @@ public class DatasetApiController implements DatasetApi {
 		Path p = Paths.get(zipFilePath);
 		// 1. Create an outputstream (zip) on the destination
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-			
+
 			// 2. "Walk" => iterate over the source file
 			Path pp = Paths.get(sourceDirPath);
 			try(Stream<Path> walker = Files.walk(pp)) {
-				
+
 				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
 				walker.filter(path -> !path.toFile().isDirectory())
 				.forEach(path -> {
@@ -562,7 +567,7 @@ public class DatasetApiController implements DatasetApi {
 			zos.finish();
 		}
 	}
-	
+
 	/**
 	 * Zip a single file
 	 * 
@@ -571,23 +576,23 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws IOException
 	 */
 	private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-		
+
 		byte[] buffer = new byte[1024];
-		
+
 
 		try (	FileOutputStream fos = new FileOutputStream(zipFile);
 				ZipOutputStream zos = new ZipOutputStream(fos);
 				FileInputStream fis = new FileInputStream(sourceFile);
 				) {
-				// begin writing a new ZIP entry, positions the stream to the start of the entry data
-				zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-					
-				int length;
+			// begin writing a new ZIP entry, positions the stream to the start of the entry data
+			zos.putNextEntry(new ZipEntry(sourceFile.getName()));
 
-				while ((length = fis.read(buffer)) > 0) {
-					zos.write(buffer, 0, length);
-				}
-				zos.closeEntry();
+			int length;
+
+			while ((length = fis.read(buffer)) > 0) {
+				zos.write(buffer, 0, length);
+			}
+			zos.closeEntry();
 		}
 	}
 
@@ -645,38 +650,38 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(error);
 		}
 	}
-	
+
 	/**
 	 * This enum is for coordinates system and associated units
 	 */
 	public enum CoordinatesSystem {
-	    ACPC("mm"),
-	    ALLEN("mm"),
-	    ANALYZE("mm"),
-	    BTI_4D("m"),
-	    CTF_MRI("mm"),
-	    CTF_GRADIOMETER("cm"),
-	    CAPTRAK("mm"),
-	    CHIETI("mm"),
-	    DICOM("mm"),
-	    FREESURFER("mm"),
-	    MNI("mm"),
-	    NIFTI("mm"),
-	    NEUROMAG_ELEKTA("m"),
-	    PAXINOS_FRANKLIN("mm"),
-	    TALAIRACH_TOURNOUX("mm"),
-	    YOKOGAWA("n/a");
-	    
-	    private String unit;
-	    
-	    CoordinatesSystem(final String pUnit) {
-	    	this.unit = pUnit;
-	    }
-	    public String getUnit() {
-	    	return unit;
-	    }
+		ACPC("mm"),
+		ALLEN("mm"),
+		ANALYZE("mm"),
+		BTI_4D("m"),
+		CTF_MRI("mm"),
+		CTF_GRADIOMETER("cm"),
+		CAPTRAK("mm"),
+		CHIETI("mm"),
+		DICOM("mm"),
+		FREESURFER("mm"),
+		MNI("mm"),
+		NIFTI("mm"),
+		NEUROMAG_ELEKTA("m"),
+		PAXINOS_FRANKLIN("mm"),
+		TALAIRACH_TOURNOUX("mm"),
+		YOKOGAWA("n/a");
+
+		private String unit;
+
+		CoordinatesSystem(final String pUnit) {
+			this.unit = pUnit;
+		}
+		public String getUnit() {
+			return unit;
+		}
 	}
-	
+
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadStatistics(
 			@ApiParam(value = "Study name including regular expression", required=false) @Valid
@@ -687,7 +692,7 @@ public class DatasetApiController implements DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@ApiParam(value = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
-	) throws RestServiceException, IOException {
+			) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = getUserImportDir(tmpDir);
 		File statisticsFile = recreateFile(userDir + File.separator + "shanoirExportStatistics.txt");
@@ -705,7 +710,7 @@ public class DatasetApiController implements DatasetApi {
 				bw.write(String.join("\t", strings));
 				bw.newLine();
 			}
-			
+
 		} catch (javax.persistence.NoResultException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No result found.", e));
 		} catch (Exception e) {
@@ -732,48 +737,58 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
 			@ApiParam(value = "Linked file", required = true) MultipartFile multipartFile)
-			throws RestServiceException {
+					throws RestServiceException {
 		// Load dataset file
-		Dataset dataset = datasetService.findById(datasetId);
-		DatasetFile dsFile = null;
-		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-			for (DatasetFile dsFileIt : expression.getDatasetFiles()) {
-				if (dsFileIt.getId().equals(datasetFileId)) {
-					dsFile = dsFileIt;
-					// Move the file to the adapted path
-					if (dsFile.isPacs()) {
-						// MOVE TO PACS
-					} else {
-						// MOVE on disc
-						// Files.copy(multipartFile.get, target, options)
+		try {
+			LOG.error("Receiving dataset file" + multipartFile + " " + datasetFileId);
+			Dataset dataset = datasetService.findById(datasetId);
+			DatasetFile dsFile = null;
+			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+				for (DatasetFile dsFileIt : expression.getDatasetFiles()) {
+					if (dsFileIt.getId().equals(datasetFileId)) {
+						dsFile = dsFileIt;
+						// Move the file to the adapted path
+						if (dsFile.isPacs()) {
+							// Move to PACS
+							File destination = new File("/tmp/migration/" + LocalDateTime.now() + multipartFile.getName());
+							destination.getParentFile().mkdirs();
+							Files.copy(multipartFile.getInputStream(), destination.toPath());
+							dicomService.sendDicomFilesToPacs(destination);
+						} else {
+							// MOVE nifti (and others) on disc
+							File destination = new File(dsFile.getPath());
+							destination.getParentFile().mkdirs();
+							Files.copy(multipartFile.getInputStream(), destination.toPath());
+						}
+						break;
 					}
-					// reference file from dataset
-					break;
 				}
 			}
+		} catch (Exception e) {
+			LOG.error("Error while importing dataset file: ", e);
 		}
 		return null;
 	}
 
-    @Override
+	@Override
 	public ResponseEntity<Dataset> createNewDatasets(
-    		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
-    		final BindingResult result) throws RestServiceException {
-    	// Principally used by migration API
-    	for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-    		expression.setDataset(dataset);
-    		for (DatasetFile file : expression.getDatasetFiles()) {
-    			file.setDatasetExpression(expression);
-    		}
-    	}
-    	Dataset created = datasetService.create(dataset);
-    	
-    	for (DatasetExpression expression : created.getDatasetExpressions()) {
-    		expression.setDataset(null);
-    		for (DatasetFile file : expression.getDatasetFiles()) {
-    			file.setDatasetExpression(null);
-    		}
-    	}
-    	return new ResponseEntity<>(created, HttpStatus.OK);
-    }
+			@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
+			final BindingResult result) throws RestServiceException {
+		// Principally used by migration API
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			expression.setDataset(dataset);
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				file.setDatasetExpression(expression);
+			}
+		}
+		Dataset created = datasetService.create(dataset);
+
+		for (DatasetExpression expression : created.getDatasetExpressions()) {
+			expression.setDataset(null);
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				file.setDatasetExpression(null);
+			}
+		}
+		return new ResponseEntity<>(created, HttpStatus.OK);
+	}
 }
