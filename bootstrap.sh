@@ -5,7 +5,7 @@ print_help()
 	cat <<EOF
 Build and deploy Shanoir NG
 usage:
-	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [-h|--help]
+	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [-h|--help]
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
@@ -60,6 +60,7 @@ set -e
 build=1
 deploy=1
 keycloak=1
+dcm4chee=1
 clean=
 force=
 while [ $# -ne 0 ] ; do
@@ -69,6 +70,7 @@ while [ $# -ne 0 ] ; do
 		--force)	force=1		;;
 		--no-build)	build=		;;
 		--no-keycloak)	keycloak=		;;
+		--no-dcm4chee)	dcm4chee=		;;
 		--no-deploy)	deploy=		;;
 		*)		die "unknown option '$1'"
 	esac
@@ -148,15 +150,25 @@ if [ -n "$deploy" ] ; then
 				-- docker-compose logs --no-color --follow keycloak >/dev/null
 	fi
 
-	# 3. infrastructure services
+	# 3. infrastructure services: dcm4chee
+	if [ -n "$dcm4chee" ] ; then
+		step "start: infrastructure services: dcm4chee"
+		for infra_ms_dcm4chee in ldap dcm4chee-database dcm4chee-arc
+		do
+			step "start: $infra_ms_dcm4chee infrastructure microservices dcm4chee"
+			docker-compose up -d "$infra_ms_dcm4chee"
+		done
+	fi
+	
+	# 4. infrastructure services
 	step "start: infrastructure services"
-	for infra_ms in rabbitmq ldap dcm4chee-database dcm4chee-arc preclinical-bruker2dicom solr
+	for infra_ms in rabbitmq preclinical-bruker2dicom solr
 	do
 		step "start: $infra_ms infrastructure microservice"
 		docker-compose up -d "$infra_ms"
 	done
 	
-	# 4. Shanoir-NG microservices
+	# 5. Shanoir-NG microservices
 	step "start: sh-ng microservices"
 	for ms in users studies datasets import preclinical 
 	do
@@ -166,7 +178,7 @@ if [ -n "$deploy" ] ; then
 		docker-compose up -d "$ms"
 	done
 
-	# 5. nginx
+	# 6. nginx
 	step "start: nginx"
 	docker-compose up -d nginx
 fi
