@@ -752,14 +752,14 @@ public class DatasetApiController implements DatasetApi {
 						if (dsFile.isPacs()) {
 							// Move to PACS
 							File destination = new File("/tmp/migration" + LocalDateTime.now() + File.separator + multipartFile.getName());
-							destination.mkdirs();
+							destination.getParentFile().mkdirs();
 							Files.copy(multipartFile.getInputStream(), destination.toPath());
-							dicomService.sendDicomFilesToPacs(destination);
-							FileUtils.deleteQuietly(destination);
+							dicomService.sendDicomFilesToPacs(destination.getParentFile());
+							FileUtils.deleteQuietly(destination.getParentFile());
 						} else {
 							// MOVE nifti (and others) on disc
 							File destination = new File(dsFile.getPath());
-							destination.mkdirs();
+							destination.getParentFile().mkdirs();
 							Files.copy(multipartFile.getInputStream(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 						}
 						break;
@@ -768,8 +768,9 @@ public class DatasetApiController implements DatasetApi {
 			}
 		} catch (Exception e) {
 			LOG.error("Error while importing dataset file: ", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return null;
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
