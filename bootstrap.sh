@@ -19,6 +19,7 @@ Options:
 
 --no-build	skip the build stage
 --no-keycloak do not run Keycloak (used if Keycloak is external)
+--no-dcm4chee do not run dcm4chee (used if dcm4chee is external)
 -h|--help	print this help
 
 EOF
