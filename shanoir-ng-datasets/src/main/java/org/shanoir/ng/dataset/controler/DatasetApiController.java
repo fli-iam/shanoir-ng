@@ -771,7 +771,7 @@ public class DatasetApiController implements DatasetApi {
 							FileUtils.deleteQuietly(destination.getParentFile());
 						} else {
 							// MOVE nifti (and others) on disc
-							File destination = new File(dsFile.getPath());
+							File destination = new File(dsFile.getPath().replace("file://", ""));
 							destination.getParentFile().mkdirs();
 							multipartFile.transferTo(destination);
 						}
