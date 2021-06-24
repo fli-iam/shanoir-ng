@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.Api;
@@ -80,12 +81,14 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/{datasetId}/{datasetFileId}", produces = { "application/json" })
+	@PostMapping(value = "/{datasetId}/{datasetFileId}",
+	        produces = { "application/json" },
+	        consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Dataset> addDatasetFile (
 			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "Linked file", required = true) MultipartFile multipartFile)
+			@ApiParam(value = "Linked file", required = true) @RequestPart("file") MultipartFile multipartFile)
 			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Deletes a dataset", response = Void.class, tags = {})

@@ -93,6 +93,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
@@ -736,7 +737,7 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Dataset> addDatasetFile (
 			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "Linked file", required = true) MultipartFile multipartFile)
+			@ApiParam(value = "Linked file", required = true) @RequestPart("file") MultipartFile multipartFile)
 					throws RestServiceException {
 		// Load dataset file
 		try {
