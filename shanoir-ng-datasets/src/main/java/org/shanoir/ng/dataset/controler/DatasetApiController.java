@@ -753,14 +753,14 @@ public class DatasetApiController implements DatasetApi {
 							// Move to PACS
 							File destination = new File("/tmp/migration" + LocalDateTime.now() + File.separator + multipartFile.getName());
 							destination.getParentFile().mkdirs();
-							Files.copy(multipartFile.getInputStream(), destination.toPath());
+							multipartFile.transferTo(destination);
 							dicomService.sendDicomFilesToPacs(destination.getParentFile());
 							FileUtils.deleteQuietly(destination.getParentFile());
 						} else {
 							// MOVE nifti (and others) on disc
 							File destination = new File(dsFile.getPath());
 							destination.getParentFile().mkdirs();
-							Files.copy(multipartFile.getInputStream(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							multipartFile.transferTo(destination);
 						}
 						break;
 					}
