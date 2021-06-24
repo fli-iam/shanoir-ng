@@ -75,7 +75,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.CStoreDicomService;
+import org.shanoir.ng.shared.service.StowRsDicomService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +159,7 @@ public class DatasetApiController implements DatasetApi {
 	ShanoirEventService eventService;
 	
 	@Autowired
-	CStoreDicomService dicomService;
+	StowRsDicomService dicomService;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
