@@ -37,22 +37,22 @@ export class SolrRequest {
     datasetEndDate: Date;
     datasetType: string[];
     datasetNature: string[];
+    searchText: string;
+    expertMode: boolean;
 }
 
 export class FacetField {
-    field: string;
-    key: string;
+    field: { name: string };
+    key: { name: string };
     value: string;
     valueCount: number;
     checked: boolean;
-
-    constructor (facetField: FacetField) {
-        this.field = facetField.field;
-        this.value = facetField.value;
-        this.valueCount = facetField.valueCount;
-    }
+    hidden: boolean;
 }
 
 export class FacetResultPage extends Page<FacetField>{}
 
-export class SolrResultPage extends Page<SolrDocument>{}
+export class SolrResultPage extends Page<SolrDocument>{
+
+    facetResultPages: FacetResultPage[];
+}

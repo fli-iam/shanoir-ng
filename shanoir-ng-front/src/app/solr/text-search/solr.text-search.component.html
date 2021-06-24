@@ -1,0 +1,38 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="input-frame">
+    <input type="text" placeholder="search in Shanoir ..." [(ngModel)]="searchText" (change)="onChangeSearch()" (keyup)="onType.emit()" [class.error]="syntaxError" [class.expert]="expertMode"/>
+    <span class="left-icon clickable clear" (click)="clear(); this.onChangeSearch();"><i class="fas fa-times"></i>clear</span>
+</div>
+<div class="syntax-error" *ngIf="syntaxError">syntax error</div>
+<div class="expert-mode">
+    <div>
+        <toggle-switch [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()" mode="on-off"></toggle-switch>
+        <span [class.enabled]="expertMode" class="right-icon">
+            Expert mode
+            <span class="info right-icon clickable" (click)="showInfo = !showInfo">( info<i *ngIf="!showInfo" class="fas fa-caret-down"></i><i *ngIf="showInfo" class="fas fa-caret-up"></i> )</span>
+        </span>
+    </div>
+    <div class="info-txt" *ngIf="showInfo" @slideDown>
+        <b>Query syntax example : </b> 
+        <code>(subjectName:(CT* OR demo*) AND studyName:etude test) OR datasetName:*flair*</code>
+        <br/><span class="italic">(all datasets that are in the study "etude test" with subject name that either starts with "CT" or starts with "demo". In addition any dataset that name contains "flair".)</span>
+        <p>Case is insentitive for values.</p>
+        <p>The present field names are : 
+            <code>datasetName, subjectName, datasetName, datasetStartDate, datasetEndDate, examinationComment, datasetType, datasetNature</code>
+        </p>
+        <p>For further information, see the <a href="https://solr.apache.org/guide/6_6/the-standard-query-parser.html" target="_blank">Solr official documentation</a>.</p>
+    </div>
+</div>
