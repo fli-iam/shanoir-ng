@@ -75,11 +75,12 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.StowRsDicomService;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -159,7 +160,15 @@ public class DatasetApiController implements DatasetApi {
 	ShanoirEventService eventService;
 	
 	@Autowired
-	StowRsDicomService dicomService;
+	@Qualifier("stowrs")
+	DicomServiceApi stowRsService;
+
+	@Autowired
+	@Qualifier("cstore")
+	DicomServiceApi cStoreService;
+
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
@@ -754,7 +763,11 @@ public class DatasetApiController implements DatasetApi {
 							File destination = new File("/tmp/migration" + LocalDateTime.now() + File.separator + multipartFile.getName());
 							destination.getParentFile().mkdirs();
 							multipartFile.transferTo(destination);
-							dicomService.sendDicomFilesToPacs(destination.getParentFile());
+							if (dicomWeb) {
+								stowRsService.sendDicomFilesToPacs(destination.getParentFile());
+							} else {
+								cStoreService.sendDicomFilesToPacs(destination.getParentFile());
+							}
 							FileUtils.deleteQuietly(destination.getParentFile());
 						} else {
 							// MOVE nifti (and others) on disc
