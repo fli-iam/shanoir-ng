@@ -81,14 +81,15 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/{datasetId}/{datasetFileId}",
+	@PostMapping(value = "/{datasetId}/{datasetFileId}/{isPacs}",
 	        produces = { "application/json" },
 	        consumes = { "multipart/form-data" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Dataset> addDatasetFile (
 			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "Linked file", required = true) @RequestPart("file") MultipartFile multipartFile)
+			@ApiParam(value = "Is PACS", required = true)  @PathVariable("isPacs") boolean isPacs,
+			@ApiParam(value = "Linked files", required = true) @RequestPart("files") MultipartFile[] multipartFiles)
 			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Deletes a dataset", response = Void.class, tags = {})
