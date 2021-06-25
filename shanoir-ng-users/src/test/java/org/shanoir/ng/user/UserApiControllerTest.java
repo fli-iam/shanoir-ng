@@ -64,7 +64,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {UserApiController.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class})
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class UserApiControllerTest {
 
 	private static final String REQUEST_PATH = "/users";
