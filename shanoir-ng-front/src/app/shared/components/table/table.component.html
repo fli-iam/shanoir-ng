@@ -23,12 +23,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
     <!-- User defined buttons -->
     <span *ngFor="let command of customActionDefs" class="command-block">
-        <button type="button" *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active" [disabled]="command.disabledIfNoSelected ? selection.size == 0 : false">
+        <button type="button" *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams() : null" routerLinkActive="active" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>
         </button>
-        <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="command.disabledIfNoSelected ? selection.size == 0 : false">
+        <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
             <img *ngIf="command.img" src="{{command.img}}" />
             <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
             <span>{{command.title}}</span>

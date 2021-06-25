@@ -11,20 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { DatePipe } from '@angular/common';
+import { Component, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { Component, ViewChild } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
-import { BreadcrumbsService } from "../breadcrumbs/breadcrumbs.service";
-import { DatasetService } from "../datasets/shared/dataset.service";
-import { slideDown } from "../shared/animations/animations";
-import { Pageable } from "../shared/components/table/pageable.model";
-import { TableComponent } from "../shared/components/table/table.component";
-import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from "./solr.document.model";
-import { SolrService } from "./solr.service";
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
+import { DatasetService } from '../datasets/shared/dataset.service';
+import { slideDown } from '../shared/animations/animations';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { DatePipe } from "@angular/common";
+import { Page, Pageable } from '../shared/components/table/pageable.model';
+import { TableComponent } from '../shared/components/table/table.component';
+import { DatepickerComponent } from '../shared/date-picker/date-picker.component';
+import { FacetField, FacetResultPage, SolrRequest, SolrResultPage } from './solr.document.model';
+import { SolrService } from './solr.service';
+
 
 @Component({
     selector: 'solr-search',
@@ -43,16 +44,20 @@ export class SolrSearchComponent{
     expertMode: boolean = false;
     selections: SelectionBlock[] = [];
     columnDefs: any[];
+    selectionColumnDefs: any[];
     customActionDefs: any[];
+    selectionCustomActionDefs: any[];
     form: FormGroup;
     @ViewChild('table', { static: false }) table: TableComponent;
+    @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     hasDownloadRight: boolean = true;
-    selectedDatasetIds: number[];
+    selectedDatasetIds: Set<number> = new Set();
     allFacetResultPages: FacetResultPage[] = [];
     clearTextSearch: () => void = () => {};
     syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
-    datasetEndDate: Date | 'invalid'; 
+    datasetEndDate: Date | 'invalid';
+    tab: 'results' | 'selected' = 'results';
 
     private requestKeys: string[] = [
         'studyName',
@@ -66,14 +71,16 @@ export class SolrSearchComponent{
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService) {
-        
+
         this.getFacets();
 
         this.form = this.buildForm();
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
         this.columnDefs = this.getColumnDefs();
+        this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
+        this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
 
         let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
@@ -164,10 +171,30 @@ export class SolrSearchComponent{
         })
     }
 
+    refreshTable() {
+        if (this.tab != 'results') {
+            this.openResultTab();
+            this.table.refresh();
+        } else {
+            this.table.refresh();
+        }
+    }
+
+    openResultTab() {
+        this.tab = 'results';
+    }
+
+    openSelectionTab() {
+        if (this.tab != 'selected' && this.selectedDatasetIds?.size > 0) {
+            this.tab = 'selected';
+            this.selectionTable.refresh();
+        }
+    }
+
     onDateChange(date: Date | 'invalid') {
         if (date !== undefined && (date === null || date != 'invalid')) {
             this.updateSelections();
-            this.table.refresh();
+            this.refreshTable();
         }
     }
 
@@ -229,24 +256,53 @@ export class SolrSearchComponent{
         return columnDefs;
     }
 
+    getSelectionColumnDefs() {
+        let columnDefs: any[] = this.getColumnDefs();
+        columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-trash", action: item => {
+            this.selectedDatasetIds.delete(item.id);
+            this.selectionTable.refresh();
+        }}) 
+        return columnDefs;
+    }
+
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         if (this.hasDownloadRight) {
             customActionDefs.push(
                 {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-                {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true}
+                {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+                {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true}
+            );
+        }
+        return customActionDefs;
+    }
+
+    getSelectionCustomActionsDefs(): any[] {
+        let customActionDefs:any = [];
+        if (this.hasDownloadRight) {
+            customActionDefs.push(
+                {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
+                {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+                {title: "Clear selection", awesome: "fa-snowplow", action: () => {
+                    this.selectedDatasetIds = new Set();
+                    this.table.clearSelection();
+                    this.selectionTable.refresh();
+                }, disabledIfNoResult: true}
             );
         }
         return customActionDefs;
     }
 
     massiveDownload(type: string) {
-        this.datasetService.downloadDatasets(this.selectedDatasetIds, type, this.progressBar);
+        if (this.selectedDatasetIds) {
+            this.datasetService.downloadDatasets([...this.selectedDatasetIds], type, this.progressBar);
+        }
     }
 
-    onSelectionChange (selection) {
-        this.selectedDatasetIds = [];
-        selection.forEach(sel => this.selectedDatasetIds.push(sel.datasetId));
+    onSelectionChange (selection: any) {
+        setTimeout(() => {
+            this.selectedDatasetIds = selection;
+        });
     }
 
     onRowClick(solrRequest: any) {
@@ -256,7 +312,7 @@ export class SolrSearchComponent{
     onSearchTextChange(search: {searchTxt: string, expertMode: boolean}) {
         this.keyword = search.searchTxt;
         this.expertMode = search.expertMode;
-        this.table.refresh();
+        this.refreshTable();
     }
 
     getFacets(): Promise<SolrResultPage> {
@@ -267,6 +323,10 @@ export class SolrSearchComponent{
             }
             return solrResultPage;
         });
+    }
+
+    getSelectedPage(pageable: Pageable): Promise<Page<any>> {
+        return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
     }
 
     registerTextResetCallback(resetTextCallback: () => void) {

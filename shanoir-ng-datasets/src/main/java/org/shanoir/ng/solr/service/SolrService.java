@@ -19,9 +19,12 @@
  */
 package org.shanoir.ng.solr.service;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,5 +47,7 @@ public interface SolrService {
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
 
 	void indexDataset(Long datasetId);
+
+	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
 
 }

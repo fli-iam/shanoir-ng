@@ -12,12 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Order, Pageable, Sort } from '../shared/components/table/pageable.model';
+import { Order, Page, Pageable, Sort } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
-import { SolrRequest, SolrResultPage } from './solr.document.model';
+import { SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 
 
 @Injectable()
@@ -49,6 +49,16 @@ export class SolrService {
         let pageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
             .toPromise();
+    }
+
+    public getByDatasetIds(datasetIds: number[], pageable: Pageable): Promise<Page<SolrDocument>> {
+        return this.http.post<Page<SolrDocument>>(AppUtils.BACKEND_API_SOLR_URL + '/byIds', 
+                JSON.stringify(datasetIds), 
+                { 'params': pageable.toParams() })    
+            .toPromise().then(page => {
+                if (page) page.content.forEach(solrDoc => solrDoc.id = solrDoc.datasetId);
+                return page;
+            });
     }
 
 }

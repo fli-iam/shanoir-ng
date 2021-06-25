@@ -3,7 +3,7 @@
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
 caption { overflow: hidden; }
-th { width: 100%; white-space: normal; }
+th { width: 100%; white-space: normal; position: relative; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
 		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
 			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
@@ -78,8 +78,7 @@ td checkbox { transform: scale(0.8); }
 .error { color: var(--color-error); font-weight: bold; }
 
 tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;} 
-.col-set-button-wrapper { position: relative; }
-.col-settings-button { display: block; opacity: 0; position: absolute; left: -27px; top: -11px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
+.col-settings-button { display: block; opacity: 0; position: absolute; left: -21px; top: 1px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
 
 app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
 app-modal .header, app-modal .footer { text-align: center; padding: 10px 0; }
