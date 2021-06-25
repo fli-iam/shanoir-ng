@@ -57,10 +57,11 @@ spring:
     password: guest
   session:
     store-type: none
-  http:
+  servlet:
     multipart:
-      maxFileSize: 5000Mb
-      maxRequestSize: 5000Mb
+      enabled: true
+      max-file-size: 5000MB
+      max-request-size: 5000MB
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -147,7 +148,8 @@ server:
 spring:
   config.activate.on-profile: dev
   datasource:
-    url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
+    initialize: true
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)

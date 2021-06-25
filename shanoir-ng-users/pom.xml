@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>2.4.5</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -29,12 +29,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-users</name>
-	<description>Users management project for Shanoir NG</description>
+	<description>Shanoir-NG Users Microservice</description>
 
 	<properties>
-		<spring.active.profile></spring.active.profile>
-		<docker.image.name>shanoir-ng/users</docker.image.name>
         <powermock.version>1.7.1</powermock.version>
+		<docker.image.name>shanoir-ng/users</docker.image.name>
     </properties>
 
 	<dependencies>
@@ -42,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.5</version>
 		</dependency>
 	
 		<!-- Spring boot -->
@@ -53,12 +52,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-
-		<!-- Database connector -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
 		<!-- JWT -->
@@ -72,10 +65,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
 		<!-- Test -->

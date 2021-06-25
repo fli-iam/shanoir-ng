@@ -1,37 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-Shanoir NG - Import, manage and share neuroimaging data
-Copyright (C) 2009-2019 Inria - https://www.inria.fr/
-Contact us on https://project.inria.fr/shanoir/
+<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C) 
+	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/ 
+	This program is free software: you can redistribute it and/or modify it under 
+	the terms of the GNU General Public License as published by the Free Software 
+	Foundation, either version 3 of the License, or (at your option) any later 
+	version. You should have received a copy of the GNU General Public License 
+	along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html -->
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
--->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng-back</artifactId>
 		<version>2.4.5</version>
-		<relativePath/>
+		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
-	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-import</artifactId>
-	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-import</name>
-	<description>Import microservice of Shanoir-NG</description>
+	<description>Shanoir-NG Import Microservice</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -44,106 +37,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</properties>
 
 	<dependencies>
-		<!-- Spring Boot dependencies -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-properties-migrator</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.amqp</groupId>
-			<artifactId>spring-rabbit-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-		
 		<!-- Shanoir-NG dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-tomcat8-adapter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-admin-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.session</groupId>
-					<artifactId>spring-session</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-data-redis</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-tomcat8-adapter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-admin-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.session</groupId>
-					<artifactId>spring-session</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-data-redis</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
@@ -177,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- DCM4CHE dependencies -->
 		<dependency>
 			<groupId>org.dcm4che</groupId>
@@ -212,12 +115,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</exclusions>
 		</dependency>
 		<dependency>
-		 	<groupId>org.apache.httpcomponents</groupId>
-		 	<artifactId>httpclient</artifactId>
-		</dependency> 
-		 <!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime --> 
-		<dependency> 
-			<groupId>org.apache.httpcomponents</groupId> 
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 		</dependency>
 		<!-- Tests -->
@@ -233,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -247,48 +150,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</dependency>
 	</dependencies>
 
-	<dependencyManagement>
-	    <dependencies>
-	        <dependency>
-	            <groupId>org.keycloak.bom</groupId>
-	            <artifactId>keycloak-adapter-bom</artifactId>
-	            <version>13.0.1</version>
-	            <type>pom</type>
-	            <scope>import</scope>
-	        </dependency>
-	    </dependencies>
-	</dependencyManagement>
-
 	<build>
 		<plugins>
-			<!--
-				Package shanoir-ng-import.jar as Spring Boot executable:
-				Avoid error: no main manifest attribute, in /shanoir-ng-import.jar
-			-->
-		   <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-surefire-plugin</artifactId>
-		        <configuration>
-		          <classpathDependencyExcludes>
-                     <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
-		          </classpathDependencyExcludes>
+			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
+				no main manifest attribute, in /shanoir-ng-import.jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<classpathDependencyExcludes>
+						<classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
+					</classpathDependencyExcludes>
 				</configuration>
-		    </plugin>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<profiles>
-						<profile>${spring.active.profile}</profile>
-					</profiles>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- Copy shanoir-ng-import.jar for docker-compose up running -->
 			<plugin>
@@ -305,7 +182,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									tofile="${basedir}/../docker-compose/import/entrypoint_common" />
 								<copy file="../utils/oneshot"
 									tofile="${basedir}/../docker-compose/import/oneshot" />
-								<chmod perm="+x" file="${basedir}/../docker-compose/import/oneshot" />
+								<chmod perm="+x"
+									file="${basedir}/../docker-compose/import/oneshot" />
 							</target>
 						</configuration>
 						<goals>
@@ -351,14 +229,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</snapshots>
 		</repository>
 		<repository>
-			<id>dcm4che</id>
-			<name>dcm4che</name>
-			<url>https://www.dcm4che.org/maven2/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -382,4 +252,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</properties>
 		</profile>
 	</profiles>
+
 </project>
