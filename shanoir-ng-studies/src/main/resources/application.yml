@@ -94,7 +94,8 @@ studies-data: /var/studies-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
     org.shanoir: WARN
     org.springframework.web: ERROR
@@ -135,7 +136,8 @@ ms.url:
 studies-data: /tmp
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
     org.shanoir: DEBUG
     org.springframework.web: DEBUG

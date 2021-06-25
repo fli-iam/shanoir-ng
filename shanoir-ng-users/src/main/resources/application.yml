@@ -93,7 +93,8 @@ kc.admin.client:
   client.id: admin-cli
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -115,7 +116,8 @@ spring:
 
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
