@@ -84,7 +84,6 @@ public interface DatasetApi {
 	@PostMapping(value = "/{datasetId}/{datasetFileId}/{isPacs}",
 	        produces = { "application/json" },
 	        consumes = { "multipart/form-data" })
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Dataset> addDatasetFile (
 			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
