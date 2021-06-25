@@ -23,6 +23,8 @@ public class MigrationJob {
 	private Map<Long, Long> centersMap;
 
 	private Map<Long, Long> equipmentMap;
+	
+	private Map<Long, Long> examinationMap;
 
 	private ShanoirEvent event;
 
@@ -135,6 +137,14 @@ public class MigrationJob {
 
 	public void setAccessToken(String accessToken) {
 		this.accessToken = accessToken;
+	}
+
+	public Map<Long, Long> getExaminationMap() {
+		return examinationMap;
+	}
+
+	public void setExaminationMap(Map<Long, Long> examinationMap) {
+		this.examinationMap = examinationMap;
 	}
 	
 }

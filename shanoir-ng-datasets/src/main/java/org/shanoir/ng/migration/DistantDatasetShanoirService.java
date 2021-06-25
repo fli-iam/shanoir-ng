@@ -7,6 +7,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -16,6 +17,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
@@ -25,6 +27,7 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,20 +49,22 @@ public class DistantDatasetShanoirService {
 
 
 	private static final String CREATE_EXAMINATION = "/shanoir-ng/datasets/examinations/";
-	
+
 	private static final String ADD_EXTRA_DATA = "/shanoir-ng/datasets/examinations/";
 
 	private static final String CREATE_STUDY_CARD = "/shanoir-ng/datasets/studycards/";
-	
+
 	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/new";
 
+	private static final String CREATE_DATASET = "/shanoir-ng/datasets/datasets/new";
+	
 	private static final String ADD_FILE = "/shanoir-ng/datasets/datasets/";
 
 	RestTemplate restTemplate;
 
 	@Autowired
 	ObjectMapper mapper;
-	
+
 	@Autowired
 	DistantKeycloakConfigurationService distantKeycloak;
 
@@ -101,7 +106,7 @@ public class DistantDatasetShanoirService {
 		}
 	}
 
-	
+
 	public Examination createExamination(Examination examination) throws ShanoirException {
 		try {
 			ResponseEntity<Examination> response = this.restTemplate.exchange(getURI(CREATE_EXAMINATION), HttpMethod.POST, new HttpEntity<>(examination, getHeader()), Examination.class);
@@ -115,18 +120,21 @@ public class DistantDatasetShanoirService {
 		}
 	}
 
-	public void moveDatasetFile(DatasetFile dsFile, File file) throws ShanoirException {
+	public void moveDatasetFile(DatasetFile dsFile, List<File> files, Long datasetId) throws ShanoirException {
 		try {
+			LOG.error("Sending dataset files to distant Shanoir");
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file", file);
+			for (File file : files) {
+				body.add("files", new FileSystemResource(file));
+			}
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
 
-			restTemplate.postForEntity(getURI(ADD_FILE + dsFile.getId() + File.separator + dsFile.getDatasetExpression().getDataset().getId()), requestEntity, Void.class);
+			restTemplate.postForEntity(getURI(ADD_FILE + datasetId + File.separator + dsFile != null? dsFile.getId().toString() : null + File.separator + (dsFile != null) ), requestEntity, Void.class);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add dataset file on dataset: ", e);
 		}
@@ -146,7 +154,9 @@ public class DistantDatasetShanoirService {
 	}
 
 	public DatasetAcquisition createAcquisition(DatasetAcquisition acq) throws ShanoirException {
-		try {LOG.error("Creating new acquisition: " + mapper.writeValueAsString(acq));
+		try {
+			LOG.error("Creating new acquisition: " + mapper.writeValueAsString(acq));
+
 			ResponseEntity<DatasetAcquisition> response = this.restTemplate.exchange(getURI(CREATE_DATASET_ACQUISITION), HttpMethod.POST, new HttpEntity<>(acq, getHeader()), DatasetAcquisition.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
@@ -157,7 +167,22 @@ public class DistantDatasetShanoirService {
 			throw new ShanoirException("Could not create a new distant acquisition: ", e);
 		}
 	}
-	
+
+	public Dataset createDataset(Dataset ds) throws ShanoirException {
+		try {
+			LOG.error("Creating new dataset: " + ds.getName());
+
+			ResponseEntity<Dataset> response = this.restTemplate.exchange(getURI(CREATE_DATASET), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), Dataset.class);
+			if (HttpStatus.OK.equals(response.getStatusCode())) {
+				return response.getBody();
+			} else {
+				throw new ShanoirException("Could not create a new distant dataset {} {}" + response.getStatusCode() + response.getBody());
+			}
+		} catch (Exception e) {
+			throw new ShanoirException("Could not create a new distant dataset: ", e);
+		}
+	}
+
 	public void addExminationExtraData(File file, String examId) throws ShanoirException {
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -184,6 +209,5 @@ public class DistantDatasetShanoirService {
 	public URI getURI(String apiHeader) throws URISyntaxException {
 		return new URI(distantKeycloak.getServer() + apiHeader);
 	}
-
 
 }

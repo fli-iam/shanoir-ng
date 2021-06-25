@@ -1,13 +1,16 @@
 package org.shanoir.ng.migration;
 
 import java.io.File;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -41,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.util.UriUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -148,6 +153,9 @@ public class DatasetMigrationService {
 	 * @throws ShanoirException
 	 */
 	private Examination migrateExamination(Examination exam, MigrationJob job) throws ShanoirException {
+		job.setExaminationMap(new HashMap<>());
+
+		long oldId = exam.getId();
 		exam.setId(null);
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
 		exam.setSubjectId(job.getSubjectsMap().get(exam.getSubjectId()));
@@ -166,10 +174,11 @@ public class DatasetMigrationService {
 		// Move examination
 		LOG.error("Exam " + exam);
 		exam = distantShanoir.createExamination(exam);
+		job.getExaminationMap().put(oldId, exam.getId());
 
 		// Migrate datasetAcquisition
 		for(DatasetAcquisition acq : dsAcq) {
-			migrateAcquisition(acq, exam.getId(), job);
+			migrateAcquisition(acq, exam.getId(), oldId, job);
 		}
 
 		// TODO: Move examination extra-data
@@ -184,7 +193,7 @@ public class DatasetMigrationService {
 	 * @param job
 	 * @throws ShanoirException
 	 */
-	private void migrateAcquisition(DatasetAcquisition acq, Long examId, MigrationJob job) throws ShanoirException {
+	private void migrateAcquisition(DatasetAcquisition acq, Long examId, Long oldExamId, MigrationJob job) throws ShanoirException {
 		acq.setId(null);
 		if (acq.getAcquisitionEquipmentId() != null) {
 			acq.setAcquisitionEquipmentId(job.getEquipmentMap().get(acq.getAcquisitionEquipmentId()));
@@ -199,7 +208,6 @@ public class DatasetMigrationService {
 			acq.setStudyCard(scDto);
 		}
 		List<Dataset> datasets = acq.getDatasets();
-		acq.setDatasets(null);
 
 		switch (acq.getType()) {
 		case "Mr":
@@ -231,23 +239,34 @@ public class DatasetMigrationService {
 			break;
 		}
 
-		// Update datasets
-		for (Dataset ds : datasets) {
-			migrateDataset(ds, acq, job);
-		}
-
 		//  Migrate acquisition
 		LOG.error("Acq " + acq);
-		distantShanoir.createAcquisition(acq);
+		DatasetAcquisition newacq = distantShanoir.createAcquisition(acq);
 
-		// Migrate files
-		for (Dataset ds : acq.getDatasets()) {
-			for (DatasetExpression exp : ds.getDatasetExpressions()) {
+		// Update datasets
+		for (Dataset ds : datasets) {
+			Dataset createdDataset = migrateDataset(ds, newacq, oldExamId, job);
+			for (DatasetExpression exp : createdDataset.getDatasetExpressions()) {
+				boolean pacs = false;
+				List<File> files = new ArrayList<>();
 				for (DatasetFile dsFile : exp.getDatasetFiles()) {
 					Long oldFileId = oldIdMap.get(dsFile.getPath());
 					File fileToMove = fileMap.get(oldFileId);
-
-					distantShanoir.moveDatasetFile(dsFile, fileToMove);
+					if (dsFile.isPacs()) {
+						files.add(fileToMove);
+						pacs = true;
+					} else {
+						// Nifti files are sent one by one
+						files.add(fileToMove);
+						distantShanoir.moveDatasetFile(dsFile, files, createdDataset.getId());
+					}
+				}
+				if (pacs) {
+					// Dicom files are sent all together
+					distantShanoir.moveDatasetFile(null, files, createdDataset.getId());
+					for (File fileToDelete : files) {
+						FileUtils.deleteQuietly(fileToDelete);
+					}
 				}
 			}
 		}
@@ -255,9 +274,15 @@ public class DatasetMigrationService {
 		fileMap = new HashMap<>();
 	}
 
-	private void migrateDataset(Dataset ds, DatasetAcquisition acq, MigrationJob job) throws ShanoirException {
+	private Dataset migrateDataset(Dataset ds, DatasetAcquisition acq, Long oldExamId, MigrationJob job) throws ShanoirException {
 		ds.setId(null);
-		ds.setDatasetAcquisition(null);
+		ds.setSubjectId(job.getSubjectsMap().get(ds.getSubjectId()));
+		DatasetAcquisition acqDTO = new MrDatasetAcquisition();
+		acqDTO.setId(acq.getId());
+		Examination examDTO = new Examination();
+		examDTO.setStudyId(job.getStudy().getId());
+		acqDTO.setExamination(examDTO);
+		ds.setDatasetAcquisition(acqDTO);
 
 		if ("Mr".equals(ds.getType())) {
 			MrDataset mrDs = (MrDataset) ds;
@@ -302,36 +327,43 @@ public class DatasetMigrationService {
 		}
 		ds.getDatasetProcessing();
 		ds.getReferencedDatasetForSuperimposition();
+		File workFolder = new File("/tmp/Migration_" + LocalDateTime.now());
 
 		try {
 			for (DatasetExpression expression : ds.getDatasetExpressions()) {
 				expression.setId(null);
+				expression.setDataset(null);
 				for (DatasetFile file : expression.getDatasetFiles()) {
-
+					LOG.error("Loading file..." + file.getPath());
 					String result = null;
-					File workFolder = new File("/tmp/Migration_" + LocalDateTime.now());
 					workFolder.mkdirs();
 					if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
 						// Dicom
 						result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "");
-					} else if (DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(file.getDatasetExpression().getDatasetExpressionFormat())){
+					} else {
 						// Nifti
-						result = file.getPath().replaceAll("%20", " ");
-					} else if (DatasetExpressionFormat.EEG.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
-						// EEG
-						result = file.getPath().replaceAll("%20", " ");
+						URL url = new URL(file.getPath().replaceAll("%20", " "));
+						File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+						result = srcFile.getAbsolutePath();
 					}
 					Long oldId = file.getId();
-					// Move files
 					file.setId(null);
+					file.setDatasetExpression(null);
 
 					// Update path
 					file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
-
+					file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
+					file.setPath(file.getPath().replace(
+							"-" + ds.getSubjectId()							  + "/ses-" + oldExamId ,
+							"-" + job.getSubjectsMap().get(ds.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
+					file.setPath(file.getPath().replace(
+							"/ses-" + oldExamId ,
+							"/ses-" + job.getExaminationMap().get(oldExamId)));
 					oldIdMap.put(file.getPath(), oldId);
 					fileMap.put(oldId, new File(result));
 				}
 			}
+			return distantShanoir.createDataset(ds);
 		} catch (Exception e) {
 			throw new ShanoirException("Error while copying datasets", e);
 		}
