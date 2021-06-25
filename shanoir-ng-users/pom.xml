@@ -32,7 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<description>Shanoir-NG Users Microservice</description>
 
 	<properties>
-        <powermock.version>1.7.1</powermock.version>
 		<docker.image.name>shanoir-ng/users</docker.image.name>
     </properties>
 
@@ -72,20 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail</artifactId>
 			<version>1.5.3</version>
-			<scope>test</scope>
 		</dependency>
-		<dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
 	</dependencies>
 
 	<build>

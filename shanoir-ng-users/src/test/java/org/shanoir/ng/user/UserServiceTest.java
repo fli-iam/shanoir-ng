@@ -102,7 +102,7 @@ public class UserServiceTest {
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
 				.willReturn(Arrays.asList(createUser()));
-		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser(USER_ID));
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(ModelsUtil.createUser(USER_ID));
 		given(userRepository
 				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
 						.willReturn(Arrays.asList(ModelsUtil.createUser()));
@@ -119,13 +119,13 @@ public class UserServiceTest {
 	public void confirmAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException  {
 		final User user = ModelsUtil.createUser();
 		user.setAccountRequestDemand(true);
-		given(userRepository.findOne(USER_ID)).willReturn(user);
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(user);
 
 		final User updatedUser = userService.confirmAccountRequest(createUser());
 		Assert.assertNotNull(updatedUser);
 		Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		user.setAccountRequestDemand(false);
 		Mockito.verify(userRepository, Mockito.times(1)).save(user);
 	}
@@ -133,11 +133,11 @@ public class UserServiceTest {
 	@Test(expected = EntityNotFoundException.class)
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void confirmAccountRequestBadUserIdTest() throws EntityNotFoundException, AccountNotOnDemandException {
-		given(userRepository.findOne(USER_ID)).willReturn(null);
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
 
 		userService.confirmAccountRequest(new User());
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
 	}
 
@@ -145,11 +145,11 @@ public class UserServiceTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void confirmAccountRequestNoDemandTest() throws AccountNotOnDemandException, EntityNotFoundException {
 		User user = ModelsUtil.createUser(USER_ID);
-		given(userRepository.findOne(USER_ID)).willReturn(user);
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(user);
 		
 		userService.confirmAccountRequest(user);
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
 	}
 
@@ -158,47 +158,47 @@ public class UserServiceTest {
 	public void denyAccountRequestTest() throws AccountNotOnDemandException, EntityNotFoundException {
 		final User user = ModelsUtil.createUser();
 		user.setAccountRequestDemand(true);
-		given(userRepository.findOne(USER_ID)).willReturn(user);
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(user);
 
 		userService.denyAccountRequest(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
-		Mockito.verify(userRepository, Mockito.times(1)).delete(USER_ID);
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(userRepository, Mockito.times(1)).deleteById(USER_ID);
 	}
 
 	@Test(expected = EntityNotFoundException.class)
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void denyAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		given(userRepository.findOne(USER_ID)).willReturn(null);
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
 
 		userService.denyAccountRequest(USER_ID);
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
-		Mockito.verify(userRepository, Mockito.times(0)).delete(USER_ID);
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
 	}
 
 	@Test(expected = AccountNotOnDemandException.class)
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
-		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
+		given(userRepository.findById(USER_ID).orElse(null)).willReturn(ModelsUtil.createUser());
 
 		userService.denyAccountRequest(USER_ID);
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
-		Mockito.verify(userRepository, Mockito.times(0)).delete(USER_ID);
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 2L, authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws EntityNotFoundException, ForbiddenException {
 		userService.deleteById(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test(expected = AccessDeniedException.class)
 	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_ADMIN" })
 	public void deleteByIdByUserWithSameIdTest() throws EntityNotFoundException, ForbiddenException {
 		userService.deleteById(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -218,7 +218,7 @@ public class UserServiceTest {
 		Assert.assertNotNull(user);
 		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 
 	@Test

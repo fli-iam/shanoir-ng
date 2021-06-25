@@ -148,8 +148,8 @@ public class EmailServiceTest {
 		User user = new User();
 		user.setUsername("username");
 		user.setEmail("email@email.com");
-		Mockito.when(userRepositoryMock.findOne(Mockito.anyLong())).thenReturn(user);
-		Mockito.when(userRepositoryMock.findAll(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
+		Mockito.when(userRepositoryMock.findById(Mockito.anyLong()).orElse(null)).thenReturn(user);
+		Mockito.when(userRepositoryMock.findAllById(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
 
 		// send back a list of administrators
 		DatasetImportEmail mail = new DatasetImportEmail();

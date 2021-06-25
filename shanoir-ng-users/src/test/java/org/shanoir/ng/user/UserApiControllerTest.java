@@ -64,7 +64,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {UserApiController.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class})
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class UserApiControllerTest {
 
 	private static final String REQUEST_PATH = "/users";
@@ -97,7 +97,7 @@ public class UserApiControllerTest {
 		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
 		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
 		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
-		given(userRepository.findOne(1L)).willReturn(mockUser);
+		given(userRepository.findById(1L).orElse(null)).willReturn(mockUser);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class UserApiControllerTest {
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
 		
-		ArgumentCaptor<ShanoirEvent> eventCaptor = new ArgumentCaptor();
+		ArgumentCaptor<ShanoirEvent> eventCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
 		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
 		ShanoirEvent event = eventCaptor.getValue();
 		assertEquals("1", event.getObjectId());
