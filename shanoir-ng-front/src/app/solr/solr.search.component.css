@@ -27,4 +27,4 @@ solr-criterion, .dates { margin-bottom: 20px; background-color: beige; max-width
 .tab-labels { display: flex; }
 .tabs .selected { background-color: palegoldenrod; }
 .tab-opened { margin-bottom: -1px; }
-.tabs { margin-top: 60px; }
+.tabs { margin-top: 30px; }

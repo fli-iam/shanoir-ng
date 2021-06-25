@@ -251,7 +251,8 @@ export class SolrSearchComponent{
             {headerName: "Study", field: "studyName"},
             {headerName: "Subject", field: "subjectName"},
             {headerName: "Exam", field: "examinationComment"},
-            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)}
+            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)},
+            {headerName: "", type: "button", awesome: "fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id]) }
         ];
         return columnDefs;
     }

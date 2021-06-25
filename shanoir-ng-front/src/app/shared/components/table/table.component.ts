@@ -119,7 +119,8 @@ export class TableComponent implements OnInit, OnChanges {
 
 
     onRowClick(item: Object) {
-        if (!this.rowDisabled(item)) this.rowClick.emit(item);
+        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
 

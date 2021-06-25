@@ -74,7 +74,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.odd]="i%2!=0" 
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
-    [class.edit]="editMode">
+    [class.edit]="editMode"
+    [class.selected]="isSelected(item)">
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <ng-container *ngFor="let col of columnDefs" >
