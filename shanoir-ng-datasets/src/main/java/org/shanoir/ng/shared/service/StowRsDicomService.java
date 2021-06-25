@@ -63,7 +63,7 @@ public class StowRsDicomService implements DicomServiceApi {
 
 	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
-		if (directoryWithDicomFiles == null || directoryWithDicomFiles.exists() || directoryWithDicomFiles.isDirectory()) {
+		if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists() || !directoryWithDicomFiles.isDirectory()) {
 			throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();

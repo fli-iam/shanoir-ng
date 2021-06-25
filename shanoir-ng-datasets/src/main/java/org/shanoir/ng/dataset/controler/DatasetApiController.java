@@ -166,6 +166,15 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	@Qualifier("cstore")
 	DicomServiceApi cStoreService;
+	
+	@Value("${dcm4chee-arc.protocol}")
+	private String dcm4cheeProtocol;
+	
+	@Value("${dcm4chee-arc.host}")
+	private String dcm4cheeHost;
+
+	@Value("${dcm4chee-arc.port.web}")
+	private String dcm4cheePortWeb;
 
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
@@ -763,6 +772,7 @@ public class DatasetApiController implements DatasetApi {
 							File destination = new File("/tmp/migration" + LocalDateTime.now() + File.separator + multipartFile.getName());
 							destination.getParentFile().mkdirs();
 							multipartFile.transferTo(destination);
+							// Does this actually works ?
 							if (dicomWeb) {
 								stowRsService.sendDicomFilesToPacs(destination.getParentFile());
 							} else {
@@ -795,6 +805,13 @@ public class DatasetApiController implements DatasetApi {
 			expression.setDataset(dataset);
 			for (DatasetFile file : expression.getDatasetFiles()) {
 				file.setDatasetExpression(expression);
+				
+				// Replace PACS reference
+				if (file.isPacs()) {
+					String oldPath = file.getPath();
+					String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+					file.setPath(newPath);
+				}
 			}
 		}
 		Dataset created = datasetService.create(dataset);
