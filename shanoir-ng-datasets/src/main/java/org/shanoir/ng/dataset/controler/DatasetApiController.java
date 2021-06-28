@@ -159,26 +159,6 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	ShanoirEventService eventService;
 
-	@Autowired
-	@Qualifier("stowrs")
-	DicomServiceApi stowRsService;
-
-	@Autowired
-	@Qualifier("cstore")
-	DicomServiceApi cStoreService;
-
-	@Value("${dcm4chee-arc.protocol}")
-	private String dcm4cheeProtocol;
-
-	@Value("${dcm4chee-arc.host}")
-	private String dcm4cheeHost;
-
-	@Value("${dcm4chee-arc.port.web}")
-	private String dcm4cheePortWeb;
-
-	@Value("${dcm4chee-arc.dicom.web}")
-	private boolean dicomWeb;
-
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
 
@@ -752,83 +732,10 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<Dataset> addDatasetFile (
-			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "Is PACS", required = true)  @PathVariable("isPacs") boolean isPacs,
-			@ApiParam(value = "Linked files", required = true) @RequestPart("files") MultipartFile[] multipartFiles)
-					throws RestServiceException {
-		// Load dataset file
-		try {
-			LOG.error("Receiving dataset file" + datasetFileId);
-			Dataset dataset = datasetService.findById(datasetId);
-
-			if (isPacs) {
-				// Copy the files then load them in the PACS
-				for (MultipartFile multipartFile : multipartFiles) {
-					// Copy files
-					File destination = new File("/tmp/migration-" + datasetId + File.separator + multipartFile.getName() + LocalDateTime.now());
-					destination.getParentFile().mkdirs();
-					multipartFile.transferTo(destination);
-					// Transfer to pacs
-					if (dicomWeb) {
-						stowRsService.sendDicomFilesToPacs(destination.getParentFile());
-					} else {
-						cStoreService.sendDicomFilesToPacs(destination.getParentFile());
-					}
-					FileUtils.deleteQuietly(destination.getParentFile());
-				}
-			} else {
-				for (MultipartFile multipartFile : multipartFiles) {
-					// Get the dataset file then copy the file to path
-					DatasetFile dsFile = null;
-					for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-						for (DatasetFile dsFileIt : expression.getDatasetFiles()) {
-							if (dsFileIt.getId().equals(datasetFileId)) {
-								dsFile = dsFileIt;
-								// MOVE nifti (and others) on disc
-								File destination = new File(dsFile.getPath().replace("file://", ""));
-								destination.getParentFile().mkdirs();
-								multipartFile.transferTo(destination);
-								break;
-							}
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("Error while importing dataset file: ", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<Dataset> createNewDatasets(
 			@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
 			final BindingResult result) throws RestServiceException {
-		// Principally used by migration API
-		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-			expression.setDataset(dataset);
-			for (DatasetFile file : expression.getDatasetFiles()) {
-				// Replace PACS reference
-				if (file.isPacs()) {
-					String oldPath = file.getPath();
-					String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-					file.setPath(newPath);
-				}
-				file.setDatasetExpression(expression);
-			}
-		}
-		
 		Dataset created = datasetService.create(dataset);
-
-		for (DatasetExpression expression : created.getDatasetExpressions()) {
-			expression.setDataset(null);
-			for (DatasetFile file : expression.getDatasetFiles()) {
-				file.setDatasetExpression(null);
-			}
-		}
 		return new ResponseEntity<>(created, HttpStatus.OK);
 	}
 }

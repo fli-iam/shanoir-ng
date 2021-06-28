@@ -1,5 +1,7 @@
 package org.shanoir.ng.datasetfile.service;
 
+import javax.validation.Valid;
+
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -9,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,10 +29,13 @@ public interface DatasetFileApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" })
+	@PostMapping(value = "",
+		produces = { "application/json" },
+		consumes = { "multipart/form-data" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<DatasetFile> saveNewDatasetFile(
-			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile file, BindingResult result)
+			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file,
+			BindingResult result)
 			throws RestServiceException;
 }

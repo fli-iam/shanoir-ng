@@ -48,9 +48,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -74,22 +71,6 @@ public interface DatasetApi {
     ResponseEntity<Dataset> createNewDatasets(
     		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
     		final BindingResult result) throws RestServiceException;
-
-	@ApiOperation(value = "", notes = "Add a new datasetFile on a dataset", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/{datasetId}/{datasetFileId}/{isPacs}",
-	        produces = { "application/json" },
-	        consumes = { "multipart/form-data" })
-	ResponseEntity<Dataset> addDatasetFile (
-			@ApiParam(value = "Id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "Id of the datasetFile", required = true)  @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "Is PACS", required = true)  @PathVariable("isPacs") boolean isPacs,
-			@ApiParam(value = "Linked files", required = true) @RequestPart("files") MultipartFile[] multipartFiles)
-			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Deletes a dataset", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset deleted", response = Void.class),
