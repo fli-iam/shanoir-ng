@@ -76,19 +76,11 @@ public class DatasetFileApiController implements DatasetFileApi {
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 					throws RestServiceException {
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId);
+		File destination = null;
 		try {
-			// Save file
-			if (datasetFile.isPacs()) {
-				String oldPath = datasetFile.getPath();
-				String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-				datasetFile.setPath(newPath);
-			}
-
-			DatasetFile createdFile = datasetFileService.create(datasetFile);
-
+			destination = new File("/tmp/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
 			if (datasetFile.isPacs()) {
 				// Copy file to load it in the PACS
-				File destination = new File("/tmp/migration-" + createdFile.getId() + File.separator + file.getName() + LocalDateTime.now());
 				destination.getParentFile().mkdirs();
 				file.transferTo(destination);
 				// Transfer to pacs
@@ -101,7 +93,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 			} else {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
-				File destination = new File(datasetFile.getPath().replace("file://", ""));
+				destination = new File(datasetFile.getPath().replace("file://", ""));
 				destination.getParentFile().mkdirs();
 				file.transferTo(destination);
 			}
@@ -109,6 +101,10 @@ public class DatasetFileApiController implements DatasetFileApi {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
+		} finally {
+			if (datasetFile.isPacs()) {
+				FileUtils.deleteQuietly(destination);
+			}
 		}
 	}
 }
