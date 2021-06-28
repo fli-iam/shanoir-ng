@@ -8,7 +8,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +35,7 @@ public interface DatasetFileApi {
 		consumes ={ "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<DatasetFile> saveNewDatasetFile(
-			@ApiParam(value = "datasetfile to create", required = true) @ModelAttribute DatasetFile datasetFile,
+			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
 			BindingResult result)
 			throws RestServiceException;
 
