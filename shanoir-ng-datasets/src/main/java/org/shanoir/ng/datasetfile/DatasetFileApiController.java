@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,39 +53,61 @@ public class DatasetFileApiController implements DatasetFileApi {
 	@Override
 	public 	ResponseEntity<DatasetFile> saveNewDatasetFile(
 			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file,
 			BindingResult result) throws RestServiceException  {
 		try {
-		// Save file
-		if (datasetFile.isPacs()) {
-			String oldPath = datasetFile.getPath();
-			String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-			datasetFile.setPath(newPath);
-		}
-
-		DatasetFile createdFile = datasetFileService.create(datasetFile);
-
-		if (datasetFile.isPacs()) {
-			// Copy file to load it in the PACS
-			File destination = new File("/tmp/migration-" + createdFile.getId() + File.separator + file.getName() + LocalDateTime.now());
-			destination.getParentFile().mkdirs();
-			file.transferTo(destination);
-			// Transfer to pacs
-			if (dicomWeb) {
-				stowRsService.sendDicomFilesToPacs(destination.getParentFile());
-			} else {
-				cStoreService.sendDicomFilesToPacs(destination.getParentFile());
+			// Save file
+			if (datasetFile.isPacs()) {
+				String oldPath = datasetFile.getPath();
+				String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+				datasetFile.setPath(newPath);
 			}
-			FileUtils.deleteQuietly(destination.getParentFile());
-		} else {
-			// Get the dataset file then copy the file to path
-			// MOVE nifti (and others) on disc
-			File destination = new File(datasetFile.getPath().replace("file://", ""));
-			destination.getParentFile().mkdirs();
-			file.transferTo(destination);
-		}
 
-		return new ResponseEntity<>(createdFile, HttpStatus.OK);
+			DatasetFile createdFile = datasetFileService.create(datasetFile);
+
+			return new ResponseEntity<>(createdFile, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
+		}
+	}
+
+	@Override
+	public ResponseEntity<Void> addFile(
+			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file,
+			BindingResult result)
+					throws RestServiceException {
+		DatasetFile datasetFile = datasetFileService.findById(datasetFileId);
+		try {
+			// Save file
+			if (datasetFile.isPacs()) {
+				String oldPath = datasetFile.getPath();
+				String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+				datasetFile.setPath(newPath);
+			}
+
+			DatasetFile createdFile = datasetFileService.create(datasetFile);
+
+			if (datasetFile.isPacs()) {
+				// Copy file to load it in the PACS
+				File destination = new File("/tmp/migration-" + createdFile.getId() + File.separator + file.getName() + LocalDateTime.now());
+				destination.getParentFile().mkdirs();
+				file.transferTo(destination);
+				// Transfer to pacs
+				if (dicomWeb) {
+					stowRsService.sendDicomFilesToPacs(destination.getParentFile());
+				} else {
+					cStoreService.sendDicomFilesToPacs(destination.getParentFile());
+				}
+				FileUtils.deleteQuietly(destination.getParentFile());
+			} else {
+				// Get the dataset file then copy the file to path
+				// MOVE nifti (and others) on disc
+				File destination = new File(datasetFile.getPath().replace("file://", ""));
+				destination.getParentFile().mkdirs();
+				file.transferTo(destination);
+			}
+
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
 		}
