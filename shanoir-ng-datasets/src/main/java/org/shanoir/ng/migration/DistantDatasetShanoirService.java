@@ -7,8 +7,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.List;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -18,6 +16,7 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
@@ -57,8 +56,13 @@ public class DistantDatasetShanoirService {
 	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/new";
 
 	private static final String CREATE_DATASET = "/shanoir-ng/datasets/datasets/new";
-	
-	private static final String ADD_FILE = "/shanoir-ng/datasets/datasets/";
+
+	private static final String CREATE_DATASET_EXPRESSION = "/shanoir-ng/datasets/datasetexpressions";
+
+	private static final String CREATE_DATASET_FILE = "/shanoir-ng/datasets/datasetfiles";
+
+
+	private static final String ADD_FILE = "/shanoir-ng/datasets/datasetfiles/file-upload/";
 
 	RestTemplate restTemplate;
 
@@ -120,7 +124,7 @@ public class DistantDatasetShanoirService {
 		}
 	}
 
-	public void moveDatasetFile(DatasetFile dsFile, List<File> files, Long datasetId) throws ShanoirException {
+	public void moveDatasetFile(DatasetFile dsFile, File file) throws ShanoirException {
 		try {
 			LOG.error("Sending dataset files to distant Shanoir");
 			HttpHeaders headers = new HttpHeaders();
@@ -128,13 +132,13 @@ public class DistantDatasetShanoirService {
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			for (File file : files) {
-				body.add("files", new FileSystemResource(file));
+			if (file != null && file.exists()) {
+				body.add("file", new FileSystemResource(file));
 			}
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
 
-			restTemplate.postForEntity(getURI(ADD_FILE + datasetId + File.separator + dsFile != null? dsFile.getId().toString() : null + File.separator + (dsFile != null) ), requestEntity, Void.class);
+			restTemplate.postForEntity(getURI(ADD_FILE + dsFile.getId()), requestEntity, Void.class);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add dataset file on dataset: ", e);
 		}
@@ -173,6 +177,39 @@ public class DistantDatasetShanoirService {
 			LOG.error("Creating new dataset: " + ds.getName());
 
 			ResponseEntity<Dataset> response = this.restTemplate.exchange(getURI(CREATE_DATASET), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), Dataset.class);
+			if (HttpStatus.OK.equals(response.getStatusCode())) {
+				return response.getBody();
+			} else {
+				throw new ShanoirException("Could not create a new distant dataset {} {}" + response.getStatusCode() + response.getBody());
+			}
+		} catch (Exception e) {
+			throw new ShanoirException("Could not create a new distant dataset: ", e);
+		}
+	}
+
+
+	public DatasetExpression createDatasetExpression(DatasetExpression ds) throws ShanoirException {
+		try {
+			LOG.error("Creating new dataset expression");
+
+			ResponseEntity<DatasetExpression> response = this.restTemplate.exchange(getURI(CREATE_DATASET_EXPRESSION), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), DatasetExpression.class);
+			if (HttpStatus.OK.equals(response.getStatusCode())) {
+				return response.getBody();
+
+			} else {
+				throw new ShanoirException("Could not create a new distant dataset {} {}" + response.getStatusCode() + response.getBody());
+			}
+		} catch (Exception e) {
+			throw new ShanoirException("Could not create a new distant dataset: ", e);
+		}
+	}
+
+
+	public DatasetFile createDatasetFile(DatasetFile ds) throws ShanoirException {
+		try {
+			LOG.error("Creating new datasetFile: ");
+
+			ResponseEntity<DatasetFile> response = this.restTemplate.exchange(getURI(CREATE_DATASET_FILE), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), DatasetFile.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
