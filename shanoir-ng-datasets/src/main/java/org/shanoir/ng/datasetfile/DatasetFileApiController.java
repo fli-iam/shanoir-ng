@@ -2,7 +2,6 @@ package org.shanoir.ng.datasetfile;
 
 import java.io.File;
 import java.time.LocalDateTime;
-
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -58,7 +57,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 			// Save file
 			if (datasetFile.isPacs()) {
 				String oldPath = datasetFile.getPath();
-				String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+				String newPath = oldPath.replaceAll("http(.*)wado\\?", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb + "/wado?");
 				datasetFile.setPath(newPath);
 			}
 
