@@ -231,6 +231,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
+import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 
 @NgModule({
     imports: [
@@ -388,7 +390,9 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         ReverseStudyNodeComponent,
         DUAComponent,
         DUASigningComponent,
-        EventTypePipe
+        EventTypePipe,
+        SolrCriterionComponent,
+        SolrTextSearchComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
