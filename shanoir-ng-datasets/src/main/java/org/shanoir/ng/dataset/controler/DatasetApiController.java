@@ -796,39 +796,39 @@ public class DatasetApiController implements DatasetApi {
 					}
 				}
 			}
-	} catch (Exception e) {
-		LOG.error("Error while importing dataset file: ", e);
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			LOG.error("Error while importing dataset file: ", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	return new ResponseEntity<>(HttpStatus.OK);
-}
 
-@Override
-public ResponseEntity<Dataset> createNewDatasets(
-		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
-		final BindingResult result) throws RestServiceException {
-	// Principally used by migration API
-	for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-		expression.setDataset(dataset);
-		for (DatasetFile file : expression.getDatasetFiles()) {
-			file.setDatasetExpression(expression);
-
-			// Replace PACS reference
-			if (file.isPacs()) {
-				String oldPath = file.getPath();
-				String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-				file.setPath(newPath);
+	@Override
+	public ResponseEntity<Dataset> createNewDatasets(
+			@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
+			final BindingResult result) throws RestServiceException {
+		// Principally used by migration API
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			expression.setDataset(dataset);
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				// Replace PACS reference
+				if (file.isPacs()) {
+					String oldPath = file.getPath();
+					String newPath = oldPath.replaceAll("http(.*):[0-9]{4,6}", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
+					file.setPath(newPath);
+				}
+				file.setDatasetExpression(expression);
 			}
 		}
-	}
-	Dataset created = datasetService.create(dataset);
+		
+		Dataset created = datasetService.create(dataset);
 
-	for (DatasetExpression expression : created.getDatasetExpressions()) {
-		expression.setDataset(null);
-		for (DatasetFile file : expression.getDatasetFiles()) {
-			file.setDatasetExpression(null);
+		for (DatasetExpression expression : created.getDatasetExpressions()) {
+			expression.setDataset(null);
+			for (DatasetFile file : expression.getDatasetFiles()) {
+				file.setDatasetExpression(null);
+			}
 		}
+		return new ResponseEntity<>(created, HttpStatus.OK);
 	}
-	return new ResponseEntity<>(created, HttpStatus.OK);
-}
 }
