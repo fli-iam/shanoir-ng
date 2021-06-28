@@ -73,8 +73,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 	@Override
 	public ResponseEntity<Void> addFile(
 			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file,
-			BindingResult result)
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 					throws RestServiceException {
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId);
 		try {
