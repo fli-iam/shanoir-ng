@@ -26,6 +26,10 @@ export class StudyUser {
     user: User;
     confirmed: boolean = false;
 
+    get id(): number {
+        return this.userId + (this.study ? this.study.id * 1000000 : 0); 
+    }
+
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);
     }
