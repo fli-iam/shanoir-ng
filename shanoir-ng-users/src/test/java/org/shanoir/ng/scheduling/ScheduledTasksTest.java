@@ -30,7 +30,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ScheduledTasksTest {
 
-
 	@MockBean
 	private EmailService emailService;
 

@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -97,7 +98,7 @@ public class UserApiControllerTest {
 		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
 		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
 		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
-		given(userRepository.findById(1L).orElse(null)).willReturn(mockUser);
+		given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
 	}
 
 	@Test

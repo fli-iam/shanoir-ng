@@ -16,11 +16,13 @@ package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -34,7 +36,6 @@ import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,9 +62,6 @@ public class EmailServiceTest {
 	private EmailServiceImpl emailService;
 	
 	public GreenMail greenMail;
-	
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
 	
 	@MockBean
 	private UserRepository userRepositoryMock;
@@ -148,9 +146,8 @@ public class EmailServiceTest {
 		User user = new User();
 		user.setUsername("username");
 		user.setEmail("email@email.com");
-		Mockito.when(userRepositoryMock.findById(Mockito.anyLong()).orElse(null)).thenReturn(user);
+		Mockito.when(userRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(user));
 		Mockito.when(userRepositoryMock.findAllById(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
-
 		// send back a list of administrators
 		DatasetImportEmail mail = new DatasetImportEmail();
 		mail.setStudyName("StudyName");
@@ -158,10 +155,8 @@ public class EmailServiceTest {
 		Map<Long, String> datasets = new HashMap<>();
 		datasets.put(1L, "test");
 		mail.setDatasets(datasets);
-		
 		// WHEN we receive an event with elements stating that data was imported successfuly
 		emailService.notifyStudyManagerDataImported(mail);
-		
 		// THEN an email is sent to the administrators
 		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
 	}

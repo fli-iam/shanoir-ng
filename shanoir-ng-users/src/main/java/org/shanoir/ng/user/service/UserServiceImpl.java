@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void denyAccountRequest(final Long userId) throws EntityNotFoundException, AccountNotOnDemandException {
-		final User user = userRepository.findById(userId).orElse(null);
+		final User user = userRepository.findById(userId).get();
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}

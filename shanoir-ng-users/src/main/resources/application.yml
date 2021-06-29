@@ -60,9 +60,10 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
-front.server:
-  address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
-  url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
+front:
+  server:
+    address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
+    url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
@@ -126,6 +127,8 @@ logging:
 ---
 spring:
   profiles: test
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -143,6 +146,6 @@ spring:
     port: 3025
     protocol: smtp
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-
-    
-    
+front:
+  server:
+    url: https://shanoir-ng-nginx
