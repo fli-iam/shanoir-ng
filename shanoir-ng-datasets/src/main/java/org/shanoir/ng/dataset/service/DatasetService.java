@@ -39,6 +39,15 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException;
+	
+	/**
+	 * Delete several datasets.
+	 * 
+	 * @param ids dataset ids.
+	 * @throws EntityNotFoundException
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#ids, 'CAN_ADMINITRATE'))")
+	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException;
 
 	/**
 	 * Find dataset by its id.

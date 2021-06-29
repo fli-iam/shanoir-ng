@@ -73,6 +73,12 @@ public class SolrServiceImpl implements SolrService {
 	public void deleteFromIndex(Long datasetId) {
 		solrRepository.deleteByDatasetId(datasetId);
 	}
+	
+	@Transactional
+	@Override
+	public void deleteFromIndex(List<Long> datasetIds) {
+		solrRepository.deleteByDatasetIdIn(datasetIds);
+	}
 
 	@Transactional
 	public void deleteAll() {

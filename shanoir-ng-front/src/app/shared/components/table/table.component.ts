@@ -417,6 +417,7 @@ export class TableComponent implements OnInit, OnChanges {
 
     isSelected(item: Object): boolean {
         if (!item['id']) {
+            console.log(item)
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
         }

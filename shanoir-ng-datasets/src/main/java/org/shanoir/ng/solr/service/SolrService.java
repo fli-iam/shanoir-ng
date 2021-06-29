@@ -40,6 +40,8 @@ public interface SolrService {
 	
 	void deleteFromIndex(Long datasetId);
 	
+	public void deleteFromIndex(List<Long> datasetIds);
+	
 	void indexAll();
 	
 	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
