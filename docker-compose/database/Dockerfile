@@ -12,10 +12,17 @@
 
 FROM mysql/mysql-server:5.7
 
+COPY /shanoir-entrypoint.sh /
+ENTRYPOINT ["/shanoir-entrypoint.sh"]
+CMD ["mysqld"]
+
 ADD 1_create_databases.sh /docker-entrypoint-initdb.d/
 ADD 2_add_users.sql /docker-entrypoint-initdb.d/
 ADD 3_add_statistics_procedure.sql /docker-entrypoint-initdb.d/
-
+ 
 RUN chmod a+x /docker-entrypoint-initdb.d/1_create_databases.sh
 RUN chmod a+x /docker-entrypoint-initdb.d/2_add_users.sql
 RUN chmod a+x /docker-entrypoint-initdb.d/3_add_statistics_procedure.sql
+RUN chmod a+x /shanoir-entrypoint.sh
+
+COPY db-changes /opt/db-changes
