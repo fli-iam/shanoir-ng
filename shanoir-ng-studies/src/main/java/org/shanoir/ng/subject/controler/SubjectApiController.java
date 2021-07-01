@@ -17,7 +17,6 @@ package org.shanoir.ng.subject.controler;
 import java.util.Comparator;
 import java.util.List;
 
-import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -60,16 +59,12 @@ public class SubjectApiController implements SubjectApi {
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 
 	@Autowired
-	private StudyBIDSService bidsService;
-
-	@Autowired
 	private ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
-			bidsService.deleteSubjectBids(subjectId);
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

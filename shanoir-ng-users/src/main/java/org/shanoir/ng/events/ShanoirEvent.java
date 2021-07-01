@@ -55,6 +55,9 @@ public class ShanoirEvent {
 	/** The progress of the event. */
 	protected Float progress;
 
+	/** The study ID of the event */
+	protected Long studyId;
+
 	public ShanoirEvent() {
 		// Default empty constructor for json deserializer.
 	}
@@ -183,6 +186,20 @@ public class ShanoirEvent {
 	 */
 	public void setProgress(Float progress) {
 		this.progress = progress;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }

@@ -177,7 +177,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     exportBIDSByStudyId(studyId: number, progressBar: LoadingBarComponent) {
         if (!studyId) throw Error('study id is required');
         this.subscribtions.push(
-               this.http.get(AppUtils.BACKEND_API_STUDY_BIDS_EXPORT_URL + '/studyId/' + studyId, {
+               this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
                     reportProgress: true,
                     observe: 'events',
                     responseType: 'blob'
@@ -187,7 +187,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getBidsStructure(studyId: number): Promise<BidsElement> {
         if (!studyId) throw Error('study id is required');
-        return this.http.get<BidsElement>(AppUtils.BACKEND_API_STUDY_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
             .toPromise();
     }
 

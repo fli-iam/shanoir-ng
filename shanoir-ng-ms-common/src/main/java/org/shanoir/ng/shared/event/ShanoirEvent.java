@@ -22,6 +22,8 @@ public class ShanoirEvent {
 
 	protected Float progress;
 
+	protected Long studyId;
+
 	public ShanoirEvent() {
 	}
 
@@ -31,6 +33,17 @@ public class ShanoirEvent {
 		this.userId = userId;
 		this.message = message;
 		this.status = status;
+		// Generate an ID
+		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+	}
+
+	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
+		this.eventType = eventType;
+		this.objectId = objectId;
+		this.userId = userId;
+		this.message = message;
+		this.status = status;
+		this.studyId = studyId;
 		// Generate an ID
 		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
 	}
@@ -136,6 +149,20 @@ public class ShanoirEvent {
 	 */
 	public void setProgress(Float progress) {
 		this.progress = progress;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }

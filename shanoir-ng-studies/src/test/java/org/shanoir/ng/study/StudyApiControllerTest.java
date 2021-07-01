@@ -33,8 +33,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.StudyBIDSService;
-import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
@@ -106,14 +104,6 @@ public class StudyApiControllerTest {
 	@MockBean
 	private StudyUniqueConstraintManager uniqueConstraintManager;
 
-	private Study stud;
-
-	@MockBean
-	private StudyBIDSService bidsService;
-	
-	@MockBean
-	private BidsDeserializer bidsDeserializer;
-
 	@MockBean
 	private ShanoirEventService eventService;
 
@@ -132,16 +122,12 @@ public class StudyApiControllerTest {
 	public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		stud = new Study();
-		stud.setId(1L);
-
 		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyListOf(Study.class)))
 		.willReturn(Arrays.asList(new StudyDTO()));
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
 
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
-		given(studyServiceMock.findById(1L)).willReturn(stud);
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
 		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());

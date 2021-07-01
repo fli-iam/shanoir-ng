@@ -63,7 +63,6 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -140,9 +139,6 @@ public class DatasetApiController implements DatasetApi {
 	private WADODownloaderService downloader;
 
 	@Autowired
-	private BIDSService bidsService;
-
-	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	@Autowired
@@ -168,8 +164,6 @@ public class DatasetApiController implements DatasetApi {
 					throws RestServiceException {
 
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
