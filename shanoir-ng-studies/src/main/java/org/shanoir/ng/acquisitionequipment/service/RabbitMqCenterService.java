@@ -38,7 +38,7 @@ public class RabbitMqCenterService {
 	private AcquisitionEquipmentRepository acquisitionEquipementService;
 
 	@Autowired
-	ObjectMapper mapper;
+	private ObjectMapper mapper;
 	
 	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE)
 	@RabbitHandler
