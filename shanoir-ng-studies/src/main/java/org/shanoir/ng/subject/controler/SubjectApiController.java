@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.controler;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -119,6 +120,8 @@ public class SubjectApiController implements SubjectApi {
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
 		}
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
@@ -155,6 +158,14 @@ public class SubjectApiController implements SubjectApi {
 		if (simpleSubjectDTOList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		simpleSubjectDTOList.sort(new Comparator<SimpleSubjectDTO>() {
+			@Override
+			public int compare(SimpleSubjectDTO o1, SimpleSubjectDTO o2) {
+				String aname = o1.getSubjectStudy().getSubjectStudyIdentifier() != null ? o1.getSubjectStudy().getSubjectStudyIdentifier() : o1.getName();
+				String bname = o2.getSubjectStudy().getSubjectStudyIdentifier() != null ? o2.getSubjectStudy().getSubjectStudyIdentifier() : o2.getName();
+				return aname.compareToIgnoreCase(bname);
+			}
+		});
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 

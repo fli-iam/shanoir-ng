@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -163,6 +164,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
+		daList.sort(new Comparator<DatasetAcquisition>() {
+
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
+			}
+		});
 		if (daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {

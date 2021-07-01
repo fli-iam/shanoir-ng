@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { IdName } from '../../shared/models/id-name.model';
@@ -72,11 +73,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initView(): Promise<void> {
         let scFetchPromise: Promise<void> = this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
-        });   
+        });
         this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy());
         return scFetchPromise;
     }
-    
+
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
@@ -89,8 +90,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initCreate(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
-        this.fetchNiftiConverters();
         this.studyCard = new StudyCard();
+        this.fetchNiftiConverters().then(result => {
+            // pre-select dcm2niix
+            this.studyCard.niftiConverter = result.filter(element => element.name === 'dcm2niix')[0];
+        });
         return Promise.resolve();
     }
 
@@ -142,9 +146,12 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
     }
 
-    private fetchNiftiConverters() {
-        this.niftiConverterService.getAll()
-            .then(converters => this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name)));
+    private fetchNiftiConverters(): Promise<NiftiConverter[]> {
+        return this.niftiConverterService.getAll()
+            .then(converters => {
+                this.niftiConverters = converters.map(converter => new IdName(converter.id, converter.name));
+                return converters;
+            });
     }
 
     private onStudyChange(study: IdName, form: FormGroup) {

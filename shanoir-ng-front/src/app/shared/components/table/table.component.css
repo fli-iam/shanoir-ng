@@ -1,13 +1,16 @@
  :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
-caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
+caption { overflow: hidden; }
 th { width: 100%; white-space: normal; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
-		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
-			.controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
+			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+			.controls button:disabled { opacity: 0.5; }
 			.controls button span { vertical-align: middle; }
 			.controls button img { height: 16px; vertical-align: middle; }
+			.command-block + .command-block { margin-left: 10px; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
 				.controls .awesome i { color: var(--color-c); }
 		.controls input,
@@ -16,11 +19,11 @@ th { width: 100%; white-space: normal; }
 		.controls select { width: 150px; margin-right: 5px; }
 		.controls .text-search,
 		.controls .options,
-		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 5px;vertical-align: bottom; }
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 20px 0 5px; vertical-align: baseline; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
-	th.checkbox-col { width: 17px; }
+	th.checkbox-col { width: 18px; }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -58,7 +61,8 @@ a.link { text-decoration: none; color: inherit; }
 
 .cell-button i:hover { color: var(--color-a); }
 
-checkbox { height: 13px; width: 13px; margin: 1px 0; }
+checkbox { vertical-align: middle; }
+td checkbox { transform: scale(0.8); }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
 .triangle.up { top: -12px; }
@@ -71,5 +75,15 @@ checkbox { height: 13px; width: 13px; margin: 1px 0; }
 .refresh { color: var(--greyer); }
 .refresh i, .error i { margin-left: 7px; }
 .bottom-refresh { padding: 0 !important; }
-
 .error { color: var(--color-error); font-weight: bold; }
+
+tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;} 
+.col-set-button-wrapper { position: relative; }
+.col-settings-button { display: block; opacity: 0; position: absolute; left: -27px; top: -11px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
+
+app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
+app-modal .header, app-modal .footer { text-align: center; padding: 10px 0; }
+app-modal .header { font-size: 16px; }
+app-modal .body { margin: 15px 10px; }
+app-modal input { width: 37px; }
+app-modal table td { padding: 1 5px; }

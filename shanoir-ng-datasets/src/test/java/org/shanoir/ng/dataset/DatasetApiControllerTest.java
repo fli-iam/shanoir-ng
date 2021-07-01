@@ -52,13 +52,16 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -125,18 +128,27 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean
+	private StudyRepository studyRepo;
 
 	private Subject subject = new Subject(3L, "name");
+	private Study study = new Study(1L, "studyName");
+
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
+	private Examination exam = new Examination();
 
 	@Before
 	public void setup() throws ShanoirException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+		given(studyRepo.findOne(Mockito.anyLong())).willReturn(study);
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
+		exam.setId(1L);
+		dsAcq.setExamination(exam);
 		updatedMetadata.setComment("comment");
 		updatedMetadata.setName("test 1");
 	}
@@ -217,7 +229,7 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("studyId", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
 
 		// THEN all datasets are exported
 		
@@ -265,7 +277,7 @@ public class DatasetApiControllerTest {
 				.param("format", "nii")
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2.nii")));
+		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
 
 
 		// THEN all datasets are exported

@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener, ViewChild } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
 @Component({
     selector: 'shanoir-table',
@@ -28,6 +29,7 @@ export class TableComponent implements OnInit {
     @Input() customActionDefs: any[];
     selection: Map<number, any> = new Map();
     @Input() selectionAllowed: boolean = false;
+    @Input() enableSettings: boolean = false;
     @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
@@ -36,7 +38,6 @@ export class TableComponent implements OnInit {
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
-
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -44,11 +45,10 @@ export class TableComponent implements OnInit {
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
-    
-    public isError: boolean = false;
-    
-    public filter: Filter = new Filter(null, null);
-    public firstLoading: boolean = true;
+    isError: boolean = false;
+    filter: Filter = new Filter(null, null);
+    firstLoading: boolean = true;
+    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
     
 
     constructor(
@@ -66,6 +66,12 @@ export class TableComponent implements OnInit {
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
+            this.columnDefs.forEach(col => {
+                if (savedState.columns && savedState.columns[col.field]) {
+                    col.width = savedState.columns[col.field].width;
+                    col.hidden = savedState.columns[col.field].hidden;
+                }
+            })
             this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
                 .then(() => this.firstLoading = false);
         } else {
@@ -259,16 +265,7 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
-        let currentStep = this.breadcrumbsService.currentStep
-        if(currentStep) {
-            this.breadcrumbsService.currentStep.data.tableState = {
-                lastSortedCol: this.lastSortedCol,
-                lastSortedAsc: this.lastSortedAsc,
-                filter: this.filter,
-                currentPage: this.currentPage,
-                maxResults: this.maxResults
-            };
-        }
+        this.saveState();
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -293,6 +290,28 @@ export class TableComponent implements OnInit {
                 new Sort(orders)
             );
         }
+    }
+
+    private saveState() {
+        let currentStep = this.breadcrumbsService.currentStep
+        if(currentStep) {
+            this.breadcrumbsService.currentStep.data.tableState = {
+                lastSortedCol: this.lastSortedCol,
+                lastSortedAsc: this.lastSortedAsc,
+                filter: this.filter,
+                currentPage: this.currentPage,
+                maxResults: this.maxResults,
+                columns: []
+            };
+            this.saveSettings();
+        }
+    }
+
+    saveSettings() {
+        this.breadcrumbsService.currentStep.data.tableState.columns = this.columnDefs.reduce((result, col) => {
+            result[col.field] = { width: col.width, hidden: col.hidden };
+            return result;
+        }, {});
     }
 
     updateMaxResults(): void {

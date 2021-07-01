@@ -66,6 +66,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             {headerName: "O.D.", tip: "On Demand", field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                 return params.data.accountRequestDemand || params.data.extensionRequestDemand;
             }},
+            {headerName: "Challenge", field: "accountRequestInfo.challenge", type: "boolean", defaultSortCol: true},
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);

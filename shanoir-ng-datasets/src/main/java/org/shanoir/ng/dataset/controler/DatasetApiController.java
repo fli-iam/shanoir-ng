@@ -73,6 +73,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -91,6 +92,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriUtils;
 
 import io.swagger.annotations.ApiParam;
 
@@ -146,7 +148,10 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private SubjectRepository subjectRepo;
-	
+
+	@Autowired
+	private StudyRepository studyRepo;
+
 	@Autowired
 	ShanoirEventService eventService;
 	
@@ -284,7 +289,7 @@ public class DatasetApiController implements DatasetApi {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
 
-		String tmpFilePath = userDir + File.separator + datasetName;
+		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()) + DOWNLOAD);
@@ -331,6 +336,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -401,13 +407,23 @@ public class DatasetApiController implements DatasetApi {
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
-				// Create a new folder for every dataset
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
-				datasetFile.mkdir();
+				// Create a new folder organized by subject / examination
+				String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
+				String studyName = studyRepo.findOne(dataset.getStudyId()).getName();
 
-        String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
+				Examination exam = dataset.getDatasetAcquisition().getExamination();
+				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();
+				datasetFilePath = datasetFilePath. replaceAll("[^a-zA-Z0-9_\\-]", "_");
+				if(datasetFilePath.length() > 255 ){
+					datasetFilePath = datasetFilePath.substring(0, 254);
+				}
+				datasetFilePath = tmpFile.getAbsolutePath() + File.separator + datasetFilePath;
+				File datasetFile = new File(datasetFilePath);
+				if (!datasetFile.exists()) {
+					datasetFile.mkdir();
+				}
 
-        List<URL> pathURLs = new ArrayList<>();
+				List<URL> pathURLs = new ArrayList<>();
 
 				if (dataset instanceof EegDataset) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
@@ -417,9 +433,6 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
-				}  else if (EEG.equals(format)) {
-					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else {
 					throw new RestServiceException(
@@ -452,6 +465,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 		    response.setContentType(contentType);
+		    response.setContentLengthLong(zipFile.length());
 		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 		    response.flushBuffer();
 		    event.setStatus(ShanoirEvent.SUCCESS);
@@ -471,9 +485,10 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws MessagingException
 	 */
 	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+		int index = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
+			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
 			if(dataset instanceof BidsDataset) {
 				// If bids dataset, keep the full name
@@ -488,13 +503,15 @@ public class DatasetApiController implements DatasetApi {
 			.append(dataset.getUpdatedMetadata().getComment()).append("_")
 			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
 			if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1));
+				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
 			}
-			name.append("_").append(dataset.getDatasetAcquisition().getRank()).append(".")
-			.append(FilenameUtils.getExtension(srcFile.getName()));
+			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
+			.append(index)
+			.append(".").append(FilenameUtils.getExtension(srcFile.getName()));
 
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			index++;
 		}
 	}
 

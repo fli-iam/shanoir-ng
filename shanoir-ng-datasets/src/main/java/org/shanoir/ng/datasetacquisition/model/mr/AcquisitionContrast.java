@@ -31,6 +31,8 @@ public enum AcquisitionContrast {
 	// T2 star
 	T2STAR(3),
 
+	T2_STAR(3),
+	
 	// Spin density
 	SPIN_DENSITY(4),
 	

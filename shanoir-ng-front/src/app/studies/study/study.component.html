@@ -93,6 +93,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li *ngIf="keycloakService.isUserAdmin()">
+                        <label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
+                                <span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+                            </ng-template>
+                        </span>
+                    </li>
 					<li>
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -103,6 +115,46 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
 							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
+					Data User Agreement (DUA)
+					<tool-tip class="larger">
+						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
+						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
+						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
+					</tool-tip>
+				</legend>
+				<ol>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
+							<button class="left-icon" (click)="setDuaFile()">
+								<i class="fas fa-upload"></i>Choose file
+							</button>
+						</span>
+					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+					 		{{study.dataUserAgreementPaths[0]}}
+							<button class="dl-button" (click)="deleteDataUserAgreement()">
+								<i class="fas fa-trash"></i>
+							</button>
+						</span>
+					</li>
+					<li *ngIf="mode == 'view'">
+						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+						<div [hidden]="DUAprogressBar.progress == 0">
+                            <progress-bar #DUAprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
+                        <span class="right-col">
+							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
+								{{study.dataUserAgreementPaths[0]}}
+								<button class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
+							</span>
+							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
 					</li>
 				</ol>
@@ -178,25 +230,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Protocol files</legend>
+				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
-						<span  *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]" class="right-col">
-						    <input #input hidden formControlName="protocolFile" type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-						</span>
-                        <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
-                            {{study.protocolFilePaths[0]}}
-                            <button (click)="deleteFile()" class="left-icon"><i class="fas fa-trash"></i></button>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                            <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
+                            <ul class="files">
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                </li>
+                            </ul>
                         </span>
-                        
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
+                        <div [hidden]="PFprogressBar.progress == 0">
+                            <progress-bar #PFprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
                         <span class="right-col">
-                            <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
-                            	<button (click)="downloadFile()"><i class="fas fa-save"></i></button>
+                            <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
+                                <ul>
+                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
+                                  </li>
+                                </ul>
 							</span>
                             <span *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-</span>
                         </span>

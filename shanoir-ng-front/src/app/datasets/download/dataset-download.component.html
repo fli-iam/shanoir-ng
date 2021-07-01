@@ -1,10 +1,12 @@
-<button (click)="prepareDownloadAll()" [disabled]="loading" class="right-icon">Download all datasets<i class="fas fa-download"></i></button>
-<button (click)="prepareDownloadSelected()" [disabled]="loading || !datasetIds || datasetIds.length <= 0" class="right-icon">Download selected datasets<i class="fas fa-download"></i></button> 
-<img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
+<button (click)="prepareDownloadAll()" [disabled]="progressBar.progress != 0" class="right-icon">Download all datasets<i class="fas fa-download"></i></button>
+<button (click)="prepareDownloadSelected()" [disabled]="progressBar.progress != 0 || !datasetIds || datasetIds.length <= 0" class="right-icon">Download selected datasets<i class="fas fa-download"></i></button> 
+<div [hidden]="progressBar.progress == 0">
+    <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+</div>
 <app-modal #downloadDialog >
     <div class="main">
     <div class="header">Massive download</div>
-    <div *ngIf="inError"> class="body" {{errorMessage}}</div>
+    <div *ngIf="inError" class="body">{{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
         <ng-container *ngIf="mode == 'all'">
             <p>Please select download options</p>

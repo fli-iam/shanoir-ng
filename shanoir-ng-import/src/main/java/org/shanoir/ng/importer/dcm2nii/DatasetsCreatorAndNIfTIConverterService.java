@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<>();
+
+	Random rand = new Random();
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
@@ -577,11 +580,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 		// Get subject folder to delete it after
 		File subjectFolder = diff(existingFiles, directory.getPath()).get(0);
-
 		for (File file : niiFiles) {
 			try {
 				// Copy all nifti files
-				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(file.toPath(), Paths.get(directory.getPath() + File.separator + rand.nextInt() + dataset.getName() + "_" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				LOG.error("Error while copying files", e);
 			}
@@ -821,8 +823,12 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			String filePath = image.getPath();
 			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
 			if (oldFile.exists()) {
-				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + oldFile.getName());
-				oldFile.renameTo(newFile);
+				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + filePath);
+				newFile.getParentFile().mkdirs();
+				boolean success = oldFile.renameTo(newFile);
+				if (!success) {
+					throw new ShanoirException("Error while creating serie id folder: file to copy already exists.");
+				}
 				LOG.debug("Moving file: {} to {}", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 				image.setPath(newFile.getAbsolutePath());
 			} else {

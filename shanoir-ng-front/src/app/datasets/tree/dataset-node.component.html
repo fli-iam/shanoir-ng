@@ -26,9 +26,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showDatasetDetails()"></menu-item>
+        <menu-item *ngIf="!related" label="Details..." awesome="fas fa-eye" (click)="showDatasetDetails()"></menu-item>
         <menu-item *ngIf="node.type != 'Eeg'" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item *ngIf="node.type != 'Eeg'" label="Download as Niftii" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.type != 'Eeg'" label="Download as Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
         <menu-item *ngIf="node.type == 'Eeg'" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
     </dropdown-menu>
 

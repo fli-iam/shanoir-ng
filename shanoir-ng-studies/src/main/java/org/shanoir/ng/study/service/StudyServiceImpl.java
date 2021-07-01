@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,12 +24,14 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -45,8 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,6 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Implementation of study service.
  * 
  * @author msimon
+ * @author mkain
  *
  */
 @Component
@@ -69,10 +73,16 @@ public class StudyServiceImpl implements StudyService {
 	
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserCom;
+	
+	@Autowired
+	private DataUserAgreementService dataUserAgreementService;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 	
+	@Value("${studies-data}")
+	private String dataDir;
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
@@ -114,6 +124,12 @@ public class StudyServiceImpl implements StudyService {
 		}
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
+				// if dua file exists, set StudyUser to confirmed false
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					studyUser.setConfirmed(false);
+				} else {
+					studyUser.setConfirmed(true);
+				}
 				studyUser.setStudy(study);
 			}
 		}
@@ -124,6 +140,10 @@ public class StudyServiceImpl implements StudyService {
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
+				// create a DUA for user in study, if dua file exists
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(study, studyUser.getUserId());
+				}
 				commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
 			}
 			try {
@@ -146,6 +166,9 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			studyDb.setChallenge(study.isChallenge());
+		}
 		if (!study.getName().equals(studyDb.getName())) {
 			updateStudyName(new IdName(study.getId(), study.getName()));
 		}
@@ -168,14 +191,42 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudy.setStudy(studyDb);
 			}
 		}
-		if (study.getProtocolFilePaths() != null) {
-			studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
+
+		if (studyDb.getProtocolFilePaths() != null) {
+			for(String filePath : studyDb.getProtocolFilePaths()) {
+				if (!study.getProtocolFilePaths().contains(filePath)) {
+					// Delete file
+					String filePathToDelete = getStudyFilePath(studyDb.getId(), filePath);
+					FileUtils.deleteQuietly(new File(filePathToDelete));
+				}
+			}
+		}
+
+		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
+
+		updateStudyUsers(studyDb, study);
+		
+		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
+			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
 		
-		updateStudyUsers(studyDb, study.getStudyUserList());
 		studyRepository.save(studyDb);
 
 		return studyDb;
+	}
+
+	/**
+	 * Gets the protocol or data user agreement file path
+	 * 
+	 * @param studyId
+	 *            id of the study
+	 * @param fileName
+	 *            name of the file
+	 * @return the file path of the file
+	 */
+	@Override
+	public String getStudyFilePath(Long studyId, String fileName) {
+		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
 	@Override
@@ -184,14 +235,17 @@ public class StudyServiceImpl implements StudyService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return Utils.copyList(studyRepository.findAll());
 		} else {
-			return Utils.copyList(studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
-					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId()));
+			return Utils.copyList(
+				studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(
+					KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId(), true
+				)
+			);
 		}
 	}
 
 	@Transactional
-	private void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
-		if (studyUsers == null) {
+	protected void updateStudyUsers(Study studyDb, Study study) {
+		if (study.getStudyUserList() == null) {
 			return;
 		}
 		// New lists of created / updated to send via RabbitMQ
@@ -200,15 +254,29 @@ public class StudyServiceImpl implements StudyService {
 
 		// Build maps of existing / replacing study users
 		Map<Long, StudyUser> existing = new HashMap<>();
-		for (StudyUser su : study.getStudyUserList()) {
+		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
 		}
+		
 		Map<Long, StudyUser> replacing = new HashMap<>();
-		for (StudyUser su : studyUsers) {
+		for (StudyUser su : study.getStudyUserList()) {
 			if (su.getId() == null) {
 				toBeCreated.add(su);
 			} else {
 				replacing.put(su.getId(), su);
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					// new DUA added to study
+					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
+						su.setConfirmed(false);
+						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+					}
+				} else {
+					// existing DUA removed from study
+					if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
+						su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false before
+						dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+					}
+				}
 			}
 		}
 		
@@ -225,6 +293,7 @@ public class StudyServiceImpl implements StudyService {
 			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
+			existingSu.setConfirmed(replacingSu.isConfirmed());
 			toBeUpdated.add(existingSu);
 		}
 		
@@ -232,18 +301,31 @@ public class StudyServiceImpl implements StudyService {
 		List<StudyUser> created = new ArrayList<>();
 		if (!toBeCreated.isEmpty()) {
 			for (StudyUser su : toBeCreated) {
-				su.setStudy(study);
+				su.setStudy(studyDb);
 			}
 			// save them first to get their id
 			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
+				// add DUA only to newly added StudyUser, not to existing ones
+				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
+					su.setConfirmed(false);
+					dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+				} else {
+					su.setConfirmed(true);
+				}
 				created.add(su);
 			}
-			//studyUserRepository.save(toBeCreated);
-			study.getStudyUserList().addAll(created);
+			studyDb.getStudyUserList().addAll(created);
 		}
-
-		// Remove deleted
-		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList());
+		
+		// Remove deleted: study user + data user agreements
+		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
+			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
+			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
+			if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
+				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
+			}
+		}
+		Utils.removeIdsFromList(idsToBeDeleted, studyDb.getStudyUserList());
 		
 		// Send updates via RabbitMQ
 		try {
@@ -257,11 +339,22 @@ public class StudyServiceImpl implements StudyService {
 			for (StudyUser su : toBeUpdated) {
 				commands.add(new StudyUserCommand(CommandType.UPDATE, su));
 			}
-			
 			studyUserCom.broadcast(commands);
-			
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user update info through RabbitMQ");
+		}
+	}
+	
+	@Override
+	public void addStudyUserToStudy(StudyUser studyUser, Study study) {
+		studyUserRepository.save(studyUser);
+		// Send updates via RabbitMQ
+		try {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
+			studyUserCom.broadcast(commands);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not transmit study-user create info through RabbitMQ");
 		}
 	}
 	
@@ -273,5 +366,11 @@ public class StudyServiceImpl implements StudyService {
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
 		}
+	}
+
+	@Override
+	public List<Study> findChallenges() {
+		// Utils.copyList is used to prevent a bug with @PostFilter
+		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 }

@@ -45,9 +45,9 @@ export class EegUploadComponent {
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'EEG';
         });
-        breadcrumbsService.currentStep.importStart = true;
-        breadcrumbsService.currentStep.importMode = 'EEG';
     }
 
     public uploadArchive(fileEvent: any): void {

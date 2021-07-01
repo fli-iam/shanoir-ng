@@ -17,9 +17,9 @@
 use studies;
 
 INSERT INTO study
-	(id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
+	(id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge)
 VALUES
-	(1, '\0', NULL, '\0', NULL, 1, 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1);
+	(1, '\0', NULL, '\0', NULL, 1, 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0);
 
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES

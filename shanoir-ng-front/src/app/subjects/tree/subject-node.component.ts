@@ -94,16 +94,15 @@ export class SubjectNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            []
+            exam.extraDataFilePathList
         );
     }
     
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
-            dsAcq.sortingIndex,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : [],
         );
     }
     

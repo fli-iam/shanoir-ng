@@ -57,8 +57,8 @@ spring:
     store-type: none
   http:
     multipart:
-      maxFileSize: 500Mb
-      maxRequestSize: 500Mb
+      maxFileSize: 6000Mb
+      maxRequestSize: 6000Mb
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -111,11 +111,11 @@ spring:
   profiles: dev
   datasource:
     url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    initialize: false
+    initialize: true
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: validate
+      ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
   rabbitmq:
@@ -131,6 +131,8 @@ ms.url:
   shanoir-ng-studycards: http://localhost:9904/studycards
   shanoir-ng-examinations: http://localhost:9904/examinations
   shanoir-ng-bids: http://localhost:9904/bids
+# data paths
+studies-data: /tmp
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
@@ -156,3 +158,5 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
