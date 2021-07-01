@@ -378,10 +378,17 @@ public class EmailServiceImpl implements EmailService {
 		// Get the list of recipients
 		List<User> admins = (List<User>) this.userRepository.findAll(generatedMail.getRecipients());
 		
-		List<String> datasetLinks = new ArrayList<>();
+		List<DatasetDetail> datasetLinks = new ArrayList<>();
 		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
-			datasetLinks.add(dataset.getValue() + " : " + this.shanoirServerAddress + "/shanoir-ng/datasets/details/" + dataset.getKey());
+			DatasetDetail detail = new DatasetDetail();
+			detail.setName(dataset.getValue());
+			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
+			datasetLinks.add(detail);
 		}
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
 		for (User admin : admins) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -396,17 +403,34 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(STUDY_NAME, generatedMail.getStudyName());
 				variables.put(SUBJECT, generatedMail.getSubjectName());
 				variables.put(SERIES, datasetLinks);
-				variables.put(EXAMINATION, shanoirServerAddress + "/shanoir-ng/examination/details/" + generatedMail.getExaminationId());
+				variables.put(EXAMINATION, examDetail);
 				variables.put(EXAM_DATE, generatedMail.getExamDate());
 				variables.put(STUDY_CARD, generatedMail.getStudyCard());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
+				LOG.error(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
 			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
 			mailSender.send(messagePreparator);
 		}
-		
+	}
+
+	private class DatasetDetail {
+		private String url;
+		private String name;
+		public String getUrl() {
+			return url;
+		}
+		public void setUrl(String url) {
+			this.url = url;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 }
