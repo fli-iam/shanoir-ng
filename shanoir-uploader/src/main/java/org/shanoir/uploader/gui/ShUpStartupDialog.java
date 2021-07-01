@@ -154,6 +154,7 @@ public class ShUpStartupDialog extends JFrame {
 		loginPanel.loginText.setText(ServiceConfiguration.getInstance().getUsername());
 		loginPanel.setFocusable(true);
 		loginPanel.requestFocusInWindow();
+		frame.getRootPane().setDefaultButton(loginPanel.connect);
 		additionalPanel.add(loginPanel);
 		loginPanel.repaint();
 		loginPanel.revalidate();

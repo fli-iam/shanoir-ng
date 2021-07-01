@@ -76,6 +76,15 @@ public interface UserService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
 	List<User> findAll();
+	
+	/**
+	 * Get all the users on account request
+	 * 
+	 * @return a list of users
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject)")
+	List<User> findAccountRequests();
 
 	/**
 	 * Find user by its email.

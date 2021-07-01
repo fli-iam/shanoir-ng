@@ -12,44 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewChecked, Component, ElementRef, forwardRef, Input } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
-import { IMyOptions } from 'mydatepicker';
+import { IMyOptions, MyDatePicker } from 'mydatepicker';
 
-
-// @Component({
-//     selector: 'datepicker',
-//             // <my-date-picker 
-//             //     [options]="options" 
-//             //     [ngModel]="convertedDate"
-//             //     (ngModelChange)="onModelChange($event)"
-//             //     (inputFieldChanged)="onInputFieldChanged($event)"
-//             //     (inputFocusBlur)="onTouch()">
-//             // </my-date-picker>
-//     template: `
-//         <span>
-//             <div class="input-box-container">
-//               <input class="input-box" placeholder="Click to select a date" 
-//                 angular-mydatepicker name="mydate" (click)="dp.toggleCalendar()" 
-//                 [(ngModel)]="convertedDate" [options]="options" 
-//                 #dp="angular-mydatepicker" (dateChanged)="onDateChanged($event)"/>
-//             </div>
-
-//         </span>
-//     `,
-//     styles: [
-//         ':host() { display: inline-block; height: 19px; }',
-//         ':host():has(input:focus) { border-bottom: 2px solid var(--color-a); }'
-//     ],
-//     providers: [
-//         {
-//           provide: NG_VALUE_ACCESSOR,
-//           useExisting: forwardRef(() => DatepickerComponent),
-//           multi: true,
-//         }]   
-// })
-
-// @dynamic
 @Component({
     selector: 'datepicker',
     template: `
@@ -77,6 +43,7 @@ import { IMyOptions } from 'mydatepicker';
 })
 export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
 
+    @ViewChild(MyDatePicker) innerDatePicker;
     private inputFieldContent: string;
     private lastInputFieldContent: string;
     convertedDate: Object;
@@ -122,7 +89,8 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
         if (value) {
             this.convertedDate = {jsdate: new Date(value)};
         } else {
-            this.convertedDate = null; 
+            this.convertedDate = null;
+            if (this.innerDatePicker) this.innerDatePicker.clearDate();
         }
     }
     

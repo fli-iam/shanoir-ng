@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 *ngFor="let dataset of datasets" 
                 [label]="dataset.name" 
                 [(ngModel)]="dataset.selected"
-                awesome="fa fa-hat-wizard" 
+                awesome="fa fa-bolt" 
                 (labelClick)="showDatasetDetail(dataset)"
                 [class.selected]="datasetDetail == dataset"
                 [deploy]="false"

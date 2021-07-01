@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
@@ -21,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
@@ -50,7 +53,7 @@ public class ShanoirUploaderServiceClientNG {
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
-	private static final String SERVICE_ACQUISITION_EQUIPMENT_BY_ID = "service.acquisition.equipment.find.by.id";
+	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
@@ -78,7 +81,7 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private String serviceURLStudyCardsByStudyIds;
 	
-	private String serviceURLAcquisitionEquipmentById;
+	private String serviceURLAcquisitionEquipments;
 	
 	private String serviceURLSubjectsFindByIdentifier;
 	
@@ -115,8 +118,8 @@ public class ShanoirUploaderServiceClientNG {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
-		this.serviceURLAcquisitionEquipmentById = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
+		this.serviceURLAcquisitionEquipments = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
 			+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLDatasets = this.serverURL
@@ -144,14 +147,21 @@ public class ShanoirUploaderServiceClientNG {
 			final StringBuilder postBody = new StringBuilder();
 			postBody.append("client_id=shanoir-uploader");
 			postBody.append("&grant_type=password");
-			postBody.append("&username=").append(username);
+			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
-			postBody.append("&scope=openid info offline_access");
+			postBody.append("&scope=offline_access");
+
 			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+			if(response == null) {
+				logger.error("Error while asking authentification token from: " + keycloakURL);
+				return null;
+			}
 			String responseEntityString = EntityUtils.toString(response.getEntity());
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {
 				JSONObject responseEntityJson = new JSONObject(responseEntityString);
+				String refreshToken = responseEntityJson.getString("refresh_token");
+				refreshToken(keycloakURL, refreshToken);
 				return responseEntityJson.getString("access_token");
 			}
 		} catch (UnsupportedEncodingException e) {
@@ -164,8 +174,48 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 	
+	/**
+	 * Start job, that refreshes the access token every 240 seconds.
+	 * The default access token lifetime of Keycloak is 5 min (300 secs),
+	 * we update after 4 min (240 secs) to use the time frame, but not to
+	 * be to close to the end.
+	 */
+	private void refreshToken(String keycloakURL, String refreshToken) {
+		final StringBuilder postBody = new StringBuilder();
+		postBody.append("client_id=shanoir-uploader");
+		postBody.append("&grant_type=refresh_token");
+		postBody.append("&refresh_token=").append(refreshToken);
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+		Runnable task = () -> {
+			try {
+				HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+				String responseEntityString = EntityUtils.toString(response.getEntity());
+				final int statusCode = response.getStatusLine().getStatusCode();
+				if (HttpStatus.SC_OK == statusCode) {
+					JSONObject responseEntityJson = new JSONObject(responseEntityString);
+					String newAccessToken = responseEntityJson.getString("access_token");
+					if (newAccessToken != null) {
+						ShUpOnloadConfig.setTokenString(newAccessToken);
+					} else {
+						logger.info("ERROR: with access token refresh.");
+					}
+					logger.info("Access token has been refreshed.");
+				} else {
+					logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		};
+		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
+	}
+	
 	public List<Study> findStudiesNamesAndCenters() {
+		long startTime = System.currentTimeMillis();
 		HttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    logger.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
 		int code = response.getStatusLine().getStatusCode();
 		if (code == HttpStatus.SC_OK) {
 			List<Study> studies = Util.getMappedList(response, Study.class);
@@ -179,7 +229,11 @@ public class ShanoirUploaderServiceClientNG {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
+			long startTime = System.currentTimeMillis();
 			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false);
+			long stopTime = System.currentTimeMillis();
+		    long elapsedTime = stopTime - startTime;
+		    logger.info("findStudyCardsByStudyIds: " + elapsedTime + "ms");
 			int code = response.getStatusLine().getStatusCode();
 			if (code == HttpStatus.SC_OK) {
 				List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
@@ -278,14 +332,16 @@ public class ShanoirUploaderServiceClientNG {
 		return null;
 	}
 
-	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) throws Exception {
-		if (acquisitionEquipmentId != null) {
-			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
-			int code = response.getStatusLine().getStatusCode();
-			if (code == HttpStatus.SC_OK) {
-				AcquisitionEquipment acquisitionEquipment = Util.getMappedObject(response, AcquisitionEquipment.class);
-				return acquisitionEquipment;
-			}
+	public List<AcquisitionEquipment> findAcquisitionEquipments() throws Exception {
+		long startTime = System.currentTimeMillis();
+		HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipments);
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    logger.info("findAcquisitionEquipments: " + elapsedTime + "ms");
+		int code = response.getStatusLine().getStatusCode();
+		if (code == HttpStatus.SC_OK) {
+			List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response, AcquisitionEquipment.class);
+			return acquisitionEquipments;
 		}
 		return null;
 	}

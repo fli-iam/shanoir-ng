@@ -144,7 +144,7 @@ public class MainWindow extends JFrame {
 	public MainWindow(final IDicomServerClient dicomServerClient,
 			final File shanoirUploaderFolder,
 			final UrlConfig urlConfig,
-			final ResourceBundle resourceBundle) {		
+			final ResourceBundle resourceBundle) {
 		this.dicomServerClient=dicomServerClient;
 		this.shanoirUploaderFolder=shanoirUploaderFolder;
 		this.resourceBundle=resourceBundle;
@@ -194,12 +194,26 @@ public class MainWindow extends JFrame {
 
 		JMenu mnConfiguration = new JMenu(resourceBundle.getString("shanoir.uploader.configurationMenu"));
 		menuBar.add(mnConfiguration);
+		
+		JMenu mnImport = new JMenu(resourceBundle.getString("shanoir.uploader.importMenu"));
+		menuBar.add(mnImport);
+		
+		JMenuItem mnImportExcell = new JMenuItem(resourceBundle.getString("shanoir.uploader.importMenu.csv"));
+		mnImport.add(mnImportExcell);
+		
+		mnImportExcell.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
+			}
+		});
 
 		// add Server Configuration and Dicom configuration Menu Items
 		JMenuItem mntmDicomServerConfiguration = new JMenuItem(
 				resourceBundle.getString("shanoir.uploader.configurationMenu.dicomServer"));
 		mnConfiguration.add(mntmDicomServerConfiguration);
 		mntmDicomServerConfiguration.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				DicomServerConfigurationWindow dscw = new DicomServerConfigurationWindow(
 						shanoirUploaderFolder, resourceBundle );
@@ -217,6 +231,7 @@ public class MainWindow extends JFrame {
 		mnConfiguration.add(mntmShanoirServerConfiguration);
 
 		mntmShanoirServerConfiguration.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				ShanoirServerConfigurationWindow sscw = new ShanoirServerConfigurationWindow(shanoirUploaderFolder,
 						ServiceConfiguration.getInstance(), resourceBundle);
@@ -227,6 +242,7 @@ public class MainWindow extends JFrame {
 		JMenuItem mntmLanguage = new JMenuItem(resourceBundle.getString("shanoir.uploader.configurationMenu.language"));
 		mnConfiguration.add(mntmLanguage);
 		mntmLanguage.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				LanguageConfigurationWindow sscw = new LanguageConfigurationWindow(shanoirUploaderFolder,
 						resourceBundle);
@@ -239,13 +255,14 @@ public class MainWindow extends JFrame {
 		JMenuItem mntmAboutShUp = new JMenuItem(resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp"));
 		mnHelp.add(mntmAboutShUp);
 		mntmAboutShUp.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				AboutWindow aboutW = new AboutWindow(resourceBundle);
 			}
 		});
 
 		JMenu profileSelected = new JMenu("<html><b>" + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + "</b></html>");
-		menuBar.add(Box.createRigidArea(new Dimension(550,5)));
+		menuBar.add(Box.createRigidArea(new Dimension(400,5)));
 		menuBar.add(profileSelected);
 
 		/**
@@ -320,6 +337,7 @@ public class MainWindow extends JFrame {
 		queryPanel.add(helpButton, gbc_HelpButton);
 
 		helpButton.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				String message = "<html><b> - </b>The patient name should be in this form:</html> "
 						+ "\n"
@@ -367,7 +385,7 @@ public class MainWindow extends JFrame {
 						+ "with the patient LastName only if the LastName introduced contains at least 4 characters"
 						+ "<b>" + "</html>" + "\n";
 
-				;
+				
 				JOptionPane.showMessageDialog(queryPanel, message, "Help",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
@@ -376,14 +394,16 @@ public class MainWindow extends JFrame {
 		// If fields Patient name, Patient ID and Study description are empty
 		// Query DICOM server button is grey
 		CaretListener caretQueryPACSfields = new CaretListener() {
+			@Override
 			public void caretUpdate(javax.swing.event.CaretEvent e) {
 				if (patientNameTF.getText().length() != 0
 						|| patientIDTF.getText().length() != 0
 						|| studyDescriptionTF.getText().length() != 0
-						|| dateRS.length() != 0 || studyDate.length() != 0)
+						|| dateRS.length() != 0 || studyDate.length() != 0) {
 					queryButton.setEnabled(true);
-				else
+				} else {
 					queryButton.setEnabled(false);
+				}
 
 			}
 		};
@@ -471,6 +491,7 @@ public class MainWindow extends JFrame {
 		queryPanel.add(datePicker, gbc_birthDateReasearchTF);
 
 		datePicker.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 				if (model.getValue() != null) {
@@ -481,8 +502,9 @@ public class MainWindow extends JFrame {
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
-							&& studyDate.length() == 0)
+							&& studyDate.length() == 0) {
 						queryButton.setEnabled(false);
+					}
 				}
 			}
 		});
@@ -516,6 +538,7 @@ public class MainWindow extends JFrame {
 		queryPanel.add(studyDatePicker, gbc_studyDatePicker);
 
 		studyDatePicker.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				queryButton.setEnabled(true);
 				final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
@@ -527,8 +550,9 @@ public class MainWindow extends JFrame {
 					if (patientNameTF.getText().length() == 0
 							&& patientIDTF.getText().length() == 0
 							&& studyDescriptionTF.getText().length() == 0
-							&& dateRS.length() == 0)
+							&& dateRS.length() == 0) {
 						queryButton.setEnabled(false);
+					}
 				}
 			}
 		});
@@ -684,6 +708,7 @@ public class MainWindow extends JFrame {
 		editPanel.add(birthNameTF, gBCBirthNameTF);
 
 		birthNameCopyButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				birthNameTF.setText(lastNameTF.getText());
 			}
@@ -777,8 +802,8 @@ public class MainWindow extends JFrame {
 			logger.error(e.getMessage(), e);
 		}
 		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient);
-		downloadOrCopyButton.addActionListener(dOCAL);		
-		downloadOrCopyButton.setEnabled(false);	
+		downloadOrCopyButton.addActionListener(dOCAL);
+		downloadOrCopyButton.setEnabled(false);
 		
 		/**
 		 * Init ImportDialog and its Opener here.

@@ -33,6 +33,7 @@ export class CheckboxComponent implements ControlValueAccessor {
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
+    @Input() inverse: boolean = false;
 
     constructor() {}
 

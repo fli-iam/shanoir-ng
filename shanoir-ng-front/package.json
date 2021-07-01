@@ -8,7 +8,8 @@
     "build:source-map": "ng build --prod --source-map",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "postbuild": "node src/version.ts"
   },
   "private": true,
   "dependencies": {
@@ -35,7 +36,8 @@
     "rxjs-compat": "^6.5.3",
     "sha.js": "^2.4.11",
     "tslib": "^1.10.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.10.2",
+    "git-describe": "4.0.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.1100.2",

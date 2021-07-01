@@ -41,6 +41,10 @@ public class ShanoirSolrFacet {
 	
 	private Collection<String> datasetNature;
 	
+	private String searchText;
+	
+	private boolean expertMode;
+	
 	/**
 	 * @return the studyName
 	 */
@@ -167,21 +171,23 @@ public class ShanoirSolrFacet {
 		this.datasetNature = datasetNature;
 	}
 
-//	private	Long datasetId;
-//	
-//	// DatasetModalityType: MR, CT, PET etc..
-//	private	String datasetType;
-//	
-//	// T1, T2, Diff, etc..
-//	private String datasetNature;
-//	
-//	private Date datasetCreationDate;
-//	
-//	
-//	private Date examinationDate;
-//	
-//	
-//	
-//	private Long studyId;
+	public String getSearchText() {
+		return searchText;
+	}
 
+	public void setSearchText(String searchText) {
+		this.searchText = searchText;
+	}
+
+	public boolean isExpertMode() {
+		return expertMode;
+	}
+	
+	public boolean getExpertMode() {
+		return isExpertMode();
+	}
+
+	public void setExpertMode(boolean expertMode) {
+		this.expertMode = expertMode;
+	}
 }

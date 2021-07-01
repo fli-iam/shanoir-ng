@@ -16,12 +16,15 @@ package org.shanoir.ng.dataset.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
 public class DatasetAndProcessingsDTO extends DatasetDTO implements DatasetAndProcessingsDTOInterface {
 
 	private List<DatasetProcessingDTO> processings;
+	
+	private DatasetAcquisitionDTO datasetAcquisition;
 
 	@Override
 	public List<DatasetProcessingDTO> getProcessings() {
@@ -31,5 +34,15 @@ public class DatasetAndProcessingsDTO extends DatasetDTO implements DatasetAndPr
 	@Override
 	public void setProcessings(List<DatasetProcessingDTO> processings) {
 		this.processings = processings;
+	}
+
+	@Override
+	public DatasetAcquisitionDTO getDatasetAcquisition() {
+		return this.datasetAcquisition;
+	}
+
+	@Override
+	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
+		this.datasetAcquisition = datasetAcquisition;
 	}
 }
