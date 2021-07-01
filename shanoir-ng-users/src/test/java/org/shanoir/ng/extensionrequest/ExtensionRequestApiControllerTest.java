@@ -23,6 +23,7 @@ import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -41,6 +42,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 public class ExtensionRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/extensionrequest";
+	
+	private static final String KEYCLOAK_ID = "KEYCLOAK_ID";
+
+	private static final String EMAIL = "test@gmail.com";
+	
+	private static final String PASSWORD = "password";
 
 	@Autowired
 	private MockMvc mvc;
@@ -63,16 +70,17 @@ public class ExtensionRequestApiControllerTest {
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
 	
-	final static String EMAIL = "test@gmail.com";
 
 	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
 	public void extensionRequestTest() throws Exception {
 		// GIVEN a disabled user with no current extension request
 		User mockUser = ModelsUtil.createUser(1L);
 		mockUser.setExpirationDate(LocalDate.now().minusDays(1));
 		mockUser.setExtensionRequestDemand(Boolean.FALSE);
+		mockUser.setKeycloakId(KEYCLOAK_ID);
 		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.of(mockUser));
+		Mockito.when(keycloakClient.resetPassword(KEYCLOAK_ID)).thenReturn(PASSWORD);
 
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
