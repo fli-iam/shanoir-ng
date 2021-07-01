@@ -187,7 +187,7 @@ export class TableComponent implements OnInit, OnChanges {
      * Convert a cell content to a displayable string
      */
     renderCell(item: Object, col: any): string {
-        let result: any = TableComponent.getCellValue(item, col);
+        let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else {
@@ -200,7 +200,7 @@ export class TableComponent implements OnInit, OnChanges {
      */
     isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
-        let val = TableComponent.getCellValue(this.items[0], col);
+        let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
@@ -417,7 +417,6 @@ export class TableComponent implements OnInit, OnChanges {
 
     isSelected(item: Object): boolean {
         if (!item['id']) {
-            console.log(item)
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
         }

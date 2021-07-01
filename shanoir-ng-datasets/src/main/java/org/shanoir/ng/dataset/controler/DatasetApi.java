@@ -78,7 +78,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@DeleteMapping(value = "/delete", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#datasetIds, 'CAN_ADMINITRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteDatasets(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestBody(required = true) List<Long> datasetIds)

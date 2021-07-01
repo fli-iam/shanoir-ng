@@ -300,9 +300,17 @@ export class SolrSearchComponent{
                         this.table.refresh().then(() => {
                             this.msgBoxService.log('info', 'Datasets sucessfully deleted');
                         });
+                    }).catch(reason => {
+                        if(reason.error.code == 403) {
+                            this.confirmDialogService.error('Impossible', 
+                                'Some of the selected datasets belong to studies that you don\'t administrate. '
+                                + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. ' 
+                                +' If you really need to delete those datasets, contact an administrator for the corresponding study '
+                                + ' and ask him to grant you the administrator role in the study.');
+                        } else throw Error(reason);
                     });                    
                 }
-            })
+            });
     }
 
     private getCommonColumnDefs() {
@@ -315,6 +323,7 @@ export class SolrSearchComponent{
 
         let columnDefs: any = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
+            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-shield-alt", color: "goldenrod", suppressSorting: true},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Type", field: "datasetType", width: "30px"},
             {headerName: "Nature", field: "datasetNature", width: "30px"},
