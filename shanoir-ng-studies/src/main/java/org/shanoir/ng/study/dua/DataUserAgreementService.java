@@ -44,7 +44,7 @@ public class DataUserAgreementService {
 	}
 	
 	public void acceptDataUserAgreement(Long duaId) throws ShanoirException {
-		DataUserAgreement dataUserAgreement = repository.findOne(duaId);
+		DataUserAgreement dataUserAgreement = repository.findById(duaId).orElseThrow();
 		dataUserAgreement.setTimestampOfAccepted(new Date());
 		repository.save(dataUserAgreement);
 		StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
@@ -83,7 +83,7 @@ public class DataUserAgreementService {
 	public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
 		DataUserAgreement dataUserAgreement = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, study.getId());
 		if (dataUserAgreement != null) {
-			repository.delete(dataUserAgreement.getId());
+			repository.deleteById(dataUserAgreement.getId());
 		}
 	}
 

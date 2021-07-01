@@ -85,7 +85,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		final Study study = studyRepository.findOne(id);
+		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
 			throw new EntityNotFoundException(Study.class, id);
 		}
@@ -102,12 +102,12 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		
-		studyRepository.delete(id);
+		studyRepository.deleteById(id);
 	}
 
 	@Override
 	public Study findById(final Long id) {
-		return studyRepository.findOne(id);
+		return studyRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final Study studyDb = studyRepository.findOne(study.getId());
+		final Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
 		}
@@ -304,7 +304,7 @@ public class StudyServiceImpl implements StudyService {
 				su.setStudy(studyDb);
 			}
 			// save them first to get their id
-			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
+			for (StudyUser su : studyUserRepository.saveAll(toBeCreated)) {
 				// add DUA only to newly added StudyUser, not to existing ones
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
@@ -319,7 +319,7 @@ public class StudyServiceImpl implements StudyService {
 		
 		// Remove deleted: study user + data user agreements
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
-			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
+			StudyUser studyUser = studyUserRepository.findById(studyUserIdToBeDeleted).orElseThrow();
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
 			if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
