@@ -150,7 +150,12 @@ public class ShanoirUploaderServiceClientNG {
 			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
 			postBody.append("&scope=offline_access");
+
 			HttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
+			if(response == null) {
+				logger.error("Error while asking authentification token from: " + keycloakURL);
+				return null;
+			}
 			String responseEntityString = EntityUtils.toString(response.getEntity());
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {

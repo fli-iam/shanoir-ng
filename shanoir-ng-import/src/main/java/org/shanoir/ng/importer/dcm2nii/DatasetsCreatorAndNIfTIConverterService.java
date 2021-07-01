@@ -823,8 +823,12 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			String filePath = image.getPath();
 			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
 			if (oldFile.exists()) {
-				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + oldFile.getName());
-				oldFile.renameTo(newFile);
+				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + filePath);
+				newFile.getParentFile().mkdirs();
+				boolean success = oldFile.renameTo(newFile);
+				if (!success) {
+					throw new ShanoirException("Error while creating serie id folder: file to copy already exists.");
+				}
 				LOG.debug("Moving file: {} to {}", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
 				image.setPath(newFile.getAbsolutePath());
 			} else {
