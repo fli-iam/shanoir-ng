@@ -19,6 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +41,7 @@ public interface SolrService {
 	
 	SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable);
 
-	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable);
+	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
 
 	void indexDataset(Long datasetId);
 
