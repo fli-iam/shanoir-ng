@@ -49,7 +49,7 @@ public class RabbitMqCenterService {
 	@Transactional
 	public String findCenterIdFromAcquisitionEquipement(String message) {
 		try {
-			AcquisitionEquipment ae = acquisitionEquipementService.findOne(Long.valueOf(message));
+			AcquisitionEquipment ae = acquisitionEquipementService.findById(Long.valueOf(message)).orElse(null);
 			if (ae == null) {
 				return null;
 			} else {

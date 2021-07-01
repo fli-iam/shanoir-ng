@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.acquisitionequipment.controler;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +40,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import io.swagger.annotations.ApiParam;
 
@@ -71,7 +70,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
-		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId);
+		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId).orElse(null);
 		if (equipment == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -156,8 +155,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 	
 	private void checkDataIntegrityException(DataIntegrityViolationException e, AcquisitionEquipment acquisitionEquipment) throws RestServiceException {
-		if (e.getRootCause() instanceof MySQLIntegrityConstraintViolationException) {
-			MySQLIntegrityConstraintViolationException rootEx = (MySQLIntegrityConstraintViolationException) e.getRootCause();
+		if (e.getRootCause() instanceof SQLIntegrityConstraintViolationException) {
+			SQLIntegrityConstraintViolationException rootEx = (SQLIntegrityConstraintViolationException) e.getRootCause();
 			if (rootEx.getMessage().contains("model_number_idx")) {
 				FieldErrorMap errorMap = new FieldErrorMap();
 				List<FieldError> errors = new ArrayList<>();
