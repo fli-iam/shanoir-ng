@@ -49,6 +49,7 @@ import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -489,6 +490,12 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
+			if(dataset instanceof BidsDataset) {
+				// If bids dataset, keep the full name
+				File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+				Files.copy(srcFile.toPath(), destFile.toPath());
+				continue;
+			}
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 			StringBuilder name = new StringBuilder("");
 			

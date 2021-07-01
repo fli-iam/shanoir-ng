@@ -38,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
@@ -289,6 +290,46 @@ public class DatasetApiControllerTest {
 		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
 		assertEquals(dataset.getId().toString(), event.getObjectId());
 		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+	public void testMassiveDownloadByDatasetsIdBidsDataset() throws Exception {
+		// GIVEN a list of datasets to export, with a BIDS Dataset
+		// Create a file with some text
+		File datasetFile = testFolder.newFile("test.nii");
+		datasetFile.getParentFile().mkdirs();
+		datasetFile.createNewFile();
+		FileUtils.write(datasetFile, "test");
+
+		// Link it to datasetExpression in a dataset in a study
+		BidsDataset dataset = new BidsDataset();
+		dataset.setSubjectId(3L);
+		dataset.setId(1L);
+		given(subjectRepository.findOne(3L)).willReturn(subject);
+		dataset.setDatasetAcquisition(dsAcq);
+		dataset.setUpdatedMetadata(updatedMetadata);
+
+		DatasetExpression expr = new DatasetExpression();
+		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		DatasetFile dsFile = new DatasetFile();
+		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		expr.setDatasetFiles(Collections.singletonList(dsFile));
+		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
+		dataset.setDatasetExpressions(datasetExpressions);
+
+		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
+
+		// WHEN we export all the datasets => name is kept
+		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
+				.param("format", "nii")
+				.param("datasetIds", "1"))
+		.andExpect(status().isOk())
+		.andExpect(content().string(containsString("test.nii")));
+
+
+		// THEN all datasets are exported
 	}
 
 	@Test

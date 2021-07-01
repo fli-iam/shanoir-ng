@@ -28,6 +28,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -54,11 +55,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @DatasetsModalityTypeCheck
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({  
-	@Type(value = CtDatasetAcquisition.class, name = "Ct"),  
+@JsonSubTypes({
+	@Type(value = CtDatasetAcquisition.class, name = "Ct"),
 	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
-	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
+	@Type(value = EegDatasetAcquisition.class, name = "Eeg"),
+	@Type(value = BidsDatasetAcquisition.class, name = "Bids")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/**

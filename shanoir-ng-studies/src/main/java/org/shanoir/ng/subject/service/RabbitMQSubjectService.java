@@ -37,6 +37,7 @@ import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -175,6 +176,9 @@ public class RabbitMQSubjectService {
 	@RabbitHandler
 	public String manageParticipants(String participantsFilePath) throws JsonProcessingException {
 		try {
+			// Set up an admin security context to be able to create a subject
+			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+
 			File participantsFile = new File(participantsFilePath);
 			if (!participantsFile.exists()) {
 				LOG.error("Could not find the definition of participants.tsv, no subjects created: " + participantsFilePath);
@@ -193,7 +197,7 @@ public class RabbitMQSubjectService {
 			for (Subject subjToCreate : participants) {
 				if (!existingNames.contains(subjToCreate.getName())) {
 					// If not existing, create a new one
-					Subject created = subjectRepository.save(subjToCreate);
+					Subject created = subjectService.create(subjToCreate);
 					participantsToReturn.add(new IdName(created.getId(), created.getName()));
 				} else {
 					subjToCreate.setId(getSubjectIdByName(subjToCreate.getName(), existingSubjects));
