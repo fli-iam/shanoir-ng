@@ -35,6 +35,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -191,14 +192,17 @@ public class DistantStudiesShanoirService {
 	 * @param studyId the study Id
 	 * @throws ShanoirException
 	 */
-	public void addProtocoleFile(File file, String studyId) throws ShanoirException {
+	public void addProtocoleFile(File file, Long studyId) throws ShanoirException {
 		try {
+			LOG.error("Sending dataset files to distant Shanoir");
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file", file);
+			if (file != null && file.exists()) {
+				body.add("file", new FileSystemResource(file));
+			}
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
 

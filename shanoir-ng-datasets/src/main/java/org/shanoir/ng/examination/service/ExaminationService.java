@@ -116,6 +116,5 @@ public interface ExaminationService {
 	 */
 	String addExtraData(Long examinationId, MultipartFile file);
 
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
 }

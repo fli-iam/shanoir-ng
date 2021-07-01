@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
@@ -38,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,9 @@ public class DatasetMigrationService {
 	ExaminationRepository examRepository;
 
 	@Autowired
+	ExaminationService examService;
+	
+	@Autowired
 	DistantDatasetShanoirService distantShanoir;
 
 	@Autowired
@@ -71,6 +76,9 @@ public class DatasetMigrationService {
 
 	@Autowired
 	EntityManager entityManager;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
 
 	/**
 	 * Migrates all the datasets from a study using a MigrationJob
@@ -90,6 +98,9 @@ public class DatasetMigrationService {
 			LOG.error("receiving job " + job);
 
 			this.migrateStudy(job);
+			
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
+			
 		} catch (Exception e) {
 			LOG.error("Error while moving datasets: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
@@ -167,16 +178,18 @@ public class DatasetMigrationService {
 
 		// Move examination
 		LOG.error("Exam " + exam);
-		exam = distantShanoir.createExamination(exam);
-		job.getExaminationMap().put(oldId, exam.getId());
+		Examination createdExam = distantShanoir.createExamination(exam);
+		job.getExaminationMap().put(oldId, createdExam.getId());
 
 		// Migrate datasetAcquisition
 		for(DatasetAcquisition acq : dsAcq) {
-			migrateAcquisition(acq, exam.getId(), oldId, job);
+			migrateAcquisition(acq, createdExam.getId(), oldId, job);
 		}
 
-		// TODO: Move examination extra-data
-
+		for (String fileName : exam.getExtraDataFilePathList()) {
+			String filePath = examService.getExtraDataFilePath(oldId, fileName);
+			distantShanoir.addExminationExtraData(new File(filePath), createdExam.getId());
+		}
 		return exam;
 	}
 
@@ -348,14 +361,16 @@ public class DatasetMigrationService {
 		file.setDatasetExpression(expressionDTO);
 
 		// Update path for the new  server (replace usual paths)
-		file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
-		file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
-		file.setPath(file.getPath().replace(
-				"-" + createdDataset.getSubjectId()							  + "/ses-" + oldExamId ,
-				"-" + job.getSubjectsMap().get(createdDataset.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
-		file.setPath(file.getPath().replace(
-				"/ses-" + oldExamId ,
-				"/ses-" + job.getExaminationMap().get(oldExamId)));
+		if (!file.isPacs()) {
+			file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
+			file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
+			file.setPath(file.getPath().replace(
+					"-" + createdDataset.getSubjectId()							  + "/ses-" + oldExamId ,
+					"-" + job.getSubjectsMap().get(createdDataset.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
+			file.setPath(file.getPath().replace(
+					"/ses-" + oldExamId ,
+					"/ses-" + job.getExaminationMap().get(oldExamId)));
+		}
 
 		// Move file
 		DatasetFile createdFile = distantShanoir.createDatasetFile(file);

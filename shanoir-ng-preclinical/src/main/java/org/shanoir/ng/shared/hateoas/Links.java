@@ -34,4 +34,7 @@ public class Links extends HashMap<String, Link> {
 
 	public static final String BASE_URL = "http://localhost:9900/";
 
+	public Links() {
+
+	}
 }

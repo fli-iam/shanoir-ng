@@ -1,5 +1,6 @@
 package org.shanoir.ng.migration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -160,13 +161,12 @@ public class StudyMigrationService {
 		// Add protocol/ DUA files
 		// TODO: commented as it does not work for the moment.
 		// Can easily be done manually
-		/*
-		for (String file : study.getProtocolFilePaths()) {
-			File fileAsFile = new File(studyService.getStudyFilePath(oldStudyId, file));
-			LOG.error(fileAsFile.getAbsolutePath() + " " + fileAsFile.exists());
-			distantShanoir.addProtocoleFile(fileAsFile, newStudy.getId().toString());
+		
+		for (String fileName : study.getProtocolFilePaths()) {
+			File file = new File(studyService.getStudyFilePath(oldStudyId, fileName));
+			distantShanoir.addProtocoleFile(file, newStudy.getId());
 		}
-		*/
+
 		LOG.error("Migration " + i++);
 
 

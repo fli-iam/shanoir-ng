@@ -97,6 +97,9 @@ public class RabbitMQConfiguration {
 	/** Migrate a study, communication between services. */
 	public static final String STUDY_MIGRATION_QUEUE = "study-migration-queue";
 	
+	/** Migrate a study, communication between dataset and preclinical services. */
+	public static final String STUDY_MIGRATION_PRECLINICAL_QUEUE = "study-migration-preclinical-queue";
+	
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 
@@ -315,4 +318,10 @@ public class RabbitMQConfiguration {
 	public static Queue studyMigrationQueue() {
 		return new Queue(STUDY_MIGRATION_QUEUE, true);
 	}
+	
+	@Bean
+	public static Queue studyMigrationPreclinicalQueue() {
+		return new Queue(STUDY_MIGRATION_PRECLINICAL_QUEUE, true);
+	}
+
 }

@@ -49,7 +49,7 @@ public class DistantDatasetShanoirService {
 
 	private static final String CREATE_EXAMINATION = "/shanoir-ng/datasets/examinations/";
 
-	private static final String ADD_EXTRA_DATA = "/shanoir-ng/datasets/examinations/";
+	private static final String ADD_EXTRA_DATA = "/shanoir-ng/datasets/examinations/extra-data-upload/";
 
 	private static final String CREATE_STUDY_CARD = "/shanoir-ng/datasets/studycards/";
 
@@ -60,7 +60,6 @@ public class DistantDatasetShanoirService {
 	private static final String CREATE_DATASET_EXPRESSION = "/shanoir-ng/datasets/datasetexpressions";
 
 	private static final String CREATE_DATASET_FILE = "/shanoir-ng/datasets/datasetfiles";
-
 
 	private static final String ADD_FILE = "/shanoir-ng/datasets/datasetfiles/file-upload/";
 
@@ -121,6 +120,26 @@ public class DistantDatasetShanoirService {
 			}
 		} catch (Exception e) {
 			throw new ShanoirException("Could not create a new distant examination: ", e);
+		}
+	}
+
+	public void addExminationExtraData(File file, Long examId) throws ShanoirException {
+		try {
+			LOG.error("Sending dataset files to distant Shanoir");
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			if (file != null && file.exists()) {
+				body.add("file", new FileSystemResource(file));
+			}
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
+
+			restTemplate.postForEntity(getURI(ADD_EXTRA_DATA + examId), requestEntity, Void.class);
+		} catch (Exception e) {
+			throw new ShanoirException("Could not add protocol file on study: ", e);
 		}
 	}
 
@@ -217,23 +236,6 @@ public class DistantDatasetShanoirService {
 			}
 		} catch (Exception e) {
 			throw new ShanoirException("Could not create a new distant dataset: ", e);
-		}
-	}
-
-	public void addExminationExtraData(File file, String examId) throws ShanoirException {
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
-
-			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file", file);
-
-			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
-
-			restTemplate.postForEntity(getURI(ADD_EXTRA_DATA + examId), requestEntity, Void.class);
-		} catch (Exception e) {
-			throw new ShanoirException("Could not add protocol file on study: ", e);
 		}
 	}
 
