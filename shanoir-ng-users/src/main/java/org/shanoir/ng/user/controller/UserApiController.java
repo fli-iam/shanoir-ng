@@ -123,6 +123,17 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 	
+	
+	@Override
+	public ResponseEntity<List<User>> findAccountRequests() {
+		final List<User> users = getUserService().findAccountRequests();
+		if (users.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(users, HttpStatus.OK);
+	}
+	
+	
 	@Override
 	public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
 		/* Generate a username. */

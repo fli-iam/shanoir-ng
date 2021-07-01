@@ -13,4 +13,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="line"></div>
+<div *ngIf="mode == 'on-off'" class="line over-line" [class.on]="ngModel"></div>
 <div class="button" [class.on]="(reverse && !ngModel) || (!reverse && ngModel)"></div>

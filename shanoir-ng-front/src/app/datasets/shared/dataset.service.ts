@@ -11,8 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { ErrorHandler, Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse, HttpEvent, HttpEventType} from '@angular/common/http';
+import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -22,13 +22,16 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import { Subscription } from 'rxjs'
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
-
+import { saveAs } from 'file-saver';
 
 @Injectable()
-export class DatasetService extends EntityService<Dataset> {
+export class DatasetService extends EntityService<Dataset> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    subscribtions: Subscription[] = [];
     
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -63,35 +66,46 @@ export class DatasetService extends EntityService<Dataset> {
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
-
-    public downloadDatasets(ids: number[], format: string): Promise<void> {
+    
+    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
+       switch (event.type) {
+            case HttpEventType.Sent:
+              progressBar.progress = -1;
+              break;
+            case HttpEventType.DownloadProgress:
+              progressBar.progress = (event.loaded / event.total);
+              break;
+            case HttpEventType.Response:
+                progressBar.progress = 0;
+                saveAs(event.body, this.getFilename(event));
+        }
+    }
+ 
+    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-        return this.http.post(
-                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
-                    observe: 'response',
-                    responseType: 'blob'
-                })
-            .toPromise()
-            .then((result: HttpResponse < Blob > ) => {
-                this.downloadIntoBrowser(result);
-            })
-            .catch(error => this.errorService.handleError(error));
+        this.subscribtions.push(
+           this.http.post(
+           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob'
+           }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
+         );
     }
 
-    public downloadDatasetsByStudy(studyId: number, format: string) {
+    public downloadDatasetsByStudy(studyId: number, format: string, progressBar: LoadingBarComponent) {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
-            { observe: 'response', responseType: 'blob', params: params})
-            .toPromise().then(
-                response => {
-                    this.downloadIntoBrowser(response);
-                }
-            ).catch((error: HttpErrorResponse) => {
-                this.errorService.handleError(error);
-            });
+        this.subscribtions.push(
+           this.http.get(
+           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob',
+                params: params
+            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
+        );
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -179,5 +193,11 @@ export class DatasetService extends EntityService<Dataset> {
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }

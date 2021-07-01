@@ -62,9 +62,9 @@ public class Study implements Comparable<Study> {
 	}
 
 	public String toString() {
-		if (this.getStudyCards() != null) {
+		if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
 			if (compatible) {
-				return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + this.getName();
+				return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + this.getName();
 			} else {
 				return this.getName();			
 			}

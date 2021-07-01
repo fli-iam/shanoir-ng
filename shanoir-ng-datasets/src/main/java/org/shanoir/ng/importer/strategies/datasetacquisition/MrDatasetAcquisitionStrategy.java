@@ -91,6 +91,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		if (importJob.getStudyCardId() != null) {
 			studyCard = getStudyCard(importJob.getStudyCardId());
 			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+			importJob.setStudyCardName(studyCard.getName());
 		} else {
 			LOG.warn("No studycard given for this import");
 		}

@@ -236,6 +236,7 @@ public class StudyApiController implements StudyApi {
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
 			response.setContentType(request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath()));
+		    response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}

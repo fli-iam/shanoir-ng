@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.modality;
 import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 
@@ -24,6 +25,18 @@ public class MrDatasetAndProcessingsDTO extends MrDatasetDTO implements DatasetA
 
 	private List<DatasetProcessingDTO> processings;
 
+	private DatasetAcquisitionDTO datasetAcquisition;
+
+	@Override
+	public DatasetAcquisitionDTO getDatasetAcquisition() {
+		return this.datasetAcquisition;
+	}
+
+	@Override
+	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
+		this.datasetAcquisition = datasetAcquisition;
+	}
+	
 	@Override
 	public List<DatasetProcessingDTO> getProcessings() {
 		return processings;

@@ -75,7 +75,6 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
 
     submit(): void {
         this.extensionRequestInfo = this.extensionRequestForm.value;
-        this.setDateFromDatePicker();
     }
 
     isEditUserFormValid(): boolean {
@@ -117,43 +116,6 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
         'extensionDate': '',
         'extensionMotivation': ''
     };
-
-    public myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.formatted;
-        }
-    }
-
-    onInputFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            this.selectedDateNormal = null;
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            var from = this.selectedDateNormal.valueOf().split("/");
-            var f0 = from[0]; 
-            var f1 = +from[1] - 1; 
-            var f2 = from[2];
-            this.extensionRequestInfo.extensionDate = new Date(+f2, f1, +f0);
-        } else {
-            this.extensionRequestInfo.extensionDate = null;
-        }
-    }
 
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
