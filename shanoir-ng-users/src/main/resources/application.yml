@@ -105,7 +105,7 @@ logging:
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
     initialize: true
   jpa:
@@ -126,7 +126,7 @@ logging:
     
 ---
 spring:
-  profiles: test
+  config.activate.on-profile: test
   main:
     allow-bean-definition-overriding: true
   datasource:

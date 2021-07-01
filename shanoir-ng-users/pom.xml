@@ -70,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail</artifactId>
-			<version>1.5.3</version>
+			<version>1.6.4</version>
 		</dependency>
 	</dependencies>
 

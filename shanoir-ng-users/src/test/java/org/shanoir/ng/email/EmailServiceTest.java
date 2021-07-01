@@ -59,20 +59,18 @@ public class EmailServiceTest {
 	private static final String NEW_PASSWORD = "testPwd";
 	
 	@Autowired
-	private EmailServiceImpl emailService;
+	private EmailService emailService;
 	
-	public GreenMail greenMail;
+	private GreenMail greenMail;
 	
 	@MockBean
 	private UserRepository userRepositoryMock;
-
 	
 	@Before
 	public void initGreenMail() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);
 		greenMail.start();
-		
 		given(userRepositoryMock.findAdminEmails()).willReturn(Arrays.asList(new String[]{"admin@test.shanoir.fr"}));
 	}
 	
@@ -152,10 +150,12 @@ public class EmailServiceTest {
 		DatasetImportEmail mail = new DatasetImportEmail();
 		mail.setStudyName("StudyName");
 		mail.setStudyId("12");
+		mail.setUserId(1L);
+		mail.setRecipients(Arrays. asList(1L));
 		Map<Long, String> datasets = new HashMap<>();
 		datasets.put(1L, "test");
 		mail.setDatasets(datasets);
-		// WHEN we receive an event with elements stating that data was imported successfuly
+		// WHEN we receive an event with elements stating that data was imported successfully
 		emailService.notifyStudyManagerDataImported(mail);
 		// THEN an email is sent to the administrators
 		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");

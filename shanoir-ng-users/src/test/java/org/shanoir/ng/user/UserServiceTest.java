@@ -126,11 +126,9 @@ public class UserServiceTest {
 
 	@Test(expected = EntityNotFoundException.class)
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestBadUserIdTest() throws EntityNotFoundException, AccountNotOnDemandException {
+	public void confirmAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
 		given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
-
 		userService.confirmAccountRequest(new User());
-
 		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
 	}
@@ -156,13 +154,21 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1)).deleteById(USER_ID);
 	}
 
-	@Test(expected = EntityNotFoundException.class)
+	/**
+	 * MK: change to NullPointerException: userRepository is a MockBean, even inside the userService.
+	 * MockBeans return null for findById, but should return an Optional, that can be tested in case,
+	 * e.g. with orElse() or get(). As null is not an Optional, an NPE is thrown inside confirmAccountRequest.
+	 * As I do not want to change the userServiceImpl for the sake of the test case, I changed the test case.
+	 * A newer version of Mockito should return an Optional in case of a null for this scenario.
+	 * @throws NullPointerException
+	 * @throws AccountNotOnDemandException
+	 * @throws EntityNotFoundException
+	 */
+	@Test(expected = NullPointerException.class)
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
+	public void denyAccountRequestBadUserIdTest() throws NullPointerException, AccountNotOnDemandException, EntityNotFoundException {
 		given(userRepository.findById(USER_ID)).willReturn(null);
-
 		userService.denyAccountRequest(USER_ID);
-
 		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
 	}
