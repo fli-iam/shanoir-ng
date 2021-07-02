@@ -25,6 +25,10 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.model.DiffusionGradient;
+import org.shanoir.ng.shared.model.EchoTime;
+import org.shanoir.ng.shared.model.InversionTime;
+import org.shanoir.ng.shared.model.RepetitionTime;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -34,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Dataset service implementation.
@@ -82,6 +87,34 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset create(final Dataset dataset) {
+		if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
+			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {
+				for (DiffusionGradient element : mrDataset.getDiffusionGradients()) {
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getDiffusionGradients())) {
+				for (DiffusionGradient element : mrDataset.getDiffusionGradients()) {
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getEchoTime())) {
+				for (EchoTime element : mrDataset.getEchoTime()) {
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getInversionTime())) {
+				for (InversionTime element : mrDataset.getInversionTime()) {
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getRepetitionTime())) {
+				for (RepetitionTime element : mrDataset.getRepetitionTime()) {
+					element.setMrDataset(mrDataset);
+				}
+			}
+		}
 		Dataset ds = repository.save(dataset);
 		solrService.indexDataset(ds.getId());
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));

@@ -266,7 +266,9 @@ public class DistantPreclinicalShanoirService {
 
 	public ExaminationAnesthetic createExaminationAnesthatic(ExaminationAnesthetic examAnes, Long examId) throws ShanoirException {
 		try {
-			ResponseEntity<ExaminationAnesthetic> response = this.restTemplate.exchange(getURI(CREATE_EXAMINATION_ANESTHETIC.replace("{id}", examId.toString())), HttpMethod.POST, new HttpEntity<>(examAnes, getHeader()), ExaminationAnesthetic.class);
+			LOG.error("examId " +  examId);
+
+			ResponseEntity<ExaminationAnesthetic> response = this.restTemplate.exchange(getURI(CREATE_EXAMINATION_ANESTHETIC.replace("{id}", "" + examId)), HttpMethod.POST, new HttpEntity<>(examAnes, getHeader()), ExaminationAnesthetic.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {

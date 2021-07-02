@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.migration.MigrationJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,6 +93,7 @@ public class PreclinicalMigrationService {
 	 * @throws ShanoirException
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE)
+	@RabbitHandler
 	@Transactional
 	public void migrate(String migrationJobAsString) throws AmqpRejectAndDontRequeueException {
 		try {
@@ -102,7 +104,7 @@ public class PreclinicalMigrationService {
 			distantKeycloakConfigurationService.setAccessToken(job.getAccessToken());
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
 
-			LOG.error("receiving job " + job);
+			LOG.error("receiving job " + mapper.writeValueAsString(job));
 
 			this.migratePreclinical(job);
 
@@ -134,11 +136,13 @@ public class PreclinicalMigrationService {
 	}
 	
 	private void migratePreclinical(MigrationJob job) throws ShanoirException {
+		LOG.error("Retrieving all preclinical references");
 		prepareReferences();
 
 		// Animal_subject
 		for (Entry<Long, Long> entry : job.getSubjectsMap().entrySet()) {
 			for (AnimalSubject animalSubject : animalSubjectRepository.findBy("subjectId", entry.getKey())) {
+				LOG.error("moving Animal subject " + animalSubject.getId() + animalSubject.getSubjectId());
 				migrateSubject(animalSubject, job);
 			}
 		}
@@ -152,19 +156,27 @@ public class PreclinicalMigrationService {
 	}
 
 	private void migrateAnestheticExamination(ExaminationAnesthetic examAnes, MigrationJob job) throws ShanoirException {
+		Anesthetic anesth = migrateAnesthetic(examAnes.getAnesthetic(), job);
+		Reference doseUnit = migrateReference(examAnes.getDoseUnit(), job);
+		entityManager.detach(examAnes);
 		examAnes.setId(null);
-		migrateAnesthetic(examAnes.getAnesthetic(), job);
-		migrateReference(examAnes.getDoseUnit(), job);
+		examAnes.setAnesthetic(anesth);
+		examAnes.setDoseUnit(doseUnit);
+		LOG.error("Examination anesthetic: " + examAnes.getExaminationId() + " " + job.getExaminationMap().get(examAnes.getExaminationId()));
 		examAnes.setExaminationId(job.getExaminationMap().get(examAnes.getExaminationId()));
-		distantShanoir.createExaminationAnesthatic(examAnes, job.getExaminationMap().get(examAnes.getExaminationId()));
+		distantShanoir.createExaminationAnesthatic(examAnes, examAnes.getExaminationId());
 	}
 
 	private Anesthetic migrateAnesthetic(Anesthetic anes, MigrationJob job) throws ShanoirException {
+		LOG.error("moving Anesthetic");
 		if (anesthetics.get(anes.getName()) != null) {
 			return anesthetics.get(anes.getName());
 		}
 		Set<AnestheticIngredient> oldIngredients = anes.getIngredients();
+		entityManager.detach(anes);
+
 		anes.setId(null);
+		anes.setIngredients(null);
 		Anesthetic cretedAnesthetic = distantShanoir.createAnesthetic(anes);
 		for(AnestheticIngredient ingredient : oldIngredients) {
 			migrateAnestheticIngredient(ingredient, cretedAnesthetic, job);
@@ -173,26 +185,51 @@ public class PreclinicalMigrationService {
 	}
 
 	private AnestheticIngredient migrateAnestheticIngredient(AnestheticIngredient ingredient, Anesthetic anesth, MigrationJob job) throws ShanoirException {
+		LOG.error("moving ingredient");
 		ingredient.setConcentrationUnit(migrateReference(ingredient.getConcentrationUnit(), job));
+		entityManager.detach(ingredient);
 		ingredient.setId(null);
-		ingredient.setAnesthetic(anesth);
-		return distantShanoir.createIngredient(ingredient, anesth.getId());
+		Anesthetic anesthDTO = new Anesthetic();
+		anesthDTO.setId(anesth.getId());
+		ingredient.setAnesthetic(anesthDTO);
+		return distantShanoir.createIngredient(ingredient, anesthDTO.getId());
 	}
 
 	private void migrateSubject(AnimalSubject animalSubject, MigrationJob job) throws ShanoirException {
 		// Migrate all subject references
+		entityManager.detach(animalSubject);
+
+		Long oldId = animalSubject.getId();
+		Long oldSubjectId = animalSubject.getSubjectId();
 		animalSubject.setId(null);
-		
+		animalSubject.setSubjectId(job.getSubjectsMap().get(animalSubject.getSubjectId()));
+		migrateReference(animalSubject.getBiotype(), job);
+		migrateReference(animalSubject.getProvider(), job);
+		migrateReference(animalSubject.getSpecie(), job);
+		migrateReference(animalSubject.getStabulation(), job);
+		migrateReference(animalSubject.getStrain(), job);
+
 		// Migrate Subject
 		AnimalSubject createdSubject = distantShanoir.createAnimalSubject(animalSubject);
 
+		AnimalSubject animalDTO = new AnimalSubject();
+		animalDTO.setId(oldId);
+		animalDTO.setSubjectId(oldSubjectId);
+		entityManager.detach(animalDTO);
+
 		// Subject_pathology
-		for (SubjectPathology subjectPatho : subjectPathologyRepository.findByAnimalSubject(animalSubject)) {
+		for (SubjectPathology subjectPatho : subjectPathologyRepository.findByAnimalSubject(animalDTO)) {
+			LOG.error("moving subject pathology");
+			entityManager.detach(subjectPatho);
 			migrateSubjectPathology(subjectPatho, job, createdSubject);
 		}
 
+		entityManager.detach(animalDTO);
+
 		// Subject_therapy
-		for (SubjectTherapy subjecttherap: subjectTherapyRespository.findByAnimalSubject(animalSubject)) {
+		for (SubjectTherapy subjecttherap: subjectTherapyRespository.findByAnimalSubject(animalDTO)) {
+			LOG.error("moving subject therapy");
+			entityManager.detach(subjecttherap);
 			migrateSubjectTherapy(subjecttherap, job, createdSubject);
 		}
 	}
@@ -224,6 +261,7 @@ public class PreclinicalMigrationService {
 	}
 	
 	private Therapy migrateTherapy(Therapy therapy, MigrationJob job) throws ShanoirException {
+		LOG.error("moving therapy");
 		if (therapies.get(therapy.getName()) != null) {
 			return therapies.get(therapy.getName());
 		}
@@ -232,6 +270,7 @@ public class PreclinicalMigrationService {
 	}
 
 	private PathologyModel migratePathologyModel(PathologyModel pathologyModel) throws ShanoirException {
+		LOG.error("moving patho model");
 		if (pathologyModels.get(pathologyModel.getName()) != null) {
 			return pathologyModels.get(pathologyModel.getName());
 		}
@@ -240,6 +279,7 @@ public class PreclinicalMigrationService {
 	}
 
 	private Pathology migratePathology(Pathology pathology) throws ShanoirException {
+		LOG.error("moving patho");
 		if (pathologies.get(pathology.getName()) != null) {
 			return pathologies.get(pathology.getName());
 		}
@@ -248,8 +288,9 @@ public class PreclinicalMigrationService {
 	}
 
 	private Reference migrateReference(Reference ref, MigrationJob job) throws ShanoirException {
-		if (references.get(ref.getCategory() + ref.getReftype() + ref.getValue()) != null) {
-			return references.get(ref.getCategory() + ref.getReftype() + ref.getValue());
+		LOG.error("moving reference");
+		if (references.get(ref.getValue() + ref.getCategory() + ref.getReftype()) != null) {
+			return references.get(ref.getValue() + ref.getCategory() + ref.getReftype());
 		}
 		ref.setId(null);
 		return distantShanoir.createReference(ref);

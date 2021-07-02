@@ -194,7 +194,7 @@ public class DistantStudiesShanoirService {
 	 */
 	public void addProtocoleFile(File file, Long studyId) throws ShanoirException {
 		try {
-			LOG.error("Sending dataset files to distant Shanoir");
+			LOG.error("Sending protocol files to distant Shanoir");
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());

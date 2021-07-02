@@ -38,6 +38,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,7 @@ public class DatasetMigrationService {
 	 * @throws ShanoirException
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_MIGRATION_QUEUE)
+	@RabbitHandler
 	@Transactional
 	public void migrate(String migrationJobAsString) throws AmqpRejectAndDontRequeueException {
 		try {
@@ -123,10 +125,14 @@ public class DatasetMigrationService {
 
 		// Migrate all examinations
 		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
+		Map<Long, Long> examMap = new HashMap<>();
 
 		for (Examination exam : examinations) {
-			migrateExamination(exam, job);
+			Long oldId = exam.getId();
+			Examination createdExam = migrateExamination(exam, job);
+			examMap.put(oldId, createdExam.getId());
 		}
+		job.setExaminationMap(examMap);
 	}
 
 	private StudyCard moveStudyCard(StudyCard sc, MigrationJob job) throws ShanoirException {
@@ -155,6 +161,7 @@ public class DatasetMigrationService {
 	 * Migrates an exam
 	 * @param exam
 	 * @param job
+	 * @return
 	 * @throws ShanoirException
 	 */
 	private Examination migrateExamination(Examination exam, MigrationJob job) throws ShanoirException {
@@ -186,11 +193,11 @@ public class DatasetMigrationService {
 			migrateAcquisition(acq, createdExam.getId(), oldId, job);
 		}
 
-		for (String fileName : exam.getExtraDataFilePathList()) {
+		for (String fileName : createdExam.getExtraDataFilePathList()) {
 			String filePath = examService.getExtraDataFilePath(oldId, fileName);
 			distantShanoir.addExminationExtraData(new File(filePath), createdExam.getId());
 		}
-		return exam;
+		return createdExam;
 	}
 
 	/**
@@ -268,8 +275,11 @@ public class DatasetMigrationService {
 
 		if ("Mr".equals(ds.getType())) {
 			MrDataset mrDs = (MrDataset) ds;
-			if (mrDs.getFlipAngle() != null) {
-				mrDs.getFlipAngle().get(0).setId(null);
+			if (!CollectionUtils.isEmpty(mrDs.getFlipAngle())) {
+				for (DiffusionGradient element : mrDs.getDiffusionGradients()) {
+					element.setId(null);
+					element.setMrDataset(mrDs);
+				}
 			}
 			if (mrDs.getDatasetProcessing() != null) {
 				mrDs.getDatasetProcessing().setId(null);
@@ -283,21 +293,25 @@ public class DatasetMigrationService {
 			if (!CollectionUtils.isEmpty(mrDs.getDiffusionGradients())) {
 				for (DiffusionGradient element : mrDs.getDiffusionGradients()) {
 					element.setId(null);
+					element.setMrDataset(mrDs);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDs.getEchoTime())) {
 				for (EchoTime element : mrDs.getEchoTime()) {
 					element.setId(null);
+					element.setMrDataset(mrDs);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDs.getInversionTime())) {
 				for (InversionTime element : mrDs.getInversionTime()) {
 					element.setId(null);
+					element.setMrDataset(mrDs);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDs.getRepetitionTime())) {
 				for (RepetitionTime element : mrDs.getRepetitionTime()) {
 					element.setId(null);
+					element.setMrDataset(mrDs);
 				}
 			}
 		}
