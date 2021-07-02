@@ -57,7 +57,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CenterApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class CenterApiControllerTest {
 
 	private static final String REQUEST_PATH = "/centers";
@@ -96,7 +96,7 @@ public class CenterApiControllerTest {
 
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
-		given(centerServiceMock.findById(1L)).willReturn(new Center());
+		given(centerServiceMock.findById(1L).orElse(null)).willReturn(new Center());
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());

@@ -23,6 +23,7 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -98,13 +99,13 @@ public class StudyServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testFindByIdAsUserThatCanSee() throws ShanoirException {
 		
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
 		assertAccessDenied(service::findById, 1L);
 		
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT)));
 		assertAccessAuthorized(service::findById, 1L);
 		
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
 		assertAccessAuthorized(service::findById, 1L);
 	}
 	
@@ -132,17 +133,17 @@ public class StudyServiceSecurityTest {
 		assertAccessAuthorized(service::create, mockExisting);
 		
 		Study mockOne = buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
-		given(repository.findOne(1L)).willReturn(mockOne);
+		given(repository.findById(1L)).willReturn(Optional.of(mockOne));
 		assertAccessDenied(service::update, mockOne);
 		assertAccessDenied(service::deleteById, 1L);
 		
 		Study mockTwo = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE);
-		given(repository.findOne(2L)).willReturn(mockTwo);
+		given(repository.findById(2L)).willReturn(Optional.of(mockTwo));
 		assertAccessAuthorized(service::update, mockTwo);
 		assertAccessAuthorized(service::deleteById, 2L);
 		
 		Study mockThree = buildStudyMock(3L);
-		given(repository.findOne(3L)).willReturn(mockThree);
+		given(repository.findById(3L)).willReturn(Optional.of(mockThree));
 		assertAccessDenied(service::update, mockThree);
 		assertAccessDenied(service::deleteById, 3L);
 		

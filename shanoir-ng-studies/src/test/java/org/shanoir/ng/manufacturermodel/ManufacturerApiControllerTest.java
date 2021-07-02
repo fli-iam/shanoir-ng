@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ManufacturerApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class ManufacturerApiControllerTest {
 
 	private static final String REQUEST_PATH = "/manufacturers";
@@ -70,9 +71,8 @@ public class ManufacturerApiControllerTest {
 	@Before
 	public void setup() {
 		gson = new GsonBuilder().create();
-
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
-		given(manufacturerServiceMock.findById(1L)).willReturn(new Manufacturer());
+		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(new Manufacturer()));
 		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
 		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}

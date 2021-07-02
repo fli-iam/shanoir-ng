@@ -20,6 +20,7 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -137,7 +138,7 @@ public class CenterSecurityTest {
 		List<AcquisitionEquipment> acqs = new ArrayList<>();
 		acqs.add(new AcquisitionEquipment());
 		center.setAcquisitionEquipments(acqs);
-		given(repository.findOne(ID)).willReturn(center);
+		given(repository.findById(ID)).willReturn(Optional.of(center));
 		service.deleteByIdCheckDependencies(ID);
 	}
 	
@@ -150,7 +151,7 @@ public class CenterSecurityTest {
 		List<StudyCenter> studyCenterList = new ArrayList<>();
 		studyCenterList.add(new StudyCenter());
 		center.setStudyCenterList(studyCenterList);
-		given(repository.findOne(ID)).willReturn(center);
+		given(repository.findById(ID)).willReturn(Optional.of(center));
 		service.deleteByIdCheckDependencies(ID);
 	}
 

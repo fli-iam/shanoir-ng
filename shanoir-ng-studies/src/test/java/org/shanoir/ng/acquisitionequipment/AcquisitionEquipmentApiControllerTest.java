@@ -53,7 +53,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AcquisitionEquipmentApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class AcquisitionEquipmentApiControllerTest {
 
 	private static final String REQUEST_PATH = "/acquisitionequipments";
@@ -88,7 +88,7 @@ public class AcquisitionEquipmentApiControllerTest {
 
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
-		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(new AcquisitionEquipment());
+		given(acquisitionEquipmentServiceMock.findById(1L).orElse(null)).willReturn(new AcquisitionEquipment());
 		given(acquisitionEquipmentServiceMock.create(Mockito.mock(AcquisitionEquipment.class)))
 				.willReturn(new AcquisitionEquipment());
 	}

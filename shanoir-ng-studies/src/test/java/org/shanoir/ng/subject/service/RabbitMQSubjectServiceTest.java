@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -104,7 +106,7 @@ public class RabbitMQSubjectServiceTest {
 
 		// GIVEN a studyID and a subjectID
 		subject.setSubjectStudyList(Collections.singletonList(susu));
-		Mockito.when(subjectRepository.findOne(subjectId)).thenReturn(subject);
+		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
 		// WHEN the subjectStudy already exists
 		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
@@ -122,9 +124,9 @@ public class RabbitMQSubjectServiceTest {
 
 		// GIVEN a studyID and a subjectID
 		subject.setSubjectStudyList(Collections.emptyList());
-		Mockito.when(subjectRepository.findOne(subjectId)).thenReturn(subject);
+		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
-		Mockito.when(studyRepository.findOne(studyId)).thenReturn(study);
+		Mockito.when(studyRepository.findById(studyId)).thenReturn(Optional.of(study));
 
 		// WHEN the subjectStudy does not exists
 		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
@@ -137,7 +139,7 @@ public class RabbitMQSubjectServiceTest {
 	@Test
 	public void testUpdateSubjectStudyFail() throws IOException {
 		// GIVEN a studyID and a subjectID
-		Mockito.when(subjectRepository.findOne(subjectId)).thenReturn(null);
+		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(null);
 		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
 
 		// WHEN the call fails
