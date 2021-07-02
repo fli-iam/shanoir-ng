@@ -23,6 +23,8 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.shared.migration.MigrationJob;
@@ -81,13 +83,18 @@ public class DatasetMigrationService {
 	@Autowired
 	RabbitTemplate rabbitTemplate;
 
+	@Autowired
+	ShanoirEventService eventService;
+	
+	ShanoirEvent event;
+
 	/**
 	 * Migrates all the datasets from a study using a MigrationJob
 	 * @throws ShanoirException
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_MIGRATION_QUEUE)
 	@RabbitHandler
-	@Transactional
+	@Transactional(readOnly = true)
 	public void migrate(String migrationJobAsString) throws AmqpRejectAndDontRequeueException {
 		try {
 			MigrationJob job = mapper.readValue(migrationJobAsString, MigrationJob.class);
@@ -99,11 +106,19 @@ public class DatasetMigrationService {
 
 			LOG.error("receiving job " + job);
 
+			this.event = job.getEvent();
+			publishEvent("Starting dataset migration", 0f);
+
 			this.migrateStudy(job);
+			
+			// Re-set event as it was updated
+			job.setEvent(event);
 			
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
 			
 		} catch (Exception e) {
+			event.setStatus(ShanoirEvent.ERROR);
+			publishEvent("An error occured while migrating datasets, please contact an administrator.", 1f);
 			LOG.error("Error while moving datasets: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		} finally {
@@ -118,6 +133,7 @@ public class DatasetMigrationService {
 		Map<Long, Long> studyCardsMap = new HashMap<>();
 		for (StudyCard sc : studyCards) {
 			long oldId = sc.getId();
+			publishEvent("Migrating study card : " + oldId , 0f);
 			sc = moveStudyCard(sc, job);
 			studyCardsMap.put(oldId, sc.getId());
 		}
@@ -127,8 +143,11 @@ public class DatasetMigrationService {
 		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
 		Map<Long, Long> examMap = new HashMap<>();
 
+		int i = 1;
 		for (Examination exam : examinations) {
 			Long oldId = exam.getId();
+			publishEvent("Migrating Examination: " + oldId , i++ / examinations.size());
+
 			Examination createdExam = migrateExamination(exam, job);
 			examMap.put(oldId, createdExam.getId());
 		}
@@ -167,6 +186,8 @@ public class DatasetMigrationService {
 	private Examination migrateExamination(Examination exam, MigrationJob job) throws ShanoirException {
 		job.setExaminationMap(new HashMap<>());
 
+		List<String> extraDataFilePath = exam.getExtraDataFilePathList();
+		
 		long oldId = exam.getId();
 		exam.setId(null);
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
@@ -186,14 +207,21 @@ public class DatasetMigrationService {
 		// Move examination
 		LOG.error("Exam " + exam);
 		Examination createdExam = distantShanoir.createExamination(exam);
+		entityManager.detach(exam);
+
 		job.getExaminationMap().put(oldId, createdExam.getId());
 
+		event.setMessage("Migrating acquisitions...");
+		eventService.publishEvent(event);
 		// Migrate datasetAcquisition
+		float prog = event.getProgress() / job.getExaminationMap().size();
+		int i = 1;
 		for(DatasetAcquisition acq : dsAcq) {
+			publishEvent("Migrating acquisition : " + acq.getId(), event.getProgress() + prog * i++ / dsAcq.size());
 			migrateAcquisition(acq, createdExam.getId(), oldId, job);
 		}
 
-		for (String fileName : createdExam.getExtraDataFilePathList()) {
+		for (String fileName : extraDataFilePath) {
 			String filePath = examService.getExtraDataFilePath(oldId, fileName);
 			distantShanoir.addExminationExtraData(new File(filePath), createdExam.getId());
 		}
@@ -222,6 +250,7 @@ public class DatasetMigrationService {
 			acq.setStudyCard(scDto);
 		}
 		List<Dataset> datasets = acq.getDatasets();
+		acq.setDatasets(null);
 
 		switch (acq.getType()) {
 		case "Mr":
@@ -256,9 +285,11 @@ public class DatasetMigrationService {
 		//  Migrate acquisition
 		LOG.error("Acq " + acq);
 		DatasetAcquisition newacq = distantShanoir.createAcquisition(acq);
+		entityManager.detach(acq);
 
 		// Update datasets
 		for (Dataset ds : datasets) {
+			publishEvent("Migrating dataset : " + ds.getName() + " of examination " + examId, event.getProgress());
 			migrateDataset(ds, newacq, oldExamId, job);
 		}
 	}
@@ -328,6 +359,8 @@ public class DatasetMigrationService {
 		ds.setDatasetExpressions(null);
 
 		Dataset createdDataset = distantShanoir.createDataset(ds);
+		ds.getDatasetAcquisition().setExamination(null);
+		entityManager.detach(ds);
 
 		for (DatasetExpression expression : expressions) {
 			migrateDatasetExpression(expression, createdDataset, oldExamId, job);
@@ -345,7 +378,8 @@ public class DatasetMigrationService {
 		expression.setDatasetFiles(null);
 		
 		DatasetExpression createdExpression = distantShanoir.createDatasetExpression(expression);
-		
+		entityManager.detach(expression);
+
 		for (DatasetFile file : oldFiles) {
 			migrateDatasetFile(file, createdExpression, createdDataset,oldExamId, job);
 		}
@@ -387,11 +421,18 @@ public class DatasetMigrationService {
 		}
 
 		// Move file
+		entityManager.detach(file);
 		DatasetFile createdFile = distantShanoir.createDatasetFile(file);
 		distantShanoir.moveDatasetFile(createdFile, new File(result));
 
 		} catch (Exception e) {
 			throw new ShanoirException("Error while creating the new dataset file", e);
 		}
+	}
+
+	private void publishEvent(String message, float progress) {
+		event.setMessage(message);
+		event.setProgress(progress);
+		eventService.publishEvent(event);
 	}
 }

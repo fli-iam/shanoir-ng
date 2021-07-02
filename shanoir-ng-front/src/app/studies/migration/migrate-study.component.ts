@@ -31,6 +31,7 @@ export class MigrateStudyComponent implements OnInit {
     public form: FormGroup;
     public studyOptions: Option<Study>[] = [];
     public error: string;
+    public success: string;
 
     constructor(private studyService: StudyService,
             private datasetService: DatasetService,
@@ -55,9 +56,11 @@ export class MigrateStudyComponent implements OnInit {
        .then(() => {
             this.error = "";
         }).catch(exception => {
-        if (exception.error.message.indexOf('401') != -1) {
-            this.error = "Authentication failed, please check username and password";
-        } else if (exception.error.message.indexOf('500') != -1) {
+        if (exception.status === 200) {
+            this.success = "Congratulations, migration of study successfully started. Please go to 'jobs' to follow its progression."
+        } else if (exception.error) {
+            this.error = exception.error;
+        } else  {
             this.error = "An unexpected error occured, please contact an administrator";
         }
        }

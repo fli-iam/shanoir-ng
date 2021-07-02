@@ -48,9 +48,9 @@ public class StudyMigrationService {
 	private DistantStudiesShanoirService distantShanoir;
 
 	private List<ManufacturerModel> distantModels = null;
-	
+
 	private List<AcquisitionEquipment> distantEquipements = null;
-	
+
 	private List<Manufacturer> distantManufacturers = null;
 
 	private Map <Long, Long> equipmentMap = new HashMap<>();
@@ -65,130 +65,128 @@ public class StudyMigrationService {
 
 	@Autowired
 	DistantKeycloakConfigurationService distantKeycloak;
-	
+
 	@Autowired ObjectMapper objectMapper;
 
 	/**
 	 * Migrates a given study and all its elements
 	 * This method is synchronized to avoid multiple threads running the same
 	 * @param studyId the study to migrate
+	 * @throws Exception
 	 */
-	public synchronized void migrateStudy(Long studyId, Long userId, String username, String url) throws ShanoirException {
-		int i = 0;
-		LOG.error("Migration " + i++);
+	public synchronized void migrateStudy(Long studyId, Long userId, String username, String url) throws Exception {
 		Long currentUserId = KeycloakUtil.getTokenUserId();
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.MIGRATE_STUDY_EVENT, ""+studyId, currentUserId, "Starting migration...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
-
-		LOG.error("Migration " + i++);
-		Study study = this.studyService.findById(studyId);
-		
-		Map<Long,Long> subjectMap = new HashMap<>();
-
-		// Remove all groupsOfSubjects
-		study.setExperimentalGroupsOfSubjects(null);
-		
-		event.setMessage("Migrating subjects...");
-		event.setProgress(0.01f);
-		eventService.publishEvent(event);
-
-		LOG.error("Migration " + i++);
-		// Move all concerned subjects
-		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			Subject subj = subjectStudy.getSubject();
-			subj.setUserPersonalCommentList(null);
-			Long oldId = subj.getId();
-			subj.setId(null);
-			subj.setSubjectStudyList(Collections.emptyList());
-			Subject sub = distantShanoir.createSubject(subj);
-			subj.setId(oldId);
-			// Keep updated a map of oldSubjectId => distantSubjectId
-			subjectMap.put(oldId, sub.getId());
-		}
-
-		LOG.error("Migration " + i++);
-		event.setMessage("Migrating centers...");
-		event.setProgress(0.02f);
-		eventService.publishEvent(event);
-		
-		// Move all centers
-		List<StudyCenter> centers = moveCenters(study.getStudyCenterList());
-		study.setStudyCenterList(centers);
-		
-		event.setMessage("Migrating study...");
-		event.setProgress(0.03f);
-		eventService.publishEvent(event);
-		
-		LOG.error("Migration " + i++);
-		// Migrate study
-		Long oldStudyId = study.getId();
-		
-		// Reset ID
-		study.setId(null);
-		
-		// Reset SubjectStudy to update with subjects
-		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			subjectStudy.setId(null);
-			subjectStudy.setStudy(null);
-			Subject newSubject = new Subject();
-			newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()));
-			subjectStudy.setSubject(newSubject);
-		}
-		// Reset studyExaminations
-		study.setExaminationIds(Collections.emptyList());
-		
-		LOG.error("Migration " + i++);
-		// Set StudyUser to only current user
-		List<StudyUser> suList = new ArrayList<>();
-		StudyUser su = new StudyUser();
-		su.setUserId(userId);
-		su.setConfirmed(true);
-		List<StudyUserRight> rights = new ArrayList<>();
-		rights.add(StudyUserRight.CAN_SEE_ALL);
-		rights.add(StudyUserRight.CAN_IMPORT);
-		rights.add(StudyUserRight.CAN_DOWNLOAD);
-		rights.add(StudyUserRight.CAN_ADMINISTRATE);
-		su.setStudyUserRights(rights);
-		su.setStudy(new Study());
-		su.setUserName(username);
-		suList.add(su);
-		study.setStudyUserList(suList);
-
-		LOG.error("Migration " + i++);
-
-		StudyDTO newStudy = distantShanoir.createStudy(study);
-		
-		// Add protocol/ DUA files
-		// TODO: commented as it does not work for the moment.
-		// Can easily be done manually
-		
-		for (String fileName : study.getProtocolFilePaths()) {
-			File file = new File(studyService.getStudyFilePath(oldStudyId, fileName));
-			distantShanoir.addProtocoleFile(file, newStudy.getId());
-		}
-
-		LOG.error("Migration " + i++);
-
-
-		// Send a message over rabbitMQ to move all other microservices
-		// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
-		MigrationJob job = new MigrationJob();
-		job.setOldStudyId(oldStudyId);
-		job.setStudy(new IdName(newStudy.getId(), newStudy.getName()));
-		job.setCentersMap(centerMap);
-		job.setEquipmentMap(equipmentMap);
-		job.setSubjectsMap(subjectMap);
-		job.setEvent(event);
-		job.setShanoirUrl(url);
-		job.setAccessToken(distantKeycloak.getAccessToken());
-		job.setRefreshToken(this.distantKeycloak.getRefreshToken());
-		
 		try {
+			Study study = this.studyService.findById(studyId);
+
+			Map<Long,Long> subjectMap = new HashMap<>();
+
+			// Remove all groupsOfSubjects
+			study.setExperimentalGroupsOfSubjects(null);
+
+			event.setMessage("Migrating subjects...");
+			eventService.publishEvent(event);
+
+			// Move all concerned subjects
+			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				Subject subj = subjectStudy.getSubject();
+				subj.setUserPersonalCommentList(null);
+				Long oldId = subj.getId();
+				subj.setId(null);
+				subj.setSubjectStudyList(Collections.emptyList());
+				Subject sub = distantShanoir.createSubject(subj);
+				subj.setId(oldId);
+				// Keep updated a map of oldSubjectId => distantSubjectId
+				subjectMap.put(oldId, sub.getId());
+			}
+
+			event.setMessage("Migrating centers...");
+			eventService.publishEvent(event);
+
+			// Move all centers
+			List<StudyCenter> centers = moveCenters(study.getStudyCenterList());
+			study.setStudyCenterList(centers);
+
+			event.setMessage("Migrating study...");
+			eventService.publishEvent(event);
+
+			// Migrate study
+			Long oldStudyId = study.getId();
+
+			// Reset ID
+			study.setId(null);
+
+			// Reset SubjectStudy to update with subjects
+			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				subjectStudy.setId(null);
+				subjectStudy.setStudy(null);
+				Subject newSubject = new Subject();
+				newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()));
+				subjectStudy.setSubject(newSubject);
+			}
+			// Reset studyExaminations
+			study.setExaminationIds(Collections.emptyList());
+
+			// Set StudyUser to only current user
+			List<StudyUser> suList = new ArrayList<>();
+			StudyUser su = new StudyUser();
+			su.setUserId(userId);
+			su.setConfirmed(true);
+			List<StudyUserRight> rights = new ArrayList<>();
+			rights.add(StudyUserRight.CAN_SEE_ALL);
+			rights.add(StudyUserRight.CAN_IMPORT);
+			rights.add(StudyUserRight.CAN_DOWNLOAD);
+			rights.add(StudyUserRight.CAN_ADMINISTRATE);
+			su.setStudyUserRights(rights);
+			su.setStudy(new Study());
+			su.setUserName(username);
+			suList.add(su);
+			study.setStudyUserList(suList);
+
+			StudyDTO newStudy = distantShanoir.createStudy(study);
+
+			// Add protocol/ DUA files
+			// Can easily be done manually
+
+			for (String fileName : study.getProtocolFilePaths()) {
+				File file = new File(studyService.getStudyFilePath(oldStudyId, fileName));
+				distantShanoir.addProtocoleFile(file, newStudy.getId());
+			}
+
+			// Send a message over rabbitMQ to move all other microservices
+			// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
+			MigrationJob job = new MigrationJob();
+			job.setOldStudyId(oldStudyId);
+			job.setStudy(new IdName(newStudy.getId(), newStudy.getName()));
+			job.setCentersMap(centerMap);
+			job.setEquipmentMap(equipmentMap);
+			job.setSubjectsMap(subjectMap);
+			job.setEvent(event);
+			job.setShanoirUrl(url);
+			job.setAccessToken(distantKeycloak.getAccessToken());
+			job.setRefreshToken(this.distantKeycloak.getRefreshToken());
+
+			event.setMessage("Migrating data...");
+			eventService.publishEvent(event);
+
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_QUEUE, objectMapper.writeValueAsString(job));
+
+		} catch (ShanoirException se) {
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(0f);
+			event.setMessage(se.getMessage());
+			eventService.publishEvent(event);
+			throw se;
 		} catch (Exception e) {
-			throw new ShanoirException("Error while communicating with datasets", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(0f);
+			event.setMessage("An unexpected error occured during study migration, please contact an administrator.");
+			eventService.publishEvent(event);
+			throw e;
 		}
-		
+
 		// Reset lists
 		distantModels = null;
 		distantEquipements = null;
@@ -214,7 +212,7 @@ public class StudyMigrationService {
 			boolean found = false;
 			Center center = studyCenter.getCenter();
 			Long oldId = center.getId();
-			
+
 			for (IdName distantCenter : distantCenters) {
 				// If center already exists, use it.
 				if (distantCenter.getName().equals(center.getName())) {
@@ -256,7 +254,6 @@ public class StudyMigrationService {
 		LOG.error("Migration Acq" + acquisitionEquipments);
 
 		distantEquipements = distantEquipements != null? distantEquipements : distantShanoir.getAcquisitionEquipements();
-		List<AcquisitionEquipment> toSet = new ArrayList<>();
 		for (AcquisitionEquipment equipement : acquisitionEquipments) {
 			Long oldId = equipement.getId();
 			boolean found = false;
@@ -327,7 +324,7 @@ public class StudyMigrationService {
 		LOG.error("Migration manuf" + manufacturer);
 
 		distantManufacturers = distantManufacturers != null ? distantManufacturers : this.distantShanoir.getManufacturers();
-		
+
 		boolean found = false;
 		for (Manufacturer distantManufacturer : distantManufacturers) {
 			if (distantManufacturer.getName().equals(manufacturer.getName())) {
@@ -343,7 +340,7 @@ public class StudyMigrationService {
 			manufacturer = distantShanoir.createManufacturer(manufacturer);
 			distantManufacturers.add(manufacturer);
 		}
-		
+
 		return manufacturer;
 	}
 

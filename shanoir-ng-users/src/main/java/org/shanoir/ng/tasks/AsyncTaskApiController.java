@@ -38,6 +38,8 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 		Long userId = KeycloakUtil.getTokenUserId();
 		List<ShanoirEvent> taskList = taskService.getEventsByUserAndType(userId, ShanoirEventType.IMPORT_DATASET_EVENT);
 		
+		List<ShanoirEvent> migrationTaskList = taskService.getEventsByUserAndType(userId, ShanoirEventType.MIGRATE_STUDY_EVENT);
+		
 		// Get only event with last updates < 7 days
 		Date now = new Date();
 		Long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
@@ -51,6 +53,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 			}
 		};
 		taskList.sort(comparator);
+		taskList.addAll(migrationTaskList);
 
 		return new ResponseEntity<>(taskList, HttpStatus.OK);
 	}

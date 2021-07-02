@@ -31,7 +31,6 @@ public class MigrationApiController implements MigrationApi {
 			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId,
 			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 					throws RestServiceException {
-
 		try {
 			// Connect to keycloak and keep connection alive
 			keycloakService.connectToDistantKeycloak(shanoirUrl, username, userPassword);
@@ -40,10 +39,10 @@ public class MigrationApiController implements MigrationApi {
 			this.migrationService.migrateStudy(studyId, userId, username, shanoirUrl);
 		} catch (ShanoirException e) {
 			LOG.error(e.getMessage(), e);
-			new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOG.error("ERROR: Unexpected error while migrating study {} :", studyId, e);
-			new ResponseEntity<>("ERROR: Unexpected error while migrating study, pease contact an administrator", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("ERROR: Unexpected error while migrating study, pease contact an administrator", HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {
 			keycloakService.stop();
 		}

@@ -25,6 +25,8 @@ import org.shanoir.ng.preclinical.therapies.TherapyRepository;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.shared.migration.MigrationJob;
@@ -87,6 +89,11 @@ public class PreclinicalMigrationService {
 	Map<String, Pathology> pathologies;
 
 	Map<String, Therapy> therapies;
+	
+	@Autowired
+	ShanoirEventService eventService;
+	
+	ShanoirEvent event;
 
 	/**
 	 * Migrates all the datasets from a study using a MigrationJob
@@ -94,7 +101,7 @@ public class PreclinicalMigrationService {
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE)
 	@RabbitHandler
-	@Transactional
+	@Transactional(readOnly = true)
 	public void migrate(String migrationJobAsString) throws AmqpRejectAndDontRequeueException {
 		try {
 			MigrationJob job = mapper.readValue(migrationJobAsString, MigrationJob.class);
@@ -105,11 +112,17 @@ public class PreclinicalMigrationService {
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
 
 			LOG.error("receiving job " + mapper.writeValueAsString(job));
+			
+			event = job.getEvent();
+			publishEvent("Finishing migration with preclinical elements...", 1f);
 
 			this.migratePreclinical(job);
-
+			event.setStatus(ShanoirEvent.SUCCESS);
+			publishEvent("Successfully migrated study " + job.getStudy().getName() +  " to server " + job.getShanoirUrl(), 1f);
 		} catch (Exception e) {
 			LOG.error("Error while moving preclinical elements: ", e);
+			event.setStatus(ShanoirEvent.ERROR);
+			publishEvent("An error occured while migrating preclinical elements, please contact an administrator.", 1f);
 			throw new AmqpRejectAndDontRequeueException(e);
 		} finally {
 			// Stop token refresh
@@ -294,5 +307,11 @@ public class PreclinicalMigrationService {
 		}
 		ref.setId(null);
 		return distantShanoir.createReference(ref);
+	}
+
+	private void publishEvent(String message, float progress) {
+		event.setMessage(message);
+		event.setProgress(progress);
+		eventService.publishEvent(event);
 	}
 }

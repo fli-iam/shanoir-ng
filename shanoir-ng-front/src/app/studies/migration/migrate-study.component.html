@@ -55,9 +55,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <span>
-                <button (click)="connect()">Migrate study</button>
+                <button (click)="connect()" [disabled]="error != null || success != null" >Migrate study</button>
             </span>
+        </li>
+        <li>
+            <br/>
             <label *ngIf="error" class="form-validation-alert">{{error}}</label>
+            <label *ngIf="success">{{success}}</label>
         </li>
     </ol>
 </fieldset>
