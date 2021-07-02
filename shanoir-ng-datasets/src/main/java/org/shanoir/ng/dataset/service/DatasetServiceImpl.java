@@ -92,26 +92,31 @@ public class DatasetServiceImpl implements DatasetService {
 			MrDataset mrDataset = (MrDataset) dataset;
 			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {
 				for (FlipAngle element : mrDataset.getFlipAngle()) {
+					element.setId(null);
 					element.setMrDataset(mrDataset);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDataset.getDiffusionGradients())) {
 				for (DiffusionGradient element : mrDataset.getDiffusionGradients()) {
+					element.setId(null);
 					element.setMrDataset(mrDataset);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDataset.getEchoTime())) {
 				for (EchoTime element : mrDataset.getEchoTime()) {
+					element.setId(null);
 					element.setMrDataset(mrDataset);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDataset.getInversionTime())) {
 				for (InversionTime element : mrDataset.getInversionTime()) {
+					element.setId(null);
 					element.setMrDataset(mrDataset);
 				}
 			}
 			if (!CollectionUtils.isEmpty(mrDataset.getRepetitionTime())) {
 				for (RepetitionTime element : mrDataset.getRepetitionTime()) {
+					element.setId(null);
 					element.setMrDataset(mrDataset);
 				}
 			}
