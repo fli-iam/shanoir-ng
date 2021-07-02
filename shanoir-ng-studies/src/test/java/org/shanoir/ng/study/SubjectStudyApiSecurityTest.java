@@ -55,7 +55,6 @@ import org.springframework.validation.BindingResult;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class SubjectStudyApiSecurityTest {
 

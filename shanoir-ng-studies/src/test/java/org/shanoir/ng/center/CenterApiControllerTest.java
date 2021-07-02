@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class CenterApiControllerTest {
 
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
-		given(centerServiceMock.findById(1L).orElse(null)).willReturn(new Center());
+		given(centerServiceMock.findById(1L)).willReturn(Optional.of(new Center()));
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());

@@ -102,14 +102,13 @@ logging:
     org.hibernate: ERROR
 
 ---
-
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 server:
   port: 9922
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     initialize: true
@@ -147,7 +146,7 @@ logging:
     
 ---
 spring:
-  profiles: test
+  config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_STUDY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa

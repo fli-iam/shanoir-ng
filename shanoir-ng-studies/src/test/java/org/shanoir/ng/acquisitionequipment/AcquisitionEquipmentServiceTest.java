@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,7 +59,7 @@ public class AcquisitionEquipmentServiceTest {
 	@Before
 	public void setup() {
 		given(acquisitionEquipmentRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
-		given(acquisitionEquipmentRepository.findById(ACQ_EQPT_ID).orElse(null)).willReturn(ModelsUtil.createAcquisitionEquipment());
+		given(acquisitionEquipmentRepository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
 		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
