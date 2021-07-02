@@ -29,6 +29,7 @@ import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,7 +51,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = ManufacturerApiController.class)
+@WebMvcTest(controllers = {ManufacturerApiController.class, ControlerSecurityService.class})
 @AutoConfigureMockMvc(addFilters = false)
 public class ManufacturerApiControllerTest {
 

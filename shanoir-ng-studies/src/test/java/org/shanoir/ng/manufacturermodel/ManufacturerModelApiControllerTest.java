@@ -74,6 +74,7 @@ public class ManufacturerModelApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void findManufacturerModelByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
