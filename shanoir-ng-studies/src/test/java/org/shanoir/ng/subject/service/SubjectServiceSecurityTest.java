@@ -129,8 +129,11 @@ public class SubjectServiceSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testEditAsExpert() throws ShanoirException {
+		List<Study> studiesMock = new ArrayList<>();
+		studiesMock.add(buildStudyMock(1L, StudyUserRight.CAN_IMPORT));
 		Subject subjectMock1 = buildSubjectMock(ENTITY_ID);
 		addStudyToMock(subjectMock1, 1L, StudyUserRight.CAN_IMPORT);
+		given(studyRepository.findAllById(Arrays.asList(new Long[]{1L}))).willReturn(studiesMock);
 		assertAccessAuthorized(service::update, subjectMock1);
 		
 		Subject subjectMock2 = buildSubjectMock(ENTITY_ID);
