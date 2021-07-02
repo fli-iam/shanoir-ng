@@ -233,7 +233,7 @@ public interface StudyApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@PutMapping(value = "/dua/{duaId}", produces = { "application/json" }, consumes = {"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @studySecurityService.checkUserOnDUA(#duaId)")
 	ResponseEntity<Void> acceptDataUserAgreement(
 			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 			throws RestServiceException, MicroServiceCommunicationException;
