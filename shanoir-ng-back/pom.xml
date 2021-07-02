@@ -35,8 +35,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<modules>
 		<module>../shanoir-ng-ms-common</module><!-- done -->
 		<module>../shanoir-ng-study-rights</module><!-- done -->
-		<module>../shanoir-ng-users</module>
-		<module>../shanoir-ng-anonymization</module>
+		<module>../shanoir-ng-users</module><!-- done -->
+		<module>../shanoir-ng-anonymization</module><!-- done -->
 		<module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-datasets</module>
 		<module>../shanoir-ng-import</module>
@@ -45,11 +45,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</modules>
 
 	<properties>
-		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
 		<keycloak.version>13.0.1</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<springfox-version>2.5.0</springfox-version>
+		<springfox.version>2.5.0</springfox.version>
 		<powermock.version>2.0.9</powermock.version>
 	</properties>
 
@@ -174,12 +174,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox-version}</version>
+			<version>${springfox.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox-version}</version>
+			<version>${springfox.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>org.mapstruct</artifactId>

@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<docker.image.name>shanoir-ng/preclinical</docker.image.name>
 		<supervisor.file.name>ms.preclinical.sv.dev.conf</supervisor.file.name>
 		<container_init.file.name>container_init.dev</container_init.file.name>
-		<shanoir-ng.version>0.0.1-SNAPSHOT</shanoir-ng.version>
+		<shanoir-ng.version>2.4.5</shanoir-ng.version>
 	</properties>
 
 	<dependencies>
@@ -49,35 +49,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>${shanoir-ng.version}</version>
-		</dependency>
-		<!-- Spring boot -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<!-- -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
-
-		<!-- -->
-		<!-- Database connector -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
@@ -95,9 +66,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
-
-		
-
 
 		<!-- Resteasy -->
 		<dependency>

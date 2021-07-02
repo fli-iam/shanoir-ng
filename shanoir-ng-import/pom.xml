@@ -40,22 +40,22 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>0.0.1</version>
+			<version>2.4.5</version>
 		</dependency>
 
 		<dependency>

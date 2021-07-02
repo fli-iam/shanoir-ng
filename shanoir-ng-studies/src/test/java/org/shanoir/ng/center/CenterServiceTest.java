@@ -65,7 +65,6 @@ public class CenterServiceTest {
 
 	@Before
 	public void setup() {
-		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
 		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(ModelsUtil.createCenter()));

@@ -319,7 +319,7 @@ public class StudyServiceImpl implements StudyService {
 		
 		// Remove deleted: study user + data user agreements
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
-			StudyUser studyUser = studyUserRepository.findById(studyUserIdToBeDeleted).orElseThrow();
+			StudyUser studyUser = studyUserRepository.findById(studyUserIdToBeDeleted).orElse(null);
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
 			if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
