@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
+import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -90,7 +91,7 @@ public class DatasetServiceImpl implements DatasetService {
 		if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
 			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {
-				for (DiffusionGradient element : mrDataset.getDiffusionGradients()) {
+				for (FlipAngle element : mrDataset.getFlipAngle()) {
 					element.setMrDataset(mrDataset);
 				}
 			}
