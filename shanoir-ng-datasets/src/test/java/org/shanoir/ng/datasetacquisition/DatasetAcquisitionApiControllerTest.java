@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = DatasetAcquisitionApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class DatasetAcquisitionApiControllerTest {
 
 	@MockBean

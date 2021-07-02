@@ -74,7 +74,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ExaminationApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
 public class ExaminationApiControllerTest {
