@@ -80,7 +80,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
-		return Utils.toList(repository.findAll(ids));
+		return Utils.toList(repository.findAllById(ids));
 	}
 
 	@Override
