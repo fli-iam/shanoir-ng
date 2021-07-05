@@ -37,6 +37,10 @@ public class Link {
 		this.href = href;
 	}
 
+	public Link() {
+		// Default constructor
+	}
+
 	/**
 	 * @return the rel
 	 */

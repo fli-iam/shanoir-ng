@@ -62,6 +62,8 @@ import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.componen
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { MigrateStudyComponent } from './studies/migration/migrate-study.component';
+import { MigrationService } from './studies/migration/migration.service'
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
@@ -297,6 +299,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
         DatasetListComponent,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
+        MigrateStudyComponent,
         DatepickerComponent,
         MrDatasetComponent,
         CommonDatasetComponent,
@@ -428,6 +431,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
         RoleService,
         StudyService,
         CoilService,
+        MigrationService,
         // ToolService,
         SubjectService,
         UserService,
@@ -471,6 +475,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
         WindowService,
         DicomService,
         ManufacturerModelPipe,
+        MigrationService,
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,

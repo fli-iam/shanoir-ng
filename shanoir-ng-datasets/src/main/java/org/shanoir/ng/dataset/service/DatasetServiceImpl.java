@@ -17,10 +17,7 @@ package org.shanoir.ng.dataset.service;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
 import javax.persistence.PersistenceContext;
-import javax.persistence.StoredProcedureQuery;
-
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -28,6 +25,11 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.model.DiffusionGradient;
+import org.shanoir.ng.shared.model.EchoTime;
+import org.shanoir.ng.shared.model.FlipAngle;
+import org.shanoir.ng.shared.model.InversionTime;
+import org.shanoir.ng.shared.model.RepetitionTime;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Dataset service implementation.
@@ -85,6 +88,39 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset create(final Dataset dataset) {
+		if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
+			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {
+				for (FlipAngle element : mrDataset.getFlipAngle()) {
+					element.setId(null);
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getDiffusionGradients())) {
+				for (DiffusionGradient element : mrDataset.getDiffusionGradients()) {
+					element.setId(null);
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getEchoTime())) {
+				for (EchoTime element : mrDataset.getEchoTime()) {
+					element.setId(null);
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getInversionTime())) {
+				for (InversionTime element : mrDataset.getInversionTime()) {
+					element.setId(null);
+					element.setMrDataset(mrDataset);
+				}
+			}
+			if (!CollectionUtils.isEmpty(mrDataset.getRepetitionTime())) {
+				for (RepetitionTime element : mrDataset.getRepetitionTime()) {
+					element.setId(null);
+					element.setMrDataset(mrDataset);
+				}
+			}
+		}
 		Dataset ds = repository.save(dataset);
 		solrService.indexDataset(ds.getId());
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
@@ -114,11 +150,13 @@ public class DatasetServiceImpl implements DatasetService {
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
+		
 		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
 		//datasetDb.setProcessings(dataset.getProcessings());
 		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());
+		
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		if (dataset instanceof MrDataset) {

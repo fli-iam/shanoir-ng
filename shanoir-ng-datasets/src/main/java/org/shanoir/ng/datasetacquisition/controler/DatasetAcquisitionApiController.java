@@ -64,22 +64,22 @@ import io.swagger.annotations.ApiParam;
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
-	
+
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
 	private ImporterService importerService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
-	
+
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
+
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
@@ -90,14 +90,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			throw new RestServiceException(error);
 		}
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
 		importerService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
@@ -118,7 +118,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			importerService.cleanTempFiles(importJob.getWorkFolder());
 		}
 	}
-	
+
 	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
 		long startTime = System.currentTimeMillis();
 		importerService.createAllDatasetAcquisition(importJob, userId);
@@ -126,11 +126,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		long duration = endTime - startTime;
 		LOG.info("Creation of dataset acquisition required " + duration + " millis.");
 	}
-	
+
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
-		
+
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
 		if (daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -142,13 +142,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
-		
+
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
 
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0)
 						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
 			}
 		});
@@ -158,16 +158,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
-			throws RestServiceException {
+					throws RestServiceException {
 
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -176,7 +176,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
-		
+
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -192,8 +192,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
 	}
-	
-	
+
+
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
@@ -205,18 +205,31 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
+		}
+	}
+
+	@Override
+	public ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(
+			@ApiParam(value = "DatasetAcquisition to create", required = true) @RequestBody DatasetAcquisition acquisition,
+			final BindingResult result) throws RestServiceException {
+		try {
+			validate(result);
+			DatasetAcquisition acq = datasetAcquisitionService.create(acquisition);
+			return new ResponseEntity<>(acq, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

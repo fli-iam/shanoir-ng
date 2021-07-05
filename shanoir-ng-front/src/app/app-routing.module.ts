@@ -53,6 +53,7 @@ import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-c
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
+import { MigrateStudyComponent } from './studies/migration/migrate-study.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
 import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
@@ -191,6 +192,9 @@ let routes: Routes = [
     },{ 
         path: 'download-statistics', 
         component: DownloadStatisticsComponent
+    },{ 
+        path: 'migrate-study', 
+        component: MigrateStudyComponent
     },
 
     // Automatically generated routes from:
@@ -468,6 +472,9 @@ let routes: Routes = [
 	},{ 
         path: 'download-statistics', 
         component: DownloadStatisticsComponent
+    },{ 
+        path: 'migrate-study',
+        component: MigrateStudyComponent
     },
 
 

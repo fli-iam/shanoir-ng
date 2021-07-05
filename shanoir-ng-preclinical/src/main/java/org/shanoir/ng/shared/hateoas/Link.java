@@ -28,6 +28,10 @@ public class Link {
 
 	private String href;
 
+	public Link() {
+		// Default constructor
+	}
+
 	/**
 	 * @param rel
 	 * @param href

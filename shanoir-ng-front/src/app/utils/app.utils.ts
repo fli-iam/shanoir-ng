@@ -51,6 +51,10 @@ export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STU
 export const BACKEND_API_STUDY_BIDS_EXPORT_URL: string = BACKEND_API_STUDY_URL + '/exportBIDS';
 export const BACKEND_API_STUDY_BIDS_STRUCTURE_URL: string = BACKEND_API_STUDY_URL + '/bidsStructure';
 
+// Migration API
+export const BACKEND_API_MIGRATION_URL: string = BACKEND_API_STUDIES_MS_URL + '/migration';
+
+
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';
 

@@ -1,0 +1,67 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+<form [formGroup]="form" novalidate>
+<div class="header command-zone">Migrate shanoir's study</div>
+<fieldset class="step">
+    <ol>
+        <legend>
+            Please select a study to migrate to another shanoir's instance.
+        </legend>
+        <li>
+            <label>Study</label> 
+            <span class="right-col">
+                <select-box id="study" [options]="studyOptions" formControlName="study"></select-box>
+            </span>
+        </li>
+        <legend>
+            Please connect to a distant shanoir instance.
+        </legend>
+        <li>
+            <label>Distant Shanoir URL</label> 
+            <span class="right-col">
+                <input type="text" id="url" formControlName="url" maxlength="255" />
+            </span>
+        </li>
+        <li>
+            <label>Username</label> 
+            <span class="right-col">
+                <input type="text" id="username" formControlName="username" maxlength="255" />
+            </span>
+        </li>
+        <li>
+            <label>Password</label> 
+            <span class="right-col">
+                <input type="password" id="password" formControlName="password" maxlength="255" />
+            </span>
+        </li>
+        <li>
+            <label>Distant user ID</label> 
+            <span class="right-col">
+                <input type="text" id="userId" formControlName="userId" maxlength="255" />
+            </span>
+        </li>
+        <li>
+            <span>
+                <button (click)="connect()" [disabled]="error != null || success != null" >Migrate study</button>
+            </span>
+        </li>
+        <li>
+            <br/>
+            <label *ngIf="error" class="form-validation-alert">{{error}}</label>
+            <label *ngIf="success">{{success}}</label>
+        </li>
+    </ol>
+</fieldset>
