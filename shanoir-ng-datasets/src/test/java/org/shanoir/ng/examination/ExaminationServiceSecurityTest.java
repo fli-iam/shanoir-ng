@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -221,7 +222,7 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		given(examinationRepository.findOne(Mockito.anyLong())).willReturn(mockExam(1L));
+		given(examinationRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mockExam(1L)));
 		assertAccessDenied(service::deleteById, 1L);
 	}
 
@@ -229,7 +230,7 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(right);
 		Examination mrDs = mockExam(1L);
 		mrDs.setStudyId(10L);
-		given(examinationRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
+		given(examinationRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mrDs));
 		if (right) {
 			assertAccessAuthorized(service::update, mrDs);
 		} else {

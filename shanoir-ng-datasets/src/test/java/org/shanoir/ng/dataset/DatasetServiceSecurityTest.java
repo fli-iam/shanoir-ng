@@ -16,10 +16,10 @@ package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.eq;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -205,7 +206,7 @@ public class DatasetServiceSecurityTest {
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		given(datasetRepository.findOne(Mockito.anyLong())).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mockDataset(1L)));
 		assertAccessDenied(service::deleteById, 1L);
 	}
 
@@ -213,7 +214,7 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
+		given(datasetRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mrDs));
 		assertAccessDenied(service::update, mrDs);
 	}
 	

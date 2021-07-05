@@ -128,7 +128,7 @@ public class DatasetRepositoryTest {
 		PetDataset pet1 = ModelsUtil.createPetDataset();
 		Long pet1Id = repository.save(pet1).getId();
 
-		List<Dataset> all = Utils.toList(repository.findAll(Arrays.asList(mr1Id, mr2Id, pet1Id)));
+		List<Dataset> all = Utils.toList(repository.findAllById(Arrays.asList(mr1Id, mr2Id, pet1Id)));
 		assertEquals(3, all.size());
 		
 		Dataset foundedMr1 = all.get(0);

@@ -89,7 +89,7 @@ public class ExaminationServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		examinationService.deleteById(EXAMINATION_ID);
 
-		Mockito.verify(examinationRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
