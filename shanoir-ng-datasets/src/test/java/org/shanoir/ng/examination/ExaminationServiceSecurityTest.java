@@ -140,10 +140,10 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
-		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L).orElse(null)).willReturn(mockExam(1L));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L).orElse(null)).willReturn(mockExam(1L));
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -240,7 +240,7 @@ public class ExaminationServiceSecurityTest {
 	private void testDeleteByExpert() throws ShanoirException {
 		Examination exam = mockExam(1L);
 		exam.setStudyId(10L);
-		given(examinationRepository.findOne(1L)).willReturn(exam);
+		given(examinationRepository.findById(1L).orElse(null)).willReturn(exam);
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);

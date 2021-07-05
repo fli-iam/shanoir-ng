@@ -81,7 +81,7 @@ public class DatasetRepositoryTest {
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
-		Dataset founded = repository.findOne(id);
+		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
@@ -105,7 +105,7 @@ public class DatasetRepositoryTest {
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
-		Dataset founded = repository.findOne(id);
+		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
@@ -149,7 +149,7 @@ public class DatasetRepositoryTest {
 	
 	@Test
 	public void loadingStrategyTest() throws ShanoirException {
-		assertNotNull(repository.findOne(1L).getDatasetAcquisition());
+		assertNotNull(repository.findById(1L).orElse(null).getDatasetAcquisition());
 		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
 	}
 	

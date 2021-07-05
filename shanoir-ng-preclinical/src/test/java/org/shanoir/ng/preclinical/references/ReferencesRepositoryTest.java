@@ -126,7 +126,7 @@ public class ReferencesRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Reference referenceDb = repository.findOne(REFERENCE_TEST_1_ID);
+		Reference referenceDb = repository.findById(REFERENCE_TEST_1_ID).orElse(null);
 		assertThat(referenceDb.getCategory()).isEqualTo(REFERENCE_TEST_CATEGORY_SUBJECT);
 		assertThat(referenceDb.getReftype()).isEqualTo(REFERENCE_TEST_TYPE_SPECIE);
 		assertThat(referenceDb.getValue()).isEqualTo(REFERENCE_TEST_1_VALUE);

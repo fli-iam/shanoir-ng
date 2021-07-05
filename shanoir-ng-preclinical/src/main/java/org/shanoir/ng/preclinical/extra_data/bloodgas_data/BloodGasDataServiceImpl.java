@@ -50,7 +50,7 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		bloodGasRepository.delete(id);
+		bloodGasRepository.deleteById(id);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 
 	@Override
 	public BloodGasData findById(final Long id) {
-		return bloodGasRepository.findOne(id);
+		return bloodGasRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 
 	@Override
 	public BloodGasData update(final BloodGasData extradata) throws ShanoirException {
-		final BloodGasData bloodgasDataDB = bloodGasRepository.findOne(extradata.getId());
+		final BloodGasData bloodgasDataDB = bloodGasRepository.findById(extradata.getId()).orElse(null);
 		updateBloodGasDataValues(bloodgasDataDB, extradata);
 		try {
 			bloodGasRepository.save(bloodgasDataDB);

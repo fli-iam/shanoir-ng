@@ -296,7 +296,7 @@ public class DatasetApiController implements DatasetApi {
 
 		try {
 			List<URL> pathURLs = new ArrayList<>();
-			String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
+			String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
 			if (subjectName == null) {
 				subjectName = "unknown";
 			}
@@ -407,8 +407,8 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			for (Dataset dataset : datasets) {
 				// Create a new folder organized by subject / examination
-				String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
-				String studyName = studyRepo.findOne(dataset.getStudyId()).getName();
+				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
+				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();
 				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();

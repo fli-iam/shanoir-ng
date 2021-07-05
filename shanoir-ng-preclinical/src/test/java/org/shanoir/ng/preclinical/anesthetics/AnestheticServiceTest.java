@@ -63,7 +63,7 @@ public class AnestheticServiceTest {
 	public void setup() {
 		given(anestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
 		given(anestheticRepository.findAllByAnestheticType(AnestheticType.GAS)).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
-		given(anestheticRepository.findOne(ANESTHETIC_ID)).willReturn(AnestheticModelUtil.createAnestheticGas());
+		given(anestheticRepository.findById(ANESTHETIC_ID).orElse(null)).willReturn(AnestheticModelUtil.createAnestheticGas());
 		given(anestheticRepository.save(Mockito.any(Anesthetic.class))).willReturn(AnestheticModelUtil.createAnestheticGas());
 	}
 
@@ -71,7 +71,7 @@ public class AnestheticServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		anestheticsService.deleteById(ANESTHETIC_ID);
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(anestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class AnestheticServiceTest {
 		Assert.assertNotNull(anesthetic);
 		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class AnestheticServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

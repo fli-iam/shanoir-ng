@@ -70,7 +70,7 @@ public class SubjectPathologyServiceTest {
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findOne(SPATHO_ID)).willReturn(PathologyModelUtil.createSubjectPathology());
+		given(spathosRepository.findById(SPATHO_ID).orElse(null)).willReturn(PathologyModelUtil.createSubjectPathology());
 		given(spathosRepository.save(Mockito.any(SubjectPathology.class)))
 				.willReturn(PathologyModelUtil.createSubjectPathology());
 	}
@@ -79,14 +79,14 @@ public class SubjectPathologyServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		spathosService.deleteById(SPATHO_ID);
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
 	public void deleteByAnimalSubjectTest() throws ShanoirException {
 		spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class SubjectPathologyServiceTest {
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
 		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(spatho.getAnimalSubject().getId()));
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class SubjectPathologyServiceTest {
 	 * pathologiesService.updateFromShanoirOld(createPathology());
 	 * 
 	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).findOne(Mockito.anyLong());
+	 * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	 * Mockito.verify(pathologiesRepository,
 	 * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
 	 */

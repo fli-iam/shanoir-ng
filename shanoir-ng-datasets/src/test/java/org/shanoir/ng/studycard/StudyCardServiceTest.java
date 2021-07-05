@@ -59,7 +59,7 @@ public class StudyCardServiceTest {
 	@Before
 	public void setup() {
 		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.findOne(TEMPLATE_ID)).willReturn(ModelsUtil.createStudyCard());
+		given(studyCardRepository.findById(TEMPLATE_ID).orElse(null)).willReturn(ModelsUtil.createStudyCard());
 		given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
 	}
 

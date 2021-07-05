@@ -53,8 +53,8 @@ public class DatasetRepoTest {
 	
 	@Test
 	public void test() throws ShanoirException {
-		assertNotNull(datasetRepository.findOne(1L));
-		assertNotNull(datasetRepository.findOne(1L).getDatasetAcquisition());
+		assertNotNull(datasetRepository.findById(1L).orElse(null));
+		assertNotNull(datasetRepository.findById(1L).orElse(null).getDatasetAcquisition());
 	}
 
 }

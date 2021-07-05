@@ -97,7 +97,7 @@ public class ExaminationRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Examination examinationDb = repository.findOne(EXAMINATION_TEST_1_ID);
+		Examination examinationDb = repository.findById(EXAMINATION_TEST_1_ID).orElse(null);
 		assertThat(examinationDb.getNote()).isEqualTo(EXAMINATION_TEST_1_NOTE);
 	}
 

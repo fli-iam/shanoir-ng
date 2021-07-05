@@ -48,7 +48,7 @@ public class TherapyServiceImpl implements TherapyService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		therapiesRepository.delete(id);
+		therapiesRepository.deleteById(id);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class TherapyServiceImpl implements TherapyService {
 
 	@Override
 	public Therapy findById(final Long id) {
-		return therapiesRepository.findOne(id);
+		return therapiesRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class TherapyServiceImpl implements TherapyService {
 
 	@Override
 	public Therapy update(final Therapy therapy) throws ShanoirException {
-		final Therapy therapyDb = therapiesRepository.findOne(therapy.getId());
+		final Therapy therapyDb = therapiesRepository.findById(therapy.getId()).orElse(null);
 		updateTherapyValues(therapyDb, therapy);
 		try {
 			therapiesRepository.save(therapyDb);
