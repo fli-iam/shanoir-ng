@@ -182,6 +182,23 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	@Override
+	public ResponseEntity<Void> deleteDatasets(
+			@ApiParam(value = "ids of the datasets", required=true) @Valid
+    		@RequestBody(required = true) List<Long> datasetIds)
+			throws RestServiceException {
+		try {
+			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+			for (Dataset dataset : datasets) {
+				bidsService.deleteDataset(dataset);				
+			}
+			datasetService.deleteByIdIn(datasetIds);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 
 	@Override
 	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(

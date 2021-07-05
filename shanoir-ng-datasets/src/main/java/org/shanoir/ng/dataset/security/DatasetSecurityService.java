@@ -230,7 +230,7 @@ public class DatasetSecurityService {
      * 
      * @param datasets the datasets
      * @param rightStr the right
-     * @return true or false
+     * @return a filtered list of datasets
      * @throws EntityNotFoundException
      */
     public List<Dataset> hasRightOnAtLeastOneDataset(List<Dataset> datasets, String rightStr) throws EntityNotFoundException {
@@ -260,6 +260,32 @@ public class DatasetSecurityService {
     		}
     	});
     	return filteredDatasets;
+    }
+    
+    /**
+     * Reject if one dataset doesn't have the right.
+     * DatasetIds list is also cleaned here
+     * 
+     * @param datasets the datasets
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	// If the entry is empty, return an empty list
+    	if (datasetIds == null || datasetIds.isEmpty()) {
+			return true;
+		}
+    	
+    	Iterable<Dataset> datasets = datasetRepository.findAll(datasetIds);
+    	Set<Long> studyIds = new HashSet<Long>();
+    	for (Dataset dataset : datasets) {
+    		studyIds.add(dataset.getStudyId());
+    	}
+    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
     }
     
     /**
