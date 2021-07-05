@@ -92,7 +92,7 @@ public class ExaminationServiceSecurityTest {
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findPage, new PageRequest(0, 10), false);
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false);
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam());
@@ -130,7 +130,7 @@ public class ExaminationServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findPage, new PageRequest(0, 10), false);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam());
@@ -155,7 +155,7 @@ public class ExaminationServiceSecurityTest {
 		Examination ex2 = mockExam(2L); ex2.setStudyId(1L); exList.add(ex2);
 		Examination ex3 = mockExam(3L); ex3.setStudyId(1L); exList.add(ex3);
 		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		given(examinationRepository.findByPreclinicalAndStudyIdIn(false, Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(exList));
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
