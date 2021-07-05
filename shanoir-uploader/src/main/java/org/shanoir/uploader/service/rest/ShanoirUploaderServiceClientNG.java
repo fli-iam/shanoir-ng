@@ -213,8 +213,6 @@ public class ShanoirUploaderServiceClientNG {
 	public List<Study> findStudiesNamesAndCenters() {
 		long startTime = System.currentTimeMillis();
 		HttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
-		logger.error("COUCOU:" + response);
-
 		long stopTime = System.currentTimeMillis();
 	    long elapsedTime = stopTime - startTime;
 	    logger.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
@@ -231,7 +229,6 @@ public class ShanoirUploaderServiceClientNG {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
-			logger.error("COUCOU:" + json);
 			long startTime = System.currentTimeMillis();
 			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false);
 			long stopTime = System.currentTimeMillis();

@@ -75,6 +75,7 @@ public class RefsApiController implements RefsApi {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
+
 	}
 
 	@Override

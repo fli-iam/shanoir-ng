@@ -106,37 +106,9 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName) throws IOException, MessagingException {
-		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
-			String url = ((URL) iterator.next()).toString();
-			String instanceUID = null;
-			// handle and check at first for WADO-RS URLs by "/instances/"
-			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-			if (indexInstanceUID > 0) {
-				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-				byte[] responseBody = downloadFileFromPACS(url);
-				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
-			} else {
-				// handle and check secondly for WADO-URI URLs by "objectUID="
-				// instanceUID == objectUID
-				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
-				if (indexInstanceUID > 0) {
-					instanceUID = extractInstanceUID(url, instanceUID);
-					byte[] responseBody = downloadFileFromPACS(url);
-					String name = subjectName + "_" + instanceUID;
-					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
-					ByteArrayInputStream bIS = null;
-					try {
-						bIS = new ByteArrayInputStream(responseBody);
-						Files.copy(bIS, extractedDicomFile.toPath());
-					} finally {
-						if (bIS != null) {
-							bIS.close();
-						}
-					}
-				} else {
-					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
-				}
-			}
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			String url = iterator.next().toString();
+			downloadDicomFilesForURL(url, workFolder, subjectName);
 		}
 	}
 

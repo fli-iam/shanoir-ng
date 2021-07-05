@@ -395,7 +395,7 @@ public class ImporterService {
 						File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 						Path finalLocation = null;
 						try {
-							finalLocation = Files.copy(srcFile.toPath(), destFile.	toPath(), StandardCopyOption.REPLACE_EXISTING);
+							finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 						} catch (IOException e) {
 							LOG.error("IOException generating EEG Dataset Expression", e);
 						}
