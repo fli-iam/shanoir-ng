@@ -1,4 +1,5 @@
 /**
+
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -73,6 +74,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -148,6 +150,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private SubjectRepository subjectRepo;
+
+	@Autowired
+	private StudyRepository studyRepo;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -430,11 +435,21 @@ public class DatasetApiController implements DatasetApi {
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
-				// Create a new folder for every dataset
-				File datasetFile = new File(tmpFile.getAbsolutePath() + File.separator + dataset.getId());
-				datasetFile.mkdir();
-
+				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
+				String studyName = studyRepo.findOne(dataset.getStudyId()).getName();
+
+				Examination exam = dataset.getDatasetAcquisition().getExamination();
+				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();
+				datasetFilePath = datasetFilePath. replaceAll("[^a-zA-Z0-9_\\-]", "_");
+				if(datasetFilePath.length() > 255 ){
+					datasetFilePath = datasetFilePath.substring(0, 254);
+				}
+				datasetFilePath = tmpFile.getAbsolutePath() + File.separator + datasetFilePath;
+				File datasetFile = new File(datasetFilePath);
+				if (!datasetFile.exists()) {
+					datasetFile.mkdir();
+				}
 
 				List<URL> pathURLs = new ArrayList<>();
 
@@ -446,9 +461,6 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
-				}  else if (EEG.equals(format)) {
-					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else {
 					throw new RestServiceException(

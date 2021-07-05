@@ -70,9 +70,6 @@ public class RabbitMQConfiguration {
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
 
-	/** Get the list of administrator for a given study */
-	public static final String USER_ADMIN_STUDY_QUEUE = "user-admin-study-queue";
-
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
@@ -93,6 +90,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create a study_user when subscribing to a challenge */
 	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
+	
+	/** Send a mail from dataset microservice to study users */
+	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
 	/** Queue to re-convert using a different nifti converter */
 	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
@@ -281,11 +281,6 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue userAdminStudyQueue() {
-		return new Queue(USER_ADMIN_STUDY_QUEUE, true);
-	}
-
-	@Bean
 	public static Queue createDatasetAcquisitionQueue() {
 		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
@@ -315,4 +310,8 @@ public class RabbitMQConfiguration {
 		return new Queue(NIFTI_CONVERSION_QUEUE, true);
 	}
 	
+	@Bean
+	public static Queue importDatasetMail() {
+		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+	}
 }

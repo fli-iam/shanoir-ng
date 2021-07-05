@@ -14,18 +14,15 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.shanoir.ng.email.DatasetImportEmail;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -33,6 +30,7 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,34 +78,15 @@ public class RabbitMQUserService {
 	 * Receives an import end event as a json object, thus send a mail to study Manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.IMPORT_DATASET_EVENT,
-			value = @Queue( value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE_IMPORT, durable = "true"),
-	        exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-	)
-	public void receiveImportEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
+	@RabbitHandler
+	public void receiveImportEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		try {
-			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
-			// Do nothing if it's not a success
-			if (event.getStatus() == org.shanoir.ng.shared.event.ShanoirEvent.SUCCESS) {
-				// Send mail and clean series
-				emailService.notifyStudyManagerDataImported(event, series.get(event.getId()));
-				series.remove(event.getId());
-			} else if (event.getStatus() == org.shanoir.ng.shared.event.ShanoirEvent.IN_PROGRESS) {
-				// Get serie description
-				if (series.get(event.getId()) == null) {
-					series.put(event.getId(), new ArrayList<>());
-				}
-				// "Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId()
-				Pattern pat = Pattern.compile("Treating serie (.*) for examination \\d+");
-				Matcher mat = pat.matcher(event.getMessage());
-				if (mat.matches()) {
-					series.get(event.getId()).add(mat.group(1));
-				}
-			}
+			DatasetImportEmail mail = mapper.readValue(generatedMailAsString, DatasetImportEmail.class);
+			this.emailService.notifyStudyManagerDataImported(mail);
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);

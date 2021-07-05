@@ -75,6 +75,6 @@ public interface SolrApi {
 		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable);
+	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
 	
 }
