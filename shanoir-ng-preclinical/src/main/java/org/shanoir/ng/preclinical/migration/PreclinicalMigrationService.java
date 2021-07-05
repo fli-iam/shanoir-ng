@@ -110,8 +110,6 @@ public class PreclinicalMigrationService {
 			distantKeycloakConfigurationService.setServer(job.getShanoirUrl());
 			distantKeycloakConfigurationService.setAccessToken(job.getAccessToken());
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
-
-			LOG.error("receiving job " + mapper.writeValueAsString(job));
 			
 			event = job.getEvent();
 			publishEvent("Finishing migration with preclinical elements...", 1f);

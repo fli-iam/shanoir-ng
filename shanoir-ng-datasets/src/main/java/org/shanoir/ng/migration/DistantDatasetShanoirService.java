@@ -125,7 +125,7 @@ public class DistantDatasetShanoirService {
 
 	public void addExminationExtraData(File file, Long examId) throws ShanoirException {
 		try {
-			LOG.error("Sending dataset files to distant Shanoir");
+			LOG.error("Sending examination extra data to distant Shanoir");
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
@@ -178,8 +178,6 @@ public class DistantDatasetShanoirService {
 
 	public DatasetAcquisition createAcquisition(DatasetAcquisition acq) throws ShanoirException {
 		try {
-			LOG.error("Creating new acquisition: " + mapper.writeValueAsString(acq));
-
 			ResponseEntity<DatasetAcquisition> response = this.restTemplate.exchange(getURI(CREATE_DATASET_ACQUISITION), HttpMethod.POST, new HttpEntity<>(acq, getHeader()), DatasetAcquisition.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
@@ -209,8 +207,6 @@ public class DistantDatasetShanoirService {
 
 	public DatasetExpression createDatasetExpression(DatasetExpression ds) throws ShanoirException {
 		try {
-			LOG.error("Creating new dataset expression");
-
 			ResponseEntity<DatasetExpression> response = this.restTemplate.exchange(getURI(CREATE_DATASET_EXPRESSION), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), DatasetExpression.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
@@ -226,8 +222,6 @@ public class DistantDatasetShanoirService {
 
 	public DatasetFile createDatasetFile(DatasetFile ds) throws ShanoirException {
 		try {
-			LOG.error("Creating new datasetFile: ");
-
 			ResponseEntity<DatasetFile> response = this.restTemplate.exchange(getURI(CREATE_DATASET_FILE), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), DatasetFile.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();

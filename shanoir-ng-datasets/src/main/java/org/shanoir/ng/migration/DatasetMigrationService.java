@@ -104,8 +104,6 @@ public class DatasetMigrationService {
 			distantKeycloakConfigurationService.setAccessToken(job.getAccessToken());
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
 
-			LOG.error("receiving job " + job);
-
 			this.event = job.getEvent();
 			publishEvent("Starting dataset migration", 0f);
 
