@@ -62,7 +62,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		Examination exam = examinationRepository.findOne(id);
+		Examination exam = examinationRepository.findById(id).orElse(null);
 		List<Long> datasets = new ArrayList<>();
 
 		if (exam.getDatasetAcquisitions() != null) {
@@ -73,7 +73,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 		}
 		// Delete examination
-		examinationRepository.delete(id);
+		examinationRepository.deleteById(id);
 
 		for (Long dsId : datasets) {
 			solrService.deleteFromIndex(dsId);
@@ -106,7 +106,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination findById(final Long id) {
-		return examinationRepository.findOne(id);
+		return examinationRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
-		final Examination examinationDb = examinationRepository.findOne(examination.getId());
+		final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
 		if (examinationDb == null) {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
 		}

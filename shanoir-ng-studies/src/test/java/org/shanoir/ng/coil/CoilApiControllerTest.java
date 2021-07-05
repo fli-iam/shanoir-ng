@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CoilApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @WithMockKeycloakUser(id = 123)
 public class CoilApiControllerTest {
 
@@ -84,7 +85,7 @@ public class CoilApiControllerTest {
 
 		doNothing().when(coilServiceMock).deleteById(1L);
 		given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
-		given(coilServiceMock.findById(1L)).willReturn(new Coil());
+		given(coilServiceMock.findById(1L)).willReturn(Optional.of(new Coil()));
 		Coil coil = new Coil();
 		coil.setId(Long.valueOf(123));
 		given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );

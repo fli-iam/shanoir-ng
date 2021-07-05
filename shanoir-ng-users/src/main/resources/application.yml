@@ -60,9 +60,10 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
-front.server:
-  address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
-  url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
+front:
+  server:
+    address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
+    url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
@@ -93,7 +94,8 @@ kc.admin.client:
   client.id: admin-cli
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -103,7 +105,7 @@ logging:
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
     initialize: true
   jpa:
@@ -115,7 +117,8 @@ spring:
 
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
@@ -123,7 +126,9 @@ logging:
     
 ---
 spring:
-  profiles: test
+  config.activate.on-profile: test
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
@@ -141,6 +146,6 @@ spring:
     port: 3025
     protocol: smtp
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-
-    
-    
+front:
+  server:
+    url: https://shanoir-ng-nginx

@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,8 +59,8 @@ public class ManufacturerModelServiceTest {
 	@Before
 	public void setup() {
 		given(manufacturerModelRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID))
-				.willReturn(ModelsUtil.createManufacturerModel());
+		given(manufacturerModelRepository.findById(MANUFACTURER_MODEL_ID))
+				.willReturn(Optional.of(ModelsUtil.createManufacturerModel()));
 		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
 				.willReturn(createManufacturerModel());
 	}
@@ -75,11 +76,11 @@ public class ManufacturerModelServiceTest {
 
 	@Test
 	public void findByIdTest() {
-		final ManufacturerModel manufacturerModel = manufacturerModelService.findById(MANUFACTURER_MODEL_ID);
+		final ManufacturerModel manufacturerModel = manufacturerModelService.findById(MANUFACTURER_MODEL_ID).orElseThrow();
 		Assert.assertNotNull(manufacturerModel);
 		Assert.assertTrue(ModelsUtil.MANUFACTURER_MODEL_NAME.equals(manufacturerModel.getName()));
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

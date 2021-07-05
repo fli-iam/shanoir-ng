@@ -72,7 +72,7 @@ public class RabbitMQStudiesService {
 			Long userId = event.getUserId();
 			Long studyId = Long.valueOf(event.getObjectId());
 			// Get the study
-			Study studyToUpdate = studyRepo.findOne(studyId);
+			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
 			// Create a new StudyUser
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);

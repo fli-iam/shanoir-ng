@@ -54,7 +54,7 @@ import com.google.gson.GsonBuilder;
 @WebMvcTest(controllers = TherapyApiController.class)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class TherapyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/therapy";

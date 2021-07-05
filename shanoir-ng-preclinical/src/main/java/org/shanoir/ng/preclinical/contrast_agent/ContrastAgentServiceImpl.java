@@ -49,7 +49,7 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		contrastAgentsRepository.delete(id);
+		contrastAgentsRepository.deleteById(id);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 
 	@Override
 	public ContrastAgent findById(final Long id) {
-		return contrastAgentsRepository.findOne(id);
+		return contrastAgentsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 
 	@Override
 	public ContrastAgent update(final ContrastAgent agent) throws ShanoirException {
-		final ContrastAgent agentDb = contrastAgentsRepository.findOne(agent.getId());
+		final ContrastAgent agentDb = contrastAgentsRepository.findById(agent.getId()).orElse(null);
 		updateModelValues(agentDb, agent);
 		try {
 			contrastAgentsRepository.save(agentDb);

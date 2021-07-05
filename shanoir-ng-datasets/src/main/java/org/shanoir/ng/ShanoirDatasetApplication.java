@@ -17,7 +17,6 @@ package org.shanoir.ng;
 import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -32,7 +31,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /**
  * Shanoir-NG microservice datasets application.
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication
 @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableSwagger2

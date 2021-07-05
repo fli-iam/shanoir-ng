@@ -211,7 +211,7 @@ public class ImporterServiceTest {
 		Examination examination = new Examination();
 		examination.setId(2L);
 		examination.setExaminationDate(LocalDate.now());
-		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
+		when(examinationRepository.findById(importJob.getExaminationId()).orElse(null)).thenReturn(examination);
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());

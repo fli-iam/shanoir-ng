@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -26,7 +27,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 
 /**
@@ -58,9 +58,8 @@ public abstract class DatasetDecorator implements DatasetMapper {
 
 	@Override
 	public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page) {
-		Page<DatasetDTO> mappedPage = page.map(new Converter<Dataset, DatasetDTO>() {
-			@Override
-			public DatasetDTO convert(Dataset entity) {
+		Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
+			public DatasetDTO apply(Dataset entity) {
 				if (entity instanceof MrDataset) {
 					return mrMapper.datasetToDatasetDTO((MrDataset)entity);
 				}

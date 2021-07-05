@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 

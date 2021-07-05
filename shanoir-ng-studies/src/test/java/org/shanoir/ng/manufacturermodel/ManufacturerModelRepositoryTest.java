@@ -73,8 +73,8 @@ public class ManufacturerModelRepositoryTest {
 	}
 	
 	@Test
-	public void findOneTest() throws Exception {
-		ManufacturerModel manufacturerModelDb = repository.findOne(MANUFACTURER_MODEL_TEST_1_ID);
+	public void findByIdTest() throws Exception {
+		ManufacturerModel manufacturerModelDb = repository.findById(MANUFACTURER_MODEL_TEST_1_ID).orElseThrow();
 		assertThat(manufacturerModelDb).isNotNull();
 		assertThat(manufacturerModelDb.getName()).isEqualTo(MANUFACTURER_MODEL_TEST_1_NAME);
 	}

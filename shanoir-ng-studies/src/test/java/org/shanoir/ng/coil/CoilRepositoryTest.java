@@ -83,7 +83,7 @@ public class CoilRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		Coil coilDb = repository.findOne(COIL_TEST_1_ID);
+		Coil coilDb = repository.findById(COIL_TEST_1_ID).orElseThrow();
 		assertThat(coilDb.getName()).isEqualTo(COIL_TEST_1_NAME);
 	}
 	

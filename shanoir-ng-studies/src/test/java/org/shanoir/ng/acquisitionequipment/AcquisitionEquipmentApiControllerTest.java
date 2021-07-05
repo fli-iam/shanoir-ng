@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AcquisitionEquipmentApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class AcquisitionEquipmentApiControllerTest {
 
 	private static final String REQUEST_PATH = "/acquisitionequipments";
@@ -88,7 +89,7 @@ public class AcquisitionEquipmentApiControllerTest {
 
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
-		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(new AcquisitionEquipment());
+		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(Optional.of(new AcquisitionEquipment()));
 		given(acquisitionEquipmentServiceMock.create(Mockito.mock(AcquisitionEquipment.class)))
 				.willReturn(new AcquisitionEquipment());
 	}

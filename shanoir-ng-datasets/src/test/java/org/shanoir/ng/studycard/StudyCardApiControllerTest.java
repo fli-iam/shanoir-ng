@@ -55,7 +55,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {StudyCardApiController.class, StudyCardUniqueConstraintManager.class})
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyCardApiControllerTest {
 

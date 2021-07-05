@@ -94,7 +94,7 @@ public class PathologyRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Pathology pathologyDb = repository.findOne(PATHOLOGY_TEST_1_ID);
+		Pathology pathologyDb = repository.findById(PATHOLOGY_TEST_1_ID).orElse(null);
 		assertThat(pathologyDb.getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
 	}
 

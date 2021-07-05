@@ -15,6 +15,7 @@
 package org.shanoir.ng.center.controler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -84,12 +85,11 @@ public class CenterApiController implements CenterApi {
 	@Override
 	public ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
-		
-		final Center center = centerService.findById(centerId);
-		if (center == null) {
+		final Optional<Center> center = centerService.findById(centerId);
+		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center.orElseThrow()), HttpStatus.OK);
 	}
 
 	@Override

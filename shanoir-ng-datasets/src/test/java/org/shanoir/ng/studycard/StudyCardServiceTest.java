@@ -59,14 +59,14 @@ public class StudyCardServiceTest {
 	@Before
 	public void setup() {
 		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.findOne(TEMPLATE_ID)).willReturn(ModelsUtil.createStudyCard());
+		given(studyCardRepository.findById(TEMPLATE_ID).orElse(null)).willReturn(ModelsUtil.createStudyCard());
 		given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
 	}
 
 	@Test
 	public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		studyCardService.deleteById(TEMPLATE_ID);
-		Mockito.verify(studyCardRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(studyCardRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class StudyCardServiceTest {
 		final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
 		Assert.assertNotNull(studyCard);
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

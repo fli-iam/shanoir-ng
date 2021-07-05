@@ -93,7 +93,7 @@ public class RabbitMQDatasetsService {
 		IdName receivedStudy = new IdName();
 		try {
 			receivedStudy = objectMapper.readValue(studyStr, IdName.class);
-			Study existingStudy = studyRepository.findOne(receivedStudy.getId());
+			Study existingStudy = studyRepository.findById(receivedStudy.getId()).orElse(null);
 			if (existingStudy != null) {
 				// update existing study's name
 				existingStudy.setName(receivedStudy.getName());
@@ -117,7 +117,7 @@ public class RabbitMQDatasetsService {
 		IdName receivedSubject = new IdName();
 		try {
 			receivedSubject = objectMapper.readValue(subjectStr, IdName.class);
-			Subject existingSubject = subjectRepository.findOne(receivedSubject.getId());
+			Subject existingSubject = subjectRepository.findById(receivedSubject.getId()).orElse(null);
 			if (existingSubject != null) {
 				existingSubject.setName(receivedSubject.getName());
 				subjectRepository.save(existingSubject);
@@ -184,10 +184,10 @@ public class RabbitMQDatasetsService {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.delete(exam.getId());
+				examRepository.deleteById(exam.getId());
 			}
 			// Delete subject from datasets database
-			subjectRepository.delete(Long.valueOf(event.getObjectId()));
+			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
@@ -220,10 +220,10 @@ public class RabbitMQDatasetsService {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.delete(exam.getId());
+				examRepository.deleteById(exam.getId());
 			}
 			// Delete study from datasets database
-			studyRepository.delete(Long.valueOf(event.getObjectId()));
+			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

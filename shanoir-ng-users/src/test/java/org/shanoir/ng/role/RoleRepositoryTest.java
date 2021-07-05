@@ -61,7 +61,7 @@ public class RoleRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		final Role roleDb = repository.findOne(ROLE_TEST_1_ID);
+		final Role roleDb = repository.findById(ROLE_TEST_1_ID).orElse(null);
 		assertThat(roleDb.getName()).isEqualTo(ROLE_TEST_1_NAME);
 	}
 	

@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,7 +44,6 @@ import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
@@ -73,7 +73,7 @@ public class SubjectServiceTest {
 	@Before
 	public void setup() {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
-		given(subjectRepository.findOne(SUBJECT_ID)).willReturn(ModelsUtil.createSubject());
+		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
 		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
 
@@ -83,7 +83,7 @@ public class SubjectServiceTest {
 	public void deleteByIdTest() throws EntityNotFoundException {
 		subjectService.deleteById(SUBJECT_ID);
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class SubjectServiceTest {
 		Assert.assertNotNull(subject);
 		Assert.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

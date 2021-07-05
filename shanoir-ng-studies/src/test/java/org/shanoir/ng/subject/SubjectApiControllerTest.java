@@ -67,7 +67,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectApiController.class)
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class SubjectApiControllerTest {
 
 	private static final String REQUEST_PATH = "/subjects";

@@ -132,7 +132,7 @@ public class ImporterService {
 		eventService.publishEvent(event);
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
-			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
+			Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
 			Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
 			if (examination != null) {
 				int rank = 0;

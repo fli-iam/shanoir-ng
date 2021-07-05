@@ -69,7 +69,6 @@ public class AccountRequestApiSecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
-		
 		assertAccessAuthorized((t, u) -> {
 			try {
 				accountRequestApi.saveNewAccountRequest(t, u);

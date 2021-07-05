@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -30,10 +29,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -55,7 +50,7 @@ public abstract class FieldEditionSecurityManagerImpl <T extends AbstractEntity>
 		if (entity.getId() == null) {
 			return validateCreate(entity);
 		} else {
-			T originalEntity = repository.findOne(entity.getId());
+			T originalEntity = repository.findById(entity.getId()).orElse(null);
 			return validateUpdate(entity, originalEntity);
 		}		
 	}

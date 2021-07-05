@@ -55,7 +55,7 @@ public class PathologyServiceTest {
 	@Before
 	public void setup() {
 		given(pathologiesRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathology()));
-		given(pathologiesRepository.findOne(PATHOLOGY_ID)).willReturn(PathologyModelUtil.createPathology());
+		given(pathologiesRepository.findById(PATHOLOGY_ID).orElse(null)).willReturn(PathologyModelUtil.createPathology());
 		given(pathologiesRepository.save(Mockito.any(Pathology.class))).willReturn(PathologyModelUtil.createPathology());
 	}
 
@@ -63,7 +63,7 @@ public class PathologyServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		pathologiesService.deleteById(PATHOLOGY_ID);
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class PathologyServiceTest {
 		Assert.assertNotNull(pathology);
 		Assert.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	
@@ -109,7 +109,7 @@ public class PathologyServiceTest {
 		Assert.assertNotNull(pathology);
 		Assert.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 */
 /*
@@ -117,7 +117,7 @@ public class PathologyServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

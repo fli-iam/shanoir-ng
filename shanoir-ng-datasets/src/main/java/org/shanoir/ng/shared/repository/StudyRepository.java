@@ -15,6 +15,7 @@ package org.shanoir.ng.shared.repository;
 
 import java.math.BigInteger;
 import java.util.List;
+
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

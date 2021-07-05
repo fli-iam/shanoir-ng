@@ -48,7 +48,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		subjectsRepository.delete(id);
+		subjectsRepository.deleteById(id);
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public AnimalSubject findById(final Long id) {
-		return subjectsRepository.findOne(id);
+		return subjectsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public AnimalSubject update(final AnimalSubject subject) throws ShanoirException {
-		final AnimalSubject subjectDB = subjectsRepository.findOne(subject.getId());
+		final AnimalSubject subjectDB = subjectsRepository.findById(subject.getId()).orElse(null);
 		updateSubjectValues(subjectDB, subject);
 		try {
 			subjectsRepository.save(subjectDB);

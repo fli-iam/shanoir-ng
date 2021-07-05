@@ -15,6 +15,7 @@
 package org.shanoir.ng.shared.core.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -37,7 +38,7 @@ public interface BasicEntityService<T extends AbstractEntity> {
 	 * @return an entity or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	T findById(Long id);
+	Optional<T> findById(Long id);
 	
 	/**
 	 * Get all entities.

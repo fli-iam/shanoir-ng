@@ -47,7 +47,7 @@ public class StudyUserProcessCommandTest {
 	
 	@Test
     public void processCommandsTest() {
-		given(studyUserRepository.findAll(Mockito.anyList())).willReturn(new ArrayList<>());
+		given(studyUserRepository.findAllById(Mockito.anyList())).willReturn(new ArrayList<>());
         
 		List<StudyUserCommand> commands = new ArrayList<>();
 		commands.add(new StudyUserCommand(CommandType.DELETE, 1L));

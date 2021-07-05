@@ -22,8 +22,8 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -55,7 +55,6 @@ import org.springframework.validation.BindingResult;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class SubjectStudyApiSecurityTest {
 
@@ -72,7 +71,7 @@ public class SubjectStudyApiSecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
 		assertAccessDenied((t, u, v) -> { try { api.updateSubjectStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString());	} }, ENTITY_ID, subjectStudy, bindingResult);
@@ -81,7 +80,7 @@ public class SubjectStudyApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUnauthorizedUser() throws ShanoirException, RestServiceException {
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
 		assertAccessDenied((t, u, v) -> { try { api.updateSubjectStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString());	} }, ENTITY_ID, subjectStudy, bindingResult);
@@ -90,7 +89,7 @@ public class SubjectStudyApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsAuthorizedUser() throws ShanoirException, RestServiceException {
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_IMPORT));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_IMPORT)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_IMPORT);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
 		assertAccessAuthorized((t, u, v) -> { try { api.updateSubjectStudy(t, u, v); } catch (RestServiceException e) {} }, ENTITY_ID, subjectStudy, bindingResult);
@@ -99,7 +98,7 @@ public class SubjectStudyApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsUnauthorizedExpert() throws ShanoirException, RestServiceException {
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
 		assertAccessDenied((t, u, v) -> { try { api.updateSubjectStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString());	} }, ENTITY_ID, subjectStudy, bindingResult);
@@ -108,7 +107,7 @@ public class SubjectStudyApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsAuthorizedExpert() throws ShanoirException, RestServiceException {
-		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE));
+		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
 		assertAccessAuthorized((t, u, v) -> { try { api.updateSubjectStudy(t, u, v); } catch (RestServiceException e) {} }, ENTITY_ID, subjectStudy, bindingResult);

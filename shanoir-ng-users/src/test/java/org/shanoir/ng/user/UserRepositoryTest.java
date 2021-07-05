@@ -97,7 +97,7 @@ public class UserRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		User userDb = repository.findOne(USER_TEST_1_ID);
+		User userDb = repository.findById(USER_TEST_1_ID).orElse(null);
 		assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
 	}
 	

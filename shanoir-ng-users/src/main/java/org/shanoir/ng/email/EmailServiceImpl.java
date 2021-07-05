@@ -373,10 +373,10 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerDataImported(DatasetImportEmail generatedMail) {
         // Find user that imported
-        User u = userRepository.findOne(generatedMail.getUserId());
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 
 		// Get the list of recipients
-		List<User> admins = (List<User>) this.userRepository.findAll(generatedMail.getRecipients());
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 		
 		List<DatasetDetail> datasetLinks = new ArrayList<>();
 		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {

@@ -89,7 +89,7 @@ ms.url:
   bruker2dicom: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/bruker2dicom
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -119,7 +119,7 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
 logging:
-  file: /tmp/shanoir-ng-import.log
+  file:    name: /tmp/shanoir-ng-import.log
 ---
 
 ######################################
@@ -140,7 +140,7 @@ spring:
 
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR

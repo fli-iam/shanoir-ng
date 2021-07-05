@@ -15,6 +15,7 @@
 package org.shanoir.ng.shared.core.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -23,9 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * center service implementation.
+ * central service implementation.
  * 
- * @author msimon
+ * @author msimon, mkain
  *
  */
 public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implements BasicEntityService<T> {
@@ -44,8 +45,8 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 	protected abstract T updateValues(final T from, final T to);
 
 	@Override
-	public T findById(final Long id) {
-		return repository.findOne(id);
+	public Optional<T> findById(final Long id) {
+		return repository.findById(id);
 	}
 	
 	@Override
@@ -61,20 +62,18 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 	
 	@Override
 	public T update(final T entity) throws EntityNotFoundException {
-		final T entityDb = repository.findOne(entity.getId());
-		if (entityDb == null) {
-			throw new EntityNotFoundException(entity.getClass(), entity.getId());
-		}
+		final Optional<T> entityDbOpt = repository.findById(entity.getId());
+		final T entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
 		updateValues(entity, entityDb);
 		return repository.save(entityDb);
 	}
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException  {
-		final T entity = repository.findOne(id);
-		if (entity == null) {
-			throw new EntityNotFoundException("Cannot find entity with id = " + id);
-		}
-		repository.delete(id);
+		final Optional<T> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
 	}
+
 }

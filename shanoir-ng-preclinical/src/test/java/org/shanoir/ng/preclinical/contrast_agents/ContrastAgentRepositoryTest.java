@@ -89,7 +89,7 @@ public class ContrastAgentRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		ContrastAgent agentDb = repository.findOne(AGENT_TEST_1_ID);
+		ContrastAgent agentDb = repository.findById(AGENT_TEST_1_ID).orElse(null);
 		assertThat(agentDb.getName().getValue()).isEqualTo(AGENT_TEST_1_NAME);
 		assertThat(agentDb.getManufacturedName()).isEqualTo(AGENT_TEST_1_MANUFACTURED_NAME);
 	}

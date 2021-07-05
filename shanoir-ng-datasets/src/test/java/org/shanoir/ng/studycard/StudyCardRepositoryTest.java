@@ -86,7 +86,7 @@ public class StudyCardRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		StudyCard studyCardDb = studyCardRepository.findOne(STUDYCARD_TEST_1_ID);
+		StudyCard studyCardDb = studyCardRepository.findById(STUDYCARD_TEST_1_ID).orElse(null);
 		assertThat(studyCardDb.getName()).isEqualTo(STUDYCARD_TEST_1_DATA);
 	}
 	

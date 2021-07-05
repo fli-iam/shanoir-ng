@@ -16,6 +16,7 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -24,7 +25,6 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 
 /**
@@ -54,10 +54,8 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 	
 	@Override
 	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
-
-		Page<DatasetAcquisitionDTO> mappedPage = page.map(new Converter<DatasetAcquisition, DatasetAcquisitionDTO>() {
-			@Override
-			public DatasetAcquisitionDTO convert(DatasetAcquisition entity) {
+		Page<DatasetAcquisitionDTO> mappedPage = page.map(new Function<DatasetAcquisition, DatasetAcquisitionDTO>() {
+			public DatasetAcquisitionDTO apply(DatasetAcquisition entity) {
 				return datasetAcquisitionToDatasetAcquisitionDTO(entity);
 			}
 		});

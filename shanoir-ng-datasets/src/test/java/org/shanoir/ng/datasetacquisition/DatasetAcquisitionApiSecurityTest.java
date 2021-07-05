@@ -89,7 +89,7 @@ public class DatasetAcquisitionApiSecurityTest {
 		
 		assertAccessDenied(api::findDatasetAcquisitionById, 1L);
 		assertAccessDenied(api::findByStudyCard, 1L);
-		assertAccessDenied(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { fail(e2.toString());}}, new PageRequest(0, 10));
+		assertAccessDenied(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { fail(e2.toString());}}, PageRequest.of(0, 10));
 		assertAccessDenied(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) { fail(e1.toString()); } }, new ImportJob());
 		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDsAcqDTO(1L), mockBindingResult);
 		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
@@ -103,14 +103,14 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
 		
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
-		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, new PageRequest(0, 10));
+		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, PageRequest.of(0, 10));
 		assertAccessAuthorized(api::findByStudyCard, 1L);
-		assertNull(api.findDatasetAcquisitions(new PageRequest(0, 10)).getBody());
+		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
 		assertNull(api.findByStudyCard(new Long(1L)).getBody());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
 		
-		//assertEquals(2, api.findDatasetAcquisitions(new PageRequest(0, 10)).getBody().getTotalElements());
+		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
 
 		ImportJob importJob = new ImportJob(); importJob.setExaminationId(1L);
@@ -128,13 +128,13 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
 		
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
-		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, new PageRequest(0, 10));
+		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, PageRequest.of(0, 10));
 		assertAccessAuthorized(api::findByStudyCard, 1L);
-		assertNull(api.findDatasetAcquisitions(new PageRequest(0, 10)).getBody());
+		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
 		assertNull(api.findByStudyCard(new Long(1L)).getBody());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
 		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
-		//assertEquals(2, api.findDatasetAcquisitions(new PageRequest(0, 10)).getBody().getTotalElements());
+		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
 		
 		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
@@ -170,8 +170,8 @@ public class DatasetAcquisitionApiSecurityTest {
 		
 		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
 		assertAccessAuthorized(api::findByStudyCard, 1L);
-		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, new PageRequest(0, 10));
-		//assertEquals(3, api.findDatasetAcquisitions(new PageRequest(0, 10)).getBody().getTotalElements());
+		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, PageRequest.of(0, 10));
+		//assertEquals(3, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 
 		assertAccessAuthorized(t -> { try { api.createNewDatasetAcquisition(t); } catch (RestServiceException e1) {} }, new ImportJob());
 		assertAccessAuthorized((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDsAcqDTO(1L), mockBindingResult);

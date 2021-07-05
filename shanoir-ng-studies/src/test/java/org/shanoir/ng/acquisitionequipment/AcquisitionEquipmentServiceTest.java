@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,7 +59,7 @@ public class AcquisitionEquipmentServiceTest {
 	@Before
 	public void setup() {
 		given(acquisitionEquipmentRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
-		given(acquisitionEquipmentRepository.findOne(ACQ_EQPT_ID)).willReturn(ModelsUtil.createAcquisitionEquipment());
+		given(acquisitionEquipmentRepository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
 		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
@@ -71,7 +72,7 @@ public class AcquisitionEquipmentServiceTest {
 	public void deleteByIdTest() throws EntityNotFoundException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);
 		
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -85,11 +86,11 @@ public class AcquisitionEquipmentServiceTest {
 
 	@Test
 	public void findByIdTest() {
-		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(ACQ_EQPT_ID);
+		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(ACQ_EQPT_ID).orElse(null);
 		Assert.assertNotNull(equipment);
 		Assert.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
 
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

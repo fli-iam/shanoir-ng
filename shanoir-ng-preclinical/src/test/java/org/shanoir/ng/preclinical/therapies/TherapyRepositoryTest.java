@@ -102,7 +102,7 @@ public class TherapyRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Therapy therapyDb = repository.findOne(THERAPY_TEST_1_ID);
+		Therapy therapyDb = repository.findById(THERAPY_TEST_1_ID).orElse(null);
 		assertThat(therapyDb.getName()).isEqualTo(THERAPY_TEST_1_DATA);
 	}
 

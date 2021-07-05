@@ -16,11 +16,11 @@ package org.shanoir.ng.dataset.modality;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -56,9 +56,8 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
 
 	@Override
 	public PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page) {
-		org.springframework.data.domain.Page<EegDatasetDTO> mappedPage =  page.map(new Converter<EegDataset, EegDatasetDTO>() {
-			@Override
-			public EegDatasetDTO convert(EegDataset entity) {
+		org.springframework.data.domain.Page<EegDatasetDTO> mappedPage =  page.map(new Function<EegDataset, EegDatasetDTO>() {
+			public EegDatasetDTO apply(EegDataset entity) {
 				return delegate.datasetToDatasetDTO(entity);
 			}
 		});

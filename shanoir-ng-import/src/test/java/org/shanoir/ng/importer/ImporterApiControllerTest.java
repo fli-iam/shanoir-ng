@@ -71,7 +71,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ImporterApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc
 public class ImporterApiControllerTest {
 
 	private static final String UPLOAD_EEG_PATH = "/importer/upload_eeg/";

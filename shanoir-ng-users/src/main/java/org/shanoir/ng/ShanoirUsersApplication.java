@@ -16,14 +16,13 @@ package org.shanoir.ng;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Shanoir-NG microservice users application.
  * MK: @EnableSwagger2 removed explicitly - only for ms users - to protect the best the interface.
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication
 @EnableScheduling
 public class ShanoirUsersApplication {
 

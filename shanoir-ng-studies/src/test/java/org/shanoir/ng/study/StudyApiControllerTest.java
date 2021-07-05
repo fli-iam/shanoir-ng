@@ -74,7 +74,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = StudyApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class StudyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studies";

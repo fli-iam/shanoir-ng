@@ -48,7 +48,7 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		extraDataRepository.delete(id);
+		extraDataRepository.deleteById(id);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 
 	@Override
 	public ExaminationExtraData findById(final Long id) {
-		return extraDataRepository.findOne(id);
+		return extraDataRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 
 	@Override
 	public ExaminationExtraData update(final ExaminationExtraData extradata) throws ShanoirException {
-		final ExaminationExtraData extraDataDB = extraDataRepository.findOne(extradata.getId());
+		final ExaminationExtraData extraDataDB = extraDataRepository.findById(extradata.getId()).orElse(null);
 		updateExtraDataValues(extraDataDB, extradata);
 		try {
 			extraDataRepository.save(extraDataDB);

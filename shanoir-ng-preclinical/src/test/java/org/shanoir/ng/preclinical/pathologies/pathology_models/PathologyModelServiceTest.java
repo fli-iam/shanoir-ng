@@ -66,7 +66,7 @@ public class PathologyModelServiceTest {
 	public void setup() {
 		given(modelsRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathologyModel()));
 		given(modelsRepository.findByPathology(PathologyModelUtil.createPathology())).willReturn(Arrays.asList(PathologyModelUtil.createPathologyModel()));
-		given(modelsRepository.findOne(MODEL_ID)).willReturn(PathologyModelUtil.createPathologyModel());
+		given(modelsRepository.findById(MODEL_ID).orElse(null)).willReturn(PathologyModelUtil.createPathologyModel());
 		given(modelsRepository.save(Mockito.any(PathologyModel.class))).willReturn(PathologyModelUtil.createPathologyModel());
 	}
 
@@ -74,7 +74,7 @@ public class PathologyModelServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		modelsService.deleteById(MODEL_ID);
 
-		Mockito.verify(modelsRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(modelsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class PathologyModelServiceTest {
 		Assert.assertNotNull(model);
 		Assert.assertTrue(PathologyModelUtil.MODEL_NAME.equals(model.getName()));
 
-		Mockito.verify(modelsRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(modelsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class PathologyModelServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

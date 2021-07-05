@@ -16,17 +16,18 @@ package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.matchers.JUnitMatchers.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -85,7 +86,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = DatasetApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class DatasetApiControllerTest {
 
@@ -143,7 +144,7 @@ public class DatasetApiControllerTest {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
-		given(studyRepo.findOne(Mockito.anyLong())).willReturn(study);
+		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);
@@ -208,7 +209,7 @@ public class DatasetApiControllerTest {
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findOne(3L)).willReturn(subject);
+		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 
@@ -256,7 +257,7 @@ public class DatasetApiControllerTest {
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findOne(3L)).willReturn(subject);
+		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 
@@ -369,7 +370,7 @@ public class DatasetApiControllerTest {
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findOne(3L)).willReturn(subject);
+		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 
