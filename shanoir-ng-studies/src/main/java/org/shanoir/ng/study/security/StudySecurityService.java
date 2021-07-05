@@ -408,7 +408,7 @@ public class StudySecurityService {
 	 * @return
 	 */
 	public boolean checkUserOnDUA(Long duaId) {
-		DataUserAgreement dataUserAgreement = dataUserAgreementRepository.findOne(duaId);
+		DataUserAgreement dataUserAgreement = dataUserAgreementRepository.findById(duaId).orElse(null);
 		// assure that only the user itself can accept its DUA
 		if (dataUserAgreement != null && dataUserAgreement.getUserId().equals(KeycloakUtil.getTokenUserId())) {
 			return true;
