@@ -489,7 +489,7 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
-			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 			
 			name.append(subjectName).append("_")
@@ -500,8 +500,12 @@ public class DatasetApiController implements DatasetApi {
 			}
 			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
 			.append(index)
-			.append(".").append(FilenameUtils.getExtension(srcFile.getName()));
-
+			.append(".");
+			if (srcFile.getName().endsWith(".nii.gz")) {
+				name.append("nii.gz");
+			} else {
+				name.append(FilenameUtils.getExtension(srcFile.getName()));
+			}
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			index++;
