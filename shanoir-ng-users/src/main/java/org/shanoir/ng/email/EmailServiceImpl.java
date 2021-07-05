@@ -385,6 +385,10 @@ public class EmailServiceImpl implements EmailService {
 			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
 			datasetLinks.add(detail);
 		}
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
 
 		for (User admin : admins) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -399,11 +403,12 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(STUDY_NAME, generatedMail.getStudyName());
 				variables.put(SUBJECT, generatedMail.getSubjectName());
 				variables.put(SERIES, datasetLinks);
-				variables.put(EXAMINATION, shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+				variables.put(EXAMINATION, examDetail);
 				variables.put(EXAM_DATE, generatedMail.getExamDate());
 				variables.put(STUDY_CARD, generatedMail.getStudyCard());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
+				LOG.error(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
