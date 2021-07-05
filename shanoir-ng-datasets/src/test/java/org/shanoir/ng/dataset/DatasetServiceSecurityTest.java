@@ -104,7 +104,7 @@ public class DatasetServiceSecurityTest {
 		
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::findPage, new PageRequest(0, 10));
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
 		assertAccessDenied(service::create, mockDataset());
 		assertAccessDenied(service::update, mockDataset(1L));
 		assertAccessDenied(service::deleteById, ENTITY_ID);
@@ -137,7 +137,7 @@ public class DatasetServiceSecurityTest {
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findPage, new PageRequest(0, 10));
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::create, mockDataset());
 		assertAccessAuthorized(service::update, mockDataset(1L));
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
@@ -172,7 +172,7 @@ public class DatasetServiceSecurityTest {
 		MrDataset ds2 = mockDataset(2L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds2);
 		MrDataset ds3 = mockDataset(3L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds3);
 		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
 		given(datasetRepository.findByDatasetAcquisitionExaminationStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList));

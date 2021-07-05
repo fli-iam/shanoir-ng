@@ -83,7 +83,7 @@ public class ExaminationRepositoryTest {
 
 	// @Test
 	// public void findByStudyIdInPageable() throws Exception {
-	// 	Pageable pageable = new PageRequest(0, 2);
+	// 	Pageable pageable = PageRequest.of(0, 2);
 	// 	List<Examination> examinationsDb = repository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID), pageable);
 	// 	assertThat(examinationsDb.size()).isEqualTo(2);
 	// }
