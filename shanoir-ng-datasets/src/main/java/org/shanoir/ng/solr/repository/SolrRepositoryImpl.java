@@ -10,10 +10,8 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Pageable;
