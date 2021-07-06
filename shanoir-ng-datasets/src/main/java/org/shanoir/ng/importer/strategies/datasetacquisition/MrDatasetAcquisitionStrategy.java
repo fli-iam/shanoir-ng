@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +84,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		} catch (IOException e) {
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
 		}
+		mrDatasetAcquisition.setCreationDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
