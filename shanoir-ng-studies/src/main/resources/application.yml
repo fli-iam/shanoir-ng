@@ -100,6 +100,9 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
+# This can be updated to set new servers available
+migration-servers: Qualification==https://shanoir-qualif.irisa.fr/;;Neurinfo==https//shanoir.irisa.fr/;;GME==https//fli.ai/
+
 ---
 
 ######################################

@@ -111,6 +111,8 @@ public class DatasetMigrationService {
 			
 			// Re-set event as it was updated
 			job.setEvent(event);
+			job.setAccessToken(distantKeycloakConfigurationService.getAccessToken());
+			job.setRefreshToken(distantKeycloakConfigurationService.getRefreshToken());
 			
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
 			

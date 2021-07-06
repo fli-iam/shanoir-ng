@@ -40,4 +40,9 @@ export class MigrationService {
         return this.http.get<any>(endpoint, {params: params}).toPromise();
     }
 
+    getUrls(): Promise<any> {
+        const endpoint = this.API_URL + "/urls";
+        return this.http.get<any>(endpoint).toPromise();
+    }
+
 }

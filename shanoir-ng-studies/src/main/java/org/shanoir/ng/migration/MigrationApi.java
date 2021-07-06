@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.migration;
 
+import java.io.IOException;
+import java.util.List;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,11 +41,21 @@ public interface MigrationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@GetMapping(value = "/migrate", produces = { "application/json" })
 	ResponseEntity<String> migrateStudy (
-			@ApiParam(value = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") String shanoirUrl,
+			@ApiParam(value = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") Integer shanoirUrl,
 			@ApiParam(value = "Username of user", required = true) @RequestParam("username") String username,
 			@ApiParam(value = "Password of user", required = true) @RequestParam("userPassword") String userPassword,
 			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId,
 			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Get migration configuration", response = String.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "no value", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no config found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@GetMapping(value = "urls", produces = {
+			"application/json" })
+	ResponseEntity<List<IdName>> getMigrationConfig() throws IOException;
 
 }

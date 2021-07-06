@@ -20,6 +20,7 @@ import { Option } from '../../shared/select/select.component';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { MigrationService } from './migration.service';
+import { IdName } from '../../shared/models/id-name.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -27,6 +28,8 @@ import { CommonModule } from '@angular/common';
     templateUrl: 'migrate-study.component.html'
 })
 export class MigrateStudyComponent implements OnInit {
+
+    public urls: Option<string>[] = [];
 
     public form: FormGroup;
     public studyOptions: Option<Study>[] = [];
@@ -48,6 +51,11 @@ export class MigrateStudyComponent implements OnInit {
     ngOnInit() {
         this.studyService.findStudiesByUserId().then(studies => {
             this.studyOptions = studies.map(study => new Option(study, study.name));
+        });
+        this.migrationService.getUrls().then(result => {
+            for (let element of result) {
+                this.urls.push(new Option(element.id, element.name));
+            }
         });
     }
 
