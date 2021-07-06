@@ -22,6 +22,6 @@ checkbox { transform: scale(0.8); margin-right: 7px; vertical-align: -4px; }
 .count { margin-top: 10px; height: 17px; }
 .facet-count { margin-left: 8px; color: var(--color-c-light); font-size: 10px; }
 
-.facet { color: var(--color-a); }
+.facet { color: var(--color-a); max-width: 135px; display: inline-block; overflow: hidden; text-overflow: ellipsis; vertical-align: -4px; white-space: nowrap; }
 
 .more, .less { color: var(--greyer); margin-left: 1px; }
