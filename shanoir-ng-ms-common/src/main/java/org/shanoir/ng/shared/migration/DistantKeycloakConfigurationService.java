@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,9 +39,18 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class DistantKeycloakConfigurationService {
 
+
 	private static final Logger LOG = LoggerFactory.getLogger(DistantKeycloakConfigurationService.class);
+
+	private static final String SHANOIR_QUALIF = "shanoir-qualif";
+	private static final String SHANOIR_DEV = "shanoir-ng-nginx";
 	
+	@Autowired
 	RestTemplate restTemplate;
+	
+	RestTemplate weakRestTemplate;
+
+	RestTemplate usedTemplate;
 	
 	private String refreshToken;
 	
@@ -70,7 +80,7 @@ public class DistantKeycloakConfigurationService {
 					new HttpComponentsClientHttpRequestFactory();
 
 			requestFactory.setHttpClient(httpClient);
-			restTemplate = new RestTemplate(requestFactory);
+			weakRestTemplate = new RestTemplate(requestFactory);
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
 			LOG.error("Could not get a valid rest template.");
 		}
@@ -85,6 +95,11 @@ public class DistantKeycloakConfigurationService {
 	public void connectToDistantKeycloak(String shanoirUrl, String username, String userPassword) throws ShanoirException {
 		// Connect
 		this.setServer(shanoirUrl);
+		if (shanoirUrl.contains(SHANOIR_QUALIF) || shanoirUrl.contains(SHANOIR_DEV)) {
+			usedTemplate = weakRestTemplate;
+		} else {
+			usedTemplate = restTemplate;
+		}
 		String keycloakURL = shanoirUrl + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();
@@ -98,7 +113,7 @@ public class DistantKeycloakConfigurationService {
 			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 			headers.set("Content-type", "application/x-www-form-urlencoded");
 
-			ResponseEntity<String> response = restTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody.toString(), headers), String.class);
+			ResponseEntity<String> response = usedTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody.toString(), headers), String.class);
 			// Keep connection alive
 			final int statusCode = response.getStatusCodeValue();
 			if (HttpStatus.SC_OK == statusCode) {
@@ -129,6 +144,11 @@ public class DistantKeycloakConfigurationService {
 	 * be to close to the end.
 	 */
 	public void refreshToken(String keycloakURL) {
+		if (keycloakURL.contains(SHANOIR_QUALIF) || keycloakURL.contains(SHANOIR_DEV)) {
+			usedTemplate = weakRestTemplate;
+		} else {
+			usedTemplate = restTemplate;
+		}
 		final StringBuilder postBody = new StringBuilder();
 		postBody.append("client_id=shanoir-uploader");
 		postBody.append("&grant_type=refresh_token");
@@ -140,7 +160,7 @@ public class DistantKeycloakConfigurationService {
 				headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 				headers.set("Content-type", "application/x-www-form-urlencoded");
 
-				ResponseEntity<String> response = restTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody.toString(), headers), String.class);
+				ResponseEntity<String> response = usedTemplate.exchange(keycloakURL, HttpMethod.POST, new HttpEntity<>(postBody.toString(), headers), String.class);
 
 				// Keep connection alive
 				final int statusCode = response.getStatusCodeValue();
@@ -208,4 +228,7 @@ public class DistantKeycloakConfigurationService {
 		this.accessToken = accessToken;
 	}
 
+	public RestTemplate getRestTemplate() {
+		return usedTemplate;
+	}
 }

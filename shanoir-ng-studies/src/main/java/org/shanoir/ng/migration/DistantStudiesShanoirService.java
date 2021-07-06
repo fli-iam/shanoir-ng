@@ -3,22 +3,10 @@ package org.shanoir.ng.migration;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
@@ -42,11 +30,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class DistantStudiesShanoirService {
@@ -75,8 +61,6 @@ public class DistantStudiesShanoirService {
 
 	private static final String GET_MANUFACTURERS = "/shanoir-ng/studies/manufacturers";
 
-	RestTemplate restTemplate;
-
 	@Autowired
 	StudyService studyService;
 
@@ -86,45 +70,6 @@ public class DistantStudiesShanoirService {
 	@Autowired
 	DistantKeycloakConfigurationService distantKeycloak;
 
-	private static final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
-			new X509TrustManager() {
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers(){
-					return null;
-				}
-				@Override
-				public void checkClientTrusted( X509Certificate[] certs, String authType ){}
-				@Override
-				public void checkServerTrusted( X509Certificate[] certs, String authType ){}
-			}
-	};
-
-	public DistantStudiesShanoirService() {
-		// Instanciate a "weak" rest template.
-		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-
-		SSLContext sslContext;
-		try {
-			sslContext = org.apache.http.ssl.SSLContexts.custom()
-					.loadTrustMaterial(null, acceptingTrustStrategy)
-					.build();
-
-			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-
-			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLSocketFactory(csf)
-					.build();
-
-			HttpComponentsClientHttpRequestFactory requestFactory =
-					new HttpComponentsClientHttpRequestFactory();
-
-			requestFactory.setHttpClient(httpClient);
-			restTemplate = new RestTemplate(requestFactory);
-		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-			// POUTOU
-		}
-	}
-
 	/**
 	 * Creates a subject in the distant shanoir instance
 	 * @param subject the subject to create
@@ -132,7 +77,7 @@ public class DistantStudiesShanoirService {
 	 */
 	public Subject createSubject(Subject subject) throws ShanoirException {
 		try {
-			ResponseEntity<Subject> response = this.restTemplate.exchange(getURI(SERVICE_SUBJECTS_CREATE), HttpMethod.POST, new HttpEntity<>(subject, getHeader()), Subject.class);
+			ResponseEntity<Subject> response = this.distantKeycloak.getRestTemplate().exchange(getURI(SERVICE_SUBJECTS_CREATE), HttpMethod.POST, new HttpEntity<>(subject, getHeader()), Subject.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -151,7 +96,7 @@ public class DistantStudiesShanoirService {
 	public StudyDTO createStudy(Study study) throws ShanoirException {
 		try {
 			StudyDTO dto = mapper.studyToStudyDTO(study);
-			ResponseEntity<StudyDTO> response = this.restTemplate.exchange(getURI(SERVICE_STUDY_CREATE), HttpMethod.POST, new HttpEntity<>(dto, getHeader()), StudyDTO.class);
+			ResponseEntity<StudyDTO> response = this.distantKeycloak.getRestTemplate().exchange(getURI(SERVICE_STUDY_CREATE), HttpMethod.POST, new HttpEntity<>(dto, getHeader()), StudyDTO.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -173,7 +118,7 @@ public class DistantStudiesShanoirService {
 				studyCenter.setCenter(newCenter);
 				studyCenter.setStudy(newStudy);
 			}
-			ResponseEntity<Study> response = this.restTemplate.exchange(getURI(SERVICE_STUDY_CREATE + "/" + study.getId()), HttpMethod.POST, new HttpEntity<>(study, getHeader()), Study.class);
+			ResponseEntity<Study> response = this.distantKeycloak.getRestTemplate().exchange(getURI(SERVICE_STUDY_CREATE + "/" + study.getId()), HttpMethod.POST, new HttpEntity<>(study, getHeader()), Study.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -206,7 +151,7 @@ public class DistantStudiesShanoirService {
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
 
-			restTemplate.postForEntity(getURI(ADD_PROTOCOL_FILE_PATH + studyId), requestEntity, Void.class);
+			distantKeycloak.getRestTemplate().postForEntity(getURI(ADD_PROTOCOL_FILE_PATH + studyId), requestEntity, Void.class);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add protocol file on study: ", e);
 		}
@@ -218,7 +163,7 @@ public class DistantStudiesShanoirService {
 	 */
 	public List<IdName> getAllCenters() throws ShanoirException {
 		try {
-			ResponseEntity<IdName[]> response = this.restTemplate.exchange(getURI(GET_CENTERS), HttpMethod.GET, new HttpEntity<>(getHeader()), IdName[].class);
+			ResponseEntity<IdName[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_CENTERS), HttpMethod.GET, new HttpEntity<>(getHeader()), IdName[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -237,7 +182,7 @@ public class DistantStudiesShanoirService {
 	 */
 	public Center createCenter(Center center) throws ShanoirException {
 		try {
-			ResponseEntity<Center> response = this.restTemplate.exchange(getURI(CREATE_CENTER), HttpMethod.POST, new HttpEntity<Center>(center, getHeader()), Center.class);
+			ResponseEntity<Center> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_CENTER), HttpMethod.POST, new HttpEntity<Center>(center, getHeader()), Center.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -251,7 +196,7 @@ public class DistantStudiesShanoirService {
 
 	public List<AcquisitionEquipment> getAcquisitionEquipements() throws ShanoirException {
 		try {
-			ResponseEntity<AcquisitionEquipment[]> response = this.restTemplate.exchange(getURI(GET_EQUIPEMENTS), HttpMethod.GET, new HttpEntity<>(getHeader()), AcquisitionEquipment[].class);
+			ResponseEntity<AcquisitionEquipment[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_EQUIPEMENTS), HttpMethod.GET, new HttpEntity<>(getHeader()), AcquisitionEquipment[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -265,7 +210,7 @@ public class DistantStudiesShanoirService {
 
 	public List<ManufacturerModel> getModels() throws ShanoirException {
 		try {
-			ResponseEntity<ManufacturerModel[]> response = this.restTemplate.exchange(getURI(GET_MODELS), HttpMethod.GET, new HttpEntity<>(getHeader()), ManufacturerModel[].class);
+			ResponseEntity<ManufacturerModel[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_MODELS), HttpMethod.GET, new HttpEntity<>(getHeader()), ManufacturerModel[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -280,7 +225,7 @@ public class DistantStudiesShanoirService {
 
 	public List<Manufacturer> getManufacturers() throws ShanoirException {
 		try {
-			ResponseEntity<Manufacturer[]> response = this.restTemplate.exchange(getURI(GET_MANUFACTURERS), HttpMethod.GET, new HttpEntity<>(getHeader()), Manufacturer[].class);
+			ResponseEntity<Manufacturer[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_MANUFACTURERS), HttpMethod.GET, new HttpEntity<>(getHeader()), Manufacturer[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -294,7 +239,7 @@ public class DistantStudiesShanoirService {
 
 	public AcquisitionEquipment createEquipement(AcquisitionEquipment equipement) throws ShanoirException {
 		try {
-			ResponseEntity<AcquisitionEquipment> response = this.restTemplate.exchange(getURI(CREATE_EQUIPEMENT), HttpMethod.POST, new HttpEntity<AcquisitionEquipment>(equipement, getHeader()), AcquisitionEquipment.class);
+			ResponseEntity<AcquisitionEquipment> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_EQUIPEMENT), HttpMethod.POST, new HttpEntity<AcquisitionEquipment>(equipement, getHeader()), AcquisitionEquipment.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -307,7 +252,7 @@ public class DistantStudiesShanoirService {
 
 	public Manufacturer createManufacturer(Manufacturer manufacturer) throws ShanoirException {
 		try {
-			ResponseEntity<Manufacturer> response = this.restTemplate.exchange(getURI(CREATE_MANUFACTURER), HttpMethod.POST, new HttpEntity<Manufacturer>(manufacturer, getHeader()), Manufacturer.class);
+			ResponseEntity<Manufacturer> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_MANUFACTURER), HttpMethod.POST, new HttpEntity<Manufacturer>(manufacturer, getHeader()), Manufacturer.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -321,7 +266,7 @@ public class DistantStudiesShanoirService {
 
 	public ManufacturerModel createManufacturerModel(ManufacturerModel manufacturerModel) throws ShanoirException {
 		try {
-			ResponseEntity<ManufacturerModel> response = this.restTemplate.exchange(getURI(CREATE_MODEL), HttpMethod.POST, new HttpEntity<ManufacturerModel>(manufacturerModel, getHeader()), ManufacturerModel.class);
+			ResponseEntity<ManufacturerModel> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_MODEL), HttpMethod.POST, new HttpEntity<ManufacturerModel>(manufacturerModel, getHeader()), ManufacturerModel.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {

@@ -2,22 +2,10 @@ package org.shanoir.ng.preclinical.migration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.examination_anesthetics.ExaminationAnesthetic;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
@@ -38,32 +26,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class DistantPreclinicalShanoirService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DistantPreclinicalShanoirService.class);
 
-	RestTemplate restTemplate;
 
 	@Autowired
 	DistantKeycloakConfigurationService distantKeycloak;
-
-	private static final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
-			new X509TrustManager() {
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers(){
-					return null;
-				}
-				@Override
-				public void checkClientTrusted( X509Certificate[] certs, String authType ){}
-				@Override
-				public void checkServerTrusted( X509Certificate[] certs, String authType ){}
-			}
-	};
 
 	private static final String GET_REFERENCES = "/shanoir-ng/preclinical/refs/";
 
@@ -95,35 +67,9 @@ public class DistantPreclinicalShanoirService {
 
 	private static final String CREATE_INGREDIENT = "/shanoir-ng/preclinical/anesthetic/{id}/ingredient/";
 
-	public DistantPreclinicalShanoirService() {
-		// Instanciate a "weak" rest template.
-		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-
-		SSLContext sslContext;
-		try {
-			sslContext = org.apache.http.ssl.SSLContexts.custom()
-					.loadTrustMaterial(null, acceptingTrustStrategy)
-					.build();
-
-			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-
-			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLSocketFactory(csf)
-					.build();
-
-			HttpComponentsClientHttpRequestFactory requestFactory =
-					new HttpComponentsClientHttpRequestFactory();
-
-			requestFactory.setHttpClient(httpClient);
-			restTemplate = new RestTemplate(requestFactory);
-		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-
-		}
-	}
-
 	public List<Reference> getPreclinicalReferences() throws ShanoirException {
 		try {
-			ResponseEntity<Reference[]> response = this.restTemplate.exchange(getURI(GET_REFERENCES), HttpMethod.GET, new HttpEntity<>(getHeader()), Reference[].class);
+			ResponseEntity<Reference[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_REFERENCES), HttpMethod.GET, new HttpEntity<>(getHeader()), Reference[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -136,7 +82,7 @@ public class DistantPreclinicalShanoirService {
 
 	public List<Anesthetic> getAnesthetics() throws ShanoirException {
 		try {
-			ResponseEntity<Anesthetic[]> response = this.restTemplate.exchange(getURI(GET_ANESTHETICS), HttpMethod.GET, new HttpEntity<>(getHeader()), Anesthetic[].class);
+			ResponseEntity<Anesthetic[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_ANESTHETICS), HttpMethod.GET, new HttpEntity<>(getHeader()), Anesthetic[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -149,7 +95,7 @@ public class DistantPreclinicalShanoirService {
 
 	public List<PathologyModel> getPathologyModels() throws ShanoirException {
 		try {
-			ResponseEntity<PathologyModel[]> response = this.restTemplate.exchange(getURI(GET_PATHOLOGY_MODELS), HttpMethod.GET, new HttpEntity<>(getHeader()), PathologyModel[].class);
+			ResponseEntity<PathologyModel[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_PATHOLOGY_MODELS), HttpMethod.GET, new HttpEntity<>(getHeader()), PathologyModel[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -162,7 +108,7 @@ public class DistantPreclinicalShanoirService {
 
 	public List<Pathology> getPathologies() throws ShanoirException {
 		try {
-			ResponseEntity<Pathology[]> response = this.restTemplate.exchange(getURI(GET_PATHOLOGIES), HttpMethod.GET, new HttpEntity<>(getHeader()), Pathology[].class);
+			ResponseEntity<Pathology[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_PATHOLOGIES), HttpMethod.GET, new HttpEntity<>(getHeader()), Pathology[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -175,7 +121,7 @@ public class DistantPreclinicalShanoirService {
 
 	public List<Therapy> getTherapies() throws ShanoirException {
 		try {
-			ResponseEntity<Therapy[]> response = this.restTemplate.exchange(getURI(GET_THERAPIES), HttpMethod.GET, new HttpEntity<>(getHeader()), Therapy[].class);
+			ResponseEntity<Therapy[]> response = this.distantKeycloak.getRestTemplate().exchange(getURI(GET_THERAPIES), HttpMethod.GET, new HttpEntity<>(getHeader()), Therapy[].class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return new ArrayList<>(Arrays.asList(response.getBody()));
 			} else {
@@ -188,7 +134,7 @@ public class DistantPreclinicalShanoirService {
 
 	public AnimalSubject createAnimalSubject(AnimalSubject animalSubject) throws ShanoirException {
 		try {
-			ResponseEntity<AnimalSubject> response = this.restTemplate.exchange(getURI(CREATE_ANIMAL_SUBJECT), HttpMethod.POST, new HttpEntity<>(animalSubject, getHeader()), AnimalSubject.class);
+			ResponseEntity<AnimalSubject> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_ANIMAL_SUBJECT), HttpMethod.POST, new HttpEntity<>(animalSubject, getHeader()), AnimalSubject.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -201,7 +147,7 @@ public class DistantPreclinicalShanoirService {
 
 	public Therapy createTherapy(Therapy therapy) throws ShanoirException {
 		try {
-			ResponseEntity<Therapy> response = this.restTemplate.exchange(getURI(CREATE_THERAPY), HttpMethod.POST, new HttpEntity<>(therapy, getHeader()), Therapy.class);
+			ResponseEntity<Therapy> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_THERAPY), HttpMethod.POST, new HttpEntity<>(therapy, getHeader()), Therapy.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -214,7 +160,7 @@ public class DistantPreclinicalShanoirService {
 
 	public Anesthetic createAnesthetic(Anesthetic anesthetic) throws ShanoirException {
 		try {
-			ResponseEntity<Anesthetic> response = this.restTemplate.exchange(getURI(CREATE_ANESTHETIC), HttpMethod.POST, new HttpEntity<>(anesthetic, getHeader()), Anesthetic.class);
+			ResponseEntity<Anesthetic> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_ANESTHETIC), HttpMethod.POST, new HttpEntity<>(anesthetic, getHeader()), Anesthetic.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -227,7 +173,7 @@ public class DistantPreclinicalShanoirService {
 
 	public SubjectTherapy createSubjectTherapy(SubjectTherapy subjecttherap, Long subjectId) throws ShanoirException {
 		try {
-			ResponseEntity<SubjectTherapy> response = this.restTemplate.exchange(getURI(CREATE_SUBJECT_THERAPY.replace("{id}", subjectId.toString())), HttpMethod.POST, new HttpEntity<>(subjecttherap, getHeader()), SubjectTherapy.class);
+			ResponseEntity<SubjectTherapy> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_SUBJECT_THERAPY.replace("{id}", subjectId.toString())), HttpMethod.POST, new HttpEntity<>(subjecttherap, getHeader()), SubjectTherapy.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -240,7 +186,7 @@ public class DistantPreclinicalShanoirService {
 
 	public SubjectPathology createSubjectPathology(SubjectPathology subjectPatho, Long subjectId) throws ShanoirException {
 		try {
-			ResponseEntity<SubjectPathology> response = this.restTemplate.exchange(getURI(CREATE_SUBJECT_PATHOLOGY.replace("{id}", subjectId.toString())), HttpMethod.POST, new HttpEntity<>(subjectPatho, getHeader()), SubjectPathology.class);
+			ResponseEntity<SubjectPathology> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_SUBJECT_PATHOLOGY.replace("{id}", subjectId.toString())), HttpMethod.POST, new HttpEntity<>(subjectPatho, getHeader()), SubjectPathology.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -253,7 +199,7 @@ public class DistantPreclinicalShanoirService {
 
 	public PathologyModel createPathologyModel(PathologyModel pathologyModel) throws ShanoirException {
 		try {
-			ResponseEntity<PathologyModel> response = this.restTemplate.exchange(getURI(CREATE_PATHOLOGY_MODEL), HttpMethod.POST, new HttpEntity<>(pathologyModel, getHeader()), PathologyModel.class);
+			ResponseEntity<PathologyModel> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_PATHOLOGY_MODEL), HttpMethod.POST, new HttpEntity<>(pathologyModel, getHeader()), PathologyModel.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -268,7 +214,7 @@ public class DistantPreclinicalShanoirService {
 		try {
 			LOG.error("examId " +  examId);
 
-			ResponseEntity<ExaminationAnesthetic> response = this.restTemplate.exchange(getURI(CREATE_EXAMINATION_ANESTHETIC.replace("{id}", "" + examId)), HttpMethod.POST, new HttpEntity<>(examAnes, getHeader()), ExaminationAnesthetic.class);
+			ResponseEntity<ExaminationAnesthetic> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_EXAMINATION_ANESTHETIC.replace("{id}", "" + examId)), HttpMethod.POST, new HttpEntity<>(examAnes, getHeader()), ExaminationAnesthetic.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -281,7 +227,7 @@ public class DistantPreclinicalShanoirService {
 
 	public Pathology createPathology(Pathology pathology) throws ShanoirException {
 		try {
-			ResponseEntity<Pathology> response = this.restTemplate.exchange(getURI(CREATE_PATHOLOGY), HttpMethod.POST, new HttpEntity<>(pathology, getHeader()), Pathology.class);
+			ResponseEntity<Pathology> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_PATHOLOGY), HttpMethod.POST, new HttpEntity<>(pathology, getHeader()), Pathology.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -294,7 +240,7 @@ public class DistantPreclinicalShanoirService {
 
 	public Reference createReference(Reference ref) throws ShanoirException {
 		try {
-			ResponseEntity<Reference> response = this.restTemplate.exchange(getURI(CREATE_REFERENCE), HttpMethod.POST, new HttpEntity<>(ref, getHeader()), Reference.class);
+			ResponseEntity<Reference> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_REFERENCE), HttpMethod.POST, new HttpEntity<>(ref, getHeader()), Reference.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
@@ -307,7 +253,7 @@ public class DistantPreclinicalShanoirService {
 
 	public AnestheticIngredient createIngredient(AnestheticIngredient ingredient, Long anestheticId) throws ShanoirException {
 		try {
-			ResponseEntity<AnestheticIngredient> response = this.restTemplate.exchange(getURI(CREATE_INGREDIENT.replace("{id}", anestheticId.toString())), HttpMethod.POST, new HttpEntity<>(ingredient, getHeader()), AnestheticIngredient.class);
+			ResponseEntity<AnestheticIngredient> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_INGREDIENT.replace("{id}", anestheticId.toString())), HttpMethod.POST, new HttpEntity<>(ingredient, getHeader()), AnestheticIngredient.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
