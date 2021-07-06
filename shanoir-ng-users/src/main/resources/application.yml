@@ -28,7 +28,7 @@ spring:
     password: password
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
+    initialization-mode: never
     data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -107,7 +107,7 @@ logging:
 spring:
   config.activate.on-profile: dev
   datasource:
-    initialize: true
+    initialization-mode: always
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -134,7 +134,7 @@ spring:
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    initialize: true
+    initialization-mode: always
     data: classpath:/scripts/test-data-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
