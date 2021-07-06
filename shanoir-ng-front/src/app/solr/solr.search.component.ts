@@ -20,16 +20,19 @@ import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+
+import { AfterViewChecked } from "@angular/core";
+import { Pageable } from "../shared/components/table/pageable.model";
+import { TableComponent } from "../shared/components/table/table.component";
+import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
+import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { Page, Pageable } from '../shared/components/table/pageable.model';
-import { TableComponent } from '../shared/components/table/table.component';
-import { DatepickerComponent } from '../shared/date-picker/date-picker.component';
+import { Page } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
-import { SolrService } from './solr.service';
 
 
 @Component({
@@ -40,7 +43,7 @@ import { SolrService } from './solr.service';
     providers: [DatePipe]
 })
 
-export class SolrSearchComponent{
+export class SolrSearchComponent implements AfterViewChecked{
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
@@ -57,13 +60,15 @@ export class SolrSearchComponent{
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
     allFacetResultPages: FacetResultPage[] = [];
-    clearTextSearch: () => void = () => {};
+    clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
+    loaded: boolean = false;
+    viewChecked: boolean = false;
 
     private requestKeys: string[] = [
         'studyName',
@@ -80,13 +85,22 @@ export class SolrSearchComponent{
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private msgBoxService: MsgBoxService) {
 
-        this.getFacets();
         this.getRole();
         if (this.role != 'admin') this.getRights();
-
-        this.form = this.buildForm();
+                
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
+        
+        this.getFacets().then(() => {
+            if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+                let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+                this.loadState(savedRequest);
+                this.updateSelections();
+            }
+            this.loaded = true;
+        });
+
+        this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
@@ -121,6 +135,12 @@ export class SolrSearchComponent{
     hasDownloadRight(studyId: number) {
         if (this.role == 'admin') return true;
         else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_DOWNLOAD);
+    }
+
+    ngAfterViewChecked(): void {
+        setTimeout(() => {
+            this.viewChecked = true;
+        });
     }
     
     buildForm(): FormGroup {
@@ -182,6 +202,28 @@ export class SolrSearchComponent{
         }
         return solrRequest;
     }
+
+    private saveState(solrRequest: SolrRequest) {
+        this.breadcrumbsService.currentStep.data.solrRequest = solrRequest;
+    }
+
+    private loadState(solrRequest: SolrRequest) {
+        if (solrRequest && Object.keys(solrRequest).length != 0) {
+            this.allFacetResultPages.forEach(facetResult => {
+                if (facetResult.content.length > 0) {
+                    let key: string = facetResult.content[0].field.name.replace('_str', '');
+                    facetResult.content.forEach(field => {
+                        field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
+                    })
+                }
+            });
+            if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
+            if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
+            this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
+            this.keyword = solrRequest.searchText;
+            this.expertMode = solrRequest.expertMode;
+        }
+    }
     
     updateSelections() {
         this.selections = [];
@@ -227,7 +269,7 @@ export class SolrSearchComponent{
     }
 
     onDateChange(date: Date | 'invalid') {
-        if (date !== undefined && (date === null || date != 'invalid')) {
+        if (this.loaded && (date === null || (date && ('invalid' != date)))) {
             this.updateSelections();
             this.refreshTable();
         }
@@ -249,6 +291,7 @@ export class SolrSearchComponent{
             let solrRequest: SolrRequest = new SolrRequest();
             if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
             solrRequest = this.updateWithFields(solrRequest);
+            this.saveState(solrRequest);
 
             return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 
@@ -257,7 +300,6 @@ export class SolrSearchComponent{
                 }
                 return solrResultPage;
             }).catch(reason => {
-                console.log(reason.error.code, reason.error.message, reason.error.code == 422 && reason.error.message == 'solr query failed')
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
