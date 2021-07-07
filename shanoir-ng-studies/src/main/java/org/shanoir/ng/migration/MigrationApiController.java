@@ -73,7 +73,8 @@ public class MigrationApiController implements MigrationApi {
 			int i = 0;
 			for (String element : urlsAsString.split(";;")) {
 				urls.add(new IdName(Long.valueOf(i), element.split("==")[0]));
-				urlsAsMap.put(i++, element.split("==")[1]);
+				urlsAsMap.put(i, element.split("==")[1]);
+				i++;
 			}
 		}
 		return new ResponseEntity<>(this.urls, HttpStatus.OK);

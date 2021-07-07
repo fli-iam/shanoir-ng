@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -64,7 +65,7 @@ public class DatasetMigrationService {
 
 	@Autowired
 	ExaminationService examService;
-	
+
 	@Autowired
 	DistantDatasetShanoirService distantShanoir;
 
@@ -85,7 +86,7 @@ public class DatasetMigrationService {
 
 	@Autowired
 	ShanoirEventService eventService;
-	
+
 	ShanoirEvent event;
 
 	/**
@@ -108,14 +109,14 @@ public class DatasetMigrationService {
 			publishEvent("Starting dataset migration", 0f);
 
 			this.migrateStudy(job);
-			
+
 			// Re-set event as it was updated
 			job.setEvent(event);
 			job.setAccessToken(distantKeycloakConfigurationService.getAccessToken());
 			job.setRefreshToken(distantKeycloakConfigurationService.getRefreshToken());
-			
+
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
-			
+
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			publishEvent("An error occured while migrating datasets, please contact an administrator.", 1f);
@@ -187,7 +188,7 @@ public class DatasetMigrationService {
 		job.setExaminationMap(new HashMap<>());
 
 		List<String> extraDataFilePath = exam.getExtraDataFilePathList();
-		
+
 		long oldId = exam.getId();
 		exam.setId(null);
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
@@ -376,7 +377,7 @@ public class DatasetMigrationService {
 		datasetDTO.setId(createdDataset.getId());
 		expression.setDataset(datasetDTO);
 		expression.setDatasetFiles(null);
-		
+
 		DatasetExpression createdExpression = distantShanoir.createDatasetExpression(expression);
 		entityManager.detach(expression);
 
@@ -386,47 +387,48 @@ public class DatasetMigrationService {
 	}
 
 	private void migrateDatasetFile(DatasetFile file, DatasetExpression createdExpression, Dataset createdDataset, Long oldExamId, MigrationJob job) throws ShanoirException {
-		try {
-		// This is more complicated than what it seems to be.
 		File workFolder = new File("/tmp/Migration_" + LocalDateTime.now());
-		workFolder.mkdirs();
-		
-		LOG.error("Loading file..." + file.getPath());
-		String result = null;
-		if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
-			// Dicom
-			result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "");
-		} else {
-			// Nifti
-			URL url = new URL(file.getPath().replaceAll("%20", " "));
-			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-			result = srcFile.getAbsolutePath();
-		}
+		try {
+			workFolder.mkdirs();
 
-		file.setId(null);
-		DatasetExpression expressionDTO = new DatasetExpression();
-		expressionDTO.setId(createdExpression.getId());
-		file.setDatasetExpression(expressionDTO);
+			LOG.error("Loading file..." + file.getPath());
+			String result = null;
+			if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
+				// Dicom
+				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "");
+			} else {
+				// Nifti
+				URL url = new URL(file.getPath().replaceAll("%20", " "));
+				File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+				result = srcFile.getAbsolutePath();
+			}
 
-		// Update path for the new  server (replace usual paths)
-		if (!file.isPacs()) {
-			file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
-			file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
-			file.setPath(file.getPath().replace(
-					"-" + createdDataset.getSubjectId()							  + "/ses-" + oldExamId ,
-					"-" + job.getSubjectsMap().get(createdDataset.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
-			file.setPath(file.getPath().replace(
-					"/ses-" + oldExamId ,
-					"/ses-" + job.getExaminationMap().get(oldExamId)));
-		}
+			file.setId(null);
+			DatasetExpression expressionDTO = new DatasetExpression();
+			expressionDTO.setId(createdExpression.getId());
+			file.setDatasetExpression(expressionDTO);
 
-		// Move file
-		entityManager.detach(file);
-		DatasetFile createdFile = distantShanoir.createDatasetFile(file);
-		distantShanoir.moveDatasetFile(createdFile, new File(result));
+			// Update path for the new  server (replace usual paths)
+			if (!file.isPacs()) {
+				file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
+				file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
+				file.setPath(file.getPath().replace(
+						"-" + createdDataset.getSubjectId()							  + "/ses-" + oldExamId ,
+						"-" + job.getSubjectsMap().get(createdDataset.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
+				file.setPath(file.getPath().replace(
+						"/ses-" + oldExamId ,
+						"/ses-" + job.getExaminationMap().get(oldExamId)));
+			}
+
+			// Move file
+			entityManager.detach(file);
+			DatasetFile createdFile = distantShanoir.createDatasetFile(file);
+			distantShanoir.moveDatasetFile(createdFile, new File(result));
 
 		} catch (Exception e) {
 			throw new ShanoirException("Error while creating the new dataset file", e);
+		} finally {
+			FileUtils.deleteQuietly(workFolder);
 		}
 	}
 
