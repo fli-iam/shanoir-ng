@@ -129,13 +129,12 @@ public class DistantKeycloakConfigurationService {
 				refreshToken = responseEntityJson.getString("refresh_token");
 				this.refreshToken(keycloakURL);
 			} else {
-				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.getBody());
+				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.toString());
 			}
 		} catch (Exception e) {
 			throw new ShanoirException("ERROR: Could not connect to distant keycloak", e);
 		}
 	}
-
 
 	/**
 	 * Start job, that refreshes the access token every 240 seconds.
@@ -190,8 +189,6 @@ public class DistantKeycloakConfigurationService {
 	public void setServer(String server) {
 		this.server = server;
 	}
-	
-	
 	
 	/**
 	 * @return the refreshToken
