@@ -31,6 +31,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class is used to connect to a distant Shanoir using an URL, a username and a password, and to keep open the connection
  * @author fli
@@ -47,6 +49,9 @@ public class DistantKeycloakConfigurationService {
 	
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Autowired
+	ObjectMapper objectMapper;
 	
 	RestTemplate weakRestTemplate;
 
@@ -129,7 +134,7 @@ public class DistantKeycloakConfigurationService {
 				refreshToken = responseEntityJson.getString("refresh_token");
 				this.refreshToken(keycloakURL);
 			} else {
-				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + response.toString());
+				throw new ShanoirException("ERROR: Access token could NOT be getted: HttpStatus-" + statusCode + objectMapper.writeValueAsString(response));
 			}
 		} catch (Exception e) {
 			throw new ShanoirException("ERROR: Could not connect to distant keycloak", e);
