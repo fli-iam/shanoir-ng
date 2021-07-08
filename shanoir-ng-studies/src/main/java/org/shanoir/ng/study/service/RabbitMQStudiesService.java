@@ -33,6 +33,7 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class RabbitMQStudiesService {
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
+	@RabbitHandler
 	@Transactional
 	public void linkExamination(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
@@ -89,6 +91,7 @@ public class RabbitMQStudiesService {
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
+	@RabbitHandler
 	@Transactional
 	public void deleteExaminationStudy(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
