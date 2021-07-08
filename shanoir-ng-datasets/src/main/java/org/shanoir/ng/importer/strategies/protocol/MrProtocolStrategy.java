@@ -75,6 +75,11 @@ public class MrProtocolStrategy {
 		LOG.debug("extractMetadata : imagingFrequency=" + imagingFrequency);
 		mrProtocol.setImagingFrequency(imagingFrequency);
 
+		// Magnetic field strength
+		final Double magneticFieldStrength = attributes.getDouble(Tag.MagneticFieldStrength, 0);
+		LOG.debug("extractMetadata : magneticFieldStrength=" + magneticFieldStrength);
+		mrProtocol.setMagneticFieldStrength(magneticFieldStrength);
+
 		// Acquisition duration
 		final Double acquisitionDuration = attributes.getDouble(Tag.AcquisitionDuration, 0);
 		LOG.debug("extractMetadata : acquisitionDuration=" + acquisitionDuration);

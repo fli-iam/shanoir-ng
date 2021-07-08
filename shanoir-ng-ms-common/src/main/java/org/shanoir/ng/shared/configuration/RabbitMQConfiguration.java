@@ -100,6 +100,9 @@ public class RabbitMQConfiguration {
 	/** Send a mail from dataset microservice to study users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
+	/** Queue to re-convert using a different nifti converter */
+	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -128,7 +131,6 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
-	
 
 	////////////////// EXCHANGES //////////////////
 
@@ -319,7 +321,11 @@ public class RabbitMQConfiguration {
 		return new Queue(EXAMINATION_STUDY_DELETE_QUEUE, true);
 	}
 
-
+	@Bean
+	public static Queue niftiConversionQueue() {
+		return new Queue(NIFTI_CONVERSION_QUEUE, true);
+	}
+	
 	@Bean
 	public static Queue importDatasetMail() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);

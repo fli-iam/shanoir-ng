@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.dto;
 
+import java.time.LocalDate;
+
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
@@ -38,6 +40,8 @@ public class DatasetAcquisitionDTO {
 	private String type;
 
 	private Object protocol;
+
+	private LocalDate creationDate;
 
 	
 	public Long getId() {
@@ -119,4 +123,13 @@ public class DatasetAcquisitionDTO {
 	public void setProtocol(Object protocol) {
 		this.protocol = protocol;
 	}
+
+	public LocalDate getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(LocalDate creationDate) {
+		this.creationDate = creationDate;
+	}
+	
 }

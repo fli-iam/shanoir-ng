@@ -13,3 +13,6 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+i { font-size: 30px; vertical-align: bottom; margin-right: 5px; }
+.error .header { color: darkred; }
