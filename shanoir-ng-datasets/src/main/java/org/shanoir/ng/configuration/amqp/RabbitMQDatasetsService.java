@@ -32,6 +32,8 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
+	
+	@Autowired
+	private StudyCardRepository studyCardRepository;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -216,6 +221,11 @@ public class RabbitMQDatasetsService {
 			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
 				examinationService.deleteFromRabbit(exam);
 			}
+			// also delete associated study cards
+			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				studyCardRepository.delete(sc);
+			}
+
 			// Delete study from datasets database
 			studyRepository.delete(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
