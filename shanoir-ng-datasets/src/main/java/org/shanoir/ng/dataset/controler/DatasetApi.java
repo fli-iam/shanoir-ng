@@ -70,6 +70,19 @@ public interface DatasetApi {
 	ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
 			throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Deletes several datasets", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "datasets deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no dataset found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@DeleteMapping(value = "/delete", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
+	ResponseEntity<Void> deleteDatasets(
+			@ApiParam(value = "ids of the datasets", required=true) @Valid
+    		@RequestBody(required = true) List<Long> datasetIds)
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the dataset corresponding to the given id", response = Dataset.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset", response = Dataset.class),
@@ -152,8 +165,10 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     void downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
+    		@ApiParam(value = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
-    			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid
+    			allowableValues = "dcm, nii", defaultValue = "dcm")
+    		@Valid
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })

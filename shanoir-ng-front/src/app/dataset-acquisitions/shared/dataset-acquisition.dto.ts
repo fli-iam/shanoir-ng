@@ -89,6 +89,7 @@ export class DatasetAcquisitionDTOService {
         entity.softwareRelease = dto.softwareRelease;
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
+        entity.creationDate = dto.creationDate;
         if (dto.examination) {
             entity.examination = new Examination();
             ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
@@ -130,6 +131,7 @@ export class DatasetAcquisitionDTO {
         this.softwareRelease = dsAcq.softwareRelease;
         this.sortingIndex = dsAcq.sortingIndex;
         this.type = dsAcq.type;
+        this.creationDate = dsAcq.creationDate;
     }
 
     id: number;
@@ -139,6 +141,7 @@ export class DatasetAcquisitionDTO {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
+    creationDate: Date;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
 }
 

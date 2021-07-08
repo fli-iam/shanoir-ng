@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <h2>Solr Search</h2>
 
         <div class="reset">
-            <button type="button" (click)="removeAllFacets(); keyword = null; table.refresh()" class="left-icon" [disabled]="(!selections || selections.length == 0) && (!keyword || keyword.trim().length == 0)">
+            <button type="button" (click)="removeAllFacets(); keyword = null; refreshTable()" class="left-icon" [disabled]="(!selections || selections.length == 0) && (!keyword || keyword.trim().length == 0)">
                 <i class="fas fa-snowplow"></i>Reset
             </button>
         </div>
@@ -27,21 +27,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 label="Study"
                 [currentFacetPage]="facetResultPages[0]"
                 [allFacetPage]="allFacetResultPages[0]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
                 label="Subject"
                 [currentFacetPage]="facetResultPages[1]"
                 [allFacetPage]="allFacetResultPages[1]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
                 label="Dataset"
                 [currentFacetPage]="facetResultPages[2]"
                 [allFacetPage]="allFacetResultPages[2]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <div class="dates">
@@ -61,21 +61,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 label="Examination"
                 [currentFacetPage]="facetResultPages[3]"
                 [allFacetPage]="allFacetResultPages[3]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
                 label="Dataset Modality Type"
                 [currentFacetPage]="facetResultPages[4]"
                 [allFacetPage]="allFacetResultPages[4]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
                 label="Mr Dataset Nature"
                 [currentFacetPage]="facetResultPages[5]"
                 [allFacetPage]="allFacetResultPages[5]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
     </div>
@@ -90,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <div *ngIf="selections" class="selections">
             <span class="selection" *ngFor="let sel of selections; let i = index">
-                <span class="clickable" (click)="removeSelection(i); table.refresh();">
+                <span class="clickable" (click)="removeSelection(i); refreshTable();">
                     <i class="fas fa-times"></i>
                 </span>
                 {{sel.label}}
@@ -100,16 +100,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div [hidden]="progressBar.progress == 0">
             <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
         </div>
-        <shanoir-table #table
-            [getPage]="getPage.bind(this)" 
-            [maxResults]="50"
-            [columnDefs]="columnDefs" 
-            [customActionDefs]="customActionDefs"
-            (rowClick)="onRowClick($event)"
-            [browserSearch]="false"
-            [selectionAllowed]="true"
-            (selectionChange)="onSelectionChange($event)"
-            [enableSettings]="true">
-        </shanoir-table>
+
+        <div class="tabs">
+            <div class="tab-labels">
+                <span class="left-icon" (click)="openResultTab()" [class.tab-opened]="tab == 'results'">
+                    <i class="fas fa-search"></i>Results
+                </span>
+                <span class="selected left-icon" (click)="openSelectionTab()" [class.tab-opened]="tab == 'selected'" [class.disabled]="!selectedDatasetIds || selectedDatasetIds.size == 0">
+                    <i class="fas fa-shopping-cart"></i>Selection ({{selectedDatasetIds ? selectedDatasetIds.size : 0}})
+                </span>
+            </div>
+            <div class="tab-body" [hidden]="tab != 'results'">
+                <shanoir-table #table
+                    identifier="results"
+                    [getPage]="getPage.bind(this)" 
+                    [maxResults]="50"
+                    [columnDefs]="columnDefs" 
+                    [customActionDefs]="customActionDefs"
+                    [browserSearch]="false"
+                    [selectionAllowed]="true"
+                    [selection]="selectedDatasetIds"
+                    (selectionChange)="onSelectionChange($event)"
+                    [enableSettings]="true">
+                </shanoir-table>
+            </div>
+            <div class="tab-body selected" [hidden]="tab != 'selected'">
+                <shanoir-table #selectionTable
+                    identifier="selected"
+                    [getPage]="getSelectedPage.bind(this)" 
+                    [maxResults]="50"
+                    [columnDefs]="selectionColumnDefs" 
+                    [customActionDefs]="selectionCustomActionDefs"
+                    (rowClick)="onRowClick($event)"
+                    [browserSearch]="false"
+                    [enableSettings]="true">
+                </shanoir-table>
+            </div>
+        </div>
     </div>
 </form>
