@@ -12,17 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export type DatasetType = 
-          'Calibration' 
-        | 'Ct' 
-        | 'Eeg' 
-        | 'Meg' 
-        | 'Mesh' 
-        | 'Mr' 
-        | 'ParameterQuantification'                   
-        | 'Pet' 
-        | 'Registration' 
-        | 'Segmentation' 
-        | 'Spect' 
-        | 'Statistical' 
-        | 'Template';
+export const DatasetTypes = [
+  'Calibration',
+  'Ct',
+  'Eeg',
+  'Meg',
+  'Mesh',
+  'Mr',
+  'ParameterQuantification',
+  'Pet',
+  'Registration',
+  'Segmentation',
+  'Spect',
+  'Statistical',
+  'Template'
+] as const;
+
+export type DatasetType = typeof DatasetTypes[number];

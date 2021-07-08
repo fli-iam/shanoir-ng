@@ -163,4 +163,23 @@ public class DatasetMetadata extends AbstractEntity {
 		}
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof AbstractEntity)) {
+			return false;
+		}
+		AbstractEntity entity = (AbstractEntity) obj;
+		if (this.getId() == null && entity.getId() != null) {
+			return false;
+		} else {
+			return this.getId().equals(entity.getId());
+		}
+	}
+
 }
