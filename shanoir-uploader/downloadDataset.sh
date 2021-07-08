@@ -22,4 +22,4 @@
 MAIN_CLASS=org.shanoir.downloader.ShanoirDownloader
 MAIN_JAR=shanoir-uploader-7.0.1-jar-with-dependencies.jar
 
-$JAVA_HOME/bin/java -cp $MAIN_JAR $MAIN_CLASS "$@"
+$JAVA_HOME/bin/java -Dfile.encoding=UTF-8 -cp $MAIN_JAR $MAIN_CLASS "$@"
