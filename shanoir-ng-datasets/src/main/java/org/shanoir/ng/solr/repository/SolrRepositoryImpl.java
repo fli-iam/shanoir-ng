@@ -17,6 +17,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Range;
 import org.springframework.data.solr.UncategorizedSolrException;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
@@ -62,6 +63,14 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			criteria = criteria.and(Criteria.where(fieldName).is(values));
 		}
 	}
+	
+	
+	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Range<Float> range) {
+		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
+			criteria = criteria.and(Criteria.where(fieldName).between(range.getLowerBound(), range.getUpperBound(), range.getLowerBound() != null , range.getUpperBound() != null));
+		}
+	}
+
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		addAndPredicateToCriteria(criteria, "studyName", facet.getStudyName());
@@ -70,6 +79,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addAndPredicateToCriteria(criteria, "datasetName", facet.getDatasetName());
 		addAndPredicateToCriteria(criteria, "datasetType", facet.getDatasetType());
 		addAndPredicateToCriteria(criteria, "datasetNature", facet.getDatasetNature());
+		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
+		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
+		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
 		
 		if (facet.getDatasetStartDate() != null) {
 			criteria.and(Criteria.where("datasetCreationDate").greaterThanEqual(DateTimeUtils.localDateToSolrString(facet.getDatasetStartDate())));
@@ -108,7 +120,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			throw new RestServiceException(e, error);
 		}
 	}
-	
+
 	private void addExpertClause(Criteria criteria, String searchStr) {
 		criteria.and(new Criteria().expression(
 				new StringBuilder("(").append(searchStr).append(")").toString()));

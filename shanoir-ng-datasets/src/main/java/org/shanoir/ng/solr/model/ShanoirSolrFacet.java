@@ -17,6 +17,8 @@ package org.shanoir.ng.solr.model;
 import java.time.LocalDate;
 import java.util.Collection;
 
+import org.springframework.data.domain.Range;
+
 /**
  * @author yyao
  *
@@ -46,6 +48,12 @@ public class ShanoirSolrFacet {
 	private String searchText;
 	
 	private boolean expertMode;
+	
+	private Range<Float> sliceThickness;
+	
+	private Range<Float> pixelBandwidth;
+	
+	private Range<Float> magneticFieldStrength;
 	
 	/**
 	 * @return the studyName
@@ -199,5 +207,29 @@ public class ShanoirSolrFacet {
 
 	public void setExpertMode(boolean expertMode) {
 		this.expertMode = expertMode;
+	}
+
+	public Range<Float> getSliceThickness() {
+		return sliceThickness;
+	}
+
+	public void setSliceThickness(Range<Float> sliceThickness) {
+		this.sliceThickness = sliceThickness;
+	}
+
+	public Range<Float> getPixelBandwidth() {
+		return pixelBandwidth;
+	}
+
+	public void setPixelBandwidth(Range<Float> pixelBandwidth) {
+		this.pixelBandwidth = pixelBandwidth;
+	}
+
+	public Range<Float> getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Range<Float> magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 }
