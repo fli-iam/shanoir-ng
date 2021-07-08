@@ -95,6 +95,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     canDelete(study: Study): boolean {
-        return this.canEdit(study);
+        // Disallow delete study from list directly
+        return false
     }
 }

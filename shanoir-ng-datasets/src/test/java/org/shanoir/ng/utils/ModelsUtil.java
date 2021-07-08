@@ -15,6 +15,7 @@
 package org.shanoir.ng.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.shanoir.ng.dataset.modality.CtDataset;
@@ -109,6 +110,7 @@ public final class ModelsUtil {
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
 		examination.setPreclinical(false);
+		examination.setDatasetAcquisitions(Collections.emptyList());
 		return examination;
 	}
 	

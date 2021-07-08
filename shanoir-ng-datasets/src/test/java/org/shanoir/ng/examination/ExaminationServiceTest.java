@@ -32,6 +32,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
@@ -72,6 +73,9 @@ public class ExaminationServiceTest {
 	
 	@MockBean
 	private StudyRightsService rightsService;
+
+	@Mock
+	private ShanoirEventService eventService;
 
 	@Before
 	public void setup() throws ShanoirException {

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -33,6 +34,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
@@ -40,7 +42,9 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -140,12 +144,17 @@ public class ExaminationApiControllerTest {
 
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
+		
+		// Test event here
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDeleteExaminationWithExtraData() throws IOException {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+		Examination exam = new Examination();
+		exam.setStudyId(3L);
+		exam.setId(1L);
+		given(examinationServiceMock.findById(1L)).willReturn(exam);
 
 		// GIVEN an examination to delete with extra data files
 		File extraData = new File(tempFolderPath + "examination-1");
@@ -157,6 +166,16 @@ public class ExaminationApiControllerTest {
 		try {
 			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNoContent());
+
+			// Test events
+			ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+			Mockito.verify(eventService).publishEvent(eventCatcher.capture());
+			
+			ShanoirEvent event = eventCatcher.getValue();
+			assertNotNull(event);
+			assertEquals(exam.getStudyId().toString(), event.getMessage());
+			assertEquals(exam.getId().toString(), event.getObjectId());
+			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 
 			// THEN both examination and files are deleted
 			assertFalse(extraData.exists());
@@ -186,11 +205,24 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+		Examination exam = new Examination();
+		exam.setStudyId(3L);
+		exam.setId(2L);
+		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
 		.andExpect(status().isOk());
+		
+		// Check event here to verify that the message is well set to event
+		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+		Mockito.verify(eventService).publishEvent(eventCatcher.capture());
+		
+		ShanoirEvent event = eventCatcher.getValue();
+		assertNotNull(event);
+		assertEquals(exam.getStudyId().toString(), event.getMessage());
+		assertEquals(exam.getId().toString(), event.getObjectId());
+		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}
 
 	@Test

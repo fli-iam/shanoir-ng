@@ -308,6 +308,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                             } else {
                                 this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
                             }
+                        } else if (reason && reason.status) {
+                            if (reason.status != 422) {
+                               throw Error(reason); 
+                            } else {
+                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                            }
                         } else {
                             console.error(reason);
                         }

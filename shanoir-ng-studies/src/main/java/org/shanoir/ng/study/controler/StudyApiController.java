@@ -126,7 +126,11 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			Study studyDeleted = studyService.findById(studyId);
+			Study study = studyService.findById(studyId);
+			if (study.getExaminationIds() != null && !study.getExaminationIds().isEmpty()) {
+				// Error => should not be able to do this see #793
+				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
 
 			// Delete all linked files and DUA
 			File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));

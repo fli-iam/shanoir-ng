@@ -219,10 +219,7 @@ public class BidsServiceTest {
 		bidsDataFile = new File(examFile.getAbsolutePath() + "/eeg/test.test");
 		assertFalse(bidsDataFile.exists());
 
-		// WHEN we delete an examination
-		given(examService.findById(exam2.getId())).willReturn(exam2);
-	
-		service.deleteExam(exam2.getId());
+		service.deleteExam(exam2);
 		
 		// THEN it is also deleted in the BIDS folder
 		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
