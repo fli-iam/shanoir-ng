@@ -77,7 +77,7 @@ public class ShanoirSolrDocument {
 	private Long studyId;
 	
 	@Field
-	@Indexed(name="canterName", type="string")
+	@Indexed(name="centerName", type="string")
 	private String centerName;
 	
 	
