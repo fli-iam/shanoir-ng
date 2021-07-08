@@ -19,6 +19,7 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	@Autowired
 	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
 	
+	@Autowired
+	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
+	
 	// add other strategies for other modalities here
 	
 	private DatasetAcquisitionStrategy datasetAcquisitionStrategy;
@@ -59,6 +63,9 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 			this.datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
 		} else if ("PT".equals(modality)) {
 			this.datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+		} else {
+			// By default we just create an generic dataset acquisition
+			this.datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
 		}
 		// else... add other modalities here
 	}
