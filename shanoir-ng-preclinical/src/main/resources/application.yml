@@ -105,14 +105,14 @@ preclinical:
 # DO NOT CHANGE #
 #################
 spring:
-  profiles: test
+  config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: 
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-preclinical-h2.sql
-    initialize: true
+    initialization-mode: always
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
@@ -126,9 +126,9 @@ logging:
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
-    initialize: true
+    initialization-mode: always
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)

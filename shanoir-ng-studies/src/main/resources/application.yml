@@ -114,6 +114,7 @@ spring:
     url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -150,12 +151,13 @@ spring:
   config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_STUDY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password: 
     driver-class-name: org.h2.Driver
     initialization-mode: always
     data: classpath:/scripts/test-data-h2.sql
+    username: sa
+    password: sa
   jpa:
+    generate-ddl: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)

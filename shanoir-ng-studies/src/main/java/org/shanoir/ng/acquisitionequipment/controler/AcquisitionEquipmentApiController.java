@@ -114,8 +114,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		
 		/* Save acquisition equipment in db. */
 		try {
-			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
-					acquisitionEquipmentService.create(acquisitionEquipment));
+			AcquisitionEquipment newAcqEquipment = acquisitionEquipmentService.create(acquisitionEquipment);
+			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(newAcqEquipment);
 			
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipementCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(equipementCreated, HttpStatus.OK);

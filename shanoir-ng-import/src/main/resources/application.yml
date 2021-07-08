@@ -149,7 +149,7 @@ spring:
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
-    initialize: true
+    initialization-mode: always
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
