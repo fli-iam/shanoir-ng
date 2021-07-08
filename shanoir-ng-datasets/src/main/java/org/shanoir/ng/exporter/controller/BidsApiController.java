@@ -83,11 +83,15 @@ public class BidsApiController implements BidsApi {
 		// Add timestamp to get a "random" difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File tmpFile = new File(userDir + File.separator + formatter.format(new DateTime().toDate()) + File.separator);
-		tmpFile.mkdirs();
+		File fileDir = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName());
+		fileDir.mkdirs();
+		// Copy the file into the temp dir
+		Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+
 		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
 		zipFile.createNewFile();
 
-		zip(fileToBeZipped.getAbsolutePath(), zipFile.getAbsolutePath());
+		zip(fileDir.getAbsolutePath(), zipFile.getAbsolutePath());
 		
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
