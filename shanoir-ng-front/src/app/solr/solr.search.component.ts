@@ -375,6 +375,9 @@ export class SolrSearchComponent implements AfterViewChecked{
             {headerName: "Center", field: "centerName"},
             {headerName: "Exam", field: "examinationComment"},
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)},
+            {headerName: "Slice", field: "sliceThickness"},
+            {headerName: "Pixel", field: "pixelBandwidth"},
+            {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "", type: "button", awesome: "fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
         ];
         return columnDefs;
