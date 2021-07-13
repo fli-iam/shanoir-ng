@@ -45,20 +45,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-criterion>
 
         <div class="dates">
-            <div class="title">Dataset Creation Date</div>
-            <div class="date-from">
-                <span class="left-title">from :</span> <datepicker [(ngModel)]="datasetStartDate" (ngModelChange)="onDateChange($event)" formControlName="startDate"></datepicker>
-                <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+            <div class="title">
+                Dataset Creation Date
+                <span *ngIf="!dateOpen" class="date-colapse" (click)="dateOpen = true"><i class="fas fa-chevron-down"></i></span>
+                <span *ngIf="dateOpen" class="date-colapse" (click)="dateOpen = false"><i class="fas fa-chevron-up"></i></span>
             </div>
-            <div class="date-to">
-                <span class="left-title">to :</span> <datepicker [(ngModel)]="datasetEndDate" (ngModelChange)="onDateChange($event)" formControlName="endDate"></datepicker>
-                <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
-                <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
+            <div class="date-content" *ngIf="dateOpen" @slideDown>
+                <div class="date-from">
+                    <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" [(ngModel)]="datasetStartDate" (ngModelChange)="onDateChange($event)" formControlName="startDate"></datepicker>
+                    <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+                </div>
+                <div class="date-to">
+                    <span class="left-title">to :</span> <datepicker  *ngIf="viewChecked" [(ngModel)]="datasetEndDate" (ngModelChange)="onDateChange($event)" formControlName="endDate"></datepicker>
+                    <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
+                    <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
+                </div>
             </div>
         </div>
 
         <solr-criterion
                 label="Examination"
+                [currentFacetPage]="facetResultPages[4]"
+                [allFacetPage]="allFacetResultPages[4]"
+                (onChange)="updateSelections(); table.refresh()">
+        </solr-criterion>
+
+        <solr-criterion
+                label="Center"
                 [currentFacetPage]="facetResultPages[3]"
                 [allFacetPage]="allFacetResultPages[3]"
                 (onChange)="updateSelections(); refreshTable()">
@@ -66,18 +79,38 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-criterion
                 label="Dataset Modality Type"
-                [currentFacetPage]="facetResultPages[4]"
-                [allFacetPage]="allFacetResultPages[4]"
-                (onChange)="updateSelections(); refreshTable()">
-        </solr-criterion>
-
-        <solr-criterion
-                label="Mr Dataset Nature"
                 [currentFacetPage]="facetResultPages[5]"
                 [allFacetPage]="allFacetResultPages[5]"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
+        <solr-criterion
+                label="Mr Dataset Nature"
+                [currentFacetPage]="facetResultPages[6]"
+                [allFacetPage]="allFacetResultPages[6]"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-criterion>
+
+        <!-- sliceThickness
+        pixelBandwidth
+        magneticFieldStrength -->
+        <solr-range-criterion
+                [range]="sliceThicknessRange"
+                label="Slice Thickness"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-range-criterion>
+
+        <solr-range-criterion
+                [range]="pixelBandwidthRange"
+                label="Pixel Bandwidth"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-range-criterion>
+
+        <solr-range-criterion
+                [range]="magneticFieldStrengthRange"
+                label="Magnetic Field Strength"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-range-criterion>
     </div>
     <div class="right">
 
@@ -106,11 +139,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="left-icon" (click)="openResultTab()" [class.tab-opened]="tab == 'results'">
                     <i class="fas fa-search"></i>Results
                 </span>
-                <span class="selected left-icon" (click)="openSelectionTab()" [class.tab-opened]="tab == 'selected'" [class.disabled]="!selectedDatasetIds || selectedDatasetIds.size == 0">
+                <span class="selected left-icon" *ngIf="viewChecked" (click)="openSelectionTab()" [class.tab-opened]="tab == 'selected'" [class.disabled]="!selectedDatasetIds || selectedDatasetIds.size == 0">
                     <i class="fas fa-shopping-cart"></i>Selection ({{selectedDatasetIds ? selectedDatasetIds.size : 0}})
                 </span>
             </div>
-            <div class="tab-body" [hidden]="tab != 'results'">
+            <div class="tab-body" [hidden]="tab != 'results'" *ngIf="loaded">
                 <shanoir-table #table
                     identifier="results"
                     [getPage]="getPage.bind(this)" 
@@ -124,7 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [enableSettings]="true">
                 </shanoir-table>
             </div>
-            <div class="tab-body selected" [hidden]="tab != 'selected'">
+            <div class="tab-body selected" [hidden]="tab != 'selected'" *ngIf="loaded">
                 <shanoir-table #selectionTable
                     identifier="selected"
                     [getPage]="getSelectedPage.bind(this)" 
@@ -136,6 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [enableSettings]="true">
                 </shanoir-table>
             </div>
+            <div *ngIf="!loaded">Loading ...</div>
         </div>
     </div>
 </form>

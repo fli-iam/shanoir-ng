@@ -14,7 +14,5 @@ toggle-switch { margin-right: 7px; }
 span > i { color: var(--grey); }
 span.enabled > i { color: darkgreen; }
 .italic { font-style: italic; }
-code { color: navy; }
-.info-txt a:link { text-decoration: underline; }
-.info-txt a { color: blue; }
+code { color: darkmagenta; }
 .info-txt a:visited { color: purple; }

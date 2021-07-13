@@ -54,10 +54,8 @@ export class SolrTextSearchComponent implements OnChanges {
         }
     }
 
-    clear() {
-        if (this.searchText && this.searchText.length > 0) {
-            this.searchText = "";
-            // this.onChangeSearch();
-        }
+    clear(text?: string, expertMode?: boolean) {
+        this.searchText = text ? text : '';
+        this.expertMode = !!expertMode;
     }
 }

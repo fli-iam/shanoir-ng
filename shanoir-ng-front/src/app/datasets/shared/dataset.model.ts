@@ -19,6 +19,7 @@ import { DatasetProcessing } from './dataset-processing.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { DatasetType } from './dataset-type.model';
+import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 
 
 export abstract class Dataset extends Entity {
@@ -27,7 +28,7 @@ export abstract class Dataset extends Entity {
     creationDate: Date;
     name: string;
     type: DatasetType;
-    //datasetAcquisition: DatasetAcquisition
+    datasetAcquisition: DatasetAcquisition
     //datasetExpressions: List<DatasetExpression>
     //datasetProcessing: DatasetProcessing
     //groupOfSubjectsId: number;

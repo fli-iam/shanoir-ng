@@ -34,13 +34,12 @@ export class SolrService {
     }
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
-        if (!solrReq.studyName && !solrReq.subjectName && !solrReq.examinationComment && !solrReq.datasetName
-            && !solrReq.datasetStartDate && !solrReq.datasetEndDate && !solrReq.datasetType && !solrReq.datasetNature 
-            && !solrReq.searchText) {
-                return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
+        let serializedSolrRequest: string = JSON.stringify(solrReq);
+        if (serializedSolrRequest == '{}') {
+            return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
             .toPromise();
         } else {
-            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, JSON.stringify(solrReq), { 'params': pageable.toParams() })    
+            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, serializedSolrRequest, { 'params': pageable.toParams() })    
             .toPromise();
         }
     }

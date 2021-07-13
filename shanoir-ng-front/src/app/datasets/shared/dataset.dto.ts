@@ -24,6 +24,8 @@ import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, Repet
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
 import { DatasetProcessing } from './dataset-processing.model';
+import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
 
 @Injectable()
 export class DatasetDTOService {
@@ -95,6 +97,11 @@ export class DatasetDTOService {
             entity.subject = new Subject();
             entity.subject.id = dto.subjectId;
         }
+        if (dto.datasetAcquisition) {
+            let dsAcq = DatasetAcquisitionUtils.getNewDAInstance(dto.datasetAcquisition.type);
+            DatasetAcquisitionDTOService.mapSyncFields(dto.datasetAcquisition, dsAcq);
+            entity.datasetAcquisition = dsAcq;
+        }
         if (entity.type == 'Mr') {
             this.mapSyncFieldsMr(dto as MrDatasetDTO, entity as MrDataset);
         }
@@ -144,6 +151,7 @@ export class DatasetDTO {
 	name: string;
     type: DatasetType;
     processings: DatasetProcessing[];
+    datasetAcquisition: DatasetAcquisitionDTO;
 
     constructor(dataset?: Dataset) {
         if (dataset) {
@@ -157,6 +165,7 @@ export class DatasetDTO {
             this.name = dataset.name;
             this.type = dataset.type;
             this.processings = dataset.processings;
+            this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
         }
     }
 }

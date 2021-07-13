@@ -12,17 +12,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span>
-    <div class="header command-zone">
-        {{title}}
-        <img [src]="zoomOutIconPath" *ngIf="tab_open" (click)="tab_open = false" />
-        <img [src]="zoomInIconPath" *ngIf="!tab_open" (click)="tab_open = true" />
-    </div>
-</span>
-<ul *ngIf="tab_open">
-    <li *ngFor="let o of list">
-        <a [routerLink]="[getLink(o) + '/details/', o.id]">
-            <span [innerHTML]="getText(o)"></span>
-        </a>
-    </li>
-</ul>
+<div class="title">
+    {{label}}
+    <span *ngIf="!open" class="colapse" (click)="open = true"><i class="fas fa-chevron-down"></i></span>
+    <span *ngIf="open" class="colapse" (click)="open = false"><i class="fas fa-chevron-up"></i></span>
+</div>
+<div class="body content" *ngIf="open" @slideDown>
+    <span>from : </span>
+    <input type="number" [(ngModel)]="range.lowerBound" (change)="change()"/>
+    <span>to : </span>
+    <input type="number" [(ngModel)]="range.upperBound" (change)="change()"/>
+</div>
