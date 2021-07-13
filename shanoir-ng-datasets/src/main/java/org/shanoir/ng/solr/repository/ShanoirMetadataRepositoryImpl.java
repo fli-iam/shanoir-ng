@@ -35,11 +35,11 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
+@SuppressWarnings("unchecked")
 public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryCustom {
 	@PersistenceContext
 	private EntityManager em;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ShanoirMetadata> findAllAsSolrDoc() {
 		List<ShanoirMetadata> result = new ArrayList<>();

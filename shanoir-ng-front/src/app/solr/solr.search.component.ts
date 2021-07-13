@@ -33,6 +33,7 @@ import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { Range } from '../shared/models/range.model';
 
 
 @Component({
@@ -64,6 +65,11 @@ export class SolrSearchComponent implements AfterViewChecked{
     syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
+    dateOpen: boolean = false;
+    sliceThicknessRange: Range = new Range(null, null);
+    pixelBandwidthRange: Range = new Range(null, null);
+    magneticFieldStrengthRange: Range = new Range(null, null);
+
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
@@ -138,9 +144,11 @@ export class SolrSearchComponent implements AfterViewChecked{
     }
 
     ngAfterViewChecked(): void {
-        setTimeout(() => {
-            this.viewChecked = true;
-        });
+        if (!this.viewChecked) {
+            setTimeout(() => {
+                this.viewChecked = true;
+            });
+        }
     }
     
     buildForm(): FormGroup {
@@ -200,6 +208,15 @@ export class SolrSearchComponent implements AfterViewChecked{
         if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
             solrRequest.datasetEndDate = this.datasetEndDate;
         }
+        if (this.sliceThicknessRange.hasBound()) {
+            solrRequest.sliceThickness = this.sliceThicknessRange;
+        }
+        if (this.pixelBandwidthRange.hasBound()) {
+            solrRequest.pixelBandwidth = this.pixelBandwidthRange;
+        }
+        if (this.magneticFieldStrengthRange.hasBound()) {
+            solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
+        }
         return solrRequest;
     }
 
@@ -219,6 +236,9 @@ export class SolrSearchComponent implements AfterViewChecked{
             });
             if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
             if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
+            if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
+            if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
+            if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
             this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
             this.keyword = solrRequest.searchText;
             this.expertMode = solrRequest.expertMode;
@@ -246,6 +266,15 @@ export class SolrSearchComponent implements AfterViewChecked{
                     .map(facetField => new FacetSelectionBlock(facetField))
             );
         })
+        if (this.sliceThicknessRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('S. Thickness', this.sliceThicknessRange));
+        }
+        if (this.pixelBandwidthRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.pixelBandwidthRange));
+        }
+        if (this.magneticFieldStrengthRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.magneticFieldStrengthRange));
+        }
     }
 
     refreshTable() {
@@ -436,9 +465,7 @@ export class SolrSearchComponent implements AfterViewChecked{
     }
 
     onSelectionChange (selection: any) {
-        setTimeout(() => {
-            this.selectedDatasetIds = selection;
-        });
+        this.selectedDatasetIds = selection;
     }
 
     onRowClick(solrRequest: any) {
@@ -495,5 +522,25 @@ export class DateSelectionBlock implements SelectionBlock {
 
     get label(): string {
         return this.formattedLabel;
+    }
+}
+
+export class RangeSelectionBlock implements SelectionBlock {
+
+    constructor(private title: string, public range: Range) {}
+
+    remove(): void {
+        this.range.upperBound = null;
+        this.range.lowerBound = null;
+    }
+
+    get label(): string {
+        if (this.range.hasLowerBound() && this.range.hasUpperBound()) {
+            return this.title + ' [' + this.range.lowerBound + ', ' + this.range.upperBound + ']';
+        } else if (this.range.hasLowerBound() && !this.range.hasUpperBound()) {
+            return this.title + ' > ' + this.range.lowerBound;
+        } else if (!this.range.hasLowerBound() && this.range.hasUpperBound()) {
+            return this.title + ' < ' + this.range.upperBound;
+        }
     }
 }

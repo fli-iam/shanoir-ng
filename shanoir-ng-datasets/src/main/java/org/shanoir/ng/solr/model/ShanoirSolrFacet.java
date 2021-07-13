@@ -17,7 +17,7 @@ package org.shanoir.ng.solr.model;
 import java.time.LocalDate;
 import java.util.Collection;
 
-import org.springframework.data.domain.Range;
+import org.shanoir.ng.utils.Range;
 
 /**
  * @author yyao

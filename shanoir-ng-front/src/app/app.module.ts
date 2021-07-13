@@ -227,6 +227,7 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
@@ -387,7 +388,8 @@ import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/
         DUASigningComponent,
         EventTypePipe,
         SolrCriterionComponent,
-        SolrTextSearchComponent
+        SolrTextSearchComponent,
+        SolrRangeCriterionComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
