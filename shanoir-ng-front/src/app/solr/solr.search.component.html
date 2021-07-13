@@ -47,11 +47,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="dates">
             <div class="title">Dataset Creation Date</div>
             <div class="date-from">
-                <span class="left-title">from :</span> <datepicker [(ngModel)]="datasetStartDate" (ngModelChange)="onDateChange($event)" formControlName="startDate"></datepicker>
+                <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" [(ngModel)]="datasetStartDate" (ngModelChange)="onDateChange($event)" formControlName="startDate"></datepicker>
                 <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
             </div>
             <div class="date-to">
-                <span class="left-title">to :</span> <datepicker [(ngModel)]="datasetEndDate" (ngModelChange)="onDateChange($event)" formControlName="endDate"></datepicker>
+                <span class="left-title">to :</span> <datepicker  *ngIf="viewChecked" [(ngModel)]="datasetEndDate" (ngModelChange)="onDateChange($event)" formControlName="endDate"></datepicker>
                 <label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
                 <label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
             </div>
@@ -59,6 +59,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-criterion
                 label="Examination"
+                [currentFacetPage]="facetResultPages[4]"
+                [allFacetPage]="allFacetResultPages[4]"
+                (onChange)="updateSelections(); table.refresh()">
+        </solr-criterion>
+
+        <solr-criterion
+                label="Center"
                 [currentFacetPage]="facetResultPages[3]"
                 [allFacetPage]="allFacetResultPages[3]"
                 (onChange)="updateSelections(); refreshTable()">
@@ -66,15 +73,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-criterion
                 label="Dataset Modality Type"
-                [currentFacetPage]="facetResultPages[4]"
-                [allFacetPage]="allFacetResultPages[4]"
+                [currentFacetPage]="facetResultPages[5]"
+                [allFacetPage]="allFacetResultPages[5]"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
                 label="Mr Dataset Nature"
-                [currentFacetPage]="facetResultPages[5]"
-                [allFacetPage]="allFacetResultPages[5]"
+                [currentFacetPage]="facetResultPages[6]"
+                [allFacetPage]="allFacetResultPages[6]"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
@@ -110,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fas fa-shopping-cart"></i>Selection ({{selectedDatasetIds ? selectedDatasetIds.size : 0}})
                 </span>
             </div>
-            <div class="tab-body" [hidden]="tab != 'results'">
+            <div class="tab-body" [hidden]="tab != 'results'" *ngIf="loaded">
                 <shanoir-table #table
                     identifier="results"
                     [getPage]="getPage.bind(this)" 
@@ -124,7 +131,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [enableSettings]="true">
                 </shanoir-table>
             </div>
-            <div class="tab-body selected" [hidden]="tab != 'selected'">
+            <div class="tab-body selected" [hidden]="tab != 'selected'" *ngIf="loaded">
                 <shanoir-table #selectionTable
                     identifier="selected"
                     [getPage]="getSelectedPage.bind(this)" 
@@ -136,6 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [enableSettings]="true">
                 </shanoir-table>
             </div>
+            <div *ngIf="!loaded">Loading ...</div>
         </div>
     </div>
 </form>

@@ -21,6 +21,7 @@ export class SolrDocument {
     datasetNature: string;
     datasetCreationDate: Date;
     examinationComment: string;
+    centerName: string;
     examinationDate: Date;
     subjectName: string;
     studyName: string;
@@ -32,6 +33,7 @@ export class SolrRequest {
     studyName: string[];
     subjectName: string[];
     examinationComment: string[];
+    centerName: string[];
     datasetName: string[];
     datasetStartDate: Date;
     datasetEndDate: Date;

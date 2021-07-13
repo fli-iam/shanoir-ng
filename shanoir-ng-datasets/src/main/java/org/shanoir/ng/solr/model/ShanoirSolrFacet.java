@@ -31,6 +31,8 @@ public class ShanoirSolrFacet {
 	
 	private	Collection<String> datasetName;
 	
+	private	Collection<String> centerName;
+	
 	private Collection<Long> studyId; 
 	
 	private LocalDate datasetStartDate;
@@ -99,6 +101,14 @@ public class ShanoirSolrFacet {
 	 */
 	public void setDatasetName(Collection<String> datasetName) {
 		this.datasetName = datasetName;
+	}
+
+	public Collection<String> getCenterName() {
+		return centerName;
+	}
+
+	public void setCenterName(Collection<String> centerName) {
+		this.centerName = centerName;
 	}
 
 	/**

@@ -41,7 +41,8 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
 			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class), 
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
-			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class)
+			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
+			@ColumnResult(name="centerName", type = String.class)
 	})
 }) 
 public class ShanoirMetadata {
@@ -71,13 +72,15 @@ public class ShanoirMetadata {
 	
 	private Long studyId;
 	
+	private String centerName;
+	
 	public ShanoirMetadata () {
 		
 	}
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature, 
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
-			String subjectName, String studyName, Long studyId) {
+			String subjectName, String studyName, Long studyId, String centerName) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -88,6 +91,7 @@ public class ShanoirMetadata {
 		this.subjectName = subjectName;
 		this.studyName = studyName;
 		this.studyId = studyId;
+		this.centerName = centerName;
 	}
 	
 	/**
@@ -244,6 +248,14 @@ public class ShanoirMetadata {
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+
+	public String getCenterName() {
+		return centerName;
+	}
+
+	public void setCenterName(String centerName) {
+		this.centerName = centerName;
 	}
 
 }

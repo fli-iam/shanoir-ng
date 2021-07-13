@@ -76,13 +76,18 @@ public class ShanoirSolrDocument {
 	@Indexed(name="studyId", type="Long")
 	private Long studyId;
 	
+	@Field
+	@Indexed(name="centerName", type="string")
+	private String centerName;
+	
+	
 	public ShanoirSolrDocument () {
 		
 	}
 	
 	public ShanoirSolrDocument (Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId) {
+			String subjectName, String studyName, Long studyId, String centerName) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -93,6 +98,7 @@ public class ShanoirSolrDocument {
 		this.subjectName = subjectName;
 		this.studyName = studyName;
 		this.studyId = studyId;
+		this.centerName = centerName;
 	}
 
 	/**
@@ -235,4 +241,12 @@ public class ShanoirSolrDocument {
 		this.studyId = studyId;
 	}
 
+	public String getCenterName() {
+		return centerName;
+	}
+
+	public void setCenterName(String centerName) {
+		this.centerName = centerName;
+	}
+	
 }

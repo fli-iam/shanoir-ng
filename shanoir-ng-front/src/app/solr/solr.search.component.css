@@ -1,6 +1,6 @@
 .row { display: flex; }
 .left { flex: 300px; }
-.right { padding-left: 50px; }
+.right { padding-left: 50px; width: 100%; }
 
 h2 { margin-bottom: 40px; }
 solr-text-search { margin:10px 0 30px; }
