@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -78,8 +80,12 @@ public class WADODownloaderService {
 	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
 
 	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
+	
+	private static final String WADO_REQUEST_SERIE_WADO_RS = "/series/";
 
 	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
+	
+	private static final String WADO_REQUEST_STUDY_WADO_URI = "studyUID=";
 
 	private static final String DCM = ".dcm";
 
@@ -89,6 +95,8 @@ public class WADODownloaderService {
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+	
+	private static final String CONTENT_TYPE_DICOM_XML = "application/dicom+xml";
 
 	private static final String CONTENT_TYPE = "&contentType";
 	
@@ -107,7 +115,7 @@ public class WADODownloaderService {
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName) throws IOException, MessagingException {
 		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
-			String url = ((URL) iterator.next()).toString();
+			String url = ((URL) iterator.next()).toString() + "&";
 			String instanceUID = null;
 			// handle and check at first for WADO-RS URLs by "/instances/"
 			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
@@ -137,6 +145,20 @@ public class WADODownloaderService {
 					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 				}
 			}
+		}
+	}
+	
+	public String downloadDicomMetadataForURLs(final List<URL> urls) throws IOException, MessagingException {
+		if (!urls.isEmpty()) {
+			String firstUrl = urls.get(0).toString();
+			LOG.error("####### 1 " + firstUrl);
+			if (firstUrl.contains(WADO_REQUEST_STUDY_WADO_URI)) firstUrl = wadoURItoWadoRS(firstUrl);
+			LOG.error("####### 2 " + firstUrl);
+			firstUrl = firstUrl.split(WADO_REQUEST_SERIE_WADO_RS)[0].concat("/metadata/");
+			LOG.error("####### 3 " + firstUrl);
+			return downloadMetadataFromPACS(firstUrl);
+		} else {
+			return null;
 		}
 	}
 
@@ -183,6 +205,21 @@ public class WADODownloaderService {
 			throw new IOException("Download did not work: wrong status code received.");
 		}
 	}
+	
+	
+	private String downloadMetadataFromPACS(final String url) throws IOException {
+		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM_XML + ";");
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		ResponseEntity<String> response = restTemplate.exchange(url,
+				HttpMethod.GET, entity,String.class, "1");
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		} else {
+			throw new IOException("Download did not work: wrong status code received.");
+		}
+	}
 
 	/**
 	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
@@ -207,7 +244,7 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 					File extractedDicomFile = null;
 					if (count == 1) {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
@@ -220,6 +257,16 @@ public class WADODownloaderService {
 				}
 			}
 		}
+	}
+	
+	
+	private String wadoURItoWadoRS(String url) {
+		return url
+				.replace("wado?requestType=WADO", "rs")
+				.replace("&studyUID=", "/studies/")
+				.replace("&seriesUID=", "/series/")
+				.replace("&objectUID=", "/instances/")
+				.replace("&contentType=application/dicom&", "");
 	}
 
 }

@@ -393,6 +393,16 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<String> getDicomMetadataByDatasetId(
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
+		
+		final Dataset dataset = datasetService.findById(datasetId);
+		List<URL> pathURLs = new ArrayList<>();
+		getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		return new ResponseEntity<>(downloader.downloadDicomMetadataForURLs(pathURLs), HttpStatus.OK);
+	}
+	
+	@Override
 	public void massiveDownloadByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,

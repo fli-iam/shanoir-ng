@@ -154,4 +154,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
+
+    downloadMetadata() {
+        this.datasetService.downloadDicomMetadata(this.dataset.id);
+    }
 }

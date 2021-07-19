@@ -131,6 +131,13 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         return this.downloadFromId(dataset.id, format, converterId);
     }
 
+    downloadDicomMetadata(datasetId: number): Promise<any> {
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/dicom-metadata/' + datasetId,
+            { responseType: 'text' }
+        ).toPromise();
+    }
+
     downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
         return this.downloadToBlob(datasetId, format, converterId).then(
