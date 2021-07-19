@@ -242,6 +242,7 @@ public class SubjectServiceSecurityTest {
 		studiesMock = new ArrayList<>();
 		studiesMock.add(buildStudyMock(13L, StudyUserRight.CAN_IMPORT));
 		given(studyRepository.findAllById(Arrays.asList(new Long[] { 13L }))).willReturn(studiesMock);
+		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 13L);
 		assertAccessAuthorized(service::create, newSubjectMock);
 	}
