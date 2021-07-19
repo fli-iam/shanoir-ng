@@ -24,36 +24,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <div *ngIf="loaded && (admin || !challengeDua)">
-    <div *ngIf="challengeStudy" class="block challenge">
-        <table><tr>
-            <td class="left-cell">
-                <div class="block-title">
-                    <span class="challenge-title">
-                        <i class="fas fa-trophy"></i>
-                        Challenge
-                        <i class="fas fa-trophy"></i>
-                    </span>
-                </div>
-                <p class="challenge-name">{{challengeStudy.name}}</p>
-                <p class="msg">Here you can now download all the ressources you need for the challenge and explore its data using Shanoir</p>
-            </td>
-            <td>
-                <ul class="challenge-files">
-                    <div [hidden]="progressBar.progress == 0">
-                        <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
-                    </div>
-                    <li *ngFor="let filePath of challengeStudy.protocolFilePaths">
-                        <i class="fas fa-download" (click)="downloadFile(filePath)"></i>
-                        <span (click)="downloadFile(filePath)">{{filePath}}</span>
-                    </li>
-                    <li class="study">
-                        <i class="fas fa-folder-open" [routerLink]="'/study/details/' + challengeStudy.id"></i>
-                        <span [routerLink]="'/study/details/' + challengeStudy.id">Explore the study</span>
-                    </li>
-                </ul>
-            </td>
-        </tr></table>
-    </div>
+   
+    <challenge-block *ngFor="let challengeStudy of challengeStudies" [challengeStudy]="challengeStudy">
+    </challenge-block>
+
     <div class="block account-requests" *ngIf="admin">
         <table><tr>
             <td class="icon link" routerLink="/user/list">
