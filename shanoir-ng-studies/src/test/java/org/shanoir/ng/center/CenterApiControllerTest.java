@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,9 +87,12 @@ public class CenterApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 
 	@Before
-	public void setup() throws EntityNotFoundException  {
+	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
@@ -103,6 +108,7 @@ public class CenterApiControllerTest {
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
 	}
 
 	@Test

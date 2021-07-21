@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -32,6 +33,7 @@ import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.service.CoilService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = CoilApiController.class)
+@WebMvcTest(CoilApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockKeycloakUser(id = 123)
 public class CoilApiControllerTest {
@@ -74,9 +76,12 @@ public class CoilApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 
 	@Before
-	public void setup() throws EntityNotFoundException {
+	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyListOf(Coil.class)))
@@ -89,6 +94,7 @@ public class CoilApiControllerTest {
 		Coil coil = new Coil();
 		coil.setId(Long.valueOf(123));
 		given(coilServiceMock.create(Mockito.any(Coil.class))).willReturn(coil );
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Coil.class))).willReturn(true);
 	}
 
 	@Test
