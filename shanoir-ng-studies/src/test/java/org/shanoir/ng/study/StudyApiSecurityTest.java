@@ -46,7 +46,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -184,7 +183,7 @@ public class StudyApiSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findAllById(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true)).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-		given(repository.findById(3L)).willReturn(Optional.of(studyMockNoRights));
+		given(repository.findById(3L)).willReturn(Optional.of(studyMockRightRights));
 		assertAccessAuthorized(api::findStudies);
 		assertNotNull(api.findStudies().getBody());
 		assertEquals(1, api.findStudies().getBody().size());
