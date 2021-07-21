@@ -43,6 +43,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -57,7 +58,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = CenterApiController.class)
+@WebMvcTest(CenterApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class CenterApiControllerTest {
 
@@ -112,24 +113,28 @@ public class CenterApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser
 	public void findCenterByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockUser
 	public void findCentersTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockUser
 	public void findCentersNamesTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 	
 	@Test
+	@WithMockUser
 	public void findCentersNamesByStudyIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES + "/1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
