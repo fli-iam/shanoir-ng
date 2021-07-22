@@ -17,6 +17,7 @@ package org.shanoir.ng.manufacturermodel;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -24,9 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.manufacturermodel.controler.ManufacturerModelApiController;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,7 +51,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = ManufacturerModelApiController.class)
+@WebMvcTest(ManufacturerModelApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class ManufacturerModelApiControllerTest {
 
@@ -62,15 +65,19 @@ public class ManufacturerModelApiControllerTest {
 
 	@MockBean
 	private ManufacturerModelService manufacturerModelServiceMock;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 
 	@Before
-	public void setup() {
+	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().create();
 
 		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(new ManufacturerModel()));
 		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
 				.willReturn(new ManufacturerModel());
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
 	}
 
 	@Test

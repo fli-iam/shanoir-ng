@@ -80,8 +80,6 @@ public class RabbitMQSubjectServiceTest {
 		SimpleSubjectDTO dto = new SimpleSubjectDTO();
 		String ident="subjectIdentifier";
 		dto.setIdentifier(ident);
-		List<SimpleSubjectDTO> list = Collections.singletonList(dto );
-		Mockito.when(subjectService.findAllSubjectsOfStudy(studyId)).thenReturn(list);
 		Mockito.when(mapper.writeValueAsString(Mockito.any())).thenReturn(ident);
 
 		// GIVEN a study ID, retrieve all associated subjects
@@ -109,7 +107,8 @@ public class RabbitMQSubjectServiceTest {
 		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
 		// WHEN the subjectStudy already exists
-		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
+		String message = "{id: 1, name: \"1L\"}";
+		String name = rabbitMQSubjectService.updateSubjectStudy(message);
 		
 		// THEN nothing is created
 		Mockito.verifyZeroInteractions(subjectStudyRepository);
@@ -129,7 +128,8 @@ public class RabbitMQSubjectServiceTest {
 		Mockito.when(studyRepository.findById(studyId)).thenReturn(Optional.of(study));
 
 		// WHEN the subjectStudy does not exists
-		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
+		String message = "{id: 1, name: \"1L\"}";
+		String name = rabbitMQSubjectService.updateSubjectStudy(message);
 		
 		// THEN a new subejctStudy is created
 		Mockito.verify(subjectStudyRepository).save(Mockito.any(SubjectStudy.class));
@@ -138,10 +138,7 @@ public class RabbitMQSubjectServiceTest {
 
 	@Test
 	public void testUpdateSubjectStudyFail() throws IOException {
-		// GIVEN a studyID and a subjectID
-		Mockito.when(subjectRepository.findById(subjectId)).thenReturn(null);
-		Mockito.when(mapper.readValue(Mockito.anyString(), Mockito.eq(IdName.class))).thenReturn(idName);
-
+	
 		// WHEN the call fails
 		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
 		
