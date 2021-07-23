@@ -33,9 +33,6 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      # Naming strategy
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
     properties:
       hibernate:
         connection:

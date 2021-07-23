@@ -124,22 +124,6 @@
 						</execution>
 					</executions>
 				</plugin>
-				<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.4.11</version>
-					<configuration>
-						<imageName>${docker.image.name}</imageName>
-						<dockerDirectory>src/main/docker</dockerDirectory>
-						<resources>
-							<resource>
-								<targetPath>/</targetPath>
-								<directory>${project.build.directory}</directory>
-								<include>${project.build.finalName}.jar</include>
-							</resource>
-						</resources>
-					</configuration>
-				</plugin>
 				<!-- Copy shanoir-ng-studies.jar for docker-compose up running -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

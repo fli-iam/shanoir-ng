@@ -52,7 +52,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -65,7 +64,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class DatasetServiceSecurityTest {
 
@@ -146,10 +144,10 @@ public class DatasetServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
-		given(datasetRepository.findById(1L).orElse(null)).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(datasetRepository.findById(1L).orElse(null)).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(Collections.singleton(1L));
 		assertNotNull(service.findById(1L));
 	}
@@ -221,7 +219,7 @@ public class DatasetServiceSecurityTest {
 	private void testDeleteByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findById(1L).orElse(null)).willReturn(mrDs);
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mrDs));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
@@ -235,7 +233,7 @@ public class DatasetServiceSecurityTest {
 	private void testUpdateByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findById(1L).orElse(null)).willReturn(mrDs);
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mrDs));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);

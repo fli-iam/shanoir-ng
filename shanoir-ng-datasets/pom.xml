@@ -30,8 +30,6 @@
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
 		<dcm4che.version>5.14.1</dcm4che.version>
-		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
-		<powermock.version>1.7.1</powermock.version>
 	</properties>
 
 	<dependencies>
@@ -106,23 +104,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
-		<!-- Tests -->
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<!-- Solr -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-solr</artifactId>
+		</dependency>
+		<!-- Used by unit tests -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-keyvalue</artifactId>
 		</dependency>
 	</dependencies>
 

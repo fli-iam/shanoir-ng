@@ -3,6 +3,7 @@ package org.shanoir.ng.exporter.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +36,9 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -50,7 +53,7 @@ public class BidsServiceTest {
 	@Mock
 	private ExaminationService examService;
 
-	@Mock
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks

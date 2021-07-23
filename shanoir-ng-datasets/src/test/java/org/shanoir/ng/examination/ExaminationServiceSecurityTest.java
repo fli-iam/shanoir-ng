@@ -46,7 +46,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -59,7 +58,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class ExaminationServiceSecurityTest {
 
@@ -141,10 +139,10 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
-		given(examinationRepository.findById(1L).orElse(null)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(examinationRepository.findById(1L).orElse(null)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -241,7 +239,7 @@ public class ExaminationServiceSecurityTest {
 	private void testDeleteByExpert() throws ShanoirException {
 		Examination exam = mockExam(1L);
 		exam.setStudyId(10L);
-		given(examinationRepository.findById(1L).orElse(null)).willReturn(exam);
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(exam));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);

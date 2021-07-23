@@ -209,7 +209,7 @@ public class DatasetApiControllerTest {
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
+		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 
@@ -257,7 +257,7 @@ public class DatasetApiControllerTest {
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
+		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 
@@ -370,7 +370,7 @@ public class DatasetApiControllerTest {
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
 		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L).orElse(null)).willReturn(subject);
+		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
 		dataset.setDatasetAcquisition(dsAcq);
 		dataset.setUpdatedMetadata(updatedMetadata);
 

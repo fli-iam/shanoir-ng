@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +35,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Study card service test.
@@ -50,7 +52,7 @@ public class StudyCardServiceTest {
 	@Mock
 	private StudyCardRepository studyCardRepository;
 
-	@Mock
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
@@ -59,7 +61,7 @@ public class StudyCardServiceTest {
 	@Before
 	public void setup() {
 		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.findById(TEMPLATE_ID).orElse(null)).willReturn(ModelsUtil.createStudyCard());
+		given(studyCardRepository.findById(TEMPLATE_ID)).willReturn(Optional.of(ModelsUtil.createStudyCard()));
 		given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
 	}
 
