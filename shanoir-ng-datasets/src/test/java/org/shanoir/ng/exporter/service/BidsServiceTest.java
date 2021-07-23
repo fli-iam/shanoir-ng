@@ -36,7 +36,6 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +52,7 @@ public class BidsServiceTest {
 	@Mock
 	private ExaminationService examService;
 
-	@Autowired
+	@Mock
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
@@ -64,7 +63,6 @@ public class BidsServiceTest {
 
 	Examination exam = ModelsUtil.createExamination();
 	Subject subject = new Subject();
-
 	
 	public static String tempFolderPath;
 
@@ -148,7 +146,6 @@ public class BidsServiceTest {
 		ObjectMapper mapper = new ObjectMapper();
 		String value = mapper.writeValueAsString(subjects);
 		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
-
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));

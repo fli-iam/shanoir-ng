@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -211,7 +212,7 @@ public class ImporterServiceTest {
 		Examination examination = new Examination();
 		examination.setId(2L);
 		examination.setExaminationDate(LocalDate.now());
-		when(examinationRepository.findById(importJob.getExaminationId()).orElse(null)).thenReturn(examination);
+		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
