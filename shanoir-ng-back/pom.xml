@@ -37,9 +37,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-study-rights</module><!-- done -->
 		<module>../shanoir-ng-users</module><!-- done -->
 		<module>../shanoir-ng-anonymization</module><!-- done -->
-		<module>../shanoir-ng-studies</module>
+		<module>../shanoir-ng-studies</module><!-- done -->
 		<module>../shanoir-ng-datasets</module>
-		<module>../shanoir-ng-import</module>
+		<module>../shanoir-ng-import</module><!-- done -->
 		<module>../shanoir-ng-preclinical</module>
 		<module>../shanoir-ng-exchange</module>
 	</modules>
