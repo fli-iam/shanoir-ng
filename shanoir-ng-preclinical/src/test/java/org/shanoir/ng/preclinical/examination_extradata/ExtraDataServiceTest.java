@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,7 +69,7 @@ public class ExtraDataServiceTest {
 		given(extraDataRepository.findAll()).willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.findAllByExaminationId(1L))
 				.willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
-		given(extraDataRepository.findById(EXTRADATA_ID).orElse(null)).willReturn(ExtraDataModelUtil.createExaminationExtraData());
+		given(extraDataRepository.findById(EXTRADATA_ID)).willReturn(Optional.of(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.save(Mockito.any(ExaminationExtraData.class)))
 				.willReturn(ExtraDataModelUtil.createExaminationExtraData());
 	}

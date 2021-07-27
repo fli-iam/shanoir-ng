@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,7 +64,7 @@ public class AnestheticIngredientServiceTest {
 	public void setup() {
 		given(ingredientsRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
 		given(ingredientsRepository.findByAnesthetic(AnestheticModelUtil.createAnestheticGas())).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
-		given(ingredientsRepository.findById(INGREDIENT_ID).orElse(null)).willReturn(AnestheticModelUtil.createAnestheticIngredient());
+		given(ingredientsRepository.findById(INGREDIENT_ID)).willReturn(Optional.of(AnestheticModelUtil.createAnestheticIngredient()));
 		given(ingredientsRepository.save(Mockito.any(AnestheticIngredient.class))).willReturn(AnestheticModelUtil.createAnestheticIngredient());
 	}
 

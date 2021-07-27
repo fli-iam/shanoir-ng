@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class PathologyServiceTest {
 	@Before
 	public void setup() {
 		given(pathologiesRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathology()));
-		given(pathologiesRepository.findById(PATHOLOGY_ID).orElse(null)).willReturn(PathologyModelUtil.createPathology());
+		given(pathologiesRepository.findById(PATHOLOGY_ID)).willReturn(Optional.of(PathologyModelUtil.createPathology()));
 		given(pathologiesRepository.save(Mockito.any(Pathology.class))).willReturn(PathologyModelUtil.createPathology());
 	}
 

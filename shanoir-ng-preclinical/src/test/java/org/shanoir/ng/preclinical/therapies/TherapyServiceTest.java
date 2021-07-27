@@ -60,7 +60,7 @@ public class TherapyServiceTest {
 		given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.findByTherapyType(TherapyType.SURGERY)).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.findById(THERAPY_ID).orElse(null)).willReturn(TherapyModelUtil.createTherapyBrain());
+		given(therapiesRepository.findById(THERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.save(Mockito.any(Therapy.class))).willReturn(TherapyModelUtil.createTherapyBrain());
 	}
 

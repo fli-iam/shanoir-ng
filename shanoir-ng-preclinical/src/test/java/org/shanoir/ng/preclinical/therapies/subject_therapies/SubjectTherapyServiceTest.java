@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,12 +65,12 @@ public class SubjectTherapyServiceTest {
 	@Before
 	public void setup() {
 		given(stherapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
-		given(subjectsRepository.findById(1L).orElse(null)).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		given(subjectsRepository.findById(1L)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(stherapiesRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
 				.willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
 		given(stherapiesRepository.findByTherapy(TherapyModelUtil.createTherapyBrain()))
 				.willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
-		given(stherapiesRepository.findById(STHERAPY_ID).orElse(null)).willReturn(TherapyModelUtil.createSubjectTherapy());
+		given(stherapiesRepository.findById(STHERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createSubjectTherapy()));
 		given(stherapiesRepository.save(Mockito.any(SubjectTherapy.class)))
 				.willReturn(TherapyModelUtil.createSubjectTherapy());
 	}

@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -70,7 +71,7 @@ public class SubjectPathologyServiceTest {
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findById(SPATHO_ID).orElse(null)).willReturn(PathologyModelUtil.createSubjectPathology());
+		given(spathosRepository.findById(SPATHO_ID)).willReturn(Optional.of(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.save(Mockito.any(SubjectPathology.class)))
 				.willReturn(PathologyModelUtil.createSubjectPathology());
 	}

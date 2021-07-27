@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +61,7 @@ public class ExaminationAnestheticServiceTest {
 	public void setup() {
 		given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
 		given(examAnestheticRepository.findByExaminationId(1L)).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
-		given(examAnestheticRepository.findById(EXAM_ANESTHETIC_ID).orElse(null)).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
+		given(examAnestheticRepository.findById(EXAM_ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createExaminationAnesthetic()));
 		given(examAnestheticRepository.save(Mockito.any(ExaminationAnesthetic.class))).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
 	}
 

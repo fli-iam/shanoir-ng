@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,7 +65,7 @@ public class AnimalSubjectServiceTest {
 		given(subjectsRepository.findAll()).willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(subjectsRepository.findByReference(ReferenceModelUtil.createReferenceSpecie()))
 				.willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
-		given(subjectsRepository.findById(SUBJECT_ID).orElse(null)).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		given(subjectsRepository.findById(SUBJECT_ID)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(refsRepository.save(Mockito.any(Reference.class))).willReturn(AnimalSubjectModelUtil.createSpecie());
 		given(subjectsRepository.save(Mockito.any(AnimalSubject.class)))
 				.willReturn(AnimalSubjectModelUtil.createAnimalSubject());

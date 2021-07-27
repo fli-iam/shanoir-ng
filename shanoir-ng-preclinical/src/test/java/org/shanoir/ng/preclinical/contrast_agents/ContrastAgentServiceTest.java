@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,7 +65,7 @@ public class ContrastAgentServiceTest {
 	@Before
 	public void setup() {
 		given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
-		given(agentsRepository.findById(AGENT_ID).orElse(null)).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
+		given(agentsRepository.findById(AGENT_ID)).willReturn(Optional.of(ContrastAgentModelUtil.createContrastAgentGado()));
 		given(agentsRepository.save(Mockito.any(ContrastAgent.class))).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
 	}
 

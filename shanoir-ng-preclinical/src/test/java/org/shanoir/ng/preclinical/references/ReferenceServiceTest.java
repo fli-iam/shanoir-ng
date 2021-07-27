@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class ReferenceServiceTest {
 	@Before
 	public void setup() {
 		given(refsRepository.findAll()).willReturn(Arrays.asList(ReferenceModelUtil.createReferenceSpecie()));
-		given(refsRepository.findById(REFERENCE_ID).orElse(null)).willReturn(ReferenceModelUtil.createReferenceSpecie());
+		given(refsRepository.findById(REFERENCE_ID)).willReturn(Optional.of(ReferenceModelUtil.createReferenceSpecie()));
 		given(refsRepository.save(Mockito.any(Reference.class))).willReturn(ReferenceModelUtil.createReferenceSpecie());
 	}
 
