@@ -16,11 +16,11 @@ package org.shanoir.ng.dataset.modality;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -56,9 +56,8 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
 
 	@Override
 	public PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page) {
-		org.springframework.data.domain.Page<MrDatasetDTO> mappedPage =  page.map(new Converter<MrDataset, MrDatasetDTO>() {
-			@Override
-			public MrDatasetDTO convert(MrDataset entity) {
+		org.springframework.data.domain.Page<MrDatasetDTO> mappedPage =  page.map(new Function<MrDataset, MrDatasetDTO>() {
+			public MrDatasetDTO apply(MrDataset entity) {
 				return delegate.datasetToDatasetDTO(entity);
 			}
 		});

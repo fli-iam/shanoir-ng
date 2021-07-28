@@ -129,7 +129,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	}
 
 	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
+		StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
 		if (studyCard == null) {
 			throw new IllegalArgumentException("No study card found with id " + studyCardId);
 		}

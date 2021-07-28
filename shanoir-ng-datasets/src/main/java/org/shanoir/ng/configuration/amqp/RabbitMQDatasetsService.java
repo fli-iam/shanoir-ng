@@ -102,7 +102,7 @@ public class RabbitMQDatasetsService {
 		IdName receivedStudy = new IdName();
 		try {
 			receivedStudy = objectMapper.readValue(studyStr, IdName.class);
-			Study existingStudy = studyRepository.findOne(receivedStudy.getId());
+			Study existingStudy = studyRepository.findById(receivedStudy.getId()).orElse(null);
 			if (existingStudy != null) {
 				// update existing study's name
 				existingStudy.setName(receivedStudy.getName());
@@ -126,7 +126,7 @@ public class RabbitMQDatasetsService {
 		IdName receivedSubject = new IdName();
 		try {
 			receivedSubject = objectMapper.readValue(subjectStr, IdName.class);
-			Subject existingSubject = subjectRepository.findOne(receivedSubject.getId());
+			Subject existingSubject = subjectRepository.findById(receivedSubject.getId()).orElse(null);
 			if (existingSubject != null) {
 				existingSubject.setName(receivedSubject.getName());
 				subjectRepository.save(existingSubject);
@@ -187,11 +187,16 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository
-			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
-				examinationService.deleteFromRabbit(exam);
+			for (Examination exam : examRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
+				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
+					for (Dataset ds : dsAcq.getDatasets())  {
+						solrService.deleteFromIndex(ds.getId());
+					}
+				}
+				examRepository.deleteById(exam.getId());
 			}
 			// Delete subject from datasets database
-			subjectRepository.delete(Long.valueOf(event.getObjectId()));
+			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
@@ -218,8 +223,13 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository then from database
-			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
-				examinationService.deleteFromRabbit(exam);
+			for (Examination exam : examRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
+					for (Dataset ds : dsAcq.getDatasets())  {
+						solrService.deleteFromIndex(ds.getId());
+					}
+				}
+				examRepository.deleteById(exam.getId());
 			}
 			// also delete associated study cards
 			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
@@ -227,7 +237,7 @@ public class RabbitMQDatasetsService {
 			}
 
 			// Delete study from datasets database
-			studyRepository.delete(Long.valueOf(event.getObjectId()));
+			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

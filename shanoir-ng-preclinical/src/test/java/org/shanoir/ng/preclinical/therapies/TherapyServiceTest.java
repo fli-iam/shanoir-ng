@@ -60,7 +60,7 @@ public class TherapyServiceTest {
 		given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.findByTherapyType(TherapyType.SURGERY)).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
-		given(therapiesRepository.findOne(THERAPY_ID)).willReturn(TherapyModelUtil.createTherapyBrain());
+		given(therapiesRepository.findById(THERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.save(Mockito.any(Therapy.class))).willReturn(TherapyModelUtil.createTherapyBrain());
 	}
 
@@ -68,7 +68,7 @@ public class TherapyServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		therapiesService.deleteById(THERAPY_ID);
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(therapiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class TherapyServiceTest {
 		Assert.assertNotNull(therapy);
 		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	@Test
@@ -129,7 +129,7 @@ public class TherapyServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

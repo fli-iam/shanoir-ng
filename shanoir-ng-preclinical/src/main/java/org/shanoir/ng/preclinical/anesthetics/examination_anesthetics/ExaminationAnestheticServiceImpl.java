@@ -48,7 +48,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		examAnestheticsRepository.delete(id);
+		examAnestheticsRepository.deleteById(id);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 
 	@Override
 	public ExaminationAnesthetic findById(final Long id) {
-		return examAnestheticsRepository.findOne(id);
+		return examAnestheticsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 
 	@Override
 	public ExaminationAnesthetic update(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
-		final ExaminationAnesthetic examAnestheticDb = examAnestheticsRepository.findOne(examAnesthetic.getId());
+		final ExaminationAnesthetic examAnestheticDb = examAnestheticsRepository.findById(examAnesthetic.getId()).orElse(null);
 		updateModelValues(examAnestheticDb, examAnesthetic);
 		try {
 			examAnestheticsRepository.save(examAnestheticDb);

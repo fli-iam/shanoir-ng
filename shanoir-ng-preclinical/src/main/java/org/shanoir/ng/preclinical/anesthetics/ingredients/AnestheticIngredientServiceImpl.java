@@ -48,7 +48,7 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		ingredientsRepository.delete(id);
+		ingredientsRepository.deleteById(id);
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 
 	@Override
 	public AnestheticIngredient findById(final Long id) {
-		return ingredientsRepository.findOne(id);
+		return ingredientsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 
 	@Override
 	public AnestheticIngredient update(final AnestheticIngredient ingredient) throws ShanoirException {
-		final AnestheticIngredient ingredientDb = ingredientsRepository.findOne(ingredient.getId());
+		final AnestheticIngredient ingredientDb = ingredientsRepository.findById(ingredient.getId()).orElse(null);
 		updateModelValues(ingredientDb, ingredient);
 		try {
 			ingredientsRepository.save(ingredientDb);

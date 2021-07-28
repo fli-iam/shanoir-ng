@@ -50,7 +50,7 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		physioDataRepository.delete(id);
+		physioDataRepository.deleteById(id);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 
 	@Override
 	public PhysiologicalData findById(final Long id) {
-		return physioDataRepository.findOne(id);
+		return physioDataRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 
 	@Override
 	public PhysiologicalData update(final PhysiologicalData extradata) throws ShanoirException {
-		final PhysiologicalData physiologicalDataDB = physioDataRepository.findOne(extradata.getId());
+		final PhysiologicalData physiologicalDataDB = physioDataRepository.findById(extradata.getId()).orElse(null);
 		updatePhysiologicalDataValues(physiologicalDataDB, extradata);
 		try {
 			physioDataRepository.save(physiologicalDataDB);

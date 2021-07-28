@@ -105,7 +105,7 @@ public class KeycloakClient {
 			userResource.resetPassword(credential);
 
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
+			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays
 					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
@@ -183,7 +183,7 @@ public class KeycloakClient {
 				}
 			}
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
+			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays
 					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));

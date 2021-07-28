@@ -16,6 +16,7 @@ package org.shanoir.ng.center.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -42,15 +43,15 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public void deleteByIdCheckDependencies(final Long id) throws EntityNotFoundException, UndeletableDependenciesException {
-		final Center center = centerRepository.findOne(id);
-		if (center == null) {
+		final Optional<Center> centerOpt = centerRepository.findById(id);
+		if (centerOpt.isEmpty()) {
 			throw new EntityNotFoundException(Center.class, id);
 		}
 		final List<FieldError> errors = new ArrayList<>();
-		if (!center.getAcquisitionEquipments().isEmpty()) {
+		if (!centerOpt.get().getAcquisitionEquipments().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "acquisitionEquipments"));
 		}
-		if (!center.getStudyCenterList().isEmpty()) {
+		if (!centerOpt.get().getStudyCenterList().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "studies"));
 		}
 		if (!errors.isEmpty()) {
@@ -58,7 +59,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 			errorMap.put("delete", errors);
 			throw new UndeletableDependenciesException(errorMap);
 		}
-		centerRepository.delete(id);
+		centerRepository.deleteById(id);
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,12 +65,12 @@ public class SubjectTherapyServiceTest {
 	@Before
 	public void setup() {
 		given(stherapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
-		given(subjectsRepository.findOne(1L)).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		given(subjectsRepository.findById(1L)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(stherapiesRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
 				.willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
 		given(stherapiesRepository.findByTherapy(TherapyModelUtil.createTherapyBrain()))
 				.willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
-		given(stherapiesRepository.findOne(STHERAPY_ID)).willReturn(TherapyModelUtil.createSubjectTherapy());
+		given(stherapiesRepository.findById(STHERAPY_ID)).willReturn(Optional.of(TherapyModelUtil.createSubjectTherapy()));
 		given(stherapiesRepository.save(Mockito.any(SubjectTherapy.class)))
 				.willReturn(TherapyModelUtil.createSubjectTherapy());
 	}
@@ -78,14 +79,14 @@ public class SubjectTherapyServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		stherapiesService.deleteById(STHERAPY_ID);
 
-		Mockito.verify(stherapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(stherapiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
 	public void deleteByAnimalSubjectTest() throws ShanoirException {
 		stherapiesService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
-		Mockito.verify(stherapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(stherapiesRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -124,7 +125,7 @@ public class SubjectTherapyServiceTest {
 		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(stherapy.getTherapy().getName()));
 		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(stherapy.getAnimalSubject().getSubjectId()));
 
-		Mockito.verify(stherapiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(stherapiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class SubjectTherapyServiceTest {
 	 * stherapiesService.updateFromShanoirOld(createTherapy());
 	 * 
 	 * Mockito.verify(stherapiesRepository,
-	 * Mockito.times(1)).findOne(Mockito.anyLong());
+	 * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	 * Mockito.verify(stherapiesRepository,
 	 * Mockito.times(1)).save(Mockito.any(Therapy.class)); }
 	 */

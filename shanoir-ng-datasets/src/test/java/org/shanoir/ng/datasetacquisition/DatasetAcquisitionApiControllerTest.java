@@ -1,7 +1,7 @@
 package org.shanoir.ng.datasetacquisition;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = DatasetAcquisitionApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class DatasetAcquisitionApiControllerTest {
 
 	@MockBean

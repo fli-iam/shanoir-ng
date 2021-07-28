@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,7 +65,7 @@ public class ContrastAgentServiceTest {
 	@Before
 	public void setup() {
 		given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
-		given(agentsRepository.findOne(AGENT_ID)).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
+		given(agentsRepository.findById(AGENT_ID)).willReturn(Optional.of(ContrastAgentModelUtil.createContrastAgentGado()));
 		given(agentsRepository.save(Mockito.any(ContrastAgent.class))).willReturn(ContrastAgentModelUtil.createContrastAgentGado());
 	}
 
@@ -72,7 +73,7 @@ public class ContrastAgentServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		agentsService.deleteById(AGENT_ID);
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(agentsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ public class ContrastAgentServiceTest {
 		Assert.assertNotNull(agent);
 		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	@Test
@@ -99,7 +100,7 @@ public class ContrastAgentServiceTest {
 		Assert.assertNotNull(agent);
 		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 	
 	
@@ -125,7 +126,7 @@ public class ContrastAgentServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,7 +69,7 @@ public class ExtraDataServiceTest {
 		given(extraDataRepository.findAll()).willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.findAllByExaminationId(1L))
 				.willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
-		given(extraDataRepository.findOne(EXTRADATA_ID)).willReturn(ExtraDataModelUtil.createExaminationExtraData());
+		given(extraDataRepository.findById(EXTRADATA_ID)).willReturn(Optional.of(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.save(Mockito.any(ExaminationExtraData.class)))
 				.willReturn(ExtraDataModelUtil.createExaminationExtraData());
 	}
@@ -77,7 +78,7 @@ public class ExtraDataServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		extraDataService.deleteById(EXTRADATA_ID);
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(extraDataRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class ExtraDataServiceTest {
 		Assert.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
 		Assert.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}
 
 	@Test
@@ -121,7 +122,7 @@ public class ExtraDataServiceTest {
 	 * pathologiesService.updateFromShanoirOld(createPathology());
 	 * 
 	 * Mockito.verify(pathologiesRepository,
-	 * Mockito.times(1)).findOne(Mockito.anyLong());
+	 * Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	 * Mockito.verify(pathologiesRepository,
 	 * Mockito.times(1)).save(Mockito.any(Pathology.class)); }
 	 */

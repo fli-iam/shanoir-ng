@@ -49,7 +49,7 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		subtherapiesRepository.delete(id);
+		subtherapiesRepository.deleteById(id);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 
 	@Override
 	public SubjectTherapy findById(final Long id) {
-		return subtherapiesRepository.findOne(id);
+		return subtherapiesRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 
 	@Override
 	public SubjectTherapy update(final SubjectTherapy subtherapy) throws ShanoirException {
-		final SubjectTherapy subtherapyDb = subtherapiesRepository.findOne(subtherapy.getId());
+		final SubjectTherapy subtherapyDb = subtherapiesRepository.findById(subtherapy.getId()).orElse(null);
 		updateModelValues(subtherapyDb, subtherapy);
 		try {
 			subtherapiesRepository.save(subtherapyDb);

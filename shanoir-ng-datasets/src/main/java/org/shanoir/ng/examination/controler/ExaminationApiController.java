@@ -164,7 +164,7 @@ public class ExaminationApiController implements ExaminationApi {
 		
 		// TODO: Get all related datasets to the subject/study
 		// Load study-dataset association (dataset database)
-		Study study = studyRepository.findOne(studyId);
+		Study study = studyRepository.findById(studyId).orElse(null);
 		
 		List<Dataset> relatedDatasets = study.getRelatedDatasets();
 		if (relatedDatasets != null && !relatedDatasets.isEmpty()) {

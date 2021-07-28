@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,11 +65,9 @@ public class CenterServiceTest {
 
 	@Before
 	public void setup() {
-		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
-		
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
 		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
-		given(centerRepository.findOne(CENTER_ID)).willReturn(ModelsUtil.createCenter());
+		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(ModelsUtil.createCenter()));
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(createCenter());
 	}
 
@@ -81,14 +80,14 @@ public class CenterServiceTest {
 	public void deleteByIdTest() throws EntityNotFoundException {
 		centerService.deleteById(CENTER_ID);
 
-		Mockito.verify(centerRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(centerRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
 	public void deleteByIdWithAcquisitionEquipmentTest() throws EntityNotFoundException {
 		final Center center = ModelsUtil.createCenter();
 		center.getAcquisitionEquipments().add(ModelsUtil.createAcquisitionEquipment());
-		given(centerRepository.findOne(CENTER_ID)).willReturn(center);
+		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
 		centerService.deleteById(CENTER_ID);
 	}
 
@@ -96,7 +95,7 @@ public class CenterServiceTest {
 	public void deleteByIdWithStudyTest() throws EntityNotFoundException {
 		final Center center = ModelsUtil.createCenter();
 		center.getStudyCenterList().add(new StudyCenter());
-		given(centerRepository.findOne(CENTER_ID)).willReturn(center);
+		given(centerRepository.findById(CENTER_ID)).willReturn(Optional.of(center));
 		centerService.deleteById(CENTER_ID);
 	}
 
@@ -111,11 +110,11 @@ public class CenterServiceTest {
 
 	@Test
 	public void findByIdTest() {
-		final Center center = centerService.findById(CENTER_ID);
+		final Center center = centerService.findById(CENTER_ID).orElse(null);
 		Assert.assertNotNull(center);
 		Assert.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
 
-		Mockito.verify(centerRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(centerRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

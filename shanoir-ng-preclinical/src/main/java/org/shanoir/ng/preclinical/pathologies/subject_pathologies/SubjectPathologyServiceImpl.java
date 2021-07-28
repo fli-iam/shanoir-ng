@@ -51,7 +51,7 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		pathosRepository.delete(id);
+		pathosRepository.deleteById(id);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 
 	@Override
 	public SubjectPathology findById(final Long id) {
-		return pathosRepository.findOne(id);
+		return pathosRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 
 	@Override
 	public SubjectPathology update(final SubjectPathology pathos) throws ShanoirException {
-		final SubjectPathology pathosDb = pathosRepository.findOne(pathos.getId());
+		final SubjectPathology pathosDb = pathosRepository.findById(pathos.getId()).orElse(null);
 		updateModelValues(pathosDb, pathos);
 		try {
 			pathosRepository.save(pathosDb);

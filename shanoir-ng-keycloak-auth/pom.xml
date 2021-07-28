@@ -18,16 +18,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-keycloak-auth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-keycloak-auth</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
-		<keycloak.version>12.0.4</keycloak.version>
+		<keycloak.version>13.0.1</keycloak.version>
 	</properties>
 
 	<dependencies>

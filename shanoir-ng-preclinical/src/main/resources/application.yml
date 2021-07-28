@@ -89,7 +89,7 @@ ms.url:
   bruker2dicom: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/bruker2dicom
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -105,30 +105,30 @@ preclinical:
 # DO NOT CHANGE #
 #################
 spring:
-  profiles: test
+  config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: 
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-preclinical-h2.sql
-    initialize: true
+    initialization-mode: always
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
 logging:
-  file: /tmp/shanoir-ng-import.log
+  file:    name: /tmp/shanoir-ng-import.log
 ---
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
-    initialize: true
+    initialization-mode: always
   jpa:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -140,7 +140,7 @@ spring:
 
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR

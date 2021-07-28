@@ -48,7 +48,7 @@ public class RefsServiceImpl implements RefsService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		refsRepository.delete(id);
+		refsRepository.deleteById(id);
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class RefsServiceImpl implements RefsService {
 
 	@Override
 	public Reference findById(final Long id) {
-		return refsRepository.findOne(id);
+		return refsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class RefsServiceImpl implements RefsService {
 
 	@Override
 	public Reference update(final Reference ref) throws ShanoirException {
-		final Reference refDb = refsRepository.findOne(ref.getId());
+		final Reference refDb = refsRepository.findById(ref.getId()).orElse(null);
 		updateReferenceValues(refDb, ref);
 		try {
 			refsRepository.save(refDb);

@@ -67,7 +67,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		Examination exam = examinationRepository.findOne(id);
+		Examination exam = examinationRepository.findById(id).orElse(null);
+		List<Long> datasets = new ArrayList<>();
 
 		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		String studyIdAsString = exam.getStudyId().toString();
@@ -83,7 +84,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 		// Delete examination
-		examinationRepository.delete(id);
+    examinationRepository.deleteById(id);
 	}
 
 	@Override
@@ -128,7 +129,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination findById(final Long id) {
-		return examinationRepository.findOne(id);
+		return examinationRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -140,7 +141,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
-		final Examination examinationDb = examinationRepository.findOne(examination.getId());
+		final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
 		if (examinationDb == null) {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
 		}

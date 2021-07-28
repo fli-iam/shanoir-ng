@@ -139,7 +139,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
-		return niftiConverterRepository.findOne(id);
+		return niftiConverterRepository.findById(id).orElse(null);
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
