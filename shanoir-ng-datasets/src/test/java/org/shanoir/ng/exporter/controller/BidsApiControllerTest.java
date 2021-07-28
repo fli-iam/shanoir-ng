@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,6 +40,7 @@ public class BidsApiControllerTest {
 	private MockMvc mvc;
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testGenerateBIDSByStudyId() throws Exception {
 		// GIVEN a study with a bids folder to generate
 		
@@ -50,6 +52,7 @@ public class BidsApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testExportBIDSFileNoFile() throws Exception  {
 		// GIVEN a study with a bids folder to generate
 		
@@ -60,6 +63,7 @@ public class BidsApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testExportBIDSFileUnauthorized() throws Exception  {
 		// GIVEN a study with a bids folder to generate
 
