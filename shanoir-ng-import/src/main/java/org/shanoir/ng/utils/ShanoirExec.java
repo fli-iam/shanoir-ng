@@ -164,9 +164,9 @@ public class ShanoirExec {
 			cmd[11] = "-s";
 			cmd[12] = "n";
 
-			// no gzip compression
+			// gzip compression
 			cmd[13] = "-z";
-			cmd[14] = "n";
+			cmd[14] = "y";
 
 			// output directory
 			cmd[15] = "-o";
@@ -220,9 +220,9 @@ public class ShanoirExec {
 			cmd[11] = "-p";
 			cmd[12] = "y";
 
-			// no gzip compression
+			// gzip compression
 			cmd[13] = "-g";
-			cmd[14] = "n";
+			cmd[14] = "y";
 
 			// no file source name in destination file name
 			cmd[15] = "-f";
@@ -595,8 +595,7 @@ public class ShanoirExec {
 	public String dicomifier(String inputFolder, String outputFolder) {
 		String requestJson = "{\"source\":\"" + inputFolder
 				+ "\", \"destination\":\"" + outputFolder
-				+ "\", \"zip\": false"
-				+ ", \"dicomdir\": true }";
+				+ "\", \"zip\": true }";
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

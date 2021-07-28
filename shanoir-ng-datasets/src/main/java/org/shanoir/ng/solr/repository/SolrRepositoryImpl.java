@@ -30,7 +30,7 @@ import org.springframework.http.HttpStatus;
  * @author yyao
  *
  */
-public class SolrRepositoryImpl implements SolrRepositoryCustom{
+public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String DATASET_NATURE_FACET = "datasetNature";
 	private static final String DATASET_TYPE_FACET = "datasetType";
 	private static final String DATASET_NAME_FACET = "datasetName_str";

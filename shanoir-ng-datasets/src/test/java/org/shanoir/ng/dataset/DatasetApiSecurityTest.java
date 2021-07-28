@@ -20,7 +20,6 @@ import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
-import java.io.IOException;
 import java.util.Set;
 
 import org.junit.Before;

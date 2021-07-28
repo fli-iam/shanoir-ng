@@ -179,13 +179,19 @@ public class MrProtocol extends AbstractEntity {
 	 * The unit of measure of the slice thickness must be in mm.
 	 */
 	private Double sliceThickness;
-
+	
 	/**
 	 * Functional only. From (0020,0110) Time delta between Images in a dynamic
 	 * or functional set of Images. The unit of measure of the temporal
 	 * resolution must be in millisec.
 	 */
 	private Double temporalResolution;
+
+	/**
+	* (0018,0087) Magnetic Field Strength
+	* The Magnetic field strength.
+	*/
+	private Double magneticFieldStrength;
 
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
@@ -572,6 +578,14 @@ public class MrProtocol extends AbstractEntity {
 	 */
 	public void setUpdatedMetadata(MrProtocolSCMetadata updatedMetadata) {
 		this.updatedMetadata = updatedMetadata;
+	}
+	
+	public Double getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Double magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
 }

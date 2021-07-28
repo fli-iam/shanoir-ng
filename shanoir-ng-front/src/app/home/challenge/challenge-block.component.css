@@ -1,0 +1,26 @@
+:host() { border: 1px solid black; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 30px ;}
+:host() table { border-collapse: collapse; }
+:host() .icon, :host() .pannel, :host()-title { width: 180px; padding: 0 10px; vertical-align: middle; }
+:host() .icon, :host() { height: 200px; }
+:host() .pannel { text-align: left; }
+:host(), :host() table, :host() input { font-size: 12px; }
+:host()-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: var(--color-b-light); }
+.icon { color: black; }
+.icon i { font-size: 120px; display: block; height: 136px; margin-top: 10px; opacity: 0.7; }
+:host() td { position: relative; height: 200px; }
+:host() .pannel table { width: 100%; }
+:host() .pannel td { height: auto; }
+
+:host() { width: 866px; border-color: blue; }
+.challenge-title { width: auto; margin-top: 15px; margin-bottom: 0; font-size: 30px; }
+.challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; width: 405px; white-space: nowrap; overflow: hidden; }
+.challenge-files li { line-height: 26px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
+.challenge-files li:hover { color: blue; }
+.challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
+.left-cell { background-color: blue; color: white; }
+.msg { font-size: 16px;  width: 412px; color: white; padding: 0 10px; }
+.challenge-name { font-size: 20px; margin-top: 3px; }
+.challenge-title { color: midnightblue; }
+.challenge-title i { margin: 0 15px; }
+
+h2 { margin-bottom: 30px; }

@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -34,6 +35,7 @@ import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -70,6 +72,12 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	public void deleteFromIndex(Long datasetId) {
 		solrRepository.deleteByDatasetId(datasetId);
+	}
+	
+	@Transactional
+	@Override
+	public void deleteFromIndex(List<Long> datasetIds) {
+		solrRepository.deleteByDatasetIdIn(datasetIds);
 	}
 
 	@Transactional
@@ -154,6 +162,25 @@ public class SolrServiceImpl implements SolrService {
 			}
 		}
 		return pageable;
+	}
+
+	@Override
+	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) {
+		if (datasetIds.isEmpty()) {
+			return new PageImpl<ShanoirSolrDocument>();
+		}		
+		Page<ShanoirSolrDocument> result;
+		pageable = prepareTextFields(pageable);
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findByDatasetIdIn(datasetIds, pageable);
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			if (studyIds.isEmpty()) {
+				return new PageImpl<ShanoirSolrDocument>();
+			}
+			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
+		}
+		return result;
 	}
 
 }

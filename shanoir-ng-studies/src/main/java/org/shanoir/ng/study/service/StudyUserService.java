@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +30,9 @@ public interface StudyUserService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	List<StudyUserRight> getRightsForStudy(Long studyId);
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	Map<Long, List<StudyUserRight>> getRights();
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	boolean hasOneStudyToImport();
