@@ -90,7 +90,7 @@ public class AnestheticServiceTest {
 		Assert.assertNotNull(anesthetic);
 		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
 
-		Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test
@@ -121,15 +121,6 @@ public class AnestheticServiceTest {
 		Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
 	}
 
-/*
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirException {
-		pathologiesService.updateFromShanoirOld(createPathology());
-
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
-	}
-*/
 	private Anesthetic createAnesthetic() {
 		final Anesthetic anesthetic = new Anesthetic();
 		anesthetic.setId(ANESTHETIC_ID);

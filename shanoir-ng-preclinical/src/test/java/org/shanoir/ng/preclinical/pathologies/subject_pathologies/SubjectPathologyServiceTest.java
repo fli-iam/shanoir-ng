@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.RefsRepository;
+import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -69,8 +70,6 @@ public class SubjectPathologyServiceTest {
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.findAllByPathology(PathologyModelUtil.createPathology()))
 				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
-		given(spathosRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
-				.willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.findById(SPATHO_ID)).willReturn(Optional.of(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.save(Mockito.any(SubjectPathology.class)))
 				.willReturn(PathologyModelUtil.createSubjectPathology());
@@ -85,6 +84,9 @@ public class SubjectPathologyServiceTest {
 
 	@Test
 	public void deleteByAnimalSubjectTest() throws ShanoirException {
+		
+		given(spathosRepository.findByAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
+
 		spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
@@ -148,7 +150,7 @@ public class SubjectPathologyServiceTest {
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
 		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(spatho.getAnimalSubject().getId()));
 
-		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

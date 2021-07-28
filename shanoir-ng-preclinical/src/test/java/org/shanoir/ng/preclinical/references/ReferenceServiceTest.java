@@ -84,7 +84,7 @@ public class ReferenceServiceTest {
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_TYPE.equals(reference.getReftype()));
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_VALUE.equals(reference.getValue()));
 
-		Mockito.verify(refsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(refsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

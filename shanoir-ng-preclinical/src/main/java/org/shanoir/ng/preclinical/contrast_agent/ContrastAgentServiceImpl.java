@@ -42,9 +42,6 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	private static final Logger LOG = LoggerFactory.getLogger(ContrastAgentServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private ContrastAgentRepository contrastAgentsRepository;
 
 	@Override
@@ -58,15 +55,11 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	}
 
 	@Override
-	public List<ContrastAgent> findBy(final String fieldName, final Object value) {
-		return contrastAgentsRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public ContrastAgent findByProtocolId(final Long protocolId) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByProtocolId(protocolId);
-		if (ca.isPresent())
+		if (ca.isPresent()) {
 			return ca.get();
+		}
 		return null;
 	}
 
@@ -78,8 +71,9 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	@Override
 	public ContrastAgent findByName(final Reference name) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByName(name);
-		if (ca.isPresent())
+		if (ca.isPresent()) {
 			return ca.get();
+		}
 		return null;
 	}
 

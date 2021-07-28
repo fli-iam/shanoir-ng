@@ -41,9 +41,6 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	private static final Logger LOG = LoggerFactory.getLogger(AnimalSubjectServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private AnimalSubjectRepository subjectsRepository;
 
 	@Override
@@ -102,8 +99,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public List<AnimalSubject> findBy(String fieldName, Object value) {
-		return subjectsRepository.findBy(fieldName, value);
+	public List<AnimalSubject> findBySubjectId(Long id) {
+		return this.subjectsRepository.findBySubjectId(id);
 	}
 
 }

@@ -86,7 +86,7 @@ public class TherapyServiceTest {
 		Assert.assertNotNull(therapy);
 		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
 
-		Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test

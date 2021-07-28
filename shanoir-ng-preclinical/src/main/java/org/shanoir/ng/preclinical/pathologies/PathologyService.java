@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
 
@@ -28,7 +27,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface PathologyService extends UniqueCheckableService<Pathology> {
+public interface PathologyService {
 
 	/**
 	 * Delete a reference value.

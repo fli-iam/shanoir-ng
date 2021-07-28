@@ -87,7 +87,7 @@ public class ExaminationAnestheticServiceTest {
 		Assert.assertNotNull(examAnesthetic);
 		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
 		
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test

@@ -73,11 +73,6 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 	}
 
 	@Override
-	public List<SubjectPathology> findBy(final String fieldName, final Object value) {
-		return pathosRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public SubjectPathology findById(final Long id) {
 		return pathosRepository.findById(id).orElse(null);
 	}
@@ -129,6 +124,11 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 		pathosDb.setStartDate(pathos.getStartDate());
 		pathosDb.setEndDate(pathos.getEndDate());
 		return pathosDb;
+	}
+
+	@Override
+	public List<SubjectPathology> findByPathologyModel(PathologyModel patMod) {
+		return this.pathosRepository.findAllByPathologyModel(patMod);
 	}
 
 }

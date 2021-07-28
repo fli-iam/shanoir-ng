@@ -20,7 +20,7 @@ import org.shanoir.ng.preclinical.references.Reference;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface ContrastAgentRepository extends CrudRepository<ContrastAgent, Long>, ContrastAgentRepositoryCustom{
+public interface ContrastAgentRepository extends CrudRepository<ContrastAgent, Long> {
 
 	Optional<ContrastAgent> findByProtocolId(Long protocolId);
 	

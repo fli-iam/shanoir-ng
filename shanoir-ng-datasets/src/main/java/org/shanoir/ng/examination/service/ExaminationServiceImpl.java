@@ -100,7 +100,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
-		examinationRepository.delete(exam.getId());
+		examinationRepository.delete(exam);
 	}
 
 	@Value("${datasets-data}")

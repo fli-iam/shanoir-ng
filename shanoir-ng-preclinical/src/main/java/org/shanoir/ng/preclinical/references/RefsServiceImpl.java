@@ -67,11 +67,6 @@ public class RefsServiceImpl implements RefsService {
 	}
 
 	@Override
-	public List<Reference> findBy(final String fieldName, final Object value) {
-		return null;
-	}
-
-	@Override
 	public Reference findByCategoryTypeAndValue(String category, String reftype, String value) {
 		Optional<Reference> ref = refsRepository.findByCategoryTypeAndValue(category, reftype, value);
 		if (!ref.isPresent()) {

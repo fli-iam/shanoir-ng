@@ -35,12 +35,4 @@ public class AnimalSubjectRepositoryImpl implements AnimalSubjectRepositoryCusto
 				"SELECT a FROM AnimalSubject a LEFT JOIN a." + reference.getReftype() + " r WHERE r.value LIKE :value")
 				.setParameter("value", reference.getValue()).getResultList();
 	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<AnimalSubject> findBy(String fieldName, Object value) {
-		return em.createQuery("SELECT a FROM AnimalSubject a WHERE a." + fieldName + " LIKE :value")
-				.setParameter("value", value).getResultList();
-	}
-
 }

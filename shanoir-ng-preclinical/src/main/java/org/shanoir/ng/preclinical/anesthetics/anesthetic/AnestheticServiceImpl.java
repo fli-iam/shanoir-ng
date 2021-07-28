@@ -40,9 +40,6 @@ public class AnestheticServiceImpl implements AnestheticService {
 	private static final Logger LOG = LoggerFactory.getLogger(AnestheticServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private AnestheticRepository anestheticsRepository;
 
 	@Override
@@ -58,11 +55,6 @@ public class AnestheticServiceImpl implements AnestheticService {
 	@Override
 	public List<Anesthetic> findAllByAnestheticType(AnestheticType type) {
 		return Utils.toList(anestheticsRepository.findAllByAnestheticType(type));
-	}
-
-	@Override
-	public List<Anesthetic> findBy(final String fieldName, final Object value) {
-		return anestheticsRepository.findBy(fieldName, value);
 	}
 
 	@Override

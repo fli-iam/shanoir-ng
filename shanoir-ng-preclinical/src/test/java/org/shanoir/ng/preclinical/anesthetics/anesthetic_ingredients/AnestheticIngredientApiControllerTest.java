@@ -29,8 +29,11 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientApiController;
+import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientEditableByManager;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientService;
+import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientUniqueValidator;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,14 @@ public class AnestheticIngredientApiControllerTest {
 	private AnestheticIngredientService ingredientsServiceMock;
 	@MockBean
 	private AnestheticService anestheticsServiceMock;
+	
+	@MockBean
+	private AnestheticIngredientUniqueValidator uniqueValidator;
+	
+	@MockBean
+	private AnestheticIngredientEditableByManager editableOnlyValidator;
+
+
 
 	@MockBean
 	private RefsService referencesServiceMock;
@@ -93,6 +104,8 @@ public class AnestheticIngredientApiControllerTest {
 		given(ingredientsServiceMock.findById(1L)).willReturn(new AnestheticIngredient());
 		given(ingredientsServiceMock.save(Mockito.mock(AnestheticIngredient.class)))
 				.willReturn(new AnestheticIngredient());
+		given(uniqueValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(AnestheticIngredient.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

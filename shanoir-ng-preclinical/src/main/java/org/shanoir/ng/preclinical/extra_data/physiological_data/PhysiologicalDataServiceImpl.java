@@ -43,9 +43,6 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 	private static final Logger LOG = LoggerFactory.getLogger(PhysiologicalDataServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private PhysiologicalDataRepository physioDataRepository;
 
 	@Override
@@ -56,11 +53,6 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 	@Override
 	public List<PhysiologicalData> findAllByExaminationId(Long id) {
 		return Utils.toList(physioDataRepository.findAllByExaminationId(id));
-	}
-
-	@Override
-	public List<PhysiologicalData> findBy(final String fieldName, final Object value) {
-		return physioDataRepository.findBy(fieldName, value);
 	}
 
 	@Override

@@ -371,7 +371,7 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public void addExaminationToStudy(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findOne(studyId);
+		Study stud = this.studyRepository.findById(studyId).orElse(null);
 		Set<Long> exams = stud.getExaminationIds();
 		if (exams == null) {
 			exams = new HashSet<>();
@@ -384,7 +384,7 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public void deleteExamination(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findOne(studyId);
+		Study stud = this.studyRepository.findById(studyId).orElse(null);
 		Set<Long> exams = stud.getExaminationIds();
 		if (exams == null) {
 			exams = new HashSet<>();

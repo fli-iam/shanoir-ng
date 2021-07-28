@@ -121,7 +121,7 @@ public class ReferencesRepositoryTest {
 		List<String> typesDb = repository.findTypesByCategory(REFERENCE_TEST_CATEGORY_SUBJECT);
 		assertNotNull(typesDb);
 		assertThat(typesDb.size()).isEqualTo(5);
-		assertThat(typesDb.get(0)).isEqualTo(REFERENCE_TEST_TYPE_PROVIDER);
+		assertThat(typesDb.contains(REFERENCE_TEST_TYPE_PROVIDER));
 	}
 
 	@Test

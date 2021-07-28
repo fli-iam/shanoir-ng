@@ -41,9 +41,6 @@ public class PathologyModelServiceImpl implements PathologyModelService {
 	private static final Logger LOG = LoggerFactory.getLogger(PathologyModelServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private PathologyModelRepository modelsRepository;
 
 	@Override
@@ -54,11 +51,6 @@ public class PathologyModelServiceImpl implements PathologyModelService {
 	@Override
 	public List<PathologyModel> findAll() {
 		return Utils.toList(modelsRepository.findAll());
-	}
-
-	@Override
-	public List<PathologyModel> findBy(final String fieldName, final Object value) {
-		return modelsRepository.findBy(fieldName, value);
 	}
 
 	@Override

@@ -41,9 +41,6 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationAnestheticServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private ExaminationAnestheticRepository examAnestheticsRepository;
 
 	@Override
@@ -59,11 +56,6 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	@Override
 	public List<ExaminationAnesthetic> findByExaminationId(Long examinationId) {
 		return Utils.toList(examAnestheticsRepository.findByExaminationId(examinationId));
-	}
-
-	@Override
-	public List<ExaminationAnesthetic> findBy(final String fieldName, final Object value) {
-		return examAnestheticsRepository.findBy(fieldName, value);
 	}
 
 	@Override
