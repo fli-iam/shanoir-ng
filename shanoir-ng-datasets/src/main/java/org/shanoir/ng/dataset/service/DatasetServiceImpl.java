@@ -19,6 +19,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import javax.transaction.Transactional;
+
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -70,6 +72,16 @@ public class DatasetServiceImpl implements DatasetService {
 		solrService.deleteFromIndex(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
+	
+	@Override
+	@Transactional
+	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+		repository.deleteByIdIn(ids);
+		solrService.deleteFromIndex(ids);
+		for (Long id : ids) {
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));			
+		}
+	}	
 
 	@Override
 	public Dataset findById(final Long id) {
@@ -157,4 +169,5 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
+
 }

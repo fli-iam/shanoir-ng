@@ -20,8 +20,10 @@
 package org.shanoir.ng.solr.repository;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.data.solr.repository.Facet;
@@ -42,6 +44,12 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "examinationComment_str",
 			"datasetType", "datasetNature"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
-
+	
 	public void deleteByDatasetId(Long datasetId);
+
+	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable);
+
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Collection<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
+
+	public void deleteByDatasetIdIn(List<Long> datasetIds);
 }

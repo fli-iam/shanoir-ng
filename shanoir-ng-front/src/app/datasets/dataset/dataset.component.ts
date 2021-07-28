@@ -13,6 +13,7 @@
  */
 
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
@@ -22,6 +23,8 @@ import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
+import { NiftiConverterService } from 'src/app/niftiConverters/nifti.converter.service';
 
 
 @Component({
@@ -39,19 +42,23 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private hasAdministrateRight: boolean = false;
     public downloading: boolean = false;
     public papayaLoaded: boolean = false;
-    
-    constructor(
-            private datasetService: DatasetService,
-            private route: ActivatedRoute,
-            private dicomArchiveService: DicomArchiveService,
-            private studyRightsService: StudyRightsService) {
+    public converters: NiftiConverter[];
+    public converterId: number;
+    public menuOpened = false;
 
+    constructor(
+        private datasetService: DatasetService,
+        private route: ActivatedRoute,
+        private dicomArchiveService: DicomArchiveService,
+        private studyRightsService: StudyRightsService,
+        private niftiConverterService: NiftiConverterService) {
         super(route, 'dataset');
+        niftiConverterService.getAll().then(result => this.converters = result);
     }
 
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
-    
+
     getService(): EntityService<Dataset> {
         return this.datasetService;
     }
@@ -85,7 +92,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     buildForm(): FormGroup {
         return this.formBuilder.group({});
     }
-    
+
     private fetchDataset(): Promise<Dataset> {
         if (this.mode != 'create') {
             return this.datasetService.get(this.id).then((dataset: Dataset) => {
@@ -94,7 +101,18 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             });
         }
     }
-    
+
+    toggleMenu() {
+        this.menuOpened = !this.menuOpened;
+    }
+    convertNiftiToggle() {
+        this.toggleMenu();
+    }
+    convertNifti(id: number) {
+        this.downloading = true;
+        this.datasetService.download(this.dataset, 'nii', id).then(() => this.downloading = false);
+    }
+
     download(format: string) {
         this.downloading = true;
         this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
@@ -104,20 +122,20 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.papayaLoaded = true;
         this.datasetService.downloadToBlob(this.id, 'nii').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
-                this.dicomArchiveService.importFromZip(blobReponse.body)
-                    .then(response => {
-                            this.dicomArchiveService.extractFileDirectoryStructure()
-                            .then(response => {
-                                this.initPapaya(response);
-                            });
-                    });
+            this.dicomArchiveService.importFromZip(blobReponse.body)
+                .then(response => {
+                    this.dicomArchiveService.extractFileDirectoryStructure()
+                        .then(response => {
+                            this.initPapaya(response);
+                        });
+                });
         });
     }
 
     private initPapaya(dataFiles: any): void {
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
-            if(key.indexOf(".nii") != -1) {
+            if (key.indexOf(".nii") != -1) {
                 buffs.push(dataFiles.files[key].async("arraybuffer"));
             }
         });
@@ -132,7 +150,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
-    
+
     public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }

@@ -11,21 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse, HttpEvent, HttpEventType} from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { Subscription } from 'rxjs'
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
-import { saveAs } from 'file-saver';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> implements OnDestroy {
@@ -44,6 +43,11 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
 
     private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
+
+    deleteAll(ids: number[]) {
+        return this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) })
+                .toPromise();
+    }
 
     getEntityInstance(entity: Dataset) { 
         return DatasetUtils.getDatasetInstance(entity.type);
@@ -122,24 +126,24 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         )
     }
 
-    download(dataset: Dataset, format: string): Promise<void> {
+    download(dataset: Dataset, format: string, converterId: number = null): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadFromId(dataset.id, format);
+        return this.downloadFromId(dataset.id, format, converterId);
     }
 
-    downloadFromId(datasetId: number, format: string): Promise<void> {
+    downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format).then(
+        return this.downloadToBlob(datasetId, format, converterId).then(
             response => {
                 this.downloadIntoBrowser(response);
             }
         );
     }
 
-    downloadToBlob(id: number, format: string): Promise<HttpResponse<Blob>> {
+    downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {
         if (!id) throw Error('Cannot download a dataset without an id');
         return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format, 
+            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format + (converterId ? ('&converterId=' + converterId) : ''),
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
     }

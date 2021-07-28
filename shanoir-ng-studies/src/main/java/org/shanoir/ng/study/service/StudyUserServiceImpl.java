@@ -15,7 +15,9 @@
 package org.shanoir.ng.study.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
@@ -44,6 +46,21 @@ public class StudyUserServiceImpl implements StudyUserService {
 			return studyUser.getStudyUserRights();
 		} else {
 			return new ArrayList<>();
+		}
+	}
+	
+	@Override
+	public Map<Long, List<StudyUserRight>> getRights() {
+		Long userId = KeycloakUtil.getTokenUserId();
+		List<StudyUser> studyUsers = studyUserRepository.findByUserId(userId);
+		if (studyUsers != null) {
+			Map<Long, List<StudyUserRight>> map = new HashMap<>();
+			for (StudyUser studyUser : studyUsers) {
+				map.put(studyUser.getStudyId(), studyUser.getStudyUserRights());
+			}
+			return map;
+		} else {
+			return new HashMap<>();
 		}
 	}
 
