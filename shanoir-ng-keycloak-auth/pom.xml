@@ -26,6 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
 		<keycloak.version>13.0.1</keycloak.version>
 	</properties>
@@ -72,6 +73,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
