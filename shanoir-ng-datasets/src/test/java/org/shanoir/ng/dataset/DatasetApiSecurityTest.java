@@ -20,6 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
+import java.io.IOException;
 import java.util.Set;
 
 import org.junit.Before;
@@ -45,7 +46,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
 /**
- * User security service test.
+ * DatasetAPI security test.
  * 
  * @author jlouis
  * 
@@ -78,11 +79,10 @@ public class DatasetApiSecurityTest {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		
 		assertAccessDenied(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 		assertAccessDenied(api::findDatasetById, 1L);
 		assertAccessDenied(t -> { try { api.findDatasets(t); } catch (RestServiceException e) { fail(e.toString()); }}, PageRequest.of(0, 10));
-		assertAccessDenied((t, u) -> { try { api.downloadDatasetById(t, u, response); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, "dcm");
+		assertAccessDenied((t, u, v) -> { try { api.downloadDatasetById(t, u, v, response); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, 1L, "dcm");
 		assertAccessDenied((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDataset(1L), mockBindingResult);
 	}
 	
@@ -104,10 +104,9 @@ public class DatasetApiSecurityTest {
 		assertAccessAuthorized(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { }}, 1L);
 		assertAccessAuthorized(api::findDatasetById, 1L);
 		assertAccessAuthorized(t -> { try { api.findDatasets(t); } catch (RestServiceException e) {  }}, PageRequest.of(0, 10));
-		assertAccessAuthorized((t, u) -> { try { api.downloadDatasetById(t, u, response); } catch (IOException | RestServiceException e) { }}, 1L, "dcm");
+		assertAccessAuthorized((t, u, v) -> { try { api.downloadDatasetById(t, u, v, response); } catch (IOException | RestServiceException e) { }}, 1L, 1L, "dcm");
 		assertAccessAuthorized((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDataset(1L), mockBindingResult);
 	}
-	
 	
 	private MrDataset mockDataset(Long id) {
 		MrDataset ds = ModelsUtil.createMrDataset();

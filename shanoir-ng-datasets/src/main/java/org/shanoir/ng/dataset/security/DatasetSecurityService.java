@@ -280,7 +280,7 @@ public class DatasetSecurityService {
 			return true;
 		}
     	
-    	Iterable<Dataset> datasets = datasetRepository.findAll(datasetIds);
+    	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
     	Set<Long> studyIds = new HashSet<Long>();
     	for (Dataset dataset : datasets) {
     		studyIds.add(dataset.getStudyId());
