@@ -27,12 +27,8 @@
 	<description>Shanoir-NG Import Microservice</description>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dcm4che.version>5.14.1</dcm4che.version>
 		<weasis.version>5.14.1</weasis.version>
-		<docker.image.name>shanoir-ng/template</docker.image.name>
-		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
 
 	<dependencies>
