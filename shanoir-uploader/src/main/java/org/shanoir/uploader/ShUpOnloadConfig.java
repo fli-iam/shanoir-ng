@@ -46,8 +46,6 @@ public class ShUpOnloadConfig {
 
 	private static boolean autoImportEnabled;
 
-	private static boolean shanoirNg;
-
 	private static String tokenString;
 
 	/** Constructeur privé */
@@ -149,14 +147,6 @@ public class ShUpOnloadConfig {
 
 	public static void setAutoImportEnabled(boolean autoImportEnabled) {
 		ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
-	}
-
-	public static boolean isShanoirNg() {
-		return shanoirNg;
-	}
-
-	public static void setShanoirNg(boolean shanoirNg) {
-		ShUpOnloadConfig.shanoirNg = shanoirNg;
 	}
 	
 	public static String getTokenString() throws VerificationException, IOException, HttpFailure  {

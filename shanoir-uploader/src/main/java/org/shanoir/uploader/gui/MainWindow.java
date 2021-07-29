@@ -134,7 +134,6 @@ public class MainWindow extends JFrame {
 	public ShUpConfig shanoirUploaderConfiguration;
 	
 	private ImportDialogOpener importDialogOpener;
-	private ImportDialogOpener importDialogOpenerNG;
 
 	/**
 	 * Create the frame.
@@ -794,7 +793,6 @@ public class MainWindow extends JFrame {
 		/**
 		 * Init ImportDialog and its Opener here.
 		 */
-
 		importDialogOpener = new ImportDialogOpener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 		
 		// add ShUp principal panel (splitPane) and upload job display pane
@@ -880,11 +878,9 @@ public class MainWindow extends JFrame {
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
 		currentUploadsPanel.add(scrollPaneUpload);
-		if (ShUpOnloadConfig.isShanoirNg()) {
-			final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
-			tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
-					resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
-		}
+		final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
+		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
+				resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
@@ -906,18 +902,6 @@ public class MainWindow extends JFrame {
 
 	public ImportDialogOpener getImportDialogOpener() {
 		return importDialogOpener;
-	}
-
-	public void setImportDialogOpener(ImportDialogOpener importDialogOpener) {
-		this.importDialogOpener = importDialogOpener;
-	}
-
-	public ImportDialogOpener getImportDialogOpenerNG() {
-		return importDialogOpenerNG;
-	}
-
-	public void setImportDialogOpenerNG(ImportDialogOpener importDialogOpenerNG) {
-		this.importDialogOpenerNG = importDialogOpenerNG;
 	}
 	
 }

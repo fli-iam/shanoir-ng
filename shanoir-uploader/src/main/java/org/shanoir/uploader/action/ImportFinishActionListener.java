@@ -52,10 +52,10 @@ public class ImportFinishActionListener implements ActionListener {
 	
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	
-	private ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG;
+	private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
 
 	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, Subject subject,
-			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG) {
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
 		this.mainWindow = mainWindow;
 		this.uploadJob = uploadJob;
 		this.uploadFolder = uploadFolder;
@@ -182,7 +182,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 */
 		//Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
-		Runnable runnable = new ImportFinishRunnableNG(uploadJob, uploadFolder, importJob, subject.getName());
+		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
 		

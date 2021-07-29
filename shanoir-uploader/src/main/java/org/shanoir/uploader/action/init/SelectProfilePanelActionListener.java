@@ -41,18 +41,14 @@ public class SelectProfilePanelActionListener implements ActionListener {
 				ShUpConfig.profileProperties, "shanoir.server.user.password");
 		logger.info("Profile " + selectedProfile + " successfully initialized.");
 		
-		// put settings into ShUpOnloadConfig for sh-ng
-		ShUpOnloadConfig.setShanoirNg(
-				Boolean.parseBoolean(ShUpConfig.profileProperties.getProperty("is.ng.up")));
 		File keycloakJson = new File(ShUpConfig.profileDirectory, ShUpConfig.KEYCLOAK_JSON);
 		if (keycloakJson.exists()) {
 			ShUpConfig.keycloakJson = keycloakJson;
 			logger.info("keycloak.json successfully initialized.");
 		} else {
-			if (ShUpOnloadConfig.isShanoirNg()) {
-				logger.error("Error: missing keycloak.json! Connection with sh-ng will not work.");
-			}
-		}
+			logger.error("Error: missing keycloak.json! Connection with sh-ng will not work.");
+			return;
+	}
 
 		// check if pseudonymus has been copied in case of true
 		if (Boolean.parseBoolean(ShUpConfig.profileProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS))) {
@@ -64,13 +60,18 @@ public class SelectProfilePanelActionListener implements ActionListener {
 			// than check for the key in the .jar file
 			Properties keyProperties = new Properties();
 			InputStream in = getClass().getResourceAsStream("/profile." + selectedProfile + "/" + ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE);
-			try {
-				keyProperties.load(in);
-				in.close();
-			} catch (IOException ex) {
-				logger.error(ex.getMessage(), ex);
+			if (in != null) {
+				try {
+					keyProperties.load(in);
+					in.close();
+				} catch (IOException ex) {
+					logger.error(ex.getMessage(), ex);
+				}
+				ShUpConfig.basicProperties.put(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyProperties.get(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE));				
+			} else {
+				logger.error("Missing pseudonymus key file.");
+				return;
 			}
-			ShUpConfig.basicProperties.put(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE, keyProperties.get(ShUpConfig.MODE_PSEUDONYMUS_KEY_FILE));
 		}
 		sSC.nextState();
 	}

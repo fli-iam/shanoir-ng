@@ -49,14 +49,14 @@ public class ImportFromCSVWindow extends JFrame {
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
-	ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
+	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 
 	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
-		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
+		this.shanoirUploaderServiceClient = shanoirUploaderServiceClientNG;
 		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.

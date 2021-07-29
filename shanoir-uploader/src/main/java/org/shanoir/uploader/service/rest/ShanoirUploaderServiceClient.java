@@ -139,7 +139,7 @@ public class ShanoirUploaderServiceClient {
 		+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 		this.serviceURLImporterStartImport = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT);
-		logger.info("ShanoirUploaderServiceNG successfully initialized.");
+		logger.info("ShanoirUploaderService successfully initialized.");
 	}
 	
 	public String loginWithKeycloakForToken(String username, String password) throws JSONException {

@@ -21,7 +21,7 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 
-public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
+public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private MainWindow mainWindow;
 	
@@ -33,7 +33,7 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 	
 	private Date studyDate;
 
-	public ImportStudyAndStudyCardCBItemListenerNG(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.examinationsOfSubject = examinationDTOs;

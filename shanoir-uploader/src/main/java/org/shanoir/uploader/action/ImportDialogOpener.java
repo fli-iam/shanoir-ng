@@ -42,13 +42,13 @@ public class ImportDialogOpener {
 
 	private ResourceBundle resourceBundle;
 
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
+	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
 	public ImportDialogOpener(final MainWindow mainWindow,
-			final ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
 		this.mainWindow = mainWindow;
 		this.resourceBundle = mainWindow.resourceBundle;
-		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
+		this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
 	}
 
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
@@ -59,11 +59,11 @@ public class ImportDialogOpener {
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
-			ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBILNG = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow, subject, examinationDTOs, studyDate);
-			ImportFinishActionListener importFinishALNG = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBILNG);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate);
+			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-					importStudyAndStudyCardCBILNG, importFinishALNG);
+					importStudyAndStudyCardCBIL, importFinishAL);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of dialog
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
@@ -110,18 +110,18 @@ public class ImportDialogOpener {
 		String manufacturer = firstSerie.getMriInformation().getManufacturer();
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesNamesAndCenters();
+		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 		if (studies != null) {
-			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
+			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
 			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = getAllStudyCards(studies);
-			logger.info("getAllStudyCards: " + studyCards.size() + " studycards found.");
 			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 				Study study = (Study) iterator.next();
 				study.setCompatible(new Boolean(false));
 				Boolean compatibleStudyCard = false;
 				if (studyCards != null) {
+					logger.info("getAllStudyCards: " + studyCards.size() + " studycards found.");
 					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
 					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
@@ -176,7 +176,7 @@ public class ImportDialogOpener {
 			Study study = (Study) iterator.next();
 			idList.getIdList().add(study.getId());
 		}
-		List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
+		List<StudyCard> studyCards = shanoirUploaderServiceClient.findStudyCardsByStudyIds(idList);
 		return studyCards;
 	}
 
@@ -228,7 +228,7 @@ public class ImportDialogOpener {
 	private Subject getSubject(final UploadJob uploadJob) throws Exception {
 		Subject foundSubject = null;
 		if (uploadJob.getSubjectIdentifier() != null) {
-			foundSubject = shanoirUploaderServiceClientNG
+			foundSubject = shanoirUploaderServiceClient
 					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
 		}
 		return foundSubject;
@@ -301,7 +301,7 @@ public class ImportDialogOpener {
 
 	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
 		if (subjectDTO != null) {
-			List<Examination> examinationList = shanoirUploaderServiceClientNG
+			List<Examination> examinationList = shanoirUploaderServiceClient
 					.findExaminationsBySubjectId(subjectDTO.getId());
 			return examinationList;
 		}
