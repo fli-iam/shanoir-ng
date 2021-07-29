@@ -11,9 +11,8 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
-import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
  * 
@@ -42,8 +41,6 @@ public class ShUpOnloadConfig {
 	private static CurrentNominativeDataController currentNominativeDataController;
 
 	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
-	
-	private static ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
 	private static UrlConfig urlConfig = new UrlConfig();
 
@@ -133,7 +130,7 @@ public class ShUpOnloadConfig {
 	public static ShanoirUploaderServiceClient getShanoirUploaderServiceClient() {
 		return shanoirUploaderServiceClient;
 	}
-
+	
 	public static void setShanoirUploaderServiceClient(ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
 		ShUpOnloadConfig.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
 	}
@@ -168,14 +165,6 @@ public class ShUpOnloadConfig {
 	
 	public static void setTokenString(String tokenString) {
 		ShUpOnloadConfig.tokenString = tokenString;
-	}
-
-	public static ShanoirUploaderServiceClientNG getShanoirUploaderServiceClientNG() {
-		return shanoirUploaderServiceClientNG;
-	}
-
-	public static void setShanoirUploaderServiceClientNG(ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
-		ShUpOnloadConfig.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 	}
 
 }

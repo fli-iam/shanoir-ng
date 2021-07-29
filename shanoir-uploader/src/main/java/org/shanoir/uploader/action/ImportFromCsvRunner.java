@@ -47,7 +47,7 @@ import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.shanoir.util.ShanoirUtil;
@@ -64,9 +64,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	private ImportFromCSVWindow importFromCSVWindow;
 	private IdentifierCalculator identifierCalculator;
 	private IDicomServerClient dicomServerClient;
-	private ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 
-	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.csvImports = csvImports;
 		this.resourceBundle = ressourceBundle;
 		this.importFromCSVWindow = importFromCSVWindow;
