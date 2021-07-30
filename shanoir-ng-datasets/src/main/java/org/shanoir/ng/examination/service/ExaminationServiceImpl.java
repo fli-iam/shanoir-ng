@@ -15,6 +15,7 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -84,7 +85,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 		// Delete examination
-    examinationRepository.deleteById(id);
+		examinationRepository.deleteById(id);
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
-		examinationRepository.delete(exam);
+		examinationRepository.deleteById(exam.getId());
 	}
 
 	@Value("${datasets-data}")

@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,10 +60,12 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -112,8 +115,11 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private WADODownloaderService downloader;
 	
-	@MockBean
+	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 	
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder();
@@ -144,34 +150,37 @@ public class DatasetApiControllerTest {
 	private Examination exam = new Examination();
 
 	@Before
-	public void setup() throws ShanoirException {
+	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);
+		exam.setStudyId(1L);
 		dsAcq.setExamination(exam);
 		updatedMetadata.setComment("comment");
 		updatedMetadata.setName("test 1");
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteDatasetTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNoContent());
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void findDatasetByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateDatasetTest() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		Dataset ds = ModelsUtil.createMrDataset();
@@ -179,24 +188,6 @@ public class DatasetApiControllerTest {
 		String json = mapper.writeValueAsString(ds);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByStudyIdNull() throws Exception {
-		// GIVEN a study with some datasets to export in nii format
-
-		// WHEN we export all the datasets but with null studyId
-		try {
-			mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-					.param("format", "nii")
-					.param("studyId", ""))
-			.andExpect(status().isForbidden());
-		} catch (Exception e) {
-			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"Please use a valid study ID.\",\"details\":null}");
-		}
-
-		// THEN we have a forbidden http status
 	}
 
 	@Test

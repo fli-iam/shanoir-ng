@@ -98,6 +98,7 @@ public class ImporterServiceTest {
 	public void setUp() throws IOException {
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
+        given(examinationService.findById(Mockito.anyLong())).willReturn(new Examination());
 	}
 
 	@Test

@@ -901,7 +901,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		Long converterId = Long.valueOf(messageSplit[0]);
 		String workFolder = messageSplit[1];
 
-		NIfTIConverter converter = niftiConverterRepository.findOne(converterId);
+		NIfTIConverter converter = niftiConverterRepository.findById(converterId).orElse(null);
 		
 		if (converter == null) {
 			return false;

@@ -38,10 +38,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-users</module><!-- done -->
 		<module>../shanoir-ng-anonymization</module><!-- done -->
 		<module>../shanoir-ng-studies</module><!-- done -->
-		<module>../shanoir-ng-datasets</module>
+		<module>../shanoir-ng-datasets</module><!-- done -->
 		<module>../shanoir-ng-import</module><!-- done -->
 		<module>../shanoir-ng-preclinical</module>
-		<module>../shanoir-ng-exchange</module>
+		<module>../shanoir-ng-exchange</module><!-- done -->
 	</modules>
 
 	<properties>
@@ -214,6 +214,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>

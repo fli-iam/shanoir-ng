@@ -21,7 +21,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -75,10 +74,7 @@ public class RabbitMQDatasetsService {
 	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
-	private ExaminationService examinationService;
-
-	@Autowired
-	private ExaminationRepository examinationRepository;
+	private ExaminationRepository examRepository;
 	
 	@Autowired
 	private StudyCardRepository studyCardRepository;

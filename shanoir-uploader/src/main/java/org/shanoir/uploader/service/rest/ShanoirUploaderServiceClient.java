@@ -21,6 +21,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -43,9 +44,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  * @author mkain
  *
  */
-public class ShanoirUploaderServiceClientNG {
+public class ShanoirUploaderServiceClient {
 
-	private static Logger logger = Logger.getLogger(ShanoirUploaderServiceClientNG.class);
+	private static Logger logger = Logger.getLogger(ShanoirUploaderServiceClient.class);
 	
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
 
@@ -103,7 +104,7 @@ public class ShanoirUploaderServiceClientNG {
 
 	private Map<Integer, String> apiResponseMessages;
 
-	public ShanoirUploaderServiceClientNG() {
+	public ShanoirUploaderServiceClient() {
 		this.httpService = new HttpService();
 		
 		apiResponseMessages = new HashMap<Integer, String>();
@@ -138,10 +139,10 @@ public class ShanoirUploaderServiceClientNG {
 		+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 		this.serviceURLImporterStartImport = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT);
-		logger.info("ShanoirUploaderServiceNG successfully initialized.");
+		logger.info("ShanoirUploaderService successfully initialized.");
 	}
 	
-	public String loginWithKeycloakForToken(String username, String password) {
+	public String loginWithKeycloakForToken(String username, String password) throws JSONException {
 		String keycloakURL = this.serverURL + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();

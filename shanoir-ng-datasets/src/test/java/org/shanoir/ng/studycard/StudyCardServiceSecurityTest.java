@@ -42,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * User security service test.
+ * StudyCard service security test.
  * 
  * @author jlouis
  * 

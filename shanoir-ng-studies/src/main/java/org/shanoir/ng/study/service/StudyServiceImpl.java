@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -50,6 +51,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -371,28 +373,34 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public void addExaminationToStudy(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findById(studyId).orElse(null);
-		Set<Long> exams = stud.getExaminationIds();
-		if (exams == null) {
-			exams = new HashSet<>();
-			stud.setExaminationIds(exams);
+		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
+		if (studyOpt.isPresent()) {
+			Study study = studyOpt.get();
+			Set<Long> exams = study.getExaminationIds();
+			if (exams == null) {
+				exams = new HashSet<>();
+				study.setExaminationIds(exams);
+			}
+			exams.add(examinationId);
+			this.studyRepository.save(study);
 		}
-		exams.add(examinationId);
-		this.studyRepository.save(stud);
 	}
 
 	@Override
 	public void deleteExamination(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findById(studyId).orElse(null);
-		Set<Long> exams = stud.getExaminationIds();
-		if (exams == null) {
-			exams = new HashSet<>();
-		} else {
-			exams.remove(examinationId);
+		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
+		if (studyOpt.isPresent()) {
+			Study study = studyOpt.get();
+			Set<Long> exams = study.getExaminationIds();
+			if (exams == null) {
+				exams = new HashSet<>();
+			} else {
+				exams.remove(examinationId);
+			}
+			study.setExaminationIds(exams);
+			this.studyRepository.save(study);
 		}
-		stud.setExaminationIds(exams);
-		this.studyRepository.save(stud);
 	}
 
 	@Override
@@ -400,4 +408,5 @@ public class StudyServiceImpl implements StudyService {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
+
 }
