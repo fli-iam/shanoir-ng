@@ -50,8 +50,9 @@ spring:
     port: 5672
   session:
     store-type: none
-  http:
+  servlet:
     multipart:
+      enabled: true
       max-file-size: -1
       max-request-size: -1
 front.server:
