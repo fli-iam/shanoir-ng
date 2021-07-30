@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,9 +64,6 @@ public class BrukerApiControllerTest {
 
 	@MockBean
 	private RestTemplate restTemplate;
-
-	@MockBean
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();

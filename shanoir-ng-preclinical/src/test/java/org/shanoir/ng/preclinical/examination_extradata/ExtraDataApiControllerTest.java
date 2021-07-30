@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataApiController;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataEditableByManager;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
@@ -102,9 +101,6 @@ public class ExtraDataApiControllerTest {
 	@MockBean
 	private ExtraDataService<BloodGasData> bloodGasDataService;
 
-	@MockBean
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
-	
 	@MockBean
 	private ExtraDataUniqueConstraintManager uniqueConstraintManager;
 	

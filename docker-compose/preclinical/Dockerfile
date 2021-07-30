@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:13-jdk-alpine
 RUN apk add bash
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
