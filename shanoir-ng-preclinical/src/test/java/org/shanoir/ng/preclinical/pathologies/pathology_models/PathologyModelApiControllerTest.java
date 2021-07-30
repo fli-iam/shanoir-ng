@@ -28,7 +28,6 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -80,8 +79,6 @@ public class PathologyModelApiControllerTest {
 	private PathologyModelService modelServiceMock;
 	@MockBean
 	private PathologyService pathologyServiceMock;
-	@MockBean
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
 	@MockBean
 	private ShanoirEventService eventService;
 	@MockBean

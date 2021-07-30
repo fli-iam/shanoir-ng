@@ -18,7 +18,7 @@ RUN set -ex && \
     apt update -y && \
     apt install -t \
       stretch-backports \
-      openjdk-8-jre-headless \
+      openjdk-11-jre-headless \
       ca-certificates-java -y
 
 RUN apt-get update && apt-get install openssl
