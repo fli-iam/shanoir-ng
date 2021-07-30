@@ -30,6 +30,7 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
@@ -85,6 +86,13 @@ public class AnimalSubjectApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean
+	private AnimalSubjectUniqueValidator uniqueValidator;
+
+	@MockBean
+	private AnimalSubjectEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -95,10 +103,13 @@ public class AnimalSubjectApiControllerTest {
 		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
 		List<AnimalSubject> subjects = new ArrayList<AnimalSubject>();
 		subjects.add(new AnimalSubject());
-		given(subjectsServiceMock.findBy("subjectId", 1L)).willReturn(subjects);
+		given(subjectsServiceMock.findBySubjectId(1L)).willReturn(subjects);
 		AnimalSubject anSubj = new AnimalSubject();
 		anSubj.setId(Long.valueOf(123));
 		given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );
+		given(uniqueValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
+
 	}
 
 	@Test

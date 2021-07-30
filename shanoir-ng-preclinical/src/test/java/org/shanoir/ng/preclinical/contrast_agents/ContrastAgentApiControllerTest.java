@@ -27,8 +27,11 @@ import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentApiController;
+import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentEditableByManager;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentService;
+import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentUniqueValidator;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
@@ -75,6 +78,13 @@ public class ContrastAgentApiControllerTest {
 
 	@MockBean
 	private RefsService referencesServiceMock;
+	
+	@MockBean
+	private ContrastAgentUniqueValidator uniqueValidator;
+	
+	@MockBean
+	private ContrastAgentEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -88,6 +98,8 @@ public class ContrastAgentApiControllerTest {
 				.willReturn(new ContrastAgent());
 		given(agentsServiceMock.findById(1L)).willReturn(new ContrastAgent());
 		given(agentsServiceMock.save(Mockito.mock(ContrastAgent.class))).willReturn(new ContrastAgent());
+		given(uniqueValidator.validate(Mockito.any(ContrastAgent.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(ContrastAgent.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

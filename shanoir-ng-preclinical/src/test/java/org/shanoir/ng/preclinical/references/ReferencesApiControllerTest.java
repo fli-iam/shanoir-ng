@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
@@ -75,6 +76,13 @@ public class ReferencesApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean
+	private ReferenceUniqueValidator uniqueValidator;
+
+	@MockBean
+	private RefsEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -87,6 +95,8 @@ public class ReferencesApiControllerTest {
 		Reference ref = new Reference();
 		ref.setId(Long.valueOf(123));
 		given(refsServiceMock.save(Mockito.any(Reference.class))).willReturn(ref );
+		given(uniqueValidator.validate(Mockito.any(Reference.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(Reference.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

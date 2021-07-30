@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
@@ -75,6 +76,14 @@ public class TherapyApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean
+	private TherapyUniqueValidator uniqueValidator;
+	
+	@MockBean
+	private TherapyEditableByManager editableOnlyValidator;
+
+	
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -87,6 +96,8 @@ public class TherapyApiControllerTest {
 		Therapy therapy = new Therapy();
 		therapy.setId(Long.valueOf(123));
 		given(therapyServiceMock.save(Mockito.any(Therapy.class))).willReturn(therapy );
+		given(uniqueValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(Therapy.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

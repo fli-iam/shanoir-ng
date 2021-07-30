@@ -93,7 +93,7 @@ public class PathologyModelServiceTest {
 		Assert.assertNotNull(model);
 		Assert.assertTrue(PathologyModelUtil.MODEL_NAME.equals(model.getName()));
 
-		Mockito.verify(modelsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(modelsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test

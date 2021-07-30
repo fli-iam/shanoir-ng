@@ -41,9 +41,6 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationExtraDataServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private ExaminationExtraDataRepository extraDataRepository;
 
 	@Override
@@ -54,11 +51,6 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 	@Override
 	public List<ExaminationExtraData> findAllByExaminationId(Long id) {
 		return Utils.toList(extraDataRepository.findAllByExaminationId(id));
-	}
-
-	@Override
-	public List<ExaminationExtraData> findBy(final String fieldName, final Object value) {
-		return extraDataRepository.findBy(fieldName, value);
 	}
 
 	@Override

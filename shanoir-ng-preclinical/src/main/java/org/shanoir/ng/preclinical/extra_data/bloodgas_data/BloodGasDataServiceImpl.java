@@ -43,9 +43,6 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 	private static final Logger LOG = LoggerFactory.getLogger(BloodGasDataServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private BloodGasDataRepository bloodGasRepository;
 
 	@Override
@@ -56,11 +53,6 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 	@Override
 	public List<BloodGasData> findAllByExaminationId(Long id) {
 		return Utils.toList(bloodGasRepository.findAllByExaminationId(id));
-	}
-
-	@Override
-	public List<BloodGasData> findBy(final String fieldName, final Object value) {
-		return bloodGasRepository.findBy(fieldName, value);
 	}
 
 	@Override

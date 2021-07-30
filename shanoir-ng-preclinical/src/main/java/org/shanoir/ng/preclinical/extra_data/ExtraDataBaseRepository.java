@@ -19,7 +19,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface ExtraDataBaseRepository<T extends ExaminationExtraData> extends CrudRepository<T, Long>, ExtraDataRepositoryCustom{
+public interface ExtraDataBaseRepository<T extends ExaminationExtraData> extends CrudRepository<T, Long>, ExtraDataRepositoryCustom<T> {
 
  
 }

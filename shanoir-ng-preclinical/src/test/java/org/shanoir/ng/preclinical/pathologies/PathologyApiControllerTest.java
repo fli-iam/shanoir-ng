@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,13 @@ public class PathologyApiControllerTest {
 
 	@MockBean
 	private PathologyService pathologyServiceMock;
+	
+	@MockBean
+	private PathologyUniqueValidator uniqueValidator;
+	
+	@MockBean
+	private PathologyEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -75,6 +83,8 @@ public class PathologyApiControllerTest {
 		given(pathologyServiceMock.findAll()).willReturn(Arrays.asList(new Pathology()));
 		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
 		given(pathologyServiceMock.save(Mockito.mock(Pathology.class))).willReturn(new Pathology());
+		given(uniqueValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(Pathology.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

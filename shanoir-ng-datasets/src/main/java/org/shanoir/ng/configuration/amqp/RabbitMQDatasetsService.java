@@ -183,13 +183,13 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository
-			for (Examination exam : examRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
+			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
 				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
 					for (Dataset ds : dsAcq.getDatasets())  {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.deleteById(exam.getId());
+				examinationRepository.deleteById(exam.getId());
 			}
 			// Delete subject from datasets database
 			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
@@ -219,13 +219,13 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository then from database
-			for (Examination exam : examRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
 				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
 					for (Dataset ds : dsAcq.getDatasets())  {
 						solrService.deleteFromIndex(ds.getId());
 					}
 				}
-				examRepository.deleteById(exam.getId());
+				examinationRepository.deleteById(exam.getId());
 			}
 			// also delete associated study cards
 			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {

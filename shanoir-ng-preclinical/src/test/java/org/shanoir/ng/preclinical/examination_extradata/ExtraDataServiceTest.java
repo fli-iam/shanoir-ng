@@ -66,7 +66,6 @@ public class ExtraDataServiceTest {
 
 	@Before
 	public void setup() {
-		given(extraDataRepository.findAll()).willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.findAllByExaminationId(1L))
 				.willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
 		given(extraDataRepository.findById(EXTRADATA_ID)).willReturn(Optional.of(ExtraDataModelUtil.createExaminationExtraData()));
@@ -88,7 +87,7 @@ public class ExtraDataServiceTest {
 		Assert.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
 		Assert.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
 
-		Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

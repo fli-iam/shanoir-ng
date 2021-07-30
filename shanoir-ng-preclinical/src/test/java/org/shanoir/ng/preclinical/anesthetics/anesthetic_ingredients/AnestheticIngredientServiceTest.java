@@ -90,7 +90,7 @@ public class AnestheticIngredientServiceTest {
 		Assert.assertNotNull(ingredient);
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_INGREDIENT_ISOFLURANE_VALUE.equals(ingredient.getName().getValue()));
 
-		Mockito.verify(ingredientsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(ingredientsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test

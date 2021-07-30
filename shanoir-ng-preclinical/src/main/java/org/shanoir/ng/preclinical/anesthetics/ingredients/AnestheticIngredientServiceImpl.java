@@ -41,9 +41,6 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 	private static final Logger LOG = LoggerFactory.getLogger(AnestheticIngredientServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private AnestheticIngredientRepository ingredientsRepository;
 
 	@Override
@@ -59,11 +56,6 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 	@Override
 	public List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic) {
 		return Utils.toList(ingredientsRepository.findByAnesthetic(anesthetic));
-	}
-
-	@Override
-	public List<AnestheticIngredient> findBy(final String fieldName, final Object value) {
-		return ingredientsRepository.findBy(fieldName, value);
 	}
 
 	@Override

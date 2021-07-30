@@ -1,5 +1,5 @@
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
+Subje * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -66,7 +66,6 @@ public class AnimalSubjectServiceTest {
 		given(subjectsRepository.findByReference(ReferenceModelUtil.createReferenceSpecie()))
 				.willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(subjectsRepository.findById(SUBJECT_ID)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
-		given(refsRepository.save(Mockito.any(Reference.class))).willReturn(AnimalSubjectModelUtil.createSpecie());
 		given(subjectsRepository.save(Mockito.any(AnimalSubject.class)))
 				.willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 	}
@@ -93,7 +92,7 @@ public class AnimalSubjectServiceTest {
 		Assert.assertNotNull(subject);
 		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(subject.getId()));
 
-		Mockito.verify(subjectsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(subjectsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

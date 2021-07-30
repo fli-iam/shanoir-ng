@@ -57,11 +57,6 @@ public class PathologyServiceImpl implements PathologyService {
 	}
 
 	@Override
-	public List<Pathology> findBy(final String fieldName, final Object value) {
-		return pathologiesRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public Pathology findById(final Long id) {
 		return pathologiesRepository.findById(id).orElse(null);
 	}

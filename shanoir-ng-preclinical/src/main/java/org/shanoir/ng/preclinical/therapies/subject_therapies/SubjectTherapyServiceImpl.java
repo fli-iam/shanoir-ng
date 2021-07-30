@@ -42,9 +42,6 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectTherapyServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private SubjectTherapyRepository subtherapiesRepository;
 
 	@Override
@@ -73,11 +70,6 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 	@Override
 	public List<SubjectTherapy> findAllByTherapy(Therapy therapy) {
 		return Utils.toList(subtherapiesRepository.findByTherapy(therapy));
-	}
-
-	@Override
-	public List<SubjectTherapy> findBy(final String fieldName, final Object value) {
-		return subtherapiesRepository.findBy(fieldName, value);
 	}
 
 	@Override

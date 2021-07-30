@@ -65,7 +65,6 @@ public class SubjectTherapyServiceTest {
 	@Before
 	public void setup() {
 		given(stherapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
-		given(subjectsRepository.findById(1L)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(stherapiesRepository.findByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject()))
 				.willReturn(Arrays.asList(TherapyModelUtil.createSubjectTherapy()));
 		given(stherapiesRepository.findByTherapy(TherapyModelUtil.createTherapyBrain()))
@@ -125,7 +124,7 @@ public class SubjectTherapyServiceTest {
 		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(stherapy.getTherapy().getName()));
 		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(stherapy.getAnimalSubject().getSubjectId()));
 
-		Mockito.verify(stherapiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(stherapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

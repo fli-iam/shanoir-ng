@@ -91,7 +91,7 @@ public class ContrastAgentServiceTest {
 		Assert.assertNotNull(agent);
 		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test
@@ -100,7 +100,7 @@ public class ContrastAgentServiceTest {
 		Assert.assertNotNull(agent);
 		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
-		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	
