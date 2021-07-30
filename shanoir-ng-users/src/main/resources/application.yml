@@ -26,18 +26,15 @@ spring:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: users
     password: password
-    # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: never
     data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+    generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      # Naming strategy
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
     properties:
       hibernate:
         connection:
@@ -109,6 +106,7 @@ spring:
   datasource:
     initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -138,6 +136,7 @@ spring:
     data: classpath:/scripts/test-data-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop

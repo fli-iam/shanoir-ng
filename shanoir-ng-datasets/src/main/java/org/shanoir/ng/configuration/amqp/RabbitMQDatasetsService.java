@@ -74,7 +74,7 @@ public class RabbitMQDatasetsService {
 	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
-	private ExaminationRepository examRepository;
+	private ExaminationRepository examinationRepository;
 	
 	@Autowired
 	private StudyCardRepository studyCardRepository;

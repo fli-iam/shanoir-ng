@@ -13,7 +13,6 @@
 ######################################
 # Default profile is production      #
 ######################################
-debug: true
 server:
   port: 9903
   error:
@@ -25,12 +24,14 @@ spring:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: import
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.jdbc.Driver
+    initialization-mode: never
+    data: classpath:/scripts/import.sql
   jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-    open-in-view: false
-    generate-ddl: true
-    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
+# keep the below for Spring Boot 2.5:
+#    defer-datasource-initialization: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
@@ -40,10 +41,11 @@ spring:
           charset: UTF-8
         hbm2ddl:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
-  sql:
-    init:
-      enabled: true
-      data-locations: classpath:/scripts/import.sql
+# keep the below for Spring Boot 2.5:
+#  sql:
+#    init:
+#      enabled: true
+#      data-locations: classpath:/scripts/import.sql
 ##### Others #####
   jackson:
     mapper:
@@ -151,6 +153,7 @@ spring:
     url: jdbc:mysql://localhost:3307/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
     initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -212,29 +215,19 @@ spring:
     username: sa
     password: 
     driver-class-name: org.h2.Driver
+    initialization-mode: always
+    data: classpath:/scripts/test-data-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-  sql:
-    init:
-      data-locations: classpath:/scripts/test-data-h2.sql
+# keep for Spring Boot 2.5
+#  sql:
+#    init:
+#      data-locations: classpath:/scripts/test-data-h2.sql
 logging:
   file:
     name: /tmp/shanoir-ng-import.log
----
-
-#################
-# DO NOT CHANGE #
-#################
-spring:
-  config.activate.on-profile: qualif
-  jpa:
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: validate
-#keycloak
-keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth

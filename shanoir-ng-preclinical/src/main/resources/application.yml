@@ -24,18 +24,15 @@ spring:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: preclinical
     password: password
-    # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
+    initialization-mode: never
     data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+    generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      # Naming strategy
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
     properties:
       hibernate:
         connection:
@@ -111,13 +108,14 @@ spring:
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    data: classpath:/scripts/test-data-preclinical-h2.sql
     initialization-mode: always
+    data: classpath:/scripts/test-data-preclinical-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: create-drop
 logging:
   file:    name: /tmp/shanoir-ng-import.log
 ---
@@ -130,6 +128,7 @@ spring:
   datasource:
     initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
