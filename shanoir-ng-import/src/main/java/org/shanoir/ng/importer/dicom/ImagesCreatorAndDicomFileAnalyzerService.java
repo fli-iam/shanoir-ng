@@ -132,6 +132,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
 			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
+			LOG.error("filterAndCreateImages " + serie.getSeriesDescription() + " " + instanceFile.getAbsolutePath());
+							
 			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
 		}
 		serie.setNonImages(nonImages);
@@ -199,29 +201,27 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes attributes = dIS.readDataset(-1, -1);
 			final String sopClassUID = attributes.getString(Tag.SOPClassUID);
+			
+			boolean spectro =
+					UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
+					|| UID.MRSpectroscopyStorage.equals(sopClassUID)
+					|| checkSerieIsSpectroscopy(sopClassUID);
+
 			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
-			if (sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
+			if (!spectro && sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
 				// do nothing here as instances list will be emptied after split
 			} else {
 				// divide here between non-images and images, non-images at first
 				final String seriesDescription = attributes.getString(Tag.SeriesDescription);
-				if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
-						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
-						|| checkSerieIsSpectroscopy(seriesDescription)) {
-					// in the current implementation non-images are ignored (no import possible)
-					LOG.warn("Attention: non-images/spectroscopy serie is included in this import (but ignored)!");
-				// images at the second
-				} else {
-					Image image = new Image();
-					/**
-					 * Attention: the path of each image is always relative: either to the temporary folder created
-					 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
-					 */
-					String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
-					image.setPath(relativeFilePath);
-					addImageSeparateDatasetsInfo(image, attributes);
-					images.add(image);
-				}
+				Image image = new Image();
+				/**
+				 * Attention: the path of each image is always relative: either to the temporary folder created
+				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
+				 */
+				String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+				image.setPath(relativeFilePath);
+				addImageSeparateDatasetsInfo(image, attributes);
+				images.add(image);
 			}
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
