@@ -96,22 +96,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.11</version>
-				<configuration>
-					<imageName>${docker.image.name}</imageName>
-					<dockerDirectory>src/main/docker</dockerDirectory>
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
-						</resource>
-					</resources>
-				</configuration>
-			</plugin>
 			<!-- Copy shanoir-ng-users.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -140,46 +124,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<spring.active.profile>dev</spring.active.profile>
-			</properties>
-		</profile>
-		<profile>
-			<id>init-keycloak</id>
-			<properties>
-				<maven.test.skip>true</maven.test.skip>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>repackage</goal>
-								</goals>
-								<configuration>
-									<classifier>exec</classifier>
-									<profiles>
-										<profile>${spring.active.profile}</profile>
-									</profiles>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>qualif</id>
-			<properties>
-				<spring.active.profile>qualif</spring.active.profile>
-				<maven.test.skip>true</maven.test.skip>
-			</properties>
-		</profile>
-	</profiles>
 </project>
