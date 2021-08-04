@@ -10,8 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM openjdk:13-jdk-alpine
-RUN apk add bash
+FROM debian:stretch
+
+RUN set -ex && \
+    echo 'deb http://deb.debian.org/debian stretch-backports main' \
+      > /etc/apt/sources.list.d/stretch-backports.list && \
+    apt update -y && \
+    apt install -t \
+      stretch-backports \
+      openjdk-11-jre-headless \
+      ca-certificates-java -y
+
+RUN apt-get update
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-studies.jar shanoir-ng-studies.jar

@@ -10,8 +10,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM openjdk:13-jdk-alpine
-RUN apk add bash
+FROM debian:stretch
+
+RUN set -ex && \
+    echo 'deb http://deb.debian.org/debian stretch-backports main' \
+      > /etc/apt/sources.list.d/stretch-backports.list && \
+    apt update -y && \
+    apt install -t \
+      stretch-backports \
+      openjdk-11-jre-headless \
+      ca-certificates-java -y
+
+RUN apt-get update -qq \
+    && apt-get install -y \
+    unzip \
+    pigz \
+    gzip \
+    wget
 
 # Installation of dcm4che to manage the store-scu into the PACS
 # dcm4che3, used last version 5.21.0 as available on the 2020-02-14
