@@ -31,10 +31,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<name>shanoir-ng-users</name>
 	<description>Shanoir-NG Users Microservice</description>
 
-	<properties>
-		<docker.image.name>shanoir-ng/users</docker.image.name>
-    </properties>
-
 	<dependencies>
 		<!-- Common MS dependency -->
 		<dependency>
