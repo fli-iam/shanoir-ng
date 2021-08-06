@@ -83,7 +83,7 @@ keycloak:
       - patterns:
         - /*
 # Solr
-spring.data.solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir/
+spring.data.solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/
 # microservices url
 ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
