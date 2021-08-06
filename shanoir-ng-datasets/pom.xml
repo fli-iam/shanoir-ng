@@ -152,20 +152,4 @@
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<spring-active-profile>dev</spring-active-profile>
-			</properties>
-		</profile>
-		<profile>
-			<id>qualif</id>
-			<properties>
-				<spring.active.profile>qualif</spring.active.profile>
-				<maven.test.skip>true</maven.test.skip>
-			</properties>
-		</profile>
-	</profiles>
-
 </project>
