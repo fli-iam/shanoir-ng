@@ -36,6 +36,7 @@ spring:
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    open-in-view: false
     properties:
       hibernate:
         connection:
