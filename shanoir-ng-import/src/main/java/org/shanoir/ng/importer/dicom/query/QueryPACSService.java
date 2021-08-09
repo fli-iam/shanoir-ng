@@ -27,6 +27,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
+import org.shanoir.ng.importer.dicom.DicomSerieAnalyzer;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -35,6 +36,7 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.weasis.dicom.op.CFind;
@@ -78,6 +80,9 @@ public class QueryPACSService {
 	
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
+	
+	@Autowired
+	private DicomSerieAnalyzer dicomSerieAnalyzer;
 	
 	@PostConstruct
 	private void initDicomNodes() {
@@ -266,6 +271,7 @@ public class QueryPACSService {
 		DicomParam[] params = {
 			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
 			new DicomParam(Tag.SeriesInstanceUID),
+			new DicomParam(Tag.SOPInstanceUID),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
@@ -283,6 +289,8 @@ public class QueryPACSService {
 				if (serie.getModality() != null && !"PR".equals(serie.getModality()) && !"SR".equals(serie.getModality())) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
+						boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(serie.getSopClassUID(), serie.getSeriesDescription());
+						serie.setIsSpectroscopy(isSpectroscopy);
 						series.add(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());

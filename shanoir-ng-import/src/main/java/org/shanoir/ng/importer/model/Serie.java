@@ -107,6 +107,7 @@ public class Serie {
 
 	public Serie(Attributes attributes) {
 		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		this.sopClassUID = attributes.getString(Tag.SOPClassUID);
 		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
 		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
 		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
