@@ -28,6 +28,7 @@ import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAnalyzer;
+import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -271,7 +272,7 @@ public class QueryPACSService {
 		DicomParam[] params = {
 			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
 			new DicomParam(Tag.SeriesInstanceUID),
-			new DicomParam(Tag.SOPInstanceUID),
+			new DicomParam(Tag.SOPClassUID),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
@@ -299,6 +300,7 @@ public class QueryPACSService {
 					LOG.warn("Serie found with wrong modality (PR or SR) therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 				}
 			}
+			series.sort(new SeriesNumberSorter());
 			study.setSeries(series);
 		}
 	}
