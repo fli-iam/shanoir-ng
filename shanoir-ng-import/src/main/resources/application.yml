@@ -128,7 +128,7 @@ shanoir:
       # Also during the nifti conversion, it will be reconstructed as 4D volumes.
       seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*relaxo*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;
       # If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
-      isspectroscopy: seriesDescription==*CSI*
+      isspectroscopy: seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;
   conversion:
     converters:
       path: /opt/nifti-converters/
