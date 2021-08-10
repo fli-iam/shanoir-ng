@@ -57,24 +57,25 @@ public class DicomDirToModelService {
 		final DicomDirReader dicomDirReader = new DicomDirReader(file);
 		try {
 			// patient level
-			List<Patient> patients = new ArrayList<>();
+			List<Patient> patients = new ArrayList<Patient>();
 			Attributes patientRecord = dicomDirReader.findPatientRecord();
 			while(patientRecord != null) {
 				Patient patient = new Patient(patientRecord);
 				patients.add(patient);
 				// study level
-				List<Study> studies = new ArrayList<>();
+				List<Study> studies = new ArrayList<Study>();
 				Attributes studyRecord = dicomDirReader.findStudyRecord(patientRecord);
 				while(studyRecord != null) {
 					Study study = new Study(studyRecord);
 					studies.add(study);
 					// serie level
-					List<Serie> series = new ArrayList<>();
+					List<Serie> series = new ArrayList<Serie>();
 					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
 					while(serieRecord != null) {
 						handleSerieAndInstanceRecords(series, serieRecord, dicomDirReader);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
+					series.sort(new SeriesNumberSorter());
 					study.setSeries(series);
 					studyRecord = dicomDirReader.findNextStudyRecord(studyRecord);
 				}
@@ -91,7 +92,7 @@ public class DicomDirToModelService {
 	}
 
 	/**
-	 * Hanldles Serie and Instance records.
+	 * Handles Serie and Instance records.
 	 * @param series
 	 * @param serieRecord
 	 * @param dicomDirReader
@@ -103,7 +104,7 @@ public class DicomDirToModelService {
 		if (AcquisitionModality.codeOf(modality) != null) {
 			Serie serie = new Serie(serieRecord);
 			// instance level: could be image or non-image (to filter later)
-			List<Instance> instances = new ArrayList<>();
+			List<Instance> instances = new ArrayList<Instance>();
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
