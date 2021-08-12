@@ -72,6 +72,9 @@ public class Serie {
 
 	@JsonProperty("isEnhancedMR")
 	private Boolean isEnhancedMR;
+	
+	@JsonProperty("isSpectroscopy")
+	private Boolean isSpectroscopy;
 
 	@JsonProperty("nonImages")
 	private List<Object> nonImages = null;
@@ -251,6 +254,14 @@ public class Serie {
 
 	public void setIsEnhancedMR(Boolean isEnhancedMR) {
 		this.isEnhancedMR = isEnhancedMR;
+	}
+
+	public Boolean getIsSpectroscopy() {
+		return isSpectroscopy;
+	}
+
+	public void setIsSpectroscopy(Boolean isSpectroscopy) {
+		this.isSpectroscopy = isSpectroscopy;
 	}
 	
 }
