@@ -171,7 +171,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						// otherwise just do not separate the series and keep all images for one nii conversion
 						serie.setDatasets(new ArrayList<Dataset>());
 						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-						constructNifti(serieIDFolderFile, serie, converterId);
+						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+						if (!serie.getIsSpectroscopy()) {
+							constructNifti(serieIDFolderFile, serie, converterId);
+						}
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
@@ -644,7 +647,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, directory, dataset) : niftiFileSorting(existingFiles, directory, serieIDFolderFile);
 						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
-
 					}
 				}
 			} else if (serie.getDatasets().size() == 1) {
