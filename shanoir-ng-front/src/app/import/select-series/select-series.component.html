@@ -107,7 +107,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
-        <div *ngIf="!papayaError && modality != 'Ct'"> 
+        <div *ngIf="!papayaError && modality != 'Ct' && !detailedSerie.isSpectroscopy"> 
             <papaya [params]="papayaParams"></papaya>
         </div>
         <div *ngIf="papayaError" class="error"> 

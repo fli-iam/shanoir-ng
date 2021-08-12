@@ -76,13 +76,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		Attributes dicomAttributes = null;
 		try {
-			// TODO ATO : should always be a dicom: add check
 			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhancedMR());
 		} catch (IOException e) {
-			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
+			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
 		}
 		mrDatasetAcquisition.setCreationDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
@@ -90,7 +89,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
 		StudyCard studyCard = null;
-		if (importJob.getStudyCardId() != null) {
+		if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
 			studyCard = getStudyCard(importJob.getStudyCardId());
 			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 			importJob.setStudyCardName(studyCard.getName());
