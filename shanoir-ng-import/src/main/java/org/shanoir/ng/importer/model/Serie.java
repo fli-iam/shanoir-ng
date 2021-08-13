@@ -75,12 +75,13 @@ public class Serie {
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
 
-	@JsonProperty("isEnhancedMR")
-	private Boolean isEnhancedMR;
+	@JsonProperty("isEnhanced")
+	private Boolean isEnhanced;
 
 	@JsonProperty("isMultiFrame")
 	private Boolean isMultiFrame;
 
+	// TODO rename to frameCount, as can be 1 too
 	@JsonProperty("multiFrameCount")
 	private Integer multiFrameCount;
 
@@ -289,12 +290,12 @@ public class Serie {
 		this.isSpectroscopy = isSpectroscopy;
 	}
 
-	public Boolean getIsEnhancedMR() {
-		return isEnhancedMR;
+	public Boolean getIsEnhanced() {
+		return isEnhanced;
 	}
 
-	public void setIsEnhancedMR(Boolean isEnhancedMR) {
-		this.isEnhancedMR = isEnhancedMR;
+	public void setIsEnhanced(Boolean isEnhanced) {
+		this.isEnhanced = isEnhanced;
 	}
 
 	public String getSequenceName() {

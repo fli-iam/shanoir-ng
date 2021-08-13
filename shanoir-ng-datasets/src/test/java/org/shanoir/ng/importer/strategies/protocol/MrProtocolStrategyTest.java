@@ -123,12 +123,12 @@ public class MrProtocolStrategyTest {
 		Serie serie = new Serie();
 		if (UID.EnhancedMRImageStorage.equals(attributes.getString(Tag.SOPClassUID))) {
 			serie.setIsMultiFrame(true);
-			serie.setIsEnhancedMR(true);
+			serie.setIsEnhanced(true);
 			serie.setMultiFrameCount(getFrameCount(attributes));
 			serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
 		} else {
 			serie.setIsMultiFrame(false);
-			serie.setIsEnhancedMR(false);
+			serie.setIsEnhanced(false);
 			serie.setSequenceName(attributes.getString(Tag.SequenceName));
 		}
 		serie.setProtocolName(attributes.getString(Tag.ProtocolName));
