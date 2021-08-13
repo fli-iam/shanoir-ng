@@ -79,7 +79,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				LocalDateTime acquisitionTime = null;
 				Attributes dicomAttributes = null;
 				try {
-					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhancedMR());
+					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}

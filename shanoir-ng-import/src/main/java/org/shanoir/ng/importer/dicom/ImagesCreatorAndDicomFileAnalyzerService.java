@@ -71,7 +71,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private static final String SUFFIX_DCM = ".dcm";
 	
 	@Autowired
-	private DicomSerieAnalyzer dicomSerieAnalyzer;
+	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
@@ -112,8 +112,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	}
 
 	/**
-	 * This method iterates over all instances and filter only the images
-	 * and puts them into a new list: images. For the moment non-images is
+	 * This method iterates over all instances, filters only the images
+	 * and puts them into a new list: images. For the moment non-images are
 	 * not implemented.
 	 * 
 	 * @param folderFileAbsolutePath
@@ -122,8 +122,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
 		// instance level
-		List<Object> nonImages = new ArrayList<>();
-		List<Image> images = new ArrayList<>();
+		List<Image> images = new ArrayList<Image>();
+		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
@@ -195,11 +195,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void processDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes attributes = dIS.readDataset(-1, -1);
-			final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-			boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(attributes);
-			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
-			if (!isSpectroscopy && sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
-				// do nothing here as instances list will be emptied after split
+			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
+			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
 				// divide here between non-images and images, non-images at first
 				Image image = new Image();
@@ -229,7 +227,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
-			checkIsMultiFrame(serie, attributes);
+			dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
@@ -339,8 +337,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(serie.getSopClassUID(), serie.getSeriesDescription());
-		serie.setIsSpectroscopy(isSpectroscopy);
+		dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
@@ -369,45 +366,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		if (StringUtils.isEmpty(patient.getPatientSex())) {
 			// has not been found in dicomdir, so we get it from .dcm file:
 			patient.setPatientSex(attributes.getString(Tag.PatientSex));
-		}
-	}
-
-	/**
-	 * Checks for multi-frame dicom files.
-	 * 
-	 * @param serie
-	 * @param attributes
-	 */
-	private void checkIsMultiFrame(Serie serie, Attributes attributes) {
-		if (UID.EnhancedMRImageStorage.equals(attributes.getString(Tag.SOPClassUID))) {
-			serie.setIsMultiFrame(true);
-			serie.setIsEnhancedMR(true);
-			serie.setMultiFrameCount(getFrameCount(attributes));
-			serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
-		} else {
-			serie.setIsMultiFrame(false);
-			serie.setIsEnhancedMR(false);
-			serie.setSequenceName(attributes.getString(Tag.SequenceName));
-		}
-	}
-
-	/**
-	 * Get the frame count of the given dicom object.
-	 *
-	 * @param dcmObj
-	 *            the dcmObj
-	 * @return the frame count
-	 */
-	private int getFrameCount(final Attributes attributes) {
-		if (attributes != null) {
-			Attributes pffgs = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);
-			if (pffgs != null) {
-				return pffgs.size();
-			} else {
-				return 0;
-			}
-		} else {
-			return -1;
 		}
 	}
 

@@ -27,7 +27,7 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
-import org.shanoir.ng.importer.dicom.DicomSerieAnalyzer;
+import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -83,7 +83,7 @@ public class QueryPACSService {
 	private String calledNameSCP;
 	
 	@Autowired
-	private DicomSerieAnalyzer dicomSerieAnalyzer;
+	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 	
 	@PostConstruct
 	private void initDicomNodes() {
@@ -290,8 +290,7 @@ public class QueryPACSService {
 				if (serie.getModality() != null && !"PR".equals(serie.getModality()) && !"SR".equals(serie.getModality())) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
-						boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(serie.getSopClassUID(), serie.getSeriesDescription());
-						serie.setIsSpectroscopy(isSpectroscopy);
+						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 						series.add(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
