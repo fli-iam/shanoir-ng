@@ -134,7 +134,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.centerNameUpdateQueue().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
 					new ObjectMapper().writeValueAsString(idName));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
