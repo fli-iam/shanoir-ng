@@ -183,13 +183,12 @@ public class BIDSServiceImpl implements BIDSService {
 	}
 
 	@Override
-	public void deleteExam(Long examId) {
-		Examination exam = examService.findById(examId);
+	public void deleteExam(Examination exam) {
 		if (exam == null) {
 			// Not found, just get back
 			return;
 		}
-
+		
 		File fileToDelete = null;
 		try {
 			// Get study folder
@@ -210,10 +209,10 @@ public class BIDSServiceImpl implements BIDSService {
 
 			// delete from scans.tsv searching by examination ID
 			File scans = getScansFile(fileToDelete);
-			deleteLineFromFile(scans, examId, ".*");
+			deleteLineFromFile(scans, exam.getId(), ".*");
 
 			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+			fileToDelete = getFileFromId(exam.getId().toString(), fileToDelete);
 
 
 			// Delete all the folder

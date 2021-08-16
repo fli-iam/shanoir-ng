@@ -38,9 +38,9 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -69,16 +69,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private static final String SLASH = "/";
 
 	private static final String SUFFIX_DCM = ".dcm";
-
-	private static final String DOUBLE_EQUAL = "==";
-
-	private static final String SEMI_COLON = ";";
+	
+	@Autowired
+	private DicomSerieAnalyzer dicomSerieAnalyzer;
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
-
-	@Value("${shanoir.import.series.isspectroscopy}")
-	private String isSpectroscopy;
 
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
@@ -132,6 +128,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
 			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
+			LOG.info("filterAndCreateImages " + serie.getSeriesDescription() + " " + instanceFile.getAbsolutePath());		
 			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
 		}
 		serie.setNonImages(nonImages);
@@ -199,29 +196,21 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes attributes = dIS.readDataset(-1, -1);
 			final String sopClassUID = attributes.getString(Tag.SOPClassUID);
+			boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(attributes);
 			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
-			if (sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
+			if (!isSpectroscopy && sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
 				// do nothing here as instances list will be emptied after split
 			} else {
 				// divide here between non-images and images, non-images at first
-				final String seriesDescription = attributes.getString(Tag.SeriesDescription);
-				if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
-						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
-						|| checkSerieIsSpectroscopy(seriesDescription)) {
-					// in the current implementation non-images are ignored (no import possible)
-					LOG.warn("Attention: non-images/spectroscopy serie is included in this import (but ignored)!");
-				// images at the second
-				} else {
-					Image image = new Image();
-					/**
-					 * Attention: the path of each image is always relative: either to the temporary folder created
-					 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
-					 */
-					String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
-					image.setPath(relativeFilePath);
-					addImageSeparateDatasetsInfo(image, attributes);
-					images.add(image);
-				}
+				Image image = new Image();
+				/**
+				 * Attention: the path of each image is always relative: either to the temporary folder created
+				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
+				 */
+				String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+				image.setPath(relativeFilePath);
+				addImageSeparateDatasetsInfo(image, attributes);
+				images.add(image);
 			}
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
@@ -237,7 +226,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
@@ -245,27 +233,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
-			LOG.error("Error during DICOM file process", e);
+			LOG.error("Error during processing of DICOM file:", e);
 		}
 	}
 
-	/**
-	 * This method uses the properties string isspectroscopy to check if a serie
-	 * contains spectroscopy.
-	 */
-	private boolean checkSerieIsSpectroscopy(final String seriesDescription) {
-		final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
-		for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
-			final String tag = item.split(DOUBLE_EQUAL)[0];
-			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
-			String wildcard = ImportUtils.wildcardToRegex(value);
-			if (seriesDescription != null && seriesDescription.matches(wildcard)) {
-				return true;
-			}
-		}
-		return false;
-	}
+
 
 	/**
 	 * This method adds all required infos to separate datasets within series for
@@ -367,9 +339,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		serie.setIsSpectroscopy(UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
-				|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
-				|| checkSerieIsSpectroscopy(serie.getSeriesDescription()));
+		boolean isSpectroscopy = dicomSerieAnalyzer.checkSerieIsSpectroscopy(serie.getSopClassUID(), serie.getSeriesDescription());
+		serie.setIsSpectroscopy(isSpectroscopy);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}

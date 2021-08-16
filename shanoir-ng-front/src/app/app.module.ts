@@ -231,6 +231,7 @@ import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterio
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
+import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
 
 @NgModule({
     imports: [
@@ -389,7 +390,8 @@ import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/
         EventTypePipe,
         SolrCriterionComponent,
         SolrTextSearchComponent,
-        SolrRangeCriterionComponent
+        SolrRangeCriterionComponent,
+        ChallengeBlockComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

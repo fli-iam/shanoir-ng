@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -33,6 +34,8 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +66,6 @@ public class RabbitMQDatasetsService {
 	private RabbitMqStudyUserService listener;
 
 	@Autowired
-	private ExaminationRepository examRepository;
-
-	@Autowired
 	private StudyRepository studyRepository;
 
 	@Autowired
@@ -80,6 +80,15 @@ public class RabbitMQDatasetsService {
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
 
+	@Autowired
+	private ExaminationService examinationService;
+
+	@Autowired
+	private ExaminationRepository examinationRepository;
+	
+	@Autowired
+	private StudyCardRepository studyCardRepository;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
 	@RabbitListener(bindings = @QueueBinding(
@@ -172,7 +181,7 @@ public class RabbitMQDatasetsService {
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-			key = "deleteSubject.event",
+			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
@@ -186,13 +195,8 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository
-			for (Examination exam : examRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examRepository.delete(exam.getId());
+			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
+				examinationService.deleteFromRabbit(exam);
 			}
 			// Delete subject from datasets database
 			subjectRepository.delete(Long.valueOf(event.getObjectId()));
@@ -222,14 +226,14 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository then from database
-			for (Examination exam : examRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examRepository.delete(exam.getId());
+			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				examinationService.deleteFromRabbit(exam);
 			}
+			// also delete associated study cards
+			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				studyCardRepository.delete(sc);
+			}
+
 			// Delete study from datasets database
 			studyRepository.delete(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
