@@ -187,12 +187,9 @@ public class ImporterApiController implements ImporterApi {
 			 * the import work folder (the root of everything): split imports to clearly
 			 * separate them into separate folders for each user
 			 */
-			File userImportDir = ImportUtils.getUserImportDir(importDir);
-			
+			File userImportDir = ImportUtils.getUserImportDir(importDir);			
 			boolean createDicomDir = false;
-
 			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
-
 			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 				createDicomDir = true;
 			}

@@ -45,10 +45,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <node  
                             *ngFor="let serie of study.series" 
                             label="{{serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber}}
-                            	+ ' ' + {{serie.seriesDate | date: 'dd/MM/yyyy'}}
-                            	+ ' ' + serie.modality + ' '
-                            	+ ' ' + {{serie.enhanced ? 'E' : ''}}
-                            	+ ' ' + {{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
+                            	{{serie.seriesDate | date: 'dd/MM/yyyy'}}
+                            	{{serie.modality}}
+                            	{{serie.isEnhanced ? 'E' : ''}}
+                            	{{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
                             awesome="fa fa-brain" 
                             hasBox="true" 
                             [(ngModel)]="serie.selected"
@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Enhanced</td>
-                <td class="value">{{$any(detailedSerie)?.enhanced}}</td>
+                <td class="value">{{$any(detailedSerie)?.isEnhanced ? 'Yes' : 'No'}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>

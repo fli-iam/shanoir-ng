@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.dcm4che3.dcmr.AcquisitionModality;
 import org.dcm4che3.media.DicomDirReader;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -30,6 +28,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,6 +45,9 @@ import org.springframework.stereotype.Service;
 public class DicomDirToModelService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
+	
+	@Autowired
+	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
 	/**
 	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
@@ -99,11 +101,8 @@ public class DicomDirToModelService {
 	 * @throws IOException
 	 */
 	private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
-		String modality = serieRecord.getString(Tag.Modality);
-		// Use dcm4che3 class here: ignore everything outside medical imaging
-		if (AcquisitionModality.codeOf(modality) != null) {
-			Serie serie = new Serie(serieRecord);
-			// instance level: could be image or non-image (to filter later)
+		Serie serie = new Serie(serieRecord);
+		if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
 			List<Instance> instances = new ArrayList<Instance>();
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
 			while(instanceRecord != null) {
@@ -113,12 +112,14 @@ public class DicomDirToModelService {
 			}
 			if (!instances.isEmpty()) {
 				serie.setInstances(instances);
+				dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieRecord);
+				dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 				series.add(serie);
 			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {} ).", serie.getSeriesInstanceUID());
+				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 			}
 		} else {
-			LOG.info("Serie found with non medical imaging modality and therefore ignored.");
+			LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 		}
 	}
 	
