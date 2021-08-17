@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<!-- TODO : other types -->
 
 			<div>
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
 				<node [opened]="false" [hasChildren]="false">
 					<dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
 						<ng-template ngFor let-converter [ngForOf]="converters">
@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</node>
 			</div>
 
-			<fieldset *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'">
+			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg'">
 				<legend>Preview</legend>
                 <button *ngIf="!papayaLoaded" (click)="loadDicomInMemory()">Load preview</button>
 				<papaya *ngIf="papayaLoaded" [params]="papayaParams"></papaya>
@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(back)="goBack()"
 					(save)="save()">
 				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
 				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
             </form-footer>
 
