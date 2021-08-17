@@ -16,8 +16,9 @@
 #              migrations in the DB_CHANGES_DIR and exit
 #              (to be used for setting up a new shanoir instance)
 #
-#   never   -> do not apply anything, just run the myslqd server
-#              (to be used for normal operation)
+#   auto    -> run the mysqld as pid 1, then initialise or apply migrations in a
+#              background process. The mysql daemon is killed in case of
+#              migration failure (fail-fast)
 #
 #   manual  -> apply the migrations manually and exit
 #              (to be used when migrating to a newer shanoir version)
@@ -25,10 +26,9 @@
 #   never   -> do not apply anything, just run the myslqd server
 #              (to be used for normal operation)
 #
-#   auto    -> do not apply anything, just run the myslqd server
-#              (to be used for development only: in auto mode there is no
-#              migration tracking: migrations are applied automatically by the
-#              microservices)
+#   dev     -> do not apply anything, just run the myslqd server
+#              (to be used in development mode: migrations are applied directly
+#              by the microservices with spring.jpa.hibernate.ddl-auto=update)
 
 DB_CHANGES_DIR="/opt/db-changes"
 
@@ -68,6 +68,19 @@ stop_mysqld()
 	echo "$HEADER done"
 }
 
+# return true if the migrations table exists
+check_migrations_db()
+{
+	local tbs="`$MYSQL "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
+	if [ -n "$tbs" ] ; then
+		echo "$HEADER migration table exists"
+		return 0
+	else
+		echo "$HEADER migration table does not exist"
+		return 1
+	fi
+}
+
 # list all existing migrations in the DB_CHANGES_DIR
 list_all_migrations()
 {
@@ -99,8 +112,9 @@ init_migrations()
 			comma=,
 		done
 		echo ';'
-	) | $MYSQL "$MIGRATION_DB" || exit 1
+	) | $MYSQL "$MIGRATION_DB" || return 1
 	echo "$HEADER done migrations init"
+	return 0
 }
 
 # walk all migrations and apply those which are not yet listed in the migrations table
@@ -125,7 +139,7 @@ apply_migrations()
 		else
 			echo "    $migration..."
 
-			[[ "$migration" =~ ^([^/]+)/ ]] || exit 1
+			[[ "$migration" =~ ^([^/]+)/ ]] || return 1
 			db="${BASH_REMATCH[1]}"
 
 			if $MYSQL "$db" <"$DB_CHANGES_DIR/$migration" &&
@@ -138,9 +152,10 @@ apply_migrations()
 		fi
 		printf "    %-64s (%s)\n" "$migration" "$status"
 
-		[ "$status" != fail ] || exit 1
+		[ "$status" != fail ] || return 1
 	done
 	echo "$HEADER done applying migrations"
+	return 0
 }
 
 echo "$HEADER Shanoir NG entrypoint"
@@ -171,17 +186,29 @@ if [ "$1" = mysqld ] ; then
 		wait_mysqld
 		trap stop_mysqld EXIT
 		init_migrations
-		exit 0
+		exit $?
 		;;
 	never)
 		# TODO: (warn/fail/alter healthcheck) if there are pending migrations
 		;;
 	auto)
 		# automatic mode
-                #
-                # no migration tracking (migrations applied automatically by
-                # the microservices)
-                ;;
+		# - run mysqld as PID 1
+		# - init db or apply migrations in a background process
+		(
+			wait_mysqld
+			if check_migrations_db ; then
+				apply_migrations
+			else
+				init_migrations
+			fi
+			if [ $? -ne 0 ] ; then
+				# fail fast
+				echo "migration failed, killing the mysql daemon..."
+				kill 1
+			fi
+		)&
+		;;
 	manual)
 		# manual mode
 		# - run mysqld in a background process
@@ -193,8 +220,12 @@ if [ "$1" = mysqld ] ; then
 		wait_mysqld
 		trap stop_mysqld EXIT
 		apply_migrations
-		exit 0
+		exit $?
 		;;
+	
+	dev)
+		;;
+
 	'')
 		echo "$HEADER error: SHANOIR_MIGRATION is unset" >&2
 		exit 1
