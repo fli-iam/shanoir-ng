@@ -121,14 +121,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @throws FileNotFoundException
 	 */
 	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
-		// instance level
 		List<Image> images = new ArrayList<Image>();
 		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
 			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-			LOG.info("filterAndCreateImages " + serie.getSeriesDescription() + " " + instanceFile.getAbsolutePath());		
 			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
 		}
 		serie.setNonImages(nonImages);
@@ -227,15 +225,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
-			dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
 			LOG.error("Error during processing of DICOM file:", e);
 		}
 	}
-
-
 
 	/**
 	 * This method adds all required infos to separate datasets within series for
@@ -260,7 +255,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			}
 			image.setImageOrientationPatient(imageOrientationPatient);
 		} else {
-			LOG.error("imageOrientationPatientArray in dcm file null: {}", image.getPath());
+			LOG.warn("imageOrientationPatientArray in dcm file null: {}", image.getPath());
 		}
 		// repetition time
 		image.setRepetitionTime(attributes.getDouble(Tag.RepetitionTime, 0));
@@ -337,6 +332,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
+		dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 		dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
@@ -348,6 +344,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		if (StringUtils.isEmpty(serie.getProtocolName())) {
 			serie.setProtocolName(attributes.getString(Tag.ProtocolName));
 		}
+		// keep this check at this place: enhanced Dicom needs to be checked first
+		dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 	}
 
 	/**
