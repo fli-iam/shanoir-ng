@@ -82,9 +82,10 @@ check_migrations_db()
 }
 
 # list all existing migrations in the DB_CHANGES_DIR
+# (in the order they shall be applied)
 list_all_migrations()
 {
-	(cd "$DB_CHANGES_DIR" && find * -name "*.sql") || exit 1
+	(cd "$DB_CHANGES_DIR" && find * -name "*.sql" | sort) || exit 1
 }
 
 # list the migrations that are already applied (i.e. migrations that are listed
