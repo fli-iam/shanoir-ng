@@ -3,6 +3,7 @@ package org.shanoir.ng.importer.dicom;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
+import org.dcm4che3.dcmr.AcquisitionModality;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
@@ -48,12 +49,24 @@ public class DicomSerieAndInstanceAnalyzer {
 		return false;
 	}
 	
-	public Serie checkSerieIsSpectroscopy(Serie serie) {
+	/**
+	 * Ignore all series, that are not medical imaging.
+	 * @param serie
+	 * @return
+	 */
+	public boolean checkSerieIsIgnored(Attributes attributes) {
+		String modality = attributes.getString(Tag.Modality);
+		if (AcquisitionModality.codeOf(modality) != null) {
+			return false;
+		}
+		return true;
+	}
+	
+	public void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();
 		final String seriesDescription = serie.getSeriesDescription();	
 		boolean isSpectroscopy = checkSerieIsSpectroscopy(sopClassUID, seriesDescription);
 		serie.setIsSpectroscopy(isSpectroscopy);
-		return serie;
 	}
 
 	public Serie checkSerieIsSpectroscopy(Serie serie, Attributes attributes) {
@@ -72,6 +85,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	private boolean checkSerieIsSpectroscopy(final String sopClassUID, final String seriesDescription) {
 		if (UID.MRSpectroscopyStorage.equals(sopClassUID)) {
+			LOG.info("Serie found with MR Spectroscopy: {}", seriesDescription);
 			return true;
 		}
 		if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)) { // before private attribute used by Siemens
@@ -82,6 +96,7 @@ public class DicomSerieAndInstanceAnalyzer {
 				LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
 				String wildcard = ImportUtils.wildcardToRegex(value);
 				if (seriesDescription != null && seriesDescription.matches(wildcard)) {
+					LOG.info("Serie found with Spectroscopy (CSANonImageStorage): {}", seriesDescription);
 					return true;
 				}
 			}
@@ -90,64 +105,54 @@ public class DicomSerieAndInstanceAnalyzer {
 	}
 
 	/**
-	 * Checks if serie is Enhanced MR.
+	 * Checks if serie is Enhanced Dicom. SOPClassUID is normally NOT part of the DICOMDIR,
+	 * but maybe part of the dicom query C-FIND and can be checked early.
 	 * 
 	 * @param serie
 	 * @param attributes
 	 */
-	public Serie checkSerieIsEnhanced(Serie serie, Attributes attributes) {
+	public void checkSerieIsEnhanced(Serie serie, Attributes attributes) {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-			|| UID.MRSpectroscopyStorage.equals(sopClassUID) // enhanced by default
-			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sopClassUID)
-			|| UID.EnhancedXAImageStorage.equals(sopClassUID)
-			|| UID.EnhancedXRFImageStorage.equals(sopClassUID)) {
-			serie.setIsEnhanced(true);
-			serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
+		if (sopClassUID != null) {
+			if (UID.EnhancedMRImageStorage.equals(sopClassUID)
+				|| UID.MRSpectroscopyStorage.equals(sopClassUID) // enhanced by default
+				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.LegacyConvertedEnhancedMRImageStorage.equals(sopClassUID)
+				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+				|| UID.EnhancedPETImageStorage.equals(sopClassUID)
+				|| UID.EnhancedXAImageStorage.equals(sopClassUID)
+				|| UID.EnhancedXRFImageStorage.equals(sopClassUID)) {
+				serie.setIsEnhanced(true);
+			} else {
+				serie.setIsEnhanced(false);
+			}
 		} else {
-			serie.setIsEnhanced(false);
-			serie.setIsMultiFrame(false); // original dicom does not know multi-frame
-			// SequenceName attribute only exists in original dicom
-			serie.setSequenceName(attributes.getString(Tag.SequenceName));
+			LOG.warn("SOPClassUID not found to detect Enhanced DICOM.");
 		}
-		return serie;
 	}
 	
 	/**
-	 * Checks for multi-frame dicom serie.
+	 * Checks for multi-frame dicom serie. Requires Enhanced DICOM check done before.
 	 * 
 	 * @param serie
 	 * @param attributes
 	 */
 	public void checkSerieIsMultiFrame(Serie serie, Attributes attributes) {
-		int frameCount = getFrameCount(attributes);
+		int frameCount = 0;
+		if (serie.getIsEnhanced()) {
+			Attributes pFFGS = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);
+			if (pFFGS != null) {
+				frameCount = pFFGS.size();
+			}
+			serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
+		} else {
+			serie.setSequenceName(attributes.getString(Tag.SequenceName));			
+		}
 		serie.setMultiFrameCount(frameCount);
 		if (frameCount > 1) {
 			serie.setIsMultiFrame(true);
 		} else {
-			serie.setIsMultiFrame(false); // an Enhanced MR can have only one frame
-		}
-	}
-	
-	/**
-	 * Get the frame count of the given dicom object.
-	 *
-	 * @param dcmObj
-	 *            the dcmObj
-	 * @return the frame count
-	 */
-	private int getFrameCount(final Attributes attributes) {
-		if (attributes != null) {
-			Attributes pffgs = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);
-			if (pffgs != null) {
-				return pffgs.size();
-			} else {
-				return 0;
-			}
-		} else {
-			return -1;
+			serie.setIsMultiFrame(false); // an Enhanced Dicom can have only one frame
 		}
 	}
 

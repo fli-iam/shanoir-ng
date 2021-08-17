@@ -282,21 +282,23 @@ public class QueryPACSService {
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)
 		};
-		List<Attributes> attributes = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
-		if (attributes != null) {
-			List<Serie> series = new ArrayList<>();
-			for (int i = 0; i < attributes.size(); i++) {
-				Serie serie = new Serie(attributes.get(i));
-				if (serie.getModality() != null && !"PR".equals(serie.getModality()) && !"SR".equals(serie.getModality())) {
+		List<Attributes> attributesList = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
+		if (attributesList != null) {
+			List<Serie> series = new ArrayList<Serie>();
+			for (int i = 0; i < attributesList.size(); i++) {
+				Attributes attributes = attributesList.get(i);
+				Serie serie = new Serie(attributes);
+				if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
+						dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 						series.add(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 					}
 				} else {
-					LOG.warn("Serie found with wrong modality (PR or SR) therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+					LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 				}
 			}
 			series.sort(new SeriesNumberSorter());
