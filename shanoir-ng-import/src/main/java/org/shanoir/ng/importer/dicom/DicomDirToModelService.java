@@ -112,8 +112,6 @@ public class DicomDirToModelService {
 			}
 			if (!instances.isEmpty()) {
 				serie.setInstances(instances);
-				dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, serieRecord);
-				dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 				series.add(serie);
 			} else {
 				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
