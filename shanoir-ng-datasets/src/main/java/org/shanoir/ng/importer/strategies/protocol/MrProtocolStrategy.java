@@ -48,7 +48,8 @@ public class MrProtocolStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
 	public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {
-		if (Boolean.TRUE.equals(serie.getIsEnhanced())) {
+		// dcm4che3 does not support MultiframeExtraction for MRS
+		if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
 			// MultiFrameExtractor is only used in case of EnhancedMR MRI.
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
