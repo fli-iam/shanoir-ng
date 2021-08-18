@@ -107,10 +107,13 @@ public class DicomDirToModelService {
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
-				instances.add(instance);
+				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
+					instances.add(instance);
+				}
 				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);
 			}
 			if (!instances.isEmpty()) {
+				instances.sort(new InstanceNumberSorter());
 				serie.setInstances(instances);
 				series.add(serie);
 			} else {
