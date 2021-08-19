@@ -97,6 +97,8 @@ public class WADODownloaderService {
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
 	
 	private static final String CONTENT_TYPE_DICOM_XML = "application/dicom+xml";
+	
+	private static final String CONTENT_TYPE_DICOM_JSON = "application/json";
 
 	private static final String CONTENT_TYPE = "&contentType";
 	
@@ -148,15 +150,12 @@ public class WADODownloaderService {
 		}
 	}
 	
-	public String downloadDicomMetadataForURLs(final List<URL> urls) throws IOException, MessagingException {
-		if (!urls.isEmpty()) {
-			String firstUrl = urls.get(0).toString();
-			LOG.error("####### 1 " + firstUrl);
-			if (firstUrl.contains(WADO_REQUEST_STUDY_WADO_URI)) firstUrl = wadoURItoWadoRS(firstUrl);
-			LOG.error("####### 2 " + firstUrl);
-			firstUrl = firstUrl.split(WADO_REQUEST_SERIE_WADO_RS)[0].concat("/metadata/");
-			LOG.error("####### 3 " + firstUrl);
-			return downloadMetadataFromPACS(firstUrl);
+	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException {
+		if (url != null) {
+			String urlStr = url.toString();
+			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
+			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
+			return downloadMetadataFromPACS(urlStr);
 		} else {
 			return null;
 		}
@@ -210,7 +209,7 @@ public class WADODownloaderService {
 	private String downloadMetadataFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM_XML + ";");
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		ResponseEntity<String> response = restTemplate.exchange(url,
 				HttpMethod.GET, entity,String.class, "1");

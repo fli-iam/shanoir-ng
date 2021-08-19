@@ -134,7 +134,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     downloadDicomMetadata(datasetId: number): Promise<any> {
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/dicom-metadata/' + datasetId,
-            { responseType: 'text' }
+            { responseType: 'json' }
         ).toPromise();
     }
 

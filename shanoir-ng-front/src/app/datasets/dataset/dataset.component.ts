@@ -158,4 +158,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     downloadMetadata() {
         this.datasetService.downloadDicomMetadata(this.dataset.id);
     }
+
+    seeDicomMetadata() {
+        this.router.navigate(['/dataset/details/dicom/' + this.dataset.id]);
+    }
 }

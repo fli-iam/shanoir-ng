@@ -81,6 +81,7 @@ import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acqu
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { DUAComponent } from './dua/dua.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 
 let routes: Routes = [
     {
@@ -280,6 +281,10 @@ let routes: Routes = [
         path: 'dataset/details/:id',
         component: DatasetComponent,
         data: { mode: 'view' },
+    },
+    {
+        path: 'dataset/details/dicom/:id',
+        component: MetadataComponent
     },
     {
         path: 'dataset/edit/:id',

@@ -1,0 +1,23 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<h2>Dicom metadata</h2>
+<table *ngIf="metadataArr">
+	<tr *ngFor="let tag of metadataArr">
+		<td>{{tag[0]}}</td>
+		<td>{{tag[1].tagLabel}}</td>
+		<td>{{tag[1].Value}}</td>
+	</tr>
+</table>
+<button class="Button left-icon" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>

@@ -399,7 +399,11 @@ public class DatasetApiController implements DatasetApi {
 		final Dataset dataset = datasetService.findById(datasetId);
 		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-		return new ResponseEntity<>(downloader.downloadDicomMetadataForURLs(pathURLs), HttpStatus.OK);
+		if (pathURLs.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+		}
 	}
 	
 	@Override
