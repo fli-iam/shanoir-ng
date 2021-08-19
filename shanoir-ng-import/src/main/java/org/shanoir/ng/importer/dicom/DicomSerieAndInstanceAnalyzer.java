@@ -46,6 +46,15 @@ public class DicomSerieAndInstanceAnalyzer {
 			|| UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
 			return true;
 		}
+		final String referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+		if (UID.RawDataStorage.equals(referencedSOPClassUIDInFile)
+			|| UID.SpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
+			|| UID.SpatialFiducialsStorage.equals(referencedSOPClassUIDInFile)
+			|| UID.DeformableSpatialRegistrationStorage.equals(referencedSOPClassUIDInFile)
+			|| UID.SegmentationStorage.equals(referencedSOPClassUIDInFile)
+			|| UID.SurfaceSegmentationStorage.equals(referencedSOPClassUIDInFile)) {
+			return true;
+		}
 		return false;
 	}
 	

@@ -28,6 +28,7 @@ import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
+import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
@@ -325,8 +326,11 @@ public class QueryPACSService {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < attributes.size(); i++) {
 				Instance instance = new Instance(attributes.get(i));
-				instances.add(instance);
+				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
+					instances.add(instance);
+				}
 			}
+			instances.sort(new InstanceNumberSorter());
 			serie.setInstances(instances);
 		}
 	}

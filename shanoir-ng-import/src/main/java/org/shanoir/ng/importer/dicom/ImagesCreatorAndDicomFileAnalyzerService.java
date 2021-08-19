@@ -222,6 +222,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
+			LOG.warn("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
