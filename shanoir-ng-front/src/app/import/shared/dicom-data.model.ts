@@ -63,7 +63,7 @@ export class SerieDicom {
     institution: InstitutionDicom;
     isCompressed: boolean;
     isSpectroscopy: boolean;
-    isEnhancedMR: boolean;
+    isEnhanced: boolean;
     isMultiFrame: boolean;
     multiFrameCount: number;
     nonImages: any[];

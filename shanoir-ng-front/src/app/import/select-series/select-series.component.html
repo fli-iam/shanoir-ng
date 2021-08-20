@@ -14,14 +14,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">2. Select series</div>
 <fieldset class="step"> 
-    <p>Please select only the series useful for your study.</p>
-    <p *ngIf="modality" class="modality">
-        The modality of the dataset(s) that you are importing is
-        <span *ngIf="modality=='MR'">MR</span>
-        <span *ngIf="modality=='PT'">PT</span>
-        <span *ngIf="modality=='CT'">CT</span>.
-    </p>
-    <p class="warning"><i class="fas fa-exclamation-triangle"></i>Please select the series of <strong class="warning">one</strong> patient at the time.</p>
+    <p>Please select only the series useful for your study, to save precious disk space.</p>
+    <p class="warning"><i class="fas fa-exclamation-triangle"></i>Please select the series of <strong class="warning">one</strong> patient per import.</p>
     <div class="tree">
         <node  
             *ngFor="let patient of patients" 
@@ -50,8 +44,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [hasChildren]="study.series.length > 0">
                         <node  
                             *ngFor="let serie of study.series" 
-                            label="{{serie.seriesDescription ? serie.seriesDescription : 'serie n°'
-                            	+ serie.seriesNumber}} {{serie.seriesDate | date: 'dd/MM/yyyy'}} {{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
+                            label="{{serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber}}
+                            	{{serie.seriesDate | date: 'dd/MM/yyyy'}}
+                            	{{serie.modality}}
+                            	{{serie.isEnhanced ? 'E' : ''}}
+                            	{{serie.isSpectroscopy ? 'spectroscopy' : ''}}"
                             awesome="fa fa-brain" 
                             hasBox="true" 
                             [(ngModel)]="serie.selected"
@@ -107,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
-        <div *ngIf="!papayaError && modality != 'Ct' && !detailedSerie.isSpectroscopy"> 
+        <div *ngIf="!papayaError && detailedSerie.modality != 'Ct' && !detailedSerie.isSpectroscopy"> 
             <papaya [params]="papayaParams"></papaya>
         </div>
         <div *ngIf="papayaError" class="error"> 
@@ -115,16 +112,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
         <table>
             <tr class="item">
-                <td class="label">Id</td>
-                <td class="value">{{$any(detailedSerie)?.seriesInstanceUID}}</td>
+                <td class="label">Modality</td>
+                <td class="value">{{$any(detailedSerie)?.modality}}</td>
             </tr>
             <tr class="item">
-                <td class="label">Protocol name</td>
-                <td class="value">{{$any(detailedSerie)?.protocolName}}</td>
+                <td class="label">Enhanced</td>
+                <td class="value">{{$any(detailedSerie)?.isEnhanced ? 'Yes' : 'No'}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>
                 <td class="value">{{$any(detailedSerie)?.seriesDescription}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Protocol name</td>
+                <td class="value">{{$any(detailedSerie)?.protocolName}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
@@ -135,12 +136,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <td class="value">{{$any(detailedSerie)?.seriesNumber}}</td>
             </tr>
             <tr class="item">
-                <td class="label">Number of images</td>
-                <td class="value">{{$any(detailedSerie)?.imagesNumber}}</td>
+                <td class="label">Id</td>
+                <td class="value">{{$any(detailedSerie)?.seriesInstanceUID}}</td>
             </tr>
             <tr class="item">
-                <td class="label">Modality</td>
-                <td class="value">{{$any(detailedSerie)?.modality}}</td>
+                <td class="label">Number of images</td>
+                <td class="value">{{$any(detailedSerie)?.imagesNumber}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Number of non-image objects</td>

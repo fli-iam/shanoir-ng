@@ -70,8 +70,8 @@ public class Serie {
 	@JsonProperty("multiFrameCount")
 	private Integer multiFrameCount;
 
-	@JsonProperty("isEnhancedMR")
-	private Boolean isEnhancedMR;
+	@JsonProperty("isEnhanced")
+	private Boolean isEnhanced;
 	
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
@@ -248,12 +248,12 @@ public class Serie {
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
 	}
 
-	public Boolean getIsEnhancedMR() {
-		return isEnhancedMR;
+	public Boolean getIsEnhanced() {
+		return isEnhanced;
 	}
 
-	public void setIsEnhancedMR(Boolean isEnhancedMR) {
-		this.isEnhancedMR = isEnhancedMR;
+	public void setIsEnhanced(Boolean isEnhanced) {
+		this.isEnhanced = isEnhanced;
 	}
 
 	public Boolean getIsSpectroscopy() {
