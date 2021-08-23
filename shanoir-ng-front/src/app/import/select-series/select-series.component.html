@@ -81,6 +81,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <td class="label">Birth date</td>
                 <td class="value">{{$any(detailedPatient)?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
             </tr>
+            <tr class="item">
+                <td class="label">Identity removed</td>
+                <td class="value">{{$any(detailedPatient)?.patientIdentityRemoved ? 'Yes' : 'No'}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Deidentification method</td>
+                <td class="value">{{$any(detailedPatient)?.deIdentificationMethod}}</td>
+            </tr>
         </table>
     </div>
 
