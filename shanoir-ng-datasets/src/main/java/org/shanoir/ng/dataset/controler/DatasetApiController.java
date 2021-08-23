@@ -317,9 +317,9 @@ public class DatasetApiController implements DatasetApi {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()) + DOWNLOAD);
 		workFolder.mkdirs();
+		List<URL> pathURLs = new ArrayList<>();
 
 		try {
-			List<URL> pathURLs = new ArrayList<>();
 			String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
 			if (subjectName == null) {
 				subjectName = "unknown";
@@ -367,6 +367,15 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieveing dataset data.", e));
 		}
+
+		// Check folder emptiness
+		if (pathURLs.isEmpty()) {
+			// Folder is empty => return an error
+			LOG.error("No files could be found for the dataset(s).");
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
+		}
+
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
 
@@ -449,6 +458,7 @@ public class DatasetApiController implements DatasetApi {
 		File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
 		tmpFile.mkdirs();
 
+		boolean isEmpty = true;
 		// Get the data
 		try {
 			for (Dataset dataset : datasets) {
@@ -483,6 +493,7 @@ public class DatasetApiController implements DatasetApi {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
 				}
+				isEmpty = isEmpty && pathURLs.isEmpty();
 			}
 		} catch (IOException | MessagingException e) {
 			LOG.error("Error while copying files: ", e);
@@ -495,6 +506,15 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "The size of data you tried to download is too Important. Please split your download.", error));
 		}
+
+		// Check folder emptiness
+		if (isEmpty) {
+			// Folder is empty => return an error
+			LOG.error("No files could be found for the dataset(s).");
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for the dataset(s)."));
+		}
+
 		// Zip it
 		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
 		zipFile.createNewFile();
@@ -508,13 +528,13 @@ public class DatasetApiController implements DatasetApi {
 		eventService.publishEvent(event);
 
 		try (InputStream is = new FileInputStream(zipFile);) {
-		    response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
-		    response.setContentType(contentType);
-		    response.setContentLengthLong(zipFile.length());
-		    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-		    response.flushBuffer();
-		    event.setStatus(ShanoirEvent.SUCCESS);
-		    eventService.publishEvent(event);
+			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+			response.setContentType(contentType);
+			response.setContentLengthLong(zipFile.length());
+			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+			response.flushBuffer();
+			event.setStatus(ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
 		} finally {
 			FileUtils.deleteQuietly(tmpFile);
 			FileUtils.deleteQuietly(zipFile);
