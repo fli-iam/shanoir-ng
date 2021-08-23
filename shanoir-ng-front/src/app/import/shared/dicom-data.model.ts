@@ -38,6 +38,8 @@ export class PatientDicom {
     patientName: string;
     patientBirthDate: Date;
     patientSex: Sex;
+    patientIdentityRemoved: boolean;
+    deIdentificationMethod: string;
     studies: StudyDicom[];
 }
 
