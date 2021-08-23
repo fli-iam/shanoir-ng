@@ -70,6 +70,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	private static final String SUFFIX_DCM = ".dcm";
 	
+	private static final String YES = "YES";
+
 	@Autowired
 	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
@@ -365,6 +367,15 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		if (StringUtils.isEmpty(patient.getPatientSex())) {
 			// has not been found in dicomdir, so we get it from .dcm file:
 			patient.setPatientSex(attributes.getString(Tag.PatientSex));
+		}
+		// we can not display this information for the pacs in select series: as info not available
+		String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
+		if (StringUtils.isNotBlank(patientIdentityRemoved)) {
+			if (YES.equals(patientIdentityRemoved)) {
+				patient.setPatientIdentityRemoved(true);
+				String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
+				patient.setDeIdentificationMethod(deIdentificationMethod);
+			}
 		}
 	}
 
