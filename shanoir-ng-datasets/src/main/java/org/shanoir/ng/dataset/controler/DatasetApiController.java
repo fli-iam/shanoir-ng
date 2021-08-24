@@ -182,16 +182,16 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
-    		@RequestBody(required = true) List<Long> datasetIds)
-			throws RestServiceException {
+			@RequestBody(required = true) List<Long> datasetIds)
+					throws RestServiceException {
 		try {
 			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 			for (Dataset dataset : datasets) {
-				bidsService.deleteDataset(dataset);				
+				bidsService.deleteDataset(dataset);
 			}
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -390,7 +390,7 @@ public class DatasetApiController implements DatasetApi {
 		try (InputStream is = new FileInputStream(zipFile);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
 			response.setContentType(contentType);
-		    response.setContentLengthLong(zipFile.length());
+			response.setContentLengthLong(zipFile.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 			event.setStatus(ShanoirEvent.SUCCESS);
@@ -460,8 +460,9 @@ public class DatasetApiController implements DatasetApi {
 
 		boolean isEmpty = true;
 		// Get the data
-		try {
-			for (Dataset dataset : datasets) {
+		List<Dataset> failingDatasets = new ArrayList<Dataset>();
+		for (Dataset dataset : datasets) {
+			try {
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findOne(dataset.getSubjectId()).getName();
 				String studyName = studyRepo.findOne(dataset.getStudyId()).getName();
@@ -494,25 +495,44 @@ public class DatasetApiController implements DatasetApi {
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
 				}
 				isEmpty = isEmpty && pathURLs.isEmpty();
+				if (pathURLs.isEmpty()) {
+					failingDatasets.add(dataset);
+				}
+			} catch (IOException | MessagingException e) {
+				// Here we just keep in memory the list of failing files
+				LOG.error("Error while copying files: ", e);
+				failingDatasets.add(dataset);
+			} catch(OutOfMemoryError error) {
+				LOG.error("Out of memory error while copying files: ", error);
+				FileUtils.deleteQuietly(tmpFile);
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "The size of data you tried to download is too Important. Please split your download.", error));
 			}
-		} catch (IOException | MessagingException e) {
-			LOG.error("Error while copying files: ", e);
-			FileUtils.deleteQuietly(tmpFile);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files. Please contact an administrator.", e));
-		} catch(OutOfMemoryError error) {
-			LOG.error("Out of memory error while copying files: ", error);
-			FileUtils.deleteQuietly(tmpFile);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "The size of data you tried to download is too Important. Please split your download.", error));
 		}
-
-		// Check folder emptiness
+		
+		// Check emptiness => no data at all
 		if (isEmpty) {
 			// Folder is empty => return an error
 			LOG.error("No files could be found for the dataset(s).");
+			FileUtils.deleteQuietly(tmpFile);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for the dataset(s)."));
+		}
+		
+		// Check for errors
+		if (!failingDatasets.isEmpty()) {
+			FileUtils.deleteQuietly(tmpFile);
+			StringBuilder listOfDatasets = new StringBuilder();
+			for (Dataset dataset : failingDatasets) {
+				listOfDatasets.append(dataset.getName())
+							  .append("(").append(dataset.getId())
+							  .append("), ");
+			}
+			listOfDatasets.deleteCharAt(listOfDatasets.length() - 1);
+			listOfDatasets.deleteCharAt(listOfDatasets.length() - 1);
+
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files for the following datasets: " + listOfDatasets.toString()));
 		}
 
 		// Zip it
