@@ -36,7 +36,6 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
       use-new-id-generator-mappings: false
-    open-in-view: false
     properties:
       hibernate:
         connection:
