@@ -76,7 +76,7 @@ public interface DatasetService {
 	 * @return created dataset.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#dataset.getStudyId(), 'CAN_IMPORT'))")
-	Dataset create(Dataset dataset);
+	Dataset save(Dataset dataset);
 
 	/**
 	 * Update a dataset.

@@ -99,7 +99,7 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Dataset create(final Dataset dataset) {
+	public Dataset save(final Dataset dataset) {
 		if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
 			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {

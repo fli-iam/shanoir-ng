@@ -104,7 +104,7 @@ public class DatasetServiceSecurityTest {
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findPage, new PageRequest(0, 10));
-		assertAccessDenied(service::create, mockDataset());
+		assertAccessDenied(service::save, mockDataset());
 		assertAccessDenied(service::update, mockDataset(1L));
 		assertAccessDenied(service::deleteById, ENTITY_ID);
 	}
@@ -137,7 +137,7 @@ public class DatasetServiceSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findPage, new PageRequest(0, 10));
-		assertAccessAuthorized(service::create, mockDataset());
+		assertAccessAuthorized(service::save, mockDataset());
 		assertAccessAuthorized(service::update, mockDataset(1L));
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
 	}
@@ -197,9 +197,9 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_DOWNLOAD")).willReturn(true);
-		assertAccessDenied(service::create, mrDs);
+		assertAccessDenied(service::save, mrDs);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
-		assertAccessAuthorized(service::create, mrDs);
+		assertAccessAuthorized(service::save, mrDs);
 	}
 	
 	

@@ -146,7 +146,7 @@ public class DatasetApiControllerTest {
 	public void setup() throws ShanoirException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
-		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+		given(datasetServiceMock.save(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findOne(Mockito.anyLong())).willReturn(study);
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);

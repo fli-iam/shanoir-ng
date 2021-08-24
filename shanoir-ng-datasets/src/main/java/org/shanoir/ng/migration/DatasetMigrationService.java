@@ -28,6 +28,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
+import org.shanoir.ng.shared.migration.MigrationConstants;
 import org.shanoir.ng.shared.migration.MigrationJob;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
@@ -45,6 +46,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -86,8 +88,29 @@ public class DatasetMigrationService {
 
 	@Autowired
 	ShanoirEventService eventService;
+	
+	@Value("${migration-folder}")
+	private String migrationFolder;
+	
+	@Value("${dcm4chee-arc.protocol}")
+	private String dcm4cheeProtocol;
 
-	ShanoirEvent event;
+	@Value("${dcm4chee-arc.host}")
+	private String dcm4cheeHost;
+
+	@Value("${dcm4chee-arc.port.web}")
+	private String dcm4cheePortWeb;
+
+	@Value("${dcm4chee-arc.dicom.wado.uri}")
+	private String dicomWADOURI;
+	
+	@Value("${dcm4chee-arc.dicom.web.rs}")
+	private String dicomWebRS;
+	
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
+
+	private ShanoirEvent event;
 
 	/**
 	 * Migrates all the datasets from a study using a MigrationJob
@@ -387,7 +410,7 @@ public class DatasetMigrationService {
 	}
 
 	private void migrateDatasetFile(DatasetFile file, DatasetExpression createdExpression, Dataset createdDataset, Long oldExamId, MigrationJob job) throws ShanoirException {
-		File workFolder = new File("/tmp/Migration_" + LocalDateTime.now());
+		File workFolder = new File(migrationFolder, "/Migration_" + LocalDateTime.now());
 		try {
 			workFolder.mkdirs();
 
@@ -418,6 +441,18 @@ public class DatasetMigrationService {
 				file.setPath(file.getPath().replace(
 						"/ses-" + oldExamId ,
 						"/ses-" + job.getExaminationMap().get(oldExamId)));
+			} else {
+				// Change PACS url with constants
+				String path = file.getPath();
+				path = path.replace(dcm4cheeProtocol, MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT);
+				path = path.replace(dcm4cheeHost, MigrationConstants.DCM4CHEE_HOST_CONSTANT);
+				path = path.replace(dcm4cheePortWeb, MigrationConstants.DCM4CHEE_PORT_CONSTANT);
+				if (dicomWeb) {
+					path = path.replace(dicomWADOURI, MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT);
+				} else {
+					path = path.replace(dicomWebRS, MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT);
+				}
+				file.setPath(path);
 			}
 
 			// Move file

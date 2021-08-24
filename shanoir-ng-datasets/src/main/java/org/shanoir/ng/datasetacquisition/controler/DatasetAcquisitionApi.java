@@ -61,7 +61,8 @@ public interface DatasetAcquisitionApi {
     @PostMapping(value = "/datasetacquisition/new",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<DatasetAcquisition> createNewDatasetAcquisition(
+	@PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<DatasetAcquisition> saveNewDatasetAcquisition(
     		@ApiParam(value = "DatasetAcquisition to create", required=true) @RequestBody DatasetAcquisition acquisition,
     		final BindingResult result) throws RestServiceException;
 

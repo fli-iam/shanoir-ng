@@ -127,7 +127,7 @@ public class StudyMigrationService {
 				subjectStudy.setSubject(newSubject);
 			}
 			// Reset studyExaminations
-			study.setExaminationIds(Collections.emptyList());
+			study.setExaminationIds(Collections.emptySet());
 
 			// Set StudyUser to only current user
 			List<StudyUser> suList = new ArrayList<>();

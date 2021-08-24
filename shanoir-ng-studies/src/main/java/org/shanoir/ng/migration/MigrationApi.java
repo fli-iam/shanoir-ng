@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,7 @@ public interface MigrationApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@GetMapping(value = "/migrate", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<String> migrateStudy (
 			@ApiParam(value = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") Integer shanoirUrl,
 			@ApiParam(value = "Username of user", required = true) @RequestParam("username") String username,
@@ -56,6 +58,7 @@ public interface MigrationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@GetMapping(value = "urls", produces = {
 			"application/json" })
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<IdName>> getMigrationConfig() throws IOException;
 
 }

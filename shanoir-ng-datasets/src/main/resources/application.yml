@@ -91,6 +91,7 @@ ms.url:
 # Data folder configuration
 datasets-data: /var/datasets-data
 bids-data-folder: /var/datasets-data/bids-data
+migration-folder: /tmp
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log

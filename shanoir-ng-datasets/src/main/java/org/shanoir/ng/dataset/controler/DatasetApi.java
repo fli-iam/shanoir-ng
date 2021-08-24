@@ -68,7 +68,8 @@ public interface DatasetApi {
     @PostMapping(value = "new",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Dataset> createNewDatasets(
+	@PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<Dataset> saveNewDataset(
     		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
     		final BindingResult result) throws RestServiceException;
 

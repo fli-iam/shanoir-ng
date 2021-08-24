@@ -9,6 +9,7 @@ import org.shanoir.ng.datasetfile.service.DatasetFileApi;
 import org.shanoir.ng.datasetfile.service.DatasetFileService;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.migration.MigrationConstants;
 import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,15 +28,15 @@ import io.swagger.annotations.ApiParam;
 public class DatasetFileApiController implements DatasetFileApi {
 
 	@Autowired
-	DatasetFileService datasetFileService;
+	private DatasetFileService datasetFileService;
 
 	@Autowired
 	@Qualifier("stowrs")
-	DicomServiceApi stowRsService;
+	private DicomServiceApi stowRsService;
 
 	@Autowired
 	@Qualifier("cstore")
-	DicomServiceApi cStoreService;
+	private DicomServiceApi cStoreService;
 
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -49,6 +50,15 @@ public class DatasetFileApiController implements DatasetFileApi {
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
+	@Value("${migration-folder}")
+	private String migrationFolder;
+
+	@Value("${dcm4chee-arc.dicom.wado.uri}")
+	private String dicomWADOURI;
+	
+	@Value("${dcm4chee-arc.dicom.web.rs}")
+	private String dicomWebRS;
+
 	@Override
 	public 	ResponseEntity<DatasetFile> saveNewDatasetFile(
 			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
@@ -56,9 +66,27 @@ public class DatasetFileApiController implements DatasetFileApi {
 		try {
 			// Save file
 			if (datasetFile.isPacs()) {
-				String oldPath = datasetFile.getPath();
-				String newPath = oldPath.replaceAll("http(.*)wado\\?", dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb + "/wado?");
-				datasetFile.setPath(newPath);
+
+				String path = datasetFile.getPath();
+				path = path.replace(MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT, dcm4cheeProtocol);
+				path = path.replace(MigrationConstants.DCM4CHEE_HOST_CONSTANT, dcm4cheeHost);
+				path = path.replace(MigrationConstants.DCM4CHEE_PORT_CONSTANT, dcm4cheePortWeb);
+
+				// This may have to be changes in case old is dicom and new is not
+				if (path.contains(MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT)) {
+					if (dicomWeb) {
+						path = path.replace(MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT, dicomWebRS);
+					} else {
+						path = path.replace(MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT, dicomWADOURI);
+					}
+				} else if (path.contains(MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT)){
+					if (dicomWeb) {
+						path = path.replace(MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT, dicomWebRS);
+					} else {
+						path = path.replace(MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT, dicomWADOURI);
+					}
+				}
+				datasetFile.setPath(path);
 			}
 
 			DatasetFile createdFile = datasetFileService.create(datasetFile);
@@ -77,7 +105,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId);
 		File destination = null;
 		try {
-			destination = new File("/tmp/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
+			destination = new File(migrationFolder + "/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
 			if (datasetFile.isPacs()) {
 				// Copy file to load it in the PACS
 				destination.getParentFile().mkdirs();
