@@ -126,9 +126,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
 
 		// patient birth date
-		if (patientBirthDate != null && patientBirthDate.length() != 0) {
+		if (patientBirthDate != null && patientBirthDate.length() >= 4) {
 			String newDate = patientBirthDate.substring(0, 4) + "01" + "01";
 			anonymizeTagAccordingToVR(attributes, Tag.PatientBirthDate, newDate);
+		} else {
+			anonymizeTagAccordingToVR(attributes, Tag.PatientBirthDate, "19000101");
 		}
 	}
 

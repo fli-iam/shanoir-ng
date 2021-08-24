@@ -42,6 +42,14 @@ public interface ExaminationService {
 	void deleteById(Long id) throws EntityNotFoundException;
 
 	/**
+	 * Delete an examination from a rabbit MQ call, not identified
+	 * 
+	 * @param exam the examination to delete
+	 * @throws EntityNotFoundException
+	 */
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
+
+	/**
 	 * Get a paginated list of examinations reachable by connected user.
 	 * 
 	 * @param pageable pagination data.

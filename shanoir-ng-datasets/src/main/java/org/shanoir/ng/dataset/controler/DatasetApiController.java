@@ -1,4 +1,5 @@
 /**
+
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -28,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -65,6 +65,7 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -75,12 +76,11 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -94,8 +94,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import io.swagger.annotations.ApiParam;
@@ -159,6 +157,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	ShanoirEventService eventService;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
 
@@ -176,6 +177,23 @@ public class DatasetApiController implements DatasetApi {
 			Dataset dataset = datasetService.findById(datasetId);
 			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<Void> deleteDatasets(
+			@ApiParam(value = "ids of the datasets", required=true) @Valid
+    		@RequestBody(required = true) List<Long> datasetIds)
+			throws RestServiceException {
+		try {
+			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+			for (Dataset dataset : datasets) {
+				bidsService.deleteDataset(dataset);
+			}
+			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -273,6 +291,7 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public void downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@ApiParam(value = "Dowloading nifti, decide the nifti converter id") final Long converterId,
 			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM)
 			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
 					throws RestServiceException, IOException {
@@ -310,8 +329,30 @@ public class DatasetApiController implements DatasetApi {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
 			} else if (NII.equals(format)) {
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				// Check if we want a specific converter
+				if (converterId != null) {
+					// If converter ID is set, redo a conversion
+					// Create a temporary folder
+					// Add timestamp to get a difference
+					File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
+					tmpFile.mkdirs();
+					// Download DICOMs in the temporary folder
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName);
+
+					// Convert them, sending to import microservice
+					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
+
+					if (!result) {
+						throw new RestServiceException(
+								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					}
+					tmpFilePath = tmpFile.getAbsolutePath();
+					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
+				} else  {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
@@ -494,7 +535,7 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
-			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
 			name.append(subjectName).append("_")
@@ -505,8 +546,12 @@ public class DatasetApiController implements DatasetApi {
 			}
 			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
 			.append(index)
-			.append(".").append(FilenameUtils.getExtension(srcFile.getName()));
-
+			.append(".");
+			if (srcFile.getName().endsWith(".nii.gz")) {
+				name.append("nii.gz");
+			} else {
+				name.append(FilenameUtils.getExtension(srcFile.getName()));
+			}
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			index++;

@@ -22,18 +22,6 @@
 .block .pannel table { width: 100%; }
 .block .pannel td { height: auto; }
 
-.challenge { width: 866px; border-color: blue; }
-.challenge .block-title { width: auto; margin-top: 15px; margin-bottom: 0; font-size: 30px; }
-.challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; width: 405px; white-space: nowrap; overflow: hidden; }
-.challenge-files li { line-height: 26px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
-.challenge-files li:hover { color: blue; }
-.challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
-.challenge .left-cell { background-color: blue; color: white; }
-.msg { font-size: 16px;  width: 412px; color: white; padding: 0 10px; }
-.challenge-name { font-size: 20px; margin-top: 3px; }
-.challenge-title { color: midnightblue; }
-.challenge-title i { margin: 0 15px; }
-
 .account-requests { border-color: blueviolet; }
 .account-requests .icon { background-color: blueviolet; }
 .account-requests .pannel table { margin-top: 8px; }

@@ -235,6 +235,7 @@ import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
 
 @NgModule({
     imports: [
@@ -395,7 +396,8 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
         DUASigningComponent,
         EventTypePipe,
         SolrCriterionComponent,
-        SolrTextSearchComponent
+        SolrTextSearchComponent,
+        ChallengeBlockComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

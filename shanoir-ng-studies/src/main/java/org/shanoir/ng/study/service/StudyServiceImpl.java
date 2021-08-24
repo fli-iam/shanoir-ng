@@ -369,6 +369,33 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	public void addExaminationToStudy(Long examinationId, Long studyId) {
+		// Update study_examination table
+		Study stud = this.studyRepository.findOne(studyId);
+		Set<Long> exams = stud.getExaminationIds();
+		if (exams == null) {
+			exams = new HashSet<>();
+			stud.setExaminationIds(exams);
+		}
+		exams.add(examinationId);
+		this.studyRepository.save(stud);
+	}
+
+	@Override
+	public void deleteExamination(Long examinationId, Long studyId) {
+		// Update study_examination table
+		Study stud = this.studyRepository.findOne(studyId);
+		Set<Long> exams = stud.getExaminationIds();
+		if (exams == null) {
+			exams = new HashSet<>();
+		} else {
+			exams.remove(examinationId);
+		}
+		stud.setExaminationIds(exams);
+		this.studyRepository.save(stud);
+	}
+
+	@Override
 	public List<Study> findChallenges() {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studyRepository.findByChallengeTrue());
