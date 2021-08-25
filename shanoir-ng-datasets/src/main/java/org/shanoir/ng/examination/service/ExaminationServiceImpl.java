@@ -15,7 +15,6 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -23,6 +22,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
@@ -60,24 +62,44 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private SolrService solrService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		Examination exam = examinationRepository.findOne(id);
-		List<Long> datasets = new ArrayList<>();
 
-		if (exam.getDatasetAcquisitions() != null) {
-			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-				for (Dataset ds : acq.getDatasets()) {
-					datasets.add(ds.getId());
-				}
+		Long tokenUserId = KeycloakUtil.getTokenUserId();
+		String studyIdAsString = exam.getStudyId().toString();
+
+		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
+		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+			for (Dataset ds : dsAcq.getDatasets())  {
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				solrService.deleteFromIndex(ds.getId());
 			}
 		}
+
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 		// Delete examination
 		examinationRepository.delete(id);
+	}
 
-		for (Long dsId : datasets) {
-			solrService.deleteFromIndex(dsId);
+	@Override
+	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException {
+		Long tokenUserId = KeycloakUtil.getTokenUserId();
+		String studyIdAsString = exam.getStudyId().toString();
+		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
+		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+			for (Dataset ds : dsAcq.getDatasets())  {
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				solrService.deleteFromIndex(ds.getId());
+			}
 		}
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		examinationRepository.delete(exam.getId());
 	}
 
 	@Value("${datasets-data}")
