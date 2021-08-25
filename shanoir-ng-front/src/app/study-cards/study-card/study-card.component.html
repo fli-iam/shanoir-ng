@@ -112,6 +112,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[disabled]="selectedRules.length <= 0">
 					Import selected rules<i class="fas fa-file-import"></i>
 				</button>
+				<button *ngIf="mode == 'view' && isAdminOrExpert"
+						type="button" 
+						class="Button right-icon" 
+						(click)="goToApply()">
+					Reapply study card<i class="fas fa-cogs"></i>
+				</button>
 			</form-footer>
 		</div>
 	</form>

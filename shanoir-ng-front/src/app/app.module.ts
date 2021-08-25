@@ -234,6 +234,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 
 @NgModule({
     imports: [
@@ -394,7 +395,8 @@ import { MetadataComponent } from './datasets/dataset/metadata/metadata.componen
         EventTypePipe,
         SolrCriterionComponent,
         SolrTextSearchComponent,
-        MetadataComponent
+        MetadataComponent,
+        StudyCardApplyComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

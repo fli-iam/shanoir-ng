@@ -23,6 +23,7 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -48,6 +49,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     selectedRules: StudyCardRule[] = [];
     hasAdministrateRightPromise: Promise<boolean>;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
+    isAdminOrExpert: boolean;
 
     constructor(
             private route: ActivatedRoute,
@@ -56,11 +58,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
-            private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
+            private acqEqptLabelPipe: AcquisitionEquipmentPipe,
+            keycloakService: KeycloakService) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
+        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
      }
 
     getService(): EntityService<StudyCard> {
@@ -207,6 +211,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             })
         })
         this.form.get('rules').updateValueAndValidity();
+    }
+
+    goToApply() {
+        this.router.navigate(['/study-card/apply/' + this.entity.id]);
     }
 
 }

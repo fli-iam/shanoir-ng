@@ -28,7 +28,12 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	Iterable<Dataset> findByDatasetAcquisitionExaminationStudyId(Long studyId);
 	
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+	
+	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
+
+	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudyIdIn(Long studycardId, List<Long> studyIds);
 
 	void deleteByIdIn(List<Long> ids);
+
 
 }

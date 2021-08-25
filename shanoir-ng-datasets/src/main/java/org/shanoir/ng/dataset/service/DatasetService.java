@@ -109,11 +109,13 @@ public interface DatasetService {
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	public List<Dataset> findByStudyId(Long studyId);
-
   
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
 	List<Dataset> findByAcquisition(Long acquisitionId);
-  
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
+	List<Dataset> findByStudycard(Long studycardId);
   
 	/**
 	 * Get database statistics
@@ -122,5 +124,4 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
-
 }

@@ -704,6 +704,26 @@ public class DatasetSecurityService {
     }
     
     /**
+     * Filter datasets in that page checking the connected user has the right on those datasets.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((DatasetDTO dataset) -> {
+    		studyIds.add(dataset.getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((DatasetDTO dataset) -> !checkedIds.contains(dataset.getStudyId()));
+    	return true;
+    }
+    
+    /**
      * Check that the connected user has the given right for the given examination.
      * 
      * @param examinationId the examination id

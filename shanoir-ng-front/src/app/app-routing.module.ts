@@ -82,6 +82,7 @@ import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { DUAComponent } from './dua/dua.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 
 let routes: Routes = [
     {
@@ -500,6 +501,11 @@ let routes: Routes = [
 		component: StudyCardComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
+	},
+    {
+		path: 'study-card/apply/:id',
+		component: StudyCardApplyComponent,
+        canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
 		path: 'dataset-acquisition',
