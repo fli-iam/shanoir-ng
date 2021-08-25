@@ -116,4 +116,11 @@ public interface EmailService {
 	 */
 	void notifyStudyManagerDataImported(DatasetImportEmail generatedMail);
 
+	/**
+	 *  This method notifies a study manager that san import fail for a given study
+	 * @param generatedMail: The object containing all the mail informations
+	 */
+	void notifyStudyManagerImportFailure(DatasetImportEmail generatedMail);
+
+
 }
