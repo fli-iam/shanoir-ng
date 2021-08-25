@@ -171,6 +171,7 @@ public class ImporterManagerService {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setProgress(1f);
 			eventService.publishEvent(event);
+			sendFailureMail(importJob, userId, e.getMessage());
 		}
 		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 	}
