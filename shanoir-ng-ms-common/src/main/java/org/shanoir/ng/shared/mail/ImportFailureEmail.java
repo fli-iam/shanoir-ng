@@ -1,4 +1,4 @@
-package org.shanoir.ng.utils;
+package org.shanoir.ng.shared.mail;
 
 public class ImportFailureEmail extends ImportEmail {
 

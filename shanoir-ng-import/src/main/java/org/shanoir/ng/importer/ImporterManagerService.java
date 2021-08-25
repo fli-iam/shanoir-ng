@@ -39,15 +39,22 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.mail.ImportEmail;
+import org.shanoir.ng.shared.mail.ImportFailureEmail;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -93,6 +100,9 @@ public class ImporterManagerService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+	
+	@Autowired
+	StudyUserRightsRepository studyUserRightRepo;
 
 	@Value("${shanoir.import.directory}")
 	private String importDir;
@@ -163,6 +173,47 @@ public class ImporterManagerService {
 			eventService.publishEvent(event);
 		}
 		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
+	}
+
+	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+		ImportFailureEmail generatedMail = new ImportFailureEmail();
+		generatedMail.setExaminationId(importJob.getExaminationId().toString());
+		generatedMail.setStudyId(importJob.getStudyId().toString());
+		generatedMail.setSubjectName(importJob.getSubjectName());
+		generatedMail.setStudyName(importJob.getStudyName());
+		generatedMail.setUserId(userId);
+		
+		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
+
+		sendMail(importJob, generatedMail);
+	}
+
+	/**
+	 * Sends the given mail in entry to all recipients in a given study
+	 * @param job the imprt job
+	 * @param email the recipients
+	 */
+	private void sendMail(ImportJob job, ImportEmail email) {
+		List<Long> recipients = new ArrayList<>();
+
+		// Get all recpients
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
+		for (StudyUser user : users) {
+			if (user.isReceiveNewImportReport()) {
+				recipients.add(user.getUserId());
+			}
+		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recipients
+			return;
+		}
+		email.setRecipients(recipients);
+
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(email));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send email for this import. ", e);
+		}
 	}
 	
 	/**
