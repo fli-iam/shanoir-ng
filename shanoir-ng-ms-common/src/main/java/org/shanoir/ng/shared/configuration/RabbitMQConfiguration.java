@@ -64,7 +64,7 @@ public class RabbitMQConfiguration {
 	/** Subject name updated => notify dataset MS to change database. */
 	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
 	
-	/** Subject name updated => notify dataset MS to change database. */
+	/** Center name updated => notify dataset MS to change database. */
 	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
 	
 	/** Get the list of subjects for a given study. */
