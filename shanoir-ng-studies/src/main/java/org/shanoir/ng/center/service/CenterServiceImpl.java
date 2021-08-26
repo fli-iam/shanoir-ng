@@ -20,14 +20,23 @@ import java.util.Optional;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * center service implementation.
@@ -40,6 +49,11 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 
 	@Autowired
 	private CenterRepository centerRepository;
+	
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 	
 	@Override
 	public void deleteByIdCheckDependencies(final Long id) throws EntityNotFoundException, UndeletableDependenciesException {
@@ -83,9 +97,49 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		to.setWebsite(from.getWebsite());
 		return to;
 	}
+	
+	@Override
+	public Center update(Center center) throws EntityNotFoundException {		
+		final Center centerDb = centerRepository.findOne(center.getId());
+		if (centerDb == null) {
+			throw new EntityNotFoundException(center.getClass(), center.getId());
+		}
+		String previousName = centerDb.getName();
+		updateValues(center, centerDb);
+		Center updatedCenter = centerRepository.save(centerDb);
+		// send name update via rabbitmq
+		if (!previousName.equals(updatedCenter.getName())) {
+			try {
+				updateName(new IdName(center.getId(), center.getName()));
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Could not send the center name change to the other microservices !", e);
+			}
+		}
+		return updatedCenter;
+	}
+	
+	@Override
+	public Center create(Center center) {
+		try {
+			updateName(new IdName(center.getId(), center.getName()));
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not send the center name creation to the other microservices !", e);
+		}
+		return super.create(center);
+	}
 
 	@Override
 	public Center findByName(String name) {
 		return centerRepository.findByName(name);
+	}
+	
+	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
+					new ObjectMapper().writeValueAsString(idName));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
+		}
 	}
 }

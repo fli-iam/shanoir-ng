@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <node  
             *ngFor="let patient of patients" 
             [label]="patient.patientName" 
-            awesome="fas fa-user"
+            [awesome]="patient.patientIdentityRemoved ? 'fas fa-user-secret' : 'fas fa-user'" 
             (labelClick)="showPatientDetails(patient)"
             [class.selected]="detailedPatient == patient"
             [deploy]=true
