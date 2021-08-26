@@ -15,11 +15,16 @@
 package org.shanoir.ng.preclinical.extra_data;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
@@ -36,11 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -66,8 +67,16 @@ public class ExtraDataApiController implements ExtraDataApi {
 	private ExtraDataService<BloodGasData> bloodGasDataService;
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+
 	@Value("${preclinical.uploadExtradataFolder}")
 	private String extraDataPath;
+
+	private final HttpServletRequest request;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExtraDataApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -154,7 +163,6 @@ public class ExtraDataApiController implements ExtraDataApi {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-
 	}
 
 	@Override
@@ -233,30 +241,30 @@ public class ExtraDataApiController implements ExtraDataApi {
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadExtraData(
-			@ApiParam(value = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id)
+	public void downloadExtraData(
+			@ApiParam(value = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
+			HttpServletResponse response)
 			throws RestServiceException {
 
 		final ExaminationExtraData extradata = extraDataService.findById(id);
 		if (extradata != null) {
 			try {
 				File toDownload = new File(extradata.getFilepath());
-				Path path = Paths.get(toDownload.getAbsolutePath());
-				ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
 
-				HttpHeaders header = new HttpHeaders();
-				header.setContentType(MediaType.APPLICATION_PDF);
-				header.set(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=" + extradata.getFilename().replace(" ", "_"));
+				// Try to determine file's content type
+				String contentType = request.getServletContext().getMimeType(toDownload.getAbsolutePath());
 
-				return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
-						.contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
+				try (InputStream is = new FileInputStream(toDownload);) {
+					response.setHeader("Content-Disposition", "attachment;filename=" + toDownload.getName());
+					response.setContentType(contentType);
+				    response.setContentLengthLong(toDownload.length());
+					org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+					response.flushBuffer();
+				}
 			} catch (IOException ioe) {
 				LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
