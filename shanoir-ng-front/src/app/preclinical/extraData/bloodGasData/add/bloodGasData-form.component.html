@@ -30,10 +30,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label i18n="Edit bloodgasdata|File label">File</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template  [ngSwitchCase]="'view'">
-                            <span *ngIf="bloodGasData?.filename" class="button-picto clickable" (click)="downloadFile()">
-                                <i class="'fa fas-download'"></i>
-                            </span>
 							{{bloodGasData?.filename}}
+                           <button *ngIf="bloodGasData?.filename" class="button-picto clickable" (click)="downloadFile()">
+                                <i class="fas fa-download"></i>
+                            </button>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'create'">
 							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
