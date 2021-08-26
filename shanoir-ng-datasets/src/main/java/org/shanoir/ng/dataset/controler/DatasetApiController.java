@@ -524,7 +524,7 @@ public class DatasetApiController implements DatasetApi {
 			FileUtils.deleteQuietly(tmpFile);
 			StringBuilder listOfDatasets = new StringBuilder();
 			for (Dataset dataset : failingDatasets) {
-				listOfDatasets.append("( ID = ").append(dataset.getId())
+				listOfDatasets.append("(ID = ").append(dataset.getId())
 							  .append(") ")
 							  .append(dataset.getName())
 							  .append(", ");
