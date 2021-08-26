@@ -276,8 +276,12 @@ export class TableComponent implements OnInit, OnChanges {
     /**
      * Call to refresh from outsilde
      */
-    public refresh(): Promise<void> {
-        return this.goToPage(this.currentPage, true);
+    public refresh(page?: number): Promise<void> {
+        if (page == undefined) {
+            return this.goToPage(this.currentPage, true);
+        } else {
+            return this.goToPage(page, true);
+        }
     }
 
     private getPageable(): Pageable {

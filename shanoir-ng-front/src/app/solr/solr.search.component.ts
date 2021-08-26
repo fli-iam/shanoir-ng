@@ -280,9 +280,9 @@ export class SolrSearchComponent implements AfterViewChecked{
     refreshTable() {
         if (this.tab != 'results') {
             this.openResultTab();
-            this.table.refresh();
+            this.table.refresh(1);
         } else {
-            this.table.refresh();
+            this.table.refresh(1);
         }
     }
 

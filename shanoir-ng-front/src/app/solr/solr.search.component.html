@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 label="Examination"
                 [currentFacetPage]="facetResultPages[4]"
                 [allFacetPage]="allFacetResultPages[4]"
-                (onChange)="updateSelections(); table.refresh()">
+                (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
         <solr-criterion
