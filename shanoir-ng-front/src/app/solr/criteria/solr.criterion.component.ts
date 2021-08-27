@@ -38,6 +38,7 @@ export class SolrCriterionComponent implements OnChanges {
     expandable: boolean;
     loaded: boolean = false;
     @Output() onChange: EventEmitter<string[]> = new EventEmitter();
+    open: boolean = false;
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.allFacetPage && this.allFacetPage) {
