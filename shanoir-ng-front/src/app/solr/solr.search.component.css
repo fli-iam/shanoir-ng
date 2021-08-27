@@ -1,6 +1,6 @@
 .row { display: flex; }
 .left { flex: 300px; }
-.right { padding-left: 50px; }
+.right { padding-left: 50px; width: 100%; }
 
 h2 { margin-bottom: 40px; }
 solr-text-search { margin:10px 0 30px; }
@@ -19,3 +19,12 @@ solr-criterion, .dates { margin-bottom: 20px; background-color: beige; max-width
 .clickable { cursor: pointer; }
 
 .reset { margin: -38px 0 38px; text-align: left; }
+.tab-body { border: 1px solid var(--grey); border-radius: 0 2px 2px 2px; padding: 5px 10px; }
+.tab-labels span { border-top: 1px solid var(--grey); border-right: 1px solid var(--grey); border-radius: 2px 2px 0 0; padding: 5px 10px; background-color: var(--very-light-grey); }
+.tab-labels span:not(.disabled) { cursor: pointer; }
+.tab-labels span.disabled { color: var(--grey); }
+.tab-labels span:first-child { border-left: 1px solid var(--grey); }
+.tab-labels { display: flex; }
+.tabs .selected { background-color: palegoldenrod; }
+.tab-opened { margin-bottom: -1px; }
+.tabs { margin-top: 30px; }

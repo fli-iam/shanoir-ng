@@ -98,10 +98,10 @@ public class ExaminationApiController implements ExaminationApi {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-
+	
 			examinationService.deleteById(examinationId);
-			
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -219,7 +219,8 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examinationDTO.getStudyId()));
+		// NB: Message as studyID is important in RabbitMQStudiesService
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS, examinationDTO.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
@@ -305,7 +306,12 @@ public class ExaminationApiController implements ExaminationApi {
 				// Rank is never null
 				Integer aIndex = o1.getSortingIndex() != null ? o1.getSortingIndex() : o1.getRank();
 				Integer bIndex = o2.getSortingIndex() != null ? o2.getSortingIndex() : o2.getRank();
-
+				if (aIndex == null) {
+					aIndex = 0;
+				}
+				if (bIndex == null) {
+					bIndex = 0;
+				}
 				return aIndex - bIndex;
 			}
 		});

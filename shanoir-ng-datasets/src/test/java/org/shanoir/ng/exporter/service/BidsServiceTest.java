@@ -3,9 +3,11 @@ package org.shanoir.ng.exporter.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +33,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -127,6 +130,7 @@ public class BidsServiceTest {
 		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
 		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
+
 		// No exam files as there is only one datasetAcquisition
 		assertFalse(examFile.exists());
 		File bidsDataFile = new File(subjectFile.getAbsolutePath() + "/undefined/test.test");

@@ -32,7 +32,9 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
     - nii.gz or .zip */
 export class DatasetDownloadComponent {
     
-    constructor(private datasetService: DatasetService, private studyService: StudyService) {
+    constructor(
+        private datasetService: DatasetService,
+        private studyService: StudyService) {
     }
 
     @Input() datasetIds: number[] = [];
@@ -46,6 +48,14 @@ export class DatasetDownloadComponent {
     public mode: 'all' | 'selected';
 
     @ViewChild('downloadDialog') downloadDialog: ModalComponent;
+
+    modalitySelected(value) {
+        if (value === 'nii') {
+            // display converters
+        } else {
+            // Hide converters
+        }
+    }
 
     /** Click on first button */
     prepareDownloadAll() {

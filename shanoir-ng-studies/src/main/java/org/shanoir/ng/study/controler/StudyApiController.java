@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -104,6 +105,12 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
+			Study study = studyService.findById(studyId);
+			if (study.getExaminationIds() != null && !study.getExaminationIds().isEmpty()) {
+				// Error => should not be able to do this see #793
+				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
+
 			// Delete all linked files and DUA
 			File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));
 			if (studyFolder.exists()) {
@@ -208,6 +215,16 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<List<StudyUserRight>> rights(@PathVariable("studyId") final Long studyId)
 			throws RestServiceException {
 		List<StudyUserRight> rights = this.studyUserService.getRightsForStudy(studyId);
+		if (!rights.isEmpty()) {
+			return new ResponseEntity<>(rights, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<Map<Long, List<StudyUserRight>>> rights() throws RestServiceException {
+		Map<Long, List<StudyUserRight>> rights = this.studyUserService.getRights();
 		if (!rights.isEmpty()) {
 			return new ResponseEntity<>(rights, HttpStatus.OK);
 		} else {

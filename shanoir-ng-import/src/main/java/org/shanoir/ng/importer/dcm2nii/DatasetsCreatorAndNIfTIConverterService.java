@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -48,6 +51,7 @@ import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.DiffusionUtil;
@@ -55,6 +59,8 @@ import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -165,7 +171,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						// otherwise just do not separate the series and keep all images for one nii conversion
 						serie.setDatasets(new ArrayList<Dataset>());
 						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-						constructNifti(serieIDFolderFile, serie, converterId);
+						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+						if (!serie.getIsSpectroscopy()) {
+							constructNifti(serieIDFolderFile, serie, converterId);
+						}
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
@@ -574,7 +583,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		// Have to adapt to generated folders by dicom2nifti converter
 		List<File> niiFiles = new ArrayList<>(FileUtils.listFiles(
 					directory,
-					new RegexFileFilter("^(.*?)\\.(nii|json)"),
+					new RegexFileFilter("^(.*?)\\.(nii|json|nii.gz)"),
 					DirectoryFileFilter.DIRECTORY
 				));
 
@@ -638,7 +647,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, directory, dataset) : niftiFileSorting(existingFiles, directory, serieIDFolderFile);
 						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
-
 					}
 				}
 			} else if (serie.getDatasets().size() == 1) {
@@ -880,6 +888,43 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Converts some data
+	 * @param message the string containing the converter ID + the workfolder where the dicom are
+	 * @return true if the conversion is a success, false otherwise
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean convertData(String message) {
+		String[] messageSplit = message.split(";");
+		Long converterId = Long.valueOf(messageSplit[0]);
+		String workFolder = messageSplit[1];
+
+		NIfTIConverter converter = niftiConverterRepository.findOne(converterId);
+		
+		if (converter == null) {
+			return false;
+		}
+
+		String workFolderResult = workFolder + File.separator + "result";
+		File result = new File(workFolderResult);
+
+		result.mkdirs();
+
+		this.convertToNiftiExec(converter, workFolder, workFolderResult, false);
+		
+		if (converter.isDicomifier()) {
+			Dataset dataset = new Dataset();
+			dataset.setName("name");
+			niftiFileSortingDicom2Nifti(Collections.emptyList(), result, dataset);
+		} else {
+			niftiFileSorting(Collections.emptyList(), result, new File("serieId"));
+		}
+		
+		return true;
 	}
 
 }

@@ -77,7 +77,6 @@ public class DicomDirGeneratorService {
 			fmi = din.readFileMetaInformation();
 			dataset = din.readDataset(-1, Tag.PixelData);
 		} catch (IOException e) {
-			LOG.error("failed to parse image '" + f + "' - " + e.getMessage());
 			return 0;
 		} finally {
 			if (din != null) {

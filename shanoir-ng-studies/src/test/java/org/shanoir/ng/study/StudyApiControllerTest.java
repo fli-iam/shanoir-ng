@@ -220,4 +220,14 @@ public class StudyApiControllerTest {
 		}
 	}
 
+	@Test
+	public void testDeleteStudyWithExaminations() {
+		return;
+	}
+
+	@Test
+	public void testDeleteStudy() {
+		return;
+	}
+
 }
