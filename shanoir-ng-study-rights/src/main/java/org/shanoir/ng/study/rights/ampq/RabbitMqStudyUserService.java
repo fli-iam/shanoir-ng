@@ -35,7 +35,7 @@ public class RabbitMqStudyUserService {
 	@Autowired
 	private StudyUserUpdateService service;
 	
-    public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException  {
+    public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException {
     	StudyUserCommand[] commands;
     	try {
     		LOG.debug("Received study-user commands : {}", commandArrStr);

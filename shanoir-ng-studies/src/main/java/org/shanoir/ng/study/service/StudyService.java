@@ -105,6 +105,21 @@ public interface StudyService {
 	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 	/**
+	 * Links an examination to a study
+	 * @param examinationId an examination ID
+	 * @param studyId the lionked study ID
+	 */
+	void addExaminationToStudy(Long examinationId, Long studyId);
+
+
+	/**
+	 * Deletes an examination from a study
+	 * @param examinationId the examination ID to delete
+	 * @param studyId the linked study ID
+	 */
+	void deleteExamination(Long examinationId, Long studyId);
+
+	/**
 	 * Gets the protocol or data user agreement file path
 	 * 
 	 * @param studyId

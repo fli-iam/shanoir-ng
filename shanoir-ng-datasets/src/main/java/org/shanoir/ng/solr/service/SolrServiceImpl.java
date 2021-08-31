@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -33,6 +35,7 @@ import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -70,6 +73,12 @@ public class SolrServiceImpl implements SolrService {
 	public void deleteFromIndex(Long datasetId) {
 		solrRepository.deleteByDatasetId(datasetId);
 	}
+	
+	@Transactional
+	@Override
+	public void deleteFromIndex(List<Long> datasetIds) {
+		solrRepository.deleteByDatasetIdIn(datasetIds);
+	}
 
 	@Transactional
 	public void deleteAll() {
@@ -88,12 +97,17 @@ public class SolrServiceImpl implements SolrService {
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-					shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-					shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-					shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
+			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 			addToIndex(doc);
 		}
+	}
+	
+	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
+		return new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
+				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
+				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
 	@Transactional
@@ -101,10 +115,7 @@ public class SolrServiceImpl implements SolrService {
 	public void indexDataset(Long datasetId) {
 		// Get all associated datasets and index them to solr
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
-		ShanoirSolrDocument doc = new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId());
+		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 		solrRepository.save(doc);
 	}
 
@@ -127,7 +138,7 @@ public class SolrServiceImpl implements SolrService {
 
 	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -152,6 +163,25 @@ public class SolrServiceImpl implements SolrService {
 			}
 		}
 		return pageable;
+	}
+
+	@Override
+	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) {
+		if (datasetIds.isEmpty()) {
+			return new PageImpl<ShanoirSolrDocument>();
+		}		
+		Page<ShanoirSolrDocument> result;
+		pageable = prepareTextFields(pageable);
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findByDatasetIdIn(datasetIds, pageable);
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			if (studyIds.isEmpty()) {
+				return new PageImpl<ShanoirSolrDocument>();
+			}
+			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
+		}
+		return result;
 	}
 
 }

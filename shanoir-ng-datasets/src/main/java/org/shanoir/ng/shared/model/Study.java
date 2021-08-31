@@ -23,6 +23,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * @author yyao
@@ -30,10 +31,10 @@ import org.shanoir.ng.dataset.model.Dataset;
  */
 @Entity
 @Table(name = "study")
-public class Study {
+public class Study extends IdName {
 	
 	@Id
-	private long id;
+	private Long id;
 	 
 	private String name;
 
@@ -69,14 +70,14 @@ public class Study {
 	/**
 	 * @return the id
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

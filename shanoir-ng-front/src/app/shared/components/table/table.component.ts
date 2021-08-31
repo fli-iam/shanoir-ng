@@ -11,24 +11,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { ApplicationRef, ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
-
-import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+
 
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableComponent implements OnInit {
+export class TableComponent implements OnInit, OnChanges {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
-    selection: Map<number, any> = new Map();
     @Input() selectionAllowed: boolean = false;
-    @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
+    @Input() enableSettings: boolean = false;
+    @Input() selection: Set<number> = new Set();
+    @Output() selectionChange: EventEmitter<Set<number>> = new EventEmitter<Set<number>>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
     @Input() editMode: boolean = false;
@@ -36,7 +39,6 @@ export class TableComponent implements OnInit {
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
-
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -44,11 +46,11 @@ export class TableComponent implements OnInit {
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
-    
-    public isError: boolean = false;
-    
-    public filter: Filter = new Filter(null, null);
-    public firstLoading: boolean = true;
+    isError: boolean = false;
+    filter: Filter = new Filter(null, null);
+    firstLoading: boolean = true;
+    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
+    @Input() identifier: string = 'default'; // usefull for saving table config when there is more than one table in the page
     
 
     constructor(
@@ -58,14 +60,32 @@ export class TableComponent implements OnInit {
     }
 
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['selection'] && !changes['selection'].isFirstChange()) {
+            this.saveSelection();
+        }
+    }
+
+
     ngOnInit() {
         let currentStep = this.breadcrumbsService.currentStep
-        let savedState = currentStep ? currentStep.data.tableState : null;
+        let savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.identifier] : null;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
+            this.columnDefs.forEach(col => {
+                if (savedState.columns && savedState.columns[col.field]) {
+                    col.width = savedState.columns[col.field].width;
+                    col.hidden = savedState.columns[col.field].hidden;
+                }
+            })
+            if (savedState.selection && Symbol.iterator in Object(savedState.selection)) {
+                this.selection = new Set();
+                savedState.selection.forEach(id => this.selection.add(id));
+                this.emitSelectionChange();
+            }
             this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
                 .then(() => this.firstLoading = false);
         } else {
@@ -75,6 +95,7 @@ export class TableComponent implements OnInit {
         }
     }
 
+    
     
     get items(): Object[] {
         return this.page ? this.page.content : [];
@@ -99,7 +120,8 @@ export class TableComponent implements OnInit {
 
 
     onRowClick(item: Object) {
-        if (!this.rowDisabled(item)) this.rowClick.emit(item);
+        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
 
@@ -166,7 +188,7 @@ export class TableComponent implements OnInit {
      * Convert a cell content to a displayable string
      */
     renderCell(item: Object, col: any): string {
-        let result: any = TableComponent.getCellValue(item, col);
+        let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else {
@@ -179,7 +201,7 @@ export class TableComponent implements OnInit {
      */
     isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
-        let val = TableComponent.getCellValue(this.items[0], col);
+        let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
@@ -254,21 +276,16 @@ export class TableComponent implements OnInit {
     /**
      * Call to refresh from outsilde
      */
-    public refresh(): Promise<void> {
-        return this.goToPage(this.currentPage, true);
+    public refresh(page?: number): Promise<void> {
+        if (page == undefined) {
+            return this.goToPage(this.currentPage, true);
+        } else {
+            return this.goToPage(page, true);
+        }
     }
 
     private getPageable(): Pageable {
-        let currentStep = this.breadcrumbsService.currentStep
-        if(currentStep) {
-            this.breadcrumbsService.currentStep.data.tableState = {
-                lastSortedCol: this.lastSortedCol,
-                lastSortedAsc: this.lastSortedAsc,
-                filter: this.filter,
-                currentPage: this.currentPage,
-                maxResults: this.maxResults
-            };
-        }
+        this.saveState();
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -293,6 +310,37 @@ export class TableComponent implements OnInit {
                 new Sort(orders)
             );
         }
+    }
+
+    private saveState() {
+        let currentStep = this.breadcrumbsService.currentStep
+        if(currentStep) {
+            if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+            this.breadcrumbsService.currentStep.data.tableState[this.identifier] = {
+                lastSortedCol: this.lastSortedCol,
+                lastSortedAsc: this.lastSortedAsc,
+                filter: this.filter,
+                currentPage: this.currentPage,
+                maxResults: this.maxResults,
+                columns: [],
+                selection: []
+            };
+            this.saveSettings();
+            this.saveSelection();
+        }
+    }
+
+    saveSettings() {
+        if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+        this.breadcrumbsService.currentStep.data.tableState[this.identifier].columns = this.columnDefs.reduce((result, col) => {
+            result[col.field] = { width: col.width, hidden: col.hidden };
+            return result;
+        }, {});
+    }
+
+     saveSelection() {
+        if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+        this.breadcrumbsService.currentStep.data.tableState[this.identifier].selection = [...this.selection];
     }
 
     updateMaxResults(): void {
@@ -325,7 +373,7 @@ export class TableComponent implements OnInit {
             //     this.selection = new Map();
             //     page.content.forEach(elt => this.selection.set(elt.id, elt));
             // });
-            this.page.content.forEach(elt => this.selection.set(elt['id'], elt));
+            this.page.content.forEach(elt => this.selection.add(elt['id']));
             this.emitSelectionChange();
         } else if (this.selectAll == false) {
             this.page.content.forEach(elt => {
@@ -339,14 +387,14 @@ export class TableComponent implements OnInit {
     }
 
     clearSelection() {
-        this.selection = new Map();
+        this.selection = new Set();
         this.emitSelectionChange();
         this.selectAll = false;
     }
 
     computeSelectAll() {
         if (this.page && this.page.content) {
-            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
+            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
             if (selectedOnCurrentPage.length == this.page.content.length) {
                 this.selectAll = true;
             } else if (selectedOnCurrentPage.length == 0) {
@@ -358,14 +406,13 @@ export class TableComponent implements OnInit {
     }
 
     emitSelectionChange() {
-        let arr = [];
-        this.selection.forEach(sel => arr.push(sel));
-        this.selectionChange.emit(arr);
+        this.saveSelection();
+        this.selectionChange.emit(this.selection);
     }
 
     onSelectChange(item: Object, selected: boolean) {
         if (selected) {
-            if (item['id']) this.selection.set(item['id'], item);
+            if (item['id']) this.selection.add(item['id']);
         } else {
             this.selection.delete(item['id']);
         }
@@ -378,7 +425,7 @@ export class TableComponent implements OnInit {
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
         }
-        return this.selection.get(item['id']) != undefined;
+        return this.selection.has(item['id']);
     }
 
     private getDefaultSorting() {
