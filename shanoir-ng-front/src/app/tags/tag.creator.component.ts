@@ -36,7 +36,7 @@ export type Mode =  "view" | "edit" | "create";
 })
 
 export class TagCreatorComponent extends AbstractInput implements OnChanges {
-    @Input() study: Study[];
+    @Input() study: Study;
     @Input() mode: Mode;
     selectedColor: string = null;
     text: string = null;
@@ -71,8 +71,20 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
     }
 
     public deleteTag(tag: Tag) {
+        if (this.tagUsed(tag)) {
+            return;
+        }
         this.model.splice(this.model.indexOf(tag), 1);
         this.propagateChange(this.model);
+    }
+
+    public tagUsed(tag: Tag) {
+        for (let subjectStudy of this.study.subjectStudyList) {
+            if (subjectStudy.tags.findIndex(element => element.id === tag.id) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     ngOnChanges(changes: SimpleChanges): void {

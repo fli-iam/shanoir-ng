@@ -13,11 +13,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div class="tags">
     <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of model; let i = index">
-        <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(tag)">
+        <span *ngIf="mode != 'view' && !tagUsed(tag)" class="clickable" (click)="deleteTag(tag)">
             <i class="fas fa-times"></i>
         </span>
         {{tag.name}}
     </span>
+    <tool-tip>Only tags not linked to a subject can be deleted.</tool-tip>
     <button *ngIf="mode != 'view'" (click)="toogle()"><i class="fas fa-plus"></i></button>
 </div>
 
