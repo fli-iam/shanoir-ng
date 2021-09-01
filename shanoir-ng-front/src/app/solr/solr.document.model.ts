@@ -13,6 +13,7 @@
  */
 
 import { Page } from "../shared/components/table/pageable.model";
+import { Range } from "../shared/models/range.model";
 
 export class SolrDocument {
     datasetId: string;
@@ -41,6 +42,9 @@ export class SolrRequest {
     datasetNature: string[];
     searchText: string;
     expertMode: boolean;
+    sliceThickness: Range;
+    pixelBandwidth: Range;
+    magneticFieldStrength: Range;
 }
 
 export class FacetField {
