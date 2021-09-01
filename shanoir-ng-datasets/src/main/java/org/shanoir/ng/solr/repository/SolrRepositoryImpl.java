@@ -34,13 +34,13 @@ import org.springframework.http.HttpStatus;
  *
  */
 public class SolrRepositoryImpl implements SolrRepositoryCustom {
-	private static final String DATASET_NATURE_FACET = "datasetNature";
-	private static final String DATASET_TYPE_FACET = "datasetType";
-	private static final String DATASET_NAME_FACET = "datasetName_str";
-	private static final String EXAMINATION_COMMENT_FACET = "examinationComment_str";
-	private static final String SUBJECT_NAME_FACET = "subjectName_str";
-	private static final String STUDY_NAME_FACET = "studyName_str";
-	private static final String CENTER_NAME_FACET = "centerName_str";
+	private static final String DATASET_NATURE_FACET = "datasetNature_s_lower";
+	private static final String DATASET_TYPE_FACET = "datasetType_s_lower";
+	private static final String DATASET_NAME_FACET = "datasetName_s_lower";
+	private static final String EXAMINATION_COMMENT_FACET = "examinationComment_s_lower";
+	private static final String SUBJECT_NAME_FACET = "subjectName_s_lower";
+	private static final String STUDY_NAME_FACET = "studyName_s_lower";
+	private static final String CENTER_NAME_FACET = "centerName_s_lower";
 	@Resource
 	private SolrTemplate solrTemplate;
 
@@ -73,12 +73,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
-		addAndPredicateToCriteria(criteria, "studyName", facet.getStudyName());
-		addAndPredicateToCriteria(criteria, "subjectName", facet.getSubjectName());
-		addAndPredicateToCriteria(criteria, "examinationComment", facet.getExaminationComment());
-		addAndPredicateToCriteria(criteria, "datasetName", facet.getDatasetName());
-		addAndPredicateToCriteria(criteria, "datasetType", facet.getDatasetType());
-		addAndPredicateToCriteria(criteria, "datasetNature", facet.getDatasetNature());
+		addAndPredicateToCriteria(criteria, STUDY_NAME_FACET, facet.getStudyName());
+		addAndPredicateToCriteria(criteria, SUBJECT_NAME_FACET, facet.getSubjectName());
+		addAndPredicateToCriteria(criteria, EXAMINATION_COMMENT_FACET, facet.getExaminationComment());
+		addAndPredicateToCriteria(criteria, DATASET_NAME_FACET, facet.getDatasetName());
+		addAndPredicateToCriteria(criteria, DATASET_TYPE_FACET, facet.getDatasetType());
+		addAndPredicateToCriteria(criteria, DATASET_NATURE_FACET, facet.getDatasetNature());
+		addAndPredicateToCriteria(criteria, CENTER_NAME_FACET, facet.getCenterName());
 		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
 		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
 		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
@@ -128,13 +129,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addSearchInAllClause(Criteria criteria, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] fields = {"studyName", "subjectName", "datasetName", "examinationComment", "datasetType", "datasetNature", "centerName"};
-			String[] specialChars = {"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
-			String escapedSearchStr = searchStr;
+			String[] fields = {STUDY_NAME_FACET, SUBJECT_NAME_FACET, DATASET_NAME_FACET, EXAMINATION_COMMENT_FACET, DATASET_TYPE_FACET, DATASET_NATURE_FACET, CENTER_NAME_FACET};
+			String[] specialChars = {"&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
+			String escapedSearchStr = searchStr.trim();			
 			for (String specialChar : specialChars) {
 				escapedSearchStr = escapedSearchStr.replace(specialChar, '\\' + specialChar);
 			}
-			String[] searchTerms = escapedSearchStr.trim().split(" "); 
+			String[] searchTerms = escapedSearchStr.split(" "); 
 			
 			List<String> termInAnyFieldFormattedStrList = new ArrayList<>();
 			for (String term : searchTerms) {

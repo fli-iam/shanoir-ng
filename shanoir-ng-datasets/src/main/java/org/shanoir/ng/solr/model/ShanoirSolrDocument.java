@@ -35,61 +35,61 @@ public class ShanoirSolrDocument {
 	
 	@Id
 	@Field
-	@Indexed(name="datasetId", type="Long")
+	@Indexed(name="datasetId", type="plong")
 	private	Long datasetId;
 	
 	@Field
-	@Indexed(name="datasetName", type="string")
-	private	String datasetName;
+	@Indexed(name="datasetName", type="lowercase")
+	private	String datasetName_s_lower;
 	
 	// DatasetModalityType: MR, CT, PET etc..
 	@Field
-	@Indexed(name="datasetType", type="string")
-	private	String datasetType;
+	@Indexed(name="datasetType", type="lowercase")
+	private	String datasetType_s_lower;
 	
 	// T1, T2, Diff, etc..
 	@Field
-	@Indexed(name="datasetNature", type="string")
-	private String datasetNature;
+	@Indexed(name="datasetNature", type="lowercase")
+	private String datasetNature_s_lower;
 	
 	@Field
-	@Indexed(name="datasetCreationDate", type="Date")
+	@Indexed(name="datasetCreationDate", type="pdate")
 	private Date datasetCreationDate;
 	
 	@Field
-	@Indexed(name="examinationComment", type="string")
-	private String examinationComment;
+	@Indexed(name="examinationComment", type="lowercase")
+	private String examinationComment_s_lower;
 	
 	@Field
-	@Indexed(name="examinationDate", type="Date") 
+	@Indexed(name="examinationDate", type="pdate") 
 	private Date examinationDate;
 	
 	@Field
-	@Indexed(name="subjectName", type="string")
-	private String subjectName;
+	@Indexed(name="subjectName", type="lowercase")
+	private String subjectName_s_lower;
 	
 	@Field
-	@Indexed(name="studyName", type="string")
-	private String studyName;
+	@Indexed(name="studyName", type="lowercase")
+	private String studyName_s_lower;
 	
 	@Field
-	@Indexed(name="studyId", type="Long")
+	@Indexed(name="studyId", type="plong")
 	private Long studyId;
 	
 	@Field
-	@Indexed(name="centerName", type="string")
-	private String centerName;
+	@Indexed(name="centerName", type="lowercase")
+	private String centerName_s_lower;
 	
 	@Field
-	@Indexed(name="sliceThickness", type="Float")
+	@Indexed(name="sliceThickness", type="pfloat")
 	private Float sliceThickness;
 	
 	@Field
-	@Indexed(name="pixelBandwidth", type="Float")
+	@Indexed(name="pixelBandwidth", type="pfloat")
 	private Float pixelBandwidth;
 	
 	@Field
-	@Indexed(name="magneticFieldStrength", type="Float")
+	@Indexed(name="magneticFieldStrength", type="pfloat")
 	private Float magneticFieldStrength;
 	
 	
@@ -102,16 +102,16 @@ public class ShanoirSolrDocument {
 			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness, 
 			Float pixelBandwidth, Float magneticFieldStrength) {
 		this.datasetId = datasetId;
-		this.datasetName = datasetName;
-		this.datasetType = datasetType;
-		this.datasetNature = datasetNature;
+		this.datasetName_s_lower = datasetName;
+		this.datasetType_s_lower = datasetType;
+		this.datasetNature_s_lower = datasetNature;
 		this.datasetCreationDate = datasetCreationDate;
-		this.examinationComment = examinationComment;
+		this.examinationComment_s_lower = examinationComment;
 		this.examinationDate = examinationDate;
-		this.subjectName = subjectName;
-		this.studyName = studyName;
+		this.subjectName_s_lower = subjectName;
+		this.studyName_s_lower = studyName;
 		this.studyId = studyId;
-		this.centerName = centerName;
+		this.centerName_s_lower = centerName;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
@@ -135,42 +135,42 @@ public class ShanoirSolrDocument {
 	 * @return the datasetName
 	 */
 	public String getDatasetName() {
-		return datasetName;
+		return datasetName_s_lower;
 	}
 
 	/**
 	 * @param datasetName the datasetName to set
 	 */
 	public void setDatasetName(String datasetName) {
-		this.datasetName = datasetName;
+		this.datasetName_s_lower = datasetName;
 	}
 
 	/**
 	 * @return the datasetType
 	 */
 	public String getDatasetType() {
-		return datasetType;
+		return datasetType_s_lower;
 	}
 
 	/**
 	 * @param datasetType the datasetType to set
 	 */
 	public void setDatasetType(String datasetType) {
-		this.datasetType = datasetType;
+		this.datasetType_s_lower = datasetType;
 	}
 
 	/**
 	 * @return the datasetNature
 	 */
 	public String getDatasetNature() {
-		return datasetNature;
+		return datasetNature_s_lower;
 	}
 
 	/**
 	 * @param datasetNature the datasetNature to set
 	 */
 	public void setDatasetNature(String datasetNature) {
-		this.datasetNature = datasetNature;
+		this.datasetNature_s_lower = datasetNature;
 	}
 
 	/**
@@ -191,14 +191,14 @@ public class ShanoirSolrDocument {
 	 * @return the examinationComment
 	 */
 	public String getExaminationComment() {
-		return examinationComment;
+		return examinationComment_s_lower;
 	}
 
 	/**
 	 * @param examinationComment the examinationComment to set
 	 */
 	public void setExaminationComment(String examinationComment) {
-		this.examinationComment = examinationComment;
+		this.examinationComment_s_lower = examinationComment;
 	}
 
 	/**
@@ -219,28 +219,28 @@ public class ShanoirSolrDocument {
 	 * @return the subjectName
 	 */
 	public String getSubjectName() {
-		return subjectName;
+		return subjectName_s_lower;
 	}
 
 	/**
 	 * @param subjectName the subjectName to set
 	 */
 	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
+		this.subjectName_s_lower = subjectName;
 	}
 
 	/**
 	 * @return the studyName
 	 */
 	public String getStudyName() {
-		return studyName;
+		return studyName_s_lower;
 	}
 
 	/**
 	 * @param studyName the studyName to set
 	 */
 	public void setStudyName(String studyName) {
-		this.studyName = studyName;
+		this.studyName_s_lower = studyName;
 	}
 
 	/**
@@ -258,11 +258,11 @@ public class ShanoirSolrDocument {
 	}
 
 	public String getCenterName() {
-		return centerName;
+		return centerName_s_lower;
 	}
 
 	public void setCenterName(String centerName) {
-		this.centerName = centerName;
+		this.centerName_s_lower = centerName;
 	}
 
 	public Float getSliceThickness() {

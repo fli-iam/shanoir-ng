@@ -37,12 +37,12 @@ import org.springframework.data.solr.repository.SolrCrudRepository;
 public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository<ShanoirSolrDocument, Long> {
 	
 	@Query(value = "*:*")
-	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "centerName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
+	@Facet(fields = {"studyName_s_lower", "subjectName_s_lower", "datasetName_s_lower", "centerName_s_lower", "examinationComment_s_lower",
+			"datasetType_s_lower", "datasetNature_s_lower"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
 	
-	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "centerName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
+	@Facet(fields = {"studyName_s_lower", "subjectName_s_lower", "datasetName_s_lower", "centerName_s_lower", "examinationComment_s_lower",
+			"datasetType_s_lower", "datasetNature_s_lower"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
 	public void deleteByDatasetId(Long datasetId);
