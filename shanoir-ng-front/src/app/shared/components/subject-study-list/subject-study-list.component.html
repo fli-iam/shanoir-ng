@@ -12,13 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<legend>
-    {{legend}}
-    <tool-tip>You can choose one or more {{legend | lowercase}} from the list</tool-tip>
-</legend>
 <ol>
     <li>
-        <label>List of the {{legend | lowercase}} available</label>
         <span class="right-col">
             <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()" [options]="optionList">
             </select-box>
@@ -31,6 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <th class="label-col">
                     <!-- {{columnName}} -->
                     </th>
+                    <th class="input-col">Tags</th>
                     <th class="input-col">Subject id for this study</th>
                     <th class="chkbx-col" title="Physically Involved">PI</th>
                     <th *ngIf="displaySubjectType" class="dropdown-col">Subject Type</th>
@@ -39,9 +35,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </thead>  
             <tbody>
                 <tr *ngFor="let subjectStudy of model; let i = index">
-                    <td class="label-col">
+                    <td class="dropdown-col">
                         <span *ngIf="compMode == 'study'">{{subjectStudy.subject.name}}</span>
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
+                        <input type="hidden" [(ngModel)]="model[i].tags"/>
+                        <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
+                            <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(tag, i)">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            {{tag.name}}
+                        </span>
+                    </td>
+                    <td class="dropdown-col">
+                        <select-box [ngModel]="selectedTag" [ngModelOptions]="{standalone: true}" (onAddClick)="onTagAdd($event, i)" [optionArr]="subjectStudy.availableTags">
+                        </select-box>
                     </td>
                     <td class="input-col">
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>

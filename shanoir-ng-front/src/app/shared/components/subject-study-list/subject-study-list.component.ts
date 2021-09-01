@@ -19,7 +19,7 @@ import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
-
+import { Tag } from '../../../tags/tag.model';
 
 @Component({
   selector: 'subject-study-list',
@@ -42,6 +42,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
+    public selectedTag: Tag;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
@@ -121,6 +122,39 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
             }
         }
     }
+
+    onTagAdd(tag: Tag, i: number) {
+        if (!tag) {
+            return;
+        }
+        
+        if (!this.model[i].tags) {
+            this.model[i].tags = [];
+        }
+        if (this.model[i].tags.findIndex(element => element.id = tag.id) != -1) {
+            return;
+        }
+        this.model[i].tags.push(tag);
+        this.propagateChange(this.model);
+    }
+
+    private contains(tags: Tag[], tag: Tag): boolean {
+        return ;
+    }
+
+    public deleteTag(tag: Tag, i: number) {
+        this.model[i].tags.splice(this.model.indexOf(tag), 1);
+        this.propagateChange(this.model);
+    }
+
+    getFontColor(colorInp: string): boolean {
+          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
+          var r = parseInt(color.substring(0, 2), 16); // hexToR
+          var g = parseInt(color.substring(2, 4), 16); // hexToG
+          var b = parseInt(color.substring(4, 6), 16); // hexToB
+          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 186);
+    }
+
 
     onChange() {
         this.propagateChange(this.model);

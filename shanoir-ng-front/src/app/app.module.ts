@@ -234,6 +234,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { TagCreatorComponent } from './tags/tag.creator.component';
 
 @NgModule({
     imports: [
@@ -394,7 +395,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         EventTypePipe,
         SolrCriterionComponent,
         SolrTextSearchComponent,
-        ChallengeBlockComponent
+        ChallengeBlockComponent,
+        TagCreatorComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

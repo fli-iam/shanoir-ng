@@ -40,6 +40,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -122,6 +123,11 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudy.setStudy(study);
 			}
 		}
+		if (study.getTags() != null) {
+			for (final Tag tag : study.getTags()) {
+				tag.setStudy(study);
+			}
+		}
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
 				// if dua file exists, set StudyUser to confirmed false
@@ -182,6 +188,13 @@ public class StudyServiceImpl implements StudyService {
 			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
+			}
+		}
+		
+		if (study.getTags() != null) {
+			ListDependencyUpdate.updateWith(studyDb.getTags(), study.getTags());
+			for (Tag tag : studyDb.getTags()) {
+				tag.setStudy(studyDb);
 			}
 		}
 		

@@ -17,6 +17,7 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from './subject.model';
 import { SubjectType } from './subject.types';
 import { Id } from '../../shared/models/id.model';
+import { Tag } from '../../tags/tag.model';
 
 export class SubjectStudy {
     id: number;
@@ -28,6 +29,8 @@ export class SubjectStudy {
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
+    tags: Tag[];
+    availableTags: Tag[];
 }
 
 export class SubjectStudyDTO {
@@ -38,6 +41,8 @@ export class SubjectStudyDTO {
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
+    tags: Tag[];
+    availableTags: Tag[];
 
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
@@ -47,5 +52,7 @@ export class SubjectStudyDTO {
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
+        this.tags = subjectStudy.tags;
+        this.availableTags = subjectStudy.availableTags;
     }
 }

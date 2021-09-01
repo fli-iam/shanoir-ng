@@ -16,7 +16,6 @@ package org.shanoir.ng.study.dto;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
@@ -24,6 +23,7 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.TagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
 /**
@@ -56,6 +56,8 @@ public class StudyDTO {
 	private List<String> protocolFilePaths;
 	
 	private List<String> dataUserAgreementPaths;
+
+	private List<TagDTO> tags;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -406,6 +408,20 @@ public class StudyDTO {
 
 	public void setChallenge(boolean challenge) {
 		this.challenge = challenge;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public List<TagDTO> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<TagDTO> tags) {
+		this.tags = tags;
 	}
 
 }
