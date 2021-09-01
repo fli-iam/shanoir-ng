@@ -1,0 +1,1 @@
+UPDATE dataset_acquisition set rank = 0 where rank is null;

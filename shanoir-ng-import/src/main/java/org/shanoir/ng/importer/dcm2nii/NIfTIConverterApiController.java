@@ -55,4 +55,5 @@ public class NIfTIConverterApiController implements NIfTIConverterApi{
 		}
 		return new ResponseEntity<>(niftiConverters, HttpStatus.OK);
 	}
+
 }

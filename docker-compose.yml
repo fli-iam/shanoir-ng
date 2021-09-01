@@ -95,7 +95,6 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
   #
@@ -121,7 +120,6 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -146,7 +144,6 @@ services:
      - "9903:9903"
      - "9913:9913"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -172,7 +169,6 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -195,7 +191,6 @@ services:
      - "9909:9909"
      - "9915:9915"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -308,12 +303,10 @@ services:
     ports:
      - "443:443"
     depends_on:
-      - "keycloak"
       - "users"
       - "studies"
       - "import"
       - "datasets"
-      - "dcm4chee-arc"
       - "rabbitmq"
 
 volumes:

@@ -57,4 +57,5 @@ public interface NIfTIConverterApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<NIfTIConverter>> findNiftiConverters();
+
 }

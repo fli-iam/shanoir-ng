@@ -6,7 +6,6 @@ li.info { width: 532px; }
 li.info strong { color: var(--color-a); }
 li.info i { color: var(--color-a); font-size: 16px; }
 li.info code { color: var(--color-a); }
-li.info a { text-decoration: underline; color: var(--color-a); }
 
 legend i { margin-right: 7px; }
 .clickable:not(.disabled) { cursor: pointer; }

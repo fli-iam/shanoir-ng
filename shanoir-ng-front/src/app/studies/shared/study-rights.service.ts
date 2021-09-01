@@ -44,6 +44,14 @@ export class StudyRightsService {
             .then(rights => rights ? rights : []);
     }
 
+    public getMyRights(): Promise<Map<number, StudyUserRight[]>> {
+        return this.http.get<Map<number, StudyUserRight[]>>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/all')
+            .toPromise()
+            .then(rights => {
+                return rights ? Object.entries(rights).reduce((map: Map<number, StudyUserRight[]>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            });
+    }
+
     hasOnStudyToImport(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
         return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT)

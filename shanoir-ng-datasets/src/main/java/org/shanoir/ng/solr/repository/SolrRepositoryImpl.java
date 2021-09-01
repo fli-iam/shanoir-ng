@@ -9,13 +9,13 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.solr.common.params.FacetParams.FacetRangeInclude;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.utils.Range;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.UncategorizedSolrException;
 import org.springframework.data.solr.core.SolrTemplate;
@@ -24,6 +24,7 @@ import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
+import org.springframework.data.solr.core.query.StatsOptions;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
@@ -32,13 +33,14 @@ import org.springframework.http.HttpStatus;
  * @author yyao
  *
  */
-public class SolrRepositoryImpl implements SolrRepositoryCustom{
+public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String DATASET_NATURE_FACET = "datasetNature";
 	private static final String DATASET_TYPE_FACET = "datasetType";
 	private static final String DATASET_NAME_FACET = "datasetName_str";
 	private static final String EXAMINATION_COMMENT_FACET = "examinationComment_str";
 	private static final String SUBJECT_NAME_FACET = "subjectName_str";
 	private static final String STUDY_NAME_FACET = "studyName_str";
+	private static final String CENTER_NAME_FACET = "centerName_str";
 	@Resource
 	private SolrTemplate solrTemplate;
 
@@ -61,6 +63,14 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 			criteria = criteria.and(Criteria.where(fieldName).is(values));
 		}
 	}
+	
+	
+	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Range<Float> range) {
+		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
+			criteria = criteria.and(Criteria.where(fieldName).between(range.getLowerBound(), range.getUpperBound()));
+		}
+	}
+
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		addAndPredicateToCriteria(criteria, "studyName", facet.getStudyName());
@@ -69,6 +79,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 		addAndPredicateToCriteria(criteria, "datasetName", facet.getDatasetName());
 		addAndPredicateToCriteria(criteria, "datasetType", facet.getDatasetType());
 		addAndPredicateToCriteria(criteria, "datasetNature", facet.getDatasetNature());
+		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
+		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
+		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
 		
 		if (facet.getDatasetStartDate() != null) {
 			criteria.and(Criteria.where("datasetCreationDate").greaterThanEqual(DateTimeUtils.localDateToSolrString(facet.getDatasetStartDate())));
@@ -96,6 +109,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 						.addFacetOnField(EXAMINATION_COMMENT_FACET)
 						.addFacetOnField(DATASET_TYPE_FACET)
 						.addFacetOnField(DATASET_NATURE_FACET)
+						.addFacetOnField(CENTER_NAME_FACET)
 						.setFacetLimit(-1));
 
 		try {
@@ -106,7 +120,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 			throw new RestServiceException(e, error);
 		}
 	}
-	
+
 	private void addExpertClause(Criteria criteria, String searchStr) {
 		criteria.and(new Criteria().expression(
 				new StringBuilder("(").append(searchStr).append(")").toString()));
@@ -114,8 +128,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom{
 	
 	private void addSearchInAllClause(Criteria criteria, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] fields = {"studyName", "subjectName", "datasetName", "examinationComment", "datasetType", "datasetNature"};
-			String[] searchTerms = searchStr.replace(Criteria.WILDCARD, " ").trim().split(" ");
+			String[] fields = {"studyName", "subjectName", "datasetName", "examinationComment", "datasetType", "datasetNature", "centerName"};
+			String[] specialChars = {"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
+			String escapedSearchStr = searchStr;
+			for (String specialChar : specialChars) {
+				escapedSearchStr = escapedSearchStr.replace(specialChar, '\\' + specialChar);
+			}
+			String[] searchTerms = escapedSearchStr.trim().split(" "); 
 			
 			List<String> termInAnyFieldFormattedStrList = new ArrayList<>();
 			for (String term : searchTerms) {
