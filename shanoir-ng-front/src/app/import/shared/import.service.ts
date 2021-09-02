@@ -12,20 +12,23 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType} from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
 import { ImportJob, DicomQuery } from './dicom-data.model';
 import { EegImportJob } from './eeg-data.model';
+import { Observable } from 'rxjs';
+
 
 @Injectable()
 export class ImportService {
 
     constructor(private http: HttpClient) { }
 
-    uploadFile(formData: FormData): Promise<ImportJob> {
-        return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
-            .toPromise();
+    uploadFile(formData: FormData): Observable<HttpEvent<ImportJob>> {
+           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData,
+                {reportProgress: true,
+                observe: 'events'});
     }
 
     uploadEegFile(formData: FormData): Promise<EegImportJob> {
