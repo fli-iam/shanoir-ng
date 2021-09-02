@@ -12,6 +12,8 @@
 
 use datasets;
 
+drop procedure if exists getStatistics;
+
 delimiter //
 
 create procedure getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
