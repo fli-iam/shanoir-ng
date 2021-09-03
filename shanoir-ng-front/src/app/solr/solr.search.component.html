@@ -44,6 +44,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
 
+        <solr-paging-criterion
+                label="Dataset"
+                [getPage]="getDatasetNamePage.bind(this)"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-paging-criterion>
+
         <div class="dates">
             <div class="title">
                 Dataset Creation Date

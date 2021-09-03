@@ -496,6 +496,10 @@ export class SolrSearchComponent implements AfterViewChecked{
         this.clearTextSearch = resetTextCallback;
     }
 
+    getDatasetNamePage(pageable: Pageable): Promise<FacetResultPage> {
+        return this.solrService.getFacet('datasetName', pageable);
+    }
+
 }
 
 export interface SelectionBlock {

@@ -30,12 +30,13 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.ApiParam;
 
@@ -73,6 +74,15 @@ public class SolrApiController implements SolrApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<SolrResultPage<ShanoirSolrDocument>>(documents, HttpStatus.OK);
+	}
+	
+	@Override
+	public ResponseEntity<Page<FacetFieldEntry>> facetPage(@ApiParam(value = "name of the facet field", required = true) @PathVariable("facetName") String facetName, Pageable pageable) throws RestServiceException {
+		Page<FacetFieldEntry> facetField = solrService.facetFieldSearch(facetName, pageable);
+		if (facetField.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<Page<FacetFieldEntry>>(facetField, HttpStatus.OK);
 	}
 	
 	@Override

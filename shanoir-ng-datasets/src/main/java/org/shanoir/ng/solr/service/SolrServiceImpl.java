@@ -39,6 +39,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -180,6 +181,18 @@ public class SolrServiceImpl implements SolrService {
 				return new PageImpl<ShanoirSolrDocument>();
 			}
 			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
+		}
+		return result;
+	}
+
+	@Override
+	public Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable) {
+		Page<FacetFieldEntry> result = null;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			result = solrRepository.findFacetFieldEntries(facetName, pageable);
+		} else {
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			result = solrRepository.findFacetFieldEntriesWithStudyIdIn(facetName, studyIds, pageable);
 		}
 		return result;
 	}

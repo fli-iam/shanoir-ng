@@ -29,13 +29,14 @@ import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -79,6 +80,16 @@ public interface SolrApi {
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns a facet page", response = SolrResultPage.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents and facets", response = Page.class),
+		@ApiResponse(code = 204, message = "nothing found", response = ErrorModel.class),
+		@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+		@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/facet/{facetName}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.POST)
+	ResponseEntity<Page<FacetFieldEntry>> facetPage(@ApiParam(value = "name of the facet field", required = true) @PathVariable("facetName") String facetName, Pageable pageable) throws RestServiceException;
 	
 	@ApiOperation(value = "", notes = "Returns solr documents matching the given dataset ids", response = SolrResultPage.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents", response = Page.class),

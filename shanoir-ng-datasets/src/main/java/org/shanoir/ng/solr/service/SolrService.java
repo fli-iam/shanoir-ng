@@ -26,6 +26,7 @@ import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -51,5 +52,7 @@ public interface SolrService {
 	void indexDataset(Long datasetId);
 
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
+
+	Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable);
 
 }

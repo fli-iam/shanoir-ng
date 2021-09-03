@@ -17,7 +17,7 @@ import { Injectable } from '@angular/core';
 import { Order, Page, Pageable, Sort } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
-import { SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 
 
 @Injectable()
@@ -47,6 +47,11 @@ export class SolrService {
     public getFacets(): Promise<SolrResultPage> {
         let pageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
+            .toPromise();
+    }
+
+    public getFacet(facetName: string, pageable: Pageable): Promise<FacetResultPage> {
+        return this.http.get<FacetResultPage>(AppUtils.BACKEND_API_SOLR_URL + '/facet/' + facetName, { 'params': pageable.toParams() })    
             .toPromise();
     }
 
