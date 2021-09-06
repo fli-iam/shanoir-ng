@@ -48,6 +48,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { Tag } from '../../tags/tag.model';
 
 @Component({
     selector: 'clinical-context',
@@ -687,6 +688,32 @@ export class ClinicalContextComponent implements OnDestroy {
             }
         }
        return null;
+    }
+    
+    onTagAdd(tag: Tag) {
+        if (!tag) {
+            return;
+        }
+        
+        if (!this.subject.subjectStudy.tags) {
+            this.subject.subjectStudy.tags = [];
+        }
+        if (this.subject.subjectStudy.tags.findIndex(element => element.id == tag.id) != -1) {
+            return;
+        }
+        this.subject.subjectStudy.tags.push(tag);
+    }
+
+    public deleteTag(tag: Tag) {
+        this.subject.subjectStudy.tags.splice(this.subject.subjectStudy.tags.indexOf(tag), 1);
+    }
+
+    getFontColor(colorInp: string): boolean {
+          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
+          var r = parseInt(color.substring(0, 2), 16); // hexToR
+          var g = parseInt(color.substring(2, 4), 16); // hexToG
+          var b = parseInt(color.substring(4, 6), 16); // hexToB
+          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 186);
     }
 
     ngOnDestroy() {

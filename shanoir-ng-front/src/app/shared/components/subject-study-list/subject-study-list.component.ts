@@ -138,10 +138,6 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         this.propagateChange(this.model);
     }
 
-    private contains(tags: Tag[], tag: Tag): boolean {
-        return ;
-    }
-
     public deleteTag(tag: Tag, i: number) {
         this.model[i].tags.splice(this.model.indexOf(tag), 1);
         this.propagateChange(this.model);
