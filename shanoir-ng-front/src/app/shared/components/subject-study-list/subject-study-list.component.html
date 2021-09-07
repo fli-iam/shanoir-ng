@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </legend>
 <ol>
     <li>
-        <label>List of the {{legend | lowercase}} available</label>
+        <label>List of {{legend | lowercase}} available</label>
         <span class="right-col">
             <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()" [options]="optionList">
             </select-box>
