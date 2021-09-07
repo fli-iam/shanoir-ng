@@ -131,7 +131,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         if (!this.model[i].tags) {
             this.model[i].tags = [];
         }
-        if (this.model[i].tags.findIndex(element => element.id = tag.id) != -1) {
+        if (this.model[i].tags.findIndex(element => element.id == tag.id) != -1) {
             return;
         }
         this.model[i].tags.push(tag);
