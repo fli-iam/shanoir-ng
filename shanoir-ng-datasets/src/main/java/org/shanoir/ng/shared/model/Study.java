@@ -15,15 +15,20 @@ package org.shanoir.ng.shared.model;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author yyao
@@ -31,6 +36,7 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 @Entity
 @Table(name = "study")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Study extends IdName {
 	
 	@Id
@@ -41,6 +47,26 @@ public class Study extends IdName {
 	@ManyToMany
 	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
 	private List<Dataset> relatedDatasets;
+	
+	/**
+	 * Linked tags.
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	List<Tag> tags;
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
 
 	/**
 	 * @return the relatedDatasets
@@ -70,6 +96,7 @@ public class Study extends IdName {
 	/**
 	 * @return the id
 	 */
+	@Override
 	public Long getId() {
 		return id;
 	}
@@ -77,6 +104,7 @@ public class Study extends IdName {
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -84,6 +112,7 @@ public class Study extends IdName {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -91,6 +120,7 @@ public class Study extends IdName {
 	/**
 	 * @param name the name to set
 	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}

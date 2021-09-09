@@ -91,17 +91,21 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
+        newSubjectStudy.tags=[];
         if (this.compMode == "study") {
             let studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
             newSubjectStudy.study = studyCopy;
             newSubjectStudy.subject = this.selected as Subject;
+            newSubjectStudy.availableTags = this.study.tags;
         }
         else if (this.compMode == "subject") {
             let subjectCopy: Subject = new Subject();
             subjectCopy.id = this.subject.id;
             newSubjectStudy.subject = subjectCopy;
             newSubjectStudy.study = this.selected as Study;
+            // Get available tags ?
+            newSubjectStudy.availableTags = [];
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
