@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-package org.shanoir.ng.tag;
+package org.shanoir.ng.tag.service;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,6 +24,8 @@ import java.util.Map;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.service.SubjectStudyService;
+import org.shanoir.ng.tag.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -31,6 +33,8 @@ public class TagServiceImpl implements TagService {
 	
 	@Autowired
 	SubjectServiceImpl subjectService;
+
+	SubjectStudyService subjectStudyService;
 
 	@Override
 	public Map<Long, List<Long>> getSubjectTag(List<String> subjectNames) {

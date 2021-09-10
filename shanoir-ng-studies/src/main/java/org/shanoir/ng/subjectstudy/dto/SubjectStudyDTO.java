@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.subject.model.SubjectType;
-import org.shanoir.ng.tag.TagDTO;
+import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * DTO for subject of a study.

@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
-import org.shanoir.ng.tag.Tag;
+import org.shanoir.ng.tag.model.Tag;
 
 /**
  * Relation between the subjects and the studies.

@@ -45,6 +45,10 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 		}
 		updateSubjectStudyValues(subjectStudyDb, subjectStudy);
 		subjectStudyRepository.save(subjectStudyDb);
+		
+		// Update dataset study
+		// Has to be done only here (tag at creation?)
+		
 		return subjectStudyDb;
 	}
 	

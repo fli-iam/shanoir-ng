@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -42,8 +43,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.tag.Tag;
-import org.shanoir.ng.tag.TagMapper;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -87,7 +87,7 @@ public class StudyServiceImpl implements StudyService {
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	private TagMapper tagMapper;
+	private StudyMapper studyMapper;
 	
 	@Value("${studies-data}")
 	private String dataDir;
@@ -123,13 +123,15 @@ public class StudyServiceImpl implements StudyService {
 	public Study create(final Study study) throws MicroServiceCommunicationException {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				studyCenter.setStudy(study);			}
+				studyCenter.setStudy(study);
+			}
 
 		}
 		if (study.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				subjectStudy.setStudy(study);
 			}
+			// Check for tags to update ?
 		}
 
 		if (study.getTags() != null) {
@@ -150,12 +152,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		Study studyDb = studyRepository.save(study);
-		
-		StudyDTO studyDTO = new StudyDTO();
-		studyDTO.setId(studyDb.getId());
-		studyDTO.setName(studyDb.getName());
-		studyDTO.setTags(tagMapper.tagListToTagDTOList(studyDb.getTags()));
-		updateStudyName(studyDTO);
+		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 		
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
@@ -235,11 +232,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 
 		if (updateStudyValue) {
-			StudyDTO studyDTO = new StudyDTO();
-			studyDTO.setId(study.getId());
-			studyDTO.setName(study.getName());
-			studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
-			updateStudyName(studyDTO);
+			updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 		}
 		updateStudyUsers(studyDb, study);
 		

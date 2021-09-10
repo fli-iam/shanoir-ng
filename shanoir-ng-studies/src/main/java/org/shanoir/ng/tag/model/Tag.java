@@ -1,4 +1,4 @@
-package org.shanoir.ng.tag;
+package org.shanoir.ng.tag.model;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

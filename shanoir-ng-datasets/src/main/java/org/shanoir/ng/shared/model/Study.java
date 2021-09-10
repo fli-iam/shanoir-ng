@@ -27,7 +27,6 @@ import javax.persistence.Table;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -53,6 +52,10 @@ public class Study extends IdName {
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	List<Tag> tags;
+
+	/** Relations between the subjects and the studies. */
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SubjectStudy> subjectStudyList;
 
 	/**
 	 * @return the tags
@@ -123,6 +126,20 @@ public class Study extends IdName {
 	@Override
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 }

@@ -1,16 +1,18 @@
 package org.shanoir.ng.shared.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.shanoir.ng.shared.hateoas.HalEntity;
-
 @Entity
-public class Tag extends HalEntity {
+public class Tag {
 
-	private static final long serialVersionUID = 1L;
-
+	@Id
+	@GeneratedValue
+	private Long id;
+	
 	private String name;
 
 	private String color;
@@ -18,6 +20,21 @@ public class Tag extends HalEntity {
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	private Study study;
+
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	/**
 	 * @return the name

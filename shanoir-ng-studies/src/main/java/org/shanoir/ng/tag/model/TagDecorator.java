@@ -1,4 +1,4 @@
-package org.shanoir.ng.tag;
+package org.shanoir.ng.tag.model;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -114,6 +115,7 @@ public class RabbitMQDatasetsService {
 		Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		try {
 			Study received = objectMapper.readValue(studyStr, Study.class);
+			// TAGS
 			if (stud.getTags() != null) {
 				stud.getTags().clear();
 			} else {
@@ -126,6 +128,21 @@ public class RabbitMQDatasetsService {
 				tag.setStudy(stud);
 			}
 			this.studyRepository.save(stud);
+
+			// SUBJECT_STUDY
+			if (stud.getSubjectStudyList() != null) {
+				stud.getSubjectStudyList().clear();
+			} else {
+				stud.setSubjectStudyList(new ArrayList<>());
+			}
+			if (received.getSubjectStudyList() != null) {
+				stud.getSubjectStudyList().addAll(received.getSubjectStudyList());
+			}
+			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
+				sustu.setStudy(stud);
+			}
+			
+			this.studyRepository.save(stud);
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
@@ -135,9 +152,31 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveSubjectNameUpdate(final String subjectStr) {
-		receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
-	}
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		
+		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
+		try {
+			Subject received = objectMapper.readValue(subjectStr, Subject.class);
 	
+			// SUBJECT_STUDY
+			if (su.getSubjectStudyList() != null) {
+				su.getSubjectStudyList().clear();
+			} else {
+				su.setSubjectStudyList(new ArrayList<>());
+			}
+			if (received.getSubjectStudyList() != null) {
+				su.getSubjectStudyList().addAll(received.getSubjectStudyList());
+			}
+			for (SubjectStudy sustu : su.getSubjectStudyList()) {
+				sustu.setSubject(su);
+			}
+			subjectRepository.save(su);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
 	@RabbitHandler
