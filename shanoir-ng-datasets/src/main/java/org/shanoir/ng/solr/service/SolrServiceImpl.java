@@ -19,13 +19,20 @@
  */
 package org.shanoir.ng.solr.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -62,10 +69,19 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
 
+	@Autowired
+	private SubjectStudyRepository subjectStudyRepo;
+
 	@Transactional
 	@Override
 	public void addToIndex (final ShanoirSolrDocument document) {
 		solrRepository.save(document);
+	}
+
+	@Transactional
+	@Override
+	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
+		solrRepository.save(documents);
 	}
 
 	@Transactional
@@ -90,32 +106,76 @@ public class SolrServiceImpl implements SolrService {
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() {
 		// 1. delete all
-		deleteAll();
+		//deleteAll();
 
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
+		
+		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
+		
+		List<Long> studyIds = new ArrayList<>();
+		List<Long> subjectIds = new ArrayList<>();
+		
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
+			studyIds.add(shanoirMetadata.getStudyId());
+			subjectIds.add(shanoirMetadata.getSubjectId());
+
 			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-			addToIndex(doc);
+			
+			solrDocuments.add(doc);
 		}
+
+		List<SubjectStudy> subjstuds = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(studyIds, subjectIds);
+		
+		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
+		
+		for (SubjectStudy subjstud : subjstuds) {
+			if (tags.get(subjstud.getStudy().getId()) == null) {
+				tags.put(subjstud.getStudy().getId(), new HashMap<>());
+			}
+			tags.get(subjstud.getStudy().getId()).put(subjstud.getSubject().getName(), subjstud.getTags() != null ? subjstud.getTags() : Collections.emptyList());
+		}
+
+		// Update tags
+		for (ShanoirSolrDocument doc : solrDocuments) {
+			doc.setTags(tags.get(doc.getStudyId()).get(doc.getSubjectName()).stream().map(Tag::getName).collect(Collectors.toList()));
+		}
+		
+		this.addAllToIndex(solrDocuments);
 	}
-	
+
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
 		return new ShanoirSolrDocument(shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
 				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
 				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
 				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
-				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(), shanoirMetadata.getTags());
+				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(), null);
 	}
 
 	@Transactional
 	@Override
 	public void indexDataset(Long datasetId) {
+		// delete dataset if existing
+		solrRepository.deleteByDatasetId(datasetId);
+		
 		// Get all associated datasets and index them to solr
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
+		
+		// Get tags
+		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
+		
+		List<String> tags = new ArrayList<>();
+		for (SubjectStudy susu : list) {
+			for (Tag tag : susu.getTags()) {
+				tags.add(tag.getName());
+			}
+		}
+		
+		doc.setTags(tags);
+		
 		solrRepository.save(doc);
 	}
 
@@ -129,7 +189,7 @@ public class SolrServiceImpl implements SolrService {
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
 			if (studyIds.isEmpty()) {
-				return new SolrResultPage<ShanoirSolrDocument>(Collections.emptyList());
+				return new SolrResultPage<>(Collections.emptyList());
 			}
 			result = solrRepository.findByStudyIdIn(studyIds, pageable);
 		}
@@ -154,7 +214,8 @@ public class SolrServiceImpl implements SolrService {
 		for (Sort.Order order : pageable.getSort()) {
 			if (order.getProperty().equals("studyName") || order.getProperty().equals("subjectName")
 					|| order.getProperty().equals("datasetName") || order.getProperty().equals("datasetNature")
-					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")) {
+					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
+					|| order.getProperty().equals("tags")) {
 				pageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), order.getProperty().concat("_str"));
 			} else if (order.getProperty().equals("id")) {
@@ -168,7 +229,7 @@ public class SolrServiceImpl implements SolrService {
 	@Override
 	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) {
 		if (datasetIds.isEmpty()) {
-			return new PageImpl<ShanoirSolrDocument>();
+			return new PageImpl<>();
 		}
 		Page<ShanoirSolrDocument> result;
 		pageable = prepareTextFields(pageable);
@@ -177,7 +238,7 @@ public class SolrServiceImpl implements SolrService {
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
 			if (studyIds.isEmpty()) {
-				return new PageImpl<ShanoirSolrDocument>();
+				return new PageImpl<>();
 			}
 			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
 		}

@@ -18,12 +18,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
         {{tag.name}}
     </span>
-    <tool-tip>Only tags not linked to a subject can be deleted.</tool-tip>
+    <tool-tip *ngIf="mode != 'view' && (model && model.length > 0)">Only tags not linked to a subject can be deleted.</tool-tip>
     <button *ngIf="mode != 'view'" (click)="toogle()"><i class="fas fa-plus"></i></button>
 </div>
-
 <div *ngIf="addTagVisible">
-    Add new tag: <br/> 
+    <label class="form-validation-alert">
+        <strong> Warning:</strong> Identifying informations should not be added to tags.
+    </label>  
+    <br/>
+    Add new tag: 
+    <br/> 
     <span>
     <label>Color </label>     
     <input type="color" [(ngModel)]="selectedColor"/>

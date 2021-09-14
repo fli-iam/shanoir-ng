@@ -209,7 +209,6 @@ public class StudyServiceImpl implements StudyService {
 			for (Tag tag : studyDb.getTags()) {
 				tag.setStudy(studyDb);
 			}
-			
 		}
 		
 		if (study.getSubjectStudyList() != null) {
@@ -231,16 +230,17 @@ public class StudyServiceImpl implements StudyService {
 
 		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
 
-		if (updateStudyValue) {
-			updateStudyName(studyMapper.studyToStudyDTO(studyDb));
-		}
 		updateStudyUsers(studyDb, study);
 		
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
 		
-		studyRepository.save(studyDb);
+		Study updatedStudy = studyRepository.save(studyDb);
+		
+		if (updateStudyValue) {
+			updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
+		}
 
 		return studyDb;
 	}

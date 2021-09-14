@@ -44,7 +44,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
 			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class),
 			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class),
-			@ColumnResult(name="tags", type = String.class)
+			@ColumnResult(name="subjectId", type = Long.class)
 	})
 })
 public class ShanoirMetadata {
@@ -82,7 +82,7 @@ public class ShanoirMetadata {
 	
 	private Float magneticFieldStrength;
 	
-	private String tags;
+	private Long subjectId;
 	
 	public ShanoirMetadata () {
 		
@@ -91,7 +91,7 @@ public class ShanoirMetadata {
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
 			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength, String tags) {
+			Float pixelBandwidth, Float magneticFieldStrength, Long subjectId) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -106,7 +106,7 @@ public class ShanoirMetadata {
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-		this.tags = tags;
+		this.subjectId = subjectId;
 	}
 	
 	/**
@@ -298,17 +298,17 @@ public class ShanoirMetadata {
 	}
 
 	/**
-	 * @return the tags
+	 * @return the subjectId
 	 */
-	public String getTags() {
-		return tags;
+	public Long getSubjectId() {
+		return subjectId;
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param subjectId the subjectId to set
 	 */
-	public void setTags(String tags) {
-		this.tags = tags;
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 	
 }

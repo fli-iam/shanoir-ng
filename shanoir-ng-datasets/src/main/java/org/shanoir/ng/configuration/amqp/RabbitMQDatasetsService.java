@@ -143,6 +143,10 @@ public class RabbitMQDatasetsService {
 			}
 			
 			this.studyRepository.save(stud);
+
+			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
+				updateSolr(sustu.getSubject().getId());
+			}
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
@@ -172,8 +176,26 @@ public class RabbitMQDatasetsService {
 				sustu.setSubject(su);
 			}
 			subjectRepository.save(su);
+			
+			// Update solr references
+			updateSolr(su.getId());
+			
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
+	/**
+	 * Updates all the solr references for this subject.
+	 * @param subjectId the subject ID updated
+	 */
+	private void updateSolr(final Long subjectId) {
+		for (Examination exam : examinationRepository.findBySubjectId(subjectId)) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				for (Dataset ds : acq.getDatasets()) {
+					solrService.indexDataset(ds.getId());
+				}
+			}
 		}
 	}
 

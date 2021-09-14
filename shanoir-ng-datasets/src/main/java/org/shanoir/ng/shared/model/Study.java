@@ -97,6 +97,20 @@ public class Study extends IdName {
 	}
 
 	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
+	}
+
+	/**
 	 * @return the id
 	 */
 	@Override
@@ -126,20 +140,6 @@ public class Study extends IdName {
 	@Override
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
-
-	/**
-	 * @param subjectStudyList the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
 	}
 
 }
