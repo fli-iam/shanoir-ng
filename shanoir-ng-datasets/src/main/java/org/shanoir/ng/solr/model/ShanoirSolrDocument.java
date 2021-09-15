@@ -80,6 +80,18 @@ public class ShanoirSolrDocument {
 	@Indexed(name="centerName", type="string")
 	private String centerName;
 	
+	@Field
+	@Indexed(name="sliceThickness", type="Float")
+	private Float sliceThickness;
+	
+	@Field
+	@Indexed(name="pixelBandwidth", type="Float")
+	private Float pixelBandwidth;
+	
+	@Field
+	@Indexed(name="magneticFieldStrength", type="Float")
+	private Float magneticFieldStrength;
+	
 	
 	public ShanoirSolrDocument () {
 		
@@ -87,7 +99,8 @@ public class ShanoirSolrDocument {
 	
 	public ShanoirSolrDocument (Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName) {
+			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness, 
+			Float pixelBandwidth, Float magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -99,6 +112,9 @@ public class ShanoirSolrDocument {
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
+		this.sliceThickness = sliceThickness;
+		this.pixelBandwidth = pixelBandwidth;
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
 	/**
@@ -247,6 +263,30 @@ public class ShanoirSolrDocument {
 
 	public void setCenterName(String centerName) {
 		this.centerName = centerName;
+	}
+
+	public Float getSliceThickness() {
+		return sliceThickness;
+	}
+
+	public void setSliceThickness(Float sliceThickness) {
+		this.sliceThickness = sliceThickness;
+	}
+
+	public Float getPixelBandwidth() {
+		return pixelBandwidth;
+	}
+
+	public void setPixelBandwidth(Float pixelBandwidth) {
+		this.pixelBandwidth = pixelBandwidth;
+	}
+
+	public Float getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 	
 }

@@ -9,11 +9,13 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.solr.common.params.FacetParams.FacetRangeInclude;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.utils.Range;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.UncategorizedSolrException;
 import org.springframework.data.solr.core.SolrTemplate;
@@ -22,6 +24,7 @@ import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
+import org.springframework.data.solr.core.query.StatsOptions;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
@@ -60,6 +63,14 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			criteria = criteria.and(Criteria.where(fieldName).is(values));
 		}
 	}
+	
+	
+	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Range<Float> range) {
+		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
+			criteria = criteria.and(Criteria.where(fieldName).between(range.getLowerBound(), range.getUpperBound()));
+		}
+	}
+
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(Criteria criteria, ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
 		addAndPredicateToCriteria(criteria, "studyName", facet.getStudyName());
@@ -68,6 +79,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addAndPredicateToCriteria(criteria, "datasetName", facet.getDatasetName());
 		addAndPredicateToCriteria(criteria, "datasetType", facet.getDatasetType());
 		addAndPredicateToCriteria(criteria, "datasetNature", facet.getDatasetNature());
+		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
+		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
+		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
 		
 		if (facet.getDatasetStartDate() != null) {
 			criteria.and(Criteria.where("datasetCreationDate").greaterThanEqual(DateTimeUtils.localDateToSolrString(facet.getDatasetStartDate())));
@@ -106,7 +120,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			throw new RestServiceException(e, error);
 		}
 	}
-	
+
 	private void addExpertClause(Criteria criteria, String searchStr) {
 		criteria.and(new Criteria().expression(
 				new StringBuilder("(").append(searchStr).append(")").toString()));

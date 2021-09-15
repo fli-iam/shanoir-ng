@@ -42,7 +42,8 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class), 
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class)
+			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class), 
+			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class), 
 	})
 }) 
 public class ShanoirMetadata {
@@ -74,13 +75,20 @@ public class ShanoirMetadata {
 	
 	private String centerName;
 	
+	private Float sliceThickness;
+	
+	private Float pixelBandwidth;
+	
+	private Float magneticFieldStrength;
+	
 	public ShanoirMetadata () {
 		
 	}
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature, 
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName) {
+			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
+			Float pixelBandwidth, Float magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -92,6 +100,9 @@ public class ShanoirMetadata {
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
+		this.sliceThickness = sliceThickness;
+		this.pixelBandwidth = pixelBandwidth;
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 	
 	/**
@@ -258,4 +269,28 @@ public class ShanoirMetadata {
 		this.centerName = centerName;
 	}
 
+	public Float getSliceThickness() {
+		return sliceThickness;
+	}
+
+	public void setSliceThickness(Float sliceThickness) {
+		this.sliceThickness = sliceThickness;
+	}
+
+	public Float getPixelBandwidth() {
+		return pixelBandwidth;
+	}
+
+	public void setPixelBandwidth(Float pixelBandwidth) {
+		this.pixelBandwidth = pixelBandwidth;
+	}
+
+	public Float getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
+	}
+	
 }
