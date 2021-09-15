@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -74,6 +75,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -320,9 +322,10 @@ public class DatasetApiController implements DatasetApi {
 		List<URL> pathURLs = new ArrayList<>();
 
 		try {
-			String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
-			if (subjectName == null) {
-				subjectName = "unknown";
+			String subjectName = "unknown";
+			Optional<Subject> subjectOpt = subjectRepo.findById(dataset.getSubjectId());
+			if (subjectOpt.isPresent()) {
+				subjectName = subjectOpt.get().getName();
 			}
 
 			if (DCM.equals(format)) {
