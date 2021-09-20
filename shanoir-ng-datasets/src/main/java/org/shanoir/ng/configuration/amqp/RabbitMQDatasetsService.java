@@ -227,7 +227,7 @@ public class RabbitMQDatasetsService {
 					T entity = repository.save(newOne);
 					return entity;
 				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
-					throw new IllegalStateException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
+					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
 				}
 			}
 		} catch (IOException e) {
