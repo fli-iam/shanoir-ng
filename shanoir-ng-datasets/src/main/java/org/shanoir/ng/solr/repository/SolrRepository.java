@@ -38,11 +38,11 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 	
 	@Query(value = "*:*")
 	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "centerName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
+			"datasetType", "datasetNature"}, limit = -1)
 	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
 	
 	@Facet(fields = {"studyName_str", "subjectName_str", "datasetName_str", "centerName_str", "examinationComment_str",
-			"datasetType", "datasetNature"}, limit = 200)
+			"datasetType", "datasetNature"}, limit = -1)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
 	public void deleteByDatasetId(Long datasetId);
