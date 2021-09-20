@@ -54,8 +54,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
 				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id"
-				+ " GROUP BY datasetId;", "SolrResult");
+				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id", "SolrResult");
 		Query petQuery = em.createNativeQuery(
 				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
 				+ " FROM dataset d"
@@ -64,8 +63,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN study st ON st.id = e.study_id"
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id"
-				+ " GROUP BY datasetId;", "SolrResult");
+				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id", "SolrResult");
 		Query ctQuery = em.createNativeQuery(
 				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
 				+ " FROM dataset d"
@@ -74,8 +72,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN study st ON st.id = e.study_id"
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id"
-				+ " GROUP BY datasetId;", "SolrResult");
+				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id", "SolrResult");
 		Query genericQuery = em.createNativeQuery(
 				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
 				+ " FROM dataset d"
@@ -84,8 +81,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN study st ON st.id = e.study_id"
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, generic_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id"
-				+ " GROUP BY datasetId;", "SolrResult");
+				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id", "SolrResult");
 	
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());

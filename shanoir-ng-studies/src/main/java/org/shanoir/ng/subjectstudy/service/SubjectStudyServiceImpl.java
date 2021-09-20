@@ -40,15 +40,9 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	@Override
 	public SubjectStudy update(final SubjectStudy subjectStudy) throws EntityNotFoundException {
 		final SubjectStudy subjectStudyDb = subjectStudyRepository.findOne(subjectStudy.getId());
-		if (subjectStudyDb == null) {
-			throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
-		}
+		if (subjectStudyDb == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
 		updateSubjectStudyValues(subjectStudyDb, subjectStudy);
 		subjectStudyRepository.save(subjectStudyDb);
-		
-		// Update dataset study
-		// Has to be done only here (tag at creation?)
-		
 		return subjectStudyDb;
 	}
 	

@@ -89,7 +89,7 @@ public class SolrServiceImpl implements SolrService {
 	public void deleteFromIndex(Long datasetId) {
 		solrRepository.deleteByDatasetId(datasetId);
 	}
-	
+
 	@Transactional
 	@Override
 	public void deleteFromIndex(List<Long> datasetIds) {
@@ -106,31 +106,31 @@ public class SolrServiceImpl implements SolrService {
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void indexAll() {
 		// 1. delete all
-		//deleteAll();
+		deleteAll();
 
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
 		Iterator<ShanoirMetadata> docIt = documents.iterator();
-		
+
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
-		
+
 		List<Long> studyIds = new ArrayList<>();
 		List<Long> subjectIds = new ArrayList<>();
-		
+
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
 			studyIds.add(shanoirMetadata.getStudyId());
 			subjectIds.add(shanoirMetadata.getSubjectId());
 
 			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-			
+
 			solrDocuments.add(doc);
 		}
 
 		List<SubjectStudy> subjstuds = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(studyIds, subjectIds);
-		
+
 		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
-		
+
 		for (SubjectStudy subjstud : subjstuds) {
 			if (tags.get(subjstud.getStudy().getId()) == null) {
 				tags.put(subjstud.getStudy().getId(), new HashMap<>());
@@ -142,7 +142,7 @@ public class SolrServiceImpl implements SolrService {
 		for (ShanoirSolrDocument doc : solrDocuments) {
 			doc.setTags(tags.get(doc.getStudyId()).get(doc.getSubjectName()).stream().map(Tag::getName).collect(Collectors.toList()));
 		}
-		
+
 		this.addAllToIndex(solrDocuments);
 	}
 
@@ -151,7 +151,7 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
 				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
 				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
-				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(), null);
+				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
 	@Transactional
@@ -159,23 +159,27 @@ public class SolrServiceImpl implements SolrService {
 	public void indexDataset(Long datasetId) {
 		// delete dataset if existing
 		solrRepository.deleteByDatasetId(datasetId);
-		
+
 		// Get all associated datasets and index them to solr
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-		
+
 		// Get tags
 		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
-		
+
 		List<String> tags = new ArrayList<>();
-		for (SubjectStudy susu : list) {
-			for (Tag tag : susu.getTags()) {
-				tags.add(tag.getName());
+		if (list != null) {
+			for (SubjectStudy susu : list) {
+				if (susu.getTags() != null) {
+					for (Tag tag : susu.getTags()) {
+						tags.add(tag.getName());
+					}
+				}
 			}
 		}
-		
+
 		doc.setTags(tags);
-		
+
 		solrRepository.save(doc);
 	}
 

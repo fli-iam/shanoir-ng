@@ -113,7 +113,6 @@ public class Study extends IdName {
 	/**
 	 * @return the id
 	 */
-	@Override
 	public Long getId() {
 		return id;
 	}
@@ -121,7 +120,6 @@ public class Study extends IdName {
 	/**
 	 * @param id the id to set
 	 */
-	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -129,7 +127,6 @@ public class Study extends IdName {
 	/**
 	 * @return the name
 	 */
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -137,7 +134,6 @@ public class Study extends IdName {
 	/**
 	 * @param name the name to set
 	 */
-	@Override
 	public void setName(String name) {
 		this.name = name;
 	}

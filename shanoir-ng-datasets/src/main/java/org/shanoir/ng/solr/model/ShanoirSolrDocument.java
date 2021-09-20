@@ -104,7 +104,7 @@ public class ShanoirSolrDocument {
 	public ShanoirSolrDocument (Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, String examinationComment, Date examinationDate,
 			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength, List<String> tags) {
+			Float pixelBandwidth, Float magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -119,7 +119,6 @@ public class ShanoirSolrDocument {
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-		this.tags = tags;
 	}
 
 	/**
