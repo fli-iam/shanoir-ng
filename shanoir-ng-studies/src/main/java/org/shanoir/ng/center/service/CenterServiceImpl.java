@@ -100,7 +100,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public Center update(Center center) throws EntityNotFoundException {		
-		final Center centerDb = centerRepository.findOne(center.getId());
+		final Center centerDb = centerRepository.findById(center.getId()).orElse(null);
 		if (centerDb == null) {
 			throw new EntityNotFoundException(center.getClass(), center.getId());
 		}
