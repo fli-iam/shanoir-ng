@@ -79,7 +79,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		Attributes dicomAttributes = null;
 		try {
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhanced());
+			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
 		} catch (IOException e) {
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
 		}
@@ -99,7 +99,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
 		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {

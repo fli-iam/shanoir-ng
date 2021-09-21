@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -80,6 +81,9 @@ public class RabbitMQDatasetsService {
 	private DatasetAcquisitionService datasetAcquisitionService;
 
 	@Autowired
+	private ExaminationService examinationService;
+
+	@Autowired
 	private ExaminationRepository examinationRepository;
 	
 	@Autowired
@@ -135,7 +139,7 @@ public class RabbitMQDatasetsService {
 					newOne.setName(received.getName());
 					repository.save(newOne);
 				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
-					throw new IllegalStateException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
+					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
 				}
 			}
 		} catch (IOException e) {
@@ -192,12 +196,7 @@ public class RabbitMQDatasetsService {
 
 			// Delete associated examinations and datasets from solr repository
 			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examinationRepository.deleteById(exam.getId());
+				examinationService.deleteFromRabbit(exam);
 			}
 			// Delete subject from datasets database
 			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
@@ -228,12 +227,7 @@ public class RabbitMQDatasetsService {
 
 			// Delete associated examinations and datasets from solr repository then from database
 			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examinationRepository.deleteById(exam.getId());
+				examinationService.deleteFromRabbit(exam);
 			}
 			// also delete associated study cards
 			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
