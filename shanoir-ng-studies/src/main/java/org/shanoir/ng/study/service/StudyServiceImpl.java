@@ -251,7 +251,7 @@ public class StudyServiceImpl implements StudyService {
 			return false;
 		}
 		// if one is empty, not the other
-		if (!CollectionUtils.isEmpty(oldTags) != CollectionUtils.isEmpty(newTags)) {
+		if (CollectionUtils.isEmpty(oldTags) != CollectionUtils.isEmpty(newTags)) {
 			return true;
 		}
 		// If both full
