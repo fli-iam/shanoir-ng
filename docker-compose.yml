@@ -213,7 +213,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: solr:8.1
+    build: ./docker-compose/solr
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -223,8 +223,9 @@ services:
     ports:
       - "8983:8983"
     command:
-      - solr-precreate
+      - solr-precreate 
       - shanoir
+      - /tmp/shanoir-core
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
