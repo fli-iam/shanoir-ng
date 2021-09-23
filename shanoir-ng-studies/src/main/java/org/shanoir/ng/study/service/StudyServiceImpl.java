@@ -16,14 +16,11 @@ package org.shanoir.ng.study.service;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
@@ -54,8 +51,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -203,7 +198,6 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
-		updateStudyValue = checkChanged(study.getTags(), studyDb.getTags());
 		if (study.getTags() != null) {
 			ListDependencyUpdate.updateWith(studyDb.getTags(), study.getTags());
 			for (Tag tag : studyDb.getTags()) {
@@ -238,29 +232,9 @@ public class StudyServiceImpl implements StudyService {
 		
 		Study updatedStudy = studyRepository.save(studyDb);
 		
-		if (updateStudyValue) {
-			updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
-		}
+		updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
 
 		return studyDb;
-	}
-
-	private boolean checkChanged(List<Tag> oldTags, List<Tag> newTags) {
-		// If both empty
-		if (CollectionUtils.isEmpty(oldTags) && CollectionUtils.isEmpty(newTags)) {
-			return false;
-		}
-		// if one is empty, not the other
-		if (CollectionUtils.isEmpty(oldTags) != CollectionUtils.isEmpty(newTags)) {
-			return true;
-		}
-		// If both full
-		List<Long> oldIds = oldTags.stream().map(tag -> tag.getId()).collect(Collectors.toList());
-		oldIds.sort(Comparator.naturalOrder());
-		List<Long> newIds = newTags.stream().map(tag -> tag.getId()).collect(Collectors.toList());
-		newIds.sort(Comparator.naturalOrder());
-
-		return !oldIds.equals(newIds);
 	}
 
 	/**
