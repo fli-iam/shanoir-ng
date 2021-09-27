@@ -38,6 +38,8 @@ export class PatientDicom {
     patientName: string;
     patientBirthDate: Date;
     patientSex: Sex;
+    patientIdentityRemoved: boolean;
+    deIdentificationMethod: string;
     studies: StudyDicom[];
 }
 
@@ -63,7 +65,7 @@ export class SerieDicom {
     institution: InstitutionDicom;
     isCompressed: boolean;
     isSpectroscopy: boolean;
-    isEnhancedMR: boolean;
+    isEnhanced: boolean;
     isMultiFrame: boolean;
     multiFrameCount: number;
     nonImages: any[];

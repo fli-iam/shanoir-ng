@@ -1,67 +1,33 @@
-/**
- * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
- * Contact us on https://project.inria.fr/shanoir/
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
+.row { display: flex; }
+.left { flex: 300px; }
+.right { padding-left: 50px; width: 100%; }
 
-* {
-    box-sizing: border-box;
-}
-/* Create a column layout with Flexbox */
-.row {
-    display: flex;
-}
+h2 { margin-bottom: 40px; }
+solr-text-search { margin:10px 0 30px; }
+solr-criterion, solr-range-criterion, .dates { margin-bottom: 20px; background-color: beige; max-width: 200px; min-width: 200px; }
+.dates { display: block; border: 1px solid var(--grey); border-radius: 2px; padding: 5px 10px; }
+.dates .title { margin-bottom: 2px; font-size: 20px; color: var(--color-a); }
+.date-from { margin-bottom: 7px; }
+.dates datepicker { float: right; }
+.dates label { display: inline-block; }
+.left-title { vertical-align: sub; }
 
-/* Left column: solr search  */
-.left {
-    flex: 35%;
-    padding: 15px 0;
-}
+.non-visible { visibility: hidden; }
+.selections { margin: 5px 0 20px; }
+.selection { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; display: inline-block; margin: 2px 2px; background-color: palegoldenrod; }
+.selection i { margin-right: 3px; }
+.clickable { cursor: pointer; }
 
-.left h2 {
-    padding-left: 8px;
-}
+.reset { margin: -38px 0 38px; text-align: left; }
+.tab-body { border: 1px solid var(--grey); border-radius: 0 2px 2px 2px; padding: 5px 10px; }
+.tab-labels span { border-top: 1px solid var(--grey); border-right: 1px solid var(--grey); border-radius: 2px 2px 0 0; padding: 5px 10px; background-color: var(--very-light-grey); }
+.tab-labels span:not(.disabled) { cursor: pointer; }
+.tab-labels span.disabled { color: var(--grey); }
+.tab-labels span:first-child { border-left: 1px solid var(--grey); }
+.tab-labels { display: flex; }
+.tabs .selected { background-color: palegoldenrod; }
+.tab-opened { margin-bottom: -1px; }
+.tabs { margin-top: 30px; }
 
-/* Right column: results */
-.right {
-    flex: 65%;
-    padding: 15px;
-}
-
-/* Style the search bar */
-#searchBar {
-    margin-top: 20px;
-    width: 100%;
-    font-size: 18px;
-    padding: 11px;
-    border: 1px solid #ddd;
-}
-
-/* Style the facets inside the left column */
-#facet {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#facet li {
-    padding: 12px;
-    text-decoration: none;
-    display: block;
-}
-  
-#facet li:hover {
-    background-color: #eee;
-}
-
-:host ::ng-deep tool-tip.larger .help .content{
-    width: 360px;
-}
+.date-colapse { float: right; cursor: pointer; font-size: 10px; height: 20px; line-height: 30px; color: var(--dark-grey); }
+.date-content { margin: 20px 0 14px; }

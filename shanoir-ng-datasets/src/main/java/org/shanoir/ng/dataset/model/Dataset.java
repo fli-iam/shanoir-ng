@@ -33,6 +33,7 @@ import javax.persistence.Transient;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -64,19 +65,20 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({
-		@JsonSubTypes.Type(value = CalibrationDataset.class, name = CalibrationDataset.datasetType),
-		@JsonSubTypes.Type(value = CtDataset.class, name = CtDataset.datasetType),
-		@JsonSubTypes.Type(value = EegDataset.class, name = EegDataset.datasetType),
-		@JsonSubTypes.Type(value = MegDataset.class, name = MegDataset.datasetType),
-		@JsonSubTypes.Type(value = MeshDataset.class, name = MeshDataset.datasetType),
-		@JsonSubTypes.Type(value = MrDataset.class, name = MrDataset.datasetType),
-		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = ParameterQuantificationDataset.datasetType),
-		@JsonSubTypes.Type(value = PetDataset.class, name = PetDataset.datasetType),
-		@JsonSubTypes.Type(value = RegistrationDataset.class, name = RegistrationDataset.datasetType),
-		@JsonSubTypes.Type(value = SegmentationDataset.class, name = SegmentationDataset.datasetType),
-		@JsonSubTypes.Type(value = SpectDataset.class, name = SpectDataset.datasetType),
-		@JsonSubTypes.Type(value = StatisticalDataset.class, name = StatisticalDataset.datasetType),
-		@JsonSubTypes.Type(value = TemplateDataset.class, name = TemplateDataset.datasetType) })
+		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
+		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
+		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
+		@JsonSubTypes.Type(value = MegDataset.class, name = "Meg"),
+		@JsonSubTypes.Type(value = MeshDataset.class, name = "Mesh"),
+		@JsonSubTypes.Type(value = MrDataset.class, name = "Mr"),
+		@JsonSubTypes.Type(value = GenericDataset.class, name = "Generic"),
+		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = "ParameterQuantification"),
+		@JsonSubTypes.Type(value = PetDataset.class, name = "Pet"),
+		@JsonSubTypes.Type(value = RegistrationDataset.class, name = "Registration"),
+		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
+		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
+		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
+		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template") })
 public abstract class Dataset extends AbstractEntity {
 
 	/**
@@ -269,7 +271,9 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the originMetadata
 	 */
 	public DatasetMetadata getOriginMetadata() {
-		if (originMetadata == null) originMetadata = new DatasetMetadata();
+		if (originMetadata == null) {
+			originMetadata = new DatasetMetadata();
+		}
 		return originMetadata;
 	}
 
@@ -317,7 +321,9 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@Transient
 	public Long getStudyId() {
-		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return this.studyId;
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
+			return null;
+		}
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
 
@@ -345,7 +351,9 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the updatedMetadata
 	 */
 	public DatasetMetadata getUpdatedMetadata() {
-		if (updatedMetadata == null) updatedMetadata = new DatasetMetadata();
+		if (updatedMetadata == null) {
+			updatedMetadata = new DatasetMetadata();
+		}
 		return updatedMetadata;
 	}
 

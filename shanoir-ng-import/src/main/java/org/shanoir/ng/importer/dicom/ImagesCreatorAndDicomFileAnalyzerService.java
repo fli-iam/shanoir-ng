@@ -38,9 +38,9 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -69,16 +69,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private static final String SLASH = "/";
 
 	private static final String SUFFIX_DCM = ".dcm";
+	
+	private static final String YES = "YES";
 
-	private static final String DOUBLE_EQUAL = "==";
-
-	private static final String SEMI_COLON = ";";
+	@Autowired
+	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
-
-	@Value("${shanoir.import.series.isspectroscopy}")
-	private String isSpectroscopy;
 
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
@@ -116,8 +114,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	}
 
 	/**
-	 * This method iterates over all instances and filter only the images
-	 * and puts them into a new list: images. For the moment non-images is
+	 * This method iterates over all instances, filters only the images
+	 * and puts them into a new list: images. For the moment non-images are
 	 * not implemented.
 	 * 
 	 * @param folderFileAbsolutePath
@@ -125,9 +123,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @throws FileNotFoundException
 	 */
 	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
-		// instance level
-		List<Object> nonImages = new ArrayList<>();
-		List<Image> images = new ArrayList<>();
+		List<Image> images = new ArrayList<Image>();
+		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
@@ -198,30 +195,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void processDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			Attributes attributes = dIS.readDataset(-1, -1);
-			final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
-			if (sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
-				// do nothing here as instances list will be emptied after split
+			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
+			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
 				// divide here between non-images and images, non-images at first
-				final String seriesDescription = attributes.getString(Tag.SeriesDescription);
-				if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
-						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
-						|| checkSerieIsSpectroscopy(seriesDescription)) {
-					// in the current implementation non-images are ignored (no import possible)
-					LOG.warn("Attention: non-images/spectroscopy serie is included in this import (but ignored)!");
-				// images at the second
-				} else {
-					Image image = new Image();
-					/**
-					 * Attention: the path of each image is always relative: either to the temporary folder created
-					 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
-					 */
-					String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
-					image.setPath(relativeFilePath);
-					addImageSeparateDatasetsInfo(image, attributes);
-					images.add(image);
-				}
+				Image image = new Image();
+				/**
+				 * Attention: the path of each image is always relative: either to the temporary folder created
+				 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import
+				 */
+				String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+				image.setPath(relativeFilePath);
+				addImageSeparateDatasetsInfo(image, attributes);
+				images.add(image);
 			}
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
@@ -237,34 +224,15 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			
+			LOG.warn("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
-			checkIsMultiFrame(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
-			LOG.error("Error during DICOM file process", e);
+			LOG.error("Error during processing of DICOM file:", e);
 		}
-	}
-
-	/**
-	 * This method uses the properties string isspectroscopy to check if a serie
-	 * contains spectroscopy.
-	 */
-	private boolean checkSerieIsSpectroscopy(final String seriesDescription) {
-		final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
-		for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
-			final String tag = item.split(DOUBLE_EQUAL)[0];
-			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkIsSpectroscopy : tag={}, value={}", tag, value);
-			String wildcard = ImportUtils.wildcardToRegex(value);
-			if (seriesDescription != null && seriesDescription.matches(wildcard)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -290,7 +258,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			}
 			image.setImageOrientationPatient(imageOrientationPatient);
 		} else {
-			LOG.error("imageOrientationPatientArray in dcm file null: {}", image.getPath());
+			LOG.warn("imageOrientationPatientArray in dcm file null: {}", image.getPath());
 		}
 		// repetition time
 		image.setRepetitionTime(attributes.getDouble(Tag.RepetitionTime, 0));
@@ -367,9 +335,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		serie.setIsSpectroscopy(UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
-				|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
-				|| checkSerieIsSpectroscopy(serie.getSeriesDescription()));
+		dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+		dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
@@ -380,6 +347,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		if (StringUtils.isEmpty(serie.getProtocolName())) {
 			serie.setProtocolName(attributes.getString(Tag.ProtocolName));
 		}
+		// keep this check at this place: enhanced Dicom needs to be checked first
+		dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 	}
 
 	/**
@@ -399,44 +368,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			// has not been found in dicomdir, so we get it from .dcm file:
 			patient.setPatientSex(attributes.getString(Tag.PatientSex));
 		}
-	}
-
-	/**
-	 * Checks for multi-frame dicom files.
-	 * 
-	 * @param serie
-	 * @param attributes
-	 */
-	private void checkIsMultiFrame(Serie serie, Attributes attributes) {
-		if (UID.EnhancedMRImageStorage.equals(attributes.getString(Tag.SOPClassUID))) {
-			serie.setIsMultiFrame(true);
-			serie.setIsEnhancedMR(true);
-			serie.setMultiFrameCount(getFrameCount(attributes));
-			serie.setSequenceName(attributes.getString(Tag.PulseSequenceName));
-		} else {
-			serie.setIsMultiFrame(false);
-			serie.setIsEnhancedMR(false);
-			serie.setSequenceName(attributes.getString(Tag.SequenceName));
-		}
-	}
-
-	/**
-	 * Get the frame count of the given dicom object.
-	 *
-	 * @param dcmObj
-	 *            the dcmObj
-	 * @return the frame count
-	 */
-	private int getFrameCount(final Attributes attributes) {
-		if (attributes != null) {
-			Attributes pffgs = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);
-			if (pffgs != null) {
-				return pffgs.size();
-			} else {
-				return 0;
+		// we can not display this information for the pacs in select series: as info not available
+		String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
+		if (StringUtils.isNotBlank(patientIdentityRemoved)) {
+			if (YES.equals(patientIdentityRemoved)) {
+				patient.setPatientIdentityRemoved(true);
+				String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
+				patient.setDeIdentificationMethod(deIdentificationMethod);
 			}
-		} else {
-			return -1;
 		}
 	}
 

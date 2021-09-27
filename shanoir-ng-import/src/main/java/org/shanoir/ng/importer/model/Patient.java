@@ -47,6 +47,12 @@ public class Patient {
 
 	@JsonProperty("patientSex")
 	private String patientSex;
+	
+	@JsonProperty("patientIdentityRemoved")
+	private boolean patientIdentityRemoved;
+	
+	@JsonProperty("deIdentificationMethod")
+	private String deIdentificationMethod;
 
 	@JsonProperty("subject")
 	private Subject subject;
@@ -119,6 +125,22 @@ public class Patient {
 
 	public void setSubject(Subject subject) {
 		this.subject = subject;
+	}
+
+	public boolean isPatientIdentityRemoved() {
+		return patientIdentityRemoved;
+	}
+
+	public void setPatientIdentityRemoved(boolean patientIdentityRemoved) {
+		this.patientIdentityRemoved = patientIdentityRemoved;
+	}
+
+	public String getDeIdentificationMethod() {
+		return deIdentificationMethod;
+	}
+
+	public void setDeIdentificationMethod(String deIdentificationMethod) {
+		this.deIdentificationMethod = deIdentificationMethod;
 	}
 
 }

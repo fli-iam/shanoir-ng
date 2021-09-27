@@ -92,13 +92,13 @@ public class ImportJobConstructorService {
 							serie.setIsCompressed(checkSeriesIsCompressed(datasetAttributes));
 							if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())) {
 								serie.setSequenceName(datasetAttributes.getString(Tag.PulseSequenceName));
-								serie.setIsEnhancedMR(true);
+								serie.setIsEnhanced(true);
 								serie.setIsMultiFrame(true);
 								Integer frameCount = Integer.valueOf(getFrameCount(datasetAttributes));
 								serie.setMultiFrameCount(frameCount);
 							} else {
 								serie.setSequenceName(datasetAttributes.getString(Tag.SequenceName));
-								serie.setIsEnhancedMR(false);
+								serie.setIsEnhanced(false);
 								serie.setIsMultiFrame(false);
 								serie.setMultiFrameCount(0);
 							}

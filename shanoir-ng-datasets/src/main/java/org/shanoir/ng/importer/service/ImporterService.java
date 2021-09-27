@@ -370,6 +370,7 @@ public class ImporterService {
 
 			datasetAcquisition.setExamination(examination);
 			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+			datasetAcquisition.setRank(0);
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
