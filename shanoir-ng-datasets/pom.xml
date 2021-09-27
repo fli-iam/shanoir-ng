@@ -284,7 +284,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<repository>
 			<id>dcm4che-snapshots</id>
 			<name>Dcm4Che Snapshots</name>
-			<url>http://www.dcm4che.org/maven2/</url>
+			<url>https://www.dcm4che.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
