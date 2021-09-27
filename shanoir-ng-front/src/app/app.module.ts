@@ -232,6 +232,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { TagCreatorComponent } from './tags/tag.creator.component';
 
 @NgModule({
     imports: [
@@ -390,6 +391,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         EventTypePipe,
         SolrCriterionComponent,
         SolrTextSearchComponent,
+        ChallengeBlockComponent,
+        TagCreatorComponent,
         SolrRangeCriterionComponent,
         ChallengeBlockComponent
     ],

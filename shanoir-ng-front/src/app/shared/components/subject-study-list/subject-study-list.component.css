@@ -10,3 +10,8 @@ td.buttons-col { color: var(--color-error); }
 .buttons-col { width: 0px; }
 .buttons-col .button { cursor: pointer; }
 table tr:last-child td { padding-bottom: 13px; }
+.tags { margin: 5px 0 20px; }
+.tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; display: inline-block; margin: 2px 2px; }
+.tag i { margin-right: 3px; }
+.dark { color:white }
+.clickable { cursor: pointer; }

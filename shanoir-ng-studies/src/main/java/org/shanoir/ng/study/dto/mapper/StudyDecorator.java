@@ -23,6 +23,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
+import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -44,6 +45,9 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;
+
+	@Autowired
+	private TagMapper tagMapper;
 
 	@Override
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
@@ -101,6 +105,7 @@ public abstract class StudyDecorator implements StudyMapper {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
+			studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
 		}
 		return studyDTO;
 	}

@@ -21,16 +21,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -40,6 +40,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
@@ -79,6 +80,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private StudyMapper studyMapper;
 	
 	@Value("${studies-data}")
 	private String dataDir;
@@ -114,14 +118,23 @@ public class StudyServiceImpl implements StudyService {
 	public Study create(final Study study) throws MicroServiceCommunicationException {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				studyCenter.setStudy(study);			}
+				studyCenter.setStudy(study);
+			}
 
 		}
 		if (study.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				subjectStudy.setStudy(study);
 			}
+			// Check for tags to update ?
 		}
+
+		if (study.getTags() != null) {
+			for (final Tag tag : study.getTags()) {
+				tag.setStudy(study);
+			}
+		}
+
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
 				// if dua file exists, set StudyUser to confirmed false
@@ -134,8 +147,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		Study studyDb = studyRepository.save(study);
-		
-		updateStudyName(new IdName(study.getId(), study.getName()));
+		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 		
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
@@ -159,6 +171,7 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final Study studyDb = studyRepository.findOne(study.getId());
+		boolean updateStudyValue = false;
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
 		}
@@ -170,7 +183,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setChallenge(study.isChallenge());
 		}
 		if (!study.getName().equals(studyDb.getName())) {
-			updateStudyName(new IdName(study.getId(), study.getName()));
+			updateStudyValue = true;
 		}
 		studyDb.setName(study.getName());
 		studyDb.setStudyStatus(study.getStudyStatus());
@@ -182,6 +195,13 @@ public class StudyServiceImpl implements StudyService {
 			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
 			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
 				studyCenter.setStudy(studyDb);
+			}
+		}
+
+		if (study.getTags() != null) {
+			ListDependencyUpdate.updateWith(studyDb.getTags(), study.getTags());
+			for (Tag tag : studyDb.getTags()) {
+				tag.setStudy(studyDb);
 			}
 		}
 		
@@ -210,7 +230,9 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
 		
-		studyRepository.save(studyDb);
+		Study updatedStudy = studyRepository.save(studyDb);
+		
+		updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
 
 		return studyDb;
 	}
@@ -358,7 +380,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 	
-	private boolean updateStudyName(IdName study) throws MicroServiceCommunicationException{
+	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.studyNameUpdateQueue().getName(),
 					new ObjectMapper().writeValueAsString(study));

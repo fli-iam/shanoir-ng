@@ -183,6 +183,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
+            <li>
+                <label>Tags</label>
+                <select-box (onAddClick)="onTagAdd($event)" [optionArr]="subject.subjectStudy.availableTags">
+                </select-box>
+            </li>
+            <li>
+                <input type="hidden" [(ngModel)]="subject.subjectStudy.tags"/>
+                <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subject.subjectStudy.tags">
+                    <span class="clickable" (click)="deleteTag(tag)">
+                        <i class="fas fa-times"></i>
+                    </span>
+                    {{tag.name}}
+                </span>
+            </li>
         </div>
     </ol>
 

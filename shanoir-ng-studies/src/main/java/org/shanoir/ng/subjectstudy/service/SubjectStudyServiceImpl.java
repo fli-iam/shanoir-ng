@@ -58,6 +58,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 		subjectStudyDb.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
 		subjectStudyDb.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
+		subjectStudyDb.setTags(subjectStudy.getTags());
 		return subjectStudyDb;
 	}
 

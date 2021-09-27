@@ -194,6 +194,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
+            'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': []
@@ -230,6 +231,7 @@ export class StudyComponent extends EntityComponent<Study> {
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
+        study.tags = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;

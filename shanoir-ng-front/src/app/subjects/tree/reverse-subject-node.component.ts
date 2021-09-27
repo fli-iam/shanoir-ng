@@ -74,11 +74,21 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     }
 
     private mapStudy(study: Study, examinations: SubjectExamination[]): ReverseStudyNode {
-        return new ReverseStudyNode(
-            study.id,
-            study.name,
-            UNLOADED
-        );
+        if (this.input instanceof Subject) {
+            return new ReverseStudyNode(
+                study.id,
+                study.name,
+                this.input.subjectStudyList[this.input.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
+                UNLOADED
+            );
+        } else {
+            return new ReverseStudyNode(
+                study.id,
+                study.name,
+                [],
+                UNLOADED
+            );
+        }
     }
     
     

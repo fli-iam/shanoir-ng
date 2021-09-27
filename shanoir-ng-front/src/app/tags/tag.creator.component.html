@@ -1,0 +1,37 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<div class="tags">
+    <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of model; let i = index">
+        <span *ngIf="mode != 'view' && !tagUsed(tag)" class="clickable" (click)="deleteTag(tag)">
+            <i class="fas fa-times"></i>
+        </span>
+        {{tag.name}}
+    </span>
+    <tool-tip *ngIf="mode != 'view' && (model && model.length > 0)">Only tags not linked to a subject can be deleted.</tool-tip>
+    <button *ngIf="mode != 'view'" (click)="toogle()"><i class="fas fa-plus"></i></button>
+</div>
+<div *ngIf="addTagVisible">
+    <label class="form-validation-alert">
+        <strong> Warning:</strong> Identifying informations should not be added to tags.
+    </label>  
+    <br/>
+    Add new tag: 
+    <br/> 
+    <span>
+    <label>Color </label>     
+    <input type="color" [(ngModel)]="selectedColor"/>
+    <label>Label: </label> <input type="text" [(ngModel)]="text"/>
+    <button (click)="addTag()" [disabled]="text == null || selectedColor == null"> <i class="fas fa-plus"></i> </button>
+    </span>
+</div>
