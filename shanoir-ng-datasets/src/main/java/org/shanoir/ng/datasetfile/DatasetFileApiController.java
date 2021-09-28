@@ -102,7 +102,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 					throws RestServiceException {
-		DatasetFile datasetFile = datasetFileService.findById(datasetFileId);
+		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
 		File destination = null;
 		try {
 			destination = new File(migrationFolder + "/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
