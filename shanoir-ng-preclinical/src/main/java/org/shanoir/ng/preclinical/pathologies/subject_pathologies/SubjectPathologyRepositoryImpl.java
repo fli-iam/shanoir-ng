@@ -30,15 +30,6 @@ public class SubjectPathologyRepositoryImpl implements SubjectPathologyRepositor
 
 	@PersistenceContext
     private EntityManager em;
-		
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SubjectPathology> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT p FROM SubjectPathology p WHERE p." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
-	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

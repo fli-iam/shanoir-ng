@@ -20,16 +20,20 @@ import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+
+import { AfterViewChecked } from "@angular/core";
+import { Pageable } from "../shared/components/table/pageable.model";
+import { TableComponent } from "../shared/components/table/table.component";
+import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
+import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { Page, Pageable } from '../shared/components/table/pageable.model';
-import { TableComponent } from '../shared/components/table/table.component';
-import { DatepickerComponent } from '../shared/date-picker/date-picker.component';
+import { Page } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
-import { SolrService } from './solr.service';
+import { Range } from '../shared/models/range.model';
 
 
 @Component({
@@ -40,7 +44,7 @@ import { SolrService } from './solr.service';
     providers: [DatePipe]
 })
 
-export class SolrSearchComponent{
+export class SolrSearchComponent implements AfterViewChecked{
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
@@ -57,13 +61,20 @@ export class SolrSearchComponent{
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
     allFacetResultPages: FacetResultPage[] = [];
-    clearTextSearch: () => void = () => {};
+    clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';
+    dateOpen: boolean = false;
+    sliceThicknessRange: Range = new Range(null, null);
+    pixelBandwidthRange: Range = new Range(null, null);
+    magneticFieldStrengthRange: Range = new Range(null, null);
+
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
+    loaded: boolean = false;
+    viewChecked: boolean = false;
 
     private requestKeys: string[] = [
         'studyName',
@@ -80,13 +91,22 @@ export class SolrSearchComponent{
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private msgBoxService: MsgBoxService) {
 
-        this.getFacets();
         this.getRole();
         if (this.role != 'admin') this.getRights();
-
-        this.form = this.buildForm();
+                
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
+        
+        this.getFacets().then(() => {
+            if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+                let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+                this.loadState(savedRequest);
+                this.updateSelections();
+            }
+            this.loaded = true;
+        });
+
+        this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
@@ -121,6 +141,14 @@ export class SolrSearchComponent{
     hasDownloadRight(studyId: number) {
         if (this.role == 'admin') return true;
         else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_DOWNLOAD);
+    }
+
+    ngAfterViewChecked(): void {
+        if (!this.viewChecked) {
+            setTimeout(() => {
+                this.viewChecked = true;
+            });
+        }
     }
     
     buildForm(): FormGroup {
@@ -180,7 +208,41 @@ export class SolrSearchComponent{
         if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
             solrRequest.datasetEndDate = this.datasetEndDate;
         }
+        if (this.sliceThicknessRange.hasBound()) {
+            solrRequest.sliceThickness = this.sliceThicknessRange;
+        }
+        if (this.pixelBandwidthRange.hasBound()) {
+            solrRequest.pixelBandwidth = this.pixelBandwidthRange;
+        }
+        if (this.magneticFieldStrengthRange.hasBound()) {
+            solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
+        }
         return solrRequest;
+    }
+
+    private saveState(solrRequest: SolrRequest) {
+        this.breadcrumbsService.currentStep.data.solrRequest = solrRequest;
+    }
+
+    private loadState(solrRequest: SolrRequest) {
+        if (solrRequest && Object.keys(solrRequest).length != 0) {
+            this.allFacetResultPages.forEach(facetResult => {
+                if (facetResult.content.length > 0) {
+                    let key: string = facetResult.content[0].field.name.replace('_str', '');
+                    facetResult.content.forEach(field => {
+                        field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
+                    })
+                }
+            });
+            if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
+            if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
+            if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
+            if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
+            if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
+            this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
+            this.keyword = solrRequest.searchText;
+            this.expertMode = solrRequest.expertMode;
+        }
     }
     
     updateSelections() {
@@ -204,14 +266,23 @@ export class SolrSearchComponent{
                     .map(facetField => new FacetSelectionBlock(facetField))
             );
         })
+        if (this.sliceThicknessRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('S. Thickness', this.sliceThicknessRange));
+        }
+        if (this.pixelBandwidthRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.pixelBandwidthRange));
+        }
+        if (this.magneticFieldStrengthRange.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.magneticFieldStrengthRange));
+        }
     }
 
     refreshTable() {
         if (this.tab != 'results') {
             this.openResultTab();
-            this.table.refresh();
+            this.table.refresh(1);
         } else {
-            this.table.refresh();
+            this.table.refresh(1);
         }
     }
 
@@ -227,7 +298,7 @@ export class SolrSearchComponent{
     }
 
     onDateChange(date: Date | 'invalid') {
-        if (date !== undefined && (date === null || date != 'invalid')) {
+        if (this.loaded && (date === null || (date && ('invalid' != date)))) {
             this.updateSelections();
             this.refreshTable();
         }
@@ -249,6 +320,7 @@ export class SolrSearchComponent{
             let solrRequest: SolrRequest = new SolrRequest();
             if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
             solrRequest = this.updateWithFields(solrRequest);
+            this.saveState(solrRequest);
 
             return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
                 if (solrResultPage) { 
@@ -257,7 +329,6 @@ export class SolrSearchComponent{
                 }
                 return solrResultPage;
             }).catch(reason => {
-                console.log(reason.error.code, reason.error.message, reason.error.code == 422 && reason.error.message == 'solr query failed')
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
@@ -325,13 +396,17 @@ export class SolrSearchComponent{
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-shield-alt", color: "goldenrod", suppressSorting: true},
             {headerName: "Name", field: "datasetName"},
-            {headerName: "Type", field: "datasetType", width: "30px"},
-            {headerName: "Nature", field: "datasetNature", width: "30px"},
-            {headerName: "Creation", field: "datasetCreationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
+            {headerName: "Type", field: "datasetType"},
+            {headerName: "Nature", field: "datasetNature"},
+            {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName"},
             {headerName: "Subject", field: "subjectName"},
+            {headerName: "Center", field: "centerName"},
             {headerName: "Exam", field: "examinationComment"},
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)},
+            {headerName: "Slice", field: "sliceThickness"},
+            {headerName: "Pixel", field: "pixelBandwidth"},
+            {headerName: "Mag. strength", field: "magneticFieldStrength"},
             {headerName: "", type: "button", awesome: "fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
         ];
         return columnDefs;
@@ -390,9 +465,7 @@ export class SolrSearchComponent{
     }
 
     onSelectionChange (selection: any) {
-        setTimeout(() => {
-            this.selectedDatasetIds = selection;
-        });
+        this.selectedDatasetIds = selection;
     }
 
     onRowClick(solrRequest: any) {
@@ -449,5 +522,25 @@ export class DateSelectionBlock implements SelectionBlock {
 
     get label(): string {
         return this.formattedLabel;
+    }
+}
+
+export class RangeSelectionBlock implements SelectionBlock {
+
+    constructor(private title: string, public range: Range) {}
+
+    remove(): void {
+        this.range.upperBound = null;
+        this.range.lowerBound = null;
+    }
+
+    get label(): string {
+        if (this.range.hasLowerBound() && this.range.hasUpperBound()) {
+            return this.title + ' [' + this.range.lowerBound + ', ' + this.range.upperBound + ']';
+        } else if (this.range.hasLowerBound() && !this.range.hasUpperBound()) {
+            return this.title + ' > ' + this.range.lowerBound;
+        } else if (!this.range.hasLowerBound() && this.range.hasUpperBound()) {
+            return this.title + ' < ' + this.range.upperBound;
+        }
     }
 }

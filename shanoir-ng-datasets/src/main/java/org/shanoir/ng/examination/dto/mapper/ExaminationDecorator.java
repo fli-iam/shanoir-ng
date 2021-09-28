@@ -14,15 +14,12 @@
 
 package org.shanoir.ng.examination.dto.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Function;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 
 /**
@@ -39,9 +36,8 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	@Override
 	public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
 
-		Page<ExaminationDTO> mappedPage = page.map(new Converter<Examination, ExaminationDTO>() {
-			@Override
-			public ExaminationDTO convert(Examination entity) {
+		Page<ExaminationDTO> mappedPage = page.map(new Function<Examination, ExaminationDTO>() {
+			public ExaminationDTO apply(Examination entity) {
 				return examinationToExaminationDTO(entity);
 			}
 		});
