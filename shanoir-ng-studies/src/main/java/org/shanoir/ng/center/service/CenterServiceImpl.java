@@ -120,12 +120,13 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public Center create(Center center) {
+		Center newDbCenter = super.create(center);
 		try {
-			updateName(new IdName(center.getId(), center.getName()));
+			updateName(new IdName(newDbCenter.getId(), newDbCenter.getName()));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not send the center name creation to the other microservices !", e);
 		}
-		return super.create(center);
+		return newDbCenter;
 	}
 
 	@Override

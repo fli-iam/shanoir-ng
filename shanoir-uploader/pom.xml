@@ -207,8 +207,8 @@
 			<url>https://repository.jboss.org/maven2</url>
 		</repository>
 		<repository>
-			<id>dcm4che</id>
-			<name>dcm4che</name>
+			<id>dcm4che-snapshots</id>
+			<name>Dcm4Che Snapshots</name>
 			<url>https://www.dcm4che.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
