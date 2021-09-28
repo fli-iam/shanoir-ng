@@ -49,7 +49,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AccountRequestApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class AccountRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/accountrequest";

@@ -19,7 +19,6 @@ import java.util.List;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Subject Therapy service.
@@ -27,7 +26,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface SubjectTherapyService extends UniqueCheckableService<SubjectTherapy> {
+public interface SubjectTherapyService {
 
 	/**
 	 * Delete a subject therapy.

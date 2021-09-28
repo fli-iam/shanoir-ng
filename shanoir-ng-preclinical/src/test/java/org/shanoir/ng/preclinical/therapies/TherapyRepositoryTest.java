@@ -78,14 +78,6 @@ public class TherapyRepositoryTest {
 	}
 
 	@Test
-	public void findByTest() throws Exception {
-		List<Therapy> therapyDb = repository.findBy("name", THERAPY_TEST_1_DATA);
-		assertNotNull(therapyDb);
-		assertThat(therapyDb.size()).isEqualTo(1);
-		assertThat(therapyDb.get(0).getId()).isEqualTo(THERAPY_TEST_1_ID);
-	}
-
-	@Test
 	public void findByNameTest() throws Exception {
 		Optional<Therapy> therapyDb = repository.findByName(THERAPY_TEST_1_DATA);
 		assertTrue(therapyDb.isPresent());
@@ -102,7 +94,7 @@ public class TherapyRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Therapy therapyDb = repository.findOne(THERAPY_TEST_1_ID);
+		Therapy therapyDb = repository.findById(THERAPY_TEST_1_ID).orElse(null);
 		assertThat(therapyDb.getName()).isEqualTo(THERAPY_TEST_1_DATA);
 	}
 

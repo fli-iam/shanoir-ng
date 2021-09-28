@@ -59,7 +59,6 @@ public class BidsServiceTest {
 
 	Examination exam = ModelsUtil.createExamination();
 	Subject subject = new Subject();
-
 	
 	public static String tempFolderPath;
 
@@ -130,8 +129,8 @@ public class BidsServiceTest {
 		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
 		assertTrue(subjectFile.exists());
 		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
-
 		// No exam files as there is only one datasetAcquisition
+
 		assertFalse(examFile.exists());
 		File bidsDataFile = new File(subjectFile.getAbsolutePath() + "/undefined/test.test");
 		assertTrue(bidsDataFile.exists());

@@ -50,7 +50,6 @@ import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.FindDicomActionListener;
 import org.shanoir.uploader.action.ImportDialogOpener;
-import org.shanoir.uploader.action.ImportDialogOpenerNG;
 import org.shanoir.uploader.action.NoOrYesAnonRChangeListener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
@@ -58,7 +57,6 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.rest.UrlConfig;
-import org.shanoir.uploader.service.soap.ServiceConfiguration;
 
 
 /**
@@ -136,7 +134,6 @@ public class MainWindow extends JFrame {
 	public ShUpConfig shanoirUploaderConfiguration;
 	
 	private ImportDialogOpener importDialogOpener;
-	private ImportDialogOpenerNG importDialogOpenerNG;
 
 	/**
 	 * Create the frame.
@@ -204,7 +201,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
+				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 			}
 		});
 
@@ -223,18 +220,6 @@ public class MainWindow extends JFrame {
 				dscw.hostNameLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.host"));
 				dscw.portLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.port"));
 				dscw.aetLocalPACSTF.setText(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.aet.calling"));
-			}
-		});
-
-		JMenuItem mntmShanoirServerConfiguration = new JMenuItem(
-				resourceBundle.getString("shanoir.uploader.configurationMenu.shanoirServer"));
-		mnConfiguration.add(mntmShanoirServerConfiguration);
-
-		mntmShanoirServerConfiguration.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ShanoirServerConfigurationWindow sscw = new ShanoirServerConfigurationWindow(shanoirUploaderFolder,
-						ServiceConfiguration.getInstance(), resourceBundle);
 			}
 		});
 
@@ -808,9 +793,7 @@ public class MainWindow extends JFrame {
 		/**
 		 * Init ImportDialog and its Opener here.
 		 */
-
 		importDialogOpener = new ImportDialogOpener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
-		importDialogOpenerNG = new ImportDialogOpenerNG(this, ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
 		
 		// add ShUp principal panel (splitPane) and upload job display pane
 		// (scrollPaneUpload) to TabbedPane
@@ -895,11 +878,9 @@ public class MainWindow extends JFrame {
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
 		currentUploadsPanel.add(scrollPaneUpload);
-		if (ShUpOnloadConfig.isShanoirNg()) {
-			final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
-			tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
-					resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
-		}
+		final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
+		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
+				resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
@@ -921,18 +902,6 @@ public class MainWindow extends JFrame {
 
 	public ImportDialogOpener getImportDialogOpener() {
 		return importDialogOpener;
-	}
-
-	public void setImportDialogOpener(ImportDialogOpener importDialogOpener) {
-		this.importDialogOpener = importDialogOpener;
-	}
-
-	public ImportDialogOpenerNG getImportDialogOpenerNG() {
-		return importDialogOpenerNG;
-	}
-
-	public void setImportDialogOpenerNG(ImportDialogOpenerNG importDialogOpenerNG) {
-		this.importDialogOpenerNG = importDialogOpenerNG;
 	}
 	
 }

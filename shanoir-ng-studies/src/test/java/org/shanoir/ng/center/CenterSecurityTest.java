@@ -20,6 +20,7 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -50,7 +50,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class CenterSecurityTest {
 
@@ -137,7 +136,7 @@ public class CenterSecurityTest {
 		List<AcquisitionEquipment> acqs = new ArrayList<>();
 		acqs.add(new AcquisitionEquipment());
 		center.setAcquisitionEquipments(acqs);
-		given(repository.findOne(ID)).willReturn(center);
+		given(repository.findById(ID)).willReturn(Optional.of(center));
 		service.deleteByIdCheckDependencies(ID);
 	}
 	
@@ -150,7 +149,7 @@ public class CenterSecurityTest {
 		List<StudyCenter> studyCenterList = new ArrayList<>();
 		studyCenterList.add(new StudyCenter());
 		center.setStudyCenterList(studyCenterList);
-		given(repository.findOne(ID)).willReturn(center);
+		given(repository.findById(ID)).willReturn(Optional.of(center));
 		service.deleteByIdCheckDependencies(ID);
 	}
 

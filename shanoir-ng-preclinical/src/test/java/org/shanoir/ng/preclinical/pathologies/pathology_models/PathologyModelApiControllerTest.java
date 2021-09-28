@@ -28,9 +28,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -59,7 +59,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = PathologyModelApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
 public class PathologyModelApiControllerTest {
@@ -80,9 +80,12 @@ public class PathologyModelApiControllerTest {
 	@MockBean
 	private PathologyService pathologyServiceMock;
 	@MockBean
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
-	@MockBean
 	private ShanoirEventService eventService;
+	@MockBean
+	private PathologyModelUniqueValidator uniqueValidator;
+	@MockBean
+	private PathologyModelEditableByManager editableOnlyValidator;
+
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
@@ -106,6 +109,9 @@ public class PathologyModelApiControllerTest {
 		PathologyModel patho = new PathologyModel();
 		patho.setId(Long.valueOf(123));
 		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho );
+		
+		given(uniqueValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

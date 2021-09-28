@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,6 +45,7 @@ import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
+import org.shanoir.ng.study.security.StudySecurityService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -72,7 +74,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = StudyApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class StudyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studies";
@@ -104,6 +106,9 @@ public class StudyApiControllerTest {
 	@MockBean
 	private StudyUniqueConstraintManager uniqueConstraintManager;
 
+	@MockBean(name = "studySecurityService")
+	private StudySecurityService studySecurityService;
+	
 	@MockBean
 	private ShanoirEventService eventService;
 
@@ -111,10 +116,10 @@ public class StudyApiControllerTest {
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
 	
 	public static String tempFolderPath;
+	
 	@BeforeClass
 	public static void beforeClass() {
 		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-
 	    System.setProperty("studies-data", tempFolderPath);
 	}
 	
@@ -131,6 +136,7 @@ public class StudyApiControllerTest {
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
 		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
+		given(studySecurityService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 	}
 
 	// TODO: manage keycloak token
@@ -159,13 +165,14 @@ public class StudyApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void findStudiesNamesTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testUploadProtocolFile() throws IOException {
 		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
 

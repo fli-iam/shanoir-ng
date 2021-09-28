@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -32,8 +31,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,16 +60,21 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Autowired
 	private PathologyModelService modelsService;
+	
 	@Autowired
 	private PathologyService pathologiesService;
-	@Autowired
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@Autowired
 	private ShanoirEventService eventService;
 
 	@Value("${preclinical.uploadExtradataFolder}")
 	private String extraDataPath;
+
+	@Autowired
+	private PathologyModelUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private PathologyModelEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<PathologyModel> createPathologyModel(
@@ -254,17 +256,14 @@ public class PathologyModelApiController implements PathologyModelApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final PathologyModel model) {
-		final PathologyModel previousStateModel = modelsService.findById(model.getId());
-		return new EditableOnlyByValidator<PathologyModel>().validate(previousStateModel,
-				model);
+	    return editableOnlyValidator.validate(model);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final PathologyModel model) {
-		return new EditableOnlyByValidator<PathologyModel>().validate(model);
+	    return editableOnlyValidator.validate(model);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final PathologyModel model) {
-		final UniqueValidator<PathologyModel> uniqueValidator = new UniqueValidator<>(modelsService);
 		return uniqueValidator.validate(model);
 	}
 

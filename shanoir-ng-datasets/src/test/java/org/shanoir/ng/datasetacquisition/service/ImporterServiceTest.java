@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +94,7 @@ public class ImporterServiceTest {
 	public void setUp() throws IOException {
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
+        given(examinationService.findById(Mockito.anyLong())).willReturn(new Examination());
 	}
 
 	@Test
@@ -204,7 +206,7 @@ public class ImporterServiceTest {
 		Examination examination = new Examination();
 		examination.setId(2L);
 		examination.setExaminationDate(LocalDate.now());
-		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
+		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
 		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
