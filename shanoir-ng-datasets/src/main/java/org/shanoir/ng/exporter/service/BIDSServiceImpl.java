@@ -175,7 +175,7 @@ public class BIDSServiceImpl implements BIDSService {
 		ShanoirEvent event;
 		try {
 			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-			Study studyDeleted = studyRepo.findOne(event.getStudyId());
+			Study studyDeleted = studyRepo.findById(event.getStudyId()).orElse(null);
 			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 		} catch (Exception e) {
 			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", eventAsString, e);

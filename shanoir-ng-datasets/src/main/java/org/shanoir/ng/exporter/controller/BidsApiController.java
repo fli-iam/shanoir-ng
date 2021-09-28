@@ -130,7 +130,7 @@ public class BidsApiController implements BidsApi {
 			throws RestServiceException, IOException {
 
 		BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");
-		Study study = studyRepo.findOne(studyId);
+		Study study = studyRepo.findById(studyId).orElse(null);
 		if (study != null) {
 			studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
 		}
