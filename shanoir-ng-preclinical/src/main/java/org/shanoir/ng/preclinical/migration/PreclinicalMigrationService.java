@@ -152,7 +152,7 @@ public class PreclinicalMigrationService {
 
 		// Animal_subject
 		for (Entry<Long, Long> entry : job.getSubjectsMap().entrySet()) {
-			for (AnimalSubject animalSubject : animalSubjectRepository.findBy("subjectId", entry.getKey())) {
+			for (AnimalSubject animalSubject : animalSubjectRepository.findBySubjectId(entry.getKey())) {
 				LOG.error("moving Animal subject " + animalSubject.getId() + animalSubject.getSubjectId());
 				migrateSubject(animalSubject, job);
 			}
