@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
@@ -33,12 +34,12 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -55,7 +56,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {StudyCardApiController.class, StudyCardUniqueConstraintManager.class})
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyCardApiControllerTest {
 
@@ -71,43 +72,48 @@ public class StudyCardApiControllerTest {
 	private StudyCardService studyCardServiceMock;
 	
 	@MockBean
-	FindByRepository<StudyCard> findByRepositoryMock;
+	private FindByRepository<StudyCard> findByRepositoryMock;
+	
+	@MockBean(name = "datasetSecurityService")
+	private DatasetSecurityService datasetSecurityService;
 
 	@Before
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		StudyCard studyCardMock = new StudyCard();
 		studyCardMock.setId(1L);
-
 		doNothing().when(studyCardServiceMock).deleteById(1L);
 		given(studyCardServiceMock.findAll()).willReturn(Arrays.asList(studyCardMock));
 		given(studyCardServiceMock.findById(1L)).willReturn(studyCardMock);
 		given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
-		
 		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<StudyCard>());
+		given(datasetSecurityService.filterStudyCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
+		given(datasetSecurityService.hasRightOnStudy(Mockito.any(), Mockito.anyString())).willReturn(true);
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
+	@WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteStudyCardTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_USER" })
 	public void findStudyCardByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_USER" })
 	public void findStudyCardsTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewStudyCardTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyCard())))
@@ -115,7 +121,7 @@ public class StudyCardApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateTemplateTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyCard())))

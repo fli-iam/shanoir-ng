@@ -11,10 +11,9 @@
 	<url>http://shanoir.org</url>
 
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<keycloak.version>4.6.0.Final</keycloak.version>
+		<java.version>8</java.version>
+		<keycloak.version>13.0.1</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -40,7 +39,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>0.0.1</version>
+			<version>2.4.5</version>
 			<!-- really important: solves slf4j binding issue and avoid GB of logs during upload with httpClient!!! -->
 			<exclusions>
 			    <exclusion>
@@ -57,19 +56,11 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/shanoir-1.0.0.jar</systemPath>
 		</dependency>
-		<!-- dependency ShanoirWs -->
-		<dependency>
-			<groupId>org.shanoir</groupId>
-			<artifactId>shanoir-ws</artifactId>
-			<version>0.4</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/shanoir-ws-0.4.jar</systemPath>
-		</dependency>
 		<!-- dependency Shanoir ng anonymization -->
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -211,6 +202,11 @@
 
 	<repositories>
 		<repository>
+			<id>jboss</id>
+			<name>JBoss Release Repository</name>
+			<url>https://repository.jboss.org/maven2</url>
+		</repository>
+		<repository>
 			<id>dcm4che-snapshots</id>
 			<name>Dcm4Che Snapshots</name>
 			<url>https://www.dcm4che.org/maven2/</url>
@@ -218,15 +214,19 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>jboss</id>
-			<name>JBoss Release Repository</name>
-			<url>https://repository.jboss.org/maven2</url>
-		</repository>
 	</repositories>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
 			<!-- Place any Ant task here. You can add anything you can add between 
 				<target> and </target> in a build.xml. -->
 			<plugin>

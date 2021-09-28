@@ -19,12 +19,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
@@ -105,11 +108,16 @@ public class KeycloakClient {
 			userResource.resetPassword(credential);
 
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
-			// Add realm role
-			userResource.roles().realmLevel().add(Arrays
-					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-			return keycloakId;
+			Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
+			if (roleOpt.isPresent()) {
+				final String userRoleName = roleOpt.get().getName();
+				// Add realm role
+				userResource.roles().realmLevel().add(Arrays
+						.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+				return keycloakId;
+			} else {
+				throw new NoSuchElementException("Role not found in roleRepository.");
+			}
 		} catch (Exception e) {
 			throw new SecurityException("Could not register the new user into Keycloak.", e);
 		}
@@ -183,7 +191,7 @@ public class KeycloakClient {
 				}
 			}
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
+			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays
 					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));

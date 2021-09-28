@@ -1,5 +1,0 @@
-#!/bin/sh
-
-mkdir -p /vol/log/supervisor
-
-exec supervisord -c /etc/supervisor/supervisord.conf

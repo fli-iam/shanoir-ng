@@ -43,7 +43,7 @@ public class SolrConfig {
 	
 	@Bean
 	public HttpSolrClient solrClient() {
-		return new HttpSolrClient(solrHost);
+		return new HttpSolrClient.Builder(solrHost).build();
 	}
 	
     @Bean

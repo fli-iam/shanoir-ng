@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class ReferenceServiceTest {
 	@Before
 	public void setup() {
 		given(refsRepository.findAll()).willReturn(Arrays.asList(ReferenceModelUtil.createReferenceSpecie()));
-		given(refsRepository.findOne(REFERENCE_ID)).willReturn(ReferenceModelUtil.createReferenceSpecie());
+		given(refsRepository.findById(REFERENCE_ID)).willReturn(Optional.of(ReferenceModelUtil.createReferenceSpecie()));
 		given(refsRepository.save(Mockito.any(Reference.class))).willReturn(ReferenceModelUtil.createReferenceSpecie());
 	}
 
@@ -63,7 +64,7 @@ public class ReferenceServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		referenceService.deleteById(REFERENCE_ID);
 
-		Mockito.verify(refsRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(refsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -83,7 +84,7 @@ public class ReferenceServiceTest {
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_TYPE.equals(reference.getReftype()));
 		Assert.assertTrue(ReferenceModelUtil.REFERENCE_VALUE.equals(reference.getValue()));
 
-		Mockito.verify(refsRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(refsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
@@ -107,7 +108,7 @@ public class ReferenceServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirTemplateException {
 		templateService.updateFromShanoirOld(createTemplate());
 
-		Mockito.verify(refsRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(refsRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(refsRepository, Mockito.times(1)).save(Mockito.any(Template.class));
 	}
 	*/

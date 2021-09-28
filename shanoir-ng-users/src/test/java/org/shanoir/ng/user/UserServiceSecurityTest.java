@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.user;
 
-import static org.mockito.BDDMockito.given;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -36,12 +36,10 @@ import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -55,7 +53,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class UserServiceSecurityTest {
 
 	private static final long USER_ID = 1L;
@@ -73,9 +70,6 @@ public class UserServiceSecurityTest {
 
 	@MockBean
 	private KeycloakClient keycloakClient;
-
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
 
 	@MockBean
 	private RoleRepository roleRepository;

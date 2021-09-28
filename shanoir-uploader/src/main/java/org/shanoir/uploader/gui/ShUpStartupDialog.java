@@ -20,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.StartupStateContext;
-import org.shanoir.uploader.service.soap.ServiceConfiguration;
+import org.shanoir.uploader.service.rest.ServiceConfiguration;
 
 /**
  * This class is the shanoir startup GUI which : - Display the startup info -
@@ -151,7 +151,6 @@ public class ShUpStartupDialog extends JFrame {
 	public void showLoginForm() {
 		additionalPanel.removeAll();
 		loginPanel.connect.setEnabled(true);
-		loginPanel.loginText.setText(ServiceConfiguration.getInstance().getUsername());
 		loginPanel.setFocusable(true);
 		loginPanel.requestFocusInWindow();
 		frame.getRootPane().setDefaultButton(loginPanel.connect);

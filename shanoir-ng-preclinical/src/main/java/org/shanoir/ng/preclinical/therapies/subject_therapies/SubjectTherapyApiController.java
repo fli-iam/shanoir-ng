@@ -25,8 +25,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +52,10 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 	private AnimalSubjectService subjectService;
 	@Autowired
 	private TherapyService therapyService;
+	@Autowired
+	private SubjectTherapyUniqueValidator uniqueValidator;
+	@Autowired
+	private SubjectTherapyEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<SubjectTherapy> addSubjectTherapy(
@@ -218,18 +220,14 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final SubjectTherapy subtherapy) {
-		final SubjectTherapy previousStateTherapy = subtherapiesService.findById(subtherapy.getId());
-		return new EditableOnlyByValidator<SubjectTherapy>().validate(previousStateTherapy,
-				subtherapy);
+	    return editableOnlyValidator.validate(subtherapy);
 	}
 
-	private FieldErrorMap getCreationRightsErrors(final SubjectTherapy therapies) {
-		return new EditableOnlyByValidator<SubjectTherapy>().validate(therapies);
+	private FieldErrorMap getCreationRightsErrors(final SubjectTherapy subtherapy) {
+	    return editableOnlyValidator.validate(subtherapy);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final SubjectTherapy therapies) {
-		final UniqueValidator<SubjectTherapy> uniqueValidator = new UniqueValidator<>(
-				subtherapiesService);
 		return uniqueValidator.validate(therapies);
 	}
 
