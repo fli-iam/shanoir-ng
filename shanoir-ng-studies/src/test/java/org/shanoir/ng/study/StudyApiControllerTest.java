@@ -153,7 +153,7 @@ public class StudyApiControllerTest {
 	public void deleteStudyTest() throws Exception {
 		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn("unexistingFile");
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isNoContent());
+		.andExpect(status().is5xxServerError());
 	}
 
 	@Test
@@ -225,16 +225,6 @@ public class StudyApiControllerTest {
 			e.printStackTrace();
 			fail();
 		}
-	}
-
-	@Test
-	public void testDeleteStudyWithExaminations() {
-		return;
-	}
-
-	@Test
-	public void testDeleteStudy() {
-		return;
 	}
 
 }
