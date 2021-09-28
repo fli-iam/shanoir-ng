@@ -1,55 +1,13 @@
-:host() {
-    position: relative;
-    display: inline-block;
-    width: 40px;
-    height: 19px;
-    vertical-align: sub;
-}
-
-:host().disabled {
-    opacity: 0.5;
-}
-
-:host():focus {
-    outline: none;
-}
+:host() { position: relative; display: inline-block; width: 40px; height: 19px; vertical-align: bottom; }
+:host().disabled { opacity: 0.5; }
+:host():focus { outline: none; }
 
 
-.line {
-    border: 1px solid var(--grey);
-    border-radius: 5px;
-    display: block;
-    position: absolute;
-    left: 0; right: 0; top: 7px; bottom: 7px;
-    background-color: var(--light-grey);
-}
+.line { border: 1px solid var(--grey); border-radius: 5px; display: block; position: absolute; left: 0; right: 0; top: 5px; bottom: 5px; background-color: var(--light-grey); }
+.over-line { position: absolute; left: 0; width: 0px; transition: width .4s; background-color: orange; }
+.over-line.on { width: 22px; }
 
-:host, .button {
-    -webkit-transition: transform .4s;
-    transition: transform .4s ;
-}
-
-.button {
-    position: relative;
-    display: inline-block;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
-    border: 1px solid var(--grey);
-    z-index: 1;
-    background-color: var(--very-light-grey);
-}
-
-:host():focus .button::after {
-    content: "";
-    position: absolute;
-    top: -2px; right: -2px; bottom: -2px; left: -2px;
-    border: 2px solid var(--color-a);
-    border-radius: 50%;
-}
-
-.button.on {
-    -webkit-transform: translateX(21px);
-    -ms-transform: translateX(21px);
-    transform: translateX(21px);
-}
+:host, .button { -webkit-transition: transform .4s; transition: transform .4s ; }
+.button { margin-left: -1px; position: relative; display: inline-block; width: 17px; height: 17px; border-radius: 50%; border: 1px solid var(--grey); z-index: 1; background-color: var(--very-light-grey); }
+:host():focus .button::after { content: ""; position: absolute; top: -2px; right: -2px; bottom: -2px; left: -2px; border: 2px solid var(--color-a); border-radius: 50%; }
+.button.on { -webkit-transform: translateX(22px); -ms-transform: translateX(22px); transform: translateX(22px); }

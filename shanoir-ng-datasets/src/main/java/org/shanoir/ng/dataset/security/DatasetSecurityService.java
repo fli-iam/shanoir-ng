@@ -98,7 +98,7 @@ public class DatasetSecurityService {
     	if (studyCardId == null) {
 			return false;
 		}
-    	StudyCard sc = studyCardRepository.findOne(studyCardId);
+    	StudyCard sc = studyCardRepository.findById(studyCardId).orElse(null);
     	if (sc == null) {
 			throw new EntityNotFoundException("Cannot find study card with id " + studyCardId);
 		}
@@ -137,7 +137,7 @@ public class DatasetSecurityService {
     	if (studyCardId == null) {
 			return false;
 		}
-    	StudyCard sc = studyCardRepository.findOne(studyCardId);
+    	StudyCard sc = studyCardRepository.findById(studyCardId).orElse(null);
     	if (sc == null) {
 			throw new EntityNotFoundException("Cannot find study card with id " + studyCardId);
 		}
@@ -159,7 +159,7 @@ public class DatasetSecurityService {
     	if (studyCard == null) {
 			return false;
 		}
-    	StudyCard dbStudyCard = studyCardRepository.findOne(studyCard.getId());
+    	StudyCard dbStudyCard = studyCardRepository.findById(studyCard.getId()).orElse(null);
     	if (dbStudyCard == null) {
 			throw new EntityNotFoundException("Cannot find study card with id " + studyCard.getId());
 		}
@@ -179,7 +179,7 @@ public class DatasetSecurityService {
     	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
-    	Dataset dataset = datasetRepository.findOne(datasetId);
+    	Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
         if (dataset == null) {
 			throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
 		}
@@ -198,7 +198,7 @@ public class DatasetSecurityService {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
-    	DatasetAcquisition datasetAcq = datasetAcquisitionRepository.findOne(datasetAcquisitionId);
+    	DatasetAcquisition datasetAcq = datasetAcquisitionRepository.findById(datasetAcquisitionId).orElse(null);
         if (datasetAcq == null) {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcquisitionId);
 		}
@@ -230,7 +230,7 @@ public class DatasetSecurityService {
      * 
      * @param datasets the datasets
      * @param rightStr the right
-     * @return true or false
+     * @return a filtered list of datasets
      * @throws EntityNotFoundException
      */
     public List<Dataset> hasRightOnAtLeastOneDataset(List<Dataset> datasets, String rightStr) throws EntityNotFoundException {
@@ -260,6 +260,32 @@ public class DatasetSecurityService {
     		}
     	});
     	return filteredDatasets;
+    }
+    
+    /**
+     * Reject if one dataset doesn't have the right.
+     * DatasetIds list is also cleaned here
+     * 
+     * @param datasets the datasets
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryDataset(List<Long> datasetIds, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	// If the entry is empty, return an empty list
+    	if (datasetIds == null || datasetIds.isEmpty()) {
+			return true;
+		}
+    	
+    	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
+    	Set<Long> studyIds = new HashSet<Long>();
+    	for (Dataset dataset : datasets) {
+    		studyIds.add(dataset.getStudyId());
+    	}
+    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
     }
     
     /**
@@ -312,7 +338,7 @@ public class DatasetSecurityService {
     	if (dataset.getStudyId() == null) {
 			return false;
 		}
-    	Dataset dbDataset = datasetRepository.findOne(dataset.getId());
+    	Dataset dbDataset = datasetRepository.findById(dataset.getId()).orElse(null);
     	if (dbDataset == null) {
 			throw new EntityNotFoundException("Cannot find dataset with id " + dataset.getId());
 		}
@@ -345,7 +371,7 @@ public class DatasetSecurityService {
     	if (datasetAcq.getExamination() == null || datasetAcq.getExamination().getStudyId() == null) {
 			return false;
 		}
-    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findOne(datasetAcq.getId());
+    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcq.getId()).orElse(null);
     	if (dbDatasetAcq == null) {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
 		}
@@ -378,7 +404,7 @@ public class DatasetSecurityService {
     	if (studyCard.getStudyId() == null) {
 			return false;
 		}
-    	StudyCard dbStudyCard = studyCardRepository.findOne(studyCard.getId());
+    	StudyCard dbStudyCard = studyCardRepository.findById(studyCard.getId()).orElse(null);
     	if (dbStudyCard == null) {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + studyCard.getId());
 		}
@@ -689,7 +715,7 @@ public class DatasetSecurityService {
     	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
-    	Examination exam = examinationRepository.findOne(examinationId);
+    	Examination exam = examinationRepository.findById(examinationId).orElse(null);
         if (exam == null) {
 			throw new EntityNotFoundException("Cannot find examination with id " + examinationId);
 		}

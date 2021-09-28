@@ -23,9 +23,9 @@ import java.util.Optional;
 
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T>
  */
-public class RefValueExistsValidator<T extends AbstractGenericItem> {
+public class RefValueExistsValidator<T extends AbstractEntity> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RefValueExistsValidator.class);
 

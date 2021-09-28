@@ -23,6 +23,8 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dua.DataUserAgreement;
+import org.shanoir.ng.study.dua.DataUserAgreementRepository;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -47,6 +49,9 @@ public class StudySecurityService {
 
 	@Autowired
 	StudyUserRepository studyUserRepository;
+	
+	@Autowired
+	DataUserAgreementRepository dataUserAgreementRepository;
 
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -60,7 +65,7 @@ public class StudySecurityService {
 	 */
 	public boolean hasRightOnStudy(Long studyId, String rightStr) throws EntityNotFoundException {
 		StudyUserRight right = StudyUserRight.valueOf(rightStr);
-		Study study = studyRepository.findOne(studyId);
+		Study study = studyRepository.findById(studyId).orElse(null);
 		if (study == null) {
 			throw new EntityNotFoundException("Cannot find study with id " + studyId);
 		}
@@ -148,7 +153,7 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
-		Subject subject = subjectRepository.findOne(subjectId);
+		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
 			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
 		}
@@ -176,7 +181,7 @@ public class StudySecurityService {
 	 * @throws EntityNotFoundException
 	 */
 	public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
-		Subject subject = subjectRepository.findOne(subjectId);
+		Subject subject = subjectRepository.findById(subjectId).orElse(null);
 		if (subject == null) {
 			throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
 		}
@@ -230,7 +235,7 @@ public class StudySecurityService {
 		for (SubjectDTO dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
-		for (Subject subject : subjectRepository.findAll(new ArrayList<>(map.keySet()))) {
+		for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
 			if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
 				newList.add(map.get(subject.getId()));
 			}
@@ -256,7 +261,7 @@ public class StudySecurityService {
 		for (SimpleSubjectDTO dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
-		for (Subject subject : subjectRepository.findAll(new ArrayList<>(map.keySet()))) {
+		for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
 			if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
 				newList.add(map.get(subject.getId()));
 			}
@@ -282,7 +287,7 @@ public class StudySecurityService {
 		for (IdName dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
-		for (Subject subject : subjectRepository.findAll(new ArrayList<>(map.keySet()))) {
+		for (Subject subject : subjectRepository.findAllById(new ArrayList<>(map.keySet()))) {
 			if (hasRightOnTrustedSubjectForOneStudy(subject, rightStr)) {
 				newList.add(map.get(subject.getId()));
 			}
@@ -309,7 +314,7 @@ public class StudySecurityService {
 		for (StudyDTO dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
-		for (Study study : studyRepository.findAll(new ArrayList<>(map.keySet()))) {
+		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
 			if (hasPrivilege(study, right)) {
 				newList.add(map.get(study.getId()));
 			}
@@ -336,7 +341,7 @@ public class StudySecurityService {
 		for (IdName dto : dtos) {
 			map.put(dto.getId(), dto);
 		}
-		for (Study study : studyRepository.findAll(new ArrayList<>(map.keySet()))) {
+		for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
 			if (hasPrivilege(study, right)) {
 				newList.add(map.get(study.getId()));
 			}
@@ -359,7 +364,7 @@ public class StudySecurityService {
 			return true;
 		}
 		List<Long> newList = new ArrayList<>();
-		for (Study study : studyRepository.findAll(ids)) {
+		for (Study study : studyRepository.findAllById(ids)) {
 			if (hasPrivilege(study, right)) {
 				newList.add(study.getId());
 			}
@@ -388,13 +393,27 @@ public class StudySecurityService {
 			ids.add(subjectStudy.getStudy().getId());
 		}
 		int nbStudies = 0;
-		for (Study study : studyRepository.findAll(ids)) {
+		for (Study study : studyRepository.findAllById(ids)) {
 			nbStudies++;
 			if (!hasPrivilege(study, right)) {
 				return false;
 			}
 		}
 		return nbStudies == ids.size();
+	}
+	
+	/**
+	 * Verify that DUA accepting user is the DUA user only.
+	 * @param duaId
+	 * @return
+	 */
+	public boolean checkUserOnDUA(Long duaId) {
+		DataUserAgreement dataUserAgreement = dataUserAgreementRepository.findById(duaId).orElse(null);
+		// assure that only the user itself can accept its DUA
+		if (dataUserAgreement != null && dataUserAgreement.getUserId().equals(KeycloakUtil.getTokenUserId())) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

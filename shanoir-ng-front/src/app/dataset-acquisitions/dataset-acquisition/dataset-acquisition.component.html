@@ -58,6 +58,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li>
+                        <label>Import date</label>
+                        <span class="right-col" *ngIf="mode == 'view'">
+                                {{datasetAcquisition.creationDate}}
+                        </span>
+                    </li>
 					<li>
 						<label>Acquisition equipment</label>
 						<span class="right-col" [ngSwitch]="mode">

@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.dataset.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.dataset.model.Dataset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,5 +28,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	Iterable<Dataset> findByDatasetAcquisitionExaminationStudyId(Long studyId);
 	
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+
+	void deleteByIdIn(List<Long> ids);
 
 }

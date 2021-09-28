@@ -19,7 +19,7 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface PathologyRepository extends CrudRepository<Pathology, Long>, PathologyRepositoryCustom{
+public interface PathologyRepository extends CrudRepository<Pathology, Long> {
 
 	Optional<Pathology> findByName(String name);
 }

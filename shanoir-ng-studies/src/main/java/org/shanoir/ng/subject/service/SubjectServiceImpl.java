@@ -81,10 +81,10 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		if (subjectRepository.findOne(id) == null) {
+		if (subjectRepository.findById(id) == null) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
-		subjectRepository.delete(id);
+		subjectRepository.deleteById(id);
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject findById(final Long id) {
-		return subjectRepository.findOne(id);
+		return subjectRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject update(final Subject subject) throws ShanoirException {
-		final Subject subjectDb = subjectRepository.findOne(subject.getId());
+		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
@@ -238,7 +238,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -258,7 +258,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();

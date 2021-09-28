@@ -25,7 +25,7 @@ import javax.swing.SwingConstants;
 
 import org.shanoir.downloader.ShanoirDownloader;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 
 public class DownloaderPanel extends JPanel {
@@ -221,7 +221,7 @@ public class DownloaderPanel extends JPanel {
 						// File outputDirectory = new File(outputDirectoryTF.getText());
 						File outputDirectory = new File(System.getProperty("user.home"));
 
-						ShanoirUploaderServiceClientNG shng = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
+						ShanoirUploaderServiceClient shng = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 						
 						String message = "";
 

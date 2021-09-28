@@ -42,7 +42,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = RoleApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class RoleApiControllerTest {
 
 	private static final String REQUEST_PATH = "/roles";

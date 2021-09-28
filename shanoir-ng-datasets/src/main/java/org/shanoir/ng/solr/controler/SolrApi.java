@@ -19,6 +19,8 @@
  */
 package org.shanoir.ng.solr.controler;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -33,6 +35,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,6 +78,15 @@ public interface SolrApi {
 		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable);
+	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns solr documents matching the given dataset ids", response = SolrResultPage.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents", response = Page.class),
+		@ApiResponse(code = 204, message = "nothing found", response = ErrorModel.class),
+		@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+		@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
+	ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@ApiParam(value = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 	
 }

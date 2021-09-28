@@ -28,6 +28,7 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ExaminationAnestheticApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
 public class ExaminationAnestheticApiControllerTest {
@@ -80,6 +81,12 @@ public class ExaminationAnestheticApiControllerTest {
 	@MockBean
 	private RefsService referencesServiceMock;
 
+	@MockBean
+	private ExaminationAnestheticUniqueValidator uniqueValidator;
+	
+	@MockBean
+	private ExaminationAnestheticEditableByManager editableOnlyValidator;
+	
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
@@ -93,6 +100,8 @@ public class ExaminationAnestheticApiControllerTest {
 				.willReturn(new ExaminationAnesthetic());
 		given(examAnestheticServiceMock.findByAnesthetic(new Anesthetic()))
 				.willReturn(Arrays.asList(new ExaminationAnesthetic()));
+		given(uniqueValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(ExaminationAnesthetic.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

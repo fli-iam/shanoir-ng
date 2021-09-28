@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +83,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		} catch (IOException e) {
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
 		}
+		datasetAcquisition.setCreationDate(LocalDate.now());
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
@@ -114,7 +116,7 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	}
 
 	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
+		StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
 		if (studyCard == null) {
 			throw new IllegalArgumentException("No study card found with id " + studyCardId);
 		}
