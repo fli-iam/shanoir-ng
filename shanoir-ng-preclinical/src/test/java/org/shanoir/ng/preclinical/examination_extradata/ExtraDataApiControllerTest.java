@@ -28,10 +28,16 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataApiController;
+import org.shanoir.ng.preclinical.extra_data.ExtraDataEditableByManager;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
+import org.shanoir.ng.preclinical.extra_data.ExtraDataUniqueConstraintManager;
+import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
+import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUniqueConstraintManager;
+import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +64,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ExtraDataApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
 public class ExtraDataApiControllerTest {
@@ -88,8 +94,24 @@ public class ExtraDataApiControllerTest {
 
 	@MockBean
 	private ExtraDataService<ExaminationExtraData> extraDataServiceMock;
+
 	@MockBean
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	private ExtraDataService<PhysiologicalData> physioDataService;
+	
+	@MockBean
+	private ExtraDataService<BloodGasData> bloodGasDataService;
+
+	@MockBean
+	private ExtraDataUniqueConstraintManager uniqueConstraintManager;
+	
+	@MockBean
+	private PhysioDataUniqueConstraintManager physioConstraintManager;
+	
+	@MockBean
+	private BloogGasUniqueConstraintManager bloodGasConstraintManager;
+
+	@MockBean
+	private ExtraDataEditableByManager editableOnlyValidator;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
@@ -110,6 +132,12 @@ public class ExtraDataApiControllerTest {
 		given(extraDataServiceMock.findById(1L)).willReturn(new ExaminationExtraData());
 		given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
 				.willReturn(new ExaminationExtraData());
+		
+		given(this.bloodGasConstraintManager.validate(Mockito.any(BloodGasData.class))).willReturn(new FieldErrorMap());
+		given(this.physioConstraintManager.validate(Mockito.any(PhysiologicalData.class))).willReturn(new FieldErrorMap());
+		given(this.uniqueConstraintManager.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
+
+		given(editableOnlyValidator.validate(Mockito.any(ExaminationExtraData.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

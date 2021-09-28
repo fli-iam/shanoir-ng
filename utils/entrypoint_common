@@ -137,11 +137,13 @@ handle_microservice_migration()
 {
 	case "$SHANOIR_MIGRATION" in
 		auto)
-			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.datasource.initialization-mode	never
+			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	update
 			;;
 		init)
-			env_setdefault	spring.datasource.initialize	true
+			env_setdefault	spring.datasource.initialization-mode	always
+			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	create
 
 			_ms_oneshot=1
@@ -152,7 +154,8 @@ handle_microservice_migration()
 			env_setdefault	"logging.level.org.shanoir"			INFO
 			;;
 		never)
-			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.datasource.initialization-mode	never
+			env_setdefault	spring.jpa.generate-ddl	false
 			env_setdefault	spring.jpa.hibernate.ddl-auto	validate
 			;;
 		manual)

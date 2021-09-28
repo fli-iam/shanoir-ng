@@ -94,7 +94,7 @@ public class AnimalSubjectRepositoryTest {
 	 */
 	@Test
 	public void findOneTest() throws Exception {
-		AnimalSubject subjectDb = repository.findOne(SUBJECT_TEST_1_ID);
+		AnimalSubject subjectDb = repository.findById(SUBJECT_TEST_1_ID).orElse(null);
 		assertThat(subjectDb.getId()).isEqualTo(SUBJECT_TEST_1_ID);
 	}
 

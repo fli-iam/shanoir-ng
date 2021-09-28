@@ -114,7 +114,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 						.setFacetLimit(-1));
 
 		try {
-			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
+			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage("shanoir", query, ShanoirSolrDocument.class);			
 			return (SolrResultPage<ShanoirSolrDocument>) result;
 		} catch (UncategorizedSolrException e) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");

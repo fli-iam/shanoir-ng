@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.transaction.Transactional;
 
@@ -51,6 +52,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -89,7 +91,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		final Study study = studyRepository.findOne(id);
+		final Study study = studyRepository.findById(id).orElse(null);
 		if (study == null) {
 			throw new EntityNotFoundException(Study.class, id);
 		}
@@ -106,12 +108,12 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		
-		studyRepository.delete(id);
+		studyRepository.deleteById(id);
 	}
 
 	@Override
 	public Study findById(final Long id) {
-		return studyRepository.findOne(id);
+		return studyRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -170,7 +172,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final Study studyDb = studyRepository.findOne(study.getId());
+		final Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		boolean updateStudyValue = false;
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
@@ -326,7 +328,7 @@ public class StudyServiceImpl implements StudyService {
 				su.setStudy(studyDb);
 			}
 			// save them first to get their id
-			for (StudyUser su : studyUserRepository.save(toBeCreated)) {
+			for (StudyUser su : studyUserRepository.saveAll(toBeCreated)) {
 				// add DUA only to newly added StudyUser, not to existing ones
 				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
 					su.setConfirmed(false);
@@ -341,7 +343,7 @@ public class StudyServiceImpl implements StudyService {
 		
 		// Remove deleted: study user + data user agreements
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
-			StudyUser studyUser = studyUserRepository.findOne(studyUserIdToBeDeleted);
+			StudyUser studyUser = studyUserRepository.findById(studyUserIdToBeDeleted).orElse(null);
 			// delete a DUA for removed user in study, if not yet accepted, if dua file exists
 			if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 				dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, studyUser.getUserId());
@@ -393,28 +395,34 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public void addExaminationToStudy(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findOne(studyId);
-		Set<Long> exams = stud.getExaminationIds();
-		if (exams == null) {
-			exams = new HashSet<>();
-			stud.setExaminationIds(exams);
+		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
+		if (studyOpt.isPresent()) {
+			Study study = studyOpt.get();
+			Set<Long> exams = study.getExaminationIds();
+			if (exams == null) {
+				exams = new HashSet<>();
+				study.setExaminationIds(exams);
+			}
+			exams.add(examinationId);
+			this.studyRepository.save(study);
 		}
-		exams.add(examinationId);
-		this.studyRepository.save(stud);
 	}
 
 	@Override
 	public void deleteExamination(Long examinationId, Long studyId) {
 		// Update study_examination table
-		Study stud = this.studyRepository.findOne(studyId);
-		Set<Long> exams = stud.getExaminationIds();
-		if (exams == null) {
-			exams = new HashSet<>();
-		} else {
-			exams.remove(examinationId);
+		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
+		if (studyOpt.isPresent()) {
+			Study study = studyOpt.get();
+			Set<Long> exams = study.getExaminationIds();
+			if (exams == null) {
+				exams = new HashSet<>();
+			} else {
+				exams.remove(examinationId);
+			}
+			study.setExaminationIds(exams);
+			this.studyRepository.save(study);
 		}
-		stud.setExaminationIds(exams);
-		this.studyRepository.save(stud);
 	}
 
 	@Override
@@ -422,4 +430,5 @@ public class StudyServiceImpl implements StudyService {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
+
 }

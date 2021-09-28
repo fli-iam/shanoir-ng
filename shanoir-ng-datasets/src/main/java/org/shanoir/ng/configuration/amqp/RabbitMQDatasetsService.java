@@ -212,7 +212,7 @@ public class RabbitMQDatasetsService {
 		IdName received = new IdName();
 		try {
 			received = objectMapper.readValue(receivedStr, IdName.class);
-			T existing = repository.findOne(received.getId());
+			T existing = repository.findById(received.getId()).orElse(null);
 			if (existing != null) {
 				// update existing entity's name
 				existing.setName(received.getName());
@@ -287,7 +287,7 @@ public class RabbitMQDatasetsService {
 				examinationService.deleteFromRabbit(exam);
 			}
 			// Delete subject from datasets database
-			subjectRepository.delete(Long.valueOf(event.getObjectId()));
+			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
@@ -323,7 +323,7 @@ public class RabbitMQDatasetsService {
 			}
 
 			// Delete study from datasets database
-			studyRepository.delete(Long.valueOf(event.getObjectId()));
+			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());

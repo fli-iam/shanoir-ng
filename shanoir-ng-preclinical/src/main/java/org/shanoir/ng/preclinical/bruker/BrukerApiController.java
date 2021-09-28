@@ -28,7 +28,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -70,9 +69,6 @@ public class BrukerApiController implements BrukerApi {
 
 	@Value("${preclinical.uploadBrukerFolder}")
 	private String brukerFolder;
-
-	@Autowired
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@Autowired
 	private RestTemplate restTemplate;

@@ -220,10 +220,10 @@ public class SolrServiceImpl implements SolrService {
 					|| order.getProperty().equals("datasetName") || order.getProperty().equals("datasetNature")
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
 					|| order.getProperty().equals("tags")) {
-				pageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(),
+				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), order.getProperty().concat("_str"));
 			} else if (order.getProperty().equals("id")) {
-				pageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize(),
+				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), "datasetId");
 			}
 		}
