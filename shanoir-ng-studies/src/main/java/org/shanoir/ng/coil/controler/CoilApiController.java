@@ -71,8 +71,7 @@ public class CoilApiController implements CoilApi {
 	@Override
 	public ResponseEntity<CoilDTO> findCoilById(
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
-		
-		final Coil coil = coilService.findById(coilId);
+		final Coil coil = coilService.findById(coilId).orElse(null);
 		if (coil == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}

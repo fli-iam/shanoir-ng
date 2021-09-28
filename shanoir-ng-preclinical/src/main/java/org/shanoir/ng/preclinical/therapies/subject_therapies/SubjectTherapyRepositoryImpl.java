@@ -30,13 +30,6 @@ public class SubjectTherapyRepositoryImpl implements SubjectTherapyRepositoryCus
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SubjectTherapy> findBy(String fieldName, Object value) {
-		return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t." + fieldName + " LIKE :value")
-				.setParameter("value", value).getResultList();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
 	public List<SubjectTherapy> findByAnimalSubject(AnimalSubject animalSubject) {
 		return em.createQuery("SELECT t FROM SubjectTherapy t WHERE t.animalSubject LIKE :animalSubject")
 				.setParameter("animalSubject", animalSubject).getResultList();

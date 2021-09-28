@@ -24,18 +24,16 @@ spring:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
     password: password
-    # The SQL dialect makes Hibernate generate better SQL for the chosen database
-    driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: never
     data: classpath:/scripts/import.sql
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      # Naming strategy
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      use-new-id-generator-mappings: false
     properties:
       hibernate:
         connection:
@@ -55,10 +53,11 @@ spring:
     password: guest
   session:
     store-type: none
-  http:
+  servlet:
     multipart:
-      maxFileSize: 6000Mb
-      maxRequestSize: 6000Mb
+      enabled: true
+      max-file-size: 6000MB
+      max-request-size: 6000MB
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -94,7 +93,8 @@ studies-data: /var/studies-data
 bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
     org.shanoir: WARN
     org.springframework.web: ERROR
@@ -104,18 +104,18 @@ logging:
 migration-servers: Qualification==https://shanoir-qualif.irisa.fr/;;Neurinfo==https://shanoir.irisa.fr/;;GME==https://fli.ai/
 
 ---
-
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 server:
   port: 9922
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    initialize: true
+    initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -138,7 +138,8 @@ ms.url:
 studies-data: /tmp
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
     org.shanoir: DEBUG
     org.springframework.web: DEBUG
@@ -148,15 +149,16 @@ logging:
     
 ---
 spring:
-  profiles: test
+  config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_STUDY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
-    password: 
+    password:
     driver-class-name: org.h2.Driver
-    initialize: true
+    initialization-mode: always
     data: classpath:/scripts/test-data-h2.sql
   jpa:
+    generate-ddl: true
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)

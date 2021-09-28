@@ -3,40 +3,41 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
-import org.shanoir.uploader.model.Center;
-import org.shanoir.uploader.model.Investigator;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.StudyCard;
-import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.model.dto.SubjectStudyDTO;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectStudy;
+import org.shanoir.uploader.model.rest.SubjectType;
 
-/**
- * This listener reacts on the selections in the studyCB and studyCardCB.
- * When a study has been selected it updates the studyCard list and the
- * RelSubjectStudy, if existing or propose the edition of a new relatio.
- * The ImportDialog is used as "storage" point of the relation to be read
- * later by the ImportFinishActionListener.
- * 
- * @author mkain
- *
- */
 public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private MainWindow mainWindow;
 	
-	private SubjectDTO subjectDTO;
+	private Subject subject;
 	
-	private SubjectStudyDTO subjectStudyDTO;
+	private SubjectStudy subjectStudy;
+	
+	private List<Examination> examinationsOfSubject;
+	
+	private Date studyDate;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, SubjectDTO subjectDTO) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate) {
 		this.mainWindow = mainWindow;
-		this.subjectDTO = subjectDTO;
+		this.subject = subject;
+		this.examinationsOfSubject = examinationDTOs;
+		this.studyDate = studyDate;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -46,30 +47,63 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 				Study study = (Study) e.getItem();
 				updateStudyCards(study);
 				updateSubjectStudy(study);
+				filterExistingExamsForSelectedStudy(study);
 			}
 			// the selection of the StudyCard and its center defines
 			// the center for new created examinations
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// add center
-				Center centerOfStudyCard = studyCard.getCenter();
+				// put center into exam using study card and acq equipment
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				mainWindow.importDialog.mrExaminationCenterCB.addItem(centerOfStudyCard);
-				// add investigators
-				mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
-				Study selectedStudy = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-				List<Center> centersOfSelectedStudy = selectedStudy.getCenters();
-				for (Center center : centersOfSelectedStudy) {
-					if (center.equals(centerOfStudyCard)) {
-						List<Investigator> investigators = center.getInvestigatorList();
-						for (Investigator investigator : investigators) {
-							mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);
-						}
-					}
+				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+				if (acqEquipment != null) {
+					IdName center = acqEquipment.getCenter();
+					mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				}
+				// add investigators
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
 			}			
 		} // ignore otherwise
+	}
+
+	/**
+	 * Examinations in Shanoir are related to study.
+	 * @param study
+	 * @throws ParseException 
+	 */
+	private void filterExistingExamsForSelectedStudy(Study study) {
+		// manage list of existing exams, and check if study date matches
+		mainWindow.importDialog.mrExaminationExistingExamCB.removeAllItems();
+		mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(false);
+		mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(true);
+		mainWindow.importDialog.mrExaminationNewExamCB.setSelected(true);
+		// Exams exist, but maybe not for the study selected
+		if (examinationsOfSubject != null && !examinationsOfSubject.isEmpty()) {
+			List<Examination> examinationsFilteredByStudy = examinationsOfSubject.parallelStream()
+				.filter(e -> e.getStudyId() == study.getId())
+				.collect(Collectors.toList());
+			for (Iterator iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
+				Examination examination = (Examination) iterator.next();
+				mainWindow.importDialog.mrExaminationExistingExamCB.addItem(examination); // I did not achieve to call this from within Lambda
+				// Existing exam found with the same study date: preselect and do not propose new exam per default
+				if (examination.getExaminationDate().compareTo(studyDate) == 0) {
+					mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
+					mainWindow.importDialog.mrExaminationExistingExamCB.setSelectedItem(examination);
+					mainWindow.importDialog.mrExaminationNewExamCB.setSelected(false);
+				}
+			}
+			// here we know, that for this study at least one exam exists (but not with the same study date)
+			if (mainWindow.importDialog.mrExaminationExistingExamCB.getItemCount() > 0) {
+				if (!mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
+					mainWindow.importDialog.mrExaminationExistingExamCB.setEnabled(true);
+				}
+			// No exams exist already for this subject, so user has to create a new exam
+			} else {
+				mainWindow.importDialog.mrExaminationNewExamCB.setEnabled(false);
+			}
+		} 
 	}
 
 	private void updateStudyCards(Study study) {
@@ -82,30 +116,29 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	}
 
 	private void updateSubjectStudy(Study study) {
-		this.subjectStudyDTO = null;
-		if (subjectDTO != null) {
+		if (this.subject != null) {
 			// Check if RelSubjectStudy exists for selected study
-			List<SubjectStudyDTO> subjectStudyList = subjectDTO.getSubjectStudyList();
+			List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
 			if (subjectStudyList != null) {
 				for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-					SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
+					SubjectStudy subjectStudy = (SubjectStudy) iterator.next();
 					// subject is already in study: display values in GUI and stop editing
-					if (subjectStudyDTO.getStudyId() == study.getId()) {
-						mainWindow.importDialog.subjectStudyIdentifierTF.setText(subjectStudyDTO.getSubjectStudyIdentifier());
+					if (subjectStudy.getStudy().getId().equals(study.getId())) {
+						mainWindow.importDialog.subjectStudyIdentifierTF.setText(subjectStudy.getSubjectStudyIdentifier());
+						mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
 						mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(false);
 						mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(false);
-						mainWindow.importDialog.subjectStudyIdentifierTF.setBackground(Color.LIGHT_GRAY);
-						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
+						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudy.isPhysicallyInvolved());
 						mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
+						mainWindow.importDialog.subjectTypeCB.setSelectedItem(subjectStudy.getSubjectType());
 						mainWindow.importDialog.subjectTypeCB.setEnabled(false);
-						this.subjectStudyDTO = subjectStudyDTO;
+						this.subjectStudy = subjectStudy;
 						return;
 					}
 				}
 			}
 		}
-		// subject is not in study or does not yet exist, enable editing and display defaults
+		// subject is not in study, enable editing and display defaults
 		if (ShUpConfig.isModeSubjectStudyIdentifier()) {
 			mainWindow.importDialog.subjectStudyIdentifierTF.setEnabled(true);
 			mainWindow.importDialog.subjectStudyIdentifierTF.setEditable(true);
@@ -115,15 +148,16 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
 		mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		mainWindow.importDialog.subjectTypeCB.setEnabled(true);
-		mainWindow.importDialog.subjectTypeCB.setSelectedItem(ImportDialogOpener.subjectTypeValues[1]);
+		mainWindow.importDialog.subjectTypeCB.setSelectedItem(SubjectType.values()[1]);
+		this.subjectStudy = null;
 	}
 
-	public SubjectStudyDTO getSubjectStudyDTO() {
-		return subjectStudyDTO;
+	public SubjectStudy getSubjectStudy() {
+		return subjectStudy;
 	}
 
-	public void setSubjectStudyDTO(SubjectStudyDTO subjectStudyDTO) {
-		this.subjectStudyDTO = subjectStudyDTO;
+	public void setSubjectStudy(SubjectStudy subjectStudy) {
+		this.subjectStudy = subjectStudy;
 	}
 	
 }

@@ -20,7 +20,7 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface AnestheticRepository extends CrudRepository<Anesthetic, Long>, AnestheticRepositoryCustom{
+public interface AnestheticRepository extends CrudRepository<Anesthetic, Long> {
 
 	List<Anesthetic> findAllByAnestheticType(AnestheticType type);
 }

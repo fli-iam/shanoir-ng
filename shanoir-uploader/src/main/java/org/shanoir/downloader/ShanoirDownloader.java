@@ -22,9 +22,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.json.JSONException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.Util;
 import org.springframework.http.HttpHeaders;
 
@@ -163,13 +164,15 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			exit(e.getMessage());
 		} catch (DatatypeConfigurationException e) {
 			exit(e.getMessage());
+		} catch (JSONException e) {
+			exit(e.getMessage());
 		}
 
 		System.exit(0);
 	}
 
 	/** Our business Service. */
-	private ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
 	/**
 	 * @param opts
@@ -181,11 +184,9 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	public void initialize() {
 		initProperties(ShUpConfig.BASIC_PROPERTIES, ShUpConfig.basicProperties);
-
 		initProperties(ShUpConfig.PROFILE_DIR + NG_PROFILE + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
 		ShUpConfig.profileProperties.setProperty("shanoir.server.url", getHost());
-		ShUpOnloadConfig.setShanoirNg(true);
 	}
 
 	/**
@@ -215,7 +216,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	public static String downloadDataset(File destDir, Long datasetId, String format,
-			ShanoirUploaderServiceClientNG shng) throws Exception {
+			ShanoirUploaderServiceClient shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetId + "...");
 		HttpResponse response = shng.downloadDatasetById(datasetId, format);
 		String message = "";
@@ -230,7 +231,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	public static String downloadDatasets(File destDir, List<Long> datasetIds, String format,
-			ShanoirUploaderServiceClientNG shng) throws Exception {
+			ShanoirUploaderServiceClient shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetIds + "...");
 		HttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
 		String message = "";
@@ -251,7 +252,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	public static String downloadDatasetByStudy(File destDir, Long studyId, String format,
-			ShanoirUploaderServiceClientNG shng) throws Exception {
+			ShanoirUploaderServiceClient shng) throws Exception {
 		HttpResponse response = shng.downloadDatasetsByStudyId(studyId, format);
 		String message = "";
 		if (response == null) {
@@ -265,7 +266,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	public static String downloadDatasetBySubject(File destDir, Long subjectId, String format,
-			ShanoirUploaderServiceClientNG shng) throws Exception {
+			ShanoirUploaderServiceClient shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectId(subjectId);
 		String message = "";
 		if (datasetIds == null) {
@@ -278,7 +279,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	}
 
 	public static String downloadDatasetBySubjectIdStudyId(File destDir, Long subjectId, Long studyId, String format,
-			ShanoirUploaderServiceClientNG shng) throws Exception {
+			ShanoirUploaderServiceClient shng) throws Exception {
 		List<Long> datasetIds = shng.findDatasetIdsBySubjectIdStudyId(subjectId, studyId);
 		String message = "";
 		if (datasetIds == null) {
@@ -292,8 +293,9 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 	/**
 	 * This method download Dataset corresponding to the properties set by the user.
+	 * @throws JSONException 
 	 */
-	private void download() {
+	private void download() throws JSONException {
 		String[] args = cl.getArgs();
 		for (String arg : args) {
 			System.out.println(
@@ -308,7 +310,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			}
 		}
 
-		shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
+		shanoirUploaderServiceClient = new ShanoirUploaderServiceClient();
 		
 		String user = cl.getOptionValue("user");
 		String password = cl.getOptionValue("password");
@@ -317,7 +319,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			char[] passwordArray = console.readPassword("Enter your Shanoir password: ");
 			password = new String(passwordArray);
 		}
-		String token = shanoirUploaderServiceClientNG.loginWithKeycloakForToken(user, password);
+		String token = shanoirUploaderServiceClient.loginWithKeycloakForToken(user, password);
 		
 		if (token != null) {
 			ShUpOnloadConfig.setTokenString(token);
@@ -334,25 +336,25 @@ public final class ShanoirDownloader extends ShanoirCLI {
 
 			if (cl.hasOption("datasetId")) {
 				Long datasetId = Long.parseLong(cl.getOptionValue("datasetId"));
-				downloadDataset(destDir, datasetId, format, shanoirUploaderServiceClientNG);
+				downloadDataset(destDir, datasetId, format, shanoirUploaderServiceClient);
 
 			} else {
 
 				if (cl.hasOption("studyId") && !cl.hasOption("subjectId")) {
 					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
-					downloadDatasetByStudy(destDir, studyId, format, shanoirUploaderServiceClientNG);
+					downloadDatasetByStudy(destDir, studyId, format, shanoirUploaderServiceClient);
 				}
 
 				if (cl.hasOption("subjectId") && !cl.hasOption("studyId")) {
 					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
-					downloadDatasetBySubject(destDir, subjectId, format, shanoirUploaderServiceClientNG);
+					downloadDatasetBySubject(destDir, subjectId, format, shanoirUploaderServiceClient);
 				}
 
 				if (cl.hasOption("subjectId") && cl.hasOption("studyId")) {
 					Long studyId = Long.parseLong(cl.getOptionValue("studyId"));
 					Long subjectId = Long.parseLong(cl.getOptionValue("subjectId"));
 					downloadDatasetBySubjectIdStudyId(destDir, subjectId, studyId, format,
-							shanoirUploaderServiceClientNG);
+							shanoirUploaderServiceClient);
 				}
 
 			}

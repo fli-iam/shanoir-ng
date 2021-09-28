@@ -23,8 +23,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +46,12 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 	private AnestheticIngredientService ingredientsService;
 	@Autowired
 	private AnestheticService anestheticsService;
+	@Autowired
+	private AnestheticIngredientUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private AnestheticIngredientEditableByManager editableOnlyValidator;
+
 
 	@Override
 	public ResponseEntity<AnestheticIngredient> createAnestheticIngredient(
@@ -160,18 +164,14 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final AnestheticIngredient ingredient) {
-		final AnestheticIngredient previousStateIngredient = ingredientsService.findById(ingredient.getId());
-		return new EditableOnlyByValidator<AnestheticIngredient>()
-				.validate(previousStateIngredient, ingredient);
+	    return editableOnlyValidator.validate(ingredient);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final AnestheticIngredient ingredient) {
-		return new EditableOnlyByValidator<AnestheticIngredient>().validate(ingredient);
+	    return editableOnlyValidator.validate(ingredient);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final AnestheticIngredient ingredient) {
-		final UniqueValidator<AnestheticIngredient> uniqueValidator = new UniqueValidator<>(
-				ingredientsService);
 		return uniqueValidator.validate(ingredient);
 	}
 

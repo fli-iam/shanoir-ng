@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Refs service.
@@ -26,7 +25,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface RefsService extends UniqueCheckableService<Reference> {
+public interface RefsService {
 
 	/**
 	 * Delete a reference value.

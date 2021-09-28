@@ -86,7 +86,7 @@ public class ExaminationAnestheticRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		ExaminationAnesthetic examAnestheticDb = repository.findOne(EXAM_ANESTHETIC_TEST_1_ID);
+		ExaminationAnesthetic examAnestheticDb = repository.findById(EXAM_ANESTHETIC_TEST_1_ID).orElse(null);
 		assertThat(examAnestheticDb.getAnesthetic().getId()).isEqualTo(ANESTHETIC_ID);
 		assertThat(examAnestheticDb.getAnesthetic().getName()).isEqualTo(AnestheticModelUtil.ANESTHETIC_NAME);
 	}

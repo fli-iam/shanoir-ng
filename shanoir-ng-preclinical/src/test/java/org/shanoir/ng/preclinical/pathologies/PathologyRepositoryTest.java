@@ -78,14 +78,6 @@ public class PathologyRepositoryTest {
 	}
 
 	@Test
-	public void findByTest() throws Exception {
-		List<Pathology> pathologyDb = repository.findBy("name", PATHOLOGY_TEST_1_DATA);
-		assertNotNull(pathologyDb);
-		assertThat(pathologyDb.size()).isEqualTo(1);
-		assertThat(pathologyDb.get(0).getId()).isEqualTo(PATHOLOGY_TEST_1_ID);
-	}
-
-	@Test
 	public void findByNameTest() throws Exception {
 		Optional<Pathology> pathologyDb = repository.findByName(PATHOLOGY_TEST_1_DATA);
 		assertTrue(pathologyDb.isPresent());
@@ -94,7 +86,7 @@ public class PathologyRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Pathology pathologyDb = repository.findOne(PATHOLOGY_TEST_1_ID);
+		Pathology pathologyDb = repository.findById(PATHOLOGY_TEST_1_ID).orElse(null);
 		assertThat(pathologyDb.getName()).isEqualTo(PATHOLOGY_TEST_1_DATA);
 	}
 

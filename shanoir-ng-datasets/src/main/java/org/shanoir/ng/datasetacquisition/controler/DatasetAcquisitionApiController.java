@@ -105,7 +105,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Transactional
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
 		Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
-
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, userId);
@@ -120,6 +119,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
+		LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
 		long startTime = System.currentTimeMillis();
 		importerService.createAllDatasetAcquisition(importJob, userId);
 		long endTime = System.currentTimeMillis();

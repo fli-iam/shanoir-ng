@@ -2,8 +2,6 @@ package org.shanoir.uploader.upload;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -11,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.jboss.seam.security.Identity;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -22,13 +19,11 @@ import org.shanoir.dicom.importer.UploadJobManager;
 import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
-import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.util.ShanoirUtil;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -49,8 +44,6 @@ public class UploadServiceJob implements Job {
 	private static Logger logger = Logger.getLogger(UploadServiceJob.class);
 
 	private ShanoirUploaderServiceClient uploadServiceClient;
-	
-	private ShanoirUploaderServiceClientNG uploadServiceClientNG;
 
 	private String uploadPercentage = "";
 
@@ -63,7 +56,6 @@ public class UploadServiceJob implements Job {
 		CurrentNominativeDataController currentNominativeDataController = (CurrentNominativeDataController) dataMap
 				.get("nominativeDataController");
 		uploadServiceClient = (ShanoirUploaderServiceClient) dataMap.get("uploadServiceClient");
-		uploadServiceClientNG = (ShanoirUploaderServiceClientNG) dataMap.get("uploadServiceClientNG");
 		String workFolderFilePath = dataMap.getString(ShUpConfig.WORK_FOLDER);
 		File workFolder = new File(workFolderFilePath);
 		processWorkFolder(workFolder, currentNominativeDataController);
@@ -127,13 +119,8 @@ public class UploadServiceJob implements Job {
 			nominativeDataUploadJob.setUploadState(uploadState);
 			if (uploadState.equals(UploadState.START) || uploadState.equals(UploadState.START_AUTOIMPORT)) {
 				long startTime = System.currentTimeMillis();
-				if (ShUpOnloadConfig.isShanoirNg()) {
-					processStartForServerNG(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
+				processStartForServer(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
 						uploadJobManager, nominativeDataUploadJobManager, currentNominativeDataController);
-				} else {
-					processStartForServer(folder, filesToTransfer, uploadJob, nominativeDataUploadJob,
-							uploadJobManager, nominativeDataUploadJobManager, currentNominativeDataController);					
-				}
 				long stopTime = System.currentTimeMillis();
 			    long elapsedTime = stopTime - startTime;
 				logger.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
@@ -155,59 +142,14 @@ public class UploadServiceJob implements Job {
 			UploadJobManager uploadJobManager, NominativeDataUploadJobManager nominativeDataUploadJobManager,
 			CurrentNominativeDataController currentNominativeDataController) {
 		try {
-			int i = 0;
-			for (Iterator iterator = allFiles.iterator(); iterator.hasNext();) {
-				File file = (File) iterator.next();
-				i++;
-				logger.debug("UploadServiceJob started to upload file: " + file.getName());
-				uploadServiceClient.uploadFile(folder.getName(), file);
-				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
-				uploadPercentage = i * 100 / allFiles.size() + " %";
-				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
-				currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
-				nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
-				logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
-			}
-			/**
-			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
-			 * many files have to be uploaded.
-			 */
-			File uploadJobXML = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-			uploadServiceClient.uploadFile(folder.getName(), uploadJobXML);
-			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
-			currentNominativeDataController.updateNominativeDataPercentage(folder,
-					UploadState.FINISHED_UPLOAD.toString());
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
-			uploadJobManager.writeUploadJob(uploadJob);
-		} catch (Exception e) {
-			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
-			uploadJob.setUploadState(UploadState.ERROR);
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
-			uploadJobManager.writeUploadJob(uploadJob);
-			logger.error("An error occured during upload : " + e.getMessage());
-		}
-	}
-
-	/**
-	 * This method processes the state START.
-	 * 
-	 * @param folder
-	 * @param allFiles
-	 * @param uploadJob
-	 */
-	private void processStartForServerNG(final File folder, final List<File> allFiles,
-			final UploadJob uploadJob, final NominativeDataUploadJob nominativeDataUploadJob,
-			UploadJobManager uploadJobManager, NominativeDataUploadJobManager nominativeDataUploadJobManager,
-			CurrentNominativeDataController currentNominativeDataController) {
-		try {
-			String tempDirId = uploadServiceClientNG.createTempDir();
+			String tempDirId = uploadServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			int i = 0;
 			for (Iterator iterator = allFiles.iterator(); iterator.hasNext();) {
 				File file = (File) iterator.next();
 				i++;
 				logger.debug("UploadServiceJob started to upload file: " + file.getName());
-				uploadServiceClientNG.uploadFile(tempDirId, file);
+				uploadServiceClient.uploadFile(tempDirId, file);
 				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
 				uploadPercentage = i * 100 / allFiles.size() + " %";
 				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
@@ -256,7 +198,7 @@ public class UploadServiceJob implements Job {
 		importJob.setWorkFolder(tempDirId);
 		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
 		String importJobJson = ow.writeValueAsString(importJob);
-		uploadServiceClientNG.startImportJob(importJobJson);
+		uploadServiceClient.startImportJob(importJobJson);
 	}
 	
 }

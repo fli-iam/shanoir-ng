@@ -12,7 +12,8 @@
 
 -- Populates database for test
 
-INSERT INTO study_cards 
+INSERT INTO study_cards
+	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
 	(1,1,false,0,'StudyCard1',1,1),
 	(2,1,false,0,'StudyCard2',1,1),

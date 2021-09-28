@@ -41,14 +41,11 @@ public class TherapyServiceImpl implements TherapyService {
 	private static final Logger LOG = LoggerFactory.getLogger(TherapyServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private TherapyRepository therapiesRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		therapiesRepository.delete(id);
+		therapiesRepository.deleteById(id);
 	}
 
 	@Override
@@ -57,20 +54,16 @@ public class TherapyServiceImpl implements TherapyService {
 	}
 
 	@Override
-	public List<Therapy> findBy(final String fieldName, final Object value) {
-		return therapiesRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public Therapy findById(final Long id) {
-		return therapiesRepository.findOne(id);
+		return therapiesRepository.findById(id).orElse(null);
 	}
 
 	@Override
 	public Therapy findByName(final String name) {
 		Optional<Therapy> therapy = therapiesRepository.findByName(name);
-		if (therapy.isPresent())
+		if (therapy.isPresent()) {
 			return therapy.get();
+		}
 		return null;
 	}
 
@@ -93,7 +86,7 @@ public class TherapyServiceImpl implements TherapyService {
 
 	@Override
 	public Therapy update(final Therapy therapy) throws ShanoirException {
-		final Therapy therapyDb = therapiesRepository.findOne(therapy.getId());
+		final Therapy therapyDb = therapiesRepository.findById(therapy.getId()).orElse(null);
 		updateTherapyValues(therapyDb, therapy);
 		try {
 			therapiesRepository.save(therapyDb);
