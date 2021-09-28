@@ -15,21 +15,24 @@
 package org.shanoir.ng.subjectstudy;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * Subject - study mapper test.
@@ -46,6 +49,9 @@ public class SubjectStudyMapperTest {
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;
+
+	@Mock
+	private TagMapper tagMapper;
 
 	@Test
 	public void subjectStudyListToSubjectStudyDTOListTest() {
@@ -66,8 +72,12 @@ public class SubjectStudyMapperTest {
 	private SubjectStudy createSubjectStudy() {
 		final SubjectStudy center = new SubjectStudy();
 		final Subject subject = new Subject();
+		final Study study = new Study();
+		study.setTags(Collections.emptyList());
 		subject.setId(SUBJECT_ID);
 		center.setSubject(subject);
+		center.setStudy(study);
+		center.setTags(Collections.emptyList());
 		return center;
 	}
 

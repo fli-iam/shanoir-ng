@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -53,6 +54,7 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -77,7 +79,7 @@ public class StudyServiceTest {
 	@Mock
 	private RabbitTemplate rabbitTemplate;
 
-    @InjectMocks
+	@InjectMocks
 	private StudyServiceImpl studyService;
 
 	@Mock
@@ -92,6 +94,9 @@ public class StudyServiceTest {
 	@Mock
 	private DataUserAgreementService dataUserAgreementService;
 
+	@Mock
+	private StudyMapper studyMapper;
+	
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
 	
@@ -112,7 +117,7 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
+	public void deleteBydTest() throws AccessDeniedException, EntityNotFoundException {
 		final Study newStudy = ModelsUtil.createStudy();
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setUserId(USER_ID);
