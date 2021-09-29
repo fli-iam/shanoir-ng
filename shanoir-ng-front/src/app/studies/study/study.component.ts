@@ -596,4 +596,8 @@ export class StudyComponent extends EntityComponent<Study> {
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
+
+    onTagListChange() {
+        this.study.tags = [].concat(this.study.tags); // hack : force change detection
+    }
 }

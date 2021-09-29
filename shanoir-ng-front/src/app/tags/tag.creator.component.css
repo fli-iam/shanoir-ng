@@ -1,5 +1,16 @@
 .tags { margin: 5px 0 20px; }
-.tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; display: inline-block; margin: 2px 2px; }
+.tag { border: 1px solid var(--grey); border-radius: 10px; padding: 2px 8px; display: inline-block; margin: 2px 4px 2px 0; }
 .tag i { margin-right: 3px; }
 .dark { color:white }
 .clickable { cursor: pointer; }
+.used {opacity: 0.2; }
+.save { background-color: transparent; border: none; }
+.save:hover:not(.disabled) { background-color: transparent; color: var(--grey); cursor: pointer; }
+.save.disabled { opacity: 0.2; }
+.new { margin-left: 5px; color: var(--color-a); }
+.new:hover { opacity: 0.5; }
+.edit-new { padding: 0 2px; }
+.input-box { overflow: hidden; display: inline-block; height: 15px; width: 15px; vertical-align: middle; position: relative; margin: 0 5px 0 6px; }
+.input-box input { position: absolute; top: -7px; left: -3px; height: 30px; opacity: 0; }
+.input-box i { vertical-align: 1px; }
+input[type="text"] { width: 130px; border-color: var(--color-b); }

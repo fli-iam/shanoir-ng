@@ -97,15 +97,12 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
             studyCopy.id = this.study.id;
             newSubjectStudy.study = studyCopy;
             newSubjectStudy.subject = this.selected as Subject;
-            newSubjectStudy.availableTags = this.study.tags;
         }
         else if (this.compMode == "subject") {
             let subjectCopy: Subject = new Subject();
             subjectCopy.id = this.subject.id;
             newSubjectStudy.subject = subjectCopy;
             newSubjectStudy.study = this.selected as Study;
-            // Get available tags ?
-            newSubjectStudy.availableTags = [];
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
@@ -152,7 +149,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
           var r = parseInt(color.substring(0, 2), 16); // hexToR
           var g = parseInt(color.substring(2, 4), 16); // hexToG
           var b = parseInt(color.substring(4, 6), 16); // hexToB
-          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 186);
+          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
     }
 
 

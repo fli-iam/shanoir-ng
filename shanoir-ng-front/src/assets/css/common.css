@@ -78,6 +78,8 @@ input, select, select-box, datepicker {
 input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
+input[type="color"] { border: none !important; cursor: pointer; }
+
 input.ng-invalid.ng-touched,
 select.ng-invalid.ng-touched,
 select-box.ng-invalid.ng-touched,

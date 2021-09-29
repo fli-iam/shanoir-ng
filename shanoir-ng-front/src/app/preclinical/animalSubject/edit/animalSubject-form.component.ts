@@ -235,7 +235,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     	fixedSubjectStudy.subjectId = this.preclinicalSubject.subject.id;
     	fixedSubjectStudy.studyId = subjectStudy.study.id;
         fixedSubjectStudy.tags = subjectStudy.tags;
-        fixedSubjectStudy.availableTags = subjectStudy.availableTags;
     	return fixedSubjectStudy;
     }
     

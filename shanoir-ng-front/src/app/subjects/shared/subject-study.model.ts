@@ -30,7 +30,6 @@ export class SubjectStudy {
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     tags: Tag[];
-    availableTags: Tag[];
 }
 
 export class SubjectStudyDTO {
@@ -42,7 +41,6 @@ export class SubjectStudyDTO {
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     tags: Tag[];
-    availableTags: Tag[];
 
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
@@ -53,6 +51,5 @@ export class SubjectStudyDTO {
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
         this.tags = subjectStudy.tags;
-        this.availableTags = subjectStudy.availableTags;
     }
 }

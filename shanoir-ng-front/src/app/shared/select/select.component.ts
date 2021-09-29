@@ -19,7 +19,6 @@ import {
     HostBinding,
     HostListener,
     Input,
-    NgZone,
     OnChanges,
     OnDestroy,
     Output,
@@ -91,8 +90,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     constructor(
             private element: ElementRef, 
-            private globalService: GlobalService,
-            private ngZone: NgZone) {}
+            private globalService: GlobalService) {}
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
