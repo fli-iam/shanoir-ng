@@ -41,8 +41,6 @@ public class SubjectStudyDTO {
 	private boolean physicallyInvolved;
 	
 	private List<TagDTO> tags;
-	
-	private List<TagDTO> availableTags;
 
 	public Long getId() {
 		return id;
@@ -126,19 +124,4 @@ public class SubjectStudyDTO {
 	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
 	}
-
-	/**
-	 * @return the availableTags
-	 */
-	public List<TagDTO> getAvailableTags() {
-		return availableTags;
-	}
-
-	/**
-	 * @param availableTags the availableTags to set
-	 */
-	public void setAvailableTags(List<TagDTO> availableTags) {
-		this.availableTags = availableTags;
-	}
-
 }

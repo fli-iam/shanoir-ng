@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             {{tag.name}}
                         </span>
                     </td>
-                    <td class="dropdown-col">
+                    <td class="dropdown-col" *ngIf="study?.tags">
                         <select-box [ngModel]="selectedTag" [ngModelOptions]="{standalone: true}" (onAddClick)="onTagAdd($event, i)" [optionArr]="study.tags">
                         </select-box>
                     </td>
