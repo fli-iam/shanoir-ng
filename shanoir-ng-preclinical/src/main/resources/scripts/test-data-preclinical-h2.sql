@@ -50,10 +50,11 @@ VALUES (1,'Stroke'),
 		(4,'Bone');
 
 INSERT INTO pathology_model
-	(id, comment, name,pathology_id,filename, filepath,  )
-VALUES (1,NULL,'U836',1,NULL,NULL),
-		(2,NULL,'XXXX',2,NULL,NULL),
-		(3,NULL,'ZZZZ',3,NULL,NULL);
+	(id, comment, name, pathology_id, filename, filepath)
+VALUES
+	(1,NULL,'U836',1,NULL,NULL),
+	(2,NULL,'XXXX',2,NULL,NULL),
+	(3,NULL,'ZZZZ',3,NULL,NULL);
 		
 
 INSERT INTO subject_pathology 

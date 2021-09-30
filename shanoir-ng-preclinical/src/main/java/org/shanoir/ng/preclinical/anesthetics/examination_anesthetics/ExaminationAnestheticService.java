@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Examination anesthetic service.
@@ -26,7 +25,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface ExaminationAnestheticService extends UniqueCheckableService<ExaminationAnesthetic> {
+public interface ExaminationAnestheticService {
 
 	/**
 	 * Delete an examination anesthetic

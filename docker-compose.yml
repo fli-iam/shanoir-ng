@@ -183,7 +183,7 @@ services:
       - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -307,6 +307,7 @@ services:
       - "studies"
       - "import"
       - "datasets"
+      - "preclinical"
       - "rabbitmq"
 
 volumes:

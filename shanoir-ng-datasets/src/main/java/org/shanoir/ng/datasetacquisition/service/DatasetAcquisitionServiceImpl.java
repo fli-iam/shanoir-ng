@@ -74,7 +74,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Override
 	public DatasetAcquisition findById(Long id) {
-		return repository.findOne(id);
+		return repository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Override
 	public DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException {
-		final DatasetAcquisition entityDb = repository.findOne(entity.getId());
+		final DatasetAcquisition entityDb = repository.findById(entity.getId()).orElse(null);
 		if (entityDb == null) {
 			throw new EntityNotFoundException(entity.getClass(), entity.getId());
 		}
@@ -113,7 +113,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Override
 	@Transactional
 	public void deleteById(Long id) throws EntityNotFoundException {
-		final DatasetAcquisition entity = repository.findOne(id);
+		final DatasetAcquisition entity = repository.findById(id).orElse(null);
 		if (entity == null) {
 			throw new EntityNotFoundException("Cannot find entity with id = " + id);
 		}
@@ -123,7 +123,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 				solrService.deleteFromIndex(ds.getId());
 			}
 		}
-		repository.delete(id);
+		repository.deleteById(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
 

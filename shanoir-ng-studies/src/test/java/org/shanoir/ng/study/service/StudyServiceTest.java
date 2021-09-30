@@ -20,12 +20,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +49,6 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
-import org.shanoir.ng.study.service.StudyServiceImpl;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -106,7 +107,7 @@ public class StudyServiceTest {
 	    ReflectionTestUtils.setField(studyService, "dataDir", this.tempFolderPath);
 
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
+		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
 
@@ -117,11 +118,11 @@ public class StudyServiceTest {
 		studyUser.setUserId(USER_ID);
 		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
 		newStudy.getStudyUserList().add(studyUser);
-		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
+		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
 
 		studyService.deleteById(STUDY_ID);
 
-		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(studyRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -130,7 +131,7 @@ public class StudyServiceTest {
 		Assert.assertNotNull(study);
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
-		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
@@ -140,13 +141,13 @@ public class StudyServiceTest {
 		studyUser.setUserId(USER_ID);
 		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_DOWNLOAD));
 		newStudy.getStudyUserList().add(studyUser);
-		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
+		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
 
 		final Study study = studyService.findById(STUDY_ID);
 		Assert.assertNotNull(study);
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
-		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
@@ -170,7 +171,7 @@ public class StudyServiceTest {
 		updatedStudy.setId(1L);
 		updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
 
-		given(studyRepository.findOne(STUDY_ID)).willReturn(dbStudy);
+		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
 
 		final Study returnedStudy = studyService.update(updatedStudy);
 		Assert.assertNotNull(returnedStudy);
@@ -196,12 +197,12 @@ public class StudyServiceTest {
 		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
 		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
 		
-		given(studyRepository.findOne(STUDY_ID)).willReturn(existing);
-		given(studyUserRepository.findOne(1L)).willReturn(existing.getStudyUserList().get(0));
-		given(studyUserRepository.findOne(2L)).willReturn(existing.getStudyUserList().get(1));
+		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(existing));
+		given(studyUserRepository.findById(1L)).willReturn(Optional.of(existing.getStudyUserList().get(0)));
+		given(studyUserRepository.findById(2L)).willReturn(Optional.of(existing.getStudyUserList().get(1)));
 		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
 		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, true, StudyUserRight.CAN_SEE_ALL));
-		given(studyUserRepository.save(in)).willReturn(out);
+		given(studyUserRepository.saveAll(in)).willReturn(out);
 
 		studyService.update(updated);
 	}
@@ -225,8 +226,8 @@ public class StudyServiceTest {
 
 		updated.getStudyUserList().add(suToBeAdded);
 				
-		given(studyUserRepository.save(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
-		given(studyUserRepository.findOne(2L)).willReturn(suToBeDeleted);
+		given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+		given(studyUserRepository.findById(2L)).willReturn(Optional.of(suToBeDeleted));
 
 		studyService.updateStudyUsers(existing, updated);
 		
@@ -265,7 +266,7 @@ public class StudyServiceTest {
 		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);
 		updated.getStudyUserList().add(suToBeAdded);
 		
-		given(studyUserRepository.save(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
+		given(studyUserRepository.saveAll(Mockito.any(List.class))).willReturn(Collections.singletonList(suToBeAdded));
 
 		studyService.updateStudyUsers(existing, updated);
 		for (StudyUser su : updated.getStudyUserList()) {

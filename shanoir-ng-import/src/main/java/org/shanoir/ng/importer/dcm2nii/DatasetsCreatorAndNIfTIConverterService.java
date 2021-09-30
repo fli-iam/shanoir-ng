@@ -139,7 +139,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
-		return niftiConverterRepository.findOne(id);
+		return niftiConverterRepository.findById(id).orElse(null);
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -903,7 +903,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		Long converterId = Long.valueOf(messageSplit[0]);
 		String workFolder = messageSplit[1];
 
-		NIfTIConverter converter = niftiConverterRepository.findOne(converterId);
+		NIfTIConverter converter = niftiConverterRepository.findById(converterId).orElse(null);
 		
 		if (converter == null) {
 			return false;

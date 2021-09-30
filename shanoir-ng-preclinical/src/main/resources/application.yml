@@ -24,18 +24,16 @@ spring:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: preclinical
     password: password
-    # The SQL dialect makes Hibernate generate better SQL for the chosen database
-    driver-class-name: com.mysql.jdbc.Driver
-    initialize: false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: never
     data: classpath:/scripts/import.sql
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      # Naming strategy
-      naming:
-        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      use-new-id-generator-mappings: false
     properties:
       hibernate:
         connection:
@@ -53,8 +51,9 @@ spring:
     port: 5672
   session:
     store-type: none
-  http:
+  servlet:
     multipart:
+      enabled: true
       max-file-size: -1
       max-request-size: -1
 front.server:
@@ -89,7 +88,8 @@ ms.url:
   bruker2dicom: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/bruker2dicom
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -105,31 +105,34 @@ preclinical:
 # DO NOT CHANGE #
 #################
 spring:
-  profiles: test
+  config.activate.on-profile: test
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: 
     driver-class-name: org.h2.Driver
+    initialization-mode: always
     data: classpath:/scripts/test-data-preclinical-h2.sql
-    initialize: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: create-drop
 logging:
-  file: /tmp/shanoir-ng-import.log
+  file:
+    name: /tmp/shanoir-ng-import.log
 ---
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
 spring:
-  profiles: dev
+  config.activate.on-profile: dev
   datasource:
-    initialize: true
+    initialization-mode: always
   jpa:
+    generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -140,7 +143,8 @@ spring:
 
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  file:
+    name: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
