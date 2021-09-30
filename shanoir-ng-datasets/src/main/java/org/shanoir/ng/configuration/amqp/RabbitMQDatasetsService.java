@@ -110,16 +110,48 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveStudyNameUpdate(final String studyStr) {
+		System.err.println("coucou" + studyStr);
+
 		receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		IdName received = new IdName();
+		try {
+			received = objectMapper.readValue(studyStr, IdName.class);
+			bidsService.deleteBidsFolder(received.getId(), received.getName());
+		} catch (Exception e) {
+			LOG.error("Could not read value transmit as Study class through RabbitMQ", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+		}
 	}
 
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveSubjectNameUpdate(final String subjectStr) {
+		System.err.println("coucou" + subjectStr);
 		receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
-	}
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		IdName received = new IdName();
+		try {
+			received = objectMapper.readValue(subjectStr, IdName.class);
+		
+			// Update BIDS folder
+			Set<Long> studyIds = new HashSet<>();
 	
+			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+				studyIds.add(exam.getStudyId());
+			}
+			for (Study stud : studyRepository.findAllById(studyIds)) {
+				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+			}
+		} catch (Exception e) {
+			LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+		}
+	}
+
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
 	@RabbitHandler
@@ -148,19 +180,8 @@ public class RabbitMQDatasetsService {
 					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
 				}
 			}
-			// Update BIDS folder
-			Set<Long> studyIds = new HashSet<>();
-
-			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
-				studyIds.add(exam.getStudyId());
-			}
-
-			for (Study stud : studyRepository.findAllById(studyIds)) {
-				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-			}
-
 		} catch (IOException e) {
-			LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
+			LOG.error("Could not read value transmit as " + clazz.getSimpleName() + "class through RabbitMQ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
 		}
 	}
