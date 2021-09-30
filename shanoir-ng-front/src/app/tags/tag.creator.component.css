@@ -14,3 +14,4 @@
 .input-box input { position: absolute; top: -7px; left: -3px; height: 30px; opacity: 0; }
 .input-box i { vertical-align: 1px; }
 input[type="text"] { width: 130px; border-color: var(--color-b); }
+.warn i { vertical-align: 1px; margin-right: 7px; }
