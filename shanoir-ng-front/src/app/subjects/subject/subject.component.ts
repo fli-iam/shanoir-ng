@@ -136,7 +136,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         } else {
             formGroup.get('firstName').setValidators([]);
             formGroup.get('lastName').setValidators([]);
-            formGroup.get('birthDate').setValidators([DatepickerComponent.validator])
+            formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])
         }
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
