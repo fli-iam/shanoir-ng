@@ -231,6 +231,12 @@ public class ImporterService {
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
 		DatasetImportEmail generatedMail = new DatasetImportEmail();
+
+		Map<Long, String> datasets = new HashMap<>();
+		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
+			return;
+		}
+
 		generatedMail.setExamDate(examination.getExaminationDate().toString());
 		generatedMail.setExaminationId(examination.getId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
@@ -238,11 +244,6 @@ public class ImporterService {
 		generatedMail.setStudyName(importJob.getStudyName());
 		generatedMail.setUserId(userId);
 		generatedMail.setStudyCard(importJob.getStudyCardName());
-
-		Map<Long, String> datasets = new HashMap<>();
-		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
-			return;
-		}
 
 		for (DatasetAcquisition acq : generatedAcquisitions) {
 			if (!CollectionUtils.isEmpty(acq.getDatasets())) {
