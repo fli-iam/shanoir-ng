@@ -582,11 +582,15 @@ public class DatasetApiController implements DatasetApi {
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
-			name.append(subjectName).append("_")
-			.append(dataset.getUpdatedMetadata().getComment()).append("_")
-			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-			if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+			name.append(subjectName).append("_");
+			if (dataset instanceof EegDataset) {
+				name.append(dataset.getName()).append("_");
+			} else {
+				name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+				}
 			}
 			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
 			.append(index)
