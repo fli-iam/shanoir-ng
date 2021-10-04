@@ -175,6 +175,10 @@ public class BIDSServiceImpl implements BIDSService {
 		ShanoirEvent event;
 		try {
 			event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+			if (event.getStudyId() == null) {
+				LOG.error("This event did not triggered a BIDs folder deletion {}", eventAsString);
+				return;
+			}
 			Study studyDeleted = studyRepo.findById(event.getStudyId()).orElse(null);
 			this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
 		} catch (Exception e) {
@@ -345,7 +349,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  examination.getId());
+		String sessionLabel = examination.getComment() != null ? examination.getComment() : examination.getId().toString();
+		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
 		}
@@ -367,7 +372,9 @@ public class BIDSServiceImpl implements BIDSService {
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
-			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, dataset.getDatasetAcquisition().getExamination().getId().toString(), studyName, dataset.getId().toString());
+			String examComment = dataset.getDatasetAcquisition().getExamination().getComment().toString();
+			String sessionLabel = examComment != null ? examComment : dataset.getDatasetAcquisition().getExamination().getId().toString();
+			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, sessionLabel, studyName, dataset.getId().toString());
 		} else if (dataset instanceof MrDataset) {
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
@@ -587,37 +594,6 @@ public class BIDSServiceImpl implements BIDSService {
 		.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-	}
-
-	/**
-	 * This method allows to find a specific object ( Study or subject ) from its ID in the given folder
-	 * @param id the ID to find, or the modality
-	 * @param folder the folder where we are looking for.s
-	 * @return The File we found, null otherwise
-	 * @throws IOException when there is a duplicated folder
-	 */
-	protected File getFileFromId(String id, File folder) throws IOException {
-		if (!folder.exists()) {
-			throw new IOException("ERROR: parent folder does not exist:" + folder.getAbsolutePath());
-		}
-		File[] files = folder.listFiles(new FilenameFilter() {
-
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.startsWith(SUBJECT_PREFIX + id + "_") && !name.endsWith(".zip")  && !name.endsWith(".tsv")
-						|| name.startsWith(STUDY_PREFIX + id + "_")
-						|| name.equals(SESSION_PREFIX + id)
-						|| name.equals(id);
-			}
-		});
-		if (files.length == 1) {
-			return files[0];
-		} else if (files.length > 1) {
-			LOG.error("ERROR: duplicate folder containing ID: {} in bids folder", id);
-			throw new IOException("ERROR: duplicate folder containing ID:" + id + "{} in bids folder");
-		}
-		LOG.info("ERROR: no folder containing ID: {} in bids folder. It will probably be created by the BIDS manager. Should not happen", id);
-		return null;
 	}
 
 	/**

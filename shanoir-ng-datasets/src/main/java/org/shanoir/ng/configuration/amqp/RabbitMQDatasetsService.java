@@ -110,13 +110,14 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveStudyNameUpdate(final String studyStr) {
-		receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		IdName received = new IdName();
 		try {
-			received = objectMapper.readValue(studyStr, IdName.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			IdName received = objectMapper.readValue(studyStr, IdName.class);
+
+			// Delete from BIDS first as name may have changed.
 			bidsService.deleteBidsFolder(received.getId(), received.getName());
+
+			receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		} catch (Exception e) {
 			LOG.error("Could not read value transmit as Study class through RabbitMQ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

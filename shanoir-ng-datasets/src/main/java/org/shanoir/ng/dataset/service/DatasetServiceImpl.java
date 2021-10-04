@@ -14,11 +14,12 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -30,7 +31,6 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,10 +76,15 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+		List<Dataset> dss = this.findByIdIn(ids);
+		Map<Long, Long> datasetStudyMap = new HashMap<>();
+		for (Dataset ds : dss) {
+			datasetStudyMap.put(ds.getId(), ds.getStudyId());
+		}
 		repository.deleteByIdIn(ids);
 		solrService.deleteFromIndex(ids);
 		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
 		}
 	}
 
