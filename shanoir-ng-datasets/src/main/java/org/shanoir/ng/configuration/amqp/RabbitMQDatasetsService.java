@@ -110,8 +110,6 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveStudyNameUpdate(final String studyStr) {
-		System.err.println("coucou" + studyStr);
-
 		receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -129,7 +127,6 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveSubjectNameUpdate(final String subjectStr) {
-		System.err.println("coucou" + subjectStr);
 		receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
 		
 		ObjectMapper objectMapper = new ObjectMapper();

@@ -26,8 +26,7 @@ INSERT INTO examination
 VALUES
 	(1, 1, now(), false, 1, 'examination1', 1, 1, 'examination1', false),
 	(2, 1, now(), false, 1, 'examination2', 1, 2, 'examination2', false),
-	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3', false),
-	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4', false);
+	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3', false);
 
 INSERT INTO mr_protocol_metadata
 	(dtype, id, name)
@@ -76,8 +75,7 @@ INSERT INTO dataset_metadata
 VALUES 
 	(1, 1, 'MRDataset1'),
 	(2, 1, 'PETDataset1'),
-	(3, 1, 'CTDataset1'),
-    (4, 1, 'EEGDataset');
+	(3, 1, 'CTDataset1');
 
 INSERT INTO study
 	(id, name)
@@ -102,8 +100,7 @@ INSERT INTO dataset
 VALUES 
 	(1, 1, 1, 1, 1),
 	(2, 2, 2, 2, 1),
-	(3, 3, 3, 3, 1),
-	(4, NULL, 4, 4, 1);
+	(3, 3, 3, 3, 1);
 
 INSERT INTO mr_dataset
 	(id, mr_quality_procedure_type, origin_mr_metadata_id) 
@@ -119,18 +116,3 @@ INSERT INTO ct_dataset
 	(id) 
 VALUES 
 	(3);
-	
-INSERT INTO eeg_dataset
-    (id, channel_count, sampling_frequency)
-VALUES
-    (4, 1, 1);
-
-INSERT INTO event
-    (id, type, description, channel_number, points, dataset_id)
-VALUES
-    (1, "type", "description", 1, 1, 4);
-
-INSERT INTO channel
-    (id, name, reference_type, reference_units, resolution, x, y, z, high_cutoff, low_cutoff, notch, dataset_id)
-VALUES
-    (1, "test", 1, "reference_unit", 1, 1, 1, 1, 1, 1, 1, 4);

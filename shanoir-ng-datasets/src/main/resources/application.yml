@@ -135,12 +135,12 @@ spring:
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    initialization-mode: always
+    initialization-mode: never
   jpa:
     generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: update
     # Show or not log for each sql query
     show-sql: true
   rabbitmq:
