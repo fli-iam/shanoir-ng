@@ -43,6 +43,8 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     public selectedTag: Tag;
+    studyTags: Option<Tag>[];
+    hasTags: boolean;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
@@ -54,15 +56,34 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
             if (this.selectableList) {
                 for (let item of this.selectableList) {
                     let option: Option<Subject | Study> = new Option(item, item.name);
+                    if(this.model && this.model.find(subStu => (this.compMode == 'study' ? subStu.subject.id : subStu.study.id) == option.value.id)) {
+                        option.disabled = true;
+                    }
                     this.optionList.push(option);
                 }
+            }
+        } if (changes.study) {
+            this.studyTags = [];
+            if (this.study.tags) {
+                this.studyTags = this.study.tags.map(tag => {
+                    let option: Option<Tag> = new Option<Tag>(tag, tag.name);
+                    option.color = tag.color;
+                    return option;
+                });
             }
         }
     }
     
     writeValue(obj: any): void {
         super.writeValue(obj);
-        if (this.model && this.selectableList) {
+        if (this.model) {
+            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.tags && subStu.tags.length > 0);
+        }
+        this.updateDisabled();
+    }
+
+    private updateDisabled() {
+        if (this.selectableList && this.model) {
             if (this.compMode == 'study') {
                 for (let option of this.optionList) {
                     if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true; 

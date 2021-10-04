@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <th class="label-col">
                     <!-- {{columnName}} -->
                     </th>
-                    <th class="input-col">Tags</th>
+                    <th class="input-col" *ngIf="hasTags">Tags</th>
                     <th class="input-col">Subject id for this study</th>
                     <th class="chkbx-col" title="Physically Involved">PI</th>
                     <th *ngIf="displaySubjectType" class="dropdown-col">Subject Type</th>
@@ -39,19 +39,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
             </thead>  
             <tbody>
-                <tr *ngFor="let subjectStudy of model; let i = index">
-                    <td class="dropdown-col" *ngIf="study?.tags">
+                <tr *ngFor="let subjectStudy of model; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                    <td class="dropdown-col">
                         <span *ngIf="compMode == 'study'">{{subjectStudy.subject.name}}</span>
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
+                    </td>
+                    <td class="dropdown-col tag-cell" *ngIf="hasTags">
                         <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
                             <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(tag, i)">
                                 <i class="fas fa-times"></i>
                             </span>
                             {{tag.name}}
                         </span>
-                    </td>
-                    <td class="dropdown-col" *ngIf="study?.tags">
-                        <select-box [ngModel]="selectedTag" [ngModelOptions]="{standalone: true}" (onAddClick)="onTagAdd($event, i)" [optionArr]="study.tags">
+                        <select-box
+                                *ngIf="study?.tags?.length > 0"
+                                [ngModel]="selectedTag"
+                                [ngModelOptions]="{standalone: true}"
+                                (userChange)="onTagAdd($event, i)"
+                                [options]="studyTags"
+                                [compactMode]="true">
                         </select-box>
                     </td>
                     <td class="input-col">
@@ -67,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
                         </select>
                     </td>
-                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
+                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-times"></i></span>
                 </tr>
             </tbody>
         </table>

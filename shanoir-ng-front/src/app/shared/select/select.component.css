@@ -1,5 +1,6 @@
 :host() { display: inline-block; position: relative; box-sizing: border-box; text-align: left; }
 :host().auto-width { width: auto; }
+:host().compact { width: 25px; border: none; }
 .root.disabled { opacity: 0.3; }
 .root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 100%; }
@@ -92,3 +93,4 @@ toggle-switch { margin: 0 10px; }
 .new-file .fa-plus { position: absolute; font-size: 6px; left: 7px; top: 4px; }
 
 :host().read-only { border: none !important; }
+.compact-button { cursor: pointer !important; }

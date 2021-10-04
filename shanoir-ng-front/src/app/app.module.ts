@@ -233,6 +233,7 @@ import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiolo
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
 import { TagCreatorComponent } from './tags/tag.creator.component';
+import { TagInputComponent } from './tags/tag.input.component';
 
 @NgModule({
     imports: [
@@ -394,7 +395,8 @@ import { TagCreatorComponent } from './tags/tag.creator.component';
         ChallengeBlockComponent,
         TagCreatorComponent,
         SolrRangeCriterionComponent,
-        ChallengeBlockComponent
+        ChallengeBlockComponent,
+        TagInputComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

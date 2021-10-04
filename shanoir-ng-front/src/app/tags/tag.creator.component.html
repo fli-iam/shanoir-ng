@@ -22,6 +22,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fas fa-plus"></i>
     </span>
     <span *ngIf="addTagVisible" class="tag edit-new" [style.background-color]="selectedColor" [class.dark]="newTagDarkFont"> 
+        <span (click)="addTagVisible = false" class="cancel">
+            <i class="fas fa-times"></i>
+        </span>
         <span class="input-box">
             <i class="fas fa-paint-roller"></i>
             <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()"/>

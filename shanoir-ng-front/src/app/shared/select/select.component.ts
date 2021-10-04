@@ -85,6 +85,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();
+    @HostBinding('class.compact') @Input() compactMode: boolean = false;
 
     readonly LIST_LENGTH: number = 16;
 
@@ -113,7 +114,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 else if (item.label) label = item.label;
                 else if (item.name) label = item.name;
                 else if (item.value) label = item.value;
-                this.options.push(new Option<any>(item, label));
+                let newOption: Option<any> = new Option<any>(item, label);
+                if (item.color) newOption.color = item.color;
+                if (item.backgroundColor) newOption.color = item.backgroundColr;
+                this.options.push(newOption);
             });
             this.initSelectedOption();
             this.computeMinWidth();
@@ -611,6 +615,8 @@ export class Option<T> {
 
     disabled: boolean = false;
     compatible: boolean = undefined;
+    color: string;
+    backgroundColor: string;
       
     constructor(
         public value: T,
