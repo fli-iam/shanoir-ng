@@ -1,9 +1,7 @@
-:host() { display: inline-block; }
+:host() { display: inline-block; max-width: 220px; }
 
 .tags { margin: 5px 0 20px; }
 .tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; display: inline-block; margin: 2px 4px 2px 0; }
 .tag i { margin-right: 3px; }
 .dark { color:white }
 .clickable { cursor: pointer; }
-
-.tag-bag { max-width: 220px; display: inline-block; margin-top: 10px; }

@@ -45,20 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
                     </td>
                     <td class="dropdown-col tag-cell" *ngIf="hasTags">
-                        <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
-                            <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(tag, i)">
-                                <i class="fas fa-times"></i>
-                            </span>
-                            {{tag.name}}
-                        </span>
-                        <select-box
-                                *ngIf="subjectStudy.study?.tags?.length > 0"
-                                [ngModel]="selectedTag"
-                                [ngModelOptions]="{standalone: true}"
-                                (userChange)="onTagAdd($event, i)"
-                                [optionArr]="subjectStudy.study?.tags"
-                                [compactMode]="true">
-                        </select-box>
+                        <tag-list [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}"></tag-list>
                     </td>
                     <td class="input-col">
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>

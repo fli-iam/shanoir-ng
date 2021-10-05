@@ -19,7 +19,6 @@ import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
-import { Tag } from '../../../tags/tag.model';
 
 @Component({
   selector: 'subject-study-list',
@@ -42,7 +41,6 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
-    public selectedTag: Tag;
     hasTags: boolean;
 
     get legend(): string {
@@ -133,26 +131,6 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
                 if (option) option.disabled = false;
             }
         }
-    }
-
-    onTagAdd(tag: Tag, i: number) {
-        if (!tag) {
-            return;
-        }
-        
-        if (!this.model[i].tags) {
-            this.model[i].tags = [];
-        }
-        if (this.model[i].tags.findIndex(element => element.id == tag.id) != -1) {
-            return;
-        }
-        this.model[i].tags.push(tag);
-        this.propagateChange(this.model);
-    }
-
-    public deleteTag(tag: Tag, i: number) {
-        this.model[i].tags.splice(this.model[i].tags.indexOf(tag), 1);
-        this.propagateChange(this.model);
     }
 
     getFontColor(colorInp: string): boolean {
