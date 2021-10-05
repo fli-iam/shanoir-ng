@@ -64,6 +64,9 @@ public class RabbitMQConfiguration {
 	/** Subject name updated => notify dataset MS to change database. */
 	public static final String SUBJECT_NAME_UPDATE_QUEUE = "subject-name-update-queue";
 	
+	/** Center name updated => notify dataset MS to change database. */
+	public static final String CENTER_NAME_UPDATE_QUEUE = "center-name-update-queue";
+	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 	
@@ -91,6 +94,12 @@ public class RabbitMQConfiguration {
 	/** Queue to create a study_user when subscribing to a challenge */
 	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
 	
+	/** Queue used to get information for study_examination relationship.*/
+	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
+
+	/** Queue used to get information for study_examination deletion relationship.*/
+	public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
+
 	/** Send a mail from dataset microservice to study users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
@@ -99,7 +108,7 @@ public class RabbitMQConfiguration {
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
-
+	
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
 
 	private static final String COIL_QUEUE_NAME_OUT = "coil_queue_from_ng";
@@ -281,6 +290,11 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue centerNameUpdateQueue() {
+		return new Queue(CENTER_NAME_UPDATE_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue createDatasetAcquisitionQueue() {
 		return new Queue(CREATE_DATASET_ACQUISITION_QUEUE, true);
 	}
@@ -303,6 +317,16 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue challengeSubscriptionQueue() {
 		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue examinationStudyQueue() {
+		return new Queue(EXAMINATION_STUDY_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue examinationStudyDeleteQueue() {
+		return new Queue(EXAMINATION_STUDY_DELETE_QUEUE, true);
 	}
 
 	@Bean

@@ -77,6 +77,7 @@ public final class PathologyModelUtil {
 		spatho.setPathology(createPathology());
 		spatho.setPathologyModel(createPathologyModel());
 		spatho.setAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+		spatho.setId(1L);
 		return spatho;
 	}
 

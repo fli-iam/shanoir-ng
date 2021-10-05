@@ -139,7 +139,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
-		return niftiConverterRepository.findOne(id);
+		return niftiConverterRepository.findById(id).orElse(null);
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -171,7 +171,10 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						// otherwise just do not separate the series and keep all images for one nii conversion
 						serie.setDatasets(new ArrayList<Dataset>());
 						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-						constructNifti(serieIDFolderFile, serie, converterId);
+						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+						if (!serie.getIsSpectroscopy()) {
+							constructNifti(serieIDFolderFile, serie, converterId);
+						}
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
@@ -644,7 +647,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, directory, dataset) : niftiFileSorting(existingFiles, directory, serieIDFolderFile);
 						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
-
 					}
 				}
 			} else if (serie.getDatasets().size() == 1) {
@@ -901,7 +903,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		Long converterId = Long.valueOf(messageSplit[0]);
 		String workFolder = messageSplit[1];
 
-		NIfTIConverter converter = niftiConverterRepository.findOne(converterId);
+		NIfTIConverter converter = niftiConverterRepository.findById(converterId).orElse(null);
 		
 		if (converter == null) {
 			return false;

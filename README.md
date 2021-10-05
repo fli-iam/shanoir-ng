@@ -76,6 +76,7 @@ Please note, that the MS Users does for security reasons not publicly expose his
 # Requirements
 
 To build and deploy Shanoir, you will need:
+* Java 8 (very soon 11, after Spring Boot 2 Migration)
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
 * maven 3

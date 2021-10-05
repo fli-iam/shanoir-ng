@@ -3,6 +3,7 @@ package org.shanoir.ng.exporter.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -61,7 +63,6 @@ public class BidsServiceTest {
 
 	Examination exam = ModelsUtil.createExamination();
 	Subject subject = new Subject();
-
 	
 	public static String tempFolderPath;
 
@@ -145,7 +146,6 @@ public class BidsServiceTest {
 		ObjectMapper mapper = new ObjectMapper();
 		String value = mapper.writeValueAsString(subjects);
 		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
-
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
@@ -219,10 +219,7 @@ public class BidsServiceTest {
 		bidsDataFile = new File(examFile.getAbsolutePath() + "/eeg/test.test");
 		assertFalse(bidsDataFile.exists());
 
-		// WHEN we delete an examination
-		given(examService.findById(exam2.getId())).willReturn(exam2);
-	
-		service.deleteExam(exam2.getId());
+		service.deleteExam(exam2);
 		
 		// THEN it is also deleted in the BIDS folder
 		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);

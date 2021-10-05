@@ -43,7 +43,7 @@ public class RabbitMqStudyCardService {
 	@Transactional
 	public String findStudyCard(String message) {
 		try {
-			return mapper.writeValueAsString(studyCardService.findOne(Long.valueOf(message)));
+			return mapper.writeValueAsString(studyCardService.findById(Long.valueOf(message)).orElse(null));
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}

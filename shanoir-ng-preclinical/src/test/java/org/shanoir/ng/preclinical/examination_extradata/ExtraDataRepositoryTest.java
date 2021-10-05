@@ -89,7 +89,7 @@ public class ExtraDataRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		ExaminationExtraData extradataDb = repository.findOne(EXTRADATA_TEST_1_ID);
+		ExaminationExtraData extradataDb = repository.findById(EXTRADATA_TEST_1_ID).orElse(null);
 		assertThat(extradataDb.getExaminationId()).isEqualTo(EXAMINATION_ID);
 		assertThat(extradataDb.getFilename()).isEqualTo(ExtraDataModelUtil.EXTRADATA_FILENAME);
 	}

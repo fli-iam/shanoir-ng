@@ -21,7 +21,6 @@ import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Subject Pathology service.
@@ -29,7 +28,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface SubjectPathologyService extends UniqueCheckableService<SubjectPathology> {
+public interface SubjectPathologyService {
 
 	/**
 	 * Delete a reference value.
@@ -91,5 +90,7 @@ public interface SubjectPathologyService extends UniqueCheckableService<SubjectP
 	 * @throws ShanoirException
 	 */
 	SubjectPathology update(SubjectPathology pathos) throws ShanoirException;
+
+	List<SubjectPathology> findByPathologyModel(PathologyModel patMod);
 
 }

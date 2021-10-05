@@ -21,17 +21,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
+import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,14 +59,27 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Autowired
 	private ExtraDataService<ExaminationExtraData> extraDataService;
+	
 	@Autowired
 	private ExtraDataService<PhysiologicalData> physioDataService;
+	
 	@Autowired
 	private ExtraDataService<BloodGasData> bloodGasDataService;
-	@Autowired
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
+
 	@Value("${preclinical.uploadExtradataFolder}")
 	private String extraDataPath;
+
+	@Autowired
+	private ExtraDataUniqueConstraintManager uniqueConstraintManager;
+	
+	@Autowired
+	private PhysioDataUniqueConstraintManager physioConstraintManager;
+	
+	@Autowired
+	private BloogGasUniqueConstraintManager bloodGasConstraintManager;
+
+	@Autowired
+	private ExtraDataEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -106,7 +118,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = this.uniqueConstraintManager.validate(extradata);
 
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -134,7 +146,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = physioConstraintManager.validate(extradata);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -165,7 +177,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = this.bloodGasConstraintManager.validate(extradata);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -272,8 +284,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(physioData);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(physioData);
+		// Check unique constraint
+		final FieldErrorMap uniqueErrors = this.physioConstraintManager.validate(physioData);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -307,7 +319,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(bloodGasData);
+		final FieldErrorMap uniqueErrors = bloodGasConstraintManager.validate(bloodGasData);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -328,20 +340,11 @@ public class ExtraDataApiController implements ExtraDataApi {
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final ExaminationExtraData extradata) {
-		return new EditableOnlyByValidator<ExaminationExtraData>().validate(extradata);
+		return editableOnlyValidator.validate(extradata);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ExaminationExtraData extraData) {
-		final ExaminationExtraData previousStateExtraData = extraDataService.findById(extraData.getId());
-		return new EditableOnlyByValidator<ExaminationExtraData>()
-				.validate(previousStateExtraData, extraData);
-	}
-
-	@SuppressWarnings("unchecked")
-	private FieldErrorMap getUniqueConstraintErrors(final ExaminationExtraData extradata) {
-		final UniqueValidator<ExaminationExtraData> uniqueValidator = new UniqueValidator<>(
-				extraDataService);
-		return uniqueValidator.validate(extradata);
+		return editableOnlyValidator.validate(extraData);
 	}
 
 	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)

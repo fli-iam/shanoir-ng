@@ -27,6 +27,9 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
+import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
+import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
+import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -35,6 +38,7 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.weasis.dicom.op.CFind;
@@ -78,6 +82,9 @@ public class QueryPACSService {
 	
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
+	
+	@Autowired
+	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 	
 	@PostConstruct
 	private void initDicomNodes() {
@@ -266,6 +273,7 @@ public class QueryPACSService {
 		DicomParam[] params = {
 			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
 			new DicomParam(Tag.SeriesInstanceUID),
+			new DicomParam(Tag.SOPClassUID),
 			new DicomParam(Tag.SeriesDescription),
 			new DicomParam(Tag.SeriesDate),
 			new DicomParam(Tag.SeriesNumber),
@@ -275,22 +283,26 @@ public class QueryPACSService {
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)
 		};
-		List<Attributes> attributes = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
-		if (attributes != null) {
-			List<Serie> series = new ArrayList<>();
-			for (int i = 0; i < attributes.size(); i++) {
-				Serie serie = new Serie(attributes.get(i));
-				if (serie.getModality() != null && !"PR".equals(serie.getModality()) && !"SR".equals(serie.getModality())) {
+		List<Attributes> attributesList = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
+		if (attributesList != null) {
+			List<Serie> series = new ArrayList<Serie>();
+			for (int i = 0; i < attributesList.size(); i++) {
+				Attributes attributes = attributesList.get(i);
+				Serie serie = new Serie(attributes);
+				if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
+						dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 						series.add(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 					}
 				} else {
-					LOG.warn("Serie found with wrong modality (PR or SR) therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+					LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 				}
 			}
+			series.sort(new SeriesNumberSorter());
 			study.setSeries(series);
 		}
 	}
@@ -314,8 +326,11 @@ public class QueryPACSService {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < attributes.size(); i++) {
 				Instance instance = new Instance(attributes.get(i));
-				instances.add(instance);
+				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
+					instances.add(instance);
+				}
 			}
+			instances.sort(new InstanceNumberSorter());
 			serie.setInstances(instances);
 		}
 	}

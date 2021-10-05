@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,7 +63,7 @@ public class CoilServiceTest {
 	@Before
 	public void setup() {
 		given(coilRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCoil()));
-		given(coilRepository.findOne(COIL_ID)).willReturn(ModelsUtil.createCoil());
+		given(coilRepository.findById(COIL_ID)).willReturn(Optional.of(ModelsUtil.createCoil()));
 		given(coilRepository.save(Mockito.any(Coil.class))).willReturn(ModelsUtil.createCoil());
 	}
 
@@ -74,8 +75,7 @@ public class CoilServiceTest {
 	@Test
 	public void deleteByIdTest() throws EntityNotFoundException {
 		coilService.deleteById(COIL_ID);
-
-		Mockito.verify(coilRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(coilRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -89,11 +89,11 @@ public class CoilServiceTest {
 
 	@Test
 	public void findByIdTest() {
-		final Coil coil = coilService.findById(COIL_ID);
+		final Coil coil = coilService.findById(COIL_ID).orElseThrow();
 		Assert.assertNotNull(coil);
 		Assert.assertTrue(ModelsUtil.COIL_NAME.equals(coil.getName()));
 
-		Mockito.verify(coilRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(coilRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
