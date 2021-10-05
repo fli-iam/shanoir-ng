@@ -51,5 +51,5 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
 		return this.repository.findByCenterStudyCenterListStudyId(studyId);
 	}
-
+	
 }

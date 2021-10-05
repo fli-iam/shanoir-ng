@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class TestConfiguration {
 
-	// Rabbit template is always mocked here
 	@MockBean
-	RabbitTemplate rabbitTemplate;
+	private RabbitTemplate rabbitTemplate;
+
 }

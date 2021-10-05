@@ -41,14 +41,11 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	private static final Logger LOG = LoggerFactory.getLogger(AnimalSubjectServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private AnimalSubjectRepository subjectsRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		subjectsRepository.delete(id);
+		subjectsRepository.deleteById(id);
 	}
 
 	@Override
@@ -58,7 +55,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public AnimalSubject findById(final Long id) {
-		return subjectsRepository.findOne(id);
+		return subjectsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -75,7 +72,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public AnimalSubject update(final AnimalSubject subject) throws ShanoirException {
-		final AnimalSubject subjectDB = subjectsRepository.findOne(subject.getId());
+		final AnimalSubject subjectDB = subjectsRepository.findById(subject.getId()).orElse(null);
 		updateSubjectValues(subjectDB, subject);
 		try {
 			subjectsRepository.save(subjectDB);
@@ -102,8 +99,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public List<AnimalSubject> findBy(String fieldName, Object value) {
-		return subjectsRepository.findBy(fieldName, value);
+	public List<AnimalSubject> findBySubjectId(Long id) {
+		return this.subjectsRepository.findBySubjectId(id);
 	}
 
 }

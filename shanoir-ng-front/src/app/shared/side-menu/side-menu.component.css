@@ -40,6 +40,10 @@ progress-bar { width: 100px; }
 
 .user-commands { margin-top: 5px; }
 .user-commands a + a { margin-left: 20px; }
+.user-commands a:link, .user-commands a:visited { color: inherit; text-decoration: none; }
+.user-commands a:hover, .user-commands a:active { text-decoration: none; }
+
+
 .counter { margin: 0 6px;
     background-color: var(--color-c);
     border-radius: 21px;

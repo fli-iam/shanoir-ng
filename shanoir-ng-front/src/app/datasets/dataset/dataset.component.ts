@@ -25,6 +25,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from 'src/app/niftiConverters/nifti.converter.service';
+import { MrDataset, MrDatasetMetadata } from './mr/dataset.mr.model';
 
 
 @Component({
@@ -45,6 +46,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public converters: NiftiConverter[];
     public converterId: number;
     public menuOpened = false;
+    isMRS: boolean = false; // MR Spectroscopy
 
     constructor(
         private datasetService: DatasetService,
@@ -66,6 +68,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
             this.dataset = dataset;
+            this.isMRS = this.isSpectro(dataset);
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
                 this.hasDownloadRight = true;
@@ -77,6 +80,20 @@ export class DatasetComponent extends EntityComponent<Dataset> {
                 });
             }
         });
+    }
+
+    private isSpectro(dataset: Dataset): boolean {
+        if (dataset.type != 'Mr') return false;
+        else {
+            const mrDataset = dataset as MrDataset;
+            if (mrDataset.updatedMrMetadata && mrDataset.updatedMrMetadata.mrDatasetNature) {
+                return mrDataset.updatedMrMetadata.mrDatasetNature.includes('SPECTRO');
+            } else if (mrDataset.originMrMetadata && mrDataset.originMrMetadata.mrDatasetNature) {
+                return mrDataset.originMrMetadata.mrDatasetNature.includes('SPECTRO');
+            } else {
+                return false;
+            }
+        }
     }
 
     initEdit(): Promise<void> {

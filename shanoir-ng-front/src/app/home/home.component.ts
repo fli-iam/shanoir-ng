@@ -39,7 +39,7 @@ export class HomeComponent {
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     
     challengeDua: DataUserAgreement;
-    challengeStudy: Study;
+    challengeStudies: Study[];
     studies: Study[];
     accountRequests: User[];
     jobs: Task[];
@@ -76,7 +76,7 @@ export class HomeComponent {
         }).then(() => {
             this.loaded = true;
             if (this.admin || !this.challengeDua) {
-                this.fetchChallengeStudy()
+                this.fetchChallengeStudies()
                 if (this.admin) {
                     this.fetchAccountRequests();
                 }
@@ -89,22 +89,22 @@ export class HomeComponent {
         this.load();
     }
 
-    private fetchChallengeStudy() {
+    private fetchChallengeStudies() {
         this.studyService.getAll().then(studies => {
+            this.challengeStudies = [];
             if (studies) {
                 this.studies = studies.slice(0, 8);
                 for (let study of studies) {
                     if (study.challenge) {
-                        this.challengeStudy = study;
-                        return;
+                        this.challengeStudies.push(study);
                     }
                 }
             }
         });
     }
 
-    downloadFile(filePath: string) {
-        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file', this.progressBar);
+    downloadFile(filePath: string, studyId: number) {
+        this.studyService.downloadFile(filePath, studyId, 'protocol-file', this.progressBar);
     }
 
     isAuthenticated(): boolean {

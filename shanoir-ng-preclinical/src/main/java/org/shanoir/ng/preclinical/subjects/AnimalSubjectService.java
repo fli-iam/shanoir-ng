@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Refs service.
@@ -26,7 +25,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface AnimalSubjectService extends UniqueCheckableService<AnimalSubject> {
+public interface AnimalSubjectService {
 
 	/**
 	 * Delete a animalSubject value.
@@ -74,5 +73,7 @@ public interface AnimalSubjectService extends UniqueCheckableService<AnimalSubje
 	AnimalSubject update(AnimalSubject subject) throws ShanoirException;
 
 	List<AnimalSubject> findByReference(Reference reference);
+
+	List<AnimalSubject> findBySubjectId(Long id);
 
 }

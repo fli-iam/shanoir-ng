@@ -30,8 +30,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <code>(subjectName:(CT* OR demo*) AND studyName:etude test) OR datasetName:*flair*</code>
         <br/><span class="italic">(all datasets that are in the study "etude test" with subject name that either starts with "CT" or starts with "demo". In addition any dataset that name contains "flair".)</span>
         <p>Case is insentitive for values.</p>
+        <p>You can exclude terms with - . Exemple :
+        <code>(*:* -datasetName:*localizer* AND -datasetName:*scout*)</code>
+        <br/><span class="italic">(all existing datasets except those which names contains "localizer" or "scout")</span>
         <p>The present field names are : 
-            <code>datasetName, subjectName, datasetName, datasetStartDate, datasetEndDate, examinationComment, datasetType, datasetNature</code>
+            <code>studyName, datasetName, subjectName, datasetName, datasetStartDate, datasetEndDate, examinationComment, datasetType, datasetNature, sliceThickness, pixelBandwidth, magneticFieldStrength</code>
         </p>
         <p>For further information, see the <a href="https://solr.apache.org/guide/6_6/the-standard-query-parser.html" target="_blank">Solr official documentation</a>.</p>
     </div>

@@ -34,15 +34,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
-			<span class="right-col">
-				{{dataset.mrQualityProcedureType}}<!-- TODO : 'enum' -->
-			</span>
-		</li>
-		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time</label>
 			<span class="right-col">
 				<span class="multi" *ngFor="let repetitionTime of dataset.repetitionTime">{{repetitionTime.repetitionTimeValue}}</span>
+			</span>
+		</li>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
+			<span class="right-col">
+				{{dataset.mrQualityProcedureType}}<!-- TODO : 'enum' -->
 			</span>
 		</li>
 	</ol>

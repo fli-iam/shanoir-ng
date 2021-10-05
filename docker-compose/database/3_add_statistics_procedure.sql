@@ -12,13 +12,15 @@
 
 use datasets;
 
+drop procedure if exists getStatistics;
+
 delimiter //
 
 create procedure getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 begin
     select 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'protocol_type'
     union all
-    select 
+    select distinct
     sb.id as patient_id, 
     sb.name as shanoir_name, 
     sb.identifier as double_hash, 
@@ -50,7 +52,7 @@ begin
     pr_md.name as protocol_type
 
     from studies.subject as sb
-    inner join studies.pseudonymus_hash_values as pseud on (pseud.id = sb.pseudonymus_hash_values_id)
+    left join studies.pseudonymus_hash_values as pseud on (pseud.id = sb.pseudonymus_hash_values_id)
     inner join studies.study as st
     inner join studies.center as cnt
     inner join studies.manufacturer as man
@@ -61,11 +63,10 @@ begin
     inner join datasets.examination as ex
     inner join datasets.dataset as dt
     inner join datasets.dataset_metadata as dt_md
-    inner join studies.subject_study as rel_sb_st
     inner join datasets.dataset_acquisition as dt_acq
     inner join datasets.mr_dataset_acquisition as mr_acq
 
-    on st.id = ex.subject_id
+    on st.id = ex.study_id
     and sb.id = ex.subject_id
     and ex.center_id = cnt.id
     and sb.id = dt.subject_id

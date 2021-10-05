@@ -25,6 +25,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 		</li>
+		<li *ngIf="mode == 'view'">
+			<label>Dataset Acquisition</label>
+			<span class="right-col">
+				<a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
+					Dataset acquition n°{{dataset.datasetAcquisition?.id}}
+				</a>
+			</span>
+		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
 			<span class="right-col" [ngSwitch]="mode">

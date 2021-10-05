@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ApplicationRef, Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ApplicationRef, ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -22,6 +22,7 @@ import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pagea
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent implements OnInit, OnChanges {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
@@ -275,8 +276,12 @@ export class TableComponent implements OnInit, OnChanges {
     /**
      * Call to refresh from outsilde
      */
-    public refresh(): Promise<void> {
-        return this.goToPage(this.currentPage, true);
+    public refresh(page?: number): Promise<void> {
+        if (page == undefined) {
+            return this.goToPage(this.currentPage, true);
+        } else {
+            return this.goToPage(page, true);
+        }
     }
 
     private getPageable(): Pageable {

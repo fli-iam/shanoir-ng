@@ -215,11 +215,6 @@ import { ContrastAgentService }      from './preclinical/contrastAgent/shared/co
 import { AnimalExaminationFormComponent }      from './preclinical/examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './preclinical/examination/list/animal-examination-list.component';
 import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
-import { ExtraDataListComponent }      from './preclinical/extraData/extraData/list/extradata-list.component';
-import { ExtraDataFormComponent }      from './preclinical/extraData/extraData/edit/extradata-form.component';
-import { ExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
-import { PhysiologicalDataFormComponent }      from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
-import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 // import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
@@ -232,7 +227,11 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
+import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
+import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
 
 @NgModule({
     imports: [
@@ -368,9 +367,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
     	AnimalExaminationFormComponent,
     	AnimalExaminationListComponent,
     	FileUploadComponent,
-    	ExtraDataFormComponent,
     	PhysiologicalDataFormComponent,
-    	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
@@ -392,7 +389,9 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
         DUASigningComponent,
         EventTypePipe,
         SolrCriterionComponent,
-        SolrTextSearchComponent
+        SolrTextSearchComponent,
+        SolrRangeCriterionComponent,
+        ChallengeBlockComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -444,7 +443,6 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
     	AnestheticIngredientService,
     	ExaminationAnestheticService,
     	ContrastAgentService,
-        ExtraDataService,
         AnimalExaminationService,
         AnestheticService,
     	ImportBrukerService,

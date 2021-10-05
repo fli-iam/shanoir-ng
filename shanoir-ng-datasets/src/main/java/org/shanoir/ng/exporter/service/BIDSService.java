@@ -47,6 +47,6 @@ public interface BIDSService {
 	 * @param exam the examination to delete
 	 * @return true if deleted, false otherwise
 	 */
-	public void deleteExam(Long examId);
+	public void deleteExam(Examination exam);
 
 }
