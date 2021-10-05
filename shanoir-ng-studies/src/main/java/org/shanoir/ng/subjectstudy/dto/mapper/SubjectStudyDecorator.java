@@ -55,6 +55,7 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		}
 		subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
+		subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
 
 		return subjectStudyDTO;
 	}

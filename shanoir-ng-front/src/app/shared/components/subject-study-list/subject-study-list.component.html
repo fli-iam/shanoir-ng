@@ -52,11 +52,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             {{tag.name}}
                         </span>
                         <select-box
-                                *ngIf="study?.tags?.length > 0"
+                                *ngIf="subjectStudy.study?.tags?.length > 0"
                                 [ngModel]="selectedTag"
                                 [ngModelOptions]="{standalone: true}"
                                 (userChange)="onTagAdd($event, i)"
-                                [options]="studyTags"
+                                [optionArr]="subjectStudy.study?.tags"
                                 [compactMode]="true">
                         </select-box>
                     </td>

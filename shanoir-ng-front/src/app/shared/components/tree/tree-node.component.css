@@ -14,6 +14,6 @@ checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px;
 .button-picto { color: var(--greyer); margin-left: 7px; }
 tool-tip { color: var(--greyer); vertical-align: initial; }
 .tags { margin: 5px 0 20px; }
-.tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; margin: 2px 2px; }
+.tag { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; margin: 0 2px; font-size: 10px; }
 .tag i { margin-right: 3px; }
 .dark { color:white }

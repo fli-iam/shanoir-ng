@@ -43,7 +43,6 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     public selectedTag: Tag;
-    studyTags: Option<Tag>[];
     hasTags: boolean;
 
     get legend(): string {
@@ -61,15 +60,6 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
                     }
                     this.optionList.push(option);
                 }
-            }
-        } if (changes.study) {
-            this.studyTags = [];
-            if (this.study.tags) {
-                this.studyTags = this.study.tags.map(tag => {
-                    let option: Option<Tag> = new Option<Tag>(tag, tag.name);
-                    option.color = tag.color;
-                    return option;
-                });
             }
         }
     }

@@ -32,7 +32,7 @@ public class SubjectStudyDTO {
 
 	private IdName subject;
 
-	private IdName study;
+	private StudyTagsDTO study;
 
 	private String subjectStudyIdentifier;
 
@@ -58,11 +58,11 @@ public class SubjectStudyDTO {
 		this.subject = subject;
 	}
 
-	public IdName getStudy() {
+	public StudyTagsDTO getStudy() {
 		return study;
 	}
 
-	public void setStudy(IdName study) {
+	public void setStudy(StudyTagsDTO study) {
 		this.study = study;
 	}
 
