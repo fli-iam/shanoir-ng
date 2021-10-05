@@ -21,8 +21,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,12 @@ public class PathologyApiController implements PathologyApi {
 
 	@Autowired
 	private PathologyService pathologiesService;
+
+	@Autowired
+	private PathologyUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private PathologyEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<Pathology> createPathology(
@@ -136,17 +140,14 @@ public class PathologyApiController implements PathologyApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Pathology pathology) {
-		final Pathology previousStatePathology = pathologiesService.findById(pathology.getId());
-		return new EditableOnlyByValidator<Pathology>().validate(previousStatePathology,
-				pathology);
+	    return editableOnlyValidator.validate(pathology);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final Pathology pathology) {
-		return new EditableOnlyByValidator<Pathology>().validate(pathology);
+	    return editableOnlyValidator.validate(pathology);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Pathology pathology) {
-		final UniqueValidator<Pathology> uniqueValidator = new UniqueValidator<>(pathologiesService);
 		return uniqueValidator.validate(pathology);
 	}
 

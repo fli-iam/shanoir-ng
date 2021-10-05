@@ -24,8 +24,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,13 @@ public class TherapyApiController implements TherapyApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private TherapyUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private TherapyEditableByManager editableOnlyValidator;
+
 	
 	@Override
 	public ResponseEntity<Therapy> createTherapy(
@@ -161,17 +166,14 @@ public class TherapyApiController implements TherapyApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Therapy therapy) {
-		final Therapy previousStateTherapy = therapiesService.findById(therapy.getId());
-		return new EditableOnlyByValidator<Therapy>().validate(previousStateTherapy,
-				therapy);
+	    return editableOnlyValidator.validate(therapy);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final Therapy therapy) {
-		return new EditableOnlyByValidator<Therapy>().validate(therapy);
+	    return editableOnlyValidator.validate(therapy);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Therapy therapy) {
-		final UniqueValidator<Therapy> uniqueValidator = new UniqueValidator<>(therapiesService);
 		return uniqueValidator.validate(therapy);
 	}
 

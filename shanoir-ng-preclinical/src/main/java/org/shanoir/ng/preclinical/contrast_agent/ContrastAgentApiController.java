@@ -24,8 +24,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,13 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 	private ContrastAgentService contrastAgentService;
 	@Autowired
 	private RefsService referencesService;
+
+	@Autowired
+	private ContrastAgentUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private ContrastAgentEditableByManager editableOnlyValidator;
+
 
 	@Override
 	public ResponseEntity<ContrastAgent> createContrastAgent(
@@ -175,17 +180,14 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ContrastAgent agent) {
-		final ContrastAgent previousStateContrastAgent = contrastAgentService.findById(agent.getId());
-		return new EditableOnlyByValidator<ContrastAgent>()
-				.validate(previousStateContrastAgent, agent);
+	    return editableOnlyValidator.validate(agent);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final ContrastAgent agent) {
-		return new EditableOnlyByValidator<ContrastAgent>().validate(agent);
+	    return editableOnlyValidator.validate(agent);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final ContrastAgent agent) {
-		final UniqueValidator<ContrastAgent> uniqueValidator = new UniqueValidator<>(contrastAgentService);
 		return uniqueValidator.validate(agent);
 	}
 

@@ -79,7 +79,7 @@ public class StudyRepositoryTest {
 
 	@Test
 	public void delete() {
-		studyRepository.delete(3L);
+		studyRepository.deleteById(3L);
 
 		final List<Study> studyList = (List<Study>) studyRepository.findAll();
 		assertEquals(2, studyList.size());
@@ -92,8 +92,8 @@ public class StudyRepositoryTest {
 	}
 
 	@Test
-	public void findOneTest() {
-		final Study s = studyRepository.findOne(1L);
+	public void findByIdTest() {
+		final Study s = studyRepository.findById(1L).orElseThrow();
 		assertEquals("shanoirStudy1", s.getName());
 	}
 
@@ -103,7 +103,7 @@ public class StudyRepositoryTest {
 		study.setName("StudyTest");
 		study.setId(3L);
 
-		final Study studyDb = studyRepository.findOne(study.getId());
+		final Study studyDb = studyRepository.findById(study.getId()).orElseThrow();
 		studyDb.setName(study.getName());
 		studyDb.setEndDate(study.getEndDate());
 		studyDb.setClinical(study.isClinical());
@@ -114,14 +114,14 @@ public class StudyRepositoryTest {
 
 		studyRepository.save(studyDb);
 
-		final Study studyFound = studyRepository.findOne(Long.valueOf(3));
+		final Study studyFound = studyRepository.findById(Long.valueOf(3)).orElseThrow();
 
 		assertEquals("StudyTest", studyFound.getName());
 	}
 	
 	@Test
 	public void testRights() {
-		Study studyFound = studyRepository.findOne(1L);
+		Study studyFound = studyRepository.findById(1L).orElseThrow();
 		assertEquals(2, studyFound.getStudyUserList().size());
 		assertEquals(2, studyFound.getStudyUserList().get(1).getStudyUserRights().size());
 	}
@@ -129,14 +129,14 @@ public class StudyRepositoryTest {
 //	@Test
 //	public void testUpdateStudyUsers() {
 //		int indexToDelete = 1;
-//		Study studyFound = studyRepository.findOne(1L);
+//		Study studyFound = studyRepository.findById(1L);
 //		assertEquals(2, studyFound.getStudyUserList().size());
 //		Long deletedId = studyFound.getStudyUserList().get(indexToDelete).getId();
 //		
-//		assertNotNull(studyUserRepository.findOne(deletedId));
+//		assertNotNull(studyUserRepository.findById(deletedId));
 //		studyFound.getStudyUserList().remove(indexToDelete);
 //		studyRepository.save(studyFound);
-//		assertNull(studyUserRepository.findOne(deletedId));
+//		assertNull(studyUserRepository.findById(deletedId));
 //	}
 
 }
