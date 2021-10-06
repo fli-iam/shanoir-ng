@@ -139,7 +139,7 @@ public class RabbitMQSubjectService {
 			idNameMessage = mapper.readValue(message, IdName.class);
 			Long subjectId = idNameMessage.getId();
 			Long studyId = Long.valueOf(idNameMessage.getName());
-			Subject subject = subjectRepository.findOne(subjectId);
+			Subject subject = subjectRepository.findById(subjectId).orElseThrow();
 			for (SubjectStudy subStud : subject.getSubjectStudyList()) {
 				if (subStud.getStudy().getId().equals(studyId)) {
 					// subject study already exists, don't create a new one.
@@ -148,7 +148,7 @@ public class RabbitMQSubjectService {
 			}
 			SubjectStudy subStud = new SubjectStudy();
 			subStud.setSubject(subject);
-			Study study = studyRepository.findOne(studyId);
+			Study study = studyRepository.findById(studyId).orElseThrow();
 
 			// TODO: ask
 			subStud.setSubjectType(SubjectType.PATIENT);

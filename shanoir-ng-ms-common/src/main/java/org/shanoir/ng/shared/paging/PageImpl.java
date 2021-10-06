@@ -31,7 +31,7 @@ public class PageImpl<T> extends org.springframework.data.domain.PageImpl<T> imp
 	}
 
 	public PageImpl(org.springframework.data.domain.Page<T> page) {
-		super(page.getContent(), new PageRequest(page.getNumber(), page.getSize(), page.getSort()), page.getTotalElements());
+		super(page.getContent(), PageRequest.of(page.getNumber(), page.getSize(), page.getSort()), page.getTotalElements());
 	}
 
 

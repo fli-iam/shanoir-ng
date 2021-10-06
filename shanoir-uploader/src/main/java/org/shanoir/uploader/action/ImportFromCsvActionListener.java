@@ -18,7 +18,7 @@ import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 /**
  * This class is used after 'import' button from CSV importer.
@@ -34,10 +34,10 @@ public class ImportFromCsvActionListener implements ActionListener {
 	File shanoirUploaderFolder;
 
 	List<CsvImport> csvImports;
-	ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private ResourceBundle resourceBundle;
 
-	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.dicomServerClient = dicomServerClient;
 		this.shanoirUploaderFolder = shanoirUploaderFolder;

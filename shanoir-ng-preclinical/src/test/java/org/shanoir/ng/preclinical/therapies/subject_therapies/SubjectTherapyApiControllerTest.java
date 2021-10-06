@@ -29,6 +29,7 @@ import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectTherapyApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
 public class SubjectTherapyApiControllerTest {
@@ -81,6 +82,11 @@ public class SubjectTherapyApiControllerTest {
 	private TherapyService therapiesServiceMock;
 	@MockBean
 	private AnimalSubjectService subjectsServiceMock;
+	@MockBean
+	private SubjectTherapyUniqueValidator uniqueValidator;
+	@MockBean
+	private SubjectTherapyEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -95,6 +101,8 @@ public class SubjectTherapyApiControllerTest {
 		given(subTherapiesServiceMock.findAllByAnimalSubject(new AnimalSubject()))
 				.willReturn(Arrays.asList(new SubjectTherapy()));
 		given(subTherapiesServiceMock.save(Mockito.mock(SubjectTherapy.class))).willReturn(new SubjectTherapy());
+		given(uniqueValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(SubjectTherapy.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

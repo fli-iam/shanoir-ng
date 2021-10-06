@@ -20,6 +20,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -67,5 +68,27 @@ public interface CenterService extends BasicEntityService<Center> {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	List<IdName> findIdsAndNames(Long studyId);
+	
+	
+	/**
+	 * Save an entity.
+	 *
+	 * @param entity the entity to create.
+	 * @return created entity.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #center.getId() == null")
+	Center create(Center center);
+	
+	
+	/**
+	 * Update an entity.
+	 *
+	 * @param entity the entity to update.
+	 * @return updated entity.
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException 
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	Center update(Center center) throws EntityNotFoundException;
 
 }

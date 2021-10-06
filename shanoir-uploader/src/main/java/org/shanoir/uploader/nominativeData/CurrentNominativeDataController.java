@@ -106,11 +106,7 @@ public class CurrentNominativeDataController {
 						File uploadJobFile = new File(uploadJobFilePath);
 						uploadJobManager = new UploadJobManager(uploadJobFile);
 						UploadJob uploadJob = uploadJobManager.readUploadJob();
-						if (!ShUpOnloadConfig.isShanoirNg()) {
-							cuw.frame.getImportDialogOpener().openImportDialog(uploadJob, uploadJobFile.getParentFile());
-						} else {
-							cuw.frame.getImportDialogOpenerNG().openImportDialog(uploadJob, uploadJobFile.getParentFile());
-						}
+						cuw.frame.getImportDialogOpener().openImportDialog(uploadJob, uploadJobFile.getParentFile());
 					}
 				}
 			}

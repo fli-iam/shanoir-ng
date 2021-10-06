@@ -123,7 +123,7 @@ public class SubjectPathologyRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		SubjectPathology spathoDb = repository.findOne(SPATHO_TEST_1_ID);
+		SubjectPathology spathoDb = repository.findById(SPATHO_TEST_1_ID).orElse(null);
 		assertThat(spathoDb.getLocation().getValue()).isEqualTo(LOCATION_TEST_1_DATA);
 	}
 
