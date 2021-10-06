@@ -23,8 +23,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,12 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Autowired
 	private AnestheticService anestheticsService;
+	@Autowired
+	private ExaminationAnestheticUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private ExaminationAnestheticEditableByManager editableOnlyValidator;
+
 
 	@Override
 	public ResponseEntity<ExaminationAnesthetic> addExaminationAnesthetic(
@@ -164,19 +168,14 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ExaminationAnesthetic examAnesthetic) {
-		final ExaminationAnesthetic previousStateExamAnesthetic = examAnestheticsService
-				.findById(examAnesthetic.getId());
-		return new EditableOnlyByValidator<ExaminationAnesthetic>()
-				.validate(previousStateExamAnesthetic, examAnesthetic);
+	    return editableOnlyValidator.validate(examAnesthetic);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final ExaminationAnesthetic examAnesthetics) {
-		return new EditableOnlyByValidator<ExaminationAnesthetic>().validate(examAnesthetics);
+	    return editableOnlyValidator.validate(examAnesthetics);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final ExaminationAnesthetic examAnesthetic) {
-		final UniqueValidator<ExaminationAnesthetic> uniqueValidator = new UniqueValidator<>(
-				examAnestheticsService);
 		return uniqueValidator.validate(examAnesthetic);
 	}
 

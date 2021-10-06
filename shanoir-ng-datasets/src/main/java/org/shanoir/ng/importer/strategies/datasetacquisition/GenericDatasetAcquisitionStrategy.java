@@ -3,6 +3,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -79,13 +80,14 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 	}
 
 	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
-		if (studyCard == null) {
+		Optional<StudyCard> studyCard = studyCardRepository.findById(studyCardId);
+		if (studyCard.isEmpty()) {
 			throw new IllegalArgumentException("No study card found with id " + studyCardId);
 		}
-		if (studyCard.getAcquisitionEquipmentId() == null) {
+		if (studyCard.get().getAcquisitionEquipmentId() == null) {
 			throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
 		}
-		return studyCard;
+		return studyCard.get();
 	}
+
 }

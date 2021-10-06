@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @JsonPropertyOrder({ "_links", "examinationId", "filename" })
-public class BloodGasData extends ExaminationExtraData   {
+public class BloodGasData extends ExaminationExtraData {
 
 
 }

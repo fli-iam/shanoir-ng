@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -45,7 +46,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -58,7 +58,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class ExaminationServiceSecurityTest {
 
@@ -91,7 +90,7 @@ public class ExaminationServiceSecurityTest {
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
-		assertAccessDenied(service::findPage, new PageRequest(0, 10), false);
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10), false);
 		assertAccessDenied(service::findBySubjectId, 1L);
 		assertAccessDenied(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(service::save, mockExam());
@@ -129,7 +128,7 @@ public class ExaminationServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
-		assertAccessAuthorized(service::findPage, new PageRequest(0, 10), false);
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
 		assertAccessAuthorized(service::findBySubjectId, 1L);
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(service::save, mockExam());
@@ -140,10 +139,10 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
-		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(examinationRepository.findOne(1L)).willReturn(mockExam(1L));
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -154,7 +153,7 @@ public class ExaminationServiceSecurityTest {
 		Examination ex2 = mockExam(2L); ex2.setStudyId(1L); exList.add(ex2);
 		Examination ex3 = mockExam(3L); ex3.setStudyId(1L); exList.add(ex3);
 		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		given(examinationRepository.findByPreclinicalAndStudyIdIn(false, Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(exList));
 		given(examinationRepository.findAll(pageable)).willReturn(new PageImpl<>(exList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
@@ -221,7 +220,7 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		given(examinationRepository.findOne(Mockito.anyLong())).willReturn(mockExam(1L));
+		given(examinationRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mockExam(1L)));
 		assertAccessDenied(service::deleteById, 1L);
 	}
 
@@ -229,7 +228,7 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(right);
 		Examination mrDs = mockExam(1L);
 		mrDs.setStudyId(10L);
-		given(examinationRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
+		given(examinationRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mrDs));
 		if (right) {
 			assertAccessAuthorized(service::update, mrDs);
 		} else {
@@ -240,7 +239,7 @@ public class ExaminationServiceSecurityTest {
 	private void testDeleteByExpert() throws ShanoirException {
 		Examination exam = mockExam(1L);
 		exam.setStudyId(10L);
-		given(examinationRepository.findOne(1L)).willReturn(exam);
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(exam));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
