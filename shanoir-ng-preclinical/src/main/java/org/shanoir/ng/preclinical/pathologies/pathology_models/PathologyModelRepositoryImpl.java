@@ -28,15 +28,6 @@ public class PathologyModelRepositoryImpl implements PathologyModelRepositoryCus
 
 	@PersistenceContext
     private EntityManager em;
-		
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<PathologyModel> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT p FROM PathologyModel p WHERE p." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
-	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

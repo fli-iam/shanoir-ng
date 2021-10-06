@@ -18,7 +18,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -56,8 +60,8 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = CenterApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@WebMvcTest(CenterApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class CenterApiControllerTest {
 
 	private static final String REQUEST_PATH = "/centers";
@@ -83,9 +87,12 @@ public class CenterApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 
 	@Before
-	public void setup() throws EntityNotFoundException  {
+	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
@@ -96,11 +103,12 @@ public class CenterApiControllerTest {
 
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
-		given(centerServiceMock.findById(1L)).willReturn(new Center());
+		given(centerServiceMock.findById(1L)).willReturn(Optional.of(new Center()));
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Center.class))).willReturn(true);
 	}
 
 	@Test
@@ -111,24 +119,28 @@ public class CenterApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser
 	public void findCenterByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockUser
 	public void findCentersTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockUser
 	public void findCentersNamesTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 	
 	@Test
+	@WithMockUser
 	public void findCentersNamesByStudyIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES + "/1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());

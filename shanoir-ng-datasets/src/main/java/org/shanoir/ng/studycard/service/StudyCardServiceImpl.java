@@ -40,11 +40,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final StudyCard studyCard = studyCardRepository.findOne(id);
+		final StudyCard studyCard = studyCardRepository.findById(id).orElse(null);
 		if (studyCard == null) {
 			throw new EntityNotFoundException(StudyCard.class, id);
 		}
-		studyCardRepository.delete(id);
+		studyCardRepository.deleteById(id);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 
 	@Override
 	public StudyCard findById(final Long id) {
-		return studyCardRepository.findOne(id);
+		return studyCardRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 
 	@Override
 	public StudyCard update(final StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
+		final StudyCard studyCardDb = studyCardRepository.findById(studyCard.getId()).orElse(null);
 		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, studyCard.getId());
 		updateStudyCardValues(studyCardDb, studyCard);
 		studyCardDb.setLastEditTimestamp(System.currentTimeMillis());

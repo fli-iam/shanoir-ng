@@ -49,33 +49,22 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
 	
 	// add other strategies for other modalities here
-	
-	private DatasetAcquisitionStrategy datasetAcquisitionStrategy;
-
-	/**
-	 * 1) Call first with the given modality to choose the right strategy.
-	 * @param modality
-	 */
-	public void setDatasetAcquisitionStrategy(String modality) {
-		if ("MR".equals(modality)) {
-			this.datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
-		} else if ("CT".equals(modality)) {
-			this.datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
-		} else if ("PT".equals(modality)) {
-			this.datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
-		} else {
-			// By default we just create an generic dataset acquisition
-			this.datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
-		}
-		// else... add other modalities here
-	}
 
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
-		if (datasetAcquisitionStrategy != null) {
-			return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob);
-		}
-		return null;
+		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
+		String modality = serie.getModality();
+		if ("MR".equals(modality)) {
+			datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
+		} else if ("CT".equals(modality)) {
+			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+		} else if ("PT".equals(modality)) {
+			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+		} else {
+			// By default we just create a generic dataset acquisition
+			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
+		}		
+		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 	}
 	
 }

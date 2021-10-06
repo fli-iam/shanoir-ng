@@ -16,6 +16,7 @@ package org.shanoir.ng.center.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -56,15 +57,15 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public void deleteByIdCheckDependencies(final Long id) throws EntityNotFoundException, UndeletableDependenciesException {
-		final Center center = centerRepository.findOne(id);
-		if (center == null) {
+		final Optional<Center> centerOpt = centerRepository.findById(id);
+		if (centerOpt.isEmpty()) {
 			throw new EntityNotFoundException(Center.class, id);
 		}
 		final List<FieldError> errors = new ArrayList<>();
-		if (!center.getAcquisitionEquipments().isEmpty()) {
+		if (!centerOpt.get().getAcquisitionEquipments().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "acquisitionEquipments"));
 		}
-		if (!center.getStudyCenterList().isEmpty()) {
+		if (!centerOpt.get().getStudyCenterList().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "studies"));
 		}
 		if (!errors.isEmpty()) {
@@ -72,7 +73,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 			errorMap.put("delete", errors);
 			throw new UndeletableDependenciesException(errorMap);
 		}
-		centerRepository.delete(id);
+		centerRepository.deleteById(id);
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public Center update(Center center) throws EntityNotFoundException {		
-		final Center centerDb = centerRepository.findOne(center.getId());
+		final Center centerDb = centerRepository.findById(center.getId()).orElse(null);
 		if (centerDb == null) {
 			throw new EntityNotFoundException(center.getClass(), center.getId());
 		}
@@ -119,12 +120,13 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public Center create(Center center) {
+		Center newDbCenter = super.create(center);
 		try {
-			updateName(new IdName(center.getId(), center.getName()));
+			updateName(new IdName(newDbCenter.getId(), newDbCenter.getName()));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not send the center name creation to the other microservices !", e);
 		}
-		return super.create(center);
+		return newDbCenter;
 	}
 
 	@Override
