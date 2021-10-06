@@ -185,7 +185,7 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
-      - "extra-data:/data/upload/"
+      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
