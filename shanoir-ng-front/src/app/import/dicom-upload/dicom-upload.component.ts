@@ -91,9 +91,10 @@ export class DicomUploadComponent implements OnDestroy {
             }, error => {
                 this.setArchiveStatus('error');
                 this.progressBar.progress = 0;
-                if (error && error.error && error.error.message)
+                if (error && error.error && error.error.message) {
                     this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
-                    this.fileTooBigError = error.error.message.indexOf("exceeds the configured maximum") != -1
+				}
+				this.fileTooBigError = error.status === 413;
             })
         );
     }
