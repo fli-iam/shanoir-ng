@@ -356,16 +356,15 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)
 			throws IOException {
-		// Create corresponding folders
-		Path path = Paths.get(extraDataPath + extradata.getExaminationId() + File.pathSeparator
-				+ extradata.getClass().getSimpleName());
-		Files.createDirectories(path);
+		
+		File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
+		createdFolder.mkdirs();
 		// Path to file
-		Path pathToFile = Paths.get(path.toString() + File.pathSeparator + file.getOriginalFilename());
-		byte[] bytes = file.getBytes();
-		Files.write(pathToFile, bytes);
+		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+		file.transferTo(fileToGet);
+
 		extradata.setFilename(file.getOriginalFilename());
-		extradata.setFilepath(pathToFile.toString());
+		extradata.setFilepath(fileToGet.getAbsolutePath());
 		return extradata;
 	}
 
