@@ -19,6 +19,7 @@ import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -349,7 +350,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		String sessionLabel = examination.getComment() != null ? examination.getComment() : examination.getId().toString();
+		String sessionLabel = examination.getId() + examination.getComment() != null ? "-" + examination.getComment() : "";
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
@@ -375,6 +376,8 @@ public class BIDSServiceImpl implements BIDSService {
 			String examComment = dataset.getDatasetAcquisition().getExamination().getComment().toString();
 			String sessionLabel = examComment != null ? examComment : dataset.getDatasetAcquisition().getExamination().getId().toString();
 			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, sessionLabel, studyName, dataset.getId().toString());
+		} else if (dataset instanceof PetDataset) {
+			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
