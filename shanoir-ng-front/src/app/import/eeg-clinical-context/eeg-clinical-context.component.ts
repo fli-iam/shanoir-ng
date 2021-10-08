@@ -320,6 +320,7 @@ export class EegClinicalContextComponent implements OnInit {
         let newSubject = new Subject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.subjectStudyList = [subjectStudy];
+		newSubject.birthDate = null;
         return newSubject;
     }
 
