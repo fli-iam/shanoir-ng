@@ -42,14 +42,11 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	private static final Logger LOG = LoggerFactory.getLogger(ContrastAgentServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private ContrastAgentRepository contrastAgentsRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		contrastAgentsRepository.delete(id);
+		contrastAgentsRepository.deleteById(id);
 	}
 
 	@Override
@@ -58,28 +55,25 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	}
 
 	@Override
-	public List<ContrastAgent> findBy(final String fieldName, final Object value) {
-		return contrastAgentsRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public ContrastAgent findByProtocolId(final Long protocolId) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByProtocolId(protocolId);
-		if (ca.isPresent())
+		if (ca.isPresent()) {
 			return ca.get();
+		}
 		return null;
 	}
 
 	@Override
 	public ContrastAgent findById(final Long id) {
-		return contrastAgentsRepository.findOne(id);
+		return contrastAgentsRepository.findById(id).orElse(null);
 	}
 
 	@Override
 	public ContrastAgent findByName(final Reference name) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByName(name);
-		if (ca.isPresent())
+		if (ca.isPresent()) {
 			return ca.get();
+		}
 		return null;
 	}
 
@@ -97,7 +91,7 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 
 	@Override
 	public ContrastAgent update(final ContrastAgent agent) throws ShanoirException {
-		final ContrastAgent agentDb = contrastAgentsRepository.findOne(agent.getId());
+		final ContrastAgent agentDb = contrastAgentsRepository.findById(agent.getId()).orElse(null);
 		updateModelValues(agentDb, agent);
 		try {
 			contrastAgentsRepository.save(agentDb);

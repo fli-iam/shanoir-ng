@@ -4,11 +4,9 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import javax.xml.ws.BindingProvider;
-
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.service.rest.ProxyAuthenticator;
-import org.shanoir.uploader.service.soap.ServiceConfiguration;
+import org.shanoir.uploader.service.rest.ServiceConfiguration;
 
 /**
  * 
@@ -116,63 +114,6 @@ public class ProxyUtil {
 			 * int. } etc..
 			 */
 			return -1;
-		}
-	}
-
-	public static void setProxyForBinding(BindingProvider bindingProvider) {
-		if (serviceConfiguration.isProxyEnable()) {
-			if (serviceConfiguration.isProxySecure()) {
-				if (serviceConfiguration.getProxyHost() != null) {
-					bindingProvider.getRequestContext().put("https.proxyHost", serviceConfiguration.getProxyHost());
-				}
-				if (serviceConfiguration.getProxyPort() != null) {
-					bindingProvider.getRequestContext().put("https.proxyPort", serviceConfiguration.getProxyPort());
-				}
-				if (serviceConfiguration.getProxyUser() != null) {
-					bindingProvider.getRequestContext().put("https.proxyUser", serviceConfiguration.getProxyUser());
-				}
-				if (serviceConfiguration.getProxyPassword() != null) {
-					bindingProvider.getRequestContext().put("https.proxyPassword",
-							serviceConfiguration.getProxyPassword());
-				}
-			} else {
-				if (serviceConfiguration.getProxyHost() != null) {
-					bindingProvider.getRequestContext().put("http.proxyHost", serviceConfiguration.getProxyHost());
-				}
-				if (serviceConfiguration.getProxyPort() != null) {
-					bindingProvider.getRequestContext().put("http.proxyPort", serviceConfiguration.getProxyPort());
-				}
-				if (serviceConfiguration.getProxyUser() != null) {
-					bindingProvider.getRequestContext().put("http.proxyUser", serviceConfiguration.getProxyUser());
-				}
-				if (serviceConfiguration.getProxyPassword() != null) {
-					bindingProvider.getRequestContext().put("http.proxyPassword",
-							serviceConfiguration.getProxyPassword());
-				}
-			}
-		} else {
-			try {
-				if (bindingProvider.getRequestContext().get("https.proxyHost") != null)
-					bindingProvider.getRequestContext().remove("https.proxyHost");
-				if (bindingProvider.getRequestContext().get("https.proxyPort") != null)
-					bindingProvider.getRequestContext().remove("https.proxyPort");
-				if (bindingProvider.getRequestContext().get("https.proxyUser") != null)
-					bindingProvider.getRequestContext().remove("https.proxyUser");
-				if (bindingProvider.getRequestContext().get("https.proxyPassword") != null)
-					bindingProvider.getRequestContext().remove("https.proxyPassword");
-				if (bindingProvider.getRequestContext().get("http.proxyHost") != null)
-					bindingProvider.getRequestContext().remove("http.proxyHost");
-				if (bindingProvider.getRequestContext().get("http.proxyPort") != null)
-					bindingProvider.getRequestContext().remove("http.proxyPort");
-				if (bindingProvider.getRequestContext().get("http.proxyUser") != null)
-					bindingProvider.getRequestContext().remove("http.proxyUser");
-				if (bindingProvider.getRequestContext().get("http.proxyPassword") != null)
-					bindingProvider.getRequestContext().remove("http.proxyPassword");
-			} catch (Exception e) {
-				logger.error("fail to change binding provider", e);
-			} finally {
-
-			}
 		}
 	}
 

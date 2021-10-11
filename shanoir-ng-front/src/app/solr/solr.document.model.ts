@@ -13,6 +13,7 @@
  */
 
 import { Page } from "../shared/components/table/pageable.model";
+import { Range } from "../shared/models/range.model";
 
 export class SolrDocument {
     datasetId: string;
@@ -21,6 +22,7 @@ export class SolrDocument {
     datasetNature: string;
     datasetCreationDate: Date;
     examinationComment: string;
+    centerName: string;
     examinationDate: Date;
     subjectName: string;
     studyName: string;
@@ -32,6 +34,7 @@ export class SolrRequest {
     studyName: string[];
     subjectName: string[];
     examinationComment: string[];
+    centerName: string[];
     datasetName: string[];
     datasetStartDate: Date;
     datasetEndDate: Date;
@@ -39,6 +42,9 @@ export class SolrRequest {
     datasetNature: string[];
     searchText: string;
     expertMode: boolean;
+    sliceThickness: Range;
+    pixelBandwidth: Range;
+    magneticFieldStrength: Range;
 }
 
 export class FacetField {

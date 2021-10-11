@@ -16,10 +16,10 @@ package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.eq;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -51,7 +52,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -64,7 +64,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class DatasetServiceSecurityTest {
 
@@ -103,7 +102,7 @@ public class DatasetServiceSecurityTest {
 		
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
-		assertAccessDenied(service::findPage, new PageRequest(0, 10));
+		assertAccessDenied(service::findPage, PageRequest.of(0, 10));
 		assertAccessDenied(service::create, mockDataset());
 		assertAccessDenied(service::update, mockDataset(1L));
 		assertAccessDenied(service::deleteById, ENTITY_ID);
@@ -136,7 +135,7 @@ public class DatasetServiceSecurityTest {
 	public void testAsAdmin() throws ShanoirException {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
-		assertAccessAuthorized(service::findPage, new PageRequest(0, 10));
+		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::create, mockDataset());
 		assertAccessAuthorized(service::update, mockDataset(1L));
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
@@ -145,10 +144,10 @@ public class DatasetServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
-		given(datasetRepository.findOne(1L)).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(datasetRepository.findOne(1L)).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(Collections.singleton(1L));
 		assertNotNull(service.findById(1L));
 	}
@@ -171,7 +170,7 @@ public class DatasetServiceSecurityTest {
 		MrDataset ds2 = mockDataset(2L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds2);
 		MrDataset ds3 = mockDataset(3L); ds1.getDatasetAcquisition().getExamination().setStudyId(1L); dsList.add(ds3);
 		MrDataset ds4 = mockDataset(4L); ds1.getDatasetAcquisition().getExamination().setStudyId(2L); dsList.add(ds4);
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		given(datasetRepository.findAll(pageable)).willReturn(new PageImpl<>(dsList));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L));
 		given(datasetRepository.findByDatasetAcquisitionExaminationStudyIdIn(Arrays.asList(1L), pageable)).willReturn(new PageImpl<>(dsList));
@@ -205,7 +204,7 @@ public class DatasetServiceSecurityTest {
 	
 	private void testDeleteDenied() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		given(datasetRepository.findOne(Mockito.anyLong())).willReturn(mockDataset(1L));
+		given(datasetRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mockDataset(1L)));
 		assertAccessDenied(service::deleteById, 1L);
 	}
 
@@ -213,14 +212,14 @@ public class DatasetServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findOne(Mockito.anyLong())).willReturn(mrDs);
+		given(datasetRepository.findById(Mockito.anyLong())).willReturn(Optional.of(mrDs));
 		assertAccessDenied(service::update, mrDs);
 	}
 	
 	private void testDeleteByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findOne(1L)).willReturn(mrDs);
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mrDs));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
@@ -234,7 +233,7 @@ public class DatasetServiceSecurityTest {
 	private void testUpdateByExpert() throws ShanoirException {
 		MrDataset mrDs = mockDataset(1L);
 		mrDs.getDatasetAcquisition().getExamination().setStudyId(10L);
-		given(datasetRepository.findOne(1L)).willReturn(mrDs);
+		given(datasetRepository.findById(1L)).willReturn(Optional.of(mrDs));
 		given(rightsService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(false);
 		given(rightsService.hasRightOnStudy(10L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(10L, "CAN_SEE_ALL")).willReturn(true);
