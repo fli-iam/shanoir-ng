@@ -10,8 +10,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM node:14.15.0-stretch
+FROM solr:8.1
 
-WORKDIR /app
+RUN mkdir /tmp/shanoir-core
 
-RUN npm install -g @angular/cli
+COPY ./core /tmp/shanoir-core/
