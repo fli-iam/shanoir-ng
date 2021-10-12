@@ -32,13 +32,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <!-- <li>
-            <label>Use a study card</label> 
-            <span class="right-col">
-                <checkbox [(ngModel)]="useStudyCard" (ngModelChange)="onToggleUseStudyCard($event); onContextChange();" [ngModelOptions]="{standalone: true}"></checkbox>
-            </span>
-        </li> -->
         <li *ngIf="useStudyCard" @slideDown>
+			<p *ngIf="study && (!studycardOptions || studycardOptions.length == 0)" @slideDown><b>Warning:</b> No study cards are configured on this study, please create one before trying to import MR data.<br/></p>
             <label>Select a study card</label> 
             <span class="right-col">
                 <select-box 

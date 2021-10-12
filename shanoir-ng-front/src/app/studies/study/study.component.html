@@ -188,6 +188,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
+			<p *ngIf="mode == 'create'" ><b>Warning: </b> A study card is necessary to import MR data.</p>
 			<fieldset *ngIf="mode !== 'view'">
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
