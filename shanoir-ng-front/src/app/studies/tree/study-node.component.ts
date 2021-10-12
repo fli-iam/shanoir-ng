@@ -58,6 +58,9 @@ export class StudyNodeComponent implements OnChanges {
                     let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight)));
                     return new MemberNode(studyUser.userId, studyUser.userName, rights);
                 });
+				members.sort((a:MemberNode, b:MemberNode) => {
+					return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+				})
 
                 this.node = new StudyNode(
                         this.input.id,
