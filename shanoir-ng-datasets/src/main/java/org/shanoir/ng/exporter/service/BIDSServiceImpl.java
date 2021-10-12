@@ -381,27 +381,31 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof MrDataset) {
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
-			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
-			if (protocol != null) {
-				MrProtocolSCMetadata metadata = protocol.getUpdatedMetadata();
-				if (metadata != null) {
-					MrSequenceApplication application = metadata.getMrSequenceApplication();
-					if (application != null) {
-						// CALIBRATION(1), --> fieldmap
-						if (application.equals(MrSequenceApplication.CALIBRATION)) {
-							dataFolder = createDataFolder("fmap", workDir);
-						}
-						//MORPHOMETRY(2), ==> anat
-						else if (application.equals(MrSequenceApplication.MORPHOMETRY)) {
-							dataFolder = createDataFolder("anat", workDir);
-						}
-						// DIFFUSION(8), , ==> diffusion
-						else if (application.equals(MrSequenceApplication.DIFFUSION)) {
-							dataFolder = createDataFolder("dwi", workDir);
-						}
-						// BOLD(9), , ==> functional
-						else if (application.equals(MrSequenceApplication.BOLD)) {
-							dataFolder = createDataFolder("func", workDir);
+			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getBidsDataType() != null) {
+				dataFolder = createDataFolder(dataset.getUpdatedMetadata().getBidsDataType(), workDir);
+			} else {
+				MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
+				if (protocol != null) {
+					MrProtocolSCMetadata metadata = protocol.getUpdatedMetadata();
+					if (metadata != null) {
+						MrSequenceApplication application = metadata.getMrSequenceApplication();
+						if (application != null) {
+							// CALIBRATION(1), --> fieldmap
+							if (application.equals(MrSequenceApplication.CALIBRATION)) {
+								dataFolder = createDataFolder("fmap", workDir);
+							}
+							//MORPHOMETRY(2), ==> anat
+							else if (application.equals(MrSequenceApplication.MORPHOMETRY)) {
+								dataFolder = createDataFolder("anat", workDir);
+							}
+							// DIFFUSION(8), , ==> diffusion
+							else if (application.equals(MrSequenceApplication.DIFFUSION)) {
+								dataFolder = createDataFolder("dwi", workDir);
+							}
+							// BOLD(9), , ==> functional
+							else if (application.equals(MrSequenceApplication.BOLD)) {
+								dataFolder = createDataFolder("func", workDir);
+							}
 						}
 					}
 				}
