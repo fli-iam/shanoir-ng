@@ -103,7 +103,7 @@ export class UserComponent extends EntityComponent<User> {
         this.acceptLoading = true;
         this.userService.confirmAccountRequest(this.id, this.user)
             .then((user) => {
-                this.msgBoxService.log('info', 'User saved and confirmed !');
+                this.consoleService.log('info', 'User saved and confirmed !');
                 this.goBack();
                 this.acceptLoading = false;
             }).catch(reason => {
@@ -116,7 +116,7 @@ export class UserComponent extends EntityComponent<User> {
         this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
             .then((user) => {
-                this.msgBoxService.log('info', 'The request has been denied !');
+                this.consoleService.log('info', 'The request has been denied !');
                 this.goBack();
                 this.denyLoading = false;
             }).catch(reason => {

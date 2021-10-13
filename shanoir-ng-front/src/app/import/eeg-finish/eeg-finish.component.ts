@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
@@ -40,7 +40,7 @@ export class FinishEegImportComponent {
     constructor(
             private importService: ImportService,
             private subjectService: SubjectService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
@@ -68,7 +68,7 @@ export class FinishEegImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'The data has been successfully imported')
+                            that.consoleService.log('info', 'The data has been successfully imported')
                         }, 0);
                         // go back to the first step of import
                         this.router.navigate(['/imports/eeg']);

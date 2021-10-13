@@ -516,10 +516,10 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachDataUserAgreement(event: any) {
         this.dataUserAgreement = event.target.files[0];
         if (this.dataUserAgreement.name.indexOf(".pdf", this.dataUserAgreement.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only .pdf files are accepted");
+            this.consoleService.log("error", "Only .pdf files are accepted");
             this.dataUserAgreement = null;
         } else if (this.dataUserAgreement.size > 50000000) {
-            this.msgBoxService.log("error", "File must be less than 50Mb.");
+            this.consoleService.log("error", "File must be less than 50Mb.");
             this.dataUserAgreement = null;
         } else {
             this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];

@@ -87,7 +87,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
             this.onDelete.subscribe(response => {
                 if (response instanceof ShanoirError && response.code == 422) {
                     let msg: string  = this.buildDeleteErrMsg(response.details.fieldErrors["delete"] || '');
-                    this.msgBoxService.log('warn', msg, 10000); 
+                    this.consoleService.log('warn', msg); 
                 }
             })
         );

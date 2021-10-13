@@ -17,7 +17,7 @@ import { Component } from '@angular/core';
 import { ImportDataService, ContextData } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../../breadcrumbs/router';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../shared/console/console.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
@@ -41,7 +41,7 @@ export class BrukerFinishImportComponent {
     constructor(
             private importService: ImportService,
             private subjectService: SubjectService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
@@ -76,7 +76,7 @@ export class BrukerFinishImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'The data has been successfully imported')
+                            that.consoleService.log('info', 'The data has been successfully imported')
                         }, 0);
                         this.router.navigate(['/dataset/list']);
                     }).catch(error => {

@@ -23,7 +23,7 @@ import { TableComponent } from '../../../shared/components/table/table.component
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
@@ -99,7 +99,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                     this.getService().delete(selectedExamination.id).then(() => {
                         this.onDelete.next(selectedExamination);
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-examination sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-examination sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
                             this.onDelete.next(new ShanoirError(reason));

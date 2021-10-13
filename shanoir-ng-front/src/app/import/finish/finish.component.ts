@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
@@ -42,7 +42,7 @@ export class FinishImportComponent {
     constructor(
             private importService: ImportService,
             private subjectService: SubjectService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
@@ -80,7 +80,7 @@ export class FinishImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'the import successfully started.')
+                            that.consoleService.log('info', 'the import successfully started.')
                         }, 0);
                         // go back to the first step of import
                         if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);

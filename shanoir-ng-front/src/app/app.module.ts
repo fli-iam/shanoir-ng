@@ -109,7 +109,6 @@ import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
-import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
@@ -232,6 +231,8 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ConsoleComponent } from './shared/console/console.component';
+import { ConsoleService } from './shared/console/console.service';
 
 @NgModule({
     imports: [
@@ -258,7 +259,6 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
-        ConsoleComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -391,7 +391,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         SolrCriterionComponent,
         SolrTextSearchComponent,
         SolrRangeCriterionComponent,
-        ChallengeBlockComponent
+        ChallengeBlockComponent,
+        ConsoleComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -478,7 +479,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
-        { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
+        ConsoleService,
+        //{ provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
 })

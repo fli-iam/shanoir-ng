@@ -342,7 +342,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if (response.status == 200) {
             AppUtils.browserDownloadFile(response.body, this.getFilename(response));
         } else {
-            this.msgBoxService.log('warn', 'Error: No bruker archive found');
+            this.consoleService.log('warn', 'Error: No bruker archive found');
         }
     }
 

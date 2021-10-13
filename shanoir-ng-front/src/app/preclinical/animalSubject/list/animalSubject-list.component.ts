@@ -24,7 +24,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { resolve } from 'url';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 
@@ -145,7 +145,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                                 this.preclinicalSubjects.splice(index);
                             }
                             this.table.refresh();
-                            this.msgBoxService.log('info', 'The preclinical-subject sucessfully deleted');
+                            this.consoleService.log('info', 'The preclinical-subject sucessfully deleted');
                         })
                     }
                     ).catch(reason => {

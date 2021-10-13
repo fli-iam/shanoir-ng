@@ -24,7 +24,7 @@ import { Router } from '../../../breadcrumbs/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
-import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { ConsoleService } from '../../console/console.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
@@ -53,7 +53,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     public keycloakService: KeycloakService;
-    protected msgBoxService: MsgBoxService; 
+    protected consoleService: ConsoleService; 
     public breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -71,7 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.location = ServiceLocator.injector.get(Location);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.formBuilder = ServiceLocator.injector.get(FormBuilder);
-        this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
+        this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         
         this.mode = this.activatedRoute.snapshot.data['mode'];
@@ -217,7 +217,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.entity.id = entity.id;
                 this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
-                this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
+                if (entity['name']) {
+                    this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
+                } else {
+                    this.consoleService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the id ' + entity.id);
+                }
                 this._entity.id = entity.id;
             });
         }
@@ -225,7 +229,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
-                this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
+                if (this.entity['name']) {
+                    this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + this.entity['name'] + ' with id ' + this.entity.id + ' updated');
+                } else {
+                    this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + this.entity.id + ' updated');
+                }
             });
         }
     }
@@ -239,11 +247,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
                 this.footerState.loading = false;
-                return this.catchSavingErrors(reason);
+                this.catchSavingErrors(reason);
             });
     }
 
-    protected catchSavingErrors = (reason: any): Promise<any> => {
+    protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
             this.saveError = new ShanoirError(reason);
             for (let managedField of this.onSubmitValidatedFields) {
@@ -253,7 +261,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }
             this.footerState.valid = this.form.status == 'VALID';
-        } throw reason;
+        } else {
+            throw reason;
+        }
     }
 
     /**
@@ -299,20 +309,20 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        this.consoleService.log('info', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
                         this.goToList();
                     }).catch(reason => {
                         if (reason && reason.error) {
                             if (reason.error.code != 422) {
                                throw Error(reason); 
                             } else {
-                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                                this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
                             }
                         } else if (reason && reason.status) {
                             if (reason.status != 422) {
                                throw Error(reason); 
                             } else {
-                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                                this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
                             }
                         } else {
                             console.error(reason);

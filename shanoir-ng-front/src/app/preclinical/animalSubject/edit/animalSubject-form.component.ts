@@ -333,7 +333,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.updateSubject().then(() => {
                     this.onSave.next(this.preclinicalSubject);
                     this.chooseRouteAfterSave(this.entity.animalSubject);
-                    this.msgBoxService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
+                    this.consoleService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
                 });
             }else{
                 this.addSubject().then(() => {
@@ -343,7 +343,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     } else {
                         this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
                     }
-                    this.msgBoxService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
+                    this.consoleService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
                 });
                 
             }

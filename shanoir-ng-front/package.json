@@ -27,6 +27,8 @@
     "@stomp/ng2-stompjs": "^7.2.0",
     "@types/node": "^12.11.1",
     "file-saver": "^2.0.2",
+    "git-describe": "4.0.4",
+    "http-status-codes": "^2.1.4",
     "mydatepicker": "^9.0.1",
     "ng-autosize": "^1.1.0",
     "ng-event-source": "^1.0.14",
@@ -35,8 +37,7 @@
     "rxjs-compat": "^6.5.3",
     "sha.js": "^2.4.11",
     "tslib": "^1.10.0",
-    "zone.js": "~0.10.2",
-    "git-describe": "4.0.4"
+    "zone.js": "~0.10.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.1100.2",

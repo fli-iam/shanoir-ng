@@ -37,6 +37,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
 </div>
 
+<div class="console">
+    <shanoir-console></shanoir-console>
+</div>
+
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
     <li *ngIf="duasToSign() > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>

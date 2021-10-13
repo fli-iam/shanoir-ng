@@ -20,7 +20,7 @@ import { capitalizeFirstLetter } from '../../../utils/app.utils';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
-import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { ConsoleService } from '../../console/console.service';
 import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
@@ -38,7 +38,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected confirmDialogService: ConfirmDialogService;
     protected keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
-    protected msgBoxService: MsgBoxService;
+    protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
@@ -60,7 +60,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-        this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
+        this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.windowService = ServiceLocator.injector.get(WindowService);
@@ -125,7 +125,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh().then(() => {
-                            this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
                         });
                     }).catch(reason => {
                         if (reason && reason.error) {

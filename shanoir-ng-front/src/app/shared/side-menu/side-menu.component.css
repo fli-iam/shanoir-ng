@@ -27,6 +27,8 @@ a:hover, a:active { color: white; }
 .menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 30px; }
 .menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
 
+.console { float: right; width: 270px; margin: 20px 15px 0; }
+
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
 .chevron i { margin-top: 7px; }
 .notif { font-size: 10px; }

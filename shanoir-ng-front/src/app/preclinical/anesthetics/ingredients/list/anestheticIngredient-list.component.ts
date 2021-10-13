@@ -19,7 +19,7 @@ import {
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ModesAware } from '../../../shared/mode/mode.decorator';
@@ -144,7 +144,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                             let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
                             this.anesthetic.ingredients.splice(index, 1);
                             this.table.refresh();
-                            this.msgBoxService.log('info', 'The preclinical-anesthetic-ingredient sucessfully deleted');
+                            this.consoleService.log('info', 'The preclinical-anesthetic-ingredient sucessfully deleted');
                         }).catch(reason => {
                             if (reason && reason.error) {
                                 this.onDelete.next(new ShanoirError(reason));

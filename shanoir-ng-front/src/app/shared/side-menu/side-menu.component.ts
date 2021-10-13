@@ -16,7 +16,7 @@ import { Component } from '@angular/core';
 import { SolrService } from '../../solr/solr.service';
 import { slideDown } from '../animations/animations';
 import { KeycloakService } from '../keycloak/keycloak.service';
-import { MsgBoxService } from '../msg-box/msg-box.service';
+import { ConsoleService } from '../console/console.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
 import { VERSION } from '../../../environments/version';
@@ -44,7 +44,7 @@ export class SideMenuComponent {
     constructor(
             public keycloakService: KeycloakService, 
             private solrService: SolrService,
-            private msgboxService: MsgBoxService,
+            private consoleService: ConsoleService,
             public notificationsService: NotificationsService,
             private studyService: StudyService) {
 
@@ -78,7 +78,7 @@ export class SideMenuComponent {
 
     indexToSolr() {
         this.solrService.indexAll().then(() => {
-            this.msgboxService.log('info', 'Indexation launched !');
+            this.consoleService.log('info', 'Indexation launched !');
         });
     }
 

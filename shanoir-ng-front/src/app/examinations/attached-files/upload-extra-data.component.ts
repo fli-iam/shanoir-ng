@@ -17,7 +17,7 @@ import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChange
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { Option } from '../../shared/select/select.component';
@@ -44,7 +44,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
             private location: Location,
             private keycloakService: KeycloakService,
             private examinationService: ExaminationService,
-            private msgService: MsgBoxService) {
+            private consoleService: ConsoleService) {
 
     }
 
@@ -82,7 +82,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
 
     uploadFileToActivity() {
         this.examinationService.postFile(this.fileToUpload, this.examination.id).then(data => {
-            this.msgService.log('info', 'The file has been sucessfully uploaded');
+            this.consoleService.log('info', 'The file has been sucessfully uploaded');
         });
       }
 

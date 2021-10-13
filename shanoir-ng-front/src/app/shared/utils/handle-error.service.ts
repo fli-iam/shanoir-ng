@@ -11,71 +11,61 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { ErrorHandler, Injectable } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { ErrorHandler, Injectable } from '@angular/core';
+import { StatusCodes } from 'http-status-codes';
+
+import { ConsoleService } from '../console/console.service';
 
 
-import { MsgBoxService } from '../msg-box/msg-box.service';
 
 @Injectable()
 export class HandleErrorService implements ErrorHandler {
 
-    constructor (private msgb: MsgBoxService) { }
+    constructor (private consoleService: ConsoleService) { }
 
-    public handleError(error: Response | any) {
+    public handleError(error: any) {
         try {
-            let techMsg: string = error.message ? error.message : null;
-            let userMsg: string = 'An unexpected error occured';
-    
-            if (error instanceof Response) {
-                techMsg = this.getMsgFromBackendValidation(error);
-            }
-            
+            console.error('error', error);
+            console.error(Object.keys(error));
             if (error instanceof HttpErrorResponse) {
-	        if (error.headers.get('Content-Type').indexOf('application/json') != -1) {
-	            this.handleJsonErrors(error);
-              	    return;
-                }
-            }
+                console.log('yes')
+                this.handleHttpError(error);
+            } else {
 
-            if (error.guiMsg) {
-                userMsg = error.guiMsg;
             }
-            
-            if (techMsg) console.error(techMsg);
-            console.error(error);
-            this.msgb.log('error', userMsg);
 
         } catch (error) {
             console.error('Error handler failed : ', error);
+            console.log(2, error)
         }
-    }
-    
-    private getMsgFromBackendValidation(error: Response | any): string {
-        const body = error.json() || '';
-        let techMsg = '';
-        techMsg = "[" + body.code + "]: " + body.message;
-        if (body.details) {
-            let errDetails = body.details.fieldErrors || '';
-            for (var errKey in errDetails) {
-                techMsg += "; " + errKey + " should be ";
-                var errDetailsByKey = errDetails[errKey][0];
-                for (var errDetail in errDetailsByKey) {
-                    if (errDetail === "code")
-                    techMsg += errDetailsByKey[errDetail];
-                }
-            }
-        }
-        return techMsg;
     }
 
-    private handleJsonErrors(error: HttpErrorResponse) {
-            const reader = new FileReader();
-            reader.addEventListener('loadend', (e) => {
-                this.msgb.log('error', JSON.parse(e.srcElement['result']).message)
-            });
-            reader.readAsText(error.error);
+
+    private handleHttpError(error: HttpErrorResponse) {
+        try {
+            let msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
+            let details: string[] = [
+                    formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss', 'en'),
+                    '[' + error.status + '] ' + this.getStatus(error.status),
+                    error.url,
+                    ((error.error?.message && error.error.message != '') ? 'message : ' + error.error.message : 'unknown cause')
+            ];
+            this.consoleService.log('error', msg, details);
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error handler failed, cause above');
+        }
+    }
+
+    private getStatus(code: number): string {
+        return Object.keys(StatusCodes).find(status => StatusCodes[status] === code);
+    }
+
+
+    private extractServerNameFromUrl(url: string) {
+        let urlArr: string[] = url.split('/');
+        return urlArr[urlArr.findIndex(str => str == 'shanoir-ng') + 1];
     }
 }  

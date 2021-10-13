@@ -21,7 +21,7 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../shared/models/error.model';
 import { ServiceLocator } from '../../utils/locator.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 import { ControlValueAccessor } from '@angular/forms';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';

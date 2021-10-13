@@ -27,7 +27,7 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
@@ -193,13 +193,13 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
                 this.updateExaminationAnesthetic().then(() => {
                     this.onSave.next(this.examinationAnesthetic);
                     this.chooseRouteAfterSave(this.entity);
-                    this.msgBoxService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
+                    this.consoleService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
                 });
             }else{
                 this.addExaminationAnesthetic().then( () => {
                     this.onSave.next(this.examinationAnesthetic);
                     this.chooseRouteAfterSave(this.entity);
-                    this.msgBoxService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
+                    this.consoleService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
                 });
                 
             }

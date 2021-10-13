@@ -96,7 +96,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 responseType: 'blob'
            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
             error =>  {
-                this.errorService. handleError(error);
+                this.errorService.handleError(error);
                 progressBar.progress = 0;
             })
          );

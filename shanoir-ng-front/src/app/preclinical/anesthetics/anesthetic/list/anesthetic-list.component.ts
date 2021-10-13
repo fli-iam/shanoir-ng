@@ -18,7 +18,7 @@ import {
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
@@ -117,7 +117,7 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-anesthetic sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-anesthetic sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
                             this.onDelete.next(new ShanoirError(reason));
