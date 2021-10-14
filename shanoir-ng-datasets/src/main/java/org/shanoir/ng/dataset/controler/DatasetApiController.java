@@ -466,12 +466,22 @@ public class DatasetApiController implements DatasetApi {
 		List<Dataset> failingDatasets = new ArrayList<Dataset>();
 		for (Dataset dataset : datasets) {
 			try {
+				// Ignore non adapted datasets
+				if ("eeg".equals(format) && ! (dataset instanceof EegDataset)) {
+					continue;
+				}
+				if (!"eeg".equals(format) &&  (dataset instanceof EegDataset)) {
+					continue;
+				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();
-				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();
+				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
+				if (exam.getComment() != null) {
+					datasetFilePath += "-" + exam.getComment();
+				}
 				datasetFilePath = datasetFilePath. replaceAll("[^a-zA-Z0-9_\\-]", "_");
 				if(datasetFilePath.length() > 255 ){
 					datasetFilePath = datasetFilePath.substring(0, 254);
@@ -586,7 +596,9 @@ public class DatasetApiController implements DatasetApi {
 			if (dataset instanceof EegDataset) {
 				name.append(dataset.getName()).append("_");
 			} else {
-				name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				if (dataset.getUpdatedMetadata().getComment() != null) {
+					name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				}
 				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
 				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
 					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
