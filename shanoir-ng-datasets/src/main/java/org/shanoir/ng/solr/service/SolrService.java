@@ -52,4 +52,6 @@ public interface SolrService {
 
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
 
+	void addAllToIndex(List<ShanoirSolrDocument> documents);
+
 }
