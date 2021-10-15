@@ -41,7 +41,7 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 			"datasetType", "datasetNature"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
 	
-	@Facet(fields = {"studyName", "subjectNam", "datasetName", "centerName", "examinationComment",
+	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment",
 			"datasetType", "datasetNature"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
