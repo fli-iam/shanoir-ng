@@ -144,6 +144,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
 
     onChange() {
         this.propagateChange(this.model);
+        this.propagateTouched();
     }
 
     onTouch() {

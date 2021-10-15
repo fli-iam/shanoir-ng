@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
                     </td>
                     <td class="dropdown-col tag-cell" *ngIf="hasTags">
-                        <tag-list [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}"></tag-list>
+                        <tag-list [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}" (onChange)="onChange()"></tag-list>
                     </td>
                     <td class="input-col">
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>

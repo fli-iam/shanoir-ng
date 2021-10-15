@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, HostBinding, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, forwardRef, HostBinding, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Option } from '../shared/select/select.component';
 
@@ -39,6 +39,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     tagOptions: Option<Tag>[] = [];
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
+    @Output() onChange: EventEmitter<Tag[]> = new EventEmitter<Tag[]>();
 
     writeValue(obj: any): void {
         this.tags = obj;
@@ -66,6 +67,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
             this.tags.push(tag);
             this.tagOptions = this.tagOptions.filter(opt => opt.value.id != tag.id);
             this.onChangeCallback(this.tags);
+            this.onChange.emit(this.tags);
             this.onTouchedCallback();
         }
     }
@@ -77,6 +79,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
         this.tagOptions.push(option);
         this.tagOptions.sort(this.sortTags);
         this.onChangeCallback(this.tags);
+        this.onChange.emit(this.tags);
         this.onTouchedCallback();
     }
 
