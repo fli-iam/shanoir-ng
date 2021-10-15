@@ -80,7 +80,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addAndPredicateToCriteria(criteria, DATASET_TYPE_FACET, facet.getDatasetType());
 		addAndPredicateToCriteria(criteria, DATASET_NATURE_FACET, facet.getDatasetNature());
 		addAndPredicateToCriteria(criteria, CENTER_NAME_FACET, facet.getCenterName());
-    addAndPredicateToCriteria(criteria, TAGS_FACET, facet.getTags());
+		addAndPredicateToCriteria(criteria, TAGS_FACET, facet.getTags());
 		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
 		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
 		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
@@ -131,7 +131,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addSearchInAllClause(Criteria criteria, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] fields = {STUDY_NAME_FACET, SUBJECT_NAME_FACET, DATASET_NAME_FACET, EXAMINATION_COMMENT_FACET, DATASET_TYPE_FACET, DATASET_NATURE_FACET, CENTER_NAME_FACET, TAGS_FACE};
+			String[] fields = {STUDY_NAME_FACET, SUBJECT_NAME_FACET, DATASET_NAME_FACET, EXAMINATION_COMMENT_FACET, DATASET_TYPE_FACET, DATASET_NATURE_FACET, CENTER_NAME_FACET, TAGS_FACET};
 			String[] specialChars = {"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
 			String escapedSearchStr = searchStr;
 			for (String specialChar : specialChars) {

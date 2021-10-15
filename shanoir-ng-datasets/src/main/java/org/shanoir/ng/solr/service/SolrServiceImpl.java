@@ -81,7 +81,7 @@ public class SolrServiceImpl implements SolrService {
 	@Transactional
 	@Override
 	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
-		solrRepository.save(documents);
+		solrRepository.saveAll(documents);
 	}
 
 	@Transactional
@@ -140,7 +140,10 @@ public class SolrServiceImpl implements SolrService {
 
 		// Update tags
 		for (ShanoirSolrDocument doc : solrDocuments) {
-			doc.setTags(tags.get(doc.getStudyId()).get(doc.getSubjectName()).stream().map(Tag::getName).collect(Collectors.toList()));
+		    List<Tag> list = tags.get(doc.getStudyId()).get(doc.getSubjectName());
+		    if (list != null && !list.isEmpty()) {
+		        doc.setTags(list.stream().map(Tag::getName).collect(Collectors.toList()));
+		    }
 		}
 
 		this.addAllToIndex(solrDocuments);
