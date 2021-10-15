@@ -105,7 +105,9 @@ public abstract class StudyDecorator implements StudyMapper {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
-			studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+			if (study.getTags() != null) {
+				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
+			}
 		}
 		return studyDTO;
 	}

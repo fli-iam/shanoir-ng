@@ -39,7 +39,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String SUBJECT_NAME_FACET = "subjectName";
 	private static final String STUDY_NAME_FACET = "studyName";
 	private static final String CENTER_NAME_FACET = "centerName";
-  private static final String TAGS_FACET = "tags";
+    private static final String TAGS_FACET = "tags";
 
 	@Resource
 	private SolrTemplate solrTemplate;
