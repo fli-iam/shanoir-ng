@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -204,11 +205,16 @@ public class BIDSServiceImpl implements BIDSService {
 		// Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
 		List<Subject> subjs = getSubjectsForStudy(studyId);
 
+		// Sort by ID
+		subjs.sort(Comparator.comparing(Subject::getId));
+
 		// Create participants.tsv
 		participantsSerializer(baseDir, subjs);
 
+
 		for (Subject subj : subjs) {
-			exportAsBids(subj, studyName, studyId, baseDir);
+			int index = 1;
+			exportAsBids(subj, studyName, studyId, baseDir, index);
 		}
 
 		return baseDir;
@@ -241,8 +247,6 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createBaseBidsFolder(File workFolder, String studyName) {
 		workFolder.mkdirs();
-		// Manage study files.
-		// If we find README or dataset_description_file, override it.
 		
 		// 2. Create dataset_description.json and README
 		DatasetDescription datasetDescription = new DatasetDescription();
@@ -263,11 +267,12 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param subject the subject we want to export as BIDS
 	 * @param studyName the study name
 	 * @param workDir Subject BIDS directory where we are working. Will be created if null.
+	 * @param index subject index
 	 * @return data from the subject formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
-	private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
-		File subjDir = createSubjectFolder(subject.getName(), String.valueOf(subject.getId()), workDir);
+	private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir, int index) throws IOException {
+		File subjDir = createSubjectFolder(subject.getName(), index, workDir);
 
 		// Get subject examinations and filter on the one with adapted study only
 		List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
@@ -289,12 +294,14 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Create the subject/patient BIDS folder
 	 * @param subjectName the subject name for which we want to create the folder
 	 * @param baseDir the parent folder
-	 * @param subjectId the subject id
+	 * @param index the subject id
 	 * @return the newly created folder
 	 * @throws IOException
 	 */
-	private File createSubjectFolder(final String subjectName, final String subjectId, final File baseDir) throws IOException {
-		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + subjectId + "_" + subjectName);
+	private File createSubjectFolder(final String subjectName, final int index, final File baseDir) throws IOException {
+		// Generate another ID here ?
+		
+		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "_" + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
@@ -370,7 +377,6 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof PetDataset) {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
-			MrDataset mrDataset = (MrDataset) dataset;
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
 			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
@@ -521,17 +527,15 @@ public class BIDSServiceImpl implements BIDSService {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.writeValue(new File(destFile), datasetDescription);
 
-		// Create channels.tsv file
-		String destWorkFolderPath = baseDirectory.getAbsolutePath() + File.separator + SUBJECT_PREFIX + dataset.getSubjectId() + "_" + subjectName + File.separator + SESSION_PREFIX + sessionId + File.separator + "eeg" + File.separator;
-
 		// Create the folder where we are currently working if necessary.
-		File destWorkFolderFile = new File(destWorkFolderPath);
+		File destWorkFolderFile = workFolder;
 		if (!destWorkFolderFile.exists()) {
 			destWorkFolderFile.mkdirs();
 		}
 
+		// Create channels.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_channel.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
+		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		StringBuilder buffer = new StringBuilder();
 		buffer.append("name \t type \t units \t sampling_frequency \t low_cutoff \t high_cutoff \t notch \n");
@@ -549,7 +553,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Create events.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
+		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
 		buffer.append("onset \t duration \t sample \n");
@@ -572,7 +576,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Create electrode.csv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_electrodes.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
+		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
 		buffer.append("name \t x \t y \t z \n");
@@ -587,7 +591,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Create _coordsystem.json file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
-		destFile = destWorkFolderPath + File.separator + fileName;
+		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
 		buffer.append("{\n")

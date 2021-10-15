@@ -201,9 +201,14 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	BIDS_DATA_TYPE(15) {
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			MrDatasetNature nature = MrDatasetNature.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				dataset.getUpdatedMetadata().setBidsDataType(BidsDataType.valueOf(updatedValue));
+			BidsDataType dataType = BidsDataType.valueOf(updatedValue);
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				MrSequenceApplication mrSequenceApplication = MrSequenceApplication.valueOf(updatedValue);
+				if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+				mrDsAcq.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataType);
+			} else {
+				throw new IllegalArgumentException("datasetAcquisition should be of type MrDatasetAcquisition");
 			}
 		}
 	};
