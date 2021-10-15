@@ -81,7 +81,7 @@ public class SolrServiceImpl implements SolrService {
 	@Transactional
 	@Override
 	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
-		solrRepository.save(documents);
+		solrRepository.saveAll(documents);
 	}
 
 	@Transactional
