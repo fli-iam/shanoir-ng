@@ -1,0 +1,1 @@
+ALTER TABLE mr_protocol_metadata ADD COLUMN bids_data_type varchar(255) DEFAULT NULL;

@@ -2,9 +2,6 @@ package org.shanoir.ng.dataset.modality;
 
 public enum BidsDataType {
 
-	/* positron emission tomography.*/
-	BIDS_PET("pet"),
-
 	/* task based and resting state functional MRI.*/
 	BIDS_FUNC("func"),
 	
@@ -18,19 +15,7 @@ public enum BidsDataType {
 	BIDS_ANAT("anat"),
 	
 	/* perfusion.*/
-	BIDS_PERF("perf"),
-	
-	/* magnetoencephalography.*/
-	BIDS_MEG("meg"),
-	
-	/* electroencephalography.*/
-	BIDS_EEG("eeg"),
-	
-	/* intracranial electroencephalography.*/
-	BIDS_IEEG("ieeg"),
-	
-	/* behavioral.*/
-	BIDS_BEH("beh");
+	BIDS_PERF("perf");
 
 	private String folderName;
 

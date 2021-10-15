@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.model;
 
 import javax.persistence.Entity;
 
-import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -59,9 +58,6 @@ public class DatasetMetadata extends AbstractEntity {
 
 	/** Processed dataset type. */
 	private Integer processedDatasetType;
-
-	/** Bids dataset type folder. **/
-	private String bidsDataType;
 
 	/**
 	 * @return the cardinalityOfRelatedSubjects
@@ -165,18 +161,6 @@ public class DatasetMetadata extends AbstractEntity {
 		} else {
 			this.processedDatasetType = processedDatasetType.getId();
 		}
-	}
-
-	public String getBidsDataType() {
-		return bidsDataType;
-	}
-
-	public void setBidsDataType(String bidsDataType) {
-		this.bidsDataType = bidsDataType;
-	}
-
-	public void setBidsDataType(BidsDataType bidsDataType) {
-		this.bidsDataType = bidsDataType.getFolderName();
 	}
 
 }

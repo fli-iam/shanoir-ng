@@ -1,7 +1,6 @@
 package org.shanoir.ng.exporter.service;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -89,18 +88,6 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private static final String README_FILE = "README";
 
-	private static final String NULL = "null";
-
-	private static final String IMAGED_OBJECT_CATEGORY = "imaged_object_category";
-
-	private static final String LANGUAGE_HEMISPHERIC_DOMINANCE = "language_hemispheric_dominance";
-
-	private static final String MANUAL_HEMISPHERIC_DOMINANCE = "manual_hemispheric_dominance";
-
-	private static final String BIRTH_DATE = "birth_date";
-
-	private static final String SEX = "sex";
-
 	private static final String SUBJECT_IDENTIFIER = "subject_identifier";
 
 	private static final String PARTICIPANT_ID = "participant_id";
@@ -112,11 +99,6 @@ public class BIDSServiceImpl implements BIDSService {
 	private static final String[] CSV_PARTICIPANTS_HEADER = {
 			PARTICIPANT_ID,
 			SUBJECT_IDENTIFIER
-			//IMAGED_OBJECT_CATEGORY
-			//LANGUAGE_HEMISPHERIC_DOMINANCE
-			//LANGUAGE_HEMISPHERIC_DOMINANCE
-			//BIRTH_DATE
-			//SEX
 	};
 
 	@Value("${bids-data-folder}")
@@ -226,7 +208,7 @@ public class BIDSServiceImpl implements BIDSService {
 		participantsSerializer(baseDir, subjs);
 
 		for (Subject subj : subjs) {
-			exportAsBids(subj, studyName, baseDir);
+			exportAsBids(subj, studyName, studyId, baseDir);
 		}
 
 		return baseDir;
@@ -259,7 +241,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createBaseBidsFolder(File workFolder, String studyName) {
 		workFolder.mkdirs();
-
+		// Manage study files.
+		// If we find README or dataset_description_file, override it.
+		
 		// 2. Create dataset_description.json and README
 		DatasetDescription datasetDescription = new DatasetDescription();
 		datasetDescription.setName(studyName);
@@ -282,16 +266,22 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return data from the subject formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
-	private void exportAsBids(final Subject subject, final String studyName, final File workDir) throws IOException {
+	private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
 		File subjDir = createSubjectFolder(subject.getName(), String.valueOf(subject.getId()), workDir);
 
 		// Get subject examinations and filter on the one with adapted study only
-		final List<Examination> examinationList = examService.findBySubjectId(subject.getId());
+		List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
+
+		// Create session folder only if there is multiple exmainations
+		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
 
 		// Iterate over examinations to export them as BIDS
+		File examDir = subjDir;
 		for (Examination exam : examinationList) {
-			// OTHER: can we imagine a subject in multiple studies ? Do the filter here
-			exportAsBids(exam, subjDir, studyName, subject.getName());
+			if (useSessionFolder) {
+				examDir = createExaminationFolder(exam, subjDir);
+			}
+			exportAsBids(exam, examDir, studyName, subject.getName());
 		}
 	}
 
@@ -321,16 +311,17 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return data from the examination formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
-	private void exportAsBids(final Examination examination, final File subjDir, final String studyName, final String subjectName) throws IOException {
-		// Create session folder only if there is multiple dataset acquisitions
-		File examDir;
-		if (examination.getDatasetAcquisitions() != null && examination.getDatasetAcquisitions().size() > 1 ) {
-			examDir = createExaminationFolder(examination, subjDir);
-		} else {
-			examDir = subjDir;
+	private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException {
+		// Add examination extra-data
+		for (String filePath : examination.getExtraDataFilePathList()) {
+			File file = new File(this.examService.getExtraDataFilePath(examination.getId(), filePath));
+			if (file.exists()) {
+				Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + file.getName());
+				Files.createLink(bidsExtraFilePath, file.toPath());
+			}
 		}
-
-		// Iterate over acquisitions/datasets
+		
+		// Iterate over acquisitions/datasets		
 		for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {
 			List<Dataset> datasets = acq.getDatasets();
 			for (Dataset ds : datasets) {
@@ -379,13 +370,15 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof PetDataset) {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
-			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getBidsDataType() != null) {
-				dataFolder = createDataFolder(dataset.getUpdatedMetadata().getBidsDataType(), workDir);
-			} else {
-				MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
-				if (protocol != null) {
+			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
+			if (protocol != null) {
+				if (protocol.getUpdatedMetadata() != null
+						&& protocol.getUpdatedMetadata().getBidsDataType() != null) {
+					dataFolder = createDataFolder(protocol.getUpdatedMetadata().getBidsDataType(), workDir);
+				} else {
 					MrProtocolSCMetadata metadata = protocol.getUpdatedMetadata();
 					if (metadata != null) {
 						MrSequenceApplication application = metadata.getMrSequenceApplication();
@@ -410,6 +403,8 @@ public class BIDSServiceImpl implements BIDSService {
 					}
 				}
 			}
+			// Here use mapping done by lord and saviour Clement Acquitter
+			
 			// default case, dataFolder is still null => undefined folder
 			if (dataFolder == null) {
 				dataFolder = createDataFolder("undefined", workDir);
@@ -621,7 +616,6 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer.append(CSV_SPLITTER);
 
 		for (Subject stubject : subjs) {
-
 			// Write in the file the values
 			buffer.append(stubject.getName()).append(CSV_SEPARATOR)
 			.append(stubject.getId()).append(CSV_SEPARATOR)

@@ -17,16 +17,11 @@ import { capitalsAndUnderscoresToDisplayable, allOfEnum } from "../utils/app.uti
 
 export enum BidsDataType {
 
-	PET = 'PET',
 	FUNC = 'FUNC',
 	DWI = 'DWI',
 	FMAP = 'FMAP',
 	ANAT = 'ANAT',
-	PERF = 'PERF',
-	MEG = 'MEG',
-	EEG = 'EEG',
-	IEEG = 'IEEG',
-	BEH = 'BEH'
+	PERF = 'PERF'
 	
 } export namespace BidsDataType {
     
