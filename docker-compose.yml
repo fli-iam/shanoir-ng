@@ -62,6 +62,7 @@ services:
   database:
     container_name: "${SHANOIR_PREFIX}database"
     build: ./docker-compose/database
+    command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
     volumes:
