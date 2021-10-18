@@ -211,10 +211,10 @@ public class BIDSServiceImpl implements BIDSService {
 		// Create participants.tsv
 		participantsSerializer(baseDir, subjs);
 
-
 		for (Subject subj : subjs) {
 			int index = 1;
 			exportAsBids(subj, studyName, studyId, baseDir, index);
+			index++;
 		}
 
 		return baseDir;
@@ -408,9 +408,7 @@ public class BIDSServiceImpl implements BIDSService {
 						}
 					}
 				}
-			}
-			// Here use mapping done by lord and saviour Clement Acquitter
-			
+			}			
 			// default case, dataFolder is still null => undefined folder
 			if (dataFolder == null) {
 				dataFolder = createDataFolder("undefined", workDir);
