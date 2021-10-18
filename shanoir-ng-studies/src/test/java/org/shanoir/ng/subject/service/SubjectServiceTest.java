@@ -37,6 +37,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -66,6 +68,9 @@ public class SubjectServiceTest {
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
+	
+	@Mock
+	private SubjectMapper subjectMapperMock;
 
 	@InjectMocks
 	private SubjectServiceImpl subjectService;
@@ -76,7 +81,6 @@ public class SubjectServiceTest {
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
 		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
-
 	}
 
 	@Test

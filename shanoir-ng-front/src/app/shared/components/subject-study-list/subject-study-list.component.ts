@@ -20,7 +20,6 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
 
-
 @Component({
   selector: 'subject-study-list',
   templateUrl: 'subject-study-list.component.html',
@@ -42,6 +41,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public selected: Subject | Study;
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
+    hasTags: boolean;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
@@ -53,6 +53,9 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
             if (this.selectableList) {
                 for (let item of this.selectableList) {
                     let option: Option<Subject | Study> = new Option(item, item.name);
+                    if(this.model && this.model.find(subStu => (this.compMode == 'study' ? subStu.subject.id : subStu.study.id) == option.value.id)) {
+                        option.disabled = true;
+                    }
                     this.optionList.push(option);
                 }
             }
@@ -61,7 +64,14 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     
     writeValue(obj: any): void {
         super.writeValue(obj);
-        if (this.model && this.selectableList) {
+        if (this.model) {
+            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.tags && subStu.tags.length > 0);
+        }
+        this.updateDisabled();
+    }
+
+    private updateDisabled() {
+        if (this.selectableList && this.model) {
             if (this.compMode == 'study') {
                 for (let option of this.optionList) {
                     if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true; 
@@ -90,6 +100,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
+        newSubjectStudy.tags=[];
         if (this.compMode == "study") {
             let studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
@@ -122,8 +133,18 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
     }
 
+    getFontColor(colorInp: string): boolean {
+          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
+          var r = parseInt(color.substring(0, 2), 16); // hexToR
+          var g = parseInt(color.substring(2, 4), 16); // hexToG
+          var b = parseInt(color.substring(4, 6), 16); // hexToB
+          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+    }
+
+
     onChange() {
         this.propagateChange(this.model);
+        this.propagateTouched();
     }
 
     onTouch() {
