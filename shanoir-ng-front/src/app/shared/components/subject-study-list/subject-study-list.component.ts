@@ -65,7 +65,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     writeValue(obj: any): void {
         super.writeValue(obj);
         if (this.model) {
-            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.tags && subStu.tags.length > 0);
+            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
         }
         this.updateDisabled();
     }
