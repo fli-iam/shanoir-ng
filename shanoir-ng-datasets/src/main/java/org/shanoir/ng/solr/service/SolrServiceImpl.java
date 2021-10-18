@@ -114,20 +114,13 @@ public class SolrServiceImpl implements SolrService {
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 
-		List<Long> studyIds = new ArrayList<>();
-		List<Long> subjectIds = new ArrayList<>();
-
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			studyIds.add(shanoirMetadata.getStudyId());
-			subjectIds.add(shanoirMetadata.getSubjectId());
-
 			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-
 			solrDocuments.add(doc);
 		}
 
-		List<SubjectStudy> subjstuds = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(studyIds, subjectIds);
+		List<SubjectStudy> subjstuds = subjectStudyRepo.findAll();
 
 		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
 
