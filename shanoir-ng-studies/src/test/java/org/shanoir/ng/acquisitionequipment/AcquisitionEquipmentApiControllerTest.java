@@ -18,7 +18,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +33,7 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -52,8 +56,8 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = AcquisitionEquipmentApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@WebMvcTest(AcquisitionEquipmentApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class AcquisitionEquipmentApiControllerTest {
 
 	private static final String REQUEST_PATH = "/acquisitionequipments";
@@ -65,32 +69,33 @@ public class AcquisitionEquipmentApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 
 	@MockBean
-	private AcquisitionEquipmentService acquisitionEquipmentServiceMock;
+	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	@MockBean
 	private ShanoirEventService eventService;
+	
+	@MockBean(name = "controlerSecurityService")
+	private ControlerSecurityService controlerSecurityService;
 
 	@Before
-	public void setup() throws EntityNotFoundException  {
+	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
-		given(acquisitionEquipmentMapperMock
+		given(acquisitionEquipmentMapper
 				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyListOf(AcquisitionEquipment.class)))
 						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
 		AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
 		acqEq.setId(Long.valueOf(123));
-		given(acquisitionEquipmentMapperMock
+		given(acquisitionEquipmentMapper
 				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
 						.willReturn(acqEq);
-
-		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
-		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
-		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(new AcquisitionEquipment());
-		given(acquisitionEquipmentServiceMock.create(Mockito.mock(AcquisitionEquipment.class)))
-				.willReturn(new AcquisitionEquipment());
+		doNothing().when(acquisitionEquipmentService).deleteById(1L);
+		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
+		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(new AcquisitionEquipment()));
+		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(new AcquisitionEquipment());
+		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
 	}
 
 	@Test
@@ -101,12 +106,14 @@ public class AcquisitionEquipmentApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser
 	public void findAcquisitionEquipmentByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
+	@WithMockUser
 	public void findAcquisitionEquipmentsTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

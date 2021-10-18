@@ -142,17 +142,32 @@ public class ImporterService {
 	private static final String SUBJECT_PREFIX = "sub-";
 
 	private static final String EEG_PREFIX = "eeg";
+	
+	private static int instancesCreated = 0;
 
+<<<<<<< HEAD
 	private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
+=======
+    //This constructor will be called everytime a new bean instance is created
+    public ImporterService(){
+        instancesCreated++;
+    }
 
+    public static int getInstancesCreated(){
+        return ImporterService.instancesCreated;
+    }
+>>>>>>> develop
+
+	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
+		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
 		ShanoirEvent event = importJob.getShanoirEvent();
 		event.setMessage("Starting import...");
 		eventService.publishEvent(event);
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
-			Examination examination = examinationRepository.findOne(importJob.getExaminationId());
+			Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
 			Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
 			if (examination != null) {
 				int rank = 0;
@@ -286,7 +301,6 @@ public class ImporterService {
 
 	public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		if (checkSerieForDicomImages(serie)) {
-			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
 			// TODO: put studyCard in bruker import
@@ -326,7 +340,6 @@ public class ImporterService {
 				&& !serie.getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().isEmpty();
 	}
 
-
 	public void cleanTempFiles(String workFolder) {
 		if (workFolder != null) {
 			// delete workFolder.upload file
@@ -345,6 +358,7 @@ public class ImporterService {
 			LOG.error("cleanTempFiles: workFolder is null");
 		}
 	}
+	
 	/**
 	 * Create a dataset acquisition, and associated dataset.
 	 * @param importJob the import job from importer MS.
@@ -370,6 +384,7 @@ public class ImporterService {
 
 			datasetAcquisition.setExamination(examination);
 			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+			datasetAcquisition.setRank(0);
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;

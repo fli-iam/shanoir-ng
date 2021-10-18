@@ -34,12 +34,12 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 
 	@Override
 	public SubjectStudy findById(final Long id) {
-		return subjectStudyRepository.findOne(id);
+		return subjectStudyRepository.findById(id).orElse(null);
 	}
 
 	@Override
 	public SubjectStudy update(final SubjectStudy subjectStudy) throws EntityNotFoundException {
-		final SubjectStudy subjectStudyDb = subjectStudyRepository.findOne(subjectStudy.getId());
+		final SubjectStudy subjectStudyDb = subjectStudyRepository.findById(subjectStudy.getId()).orElse(null);
 		if (subjectStudyDb == null) throw new EntityNotFoundException(SubjectStudy.class, subjectStudy.getId());
 		updateSubjectStudyValues(subjectStudyDb, subjectStudy);
 		subjectStudyRepository.save(subjectStudyDb);
@@ -58,6 +58,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 		subjectStudyDb.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
 		subjectStudyDb.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
+		subjectStudyDb.setTags(subjectStudy.getTags());
 		return subjectStudyDb;
 	}
 

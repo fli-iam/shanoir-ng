@@ -15,22 +15,30 @@
 package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.model.Tag;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +50,13 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -56,11 +66,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Component
 public class RabbitMQDatasetsService {
 	
-	@Autowired
-	private RabbitMqStudyUserService listener;
+	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
 	@Autowired
-	private ExaminationRepository examRepository;
+	private RabbitMqStudyUserService listener;
 
 	@Autowired
 	private StudyRepository studyRepository;
@@ -69,11 +78,23 @@ public class RabbitMQDatasetsService {
 	private SubjectRepository subjectRepository;
 
 	@Autowired
+	private CenterRepository centerRepository;
+
+	@Autowired
 	private SolrService solrService;
 
 	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
 
+	@Autowired
+	private ExaminationService examinationService;
+
+	@Autowired
+	private ExaminationRepository examinationRepository;
+	
+	@Autowired
+	private StudyCardRepository studyCardRepository;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
 	@RabbitListener(bindings = @QueueBinding(
@@ -90,22 +111,44 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public void receiveStudyNameUpdate(final String studyStr) {
 		ObjectMapper objectMapper = new ObjectMapper();
-		IdName receivedStudy = new IdName();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		try {
-			receivedStudy = objectMapper.readValue(studyStr, IdName.class);
-			Study existingStudy = studyRepository.findOne(receivedStudy.getId());
-			if (existingStudy != null) {
-				// update existing study's name
-				existingStudy.setName(receivedStudy.getName());
-				studyRepository.save(existingStudy);
+			Study received = objectMapper.readValue(studyStr, Study.class);
+			// TAGS
+			if (stud.getTags() != null) {
+				stud.getTags().clear();
 			} else {
-				// create new study
-				Study newStudy = new Study(receivedStudy.getId(), receivedStudy.getName());
-				studyRepository.save(newStudy);
+				stud.setTags(new ArrayList<>());
 			}
-		} catch (IOException e) {
-			LOG.error("Could not read value transmit as Study class through RabbitMQ");
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			if (received.getTags() != null) {
+				stud.getTags().addAll(received.getTags());
+			}
+			for (Tag tag : stud.getTags()) {
+				tag.setStudy(stud);
+			}
+			this.studyRepository.save(stud);
+
+			// SUBJECT_STUDY
+			if (stud.getSubjectStudyList() != null) {
+				stud.getSubjectStudyList().clear();
+			} else {
+				stud.setSubjectStudyList(new ArrayList<>());
+			}
+			if (received.getSubjectStudyList() != null) {
+				stud.getSubjectStudyList().addAll(received.getSubjectStudyList());
+			}
+			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
+				sustu.setStudy(stud);
+			}
+			
+			this.studyRepository.save(stud);
+
+			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
+				updateSolr(sustu.getSubject().getId());
+			}
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
 	}
 
@@ -114,20 +157,82 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	public void receiveSubjectNameUpdate(final String subjectStr) {
 		ObjectMapper objectMapper = new ObjectMapper();
-		IdName receivedSubject = new IdName();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		
+		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
 		try {
-			receivedSubject = objectMapper.readValue(subjectStr, IdName.class);
-			Subject existingSubject = subjectRepository.findOne(receivedSubject.getId());
-			if (existingSubject != null) {
-				existingSubject.setName(receivedSubject.getName());
-				subjectRepository.save(existingSubject);
+			Subject received = objectMapper.readValue(subjectStr, Subject.class);
+	
+			// SUBJECT_STUDY
+			if (su.getSubjectStudyList() != null) {
+				su.getSubjectStudyList().clear();
 			} else {
-				Subject newSubject = new Subject(receivedSubject.getId(), receivedSubject.getName());
-				subjectRepository.save(newSubject);
+				su.setSubjectStudyList(new ArrayList<>());
+			}
+			if (received.getSubjectStudyList() != null) {
+				su.getSubjectStudyList().addAll(received.getSubjectStudyList());
+			}
+			for (SubjectStudy sustu : su.getSubjectStudyList()) {
+				sustu.setSubject(su);
+			}
+			subjectRepository.save(su);
+			
+			// Update solr references
+			updateSolr(su.getId());
+			
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
+	/**
+	 * Updates all the solr references for this subject.
+	 * @param subjectId the subject ID updated
+	 */
+	private void updateSolr(final Long subjectId) {
+		for (Examination exam : examinationRepository.findBySubjectId(subjectId)) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				for (Dataset ds : acq.getDatasets()) {
+					solrService.indexDataset(ds.getId());
+				}
+			}
+		}
+	}
+
+	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
+	@RabbitHandler
+	public void receiveCenterNameUpdate(final String centerStr) {
+		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
+	}
+	
+	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		IdName received = new IdName();
+		try {
+			received = objectMapper.readValue(receivedStr, IdName.class);
+			T existing = repository.findById(received.getId()).orElse(null);
+			if (existing != null) {
+				// update existing entity's name
+				existing.setName(received.getName());
+				T entity =  repository.save(existing);
+				return entity;
+			} else {
+				// create new entity
+				try {
+					T newOne = clazz.newInstance();
+					newOne.setId(received.getId());
+					newOne.setName(received.getName());
+					T entity = repository.save(newOne);
+					return entity;
+				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+					throw new AmqpRejectAndDontRequeueException("Cannot instanciate " + clazz.getSimpleName() + " class through reflection. It is a programming error.", e);
+				}
 			}
 		} catch (IOException e) {
 			LOG.error("Could not read value transmit as Subject class through RabbitMQ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR);
 		}
 	}
 
@@ -155,7 +260,7 @@ public class RabbitMQDatasetsService {
 			}
 		} catch (Exception e) {
 			LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
 
@@ -164,7 +269,7 @@ public class RabbitMQDatasetsService {
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-			key = "deleteSubject.event",
+			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
@@ -178,19 +283,14 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository
-			for (Examination exam : examRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examRepository.delete(exam.getId());
+			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
+				examinationService.deleteFromRabbit(exam);
 			}
 			// Delete subject from datasets database
-			subjectRepository.delete(Long.valueOf(event.getObjectId()));
+			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
 
@@ -214,19 +314,19 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository then from database
-			for (Examination exam : examRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
-				for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
-					for (Dataset ds : dsAcq.getDatasets())  {
-						solrService.deleteFromIndex(ds.getId());
-					}
-				}
-				examRepository.delete(exam.getId());
+			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				examinationService.deleteFromRabbit(exam);
 			}
+			// also delete associated study cards
+			for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+				studyCardRepository.delete(sc);
+			}
+
 			// Delete study from datasets database
-			studyRepository.delete(Long.valueOf(event.getObjectId()));
+			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
 }

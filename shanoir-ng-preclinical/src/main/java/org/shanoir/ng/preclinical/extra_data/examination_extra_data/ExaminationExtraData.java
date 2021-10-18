@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiModelProperty;
 @Entity
 @Table(name = "examination_extradata")
 @JsonPropertyOrder({ "_links", "examination_id", "filename","extradatatype" })
-public class ExaminationExtraData extends HalEntity   {
+public class ExaminationExtraData extends HalEntity {
 	
   @JsonProperty("examination_id")
   @NotNull

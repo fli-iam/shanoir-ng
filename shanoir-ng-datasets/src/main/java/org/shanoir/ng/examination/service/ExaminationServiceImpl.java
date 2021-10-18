@@ -15,14 +15,17 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
@@ -60,24 +63,47 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private SolrService solrService;
 
+	@Autowired
+	private ShanoirEventService eventService;
+	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		Examination exam = examinationRepository.findOne(id);
-		List<Long> datasets = new ArrayList<>();
+		Optional<Examination> examinationOpt = examinationRepository.findById(id);
+		if (examinationOpt.isEmpty()) {
+			throw new EntityNotFoundException(Examination.class, id);
+		}
+		Long tokenUserId = KeycloakUtil.getTokenUserId();
+		Examination examination = examinationOpt.get();
+		String studyIdAsString = examination.getStudyId().toString();
 
-		if (exam.getDatasetAcquisitions() != null) {
-			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-				for (Dataset ds : acq.getDatasets()) {
-					datasets.add(ds.getId());
-				}
+		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
+		for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+			for (Dataset ds : dsAcq.getDatasets())  {
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				solrService.deleteFromIndex(ds.getId());
 			}
 		}
-		// Delete examination
-		examinationRepository.delete(id);
 
-		for (Long dsId : datasets) {
-			solrService.deleteFromIndex(dsId);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		// Delete examination
+		examinationRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException {
+		Long tokenUserId = KeycloakUtil.getTokenUserId();
+		String studyIdAsString = exam.getStudyId().toString();
+		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
+		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+			for (Dataset ds : dsAcq.getDatasets())  {
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				solrService.deleteFromIndex(ds.getId());
+			}
 		}
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		examinationRepository.deleteById(exam.getId());
 	}
 
 	@Value("${datasets-data}")
@@ -106,7 +132,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination findById(final Long id) {
-		return examinationRepository.findOne(id);
+		return examinationRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -118,7 +144,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
-		final Examination examinationDb = examinationRepository.findOne(examination.getId());
+		final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
 		if (examinationDb == null) {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
 		}

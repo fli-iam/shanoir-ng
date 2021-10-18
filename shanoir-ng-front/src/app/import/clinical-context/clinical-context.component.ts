@@ -178,7 +178,7 @@ export class ClinicalContextComponent implements OnDestroy {
     setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
         this.modality = this.getFirstSelectedSerie().modality.toString();
-        this.useStudyCard = this.modality.toUpperCase() != 'CT' && this.modality.toUpperCase() != 'PT';
+        this.useStudyCard = this.modality.toUpperCase() == "MR";
         return this.completeStudiesCompatibilities(this.getFirstSelectedSerie().equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */

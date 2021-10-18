@@ -20,6 +20,7 @@
 package org.shanoir.ng.solr.model;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
@@ -33,56 +34,83 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
 @SolrDocument(solrCoreName = "shanoir")
 public class ShanoirSolrDocument {
 	
+	/** An id of type string and distinct from datasetId is preferable for Solr **/
 	@Id
 	@Field
-	@Indexed(name="datasetId", type="Long")
+	@Indexed
+	private String id;
+	
+	@Field
+	@Indexed
 	private	Long datasetId;
 	
 	@Field
-	@Indexed(name="datasetName", type="string")
+	@Indexed
 	private	String datasetName;
 	
 	// DatasetModalityType: MR, CT, PET etc..
 	@Field
-	@Indexed(name="datasetType", type="string")
+	@Indexed
 	private	String datasetType;
 	
 	// T1, T2, Diff, etc..
 	@Field
-	@Indexed(name="datasetNature", type="string")
+	@Indexed
 	private String datasetNature;
 	
 	@Field
-	@Indexed(name="datasetCreationDate", type="Date")
+	@Indexed
 	private Date datasetCreationDate;
 	
 	@Field
-	@Indexed(name="examinationComment", type="string")
+	@Indexed
 	private String examinationComment;
 	
-	@Field
-	@Indexed(name="examinationDate", type="Date") 
+
+	@Indexed
 	private Date examinationDate;
 	
 	@Field
-	@Indexed(name="subjectName", type="string")
+	@Indexed
 	private String subjectName;
 	
 	@Field
-	@Indexed(name="studyName", type="string")
+	@Indexed
 	private String studyName;
 	
 	@Field
-	@Indexed(name="studyId", type="Long")
+	@Indexed
 	private Long studyId;
 	
+	@Field
+	@Indexed
+	private String centerName;
+	
+	@Field
+	@Indexed
+	private Float sliceThickness;
+	
+	@Field
+	@Indexed
+	private Float pixelBandwidth;
+	
+	@Field
+	@Indexed
+	private Float magneticFieldStrength;
+	
+	@Field
+	@Indexed(name="tags", type="string")
+	private List<String> tags;
+
 	public ShanoirSolrDocument () {
 		
 	}
 	
-	public ShanoirSolrDocument (Long datasetId, String datasetName, String datasetType, String datasetNature,
+	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId) {
+			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
+			Float pixelBandwidth, Float magneticFieldStrength) {
+		this.id = id;
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -93,6 +121,18 @@ public class ShanoirSolrDocument {
 		this.subjectName = subjectName;
 		this.studyName = studyName;
 		this.studyId = studyId;
+		this.centerName = centerName;
+		this.sliceThickness = sliceThickness;
+		this.pixelBandwidth = pixelBandwidth;
+		this.magneticFieldStrength = magneticFieldStrength;
+	}
+
+	public String getId() {
+		return this.id;
+	}
+	
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/**
@@ -235,4 +275,44 @@ public class ShanoirSolrDocument {
 		this.studyId = studyId;
 	}
 
+	public String getCenterName() {
+		return centerName;
+	}
+
+	public void setCenterName(String centerName) {
+		this.centerName = centerName;
+	}
+
+	public Float getSliceThickness() {
+		return sliceThickness;
+	}
+
+	public void setSliceThickness(Float sliceThickness) {
+		this.sliceThickness = sliceThickness;
+	}
+
+	public Float getPixelBandwidth() {
+		return pixelBandwidth;
+	}
+
+	public void setPixelBandwidth(Float pixelBandwidth) {
+		this.pixelBandwidth = pixelBandwidth;
+	}
+
+	public Float getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
+	}
+	
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+	
 }

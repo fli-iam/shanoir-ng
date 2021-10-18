@@ -48,7 +48,7 @@ public class PathologyServiceImpl implements PathologyService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		pathologiesRepository.delete(id);
+		pathologiesRepository.deleteById(id);
 	}
 
 	@Override
@@ -57,13 +57,8 @@ public class PathologyServiceImpl implements PathologyService {
 	}
 
 	@Override
-	public List<Pathology> findBy(final String fieldName, final Object value) {
-		return pathologiesRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public Pathology findById(final Long id) {
-		return pathologiesRepository.findOne(id);
+		return pathologiesRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -85,7 +80,7 @@ public class PathologyServiceImpl implements PathologyService {
 
 	@Override
 	public Pathology update(final Pathology pathology) throws ShanoirException {
-		final Pathology pathologyDb = pathologiesRepository.findOne(pathology.getId());
+		final Pathology pathologyDb = pathologiesRepository.findById(pathology.getId()).orElse(null);
 		updatePathologyValues(pathologyDb, pathology);
 		try {
 			pathologiesRepository.save(pathologyDb);
