@@ -28,3 +28,5 @@ CREATE TABLE `subject_study_tag` (
   CONSTRAINT `FKcc51xo3yrp74v2yp7df540a03` FOREIGN KEY (`tags_id`) REFERENCES `tag` (`id`),
   CONSTRAINT `FKe638djnyhwckgsoa7qxnvcayd` FOREIGN KEY (`subject_study_id`) REFERENCES `subject_study` (`id`)
 );
+
+ALTER TABLE `shanoir_metadata` ADD COLUMN `subject_id` bigint(20) DEFAULT NULL;
