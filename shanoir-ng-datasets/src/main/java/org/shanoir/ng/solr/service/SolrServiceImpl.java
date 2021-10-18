@@ -140,10 +140,12 @@ public class SolrServiceImpl implements SolrService {
 
 		// Update tags
 		for (ShanoirSolrDocument doc : solrDocuments) {
-		    List<Tag> list = tags.get(doc.getStudyId()).get(doc.getSubjectName());
-		    if (list != null && !list.isEmpty()) {
-		        doc.setTags(list.stream().map(Tag::getName).collect(Collectors.toList()));
-		    }
+			if (doc != null && tags != null && tags.get(doc.getStudyId()) != null) {
+				List<Tag> list = tags.get(doc.getStudyId()).get(doc.getSubjectName());
+				if (list != null && !list.isEmpty()) {
+					doc.setTags(list.stream().map(Tag::getName).collect(Collectors.toList()));
+				}				
+			}
 		}
 
 		this.addAllToIndex(solrDocuments);
@@ -165,6 +167,7 @@ public class SolrServiceImpl implements SolrService {
 
 		// Get all associated datasets and index them to solr
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
+		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 		// Get tags

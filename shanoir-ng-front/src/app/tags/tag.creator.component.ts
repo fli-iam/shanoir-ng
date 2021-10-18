@@ -90,9 +90,11 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
     writeValue(obj: any): void {
         super.writeValue(obj);
         this.displayedTags = new Set();
-        (this.model as Tag[]).forEach(tag => 
-            this.displayedTags.add({tag: tag, used: this.tagUsed(tag), darkFont: this.getFontColor(tag.color)})
-        );
+        if (this.model) {
+            (this.model as Tag[]).forEach(tag => 
+                this.displayedTags.add({tag: tag, used: this.tagUsed(tag), darkFont: this.getFontColor(tag.color)})
+            );
+        }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
