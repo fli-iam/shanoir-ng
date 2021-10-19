@@ -41,6 +41,7 @@ import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -114,20 +115,15 @@ public class SolrServiceImpl implements SolrService {
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 
-		List<Long> studyIds = new ArrayList<>();
-		List<Long> subjectIds = new ArrayList<>();
-
 		while (docIt.hasNext()) {
 			ShanoirMetadata shanoirMetadata = docIt.next();
-			studyIds.add(shanoirMetadata.getStudyId());
-			subjectIds.add(shanoirMetadata.getSubjectId());
 
 			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 			solrDocuments.add(doc);
 		}
 
-		List<SubjectStudy> subjstuds = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(studyIds, subjectIds);
+		List<SubjectStudy> subjstuds = Utils.toList(subjectStudyRepo.findAll());
 
 		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
 
