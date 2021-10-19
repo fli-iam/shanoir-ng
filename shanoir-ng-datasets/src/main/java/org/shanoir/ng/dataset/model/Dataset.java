@@ -48,7 +48,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -246,9 +245,9 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the name
 	 */
 	public String getName() {
-		if (updatedMetadata != null && !StringUtils.isEmpty(updatedMetadata.getName())) {
+		if (updatedMetadata != null && !updatedMetadata.getName().isEmpty()) {
 			return updatedMetadata.getName();
-		} else if (!StringUtils.isEmpty(originMetadata.getName())) {
+		} else if (!originMetadata.getName().isEmpty()) {
 			return originMetadata.getName();
 		} else {
 			final StringBuilder result = new StringBuilder();

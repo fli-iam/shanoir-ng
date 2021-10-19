@@ -155,7 +155,7 @@ public class ImporterService {
     public static int getInstancesCreated() {
         return ImporterService.instancesCreated;
     }
-
+	
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
 		ShanoirEvent event = importJob.getShanoirEvent();
@@ -498,7 +498,6 @@ public class ImporterService {
 		}
 	}
 
-<<<<<<< HEAD
 	/**
 	 * Create a processed dataset dataset associated with a dataset processing.
 	 * @param importJob the import job from importer MS.
@@ -611,6 +610,5 @@ public class ImporterService {
 			throw e;
 		}
 	}
-=======
->>>>>>> develop
+	
 }
