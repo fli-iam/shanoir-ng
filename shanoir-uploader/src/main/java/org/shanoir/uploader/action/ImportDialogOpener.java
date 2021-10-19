@@ -111,8 +111,8 @@ public class ImportDialogOpener {
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
-		logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 		if (studies != null) {
+			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
 			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = getAllStudyCards(studies);
