@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
@@ -111,12 +114,44 @@ public class InitialStartupState implements State {
 		logger.info("Pseudonymus successfully copied.");
 	}
 
-	private void initProfiles() {
+	private void initProfiles() throws IOException {
 		initProperties(ShUpConfig.PROFILES_PROPERTIES, ShUpConfig.profilesProperties);
 		logger.info("profiles.properties successfully initialized.");
 		// iterate over list of profiles, create folder and copy 3 types of files if existing
 		String profilesStr = ShUpConfig.profilesProperties.getProperty(ShUpConfig.PROFILES_PROPERTY);
 		String[] profiles = profilesStr.split(",");
+		// check if the old profiles setup exists, named with -NG
+		boolean migrateProfiles = false;
+		for (int i = 0; i < profiles.length; i++) {
+			if (profiles[i].contains("-NG")) {
+				migrateProfiles = true;
+			}
+		}
+		if (migrateProfiles) {
+			logger.info("Profiles migration starts...");
+			logger.info("Deletion of all old profiles folders.");
+			for (int i = 0; i < profiles.length; i++) {
+				File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
+				if (profileDir.exists()) {
+					logger.info("Profile migration: deletion of old profile: " + profileDir.getAbsolutePath());
+					Files.walk(profileDir.toPath())
+				      .sorted(Comparator.reverseOrder())
+				      .map(Path::toFile)
+				      .forEach(File::delete);
+				}
+			}
+			logger.info("Deletion of old profiles.properties.");
+			File profilesPropertiesOld = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILES_PROPERTIES);
+			if (profilesPropertiesOld.exists()) {
+				profilesPropertiesOld.delete();
+			}
+			initProperties(ShUpConfig.PROFILES_PROPERTIES, ShUpConfig.profilesProperties);
+			logger.info("New profiles.properties successfully initialized with new profiles.");
+			profilesStr = ShUpConfig.profilesProperties.getProperty(ShUpConfig.PROFILES_PROPERTY);
+			profiles = profilesStr.split(",");
+			logger.info("Profiles migration finished...");
+		}
+		
 		for (int i = 0; i < profiles.length; i++) {
 			logger.info("Checking profile folder: " + profiles[i]);
 			File profileDir = new File(ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROFILE_DIR + profiles[i]);
