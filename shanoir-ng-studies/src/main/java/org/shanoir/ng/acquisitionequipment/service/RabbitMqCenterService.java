@@ -17,8 +17,6 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -40,16 +38,14 @@ public class RabbitMqCenterService {
 	private AcquisitionEquipmentRepository acquisitionEquipementService;
 
 	@Autowired
-	ObjectMapper mapper;
-
-	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqCenterService.class);
+	private ObjectMapper mapper;
 	
 	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE)
 	@RabbitHandler
 	@Transactional
 	public String findCenterIdFromAcquisitionEquipement(String message) {
 		try {
-			AcquisitionEquipment ae = acquisitionEquipementService.findOne(Long.valueOf(message));
+			AcquisitionEquipment ae = acquisitionEquipementService.findById(Long.valueOf(message)).orElse(null);
 			if (ae == null) {
 				return null;
 			} else {

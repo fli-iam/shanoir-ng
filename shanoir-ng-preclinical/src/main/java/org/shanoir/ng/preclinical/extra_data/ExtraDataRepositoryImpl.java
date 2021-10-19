@@ -30,13 +30,6 @@ public class ExtraDataRepositoryImpl implements ExtraDataRepositoryCustom<Examin
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<ExaminationExtraData> findBy(String fieldName, Object value) {
-		return em.createQuery("SELECT ex FROM ExaminationExtraData ex WHERE ex." + fieldName + " LIKE :value")
-				.setParameter("value", value).getResultList();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
 	public List<ExaminationExtraData> findAllByExaminationId(Long id) {
 		return em.createQuery("SELECT ex FROM ExaminationExtraData ex WHERE ex.examinationId" + " LIKE :id")
 				.setParameter("id", id).getResultList();

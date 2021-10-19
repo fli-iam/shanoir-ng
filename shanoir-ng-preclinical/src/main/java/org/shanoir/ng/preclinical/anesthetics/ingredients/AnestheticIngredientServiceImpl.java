@@ -41,14 +41,11 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 	private static final Logger LOG = LoggerFactory.getLogger(AnestheticIngredientServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private AnestheticIngredientRepository ingredientsRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		ingredientsRepository.delete(id);
+		ingredientsRepository.deleteById(id);
 	}
 
 	@Override
@@ -62,13 +59,8 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 	}
 
 	@Override
-	public List<AnestheticIngredient> findBy(final String fieldName, final Object value) {
-		return ingredientsRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public AnestheticIngredient findById(final Long id) {
-		return ingredientsRepository.findOne(id);
+		return ingredientsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -85,7 +77,7 @@ public class AnestheticIngredientServiceImpl implements AnestheticIngredientServ
 
 	@Override
 	public AnestheticIngredient update(final AnestheticIngredient ingredient) throws ShanoirException {
-		final AnestheticIngredient ingredientDb = ingredientsRepository.findOne(ingredient.getId());
+		final AnestheticIngredient ingredientDb = ingredientsRepository.findById(ingredient.getId()).orElse(null);
 		updateModelValues(ingredientDb, ingredient);
 		try {
 			ingredientsRepository.save(ingredientDb);

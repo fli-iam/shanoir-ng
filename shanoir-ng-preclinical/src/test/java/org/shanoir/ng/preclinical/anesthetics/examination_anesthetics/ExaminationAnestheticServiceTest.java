@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +61,7 @@ public class ExaminationAnestheticServiceTest {
 	public void setup() {
 		given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
 		given(examAnestheticRepository.findByExaminationId(1L)).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
-		given(examAnestheticRepository.findOne(EXAM_ANESTHETIC_ID)).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
+		given(examAnestheticRepository.findById(EXAM_ANESTHETIC_ID)).willReturn(Optional.of(AnestheticModelUtil.createExaminationAnesthetic()));
 		given(examAnestheticRepository.save(Mockito.any(ExaminationAnesthetic.class))).willReturn(AnestheticModelUtil.createExaminationAnesthetic());
 	}
 
@@ -68,7 +69,7 @@ public class ExaminationAnestheticServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		examAnestheticsService.deleteById(EXAM_ANESTHETIC_ID);
 
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(examAnestheticRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -86,7 +87,7 @@ public class ExaminationAnestheticServiceTest {
 		Assert.assertNotNull(examAnesthetic);
 		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
 		
-		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 	
 	@Test
@@ -121,7 +122,7 @@ public class ExaminationAnestheticServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
-		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
 */

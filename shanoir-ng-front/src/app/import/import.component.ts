@@ -32,13 +32,9 @@ export class ImportComponent {
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
-            private rightsService: StudyRightsService,
-            private route: ActivatedRoute) {
+            private rightsService: StudyRightsService) {
 
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
-        setTimeout(()=> {
-            this.importMode = this.getImportMode();
-        });
     }
 
     getImportMode(): ImportMode | '' {

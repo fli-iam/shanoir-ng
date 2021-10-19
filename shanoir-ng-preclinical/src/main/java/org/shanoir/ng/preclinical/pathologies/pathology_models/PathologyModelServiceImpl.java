@@ -41,14 +41,11 @@ public class PathologyModelServiceImpl implements PathologyModelService {
 	private static final Logger LOG = LoggerFactory.getLogger(PathologyModelServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private PathologyModelRepository modelsRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirException {
-		modelsRepository.delete(id);
+		modelsRepository.deleteById(id);
 	}
 
 	@Override
@@ -57,13 +54,8 @@ public class PathologyModelServiceImpl implements PathologyModelService {
 	}
 
 	@Override
-	public List<PathologyModel> findBy(final String fieldName, final Object value) {
-		return modelsRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public PathologyModel findById(final Long id) {
-		return modelsRepository.findOne(id);
+		return modelsRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -85,7 +77,7 @@ public class PathologyModelServiceImpl implements PathologyModelService {
 
 	@Override
 	public PathologyModel update(final PathologyModel model) throws ShanoirException {
-		final PathologyModel modelDb = modelsRepository.findOne(model.getId());
+		final PathologyModel modelDb = modelsRepository.findById(model.getId()).orElse(null);
 		updateModelValues(modelDb, model);
 		try {
 			modelsRepository.save(modelDb);

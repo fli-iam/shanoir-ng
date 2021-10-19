@@ -70,7 +70,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers =  BidsImporterApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class BidsImporterApiControllerTest {
 
 	private static final String IMPORT_AS_BIDS = "/bidsImporter/";

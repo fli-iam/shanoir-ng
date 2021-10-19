@@ -13,7 +13,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -29,10 +28,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ShanoirEventServiceTest {
 
 	@Autowired
-	public ShanoirEventService service;
+	private ShanoirEventService service;
 
-	@MockBean
-	RabbitTemplate template;
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Test
 	public void testAddTask() {
@@ -46,8 +45,8 @@ public class ShanoirEventServiceTest {
 		service.publishEvent(t);
 
 		// THEN the task is sent using RabbitMQ and sent to the front
-		ArgumentCaptor<String> argumentCatcher = new ArgumentCaptor();
-		Mockito.verify(template).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
+		ArgumentCaptor<String> argumentCatcher = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
 		String message = argumentCatcher.getValue();
 		assertNotNull(message);
 		assertTrue(message.contains(t.getId().toString()));

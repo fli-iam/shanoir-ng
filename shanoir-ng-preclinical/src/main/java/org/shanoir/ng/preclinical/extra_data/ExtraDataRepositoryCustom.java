@@ -25,8 +25,5 @@ import java.util.List;
 public interface ExtraDataRepositoryCustom<T> {
 	
 	 public List<T> findAllByExaminationId(Long id);
-	  
-	 public List<T> findBy(String fieldName, Object value);
-		
 
 }
