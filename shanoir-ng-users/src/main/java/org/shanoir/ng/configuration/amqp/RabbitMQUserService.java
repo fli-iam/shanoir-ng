@@ -86,7 +86,11 @@ public class RabbitMQUserService {
 		mapper.registerModule(new JavaTimeModule());
 		try {
 			DatasetImportEmail mail = mapper.readValue(generatedMailAsString, DatasetImportEmail.class);
-			this.emailService.notifyStudyManagerDataImported(mail);
+			if (mail.getErrorMessage() == null) {
+				this.emailService.notifyStudyManagerDataImported(mail);
+			} else {
+				this.emailService.notifyStudyManagerImportFailure(mail);
+			}
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);

@@ -60,9 +60,11 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.mail.ImportEmail;
+import org.shanoir.ng.shared.mail.ImportFailureEmail;
+import org.shanoir.ng.shared.mail.SuccessImportEmail;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.DatasetImportEmail;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -159,7 +161,6 @@ public class ImporterService {
 								rank++;
 							}
 							progress += 1f / study.getSeries().size();
-							// This message is important for email service
 							event.setMessage("Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId());
 							event.setProgress(progress);
 							eventService.publishEvent(event);
@@ -172,7 +173,7 @@ public class ImporterService {
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
-			// This message is important for email service
+
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
 					+": Successfully created datasets for subject " + importJob.getSubjectName()
 					+ " in examination " + examination.getId());
@@ -218,6 +219,10 @@ public class ImporterService {
 			event.setProgress(1f);
 			eventService.publishEvent(event);
 			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
+			
+			// Send mail
+			sendFailureMail(importJob, userId, e.getMessage());
+			
 			throw new ShanoirException(event.getMessage(), e);
 		}
 	}
@@ -230,7 +235,7 @@ public class ImporterService {
 	 * @param generatedAcquisitions
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
-		DatasetImportEmail generatedMail = new DatasetImportEmail();
+		SuccessImportEmail generatedMail = new SuccessImportEmail();
 		generatedMail.setExamDate(examination.getExaminationDate().toString());
 		generatedMail.setExaminationId(examination.getId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
@@ -253,28 +258,50 @@ public class ImporterService {
 		}
 
 		generatedMail.setDatasets(datasets);
+		sendMail(importJob, generatedMail);
+	}
+
+	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+		ImportFailureEmail generatedMail = new ImportFailureEmail();
+		generatedMail.setExaminationId(importJob.getExaminationId().toString());
+		generatedMail.setStudyId(importJob.getStudyId().toString());
+		generatedMail.setSubjectName(importJob.getSubjectName());
+		generatedMail.setStudyName(importJob.getStudyName());
+		generatedMail.setUserId(userId);
+		
+		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
+
+		sendMail(importJob, generatedMail);
+	}
+
+	/**
+	 * Sends the given mail in entry to all recipients in a given study
+	 * @param job the imprt job
+	 * @param email the recipients
+	 */
+	private void sendMail(ImportJob job, ImportEmail email) {
 		List<Long> recipients = new ArrayList<>();
 
 		// Get all recpients
-		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
 		for (StudyUser user : users) {
 			if (user.isReceiveNewImportReport()) {
 				recipients.add(user.getUserId());
 			}
 		}
 		if (recipients.isEmpty()) {
-			// Do not send any mail if no recpients
+			// Do not send any mail if no recipients
 			return;
 		}
-		generatedMail.setRecipients(recipients);
+		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(generatedMail));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}
 	}
-
+	
 	public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
 		if (checkSerieForDicomImages(serie)) {
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);

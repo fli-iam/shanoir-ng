@@ -59,6 +59,8 @@ public class EmailServiceImpl implements EmailService {
 	
 	private static final String EXAMINATION = "examination";
 	
+	private static final String FAILURE_MESSAGE = "failureMessage";
+	
 	private static final String EXAM_DATE = "exam_date";
 
 	private static final String STUDY_CARD = "study_card";
@@ -408,7 +410,6 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(STUDY_CARD, generatedMail.getStudyCard());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
-				LOG.error(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
@@ -416,6 +417,44 @@ public class EmailServiceImpl implements EmailService {
 			mailSender.send(messagePreparator);
 		}
 	}
+
+	@Override
+	public void notifyStudyManagerImportFailure(DatasetImportEmail generatedMail) {
+        // Find user that imported
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+		for (User admin : admins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(USERNAME, u.getUsername());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SUBJECT, generatedMail.getSubjectName());
+				variables.put(EXAMINATION, examDetail);
+				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminImportFailed", variables);
+				LOG.error(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			mailSender.send(messagePreparator);
+		}
+	}
+
 
 	private class DatasetDetail {
 		private String url;
