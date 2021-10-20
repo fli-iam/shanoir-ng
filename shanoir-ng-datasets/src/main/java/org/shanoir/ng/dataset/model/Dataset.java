@@ -321,13 +321,9 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@Transient
 	public Long getStudyId() {
-<<<<<<< HEAD
-		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return this.studyId;
-=======
 		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
 			return null;
 		}
->>>>>>> develop
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
 

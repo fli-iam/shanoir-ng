@@ -15,6 +15,7 @@
 package org.shanoir.ng.processing.controler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -70,11 +71,11 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
 			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		
-		final DatasetProcessing datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-		if (datasetProcessing == null) {
+		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		if (!datasetProcessing.isPresent()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing), HttpStatus.OK);
+		return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing.get()), HttpStatus.OK);
 	}
 
 	@Override
@@ -89,16 +90,16 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
 			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-		final DatasetProcessing datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-		List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
+		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
 			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-		final DatasetProcessing datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-		List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
+		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+		List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
 	}
 

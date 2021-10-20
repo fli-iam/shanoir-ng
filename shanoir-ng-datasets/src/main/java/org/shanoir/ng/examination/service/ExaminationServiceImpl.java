@@ -69,7 +69,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
-		if (examinationOpt.isEmpty()) {
+		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
 		}
 		Long tokenUserId = KeycloakUtil.getTokenUserId();

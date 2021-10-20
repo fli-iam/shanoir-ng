@@ -145,11 +145,8 @@ public class ImporterService {
 	
 	private static int instancesCreated = 0;
 
-<<<<<<< HEAD
 	private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
 
-	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-=======
     //This constructor will be called everytime a new bean instance is created
     public ImporterService(){
         instancesCreated++;
@@ -158,7 +155,6 @@ public class ImporterService {
     public static int getInstancesCreated(){
         return ImporterService.instancesCreated;
     }
->>>>>>> develop
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
@@ -587,6 +583,7 @@ public class ImporterService {
 			File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
 			try {
+				destFile.getParentFile().mkdirs();
 				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				LOG.error("IOException generating Processed Dataset Expression", e);
@@ -595,6 +592,7 @@ public class ImporterService {
 			// Fill dataset with informations
 			dataset.setCreationDate(LocalDate.now());
 			dataset.setOriginMetadata(originMetadata);
+			dataset.setUpdatedMetadata(dataset.getOriginMetadata());
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 
