@@ -171,7 +171,10 @@ public class ImporterService {
 				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
 			
-			throw new IllegalAccessException("Julien Test : exception during import");
+			int a = 0;
+			if (a == 0) {
+				throw new IllegalAccessException("Julien Test : exception during import");				
+			}
 
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
