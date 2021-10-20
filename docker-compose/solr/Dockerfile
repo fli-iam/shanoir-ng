@@ -12,8 +12,11 @@
 
 FROM solr:8.1
 
-RUN mkdir /tmp/shanoir-core
+USER root
+RUN mkdir -p /etc/shanoir-core-template
+RUN chown solr:solr /etc/shanoir-core-template
+USER solr
 
-COPY ./core /tmp/shanoir-core/
+COPY ./core /etc/shanoir-core-template
 
-CMD ["solr-precreate", "shanoir", "/tmp/shanoir-core"]
+CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
