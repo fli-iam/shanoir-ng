@@ -58,6 +58,9 @@ export class StudyNodeComponent implements OnChanges {
                     let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight)));
                     return new MemberNode(studyUser.userId, studyUser.userName, rights);
                 });
+                members.sort(function(a, b) {
+                    return a.label > b.label ? 1 : -1;
+                });
 
                 this.node = new StudyNode(
                         this.input.id,
@@ -65,7 +68,8 @@ export class StudyNodeComponent implements OnChanges {
                         subjects,
                         centers,
                         UNLOADED,
-                        members);  // members    
+                        members
+                        );
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/study/details/' + this.node.id;
