@@ -40,6 +40,7 @@ import { StudyService } from '../shared/study.service';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 @Component({
     selector: 'study-detail',
@@ -49,7 +50,9 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 })
 
 export class StudyComponent extends EntityComponent<Study> {
-    
+
+    @ViewChild('DUAprogressBar') DUAprogressBar: LoadingBarComponent;
+    @ViewChild('PFprogressBar') PFprogressBar: LoadingBarComponent;
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
@@ -191,6 +194,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
+            'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': []
@@ -227,6 +231,7 @@ export class StudyComponent extends EntityComponent<Study> {
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
+        study.tags = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;
@@ -484,7 +489,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadFile(file, this.study.id, 'protocol-file');
+        this.studyService.downloadFile(file, this.study.id, 'protocol-file', this.PFprogressBar);
     }
 
     public attachNewFile(event: any) {
@@ -507,7 +512,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadDataUserAgreement() {
-        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua');
+        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua', this.DUAprogressBar);
     }
 
     public attachDataUserAgreement(event: any) {
@@ -590,5 +595,9 @@ export class StudyComponent extends EntityComponent<Study> {
    
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
+    }
+
+    onTagListChange() {
+        this.study.tags = [].concat(this.study.tags); // hack : force change detection
     }
 }

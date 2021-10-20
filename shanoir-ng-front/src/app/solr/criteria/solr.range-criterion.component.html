@@ -1,0 +1,25 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="title">
+    {{label}}
+    <span *ngIf="!open" class="colapse" (click)="open = true"><i class="fas fa-chevron-down"></i></span>
+    <span *ngIf="open" class="colapse" (click)="open = false"><i class="fas fa-chevron-up"></i></span>
+</div>
+<div class="body content" *ngIf="open" @slideDown>
+    <span>from : </span>
+    <input type="number" [(ngModel)]="range.lowerBound" (change)="change()"/>
+    <span>to : </span>
+    <input type="number" [(ngModel)]="range.upperBound" (change)="change()"/>
+</div>

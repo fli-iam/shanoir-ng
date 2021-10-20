@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
-		final User userDb = userRepository.findOne(user.getId());
+		final User userDb = userRepository.findById(user.getId()).orElse(null);
 		if (userDb == null) {
 			LOG.error("User with id {} not found", user.getId());
 			throw new EntityNotFoundException(User.class, user.getId());
@@ -107,18 +107,18 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		final User user = userRepository.findOne(id);
+		final User user = userRepository.findById(id).orElse(null);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
 		}
-		userRepository.delete(id);
+		userRepository.deleteById(id);
 		publisher.publishEvent(new UserDeleteEvent(id));
 		keycloakClient.deleteUser(user.getKeycloakId());
 	}
 
 	@Override
 	public void denyAccountRequest(final Long userId) throws EntityNotFoundException, AccountNotOnDemandException {
-		final User user = userRepository.findOne(userId);
+		final User user = userRepository.findById(userId).orElse(null);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
 		}
 		if (user.isAccountRequestDemand() != null && user.isAccountRequestDemand()) {
 			// Remove user
-			userRepository.delete(userId);
+			userRepository.deleteById(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
 			// Send emails
 			emailService.notifyAccountRequestDenied(user);
@@ -148,6 +148,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<User> findAccountRequests() {
+		return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
+	}
+
+	@Override
 	public Optional<User> findByEmail(final String email) {
 		return userRepository.findByEmail(email);
 	}
@@ -159,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findById(final Long id) {
-		return userRepository.findOne(id);
+		return userRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -188,7 +193,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException {
-		final User user = userRepository.findOne(userId);
+		final User user = userRepository.findById(userId).orElse(null);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}
@@ -252,7 +257,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User update(final User user) throws EntityNotFoundException {
-		final User userDb = userRepository.findOne(user.getId());
+		final User userDb = userRepository.findById(user.getId()).orElse(null);
 		if (userDb == null) {
 			throw new EntityNotFoundException(User.class, user.getId());
 		}

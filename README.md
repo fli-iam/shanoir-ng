@@ -11,9 +11,9 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 # :warning: Disclaimers :warning:
 
-* The latest version of Shanoir-NG is currently on the branch "develop".
-
-* You can find the installation instruction for "develop" branch below.
+* The latest stable version of Shanoir-NG is on the branch "master".
+* The latest dev version of Shanoir-NG is on "develop" (if mature -> merged into master)
+* You can find the installation instructions for "master" branch below.
 
 * Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
 
@@ -76,11 +76,11 @@ Please note, that the MS Users does for security reasons not publicly expose his
 # Requirements
 
 To build and deploy Shanoir, you will need:
+* Java 8 (very soon 11, after Spring Boot 2 Migration)
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
-* jdk 8
 * maven 3
-* at least 6GB of available RAM
+* at least 10GB of available RAM
 
 # Installation of Shanoir NG
 

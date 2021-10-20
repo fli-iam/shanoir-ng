@@ -107,6 +107,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-container>
 					</span>
 				</li>
+				<label>Studies</label>
+				<li *ngFor="let study of studies; let index = index">
+					<label></label>
+					<span class="right-col">{{study.name + '(' + study.id + ')'}}</span>
+				</li>
 			</ol>
 		</fieldset>
 

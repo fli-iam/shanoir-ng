@@ -16,12 +16,13 @@ package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -32,12 +33,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,23 +59,18 @@ public class EmailServiceTest {
 	private static final String NEW_PASSWORD = "testPwd";
 	
 	@Autowired
-	private EmailServiceImpl emailService;
+	private EmailService emailService;
 	
-	public GreenMail greenMail;
-	
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
+	private GreenMail greenMail;
 	
 	@MockBean
 	private UserRepository userRepositoryMock;
-
 	
 	@Before
 	public void initGreenMail() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);
 		greenMail.start();
-		
 		given(userRepositoryMock.findAdminEmails()).willReturn(Arrays.asList(new String[]{"admin@test.shanoir.fr"}));
 	}
 	
@@ -148,28 +141,22 @@ public class EmailServiceTest {
 	@Test
 	public void testNotifyStudyManagerDataImported() throws IOException, MessagingException {
 		// GIVEN a list of administrators to contact
-		ShanoirEvent event = new ShanoirEvent();
-		User value = new User();
-		value.setUsername("username");
-		Mockito.when(userRepositoryMock.findOne(anyLong())).thenReturn(value);
-
-		event.setMessage("StudyName(12)"
-		+": Successfully created datasets for subject SubjectName"
-		+ " in examination 23");
-		
-		List<Long> admins = Collections.singletonList(Long.valueOf(13));
-
+		User user = new User();
+		user.setUsername("username");
+		user.setEmail("email@email.com");
+		Mockito.when(userRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(user));
+		Mockito.when(userRepositoryMock.findAllById(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
 		// send back a list of administrators
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, "12")).thenReturn(admins );
-		User admin = new User();
-		admin.setLastName("lastname");
-		admin.setFirstName("firstName");
-		admin.setEmail("admin@test.shanoir.fr");
-		given(userRepositoryMock.findOne(13L)).willReturn(admin );
-
-		// WHEN we receive an event with elements stating that data was imported successfuly
-		emailService.notifyStudyManagerDataImported(event, null);
-		
+		DatasetImportEmail mail = new DatasetImportEmail();
+		mail.setStudyName("StudyName");
+		mail.setStudyId("12");
+		mail.setUserId(1L);
+		mail.setRecipients(Arrays. asList(1L));
+		Map<Long, String> datasets = new HashMap<>();
+		datasets.put(1L, "test");
+		mail.setDatasets(datasets);
+		// WHEN we receive an event with elements stating that data was imported successfully
+		emailService.notifyStudyManagerDataImported(mail);
 		// THEN an email is sent to the administrators
 		assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
 	}

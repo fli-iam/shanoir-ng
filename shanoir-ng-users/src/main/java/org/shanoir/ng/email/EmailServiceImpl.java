@@ -15,15 +15,11 @@
 package org.shanoir.ng.email;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.shanoir.ng.events.ShanoirEvent;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -63,6 +59,10 @@ public class EmailServiceImpl implements EmailService {
 	
 	private static final String EXAMINATION = "examination";
 	
+	private static final String EXAM_DATE = "exam_date";
+
+	private static final String STUDY_CARD = "study_card";
+
 	private static final String SERIES = "series";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
@@ -371,67 +371,66 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerDataImported(ShanoirEvent event, List<String> series) {
-		// Build the message
-		String message = event.getMessage();
-		
-		String patternStr = "(.*)\\((\\d+)\\)\\: Successfully created datasets for subject (.*) in examination (\\d+)";
-        Pattern pattern = Pattern.compile(patternStr);
-        Matcher matcher = pattern.matcher(message);
-        if (!matcher.find()) {
-        	return;
-        }
-
-        String studyName =matcher.group(1);
-        String studyId =matcher.group(2);
-        String subjectName =matcher.group(3);
-
+	public void notifyStudyManagerDataImported(DatasetImportEmail generatedMail) {
         // Find user that imported
-        User u = userRepository.findOne(event.getUserId());
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 
-		// Here call a study microservice (with a cache ? replicated ?)
-		List<Long> admins = this.getStudyAdministrator(studyId);
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
 		
-		for (Long id : admins) {
-			User admin = userRepository.findOne(id);
-			
+		List<DatasetDetail> datasetLinks = new ArrayList<>();
+		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
+			DatasetDetail detail = new DatasetDetail();
+			detail.setName(dataset.getValue());
+			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
+			datasetLinks.add(detail);
+		}
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+		for (User admin : admins) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
 				messageHelper.setTo(admin.getEmail());
-				messageHelper.setSubject("[Shanoir] Data imported to " + studyName);
+				messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
 				variables.put(LASTNAME, admin.getLastName());
 				variables.put(FIRSTNAME, admin.getFirstName());
 				variables.put(USERNAME, u.getUsername());
-				variables.put(STUDY_NAME, studyName);
-				variables.put(SUBJECT, subjectName);
-				variables.put(SERIES, series);
-				variables.put(EXAMINATION, event.getObjectId());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SUBJECT, generatedMail.getSubjectName());
+				variables.put(SERIES, datasetLinks);
+				variables.put(EXAMINATION, examDetail);
+				variables.put(EXAM_DATE, generatedMail.getExamDate());
+				variables.put(STUDY_CARD, generatedMail.getStudyCard());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
+				LOG.error(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
-			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), studyId);
+			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
 			mailSender.send(messagePreparator);
 		}
-		
 	}
 
-	/**
-	 * This methods call Study Microservice to get administrator users IDs for the thing
-	 * @param studyId
-	 * @return
-	 */
-	public List<Long> getStudyAdministrator(String studyId) {
-		try {
-			List<Long> response =  (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.USER_ADMIN_STUDY_QUEUE, studyId);
-			return response;
-		} catch (Exception e) {
-			// Cannot get administrators, return empty list
-			LOG.error("Could not get study administrator. No mails will be sent.", e);
-			return Collections.emptyList();
+	private class DatasetDetail {
+		private String url;
+		private String name;
+		public String getUrl() {
+			return url;
+		}
+		public void setUrl(String url) {
+			this.url = url;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 }

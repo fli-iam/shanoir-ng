@@ -4,15 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +54,7 @@ import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -87,11 +90,15 @@ public class ImporterServiceTest {
 
 	@Mock
 	private ShanoirEventService taskService;
+	
+	@Mock
+	StudyUserRightsRepository studyUserRightRepo;
 
 	@Before
 	public void setUp() throws IOException {
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
+        given(examinationService.findById(Mockito.anyLong())).willReturn(new Examination());
 	}
 
 	@Test
@@ -196,17 +203,20 @@ public class ImporterServiceTest {
 		ImportJob importJob = new ImportJob();
 		importJob.setPatients(patients );
 		importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
-		importJob.setExaminationId(Long.valueOf(1));
+		importJob.setExaminationId(Long.valueOf(2));
 		importJob.setSubjectName("subjectName");
 		importJob.setStudyName("studyName");
 		importJob.setStudyId(1L);
+		importJob.setStudyCardName("SCname");
 		importJob.setShanoirEvent(new ShanoirEvent());
 		
 		Examination examination = new Examination();
 		examination.setId(2L);
-		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
+		examination.setExaminationDate(LocalDate.now());
+		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
+		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
+		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 		
 		// WHEN we treat this importjob
 		service.createAllDatasetAcquisition(importJob, 1L);

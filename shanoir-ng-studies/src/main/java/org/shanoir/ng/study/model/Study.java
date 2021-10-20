@@ -16,6 +16,7 @@ package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -43,6 +44,7 @@ import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -86,7 +88,7 @@ public class Study extends HalEntity {
 	@ElementCollection
 	@CollectionTable(name = "study_examination")
 	@Column(name = "examination_id")
-	private List<Long> examinationIds;
+	private Set<Long> examinationIds;
 
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
@@ -148,6 +150,9 @@ public class Study extends HalEntity {
 	private boolean withExamination;
 
 	private boolean challenge;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Tag> tags;
 
 	/**
 	 * Init HATEOAS links
@@ -220,7 +225,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the examinationIds
 	 */
-	public List<Long> getExaminationIds() {
+	public Set<Long> getExaminationIds() {
 		return examinationIds;
 	}
 
@@ -228,7 +233,7 @@ public class Study extends HalEntity {
 	 * @param examinationIds
 	 *            the examinationIds to set
 	 */
-	public void setExaminationIds(List<Long> examinationIds) {
+	public void setExaminationIds(Set<Long> examinationIds) {
 		this.examinationIds = examinationIds;
 	}
 
@@ -460,5 +465,19 @@ public class Study extends HalEntity {
 	 */
 	public void setChallenge(boolean challenge) {
 		this.challenge = challenge;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
 	}
 }

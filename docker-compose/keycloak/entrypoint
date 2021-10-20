@@ -34,7 +34,9 @@ export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
 
 require  SHANOIR_MIGRATION
 oneshot=
-extra=()
+extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
+       "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
+
 case "$SHANOIR_MIGRATION" in
 auto)
 	# create the shanoir-ng realm if it does not exist yet

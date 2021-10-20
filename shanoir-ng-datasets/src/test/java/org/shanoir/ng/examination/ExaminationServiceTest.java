@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,6 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
@@ -39,6 +41,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 
@@ -64,7 +67,7 @@ public class ExaminationServiceTest {
 	@Mock
 	private MicroserviceRequestsService microservicesRequestsService;
 
-	@Mock
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
@@ -73,11 +76,14 @@ public class ExaminationServiceTest {
 	@MockBean
 	private StudyRightsService rightsService;
 
+	@Mock
+	private ShanoirEventService eventService;
+
 	@Before
 	public void setup() throws ShanoirException {
 		// given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
 		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
-		given(examinationRepository.findOne(EXAMINATION_ID)).willReturn(ModelsUtil.createExamination());
+		given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
 		given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(ModelsUtil.createExamination())));
 
@@ -89,7 +95,7 @@ public class ExaminationServiceTest {
 	public void deleteByIdTest() throws ShanoirException {
 		examinationService.deleteById(EXAMINATION_ID);
 
-		Mockito.verify(examinationRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test

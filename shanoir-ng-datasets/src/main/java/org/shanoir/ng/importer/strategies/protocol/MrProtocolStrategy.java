@@ -48,7 +48,8 @@ public class MrProtocolStrategy {
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
 	public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {
-		if (Boolean.TRUE.equals(serie.getIsEnhancedMR())) {
+		// dcm4che3 does not support MultiframeExtraction for MRS
+		if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
 			// MultiFrameExtractor is only used in case of EnhancedMR MRI.
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
@@ -59,7 +60,7 @@ public class MrProtocolStrategy {
 		mrProtocol.setOriginMetadata(mrProtocolMetadata);
 
 		// Imaged nucleus
-		final ImagedNucleus imagedNucleus = getImagedNucleus(attributes, serie.getIsEnhancedMR());
+		final ImagedNucleus imagedNucleus = getImagedNucleus(attributes, serie.getIsEnhanced());
 		if (imagedNucleus != null) {
 			LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
 			mrProtocol.setImagedNucleus(imagedNucleus);
@@ -74,6 +75,11 @@ public class MrProtocolStrategy {
 		final Double imagingFrequency = attributes.getDouble(Tag.ImagingFrequency, 0);
 		LOG.debug("extractMetadata : imagingFrequency=" + imagingFrequency);
 		mrProtocol.setImagingFrequency(imagingFrequency);
+
+		// Magnetic field strength
+		final Double magneticFieldStrength = attributes.getDouble(Tag.MagneticFieldStrength, 0);
+		LOG.debug("extractMetadata : magneticFieldStrength=" + magneticFieldStrength);
+		mrProtocol.setMagneticFieldStrength(magneticFieldStrength);
 
 		// Acquisition duration
 		final Double acquisitionDuration = attributes.getDouble(Tag.AcquisitionDuration, 0);
@@ -117,7 +123,7 @@ public class MrProtocolStrategy {
 		mrProtocol.setSliceSpacing(sliceSpacing);
 
 		// Acquisition Resolution X & Y
-		final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(attributes, serie.getIsEnhancedMR());
+		final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(attributes, serie.getIsEnhanced());
 		if (acquisitionMatrixDimension != null && acquisitionMatrixDimension.length == 2) {
 			final Integer acquisitionResolutionX = acquisitionMatrixDimension[0];
 			final Integer acquisitionResolutionY = acquisitionMatrixDimension[1];
@@ -145,7 +151,7 @@ public class MrProtocolStrategy {
 			mrProtocol.setFovY(fovY);
 		}
 
-		if (serie.getIsEnhancedMR()) {
+		if (serie.getIsEnhanced()) {
 			Integer acquisitionResolutionX = null;
 			Integer acquisitionResolutionY = null;
 			final String inPlanePhaseEncodingDirection = attributes.getString(Tag.InPlanePhaseEncodingDirection);
@@ -381,7 +387,7 @@ public class MrProtocolStrategy {
 		}
 
 		// K-Space fill
-		mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(attributes, serie.getIsEnhancedMR()));
+		mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(attributes, serie.getIsEnhanced()));
 
 		return mrProtocolMetadata;
 	}

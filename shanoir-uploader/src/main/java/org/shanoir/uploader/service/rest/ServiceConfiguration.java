@@ -93,7 +93,7 @@ public class ServiceConfiguration {
 				&& !ShUpConfig.proxyProperties.getProperty("proxy.test.url").equals("")) {
 			return (ShUpConfig.proxyProperties.getProperty("proxy.test.url"));
 		} else {
-			return "https://shanoir.irisa.fr/Shanoir/login.seam";
+			return "https://shanoir.irisa.fr";
 		}
 	}
 

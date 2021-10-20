@@ -146,7 +146,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li *ngIf="mode == 'view'">
 						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
-						<span class="right-col">
+						<div [hidden]="DUAprogressBar.progress == 0">
+                            <progress-bar #DUAprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
+                        <span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
 								{{study.dataUserAgreementPaths[0]}}
 								<button class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
@@ -185,7 +188,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view'">
+			<fieldset *ngIf="mode !== 'view' && study?.subjectStudyList">
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
@@ -240,6 +243,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
+                        <div [hidden]="PFprogressBar.progress == 0">
+                            <progress-bar #PFprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
                                 <ul>
@@ -277,6 +283,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
 						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
+            <fieldset *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+                <legend>Study tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+            </fieldset>
             <fieldset *ngIf="mode == 'view'">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id"></bids-tree>

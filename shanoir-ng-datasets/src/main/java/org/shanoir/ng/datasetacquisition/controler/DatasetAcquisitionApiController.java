@@ -105,7 +105,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Transactional
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
 		Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
-
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, userId);
@@ -120,6 +119,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 	
 	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
+		LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
 		long startTime = System.currentTimeMillis();
 		importerService.createAllDatasetAcquisition(importJob, userId);
 		long endTime = System.currentTimeMillis();
@@ -148,7 +148,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 			@Override
 			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return o1.getSortingIndex() - o2.getSortingIndex();
+				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
+						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
 			}
 		});
 		if (daList.isEmpty()) {

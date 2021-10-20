@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-keycloak-auth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-keycloak-auth</name>
@@ -26,7 +26,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<keycloak.version>4.6.0.Final</keycloak.version>
+		<java.version>11</java.version>
+		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
+		<keycloak.version>13.0.1</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -47,16 +49,53 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>${keycloak.version}</version>
 		</dependency>
 
+		<!-- Jboss -->
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>${jboss.logging.version}</version>
+		</dependency>
+
+		<!-- IPAddress -->
+		<dependency>
+			<groupId>com.github.seancfoley</groupId>
+			<artifactId>ipaddress</artifactId>
+			<version>5.3.3</version>
+		</dependency>
+
 		<!-- HttpClient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.3</version>
+			<version>4.5.13</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptor>install.xml</descriptor>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -66,7 +105,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<copy file="target/${project.build.finalName}.jar"
+								<copy file="target/${project.build.finalName}-install.jar"
 									tofile="${basedir}/../docker-compose/keycloak/${project.artifactId}.jar" />
 								<copy file="../utils/entrypoint_common"
 									tofile="${basedir}/../docker-compose/keycloak/entrypoint_common" />

@@ -40,8 +40,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import groovyjarjarcommonscli.MissingArgumentException;
-
 /**
  * This class does the user(s) management for Shanoir-NG in relation with
  * Keycloak and its dedicated microservice. This class reads command line
@@ -151,7 +149,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		}
 	}
 
-	private void initKeycloakAdminClient() throws MissingArgumentException {
+	private void initKeycloakAdminClient() {
 			keycloak = Keycloak.getInstance(
 				kcAdminClientServerUrl,
 				kcAdminClientRealm,

@@ -21,7 +21,7 @@ import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
-
+import { Tag } from '../../tags/tag.model'
 
 export class Study extends Entity {
     clinical: boolean;
@@ -47,6 +47,7 @@ export class Study extends Entity {
     visibleByDefault: boolean;
     withExamination: boolean;
     studyCardList: StudyCard[];
+    tags: Tag[];
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
@@ -82,6 +83,7 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
+    tags: Tag[];
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -110,5 +112,6 @@ export class StudyDTO {
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
+        this.tags = study.tags;
     }
 }

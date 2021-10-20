@@ -1,7 +1,7 @@
 /**********/
 /* Common */
 /**********/
-:root{
+:root {
     --very-light-grey: #fdfdfd;
     --lighter-grey: #fafafa;
     --light-grey: #f1f1f1;
@@ -25,6 +25,10 @@
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
+    
+    --instance-name: "SHANOIR_INSTANCE_NAME";
+    --instance-color: SHANOIR_INSTANCE_COLOR;
+    --user-color:     SHANOIR_USER_COLOR;
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }
@@ -39,8 +43,6 @@ ul { padding: 0; }
 li { list-style: none; } 
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
-a:link, a:visited { color: inherit; text-decoration: none; }
-a:hover, a:active { color: var(--color-a); text-decoration: none; }
 a:hover { cursor: pointer; }
 
 
@@ -76,6 +78,8 @@ input, select, select-box, datepicker {
 input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
+input[type="color"] { border: none !important; cursor: pointer; }
+
 input.ng-invalid.ng-touched,
 select.ng-invalid.ng-touched,
 select-box.ng-invalid.ng-touched,
@@ -109,7 +113,7 @@ form { color: var(--dark-grey); position: relative; }
     form fieldset li input,
     form fieldset li select,
     form fieldset li button { height: 21px; }
-    form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 473px; border-radius: 2px; }
+    form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 440px; border-radius: 2px; }
       form li.info i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { }
@@ -188,3 +192,5 @@ form { color: var(--dark-grey); position: relative; }
     .cat img { display:inline-block; height: 100px; }
 
 node node { margin-left: 18px; }
+
+.link { cursor: pointer; }

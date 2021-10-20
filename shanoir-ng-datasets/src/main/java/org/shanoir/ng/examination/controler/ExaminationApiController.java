@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +35,6 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -83,9 +82,6 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	StudyRepository studyRepository;
-	
-	@Autowired
-	ExaminationRepository examinationRepository;
 
 	private final HttpServletRequest request;
 
@@ -100,7 +96,8 @@ public class ExaminationApiController implements ExaminationApi {
 					throws RestServiceException {
 		try {
 			// delete bids folder
-			bidsService.deleteExam(examinationId);
+			Examination exam = this.examinationService.findById(examinationId);
+			bidsService.deleteExam(exam);
 			
 			// Delete extra data
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
@@ -108,10 +105,12 @@ public class ExaminationApiController implements ExaminationApi {
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-
+			
+			Long studyId = exam.getStudyId();
+			
 			examinationService.deleteById(examinationId);
 			
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" +studyId, ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -165,7 +164,7 @@ public class ExaminationApiController implements ExaminationApi {
 		
 		// TODO: Get all related datasets to the subject/study
 		// Load study-dataset association (dataset database)
-		Study study = studyRepository.findOne(studyId);
+		Study study = studyRepository.findById(studyId).orElse(null);
 		
 		List<Dataset> relatedDatasets = study.getRelatedDatasets();
 		if (relatedDatasets != null && !relatedDatasets.isEmpty()) {
@@ -179,7 +178,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 			// Load examinations linked to the study of the datasets
 			for (Long relatedStudyId : studyIds) {
-				relatedExams.addAll(examinationRepository.findBySubjectIdAndStudyId(subjectId, relatedStudyId));
+				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
 			}
 			
 			Set<Examination> examsToKeep = new HashSet<>();
@@ -230,7 +229,8 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+		// NB: Message as studyID is important in RabbitMQStudiesService
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
@@ -286,6 +286,7 @@ public class ExaminationApiController implements ExaminationApi {
 		try (InputStream is = new FileInputStream(fileToDownLoad);) {
 			response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
 			response.setContentType(contentType);
+			response.setContentLengthLong(fileToDownLoad.length());
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}
@@ -315,7 +316,12 @@ public class ExaminationApiController implements ExaminationApi {
 				// Rank is never null
 				Integer aIndex = o1.getSortingIndex() != null ? o1.getSortingIndex() : o1.getRank();
 				Integer bIndex = o2.getSortingIndex() != null ? o2.getSortingIndex() : o2.getRank();
-
+				if (aIndex == null) {
+					aIndex = 0;
+				}
+				if (bIndex == null) {
+					bIndex = 0;
+				}
 				return aIndex - bIndex;
 			}
 		});

@@ -11,8 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
 
 import { AppRoutingModule } from './app-routing.module';
 import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
@@ -38,6 +36,7 @@ import { ManufacturerService } from './acquisition-equipments/shared/manufacture
 import { AppComponent } from './app.component';
 // import { routing } from './app.routing';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { EventTypePipe } from './async-tasks/event.pipe';
 import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -216,11 +215,6 @@ import { ContrastAgentService }      from './preclinical/contrastAgent/shared/co
 import { AnimalExaminationFormComponent }      from './preclinical/examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './preclinical/examination/list/animal-examination-list.component';
 import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
-import { ExtraDataListComponent }      from './preclinical/extraData/extraData/list/extradata-list.component';
-import { ExtraDataFormComponent }      from './preclinical/extraData/extraData/edit/extradata-form.component';
-import { ExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
-import { PhysiologicalDataFormComponent }      from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
-import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 // import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
@@ -232,6 +226,14 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
+import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
+import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
+import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
+import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { TagCreatorComponent } from './tags/tag.creator.component';
+import { TagInputComponent } from './tags/tag.input.component';
 
 @NgModule({
     imports: [
@@ -367,9 +369,7 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
     	AnimalExaminationFormComponent,
     	AnimalExaminationListComponent,
     	FileUploadComponent,
-    	ExtraDataFormComponent,
     	PhysiologicalDataFormComponent,
-    	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent, 
@@ -388,7 +388,15 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
         ReverseSubjectNodeComponent,
         ReverseStudyNodeComponent,
         DUAComponent,
-        DUASigningComponent
+        DUASigningComponent,
+        EventTypePipe,
+        SolrCriterionComponent,
+        SolrTextSearchComponent,
+        ChallengeBlockComponent,
+        TagCreatorComponent,
+        SolrRangeCriterionComponent,
+        ChallengeBlockComponent,
+        TagInputComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -440,7 +448,6 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
     	AnestheticIngredientService,
     	ExaminationAnestheticService,
     	ContrastAgentService,
-        ExtraDataService,
         AnimalExaminationService,
         AnestheticService,
     	ImportBrukerService,

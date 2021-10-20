@@ -13,6 +13,7 @@
  */
 
 import { Page } from "../shared/components/table/pageable.model";
+import { Range } from "../shared/models/range.model";
 
 export class SolrDocument {
     datasetId: string;
@@ -21,6 +22,8 @@ export class SolrDocument {
     datasetNature: string;
     datasetCreationDate: Date;
     examinationComment: string;
+    centerName: string;
+    tags: string;
     examinationDate: Date;
     subjectName: string;
     studyName: string;
@@ -32,27 +35,32 @@ export class SolrRequest {
     studyName: string[];
     subjectName: string[];
     examinationComment: string[];
+    centerName: string[];
     datasetName: string[];
     datasetStartDate: Date;
     datasetEndDate: Date;
     datasetType: string[];
     datasetNature: string[];
+    tags: string[];
+    searchText: string;
+    expertMode: boolean;
+    sliceThickness: Range;
+    pixelBandwidth: Range;
+    magneticFieldStrength: Range;
 }
 
 export class FacetField {
-    field: string;
-    key: string;
+    field: { name: string };
+    key: { name: string };
     value: string;
     valueCount: number;
     checked: boolean;
-
-    constructor (facetField: FacetField) {
-        this.field = facetField.field;
-        this.value = facetField.value;
-        this.valueCount = facetField.valueCount;
-    }
+    hidden: boolean;
 }
 
 export class FacetResultPage extends Page<FacetField>{}
 
-export class SolrResultPage extends Page<SolrDocument>{}
+export class SolrResultPage extends Page<SolrDocument>{
+
+    facetResultPages: FacetResultPage[];
+}

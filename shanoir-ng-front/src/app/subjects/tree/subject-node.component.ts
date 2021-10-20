@@ -63,6 +63,7 @@ export class SubjectNodeComponent implements OnChanges {
                 this.node  = new SubjectNode(
                     this.input.id,
                     this.input.name,
+                    [],
                     UNLOADED);
             }
             this.nodeInit.emit(this.node);
@@ -94,7 +95,7 @@ export class SubjectNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            []
+            exam.extraDataFilePathList
         );
     }
     
@@ -102,7 +103,7 @@ export class SubjectNodeComponent implements OnChanges {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : [],
         );
     }
     

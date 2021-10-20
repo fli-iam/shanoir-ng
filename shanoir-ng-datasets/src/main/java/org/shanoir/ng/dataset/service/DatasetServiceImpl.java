@@ -17,9 +17,9 @@ package org.shanoir.ng.dataset.service;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
 import javax.persistence.PersistenceContext;
-import javax.persistence.StoredProcedureQuery;
+
+import javax.transaction.Transactional;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -64,23 +64,33 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		final Dataset datasetDb = repository.findOne(id);
+		final Dataset datasetDb = repository.findById(id).orElse(null);
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
 		}
-		repository.delete(id);
+		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
+	
+	@Override
+	@Transactional
+	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+		repository.deleteByIdIn(ids);
+		solrService.deleteFromIndex(ids);
+		for (Long id : ids) {
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));			
+		}
+	}	
 
 	@Override
 	public Dataset findById(final Long id) {
-		return repository.findOne(id);
+		return repository.findById(id).orElse(null);
 	}
 
 	@Override
 	public List<Dataset> findByIdIn(List<Long> ids) {
-		return Utils.toList(repository.findAll(ids));
+		return Utils.toList(repository.findAllById(ids));
 	}
 
 	@Override
@@ -93,7 +103,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Dataset update(final Dataset dataset) throws EntityNotFoundException {
-		final Dataset datasetDb = repository.findOne(dataset.getId());
+		final Dataset datasetDb = repository.findById(dataset.getId()).orElse(null);
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, dataset.getId());
 		}
@@ -159,4 +169,5 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
+
 }

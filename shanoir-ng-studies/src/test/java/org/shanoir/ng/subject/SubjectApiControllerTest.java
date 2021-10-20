@@ -67,7 +67,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectApiController.class)
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 public class SubjectApiControllerTest {
 
 	private static final String REQUEST_PATH = "/subjects";
@@ -173,7 +173,7 @@ public class SubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null}}]"));
 	}
 
 	@Test
@@ -200,7 +200,7 @@ public class SubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false}}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null}}]"));
 	}
 
 }

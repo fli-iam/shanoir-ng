@@ -44,7 +44,8 @@ public class ExtensionRequestApiController extends AbstractUserRequestApiControl
 	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
 			User userToExtend = getUserService().findByEmailForExtension(requestInfo.getEmail()).orElseThrow(() -> new EntityNotFoundException(requestInfo.getEmail()));
-			if (userToExtend.isEnabled()) {
+			// Check that the user is well disabled or that at least the first notification email was sent, see #923
+			if (userToExtend.isEnabled() && (userToExtend.isFirstExpirationNotificationSent() == null || !userToExtend.isFirstExpirationNotificationSent().booleanValue())) {
 				throw new ShanoirException("This user is not disabled, please enter an email of a disabled account. If you forgot your password, please return to login page and follow the adapted link.");
 			}
 			if (userToExtend.isExtensionRequestDemand().booleanValue()) {

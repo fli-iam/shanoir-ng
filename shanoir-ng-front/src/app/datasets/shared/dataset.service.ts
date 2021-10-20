@@ -11,11 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { ErrorHandler, Injectable } from '@angular/core';
+import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
@@ -23,17 +26,15 @@ import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
 
-
-
 @Injectable()
-export class DatasetService extends EntityService<Dataset> {
+export class DatasetService extends EntityService<Dataset> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
+    subscribtions: Subscription[] = [];
     
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
-
     constructor(protected http: HttpClient) {
         super(http)
     }
@@ -41,6 +42,11 @@ export class DatasetService extends EntityService<Dataset> {
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);
 
     private errorService: ErrorHandler  = ServiceLocator.injector.get(ErrorHandler);
+
+    deleteAll(ids: number[]) {
+        return this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) })
+                .toPromise();
+    }
 
     getEntityInstance(entity: Dataset) { 
         return DatasetUtils.getDatasetInstance(entity.type);
@@ -63,35 +69,54 @@ export class DatasetService extends EntityService<Dataset> {
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
+    
+    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
+       switch (event.type) {
+            case HttpEventType.Sent:
+              progressBar.progress = -1;
+              break;
+            case HttpEventType.DownloadProgress:
+              progressBar.progress = (event.loaded / event.total);
+              break;
+            case HttpEventType.Response:
+                progressBar.progress = 0;
+                saveAs(event.body, this.getFilename(event));
+        }
+    }
 
-    public downloadDatasets(ids: number[], format: string): Promise<void> {
+    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-        return this.http.post(
-                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
-                    observe: 'response',
-                    responseType: 'blob'
-                })
-            .toPromise()
-            .then((result: HttpResponse < Blob > ) => {
-                this.downloadIntoBrowser(result);
+        this.subscribtions.push(
+           this.http.post(
+           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob'
+           }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+            error =>  {
+                this.errorService. handleError(error);
+                progressBar.progress = 0;
             })
-            .catch(error => this.errorService.handleError(error));
+         );
     }
 
-    public downloadDatasetsByStudy(studyId: number, format: string) {
+    public downloadDatasetsByStudy(studyId: number, format: string, progressBar: LoadingBarComponent) {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',
-            { observe: 'response', responseType: 'blob', params: params})
-            .toPromise().then(
-                response => {
-                    this.downloadIntoBrowser(response);
-                }
-            ).catch((error: HttpErrorResponse) => {
-                this.errorService.handleError(error);
-            });
+        this.subscribtions.push(
+           this.http.get(
+           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob',
+                params: params
+            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+             error =>  {
+                this.errorService. handleError(error);
+                progressBar.progress = 0;
+            })
+         );
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -108,24 +133,26 @@ export class DatasetService extends EntityService<Dataset> {
         )
     }
 
-    download(dataset: Dataset, format: string): Promise<void> {
+    download(dataset: Dataset, format: string, converterId: number = null): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadFromId(dataset.id, format);
+        return this.downloadFromId(dataset.id, format, converterId);
     }
 
-    downloadFromId(datasetId: number, format: string): Promise<void> {
+    downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format).then(
+        return this.downloadToBlob(datasetId, format, converterId).then(
             response => {
                 this.downloadIntoBrowser(response);
             }
-        );
+        ).catch(error => {
+            this.errorService. handleError(error);
+        });
     }
 
-    downloadToBlob(id: number, format: string): Promise<HttpResponse<Blob>> {
+    downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {
         if (!id) throw Error('Cannot download a dataset without an id');
         return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format, 
+            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format + (converterId ? ('&converterId=' + converterId) : ''),
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
     }
@@ -179,5 +206,11 @@ export class DatasetService extends EntityService<Dataset> {
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }

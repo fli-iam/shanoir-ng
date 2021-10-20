@@ -90,8 +90,8 @@ public class SubjectRepositoryTest {
 	}
 
 	@Test
-	public void findOneTest() throws Exception {
-		Subject subjectDb = subjectRepository.findOne(SUBJECT_TEST_1_ID);
+	public void findByIdTest() throws Exception {
+		Subject subjectDb = subjectRepository.findById(SUBJECT_TEST_1_ID).orElseThrow();
 		assertThat(subjectDb.getName()).isEqualTo(SUBJECT_TEST_1_DATA);
 	}
 

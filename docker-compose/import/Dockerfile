@@ -18,7 +18,7 @@ RUN set -ex && \
     apt update -y && \
     apt install -t \
       stretch-backports \
-      openjdk-8-jre-headless \
+      openjdk-11-jre-headless \
       ca-certificates-java -y
 
 #32 bits packages are necessary
@@ -49,12 +49,16 @@ RUN apt-get update -qq \
     python
 
 # Compile DCM2NIIX from source
-ENV DCMCOMMIT=efd36a02e2a8e21acfbc62f41beeacf6731d67ac
-RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/$DCMCOMMIT.zip | bsdtar -xf- -C /usr/local
+ENV DCMCOMMIT_VERSION=v1.0.20210317
+ENV DCMCOMMIT=1.0.20210317
+
+WORKDIR /usr/local/
+RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
+WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
+RUN mkdir build
 WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
-RUN cmake -DUSE_OPENJPEG=ON ../ && \
-    make && \
-    make install
+RUN cmake ..
+RUN make install
 
 WORKDIR /
 
@@ -102,5 +106,5 @@ ADD shanoir-ng-import.jar shanoir-ng-import.jar
 COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and to active dev profile
-#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
-ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-import.jar"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/shanoir-ng-import.jar"]

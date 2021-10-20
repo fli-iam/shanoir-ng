@@ -17,7 +17,6 @@ package org.shanoir.ng.preclinical.extra_data;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * ExtraData service.
@@ -25,7 +24,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface ExtraDataService<T> extends UniqueCheckableService {
+public interface ExtraDataService<T> {
 
 	/**
 	 * Delete an examination extra data.

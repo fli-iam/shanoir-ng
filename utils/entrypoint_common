@@ -66,7 +66,8 @@ require()
             SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
             SHANOIR_MIGRATION)      match "$name" '^(auto|init|never|dev|import|export)$' ;;
 	    SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
-            SHANOIR_COLORS)         match "$name" '^[A-Za-z0-9-]+:#[0-9a-fA-F]{6}( +[A-Za-z0-9-]+:#[0-9a-fA-F]{6})*$' ;;
+	    SHANOIR_INSTANCE_NAME)  match "$name" '^[^"\\]*$'				;;
+	    SHANOIR_INSTANCE_COLOR) match "$name" '^([A-Za-z]*|#[0-9a-fA-F]{3,6})$'	;;
 
             SHANOIR_ADMIN_EMAIL)    ;;
             SHANOIR_ADMIN_NAME)     ;;
@@ -136,11 +137,13 @@ handle_microservice_migration()
 {
 	case "$SHANOIR_MIGRATION" in
 		dev)
-			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.datasource.initialization-mode	never
+			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	update
 			;;
 		init)
-			env_setdefault	spring.datasource.initialize	true
+			env_setdefault	spring.datasource.initialization-mode	always
+			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	create
 
 			_ms_oneshot=1
@@ -151,7 +154,8 @@ handle_microservice_migration()
 			env_setdefault	"logging.level.org.shanoir"			INFO
 			;;
 		never|auto)
-			env_setdefault	spring.datasource.initialize	false
+			env_setdefault	spring.datasource.initialization-mode	never
+			env_setdefault	spring.jpa.generate-ddl	false
 			env_setdefault	spring.jpa.hibernate.ddl-auto	validate
 			;;
 		manual)
