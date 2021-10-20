@@ -223,10 +223,6 @@ services:
       - shanoir_ng_network
     ports:
       - "8983:8983"
-    command:
-      - solr-precreate 
-      - shanoir
-      - /tmp/shanoir-core
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
