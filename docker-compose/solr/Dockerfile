@@ -15,3 +15,5 @@ FROM solr:8.1
 RUN mkdir /tmp/shanoir-core
 
 COPY ./core /tmp/shanoir-core/
+
+CMD ["solr-precreate", "shanoir", "/tmp/shanoir-core"]
