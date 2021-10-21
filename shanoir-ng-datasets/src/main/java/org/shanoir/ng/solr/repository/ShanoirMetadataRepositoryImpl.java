@@ -72,7 +72,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN study st ON st.id = e.study_id"
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id", "SolrResult");
+				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id;", "SolrResult");
 		Query genericQuery = em.createNativeQuery(
 				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.comment as examinationComment, e.examination_date as examinationDate, su.name as subjectName, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
 				+ " FROM dataset d"
