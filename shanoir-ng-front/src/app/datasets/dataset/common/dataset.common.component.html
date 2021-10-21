@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					{{dataset.type}}
 				</ng-template>
 				<ng-template ngSwitchDefault> 
-					<select-box [ngModelOptions]="{standalone: true}" [(ngModel)]="dataset.type" [options]="datasetModalityTypes">
+					<select-box [ngModelOptions]="{standalone: true}" [(ngModel)]="dataset.type" [options]="datasetTypes">
 					</select-box>
 				</ng-template>
 			</span>
@@ -174,7 +174,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<li>
 			<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
 			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.exploredEntity? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity}}</ng-template>
+				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.processedDatasetType? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType}}</ng-template>
 				<ng-template ngSwitchDefault>
 					<select-box 
 							[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType"
