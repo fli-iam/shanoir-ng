@@ -90,11 +90,16 @@ public class ImporterServiceTest {
 	@Mock
 	StudyUserRightsRepository studyUserRightRepo;
 
+	private Examination exam;
+
 	@Before
 	public void setUp() throws IOException {
+		exam = new Examination();
+		exam.setExaminationDate(LocalDate.now());
+		exam.setId(1l);
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
-        given(examinationService.findById(Mockito.anyLong())).willReturn(new Examination());
+        given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
 	}
 
 	@Test

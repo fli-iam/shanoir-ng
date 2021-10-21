@@ -44,6 +44,8 @@ export class ExaminationNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
+	hasEEG: boolean = false;
+	hasDicom: boolean = false;
 
     constructor(
         private router: Router,
@@ -110,7 +112,12 @@ export class ExaminationNodeComponent implements OnChanges {
                     return;
                 } else {
                     dsAcq.datasets.forEach(ds => {
-                        datasetIds.push(ds.id);                    
+                        datasetIds.push(ds.id);
+						if (ds.type === 'Eeg') {
+							this.hasEEG = true;
+						} else {
+							this.hasDicom = true;
+						}
                     });
                 }
             });

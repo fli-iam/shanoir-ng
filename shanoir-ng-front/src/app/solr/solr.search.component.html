@@ -43,6 +43,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [allFacetPage]="allFacetResultPages[2]"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
+        
+        <solr-criterion
+                label="Tags"
+                [currentFacetPage]="facetResultPages[7]"
+                [allFacetPage]="allFacetResultPages[7]"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-criterion>
 
         <div class="dates">
             <div class="title">
