@@ -103,8 +103,10 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
         return Promise.resolve();
     }
     
-    
-  
+    downloadFile() {
+        this.extradatasService.downloadFile(this.entity.id);
+    }
+
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.bloodGasData.filename= this.fileToUpload.name;
