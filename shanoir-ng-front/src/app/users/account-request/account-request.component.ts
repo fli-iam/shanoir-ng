@@ -23,7 +23,8 @@ import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors }
 
 @Component({
     selector: 'accountRequest',
-    templateUrl: 'account-request.component.html'
+    templateUrl: 'account-request.component.html',
+    styleUrls: ['account-request.component.css']
 })
 
 export class AccountRequestComponent {
@@ -35,6 +36,7 @@ export class AccountRequestComponent {
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
 
+    language: 'english' | 'french' = 'english';
     
     constructor(
             private fb: FormBuilder, 

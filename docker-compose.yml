@@ -62,6 +62,7 @@ services:
   database:
     container_name: "${SHANOIR_PREFIX}database"
     build: ./docker-compose/database
+    command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
     volumes:
@@ -214,7 +215,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: solr:8.1
+    build: ./docker-compose/solr
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -223,9 +224,6 @@ services:
       - shanoir_ng_network
     ports:
       - "8983:8983"
-    command:
-      - solr-precreate
-      - shanoir
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:

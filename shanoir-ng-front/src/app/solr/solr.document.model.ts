@@ -23,6 +23,7 @@ export class SolrDocument {
     datasetCreationDate: Date;
     examinationComment: string;
     centerName: string;
+    tags: string;
     examinationDate: Date;
     subjectName: string;
     studyName: string;
@@ -40,6 +41,7 @@ export class SolrRequest {
     datasetEndDate: Date;
     datasetType: string[];
     datasetNature: string[];
+    tags: string[];
     searchText: string;
     expertMode: boolean;
     sliceThickness: Range;
