@@ -186,6 +186,7 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
+      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -313,6 +314,7 @@ volumes:
   rabbitmq-data:
   database-data:
   datasets-data:
+  extra-data:
   studies-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
