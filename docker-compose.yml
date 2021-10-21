@@ -65,6 +65,8 @@ services:
     command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
+    environment:
+      - SHANOIR_MIGRATION
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
