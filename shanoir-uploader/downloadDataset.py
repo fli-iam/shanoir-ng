@@ -122,7 +122,7 @@ def ask_access_token():
         'password' : password,
         'scope' : 'offline_access'
     }
-    curl -d '{"client_id":"shanoir-uploader", "grant_type":"password", "username": "amasson", "password": "", "scope": "offline_access" }' -H "Content-Type: application/json" -X POST 
+    # curl -d '{"client_id":"shanoir-uploader", "grant_type":"password", "username": "amasson", "password": "", "scope": "offline_access" }' -H "Content-Type: application/json" -X POST 
 
     headers = {'content-type': 'application/x-www-form-urlencoded'}
     print('get keycloak token...', end=' ')

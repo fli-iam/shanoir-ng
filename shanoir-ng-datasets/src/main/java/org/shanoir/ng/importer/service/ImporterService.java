@@ -583,6 +583,7 @@ public class ImporterService {
 			File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
 			try {
+				destFile.getParentFile().mkdirs();
 				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				LOG.error("IOException generating Processed Dataset Expression", e);
@@ -591,6 +592,7 @@ public class ImporterService {
 			// Fill dataset with informations
 			dataset.setCreationDate(LocalDate.now());
 			dataset.setOriginMetadata(originMetadata);
+			dataset.setUpdatedMetadata(dataset.getOriginMetadata());
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 

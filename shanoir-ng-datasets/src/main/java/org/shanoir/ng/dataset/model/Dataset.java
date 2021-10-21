@@ -30,6 +30,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -245,9 +246,9 @@ public abstract class Dataset extends AbstractEntity {
 	 * @return the name
 	 */
 	public String getName() {
-		if (updatedMetadata != null && !updatedMetadata.getName().isEmpty()) {
+		if (updatedMetadata != null && !StringUtils.isEmpty(updatedMetadata.getName())) {
 			return updatedMetadata.getName();
-		} else if (!originMetadata.getName().isEmpty()) {
+		} else if (!StringUtils.isEmpty(originMetadata.getName())) {
 			return originMetadata.getName();
 		} else {
 			final StringBuilder result = new StringBuilder();

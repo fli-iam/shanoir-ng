@@ -19,7 +19,6 @@ set -e
 
 	optional SHANOIR_PREFIX
 	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
-	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.dev.conf
 ) >/etc/nginx/shanoir.conf
 
 require SHANOIR_URL_SCHEME

@@ -193,7 +193,9 @@ export class DatasetDTO {
             this.name = dataset.name;
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return { id: p.id } } );
-            this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
+            if(dataset.datasetAcquisition) {
+                this.datasetAcquisition = new DatasetAcquisitionDTO(dataset.datasetAcquisition);
+            }
         }
     }
 }

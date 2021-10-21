@@ -274,17 +274,30 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     manageSaveEntity(): void {
         this.subscribtions.push(
             this.onSave.subscribe(response => {
-                for(let datasets of [this.inputDatasetsToRemove, this.outputDatasetsToRemove]) {
-                    for (let dataset of datasets) {
-                        if(dataset.processings) {
-                            let index = dataset.processings.indexOf(this.datasetProcessing);
-                            if(index >= 0) {
-                                dataset.processings.splice(index, 1);
-                                this.datasetService.update(dataset.id, dataset);
-                            }
+
+                // This is incorrect: dataset.processings are processings for which the dataset is an input:
+                // for(let datasets of [this.inputDatasetsToRemove, this.outputDatasetsToRemove]) {
+                //     for (let dataset of datasets) {
+                //         if(dataset.processings) {
+                //             let index = dataset.processings.indexOf(this.datasetProcessing);
+                //             if(index >= 0) {
+                //                 dataset.processings.splice(index, 1);
+                //                 this.datasetService.update(dataset.id, dataset);
+                //             }
+                //         }
+                //     }
+                // }
+                
+                for (let dataset of this.inputDatasetsToRemove) {
+                    if(dataset.processings) {
+                        let index = dataset.processings.indexOf(this.datasetProcessing);
+                        if(index >= 0) {
+                            dataset.processings.splice(index, 1);
+                            this.datasetService.update(dataset.id, dataset);
                         }
                     }
                 }
+            
                 if (this.inputDatasetsToAdd) {
                     for (let dataset of this.inputDatasetsToAdd) {
                         if(dataset.processings == null) {
