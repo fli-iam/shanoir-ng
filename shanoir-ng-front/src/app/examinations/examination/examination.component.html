@@ -182,8 +182,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<button *ngIf="mode=='view' && hasDownloadRight" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-				<button *ngIf="mode=='view' && hasDownloadRight" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+				<button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets && hasEEG" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
                 <div [hidden]="progressBar.progress == 0">
                     <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
                 </div>

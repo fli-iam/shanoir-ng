@@ -20,6 +20,8 @@
 package org.shanoir.ng.solr.model;
 
 import java.util.Date;
+import java.util.List;
+
 import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
@@ -64,7 +66,7 @@ public class ShanoirSolrDocument {
 	@Indexed
 	private String examinationComment;
 	
-	@Field
+
 	@Indexed
 	private Date examinationDate;
 	
@@ -96,14 +98,17 @@ public class ShanoirSolrDocument {
 	@Indexed
 	private Float magneticFieldStrength;
 	
-	
+	@Field
+	@Indexed(name="tags", type="string")
+	private List<String> tags;
+
 	public ShanoirSolrDocument () {
 		
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness, 
+			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
 			Float pixelBandwidth, Float magneticFieldStrength) {
 		this.id = id;
 		this.datasetId = datasetId;
@@ -300,6 +305,14 @@ public class ShanoirSolrDocument {
 
 	public void setMagneticFieldStrength(Float magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
+	}
+	
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 	
 }

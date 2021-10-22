@@ -189,7 +189,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<p *ngIf="mode == 'create'" ><b>Warning: </b> A study card is necessary to import MR data.</p>
-			<fieldset *ngIf="mode !== 'view'">
+			<fieldset *ngIf="mode !== 'view' && study?.subjectStudyList">
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
@@ -284,6 +284,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
 						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
+            <fieldset *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+                <legend>Study tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+            </fieldset>
             <fieldset *ngIf="mode == 'view'">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id"></bids-tree>

@@ -54,7 +54,8 @@ INSERT INTO dataset_acquisition
 VALUES 
 	(1, 1, 1, 1, 'v1.0', 1),
 	(2, 1, 2, 1, 'v1.0', 1),
-	(3, 1, 2, 1, 'v1.0', 1);
+	(3, 1, 2, 1, 'v1.0', 1),
+	(4, 1, 2, 1, 'v1.0', 1);
 
 INSERT INTO mr_dataset_acquisition
 	(id, mr_protocol_id) 
@@ -65,7 +66,12 @@ INSERT INTO pet_dataset_acquisition
 	(id, pet_protocol_id) 
 VALUES 
 	(2, 1);
-	
+
+INSERT INTO eeg_dataset_acquisition
+	(id) 
+VALUES 
+	(4);
+
 INSERT INTO ct_dataset_acquisition
 	(id, ct_protocol_id) 
 VALUES 
@@ -103,7 +109,7 @@ VALUES
 	(1, 1, 1, 1, 1),
 	(2, 2, 2, 2, 1),
 	(3, 3, 3, 3, 1),
-	(4, NULL, 4, 4, 1);
+	(4, 4, 4, 4, 1);
 
 INSERT INTO mr_dataset
 	(id, mr_quality_procedure_type, origin_mr_metadata_id) 

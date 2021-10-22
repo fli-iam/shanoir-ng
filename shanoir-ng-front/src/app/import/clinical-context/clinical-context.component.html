@@ -178,6 +178,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
+            <li>
+                <label>Tags</label>
+                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study.tags"></tag-list>
+            </li>
         </div>
     </ol>
 
