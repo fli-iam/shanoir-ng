@@ -95,7 +95,7 @@ logging:
     org.hibernate: ERROR
 #Upload Extradata
 preclinical:
-  uploadExtradataFolder: /data/upload/
+  uploadExtradataFolder: /var/extra-data
   uploadBrukerFolder: /tmp/
   separator: /
 ---

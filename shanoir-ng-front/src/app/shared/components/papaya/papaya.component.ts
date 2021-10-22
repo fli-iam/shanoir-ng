@@ -67,6 +67,7 @@ export class PapayaComponent implements OnInit {
 
     private setDefaultParams() {
         if (!this.params["allowScroll"]) this.params["allowScroll"] = false;
+        this.params["ignoreNiftiTransforms"] =  true;
     }
 
 }

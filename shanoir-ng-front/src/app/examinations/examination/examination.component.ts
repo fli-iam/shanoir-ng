@@ -61,6 +61,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
+	hasEEG: boolean = false;
+	hasDicom: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -232,6 +234,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                     if (dsAcq.datasets != 'UNLOADED') {
                         dsAcq.datasets.forEach(ds => {
                             datasetIds.push(ds.id);
+							if (ds.type == 'Eeg') {
+								this.hasEEG = true;
+							} else {
+								this.hasDicom = true;
+							}
                         });
                     } else {
                         found = false;  

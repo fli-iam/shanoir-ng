@@ -44,6 +44,8 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -91,6 +93,9 @@ public class StudyServiceTest {
 	
 	@Mock
 	private DataUserAgreementService dataUserAgreementService;
+	
+	@Mock
+	private StudyMapper studyMapperMock;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
