@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.subjectstudy.dto;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * DTO for subject of a study.
@@ -29,13 +32,15 @@ public class SubjectStudyDTO {
 
 	private IdName subject;
 
-	private IdName study;
+	private StudyTagsDTO study;
 
 	private String subjectStudyIdentifier;
 
 	private SubjectType subjectType;
 
 	private boolean physicallyInvolved;
+	
+	private List<TagDTO> tags;
 
 	public Long getId() {
 		return id;
@@ -53,11 +58,11 @@ public class SubjectStudyDTO {
 		this.subject = subject;
 	}
 
-	public IdName getStudy() {
+	public StudyTagsDTO getStudy() {
 		return study;
 	}
 
-	public void setStudy(IdName study) {
+	public void setStudy(StudyTagsDTO study) {
 		this.study = study;
 	}
 
@@ -106,4 +111,17 @@ public class SubjectStudyDTO {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
+	/**
+	 * @return the tags
+	 */
+	public List<TagDTO> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<TagDTO> tags) {
+		this.tags = tags;
+	}
 }

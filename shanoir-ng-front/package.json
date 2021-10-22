@@ -9,7 +9,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "postbuild": "node src/version.ts"
+    "prebuild": "node src/version.ts"
   },
   "private": true,
   "dependencies": {

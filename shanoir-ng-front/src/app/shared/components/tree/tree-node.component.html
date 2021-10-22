@@ -41,6 +41,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span>
         <ng-content select="dropdown-menu"></ng-content>
     </span>
+   <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of tags">
+        {{tag.name}}
+    </span>
     <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
 </div>
 <div #childrentWrapper *ngIf="isOpen" class="content">

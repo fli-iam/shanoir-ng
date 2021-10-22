@@ -236,6 +236,11 @@ public class ImporterService {
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
 		SuccessImportEmail generatedMail = new SuccessImportEmail();
+
+		Map<Long, String> datasets = new HashMap<>();
+		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
+			return;
+		}
 		generatedMail.setExamDate(examination.getExaminationDate().toString());
 		generatedMail.setExaminationId(examination.getId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
@@ -243,11 +248,6 @@ public class ImporterService {
 		generatedMail.setStudyName(importJob.getStudyName());
 		generatedMail.setUserId(userId);
 		generatedMail.setStudyCard(importJob.getStudyCardName());
-
-		Map<Long, String> datasets = new HashMap<>();
-		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
-			return;
-		}
 
 		for (DatasetAcquisition acq : generatedAcquisitions) {
 			if (!CollectionUtils.isEmpty(acq.getDatasets())) {
@@ -368,7 +368,8 @@ public class ImporterService {
 	 */
 	public void createEegDataset(final EegImportJob importJob) {
 
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+		Long userId = KeycloakUtil.getTokenUserId();
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
@@ -388,6 +389,7 @@ public class ImporterService {
 			datasetAcquisition.setExamination(examination);
 			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 			datasetAcquisition.setRank(0);
+			datasetAcquisition.setSortingIndex(0);
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -474,7 +476,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				//datasetToCreate.setStudyId(importJob.getStudyId());
+				datasetToCreate.setUpdatedMetadata(originMetadata);
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
@@ -484,11 +486,18 @@ public class ImporterService {
 
 			datasetAcquisition.setDatasets(datasets);
 			datasetAcquisitionService.create(datasetAcquisition);
-
-			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Success");
+			
 			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.SUCCESS);
+			// This message is important for email service
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+					+": Successfully created datasets for subject " + importJob.getSubjectName()
+					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
+
+			// Send mail
+			sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition));
+
 			// Complete BIDS with data
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());

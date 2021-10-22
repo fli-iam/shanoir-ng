@@ -23,6 +23,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
+import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -44,6 +45,9 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;
+
+	@Autowired
+	private TagMapper tagMapper;
 
 	@Override
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
@@ -70,7 +74,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		
+		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
 		return simpleStudyDTO;
 	}
 	
@@ -101,6 +105,9 @@ public abstract class StudyDecorator implements StudyMapper {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
+			if (study.getTags() != null) {
+				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
+			}
 		}
 		return studyDTO;
 	}
