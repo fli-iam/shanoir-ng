@@ -95,12 +95,12 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
 
-    public save(): Promise<void> {
-        this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).subscribe((bloodGasData) => {
+    public save(): Promise<BloodGasData> {
+        return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
             this.msgBoxService.log('info', 'The new preclinical-bloodgasdata has been successfully saved under the number ' + bloodGasData.id);
+            return bloodGasData;
         });
-        return Promise.resolve();
     }
     
     downloadFile() {

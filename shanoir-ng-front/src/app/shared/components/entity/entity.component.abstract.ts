@@ -211,7 +211,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     /**
      * Chooses between create() and update(), saves the entity and return a promise
      */
-    private modeSpecificSave(): Promise<void> {
+    private modeSpecificSave(): Promise<T> {
         if (this.mode == 'create') {
             return this.getService().create(this.entity).then((entity) => {
                 this.entity.id = entity.id;
@@ -219,6 +219,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
                 this._entity.id = entity.id;
+                return entity;
             });
         }
         else if (this.mode == 'edit') {
@@ -226,15 +227,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
+                return this.entity;
             });
         }
     }
 
-    save(): Promise<void> {
+    save(): Promise<T> {
         this.footerState.loading = true;
         return this.modeSpecificSave()
-            .then(() => {
+            .then(study => {
                 this.footerState.loading = false;
+                return study;
             })
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {

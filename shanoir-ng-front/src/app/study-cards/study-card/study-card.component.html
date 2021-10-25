@@ -45,9 +45,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.study.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="studyCard.study" [optionArr]="studies">
+								<select-box formControlName="study" [(ngModel)]="studyCard.study" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Center(s)</label>
+						<span class="right-col" *ngIf="studyCard.study">
+							<span class="center" *ngFor="let center of centers">
+								{{center.name}}
+							</span>
 						</span>
 					</li>
 					<li>
@@ -57,7 +65,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyCard.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" (userChange)="onChangeAcqEq()" [options]="acquisitionEquipments">
+								<select-box formControlName="acquisitionEquipment" 
+										[(ngModel)]="studyCard.acquisitionEquipment" 
+										(userChange)="onChangeAcqEq()" 
+										[options]="acquisitionEquipments"
+										(onNewClick)="createAcqEq()">
 								</select-box>
 							</ng-template>
 						</span>
@@ -103,7 +115,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button" 
 						class="Button right-icon show-errors" 
 						(click)="onShowErrors()"
-						[disabled]="footerState.valid || showRulesErrors">
+						[disabled]="footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
 					Show all errors<i class="fas fa-bug"></i>
 				</button>
 				<button *ngIf="selectMode" 

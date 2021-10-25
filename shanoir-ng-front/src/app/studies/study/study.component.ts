@@ -225,7 +225,6 @@ export class StudyComponent extends EntityComponent<Study> {
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
-
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;
@@ -529,8 +528,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.updateValueAndValidity();
     }
 
-    save(): Promise<void> {
-        let prom = super.save().then(result => {
+    save(): Promise<Study> {
+        return super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
@@ -543,8 +542,17 @@ export class StudyComponent extends EntityComponent<Study> {
                     this.dataUserAgreement = null;
                 });
             }
+            return result;
+        }).then(study => {
+            this.confirmDialogService.confirm('Create a Study Card', 
+                'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
+                .then(userChoice => {
+                    if (userChoice) {
+                        this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                    }
+                });
+            return study;
         });
-        return prom;
     }
 
     getFileName(element): string {
