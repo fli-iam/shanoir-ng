@@ -407,7 +407,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
-            this.study.studyUserList.push(backedUpStudyUser);
+            this.study.studyUserList.unshift(backedUpStudyUser);
         } else {
             let studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
@@ -416,7 +416,7 @@ export class StudyComponent extends EntityComponent<Study> {
             studyUser.receiveNewImportReport = false;
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
-            this.study.studyUserList.push(studyUser);
+            this.study.studyUserList.unshift(studyUser);
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
