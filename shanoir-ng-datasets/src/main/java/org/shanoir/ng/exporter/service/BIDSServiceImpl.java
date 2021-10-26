@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
@@ -33,13 +34,15 @@ import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -47,14 +50,12 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -106,13 +107,13 @@ public class BIDSServiceImpl implements BIDSService {
 	private String bidsStorageDir;
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private ExaminationService examService;
 
 	@Autowired
 	private StudyRepository studyRepo;
+
+	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -125,32 +126,32 @@ public class BIDSServiceImpl implements BIDSService {
 	@RabbitListener(bindings = {
 			@QueueBinding(
 					key = ShanoirEventType.DELETE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.DELETE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.UPDATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.UPDATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC)),
 			@QueueBinding(
 					key = ShanoirEventType.CREATE_DATASET_EVENT,
-					value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
+					value = @Queue(value = RabbitMQConfiguration.BIDS_EVENT_QUEUE, durable = "true"),
 					exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 	}
@@ -173,6 +174,9 @@ public class BIDSServiceImpl implements BIDSService {
 	@Override
 	public void deleteBidsFolder(Long studyId, String studyName) {
 		try {
+			if (studyName == null) {
+				studyName = this.studyRepo.findById(studyId).get().getName();
+			}
 			// Try to delete the BIDS folder recursively if possible
 			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName);
 			if (bidsDir.exists()) {
@@ -211,8 +215,8 @@ public class BIDSServiceImpl implements BIDSService {
 		// Create participants.tsv
 		participantsSerializer(baseDir, subjs);
 
+		int index = 1;
 		for (Subject subj : subjs) {
-			int index = 1;
 			exportAsBids(subj, studyName, studyId, baseDir, index);
 			index++;
 		}
@@ -229,14 +233,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @throws JsonParseException
 	 */
 	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
-
-		/// Get the list of subjects
-		String response = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, studyId);
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		List<Subject> myObjects = objectMapper.readValue(response, new TypeReference<List<Subject>>(){});
-
-		return myObjects;
+		// Get the list of subjects
+		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		return subjectStudies.stream().map(SubjectStudy::getSubject).collect(Collectors.toList());
 	}
 
 	/**
@@ -348,7 +347,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		String sessionLabel = examination.getId() + examination.getComment() != null ? "-" + examination.getComment() : "";
+		String sessionLabel = examination.getId();
+		//+ (examination.getComment() != null ? "-" + examination.getComment() : "");
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();

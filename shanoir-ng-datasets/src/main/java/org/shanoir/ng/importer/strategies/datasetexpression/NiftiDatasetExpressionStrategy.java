@@ -82,8 +82,6 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 				File srcFile;
 				srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
-				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
-				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 				
 				// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
 				StringBuilder name = new StringBuilder("");
@@ -95,6 +93,9 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 				.append(importJob.getProperties().get(ImportJob.RANK_PROPERTY)).append("_")
 				.append(index)
 				.append(FilenameUtils.getExtension(srcFile.getName()));
+				
+				File destFile = new File(outDir.getAbsolutePath() + File.separator + name.toString());
+				index++;
 
 				Path niftiFinalLocation = null;
 				try {

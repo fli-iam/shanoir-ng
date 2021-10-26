@@ -118,9 +118,11 @@ public class RabbitMQDatasetsService {
 	public void receiveStudyNameUpdate(final String studyStr) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		try {
 			Study received = objectMapper.readValue(studyStr, Study.class);
+			bidsService.deleteBidsFolder(received.getId(), null);
+			Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
+
 			// TAGS
 			if (stud.getTags() != null) {
 				stud.getTags().clear();
@@ -152,10 +154,7 @@ public class RabbitMQDatasetsService {
 
 			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
 				updateSolr(sustu.getSubject().getId());
-			}
-			
-			bidsService.deleteBidsFolder(received.getId(), received.getName());
-			
+			}			
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
@@ -299,6 +298,7 @@ public class RabbitMQDatasetsService {
 		mapper.registerModule(new JavaTimeModule());
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
+
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			Set<Long> studyIds = new HashSet<>();
 
@@ -307,14 +307,14 @@ public class RabbitMQDatasetsService {
 				examinationService.deleteFromRabbit(exam);
 				studyIds.add(exam.getStudyId());
 			}
-			// Delete subject from datasets database
-			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 			
 			// Update BIDS folder
-
 			for (Study stud : studyRepository.findAllById(studyIds)) {
 				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
 			}
+			
+			// Delete subject from datasets database
+			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
 			
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
