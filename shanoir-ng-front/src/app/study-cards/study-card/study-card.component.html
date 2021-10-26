@@ -42,7 +42,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.study.name}}
+							    <a [routerLink]="['/study/details/', studyCard.study?.id]">
+								    {{studyCard.study.name}}
+								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="study" [(ngModel)]="studyCard.study" [optionArr]="studies">
@@ -54,7 +56,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Acquisition equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.acquisitionEquipment | acqEqptLabel}}
+							    <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
+								    {{studyCard.acquisitionEquipment | acqEqptLabel}}
+								</a>
 							</ng-template> 
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment" (userChange)="onChangeAcqEq()" [options]="acquisitionEquipments">

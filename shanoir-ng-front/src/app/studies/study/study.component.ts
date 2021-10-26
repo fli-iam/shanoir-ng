@@ -194,6 +194,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
+            'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': []
@@ -230,6 +231,7 @@ export class StudyComponent extends EntityComponent<Study> {
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
+        study.tags = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;
@@ -405,7 +407,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
-            this.study.studyUserList.push(backedUpStudyUser);
+            this.study.studyUserList.unshift(backedUpStudyUser);
         } else {
             let studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
@@ -414,7 +416,7 @@ export class StudyComponent extends EntityComponent<Study> {
             studyUser.receiveNewImportReport = false;
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
-            this.study.studyUserList.push(studyUser);
+            this.study.studyUserList.unshift(studyUser);
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
@@ -593,5 +595,9 @@ export class StudyComponent extends EntityComponent<Study> {
    
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
+    }
+
+    onTagListChange() {
+        this.study.tags = [].concat(this.study.tags); // hack : force change detection
     }
 }

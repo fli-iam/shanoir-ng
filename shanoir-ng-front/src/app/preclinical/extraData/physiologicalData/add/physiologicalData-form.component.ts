@@ -136,7 +136,11 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
             this.physioDataReady.emit(physioDataFile);
         }
     }
-  
+    
+    downloadFile() {
+        this.extradatasService.downloadFile(this.entity.id);
+    }
+
     changePhysio(){
         let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
         physioDataFile.filename = this.physioData.filename;
