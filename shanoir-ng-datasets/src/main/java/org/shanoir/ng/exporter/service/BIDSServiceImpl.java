@@ -488,7 +488,6 @@ public class BIDSServiceImpl implements BIDSService {
 					if (!datasetFile.isPacs()) {
 						URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
 						pathURLs.add(url);
-						System.err.println("Adding: " + url.getPath());
 					}
 				}
 			}

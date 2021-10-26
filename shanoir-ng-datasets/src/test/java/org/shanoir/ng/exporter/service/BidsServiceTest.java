@@ -6,7 +6,9 @@ import static org.mockito.BDDMockito.given;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -27,14 +29,12 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.Subject;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test class for BIDS service class.
@@ -49,7 +49,7 @@ public class BidsServiceTest {
 	private ExaminationService examService;
 
 	@Mock
-	private RabbitTemplate rabbitTemplate;
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@InjectMocks
 	@Spy
@@ -108,14 +108,15 @@ public class BidsServiceTest {
 	}
 
 	@Test
-	public void testExportAsBids() throws IOException {
+	public void testExportAsBids() throws IOException, InterruptedException {
 		//GIVEN a study full of data
 
 		// Mock on rest template to get the list of subjects
-		Subject[] subjects = {subject};
-		ObjectMapper mapper = new ObjectMapper();
-		String value = mapper.writeValueAsString(subjects);
-		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
+		List<SubjectStudy> subjectStudies = new ArrayList<>();
+		SubjectStudy susu = new SubjectStudy();
+		susu.setSubject(this.subject);
+		subjectStudies.add(	susu);
+		given(subjectStudyRepository.findByStudyId(exam.getStudyId())).willReturn(subjectStudies);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
@@ -126,13 +127,17 @@ public class BidsServiceTest {
 		// THEN the bids folder is generated with study - subject - exam - data
 		File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
-		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
+
+		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1_" + subject.getName());
+		System.err.println(subjectFile.getAbsolutePath());
+		System.err.println(subjectFile.exists());
 		assertTrue(subjectFile.exists());
+
 		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
 		// No exam files as there is only one datasetAcquisition
-
 		assertFalse(examFile.exists());
-		File bidsDataFile = new File(subjectFile.getAbsolutePath() + "/undefined/test.test");
+		
+		File bidsDataFile = new File(subjectFile.getAbsolutePath() + "/sub-1_name_scans.tsv");
 		assertTrue(bidsDataFile.exists());
 	}
 
