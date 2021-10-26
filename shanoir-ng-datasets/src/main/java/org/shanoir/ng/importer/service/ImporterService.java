@@ -179,8 +179,6 @@ public class ImporterService {
 					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
-			// Send mail
-			sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
 			// Create BIDS folder
 			try {
@@ -213,6 +211,10 @@ public class ImporterService {
 				examination.setExtraDataFilePathList(archives);
 				examinationRepository.save(examination);
 			}
+
+			// Send success mail
+			sendImportEmail(importJob, userId, examination, generatedAcquisitions);
+
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
@@ -510,6 +512,9 @@ public class ImporterService {
 			event.setMessage("An unexpected error occured, please contact an administrator.");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
+
+			// Send failure mail
+			sendFailureMail(importJob, userId, e.getMessage());
 			throw e;
 		}
 	}
