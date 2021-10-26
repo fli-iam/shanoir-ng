@@ -347,8 +347,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 */
 	private File createExaminationFolder(final Examination examination, final File subjectDir) {
-		String sessionLabel = examination.getId();
-		//+ (examination.getComment() != null ? "-" + examination.getComment() : "");
+		String sessionLabel = "" + examination.getId();
+		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
@@ -371,9 +371,9 @@ public class BIDSServiceImpl implements BIDSService {
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
-			String examComment = dataset.getDatasetAcquisition().getExamination().getComment().toString();
+			String examComment = dataset.getDatasetAcquisition().getExamination().getComment();
 			String sessionLabel = examComment != null ? examComment : dataset.getDatasetAcquisition().getExamination().getId().toString();
-			exportSpecificEegFiles((EegDataset) dataset, workDir, subjectName, sessionLabel, studyName, dataset.getId().toString());
+			exportSpecificEegFiles((EegDataset) dataset, subjectName, sessionLabel, studyName, dataset.getId().toString(), dataFolder);
 		} else if (dataset instanceof PetDataset) {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
@@ -488,6 +488,7 @@ public class BIDSServiceImpl implements BIDSService {
 					if (!datasetFile.isPacs()) {
 						URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
 						pathURLs.add(url);
+						System.err.println("Adding: " + url.getPath());
 					}
 				}
 			}
@@ -510,14 +511,14 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @param subjectName the subject name associated
 	 * @param sessionId the session ID / examination ID associated
 	 * @param runId The run ID
+	 * @param dataFolder 
 	 * @throws RestServiceException
 	 * @throws IOException
 	 */
-	private void exportSpecificEegFiles(final EegDataset dataset, final File workFolder, final String subjectName, final String sessionId, final String studyName, final String runId) throws IOException {
+	private void exportSpecificEegFiles(final EegDataset dataset, final String subjectName, final String sessionId, final String studyName, final String runId, File dataFolder) throws IOException {
 		// Create _eeg.json
 		String fileName = "task_" + studyName + "_eeg.json";
-		File baseDirectory = workFolder.getParentFile().getParentFile();
-		String destFile = baseDirectory.getAbsolutePath() + File.separator + fileName;
+		String destFile = dataFolder.getAbsolutePath() + File.separator + fileName;
 
 		EegDataSetDescription datasetDescription = new EegDataSetDescription();
 		datasetDescription.setTaskName(studyName);
@@ -526,7 +527,7 @@ public class BIDSServiceImpl implements BIDSService {
 		objectMapper.writeValue(new File(destFile), datasetDescription);
 
 		// Create the folder where we are currently working if necessary.
-		File destWorkFolderFile = workFolder;
+		File destWorkFolderFile = dataFolder;
 		if (!destWorkFolderFile.exists()) {
 			destWorkFolderFile.mkdirs();
 		}
