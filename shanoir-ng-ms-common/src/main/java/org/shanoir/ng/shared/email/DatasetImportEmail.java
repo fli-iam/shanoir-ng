@@ -1,10 +1,11 @@
-package org.shanoir.ng.email;
+package org.shanoir.ng.shared.email;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents an EMAIL to be sent after an email was imported.
+ * This class represents an EMAIL to be sent after a dataset was imported.
+ * 
  * @author JCD
  *
  */

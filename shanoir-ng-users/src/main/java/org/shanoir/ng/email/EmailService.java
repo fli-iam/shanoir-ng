@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.shared.email.DatasetImportEmail;
 import org.shanoir.ng.user.model.User;
 
 /**

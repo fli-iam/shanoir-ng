@@ -101,7 +101,7 @@ public class RabbitMQDatasetsService {
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
-			)
+	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveMessageImport(commandArrStr);
 	}

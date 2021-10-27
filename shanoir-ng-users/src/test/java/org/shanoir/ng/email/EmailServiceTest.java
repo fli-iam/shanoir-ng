@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.shared.email.DatasetImportEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;

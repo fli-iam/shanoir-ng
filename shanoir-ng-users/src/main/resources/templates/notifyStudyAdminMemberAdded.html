@@ -1,0 +1,30 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2021 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p>Dear <span th:text="${recipientFirstName}"></span> <span th:text="${recipientLastName}"></span>,</p><br/>
+    <br/>
+    <p>a new member has been added to your study <span th:text="${studyName}"></span> by <span th:text="${adminEmail}"></span>:</p><br/>
+    <br/>
+    <ul>
+	<li><span th:text="${memberAccountName}"></span>, <span th:text="${memberFirstName}"></span>, <span th:text="${memberLastName}"></span>, <span th:text="${memberEmail}"></span></li>
+    </ul>    
+    <br/>
+    <p>With kind regards,</p><br/>
+    <p>Shanoir administrators</p>
+</body>
+</html>

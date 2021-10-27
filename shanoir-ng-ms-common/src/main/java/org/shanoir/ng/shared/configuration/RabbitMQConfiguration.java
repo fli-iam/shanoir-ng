@@ -100,7 +100,7 @@ public class RabbitMQConfiguration {
 	/** Queue used to get information for study_examination deletion relationship.*/
 	public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
 
-	/** Send a mail from dataset microservice to study users */
+	/** Send a mail from dataset microservice to ms users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
 	/** Queue to re-convert using a different nifti converter */
