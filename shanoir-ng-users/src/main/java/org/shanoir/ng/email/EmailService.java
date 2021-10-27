@@ -14,13 +14,14 @@
 
 package org.shanoir.ng.email;
 
-import org.shanoir.ng.shared.email.DatasetImportEmail;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
 
 /**
  * Email service.
  * 
- * @author msimon
+ * @author msimon, mkain
  *
  */
 public interface EmailService {
@@ -115,6 +116,14 @@ public interface EmailService {
 	 *  This method notifies a study manager that some data was imported in the study.
 	 * @param generatedMail: The object containing all the mail informations
 	 */
-	void notifyStudyManagerDataImported(DatasetImportEmail generatedMail);
+	void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail);
+
+	/**
+	 * This method notifies a study manager that one ore more new members, StudyUsers,
+	 * have been added to his study.
+	 * 
+	 * @param mail
+	 */
+	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded generatedMail);
 
 }

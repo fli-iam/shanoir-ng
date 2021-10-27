@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.shared.email.DatasetImportEmail;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -148,7 +148,7 @@ public class EmailServiceTest {
 		Mockito.when(userRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(user));
 		Mockito.when(userRepositoryMock.findAllById(Mockito.any(Iterable.class))).thenReturn(Collections.singletonList(user));
 		// send back a list of administrators
-		DatasetImportEmail mail = new DatasetImportEmail();
+		EmailDatasetsImported mail = new EmailDatasetsImported();
 		mail.setStudyName("StudyName");
 		mail.setStudyId("12");
 		mail.setUserId(1L);

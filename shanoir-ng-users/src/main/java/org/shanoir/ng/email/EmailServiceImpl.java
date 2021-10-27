@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.shanoir.ng.shared.email.DatasetImportEmail;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -39,11 +40,13 @@ import org.thymeleaf.context.Context;
 /**
  * Implementation of email service.
  * 
- * @author msimon
+ * @author msimon, mkain
  *
  */
 @Service
 public class EmailServiceImpl implements EmailService {
+
+	private static final String EMAIL = "email";
 
 	private static final String EXPIRATION_DATE = "expirationDate";
 
@@ -373,7 +376,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerDataImported(DatasetImportEmail generatedMail) {
+	public void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail) {
         // Find user that imported
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 
@@ -419,6 +422,36 @@ public class EmailServiceImpl implements EmailService {
 		}
 	}
 
+	@Override
+	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded generatedMail) {
+        // Find user that edited the study
+        User user = userRepository.findById(generatedMail.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		
+		for (User admin : admins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Member(s) added to " + generatedMail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(EMAIL, user.getEmail());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+				LOG.error(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending study-users-added mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			mailSender.send(messagePreparator);
+		}
+	}
+	
 	private class DatasetDetail {
 		private String url;
 		private String name;

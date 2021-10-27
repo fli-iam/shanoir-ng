@@ -17,11 +17,12 @@ package org.shanoir.ng.configuration.amqp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.shanoir.ng.email.DatasetImportEmail;
+
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,7 @@ public class RabbitMQUserService {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		try {
-			DatasetImportEmail mail = mapper.readValue(generatedMailAsString, DatasetImportEmail.class);
+			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
 			this.emailService.notifyStudyManagerDataImported(mail);
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);

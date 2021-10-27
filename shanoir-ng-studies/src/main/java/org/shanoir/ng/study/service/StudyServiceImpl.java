@@ -341,6 +341,28 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.getStudyUserList().addAll(created);
 		}
 		
+		/**
+		 * 		// Get all recipients
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
+		for (StudyUser user : users) {
+			if (user.isReceiveNewImportReport()) {
+				recipients.add(user.getUserId());
+			}
+		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recipients
+			return;
+		}
+		generatedMail.setRecipients(recipients);
+		
+				try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(generatedMail));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send email for this import. ", e);
+		}
+		
+		 */
+		
 		// Remove deleted: study user + data user agreements
 		for (Long studyUserIdToBeDeleted : idsToBeDeleted) {
 			StudyUser studyUser = studyUserRepository.findById(studyUserIdToBeDeleted).orElse(null);

@@ -1,47 +1,24 @@
 package org.shanoir.ng.shared.email;
 
-import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents an EMAIL to be sent after a dataset was imported.
+ * This class represents an EMAIL to be sent after datasets have been imported.
  * 
- * @author JCD
+ * @author JCD, mkain
  *
  */
-public class DatasetImportEmail {
-
-	List<Long> recipients;
+public class EmailDatasetsImported extends EmailBase {
 
 	Map<Long, String> datasets;
-	
-    String studyName;
-    
-    String studyId;
     
     String subjectName;
 
     String examinationId;
     
-    Long userId;
-
     String examDate;
 
     String studyCard;
-
-	/**
-	 * @return the recipients
-	 */
-	public List<Long> getRecipients() {
-		return recipients;
-	}
-
-	/**
-	 * @param recipients the recipients to set
-	 */
-	public void setRecipients(List<Long> recipients) {
-		this.recipients = recipients;
-	}
 
 	/**
 	 * @return the datasets
@@ -55,34 +32,6 @@ public class DatasetImportEmail {
 	 */
 	public void setDatasets(Map<Long, String>  datasets) {
 		this.datasets = datasets;
-	}
-
-	/**
-	 * @return the studyName
-	 */
-	public String getStudyName() {
-		return studyName;
-	}
-
-	/**
-	 * @param studyName the studyName to set
-	 */
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
-
-	/**
-	 * @return the studyId
-	 */
-	public String getStudyId() {
-		return studyId;
-	}
-
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(String studyId) {
-		this.studyId = studyId;
 	}
 
 	/**
@@ -111,20 +60,6 @@ public class DatasetImportEmail {
 	 */
 	public void setExaminationId(String examinationId) {
 		this.examinationId = examinationId;
-	}
-
-	/**
-	 * @return the userId
-	 */
-	public Long getUserId() {
-		return userId;
-	}
-
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(Long userId) {
-		this.userId = userId;
 	}
 
 	/**
