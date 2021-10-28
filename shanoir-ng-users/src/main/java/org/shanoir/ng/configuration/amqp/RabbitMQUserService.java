@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
@@ -50,8 +46,6 @@ public class RabbitMQUserService {
 	@Autowired
 	EmailService emailService;
 
-	Map<Long, List<String>> series = new HashMap<>();
-
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
 	 * @param commandArrStr the task as a json string.
@@ -76,7 +70,7 @@ public class RabbitMQUserService {
 	}
 
 	/**
-	 * Receives an import end event as a json object, thus send a mail to study Manager to notice him
+	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
