@@ -40,12 +40,21 @@ configure_instance()
 	sed -i "s\"SHANOIR_INSTANCE_NAME\"$SHANOIR_INSTANCE_NAME\"g
 		s/SHANOIR_INSTANCE_COLOR/$instance_color/g
 		s/SHANOIR_USER_COLOR/$user_color/g
-		" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles.*.css
+		" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles*.css
+}
+
+configure_keycloak_adapter_mode()
+{
+	sed -i "s/'SHANOIR_KEYCLOAK_ADAPTER_MODE'/'$SHANOIR_KEYCLOAK_ADAPTER_MODE'/g
+		" /etc/nginx/html/index.html
 }
 
 optional SHANOIR_INSTANCE_COLOR
 optional SHANOIR_INSTANCE_NAME
 configure_instance
+
+optional SHANOIR_KEYCLOAK_ADAPTER_MODE
+configure_keycloak_adapter_mode
 
 abort_if_error
 

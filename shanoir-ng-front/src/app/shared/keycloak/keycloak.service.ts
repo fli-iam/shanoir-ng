@@ -16,6 +16,21 @@ import { Injectable } from '@angular/core';
 import * as AppUtils from '../../utils/app.utils';
 
 
+// The keycloak adapter supports two authentication methods : "login-required"
+// and "check-sso", as documented in:
+// https://www.keycloak.org/docs/latest/securing_apps/#_javascript_adapter)
+//
+// - "check-sso" performs the authentication in an hidden iframe and won't
+//   require any redirection (if using a silent check url). It is fast but may
+//   fail with modern browsers if the keycloak server is served from a
+//   different host name.
+//   https://www.keycloak.org/docs/latest/securing_apps/#_modern_browsers
+//
+// - "login-required" redirects the browser to the keycloak server, which
+//   checks the session cookie, generates the token and redirects to us.
+//   It is reliable but slower (because of the two redirections the
+//   authentication is performed twice and the SPA is loaded twice).
+const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
 
 declare var Keycloak: any;
 
@@ -40,17 +55,32 @@ export class KeycloakService {
         KeycloakService.auth.loggedIn = true; // false;
 
         return new Promise((resolve, reject) => {
-            keycloakAuth.init({ onLoad: 'login-required' })
-                .success(() => {
-                    KeycloakService.auth.loggedIn = true;
-                    KeycloakService.auth.authz = keycloakAuth;
-                    // Connected user id
-                    KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
-                    KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
-                        + AppUtils.LOGOUT_REDIRECT_URL;
-                    resolve(null);
+            keycloakAuth.init(
+                USE_LOGIN_REQUIRED
+                ? { onLoad: 'login-required' }
+                : { onLoad: 'check-sso', silentCheckSsoRedirectUri: AppUtils.SILENT_CHECK_SSO_URL }
+            )
+                .then((authenticated) => {
+                    if (authenticated) {
+                        KeycloakService.auth.loggedIn = true;
+                        KeycloakService.auth.authz = keycloakAuth;
+                        // Connected user id
+                        KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
+                        KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
+                            + AppUtils.LOGOUT_REDIRECT_URL;
+                        resolve(null);
+                    } else {
+                        if (!USE_LOGIN_REQUIRED) {
+                            // When the session cookie is invalid 'login-required'
+                            // automatically redirects to the login form.
+                            // But 'check-sso' only checks the cookie, we have
+                            // to do an explicit redirection
+                            window.location.replace(keycloakAuth.createLoginUrl());
+                        }
+                        reject();
+                    }
                 })
-                .error(() => {
+                .catch(() => {
                     reject();
                 });
         });
@@ -65,10 +95,10 @@ export class KeycloakService {
             this.gettingToken = true;
             this.tokenPromise = new Promise<string>((resolve, reject) => {
                 if (KeycloakService.auth.authz.token) {
-                    KeycloakService.auth.authz.updateToken(5).success(() => {
+                    KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
                         resolve(<string>KeycloakService.auth.authz.token);
-                    }).error(() => {
+                    }).catch(() => {
                         reject();
                     });
                 }

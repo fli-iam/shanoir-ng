@@ -68,6 +68,7 @@ require()
 	    SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
 	    SHANOIR_INSTANCE_NAME)  match "$name" '^[^"\\]*$'				;;
 	    SHANOIR_INSTANCE_COLOR) match "$name" '^([A-Za-z]*|#[0-9a-fA-F]{3,6})$'	;;
+	    SHANOIR_KEYCLOAK_ADAPTER_MODE) match "$name" '^(login-required|check-sso)$'	;;
 
             SHANOIR_ADMIN_EMAIL)    ;;
             SHANOIR_ADMIN_NAME)     ;;

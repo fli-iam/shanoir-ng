@@ -296,6 +296,7 @@ services:
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
+      - SHANOIR_KEYCLOAK_ADAPTER_MODE
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
