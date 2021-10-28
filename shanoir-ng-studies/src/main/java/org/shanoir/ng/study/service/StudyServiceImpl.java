@@ -314,7 +314,7 @@ public class StudyServiceImpl implements StudyService {
 		for (Long id : idsToBeUpdated) {
 			StudyUser existingSu = existing.get(id);
 			StudyUser replacingSu = replacing.get(id);
-			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
+			existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
 			existingSu.setConfirmed(replacingSu.isConfirmed());

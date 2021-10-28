@@ -1,0 +1,1 @@
+ALTER TABLE study_user RENAME COLUMN receive_anonymization_report TO receive_study_user_report;
