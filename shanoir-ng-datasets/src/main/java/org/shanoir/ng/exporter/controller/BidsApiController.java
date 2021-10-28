@@ -99,7 +99,11 @@ public class BidsApiController implements BidsApi {
 		fileDir.mkdirs();
 
 		// Copy the file into the temp dir
-		Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+		if (fileToBeZipped.isDirectory()) {
+			FileUtils.copyDirectory(fileToBeZipped, new File(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+		} else {
+			Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+		}
 		
 		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
 		zipFile.createNewFile();
@@ -155,7 +159,6 @@ public class BidsApiController implements BidsApi {
 		Path p = Paths.get(zipFilePath);
 		// 1. Create an outputstream (zip) on the destination
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-			
 			// 2. "Walk" => iterate over the source file
 			Path pp = Paths.get(sourceDirPath);
 			try(Stream<Path> walker = Files.walk(pp)) {
