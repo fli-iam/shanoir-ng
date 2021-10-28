@@ -19,6 +19,7 @@ import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,25 @@ public class RabbitMQUserService {
 		try {
 			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
 			this.emailService.notifyStudyManagerDataImported(mail);
+		} catch (Exception e) {
+			LOG.error("Something went wrong deserializing the import event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+		}
+	}
+	
+	/**
+	 * Receives an study user report as a json object, thus send a mail to study manager to notice him
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE)
+	@RabbitHandler
+	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		try {
+			EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
+			this.emailService.notifyStudyManagerStudyUsersAdded(mail);
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
