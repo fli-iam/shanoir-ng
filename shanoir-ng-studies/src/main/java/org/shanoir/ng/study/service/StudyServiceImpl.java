@@ -384,7 +384,7 @@ public class StudyServiceImpl implements StudyService {
 	
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.studyNameUpdateQueue().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
 					new ObjectMapper().writeValueAsString(study));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {

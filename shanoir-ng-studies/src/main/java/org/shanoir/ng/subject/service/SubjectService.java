@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -172,5 +173,12 @@ public interface SubjectService {
 	 * @return
 	 */
 	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
+
+	/**
+	 * Update subject name and values for other microservices.
+	 * @param subjectToSubjectDTO the subject DTO to update
+	 * @throws MicroServiceCommunicationException 
+	 */
+	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 
 }
