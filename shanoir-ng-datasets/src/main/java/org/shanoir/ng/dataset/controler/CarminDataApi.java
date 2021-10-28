@@ -4,11 +4,14 @@ import io.swagger.annotations.*;
 import org.shanoir.ng.dataset.model.carmin.GetPathResponse;
 import org.shanoir.ng.dataset.model.carmin.Path;
 import org.shanoir.ng.dataset.model.carmin.UploadData;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 
 @Api(value = "carmin-data")
 public interface CarminDataApi {
@@ -33,8 +36,8 @@ public interface CarminDataApi {
     @RequestMapping(value = "/path/{completePath}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<GetPathResponse> getPath(@ApiParam(value = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @ApiParam(value = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
-    ) @Valid @RequestParam(value = "action", required = true) String action);
+    void getPath(@ApiParam(value = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @ApiParam(value = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
+    ) @Valid @RequestParam(value = "action", required = true) String action, HttpServletResponse response) throws IOException, RestServiceException;
 
 
     @ApiOperation(value = "Upload data to a path", tags = "A request without content creates a directory (an error should be returned if the path already exists). A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. The base64 content (part of a json payload) can either be an encoded file, are an encoded zip archive that will create a directory. All other content (with any content type) will be considered as a raw file and will override the existing path content. If the parent directory of the file/directory to create does not exist, an error must be returned.")
