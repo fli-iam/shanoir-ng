@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
@@ -45,6 +46,8 @@ import org.thymeleaf.context.Context;
  */
 @Service
 public class EmailServiceImpl implements EmailService {
+
+	private static final String STUDY_USERS = "studyUsers";
 
 	private static final String EMAIL = "email";
 
@@ -423,49 +426,36 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded generatedMail) {
+	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
         // Find user that edited the study
-        User user = userRepository.findById(generatedMail.getUserId()).orElse(null);
+        User user = userRepository.findById(email.getUserId()).orElse(null);
 
 		// Get the list of recipients
-		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
 		
-		for (User admin : admins) {
+		List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
+		
+		for (User studyAdmin : studyAdmins) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
-				messageHelper.setTo(admin.getEmail());
-				messageHelper.setSubject("[Shanoir] Member(s) added to " + generatedMail.getStudyName());
+				messageHelper.setTo(studyAdmin.getEmail());
+				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
-				variables.put(FIRSTNAME, admin.getFirstName());
-				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, studyAdmin.getFirstName());
+				variables.put(LASTNAME, studyAdmin.getLastName());
 				variables.put(EMAIL, user.getEmail());
-				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(STUDY_NAME, email.getStudyName());
+				variables.put(STUDY_USERS, newStudyUsers);
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
 				LOG.error(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
-			LOG.info("Sending study-users-added mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
 			mailSender.send(messagePreparator);
 		}
 	}
-	
-	private class DatasetDetail {
-		private String url;
-		private String name;
-		public String getUrl() {
-			return url;
-		}
-		public void setUrl(String url) {
-			this.url = url;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-	}
+
 }

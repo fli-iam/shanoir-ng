@@ -10,15 +10,15 @@ import java.util.Map;
  */
 public class EmailDatasetsImported extends EmailBase {
 
-	Map<Long, String> datasets;
+	private Map<Long, String> datasets;
     
-    String subjectName;
+	private String subjectName;
 
-    String examinationId;
+	private String examinationId;
     
-    String examDate;
+	private String examDate;
 
-    String studyCard;
+	private String studyCard;
 
 	/**
 	 * @return the datasets

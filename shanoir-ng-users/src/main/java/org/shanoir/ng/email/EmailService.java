@@ -124,6 +124,6 @@ public interface EmailService {
 	 * 
 	 * @param mail
 	 */
-	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded generatedMail);
+	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
 }
