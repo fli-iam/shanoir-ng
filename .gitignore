@@ -50,3 +50,5 @@ shanoir-ng-tests/tests/.Python
 shanoir-ng-tests/tests/include/
 shanoir-ng-tests/tests/lib/
 shanoir-ng-tests/tests/pip-selfcheck.json
+.idea/
+*.iml

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/MS_ChallengeScores/ShanoirChallengeScoresMS.iml" filepath="$PROJECT_DIR$/MS_ChallengeScores/ShanoirChallengeScoresMS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-anonymization/anonymization.iml" filepath="$PROJECT_DIR$/shanoir-ng-anonymization/anonymization.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-parent/shanoir-ng.iml" filepath="$PROJECT_DIR$/shanoir-ng-parent/shanoir-ng.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-back/shanoir-ng-back.iml" filepath="$PROJECT_DIR$/shanoir-ng-back/shanoir-ng-back.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-datasets/shanoir-ng-datasets.iml" filepath="$PROJECT_DIR$/shanoir-ng-datasets/shanoir-ng-datasets.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-exchange/shanoir-ng-exchange.iml" filepath="$PROJECT_DIR$/shanoir-ng-exchange/shanoir-ng-exchange.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-front/shanoir-ng-front.iml" filepath="$PROJECT_DIR$/shanoir-ng-front/shanoir-ng-front.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-import/shanoir-ng-import.iml" filepath="$PROJECT_DIR$/shanoir-ng-import/shanoir-ng-import.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-keycloak-auth/shanoir-ng-keycloak-auth.iml" filepath="$PROJECT_DIR$/shanoir-ng-keycloak-auth/shanoir-ng-keycloak-auth.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-ms-common/shanoir-ng-ms-common.iml" filepath="$PROJECT_DIR$/shanoir-ng-ms-common/shanoir-ng-ms-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-preclinical/shanoir-ng-preclinical.iml" filepath="$PROJECT_DIR$/shanoir-ng-preclinical/shanoir-ng-preclinical.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-studies/shanoir-ng-studies.iml" filepath="$PROJECT_DIR$/shanoir-ng-studies/shanoir-ng-studies.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-study-rights/shanoir-ng-study-rights.iml" filepath="$PROJECT_DIR$/shanoir-ng-study-rights/shanoir-ng-study-rights.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-ng-users/shanoir-ng-users.iml" filepath="$PROJECT_DIR$/shanoir-ng-users/shanoir-ng-users.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shanoir-uploader/shanoir-uploader.iml" filepath="$PROJECT_DIR$/shanoir-uploader/shanoir-uploader.iml" />
+    </modules>
+  </component>
+</project>
