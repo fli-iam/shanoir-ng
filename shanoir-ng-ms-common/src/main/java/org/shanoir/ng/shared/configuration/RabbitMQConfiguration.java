@@ -341,4 +341,10 @@ public class RabbitMQConfiguration {
 	public static Queue importDatasetMail() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
+	
+	@Bean
+	public static Queue studyUserMail() {
+		return new Queue(STUDY_USER_MAIL_QUEUE, true);
+	}
+
 }
