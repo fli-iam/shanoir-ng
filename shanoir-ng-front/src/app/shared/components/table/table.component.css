@@ -3,7 +3,7 @@
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
 caption { overflow: hidden; }
-th { width: 100%; white-space: normal; position: relative; }
+th { width: 100%; white-space: normal; position: relative; height: 1px; min-width: 10px; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
 		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
 			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
@@ -71,7 +71,8 @@ td checkbox { transform: scale(0.8); }
 .triangle.down { bottom: -8px; }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
-.col-title { z-index: 1; }
+.col-title { z-index: 1; transform: rotate(45deg); }
+.click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
 
 .clickable { cursor: pointer; }
 .refresh { color: var(--greyer); }
@@ -88,3 +89,8 @@ app-modal .header { font-size: 16px; }
 app-modal .body { margin: 15px 10px; }
 app-modal input { width: 37px; }
 app-modal table td { padding: 1 5px; }
+
+.resizer { display: block; position: absolute; top: 0; bottom: 0; right: -5px; width: 10px; z-index: 1; }
+thead th:not(:first-child) { border-left: 1px solid grey; }
+
+.resizing, .resizer { cursor: col-resize !important; user-select: none; }
