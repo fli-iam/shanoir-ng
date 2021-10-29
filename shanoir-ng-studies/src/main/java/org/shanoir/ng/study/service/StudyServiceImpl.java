@@ -415,6 +415,11 @@ public class StudyServiceImpl implements StudyService {
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user create info through RabbitMQ");
 		}
+		
+		// Use study "study" to decide, to send email to which user
+		List<StudyUser> created = new ArrayList<>();
+		created.add(studyUser);
+		sendStudyUserReport(study, created);
 	}
 
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
