@@ -33,7 +33,7 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
 	List<StudyUser> findByUserId(Long userId);
 	
-	List<StudyUser> findByStudyId(Long studyId);
+	List<StudyUser> findByStudy_Id(Long studyId);
 
 	StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
 

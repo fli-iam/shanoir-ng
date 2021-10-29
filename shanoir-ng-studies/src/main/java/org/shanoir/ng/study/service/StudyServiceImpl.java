@@ -371,14 +371,15 @@ public class StudyServiceImpl implements StudyService {
 			LOG.error("Could not transmit study-user update info through RabbitMQ");
 		}
 
-		sendStudyUserReport(studyDb, created);
+		// Use updated study "study" to decide, to send email to which user
+		sendStudyUserReport(study, created);
 
 	}
 
-	private void sendStudyUserReport(Study studyDb, List<StudyUser> created) {
+	private void sendStudyUserReport(Study study, List<StudyUser> created) {
 		// Get all recipients
 		List<Long> recipients = new ArrayList<Long>();
-		List<StudyUser> studyUsers = (List<StudyUser>) studyUserRepository.findByStudyId(studyDb.getId());
+		List<StudyUser> studyUsers = study.getStudyUserList();
 		for (StudyUser studyUser : studyUsers) {
 			if (studyUser.isReceiveStudyUserReport()) {
 				recipients.add(studyUser.getUserId());
@@ -390,9 +391,10 @@ public class StudyServiceImpl implements StudyService {
 			emailStudyUserAdded.setRecipients(recipients);
 			final Long userId = KeycloakUtil.getTokenUserId();
 			emailStudyUserAdded.setUserId(userId);
-			emailStudyUserAdded.setStudyId(studyDb.getId().toString());
-			emailStudyUserAdded.setStudyName(studyDb.getName());
-			emailStudyUserAdded.setStudyUsers(created.stream().map(StudyUser::getUserId).collect(Collectors.toList()));
+			emailStudyUserAdded.setStudyId(study.getId().toString());
+			emailStudyUserAdded.setStudyName(study.getName());
+			List<Long> studyUserIds = created.stream().map(StudyUser::getUserId).collect(Collectors.toList());
+			emailStudyUserAdded.setStudyUsers(studyUserIds);
 			try {
 				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
 						new ObjectMapper().writeValueAsString(emailStudyUserAdded));

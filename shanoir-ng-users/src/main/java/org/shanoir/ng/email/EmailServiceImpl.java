@@ -439,6 +439,7 @@ public class EmailServiceImpl implements EmailService {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
+				messageHelper.setCc(user.getEmail());
 				messageHelper.setTo(studyAdmin.getEmail());
 				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
@@ -447,7 +448,7 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(EMAIL, user.getEmail());
 				variables.put(STUDY_NAME, email.getStudyName());
 				variables.put(STUDY_USERS, newStudyUsers);
-				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
 				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
 				LOG.error(content);
 				messageHelper.setText(content, true);

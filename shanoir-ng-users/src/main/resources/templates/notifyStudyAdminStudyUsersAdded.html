@@ -16,21 +16,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p><br/>
+    Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,<br/>
     <br/>
-    <p>one or more new members have been added to study <span th:text="${studyName}"></span> by <span th:text="${email}"></span>:</p><br/>
-    <br/>
+    one or more new members have been added to study <span th:text="${studyName}"></span> by <span th:text="${email}"></span>:<br/>
     <ul>
-    	<li th:each="studyUsers : ${studyUser}">
+    	<li th:each="studyUser : ${studyUsers}">
 			<span th:text="${studyUser.username}"></span>, <span th:text="${studyUser.firstName}"></span>, 
 			<span th:text="${studyUser.lastName}"></span>, <span th:text="${studyUser.email}"></span>
     	</li>
     </ul>
+    Please be aware, that it is your responsibility to manage the members of study <span th:text="${studyName}"></span>.<br/>
+    Please connect to <a th:href="${serverAddress}">Shanoir</a> to manage the members.<br/>
     <br/>
-    <p>Please be aware, that it is your responsibility to manage the members of study <span th:text="${studyName}"></span>.</p><br/>
-    <p>Please connect to <a th:href="${serverAddress}">Shanoir</a> to manage the members.</p><br/>
-    <br/>    
-    <p>With kind regards,</p><br/>
-    <p>The Shanoir administrators</p>
+    With kind regards,<br/>
+    Shanoir administrator
 </body>
 </html>
