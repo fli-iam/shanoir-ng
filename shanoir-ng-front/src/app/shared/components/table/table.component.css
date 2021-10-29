@@ -23,7 +23,7 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 			.controls .options .max-results { width: 40px; text-align: right; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
-	th.checkbox-col { width: 18px; }
+	th.checkbox-col { width: 20px; }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -71,7 +71,7 @@ td checkbox { transform: scale(0.8); }
 .triangle.down { bottom: -8px; }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
-.col-title { z-index: 1; transform: rotate(45deg); }
+.col-title { z-index: 1; }
 .click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
 
 .clickable { cursor: pointer; }

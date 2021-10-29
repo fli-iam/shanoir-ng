@@ -150,7 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
                 <span (click)="settingsDialog.show()" class="clickable left-icon"><i class="fas fa-cog"></i>Columns settings</span>
-                <span (click)="resetColumns()" class="clickable left-icon"><i class="fas fa-undo-alt"></i>Reset columns size</span>
+                <span (click)="resetColumns()" class="clickable left-icon"><i class="fas fa-undo-alt"></i>Reset columns</span>
             </ng-container>
         </span>
     </th>
