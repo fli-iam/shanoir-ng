@@ -202,14 +202,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    public save(): Promise<void> {
-        let prom = super.save().then(result => {
+    public save(): Promise<Examination> {
+        return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
+            }
+            return result;            
         });
-        return prom;
     }
 
     getFileName(element): string {
