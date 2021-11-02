@@ -170,7 +170,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 			
 			// Use newly created study "studyDb" to decide, to send email to which user
-			sendStudyUserReport(study, studyDb.getStudyUserList());
+			sendStudyUserReport(studyDb, studyDb.getStudyUserList());
 		}
 
 		return studyDb;
