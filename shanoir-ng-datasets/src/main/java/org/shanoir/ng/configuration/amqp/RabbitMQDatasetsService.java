@@ -16,6 +16,9 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -55,6 +58,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -190,12 +194,16 @@ public class RabbitMQDatasetsService {
 	 * @param subjectId the subject ID updated
 	 */
 	private void updateSolr(final Long subjectId) {
+		Set<Long> datasetsToUpdate = new HashSet<>();
 		for (Examination exam : examinationRepository.findBySubjectId(subjectId)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetsToUpdate.add(ds.getId());
 				}
 			}
+		}
+		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
+			this.solrService.indexDatasets(new ArrayList<>(datasetsToUpdate));
 		}
 	}
 
@@ -253,11 +261,13 @@ public class RabbitMQDatasetsService {
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
+			List<Long> datasetIds = new ArrayList<>();
 			if (acq != null) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetIds.add(ds.getId());
 				}
 			}
+			solrService.indexDatasets(datasetIds);
 		} catch (Exception e) {
 			LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
