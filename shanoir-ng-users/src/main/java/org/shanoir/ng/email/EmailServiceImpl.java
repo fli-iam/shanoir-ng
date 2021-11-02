@@ -416,7 +416,7 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(STUDY_CARD, generatedMail.getStudyCard());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminDataImported", variables);
-				LOG.error(content);
+				LOG.info(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
@@ -450,7 +450,7 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(STUDY_USERS, newStudyUsers);
 				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
 				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
-				LOG.error(content);
+				LOG.info(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
