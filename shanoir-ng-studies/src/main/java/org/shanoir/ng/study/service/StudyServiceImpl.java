@@ -168,6 +168,9 @@ public class StudyServiceImpl implements StudyService {
 			} catch (MicroServiceCommunicationException e) {
 				LOG.error("Could not transmit study-user create info through RabbitMQ");
 			}
+			
+			// Use newly created study "studyDb" to decide, to send email to which user
+			sendStudyUserReport(study, studyDb.getStudyUserList());
 		}
 
 		return studyDb;
@@ -386,7 +389,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		// do nothing, in case no users should receive study user report/mail
-		if (!recipients.isEmpty()) {
+		if (!recipients.isEmpty() && !created.isEmpty()) {
 			EmailStudyUsersAdded emailStudyUserAdded = new EmailStudyUsersAdded();
 			emailStudyUserAdded.setRecipients(recipients);
 			final Long userId = KeycloakUtil.getTokenUserId();
