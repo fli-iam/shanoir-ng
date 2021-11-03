@@ -366,8 +366,8 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
-            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+            { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
             { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)}
         ];
     }
@@ -411,7 +411,7 @@ export class StudyComponent extends EntityComponent<Study> {
             let studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
             studyUser.userName = selectedUser.username;
-            studyUser.receiveAnonymizationReport = false;
+            studyUser.receiveStudyUserReport = false;
             studyUser.receiveNewImportReport = false;
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
