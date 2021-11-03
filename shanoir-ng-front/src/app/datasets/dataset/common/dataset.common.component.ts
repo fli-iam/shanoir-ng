@@ -26,7 +26,7 @@ import { Option } from '../../../shared/select/select.component';
 import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
-import { DatasetType, DatasetTypes } from '../../shared/dataset-type.model';
+import { DatasetType } from '../../shared/dataset-type.model';
 
 
 @Component({
@@ -51,7 +51,7 @@ export class CommonDatasetComponent implements OnChanges {
             private formBuilder: FormBuilder) {
 
         this.exploredEntityOptions = ExploredEntity.options;
-        this.datasetTypes = DatasetTypes.map(prop => new Option<DatasetType>(prop, prop));
+        this.datasetTypes = DatasetType.options;
         this.processedDatasetTypeOptions = ProcessedDatasetType.options;
     }
 
