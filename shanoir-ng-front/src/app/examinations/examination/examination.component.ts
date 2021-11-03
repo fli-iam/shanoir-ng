@@ -61,6 +61,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
+	hasEEG: boolean = false;
+	hasDicom: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -200,14 +202,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    public save(): Promise<void> {
-        let prom = super.save().then(result => {
+    public save(): Promise<Examination> {
+        return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
             }
+            return result;            
         });
-        return prom;
     }
 
     getFileName(element): string {
@@ -232,6 +234,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                     if (dsAcq.datasets != 'UNLOADED') {
                         dsAcq.datasets.forEach(ds => {
                             datasetIds.push(ds.id);
+							if (ds.type == 'Eeg') {
+								this.hasEEG = true;
+							} else {
+								this.hasDicom = true;
+							}
                         });
                     } else {
                         found = false;  

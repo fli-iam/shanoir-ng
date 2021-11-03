@@ -20,7 +20,7 @@ export class StudyUser {
     id: number;
     study: Study;
     userId: number;
-    receiveAnonymizationReport: boolean;
+    receiveStudyUserReport: boolean;
     receiveNewImportReport: boolean;
     studyUserRights: StudyUserRight[];
     userName: string;

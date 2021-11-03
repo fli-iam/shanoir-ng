@@ -458,6 +458,7 @@
   <field name="studyId" type="plong"/>
   <field name="studyName" type="lowercase"/>
   <field name="subjectName" type="lowercase"/>
+  <field name="tags" type="strings"/>
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>

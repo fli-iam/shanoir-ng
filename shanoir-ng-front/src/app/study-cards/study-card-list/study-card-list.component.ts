@@ -61,10 +61,16 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     getColumnDefs(): any[] {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
-            { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
-            { headerName: "Center", field: 'acquisitionEquipment.center.name'},
+            { headerName: "Study", field: 'study.name', defaultField: 'study.id',
+			 	route: (studyCard: StudyCard) => '/study/details/' + studyCard.study.id
+			},
+            { headerName: "Center", field: 'acquisitionEquipment.center.name',
+				route: (studyCard: StudyCard) => studyCard.acquisitionEquipment && studyCard.acquisitionEquipment.center ? '/center/details/' + studyCard.acquisitionEquipment.center.id : null
+			},
             { headerName: "Equipment", field: "acquisitionEquipment", width: '200%',
-                cellRenderer: params => this.format(params.data.acquisitionEquipment) }
+                cellRenderer: params => this.format(params.data.acquisitionEquipment),
+				route: (studyCard: StudyCard) => studyCard.acquisitionEquipment? '/acquisition-equipment/details/' + studyCard.acquisitionEquipment.id : null
+			}
         ];
         return colDef;       
     }

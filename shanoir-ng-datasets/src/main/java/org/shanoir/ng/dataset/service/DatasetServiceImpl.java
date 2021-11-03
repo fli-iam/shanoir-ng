@@ -79,9 +79,9 @@ public class DatasetServiceImpl implements DatasetService {
 		repository.deleteByIdIn(ids);
 		solrService.deleteFromIndex(ids);
 		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));			
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 		}
-	}	
+	}
 
 	@Override
 	public Dataset findById(final Long id) {
@@ -130,6 +130,10 @@ public class DatasetServiceImpl implements DatasetService {
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
+		if (dataset.getOriginMetadata().getId().equals(dataset.getUpdatedMetadata().getId())) {
+			// Force creation of a new dataset metadata
+			dataset.getUpdatedMetadata().setId(null);
+		}
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;

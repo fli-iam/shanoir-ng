@@ -241,6 +241,7 @@ import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.com
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
 
@@ -502,6 +503,7 @@ import { TagInputComponent } from './tags/tag.input.component';
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
+		ExtraDataService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

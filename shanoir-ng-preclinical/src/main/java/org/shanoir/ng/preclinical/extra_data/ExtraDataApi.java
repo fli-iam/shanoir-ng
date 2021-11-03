@@ -16,11 +16,12 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -135,10 +136,10 @@ public interface ExtraDataApi {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
 			@ApiResponse(code = 400, message = "Invalid Examination Extra Data  id", response = Void.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
-	@GetMapping(value = "/examination/extradata/download/{id}", produces = {
-			MediaType.APPLICATION_OCTET_STREAM_VALUE, "application/json" })
-	ResponseEntity<Resource> downloadExtraData(
-			@ApiParam(value = "Examination extra data id to download", required = true) @PathVariable("id") Long id)
+	@GetMapping(value = "/examination/extradata/download/{id}")
+	void downloadExtraData(
+			@ApiParam(value = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
+			HttpServletResponse response)
 			throws RestServiceException;
 
 	@ApiOperation(value = "Update an existing physiologicalData", notes = "", response = Void.class, tags = {

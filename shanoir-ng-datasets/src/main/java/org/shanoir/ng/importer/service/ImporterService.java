@@ -71,13 +71,13 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.DatasetImportEmail;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -250,7 +250,13 @@ public class ImporterService {
 	 * @param generatedAcquisitions
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
-		DatasetImportEmail generatedMail = new DatasetImportEmail();
+		EmailDatasetsImported generatedMail = new EmailDatasetsImported();
+
+		Map<Long, String> datasets = new HashMap<>();
+		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
+			return;
+		}
+
 		generatedMail.setExamDate(examination.getExaminationDate().toString());
 		generatedMail.setExaminationId(examination.getId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
@@ -258,11 +264,6 @@ public class ImporterService {
 		generatedMail.setStudyName(importJob.getStudyName());
 		generatedMail.setUserId(userId);
 		generatedMail.setStudyCard(importJob.getStudyCardName());
-
-		Map<Long, String> datasets = new HashMap<>();
-		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
-			return;
-		}
 
 		for (DatasetAcquisition acq : generatedAcquisitions) {
 			if (!CollectionUtils.isEmpty(acq.getDatasets())) {
@@ -275,7 +276,7 @@ public class ImporterService {
 		generatedMail.setDatasets(datasets);
 		List<Long> recipients = new ArrayList<>();
 
-		// Get all recpients
+		// Get all recipients
 		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
 		for (StudyUser user : users) {
 			if (user.isReceiveNewImportReport()) {
@@ -283,7 +284,7 @@ public class ImporterService {
 			}
 		}
 		if (recipients.isEmpty()) {
-			// Do not send any mail if no recpients
+			// Do not send any mail if no recipients
 			return;
 		}
 		generatedMail.setRecipients(recipients);
@@ -361,7 +362,8 @@ public class ImporterService {
 	 */
 	public void createEegDataset(final EegImportJob importJob) {
 
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
+		Long userId = KeycloakUtil.getTokenUserId();
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 
 		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
@@ -381,6 +383,7 @@ public class ImporterService {
 			datasetAcquisition.setExamination(examination);
 			datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 			datasetAcquisition.setRank(0);
+			datasetAcquisition.setSortingIndex(0);
 
 			List<Dataset> datasets = new ArrayList<>();
 			float progress = 0f;
@@ -467,7 +470,7 @@ public class ImporterService {
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 				datasetToCreate.setOriginMetadata(originMetadata);
-				//datasetToCreate.setStudyId(importJob.getStudyId());
+				datasetToCreate.setUpdatedMetadata(originMetadata);
 				datasetToCreate.setSubjectId(importJob.getSubjectId());
 				datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
 				datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
@@ -477,11 +480,18 @@ public class ImporterService {
 
 			datasetAcquisition.setDatasets(datasets);
 			datasetAcquisitionService.create(datasetAcquisition);
-
-			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Success");
+			
 			event.setProgress(1f);
+			event.setStatus(ShanoirEvent.SUCCESS);
+			// This message is important for email service
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+					+": Successfully created datasets for subject " + importJob.getSubjectName()
+					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
+
+			// Send mail
+			sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition));
+
 			// Complete BIDS with data
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
