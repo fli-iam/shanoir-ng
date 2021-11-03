@@ -21,14 +21,14 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 public interface StudyUserInterface {
 
 	/**
-	 * @return the receiveAnonymizationReport
+	 * @return the receiveStudyUserReport
 	 */
-	public boolean isReceiveAnonymizationReport();
+	public boolean isReceiveStudyUserReport();
 
 	/**
-	 * @param receiveAnonymizationReport the receiveAnonymizationReport to set
+	 * @param receiveStudyUserReport the receiveStudyUserReport to set
 	 */
-	public void setReceiveAnonymizationReport(boolean receiveAnonymizationReport);
+	public void setReceiveStudyUserReport(boolean receiveStudyUserReport);
 
 	/**
 	 * @return the receiveNewImportReport

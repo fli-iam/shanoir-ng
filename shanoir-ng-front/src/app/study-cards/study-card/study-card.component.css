@@ -8,3 +8,5 @@
 .show-errors { background-color: var(--color-c); }
 .show-errors:hover { background-color: var(--color-c-light); }
 .show-errors:disabled { background-color: var(--grey); }
+
+.center:not(:first-child)::before { content: ","; }

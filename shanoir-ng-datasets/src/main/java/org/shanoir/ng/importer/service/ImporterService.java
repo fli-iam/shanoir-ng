@@ -56,13 +56,13 @@ import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.DatasetImportEmail;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -230,7 +230,7 @@ public class ImporterService {
 	 * @param generatedAcquisitions
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
-		DatasetImportEmail generatedMail = new DatasetImportEmail();
+		EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
 		Map<Long, String> datasets = new HashMap<>();
 		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
@@ -256,7 +256,7 @@ public class ImporterService {
 		generatedMail.setDatasets(datasets);
 		List<Long> recipients = new ArrayList<>();
 
-		// Get all recpients
+		// Get all recipients
 		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(importJob.getStudyId());
 		for (StudyUser user : users) {
 			if (user.isReceiveNewImportReport()) {
@@ -264,7 +264,7 @@ public class ImporterService {
 			}
 		}
 		if (recipients.isEmpty()) {
-			// Do not send any mail if no recpients
+			// Do not send any mail if no recipients
 			return;
 		}
 		generatedMail.setRecipients(recipients);
