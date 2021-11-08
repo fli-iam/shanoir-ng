@@ -49,6 +49,8 @@ begin
     ac_eq.serial_number as device_serial_number,
     ex.id as examination_id,
     date(ex.examination_date) as examination_date,
+    date(dt_acq.creation_date) as import_date,
+    date(dt.creation_date) as creation_date,
     pr_md.name as protocol_type
 
     from studies.subject as sb
