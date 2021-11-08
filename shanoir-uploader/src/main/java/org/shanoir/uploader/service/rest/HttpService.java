@@ -72,11 +72,10 @@ public class HttpService {
 		try {
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				HttpEntity entity = response.getEntity();
-				EntityUtils.consume(entity);
-				return response;
-			}
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			EntityUtils.consume(entity);
+			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -93,9 +92,8 @@ public class HttpService {
 			}
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
-			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-				return response;				
-			}
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			return response;				
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -113,9 +111,8 @@ public class HttpService {
 			// }
 			HttpEntity entity = builder.build();
 			httpPost.setEntity(entity);
-			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-				return response;				
-			}
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -128,9 +125,8 @@ public class HttpService {
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPut.setEntity(requestEntity);
-			try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
-				return response;				
-			}
+			CloseableHttpResponse response = httpClient.execute(httpPut);
+			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -209,31 +205,27 @@ public class HttpService {
 					.setSSLSocketFactory(sslSocketFactory)
 					.build();
 		if (proxyHost != null && credentialsProvider != null) {
-			try (final CloseableHttpClient httpClient = HttpClients.custom()
+			final CloseableHttpClient httpClient = HttpClients.custom()
 					.setConnectionManager(connectionManager)
 					.setConnectionManagerShared(true)
 					.setProxy(proxyHost)
 					.setDefaultCredentialsProvider(credentialsProvider)
-					.build()) {
-				return httpClient;
-			}			
+					.build();
+			return httpClient;			
 		} else {
 			if (proxyHost != null) {
-				try (final CloseableHttpClient httpClient = HttpClients.custom()
+				final CloseableHttpClient httpClient = HttpClients.custom()
 						.setConnectionManager(connectionManager)
 						.setConnectionManagerShared(true)
 						.setProxy(proxyHost)
-						.build()) {
-					return httpClient;
-				}			
+						.build();
+				return httpClient;			
 			} else {
-				try (final CloseableHttpClient httpClient = HttpClients.custom()
+				final CloseableHttpClient httpClient = HttpClients.custom()
 						.setConnectionManager(connectionManager)
 						.setConnectionManagerShared(true)
-						.build()) {
-					return httpClient;
-				}			
-				
+						.build();
+				return httpClient;			
 			}		
 		}
 	}
