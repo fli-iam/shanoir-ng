@@ -64,6 +64,7 @@ import { DatasetProcessingService } from './datasets/shared/dataset-processing.s
 import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
 import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
+import { ProcessedDatasetComponent } from './datasets/dataset/processed/dataset.processed.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
@@ -88,7 +89,7 @@ import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
-import { ProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
@@ -305,6 +306,7 @@ import { TagInputComponent } from './tags/tag.input.component';
         StudyNamePipe,
         DatasetComponent,
         EegDatasetComponent,
+		ProcessedDatasetComponent,
         DatasetListComponent,
         DatasetProcessingComponent,
         DatasetProcessingListComponent,
@@ -322,7 +324,7 @@ import { TagInputComponent } from './tags/tag.input.component';
         EegUploadComponent,
         BidsUploadComponent,
         QueryPacsComponent,
-        ProcessedDatasetComponent,
+        ImportProcessedDatasetComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
         ProcessedDatasetClinicalContextComponent,

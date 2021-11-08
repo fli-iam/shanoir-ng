@@ -17,7 +17,7 @@ package org.shanoir.ng.importer.dto;
 import java.io.Serializable;
 import java.util.List;
 
-import org.shanoir.ng.dataset.model.ProcessedDatasetType;
+import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 

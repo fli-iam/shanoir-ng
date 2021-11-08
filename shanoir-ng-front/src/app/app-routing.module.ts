@@ -35,7 +35,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
-import { ProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -142,7 +142,7 @@ let routes: Routes = [
                 canActivate: [CanImportFromPACSGuard]
             }, {
                 path: 'processed-dataset',
-                component: ProcessedDatasetComponent,
+                component: ImportProcessedDatasetComponent,
                 data: {importMode: 'Processed Dataset'}
             }, {
                 path: 'series',

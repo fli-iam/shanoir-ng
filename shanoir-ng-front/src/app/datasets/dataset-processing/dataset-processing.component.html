@@ -34,11 +34,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
 				</legend>
 				<li>
-					<label class="required-label">Research study</label> 
+					<label class="required-label">Research study</label>
 					<span class="right-col">
 						<select-box 
 								formControlName="study" [(ngModel)]="study" [options]="studyOptions">
 						</select-box>
+					</span>
+				</li>
+				<legend>
+					Selected subject
+				</legend>
+				<li>
+					<label class="required-label">Selected subject</label>
+					<span class="right-col">
+						{{subject.name}}
 					</span>
 				</li>
 
@@ -100,12 +109,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[editMode]="mode != 'view'"
 						[columnDefs]="inputDatasetsColumnDefs">
 					</shanoir-table>
-				
 				</li>
-
 			</ol>
 
-			<ol>
+			<ol *ngIf="mode == 'view'">
 				<legend>
 					Output datasets
 					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>

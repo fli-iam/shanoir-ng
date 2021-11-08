@@ -29,7 +29,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     styleUrls: ['processed-dataset.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
-export class ProcessedDatasetComponent {
+export class ImportProcessedDatasetComponent {
     
     archiveStatus: Status = 'none';
     extensionError: boolean;

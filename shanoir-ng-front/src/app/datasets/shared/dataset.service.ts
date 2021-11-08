@@ -75,6 +75,15 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
+
+    getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
+		if (!subjectId) {
+			return this.getByStudyId(studyId);
+		}
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/find/subject/' + subjectId + '/study/' + studyId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
     
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {

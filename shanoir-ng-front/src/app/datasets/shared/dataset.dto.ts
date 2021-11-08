@@ -23,6 +23,7 @@ import { DatasetUtils } from './dataset.utils';
 import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
+import { ProcessedDataset } from '../dataset/processed/dataset.processed.model';
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
@@ -164,8 +165,11 @@ export class DatasetDTOService {
         entity.coordinatesSystem = dto.coordinatesSystem;
         return entity
     }
+    static mapSyncFieldsProcessed(dto: ProcessedDatasetDTO, entity: ProcessedDataset): ProcessedDataset {
+        entity.processedType = dto.processedType
+        return entity
+    }
 }
-
 
 export class DatasetDTO {
 
@@ -185,7 +189,6 @@ export class DatasetDTO {
         if (dataset) {
             this.id = dataset.id;
             this.creationDate = dataset.creationDate;
-            //this.groupOfSubjectsId = dataset.groupOfSubjectsId;
             this.originMetadata = dataset.originMetadata;
             this.studyId = dataset.study ? dataset.study.id : null;
             this.subjectId = dataset.subject ? dataset.subject.id : null;
@@ -224,6 +227,9 @@ export class EegDatasetDTO extends DatasetDTO {
     selected: boolean;
 }
 
+export class ProcessedDatasetDTO extends DatasetDTO {
+    processedType: string;
+}
 
 export class MrDatasetMetadataDTO {
     mrDatasetNature: MrDatasetNature;
