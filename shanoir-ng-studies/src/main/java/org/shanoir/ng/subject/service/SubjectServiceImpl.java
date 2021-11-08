@@ -221,7 +221,7 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
-	private boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
+	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
 					new ObjectMapper().writeValueAsString(subject));
