@@ -28,7 +28,6 @@ import org.shanoir.dicom.importer.UploadJobManager;
 import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.dicom.model.DicomTreeNode;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.Media;
@@ -101,12 +100,12 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			idealist.setIdList(new ArrayList<>(idList));
 			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idealist);
 			if (studyCards == null) {
-				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
+				throw new Exception(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
 
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
 			if (acquisitionEquipments == null) {
-				throw new ShanoirException("Error while retrieving acquisition equipments");
+				throw new Exception("Error while retrieving acquisition equipments");
 			}
 
 			// Iterate over study cards to get equipment + fill study => SC map

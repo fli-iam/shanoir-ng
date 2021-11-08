@@ -32,7 +32,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.http.HttpResponse;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
@@ -67,7 +68,7 @@ public final class Util {
 	 * 
 	 * @param List<T>
 	 */
-	public static <T> List<T> getMappedList(HttpResponse response, Class<T> classname) {
+	public static <T> List<T> getMappedList(CloseableHttpResponse response, Class<T> classname) {
 		StringBuffer result = new StringBuffer();
 		ObjectMapper mapper = new ObjectMapper();
 		result = readStringBuffer(response);
@@ -88,7 +89,7 @@ public final class Util {
 		return null;
 	}
 
-	public static <T> T getMappedObject(HttpResponse response, Class<T> classname) {
+	public static <T> T getMappedObject(CloseableHttpResponse response, Class<T> classname) {
 		StringBuffer result = new StringBuffer();
 		ObjectMapper mapper = new ObjectMapper();
 		result = readStringBuffer(response);
@@ -112,7 +113,7 @@ public final class Util {
 	/**
 	 * method for deserializing HttpResponse in a StringBuffer
 	 */
-	public static StringBuffer readStringBuffer(HttpResponse response) {
+	public static StringBuffer readStringBuffer(CloseableHttpResponse response) {
 		if (response == null) {
 			return null;
 		} else {
@@ -180,7 +181,7 @@ public final class Util {
 	}
 
 	public static boolean isHttpResponseValid(HttpResponse response) {
-		int code = response.getStatusLine().getStatusCode();
+		int code = response.getCode();
 		switch (code) {
 		case 200:
 			return true;
