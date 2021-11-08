@@ -12,8 +12,6 @@ import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -73,7 +71,6 @@ public class HttpService {
 	public CloseableHttpResponse get(String url) {
 		try {
 			HttpGet httpGet = new HttpGet(url);
-			configureProxyHost(httpGet);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
@@ -86,28 +83,9 @@ public class HttpService {
 		return null;
 	}
 
-	private void configureProxyHost(HttpUriRequestBase httpMethod) {
-		if (serviceConfiguration.isProxyEnable()) {
-			HttpHost proxyHost = null;
-			// Host and port are given
-			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
-				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
-						Integer.valueOf(serviceConfiguration.getProxyPort()));
-			// Only host is configured, so do not set port
-			} else if (serviceConfiguration.getProxyHost() != null) {
-				proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
-			}
-			final RequestConfig config = RequestConfig.custom()
-		            .setProxy(proxyHost)
-		            .build();
-			httpMethod.setConfig(config);
-		}
-	}
-
 	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) {
 		try {
 			HttpPost httpPost = new HttpPost(url);
-			configureProxyHost(httpPost);
 			if (isLoginPost) {
 				httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
 			} else {
@@ -127,7 +105,6 @@ public class HttpService {
 	public CloseableHttpResponse postFile(String url, String tempDirId, File file) {
 		try {
 			HttpPost httpPost = new HttpPost(url + tempDirId);
-			configureProxyHost(httpPost);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			// for (Iterator iterator = files.iterator(); iterator.hasNext();) {
@@ -148,7 +125,6 @@ public class HttpService {
 	public CloseableHttpResponse put(String url, String json) {
 		try {
 			HttpPut httpPut = new HttpPut(url);
-			configureProxyHost(httpPut);
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPut.setEntity(requestEntity);
@@ -175,9 +151,9 @@ public class HttpService {
 			}).build();
 		}
 		// In case of proxy: generate credentials provider with correct host
+		HttpHost proxyHost = null;
 		BasicCredentialsProvider credentialsProvider = null;
 		if (serviceConfiguration.isProxyEnable()) {
-			HttpHost proxyHost = null;
 			// Host and port are given
 			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
 				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
@@ -203,7 +179,7 @@ public class HttpService {
 				throw new Exception("Proxy enabled, but no host set or only port does not work.");
 			}
 		}
-		return buildHttpClient(sslContextDev, credentialsProvider);
+		return buildHttpClient(sslContextDev, proxyHost, credentialsProvider);
 	}
 
 	/**
@@ -216,7 +192,7 @@ public class HttpService {
 	 * @return
 	 * @throws IOException
 	 */
-	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final BasicCredentialsProvider credentialsProvider) throws IOException {
+	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final HttpHost proxyHost, final BasicCredentialsProvider credentialsProvider) throws IOException {
 		final SSLConnectionSocketFactory sslSocketFactory;
 		if (sslContextDev != null) {
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
@@ -232,19 +208,33 @@ public class HttpService {
 		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
 					.setSSLSocketFactory(sslSocketFactory)
 					.build();
-		if (credentialsProvider != null) {
+		if (proxyHost != null && credentialsProvider != null) {
 			try (final CloseableHttpClient httpClient = HttpClients.custom()
 					.setConnectionManager(connectionManager)
+					.setConnectionManagerShared(true)
+					.setProxy(proxyHost)
 					.setDefaultCredentialsProvider(credentialsProvider)
 					.build()) {
 				return httpClient;
 			}			
 		} else {
-			try (final CloseableHttpClient httpClient = HttpClients.custom()
-					.setConnectionManager(connectionManager)
-					.build()) {
-				return httpClient;
-			}			
+			if (proxyHost != null) {
+				try (final CloseableHttpClient httpClient = HttpClients.custom()
+						.setConnectionManager(connectionManager)
+						.setConnectionManagerShared(true)
+						.setProxy(proxyHost)
+						.build()) {
+					return httpClient;
+				}			
+			} else {
+				try (final CloseableHttpClient httpClient = HttpClients.custom()
+						.setConnectionManager(connectionManager)
+						.setConnectionManagerShared(true)
+						.build()) {
+					return httpClient;
+				}			
+				
+			}		
 		}
 	}
 
