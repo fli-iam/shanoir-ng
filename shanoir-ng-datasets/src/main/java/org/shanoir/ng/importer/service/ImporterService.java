@@ -39,6 +39,8 @@ import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.ProcessedDataset;
+import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.modality.SpectDataset;
@@ -50,9 +52,10 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ProcessedDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -526,57 +529,24 @@ public class ImporterService {
 		}
 
 		try {
-			
 			DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-			Dataset dataset = null;
-			
-			switch(importJob.getDatasetType()) {
-				case CalibrationDataset.datasetType:
-					dataset = new CalibrationDataset();
-					break;
-				case CtDataset.datasetType:
-					dataset = new CtDataset();
-					break;
-				case EegDataset.datasetType:
-					dataset = new EegDataset();
-					break;
-				case MegDataset.datasetType:
-					dataset = new MegDataset();
-					break;
-				case MeshDataset.datasetType:
-					dataset = new MeshDataset();
-					break;
-				case MrDataset.datasetType:
-					dataset = new MrDataset();
-					break;
-				case ParameterQuantificationDataset.datasetType:
-					dataset = new ParameterQuantificationDataset();
-					break;
-				case PetDataset.datasetType:
-					dataset = new PetDataset();
-					break;
-				case RegistrationDataset.datasetType:
-					dataset = new RegistrationDataset();
-					break;
-				case SegmentationDataset.datasetType:
-					dataset = new SegmentationDataset();
-					break;
-				case SpectDataset.datasetType:
-					dataset = new SpectDataset();
-					break;
-				case StatisticalDataset.datasetType:
-					dataset = new StatisticalDataset();
-					break;
-				case TemplateDataset.datasetType:
-					dataset = new TemplateDataset();
-					break;
-				default:
-				break;
-			}
+			ProcessedDataset dataset = new ProcessedDataset();
+			dataset.setProcessedType(importJob.getDatasetType());
 
 			datasetProcessing.addOutputDataset(dataset);
 			dataset.setDatasetProcessing(datasetProcessing);
 			
+			ProcessedDatasetAcquisition procDatasetAcquisition = new ProcessedDatasetAcquisition();
+			procDatasetAcquisition.setParentAcquisitions(new ArrayList<>());
+			procDatasetAcquisition.setDatasets(Collections.singletonList(dataset));
+			
+			for (Dataset parent: datasetProcessing.getInputDatasets()) {
+				Dataset loadedParent = datasetService.findById(parent.getId());
+				procDatasetAcquisition.getParentAcquisitions().add(loadedParent.getDatasetAcquisition());
+			}
+						
+			dataset.setDatasetAcquisition(procDatasetAcquisition);
+
 			// Metadata
 			DatasetMetadata originMetadata = new DatasetMetadata();
 			originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
@@ -592,6 +562,7 @@ public class ImporterService {
 			String originalNiftiName = srcFile.getName();
 			File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
+			// Save file
 			try {
 				destFile.getParentFile().mkdirs();
 				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -606,7 +577,7 @@ public class ImporterService {
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 
-			datasetService.create(dataset);
+			datasetAcquisitionService.create(dataset.getDatasetAcquisition());
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");
