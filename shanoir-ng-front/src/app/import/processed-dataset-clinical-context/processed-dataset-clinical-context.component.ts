@@ -90,8 +90,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         let importStep: Step = this.breadcrumbsService.currentStep;
         let createDatasetProcessingRoute: string = '/dataset-processing/create';
         this.router.navigate([createDatasetProcessingRoute]).then(success => {
-	        this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
-            this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
+            this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;

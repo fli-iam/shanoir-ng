@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.model;
 
 import javax.persistence.Entity;
 
-import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**

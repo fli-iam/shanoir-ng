@@ -298,32 +298,23 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
-		return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
-	}
 
-	public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
-		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
-	}
-
-	private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-
-		List<Dataset> datasets = new ArrayList<>();
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		List<Long> datasetIds = new ArrayList<Long>();
 		for(Examination examination : examinations) {
 			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
 			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
 				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasets.add(dataset);
+					datasetIds.add(dataset.getId());
 				}
 			}
 		}
-		return datasets;
+		return new ResponseEntity<>(datasetIds, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public void downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,

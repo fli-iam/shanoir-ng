@@ -30,7 +30,6 @@ export enum DatasetType {
   Segmentation = 'Segmentation',
   Spect = 'Spect',
   Statistical = 'Statistical',
-  Processed = 'Processed',
   Template = 'Template',
 } export namespace DatasetType {
   

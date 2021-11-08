@@ -24,12 +24,10 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { Study } from '../../studies/shared/study.model';
-import { Subject } from '../../subjects/shared/subject.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -44,9 +42,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
     public study: Study;
-	public subject: Subject;
-    public subjects: SubjectWithSubjectStudy[] = [];
-
     public studyOptions: Option<Study>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
     private inputDatasetsPromise: Promise<any>;
@@ -67,9 +62,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             ) {
 
         super(route, 'dataset-processing');
-	    if (this.breadcrumbsService.currentStep.isPrefilled('subject')) {
-			this.subject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
-		}
+        this.manageSaveEntity();
     }
 
     get datasetProcessing(): DatasetProcessing { return this.entity; }
@@ -95,7 +88,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.studyService.get(this.datasetProcessing.studyId).then((study)=> {
                 this.studyOptions = [new Option<Study>(study, study.name)];
                 this.study = study;
-                return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject?.id)
+                return this.datasetService.getByStudyId(this.datasetProcessing.studyId);
             }).then(datasets=> {
                 for(let dataset of datasets) {
                     this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
@@ -126,7 +119,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.studyOptions = [new Option<Study>(study, study.name)];
             this.study = study;
             this.datasetProcessing.studyId = this.study.id;
-            this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject?.id).then(datasets=> {
+            this.datasetService.getByStudyId(this.study.id).then(datasets=> {
                 for(let dataset of datasets) {
                     this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 }   
@@ -253,6 +246,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.datasetProcessing.inputDatasets.push(selectedDataset);
         this.inputDatasetsBrowserPaging.setItems(this.datasetProcessing.inputDatasets);
         this.inputDatasetsTable.refresh();
+        // this.form.get('inputDatasetList').markAsDirty();
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
@@ -275,5 +269,46 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.outputDatasetsToRemove.push(item);
         this.outputDatasetsBrowserPaging.setItems(this.datasetProcessing.outputDatasets);
         this.outputDatasetsTable.refresh();
+    }
+
+    manageSaveEntity(): void {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
+
+                // This is incorrect: dataset.processings are processings for which the dataset is an input:
+                // for(let datasets of [this.inputDatasetsToRemove, this.outputDatasetsToRemove]) {
+                //     for (let dataset of datasets) {
+                //         if(dataset.processings) {
+                //             let index = dataset.processings.indexOf(this.datasetProcessing);
+                //             if(index >= 0) {
+                //                 dataset.processings.splice(index, 1);
+                //                 this.datasetService.update(dataset.id, dataset);
+                //             }
+                //         }
+                //     }
+                // }
+                
+                for (let dataset of this.inputDatasetsToRemove) {
+                    if(dataset.processings) {
+                        let index = dataset.processings.indexOf(this.datasetProcessing);
+                        if(index >= 0) {
+                            dataset.processings.splice(index, 1);
+                            this.datasetService.update(dataset.id, dataset);
+                        }
+                    }
+                }
+            
+                if (this.inputDatasetsToAdd) {
+                    for (let dataset of this.inputDatasetsToAdd) {
+                        if(dataset.processings == null) {
+                            dataset.processings = [];
+                        }
+                        dataset.processings.push(this.datasetProcessing);
+                        this.datasetService.update(dataset.id, dataset);
+                    }
+                }
+            })
+        );
+       
     }
 }

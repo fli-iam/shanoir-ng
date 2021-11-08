@@ -30,8 +30,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
-			<processed-dataset-details *ngIf="dataset.type == 'Processed'" [mode]="mode" [dataset]="dataset"></processed-dataset-details>
-			
 			<!-- TODO : other types -->
 
 			<div>

@@ -23,8 +23,6 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
-import org.shanoir.ng.dataset.modality.ProcessedDataset;
-import org.shanoir.ng.dataset.modality.ProcessedDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
@@ -49,9 +47,6 @@ public abstract class DatasetDecorator implements DatasetMapper {
 	@Autowired
 	protected EegDatasetMapper eegMapper;
 
-	@Autowired
-	protected ProcessedDatasetMapper processedMapper;
-
 	@Override
 	public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
 		final List<IdName> datasetDTOs = new ArrayList<>();
@@ -71,9 +66,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
 				else if (entity instanceof EegDataset) {
 					return eegMapper.datasetToDatasetDTO((EegDataset)entity);
 				}
-				else if (entity instanceof ProcessedDataset) {
-					return processedMapper.datasetToDatasetDTO((ProcessedDataset)entity);
-				}
+				// TODO : Complete
 				else {
 					return defaultMapper.datasetToDatasetDTO(entity);
 				}

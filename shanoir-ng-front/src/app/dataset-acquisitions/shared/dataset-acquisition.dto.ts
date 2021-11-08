@@ -24,7 +24,6 @@ import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.mode
 import { CtProtocol } from '../modality/ct/ct-protocol.model';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { MrProtocol } from '../modality/mr/mr-protocol.model';
-import { ProcessedDatasetAcquisition }  from '../modality/processed/processed-dataset-acquisition.model';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { PetProtocol } from '../modality/pet/pet-protocol.model';
 import { DatasetAcquisition } from './dataset-acquisition.model';
@@ -108,10 +107,6 @@ export class DatasetAcquisitionDTOService {
                 (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).protocol);
                 break;
             }
-            case 'Processed': {
-                (entity as ProcessedDatasetAcquisition).parentAcquisitions = Object.assign(new ProcessedDatasetAcquisition(), (dto as ProcessedDatasetAcquisitionDTO).parentAcquisitions);
-                break;
-            }
         }
         return entity;
     }
@@ -147,7 +142,7 @@ export class DatasetAcquisitionDTO {
     softwareRelease: string;
     sortingIndex: number;
     creationDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -162,13 +157,9 @@ export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
     protocol: any;
 }
 
-export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
-   	parentAcquisitions: any[];
-}
-
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg';
     datasets: any;
 }
