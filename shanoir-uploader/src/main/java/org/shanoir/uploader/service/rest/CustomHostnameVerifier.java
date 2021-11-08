@@ -1,15 +1,15 @@
 package org.shanoir.uploader.service.rest;
 
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 
-public class CustomHostnameVerifier implements org.apache.http.conn.ssl.X509HostnameVerifier {
+import org.apache.hc.client5.http.ssl.HttpClientHostnameVerifier;
+
+public class CustomHostnameVerifier implements HttpClientHostnameVerifier {
 
 	@Override
 	public boolean verify(String host, SSLSession session) {
@@ -18,15 +18,7 @@ public class CustomHostnameVerifier implements org.apache.http.conn.ssl.X509Host
 	}
 
 	@Override
-	public void verify(String host, SSLSocket ssl) throws IOException {
-	}
-
-	@Override
 	public void verify(String host, X509Certificate cert) throws SSLException {
-	}
-
-	@Override
-	public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException {
 	}
 
 }

@@ -1,38 +1,42 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class wraps the usage of Apache HttpClient, currently 4.3.1.
+ * This class wraps the usage of Apache HttpClient, currently 5.1.
  * 
  * In case of development environments with self-signed certificates a special
  * SocketFactory is used, that avoid the below exception:
@@ -42,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * the constructor, that "solves" the certificate issue for testing/development
  * purpose only.
  * 
- * The SocketFactory is only used in case of "-dev" or "shanoir-ng-nginx" is
+ * The SocketFactory is only used in case of "https://shanoir-ng-nginx" is
  * present in the URL.
  * 
  * @author mkain
@@ -51,86 +55,79 @@ import org.slf4j.LoggerFactory;
 public class HttpService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
-	
+
 	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
-	private static final String DEV_SERVER = "-dev";
+	private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
 
-	private static final String DEV_LOCAL = "shanoir-ng-nginx";
+	private CloseableHttpClient httpClient;
 
-	// only used for dev environments, not for prod
-	private SSLConnectionSocketFactory socketFactoryDevEnv;
-
-	/**
-	 * Initiates a SocketFactory only for qualif testing.
-	 */
-	public HttpService() {
+	public HttpService(String serverURL) {
 		try {
-			TrustManager[] trustManager = initWeakTrustManager();
-			SSLContext context = SSLContext.getInstance("TLSv1.2");
-			context.init(null, trustManager, new SecureRandom());
-			socketFactoryDevEnv = new SSLConnectionSocketFactory(context,
-					SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-		} catch (NoSuchAlgorithmException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (KeyManagementException e) {
+			httpClient = buildHttpClient(serverURL);
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
 
-	private TrustManager[] initWeakTrustManager() {
-		TrustManager[] trustManager = new TrustManager[] {
-			new X509TrustManager() {
-				public X509Certificate[] getAcceptedIssuers() {
-					return new X509Certificate[0];
-				}
-	
-				public void checkClientTrusted(X509Certificate[] certificate, String str) {
-				}
-	
-				public void checkServerTrusted(X509Certificate[] certificate, String str) {
-				}
-			}
-		};
-		return trustManager;
-	}
-
-	public HttpResponse get(String url) {
+	public CloseableHttpResponse get(String url) {
 		try {
-			HttpClient httpClient = buildHttpClient(url);
 			HttpGet httpGet = new HttpGet(url);
+			configureProxyHost(httpGet);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-			HttpResponse response = httpClient.execute(httpGet);
-			return response;
+			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+				HttpEntity entity = response.getEntity();
+				EntityUtils.consume(entity);
+				return response;
+			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public HttpResponse post(String url, String json, boolean isLoginPost) {
+	private void configureProxyHost(HttpUriRequestBase httpMethod) {
+		if (serviceConfiguration.isProxyEnable()) {
+			HttpHost proxyHost = null;
+			// Host and port are given
+			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
+				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
+						Integer.valueOf(serviceConfiguration.getProxyPort()));
+			// Only host is configured, so do not set port
+			} else if (serviceConfiguration.getProxyHost() != null) {
+				proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
+			}
+			final RequestConfig config = RequestConfig.custom()
+		            .setProxy(proxyHost)
+		            .build();
+			httpMethod.setConfig(config);
+		}
+	}
+
+	public CloseableHttpResponse post(String url, String json, boolean isLoginPost) {
 		try {
-			HttpClient httpClient = buildHttpClient(url);
 			HttpPost httpPost = new HttpPost(url);
+			configureProxyHost(httpPost);
 			if (isLoginPost) {
 				httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
 			} else {
-				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());				
+				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			}
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPost.setEntity(requestEntity);
-			HttpResponse response = httpClient.execute(httpPost);
-			return response;
+			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+				return response;				
+			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public HttpResponse postFile(String url, String tempDirId, File file) {
+	public CloseableHttpResponse postFile(String url, String tempDirId, File file) {
 		try {
-			HttpClient httpClient = buildHttpClient(url);
 			HttpPost httpPost = new HttpPost(url + tempDirId);
+			configureProxyHost(httpPost);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			// for (Iterator iterator = files.iterator(); iterator.hasNext();) {
@@ -139,23 +136,25 @@ public class HttpService {
 			// }
 			HttpEntity entity = builder.build();
 			httpPost.setEntity(entity);
-			HttpResponse response = httpClient.execute(httpPost);
-			return response;
+			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+				return response;				
+			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public HttpResponse put(String url, String json) {
+	public CloseableHttpResponse put(String url, String json) {
 		try {
-			HttpClient httpClient = buildHttpClient(url);
 			HttpPut httpPut = new HttpPut(url);
+			configureProxyHost(httpPut);
 			httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 			httpPut.setEntity(requestEntity);
-			HttpResponse response = httpClient.execute(httpPut);
-			return response;
+			try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+				return response;				
+			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -163,72 +162,90 @@ public class HttpService {
 	}
 
 	private CloseableHttpClient buildHttpClient(String url) throws Exception {
+		SSLContext sslContextDev = null;
+		if (url.equals(DEV_LOCAL)) {
+			// Create special SSLContext for local development server
+			sslContextDev = SSLContexts.custom()
+					.loadTrustMaterial(new TrustStrategy() {
+						@Override
+						public boolean isTrusted(final X509Certificate[] chain, final String authType)
+								throws CertificateException {
+							return true;
+						}
+			}).build();
+		}
+		// In case of proxy: generate credentials provider with correct host
+		BasicCredentialsProvider credentialsProvider = null;
 		if (serviceConfiguration.isProxyEnable()) {
-			HttpHost proxy = null;
-			CredentialsProvider credsProvider = null;
+			HttpHost proxyHost = null;
 			// Host and port are given
 			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
-				proxy = new HttpHost(serviceConfiguration.getProxyHost(), Integer.valueOf(serviceConfiguration.getProxyPort()));
+				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
+						Integer.valueOf(serviceConfiguration.getProxyPort()));
 				// user and password are additionally set
 				if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
-					credsProvider = new BasicCredentialsProvider();
-				    credsProvider.setCredentials(
-				            new AuthScope(proxy),
-				            new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(), serviceConfiguration.getProxyPassword()));
+					credentialsProvider = new BasicCredentialsProvider();
+					credentialsProvider.setCredentials(new AuthScope(proxyHost),
+							new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
+									serviceConfiguration.getProxyPassword().toCharArray()));
 				}
 			// Only host is configured, so do not set port
 			} else if (serviceConfiguration.getProxyHost() != null) {
-				proxy = new HttpHost(serviceConfiguration.getProxyHost());
+				proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
 				// user and password are additionally set
 				if (serviceConfiguration.getProxyUser() != null && serviceConfiguration.getProxyPassword() != null) {
-					credsProvider = new BasicCredentialsProvider();
-				    credsProvider.setCredentials(
-				            new AuthScope(proxy),
-				            new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(), serviceConfiguration.getProxyPassword()));
+					credentialsProvider = new BasicCredentialsProvider();
+					credentialsProvider.setCredentials(new AuthScope(proxyHost),
+							new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
+									serviceConfiguration.getProxyPassword().toCharArray()));
 				}
 			} else {
 				throw new Exception("Proxy enabled, but no host set or only port does not work.");
 			}
-			if (proxy != null && credsProvider != null) {
-				if (url.contains(DEV_SERVER) || url.contains(DEV_LOCAL)) {
-					return HttpClientBuilder.create()
-							.setSSLSocketFactory(socketFactoryDevEnv)
-							.setDefaultCredentialsProvider(credsProvider)
-							.setProxy(proxy).build();
-				} else {
-					// the below code solves the GitHub issue: https://github.com/fli-iam/shanoir-ng/issues/582,
-					// as Apache HttpClient does not per default use the HostnameVerifier from HttpsURLConnection (JDK/JRE)
-					return HttpClientBuilder.create()
-							.setHostnameVerifier(new CustomHostnameVerifier())
-							.setDefaultCredentialsProvider(credsProvider)
-							.setProxy(proxy).build();
-				}
-			} else if (proxy != null) {
-				if (url.contains(DEV_SERVER) || url.contains(DEV_LOCAL)) {
-					return HttpClientBuilder.create()
-							.setSSLSocketFactory(socketFactoryDevEnv)
-							.setProxy(proxy).build();
-				} else {
-					// the below code solves the GitHub issue: https://github.com/fli-iam/shanoir-ng/issues/582,
-					// as Apache HttpClient does not per default use the HostnameVerifier from HttpsURLConnection (JDK/JRE)
-					return HttpClientBuilder.create()
-							.setHostnameVerifier(new CustomHostnameVerifier())
-							.setProxy(proxy).build();
-				}
-			}
-		/**
-		 * No proxy case:
-		 */
-		} else {
-			if (url.contains(DEV_SERVER) || url.contains(DEV_LOCAL)) {
-				return HttpClientBuilder.create().setSSLSocketFactory(socketFactoryDevEnv).build();
-			} else {
-				// the below code solves the GitHub issue: https://github.com/fli-iam/shanoir-ng/issues/582,
-				// as Apache HttpClient does not per default use the HostnameVerifier from HttpsURLConnection (JDK/JRE)
-				return HttpClientBuilder.create().setHostnameVerifier(new CustomHostnameVerifier()).build();
-			}
 		}
-		return null;
+		return buildHttpClient(sslContextDev, credentialsProvider);
+	}
+
+	/**
+	 * This method builds a CloseableHttpClient depending if a special SSLContext
+	 * for development or production is required, and if credentials should be used
+	 * for the proxy.
+	 * 
+	 * @param sslContextDev
+	 * @param credentialsProvider
+	 * @return
+	 * @throws IOException
+	 */
+	private CloseableHttpClient buildHttpClient(final SSLContext sslContextDev, final BasicCredentialsProvider credentialsProvider) throws IOException {
+		final SSLConnectionSocketFactory sslSocketFactory;
+		if (sslContextDev != null) {
+			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+					.setSslContext(sslContextDev)
+					.setTlsVersions(TLS.V_1_2)
+					.build();
+		} else {
+			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
+					.setHostnameVerifier(new CustomHostnameVerifier())
+					.setTlsVersions(TLS.V_1_2)
+					.build();
+		}
+		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+					.setSSLSocketFactory(sslSocketFactory)
+					.build();
+		if (credentialsProvider != null) {
+			try (final CloseableHttpClient httpClient = HttpClients.custom()
+					.setConnectionManager(connectionManager)
+					.setDefaultCredentialsProvider(credentialsProvider)
+					.build()) {
+				return httpClient;
+			}			
+		} else {
+			try (final CloseableHttpClient httpClient = HttpClients.custom()
+					.setConnectionManager(connectionManager)
+					.build()) {
+				return httpClient;
+			}			
+		}
 	}
 
 }

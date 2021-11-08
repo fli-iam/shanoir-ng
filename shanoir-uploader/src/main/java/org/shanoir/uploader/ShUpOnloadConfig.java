@@ -1,10 +1,7 @@
 package org.shanoir.uploader;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.keycloak.adapters.ServerRequest.HttpFailure;
-import org.keycloak.common.VerificationException;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -149,7 +146,7 @@ public class ShUpOnloadConfig {
 		ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
 	}
 	
-	public static String getTokenString() throws VerificationException, IOException, HttpFailure  {
+	public static String getTokenString() throws Exception  {
 		return tokenString;
 	}
 	

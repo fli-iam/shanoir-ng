@@ -14,20 +14,36 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>8</java.version>
 		<keycloak.version>13.0.1</keycloak.version>
+		<jackson.version>2.8.3</jackson.version>
+		<javax.activation.version>1.2.0</javax.activation.version>
+		<jaxb.api.version>2.3.0</jaxb.api.version>
+		<lombok.version>1.18.6</lombok.version>
 	</properties>
 
 	<dependencies>
 		<!-- dependency httpcomponents -->
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.3.1</version>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.1</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>org.slf4j</groupId>
 			        <artifactId>slf4j-log4j12</artifactId>
 			    </exclusion>
 			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+		    <groupId>commons-io</groupId>
+		    <artifactId>commons-io</artifactId>
+		    <version>2.5</version>
+		</dependency>		
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 		<!-- dependency log4j -->
 		<dependency>
@@ -40,11 +56,21 @@
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
 			<version>2.4.5</version>
-			<!-- really important: solves slf4j binding issue and avoid GB of logs during upload with httpClient!!! -->
 			<exclusions>
 			    <exclusion>
-			        <groupId>ch.qos.logback</groupId>
-			        <artifactId>logback-classic</artifactId>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>2.4.5</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
 			    </exclusion>
 			</exclusions>
 		</dependency>
@@ -68,6 +94,32 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <version>${javax.activation.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 		<!-- dependency for avoiding Maven errors -->
 		<dependency>
 			<groupId>javax.persistence</groupId>
@@ -111,12 +163,6 @@
 			<groupId>org.jdatepicker</groupId>
 			<artifactId>jdatepicker</artifactId>
 			<version>1.3.4</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
-		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>3.0.0</version>
 		</dependency>
 		<!-- ********************************************************** ** DCM4CHE 
 			dependencies ********************************** ********************************************************** -->

@@ -20,14 +20,15 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpResponse;
 import org.json.JSONException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.Util;
-import org.springframework.http.HttpHeaders;
 
 /**
  * This class intends to be used as a binary executable to download datasets
@@ -205,27 +206,24 @@ public final class ShanoirDownloader extends ShanoirCLI {
 		}
 	}
 
-	public static void saveResponseToFile(File destDir, HttpResponse response) throws IOException {
+	public static void saveResponseToFile(File destDir, CloseableHttpResponse response) throws IOException {
 		Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
 		String fileName = header.getValue();
 		fileName = fileName.replace("attachment;filename=", "");
-
 		final File downloadedFile = new File(destDir + "/" + fileName);
-
 		FileUtils.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
 	}
 
 	public static String downloadDataset(File destDir, Long datasetId, String format,
 			ShanoirUploaderServiceClient shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetId + "...");
-		HttpResponse response = shng.downloadDatasetById(datasetId, format);
+		CloseableHttpResponse response = shng.downloadDatasetById(datasetId, format);
 		String message = "";
 		if (response == null) {
 			message = "Dataset with id " + datasetId + " not found.";
 			System.out.println(message);
 			return message;
 		}
-
 		saveResponseToFile(destDir, response);
 		return message;
 	}
@@ -233,7 +231,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 	public static String downloadDatasets(File destDir, List<Long> datasetIds, String format,
 			ShanoirUploaderServiceClient shng) throws Exception {
 		System.out.println("Downloading dataset " + datasetIds + "...");
-		HttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
+		CloseableHttpResponse response = shng.downloadDatasetsByIds(datasetIds, format);
 		String message = "";
 		if (response == null) {
 			if (datasetIds.size() > 0) {
@@ -246,21 +244,19 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			System.out.println(message);
 			return message;
 		}
-
 		saveResponseToFile(destDir, response);
 		return message;
 	}
 
 	public static String downloadDatasetByStudy(File destDir, Long studyId, String format,
 			ShanoirUploaderServiceClient shng) throws Exception {
-		HttpResponse response = shng.downloadDatasetsByStudyId(studyId, format);
+		CloseableHttpResponse response = shng.downloadDatasetsByStudyId(studyId, format);
 		String message = "";
 		if (response == null) {
 			message = "Datasets of study " + studyId + " not found.";
 			System.out.println(message);
 			return message;
 		}
-
 		saveResponseToFile(destDir, response);
 		return message;
 	}

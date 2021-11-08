@@ -3,21 +3,12 @@ package org.shanoir.uploader.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
-import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.IdList;
-import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 /**
