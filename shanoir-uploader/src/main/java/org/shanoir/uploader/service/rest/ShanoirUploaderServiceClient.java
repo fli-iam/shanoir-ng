@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -153,7 +153,8 @@ public class ShanoirUploaderServiceClient {
 				logger.error("Error while asking authentification token from: " + keycloakURL);
 				return null;
 			}
-			String responseEntityString = EntityUtils.toString(response.getEntity());
+			HttpEntity httpEntity = response.getEntity();
+			String responseEntityString = EntityUtils.toString(httpEntity);
 			final int statusCode = response.getCode();
 			if (HttpStatus.SC_OK == statusCode) {
 				JSONObject responseEntityJson = new JSONObject(responseEntityString);
