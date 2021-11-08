@@ -148,19 +148,22 @@ public class ShanoirUploaderServiceClient {
 			postBody.append("&username=").append(URLEncoder.encode(username, "UTF-8"));
 			postBody.append("&password=").append(URLEncoder.encode(password, "UTF-8"));
 			postBody.append("&scope=offline_access");
-			CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
-			if(response == null) {
-				logger.error("Error while asking authentification token from: " + keycloakURL);
-				return null;
-			}
-			HttpEntity httpEntity = response.getEntity();
-			String responseEntityString = EntityUtils.toString(httpEntity);
-			final int statusCode = response.getCode();
-			if (HttpStatus.SC_OK == statusCode) {
-				JSONObject responseEntityJson = new JSONObject(responseEntityString);
-				String refreshToken = responseEntityJson.getString("refresh_token");
-				refreshToken(keycloakURL, refreshToken);
-				return responseEntityJson.getString("access_token");
+			try (CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);) {
+				if(response == null) {
+					logger.error("Error while asking authentification token from: " + keycloakURL);
+					return null;
+				}
+				HttpEntity httpEntity = response.getEntity();
+				if (httpEntity != null) {
+					String responseEntityString = EntityUtils.toString(httpEntity);
+					final int statusCode = response.getCode();
+					if (HttpStatus.SC_OK == statusCode) {
+						JSONObject responseEntityJson = new JSONObject(responseEntityString);
+						String refreshToken = responseEntityJson.getString("refresh_token");
+						refreshToken(keycloakURL, refreshToken);
+						return responseEntityJson.getString("access_token");
+					}				
+				}
 			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(), e);
@@ -186,20 +189,21 @@ public class ShanoirUploaderServiceClient {
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 		Runnable task = () -> {
 			try {
-				CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true);
-				String responseEntityString = EntityUtils.toString(response.getEntity());
-				final int statusCode = response.getCode();
-				if (HttpStatus.SC_OK == statusCode) {
-					JSONObject responseEntityJson = new JSONObject(responseEntityString);
-					String newAccessToken = responseEntityJson.getString("access_token");
-					if (newAccessToken != null) {
-						ShUpOnloadConfig.setTokenString(newAccessToken);
+				try (CloseableHttpResponse response = httpService.post(keycloakURL, postBody.toString(), true)) {
+					String responseEntityString = EntityUtils.toString(response.getEntity());
+					final int statusCode = response.getCode();
+					if (HttpStatus.SC_OK == statusCode) {
+						JSONObject responseEntityJson = new JSONObject(responseEntityString);
+						String newAccessToken = responseEntityJson.getString("access_token");
+						if (newAccessToken != null) {
+							ShUpOnloadConfig.setTokenString(newAccessToken);
+						} else {
+							logger.info("ERROR: with access token refresh.");
+						}
+						logger.info("Access token has been refreshed.");
 					} else {
-						logger.info("ERROR: with access token refresh.");
+						logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
 					}
-					logger.info("Access token has been refreshed.");
-				} else {
-					logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
