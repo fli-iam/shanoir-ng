@@ -31,6 +31,7 @@ import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
@@ -539,12 +540,18 @@ public class ImporterService {
 			ProcessedDatasetAcquisition procDatasetAcquisition = new ProcessedDatasetAcquisition();
 			procDatasetAcquisition.setParentAcquisitions(new ArrayList<>());
 			procDatasetAcquisition.setDatasets(Collections.singletonList(dataset));
-			
-			for (Dataset parent: datasetProcessing.getInputDatasets()) {
-				Dataset loadedParent = datasetService.findById(parent.getId());
-				procDatasetAcquisition.getParentAcquisitions().add(loadedParent.getDatasetAcquisition());
+
+			List<Long> parentIds = datasetProcessing.getInputDatasets().stream().map(Dataset::getId).collect(Collectors.toList());
+			List<Dataset> parents = datasetService.findByIdIn(parentIds);
+
+			for (Dataset parent: parents) {
+				procDatasetAcquisition.getParentAcquisitions().add(parent.getDatasetAcquisition());
 			}
-						
+
+			// Set examination
+			procDatasetAcquisition.setAcquisitionEquipmentId(parents.get(0).getDatasetAcquisition().getAcquisitionEquipmentId());
+			procDatasetAcquisition.setExamination(parents.get(0).getDatasetAcquisition().getExamination());
+
 			dataset.setDatasetAcquisition(procDatasetAcquisition);
 
 			// Metadata

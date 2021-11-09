@@ -96,6 +96,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
+            dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
             this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
