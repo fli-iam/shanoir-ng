@@ -24,7 +24,6 @@ import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
@@ -73,8 +72,6 @@ public class HttpService {
 			HttpGet httpGet = new HttpGet(url);
 			httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			CloseableHttpResponse response = httpClient.execute(httpGet);
-			HttpEntity entity = response.getEntity();
-			EntityUtils.consume(entity);
 			return response;
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
