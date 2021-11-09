@@ -121,12 +121,12 @@ public class ReferencesRepositoryTest {
 		List<String> typesDb = repository.findTypesByCategory(REFERENCE_TEST_CATEGORY_SUBJECT);
 		assertNotNull(typesDb);
 		assertThat(typesDb.size()).isEqualTo(5);
-		assertThat(typesDb.get(0)).isEqualTo(REFERENCE_TEST_TYPE_PROVIDER);
+		assertThat(typesDb.contains(REFERENCE_TEST_TYPE_PROVIDER));
 	}
 
 	@Test
 	public void findOneTest() throws Exception {
-		Reference referenceDb = repository.findOne(REFERENCE_TEST_1_ID);
+		Reference referenceDb = repository.findById(REFERENCE_TEST_1_ID).orElse(null);
 		assertThat(referenceDb.getCategory()).isEqualTo(REFERENCE_TEST_CATEGORY_SUBJECT);
 		assertThat(referenceDb.getReftype()).isEqualTo(REFERENCE_TEST_TYPE_SPECIE);
 		assertThat(referenceDb.getValue()).isEqualTo(REFERENCE_TEST_1_VALUE);

@@ -231,6 +231,13 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
+        if (this.isAdminOfStudy[this.study.id] == undefined) {
+            if (this.keycloakService.isUserAdmin) {
+                this.isAdminOfStudy[this.study.id] = true;
+            } else {
+                this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
+            }
+        }
         let end: Promise<void> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
@@ -302,9 +309,6 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        if (this.isAdminOfStudy[this.study.id] == undefined) {
-            this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
-        }
         this.onContextChange();
     }
 
@@ -663,6 +667,17 @@ export class ClinicalContextComponent implements OnDestroy {
     public editStudyCard(studycard: StudyCard) {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
+                    this.importDataService.contextBackup.studyCard = entity as StudyCard;
+                })
+            );
+        });
+    }
+
+    public createStudyCard() {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(success => {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
                     this.importDataService.contextBackup.studyCard = entity as StudyCard;

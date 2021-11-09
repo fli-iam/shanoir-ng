@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.messaging;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.slf4j.Logger;
@@ -34,14 +35,11 @@ public class StudyUserUpdateBroadcastService {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 	
-	
 	public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
 		try {
 			String str = new ObjectMapper().writeValueAsString(commands);
-			rabbitTemplate.convertAndSend("study-user-exchange", "study-user", str);
-			
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
 			LOG.debug("Brodcasted study-user changes : {}", str);
-			
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Could not send data to study-user-exchange");
 		}

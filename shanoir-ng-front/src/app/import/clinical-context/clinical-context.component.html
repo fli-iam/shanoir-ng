@@ -32,12 +32,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <!-- <li>
-            <label>Use a study card</label> 
-            <span class="right-col">
-                <checkbox [(ngModel)]="useStudyCard" (ngModelChange)="onToggleUseStudyCard($event); onContextChange();" [ngModelOptions]="{standalone: true}"></checkbox>
-            </span>
-        </li> -->
+        <li class="info" *ngIf="study && (!studycardOptions || studycardOptions.length == 0)">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>No study cards are configured on this study, please create one before trying to import MR data.</strong>
+            <ng-container *ngIf="!isAdminOfStudy[study.id]">
+                <br/>You may want to contact an administrator for the study {{study.name}} and ask him/her to create a studycard.
+            </ng-container>
+            <ng-container *ngIf="isAdminOfStudy[study.id]">
+                <br/><a (click)="createStudyCard()">Click here to create a study card</a>
+            </ng-container>
+        </li>
         <li *ngIf="useStudyCard" @slideDown>
             <label>Select a study card</label> 
             <span class="right-col">
@@ -182,6 +186,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
+            </li>
+            <li>
+                <label>Tags</label>
+                <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study.tags"></tag-list>
             </li>
         </div>
     </ol>

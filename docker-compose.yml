@@ -62,8 +62,11 @@ services:
   database:
     container_name: "${SHANOIR_PREFIX}database"
     build: ./docker-compose/database
+    command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
+    environment:
+      - SHANOIR_MIGRATION
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -183,8 +186,9 @@ services:
       - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
+      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -213,7 +217,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: solr:8.1
+    build: ./docker-compose/solr
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -222,9 +226,6 @@ services:
       - shanoir_ng_network
     ports:
       - "8983:8983"
-    command:
-      - solr-precreate
-      - shanoir
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
@@ -307,6 +308,7 @@ services:
       - "studies"
       - "import"
       - "datasets"
+      - "preclinical"
       - "rabbitmq"
 
 volumes:
@@ -314,6 +316,7 @@ volumes:
   rabbitmq-data:
   database-data:
   datasets-data:
+  extra-data:
   studies-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:

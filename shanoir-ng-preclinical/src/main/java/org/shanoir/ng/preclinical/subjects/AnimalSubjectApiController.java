@@ -29,9 +29,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.RefValueExistsValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +63,12 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	private SubjectTherapyService subjectTherapyService;
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private AnimalSubjectUniqueValidator uniqueValidator;
+
+	@Autowired
+	private AnimalSubjectEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<AnimalSubject> createAnimalSubject(
@@ -185,7 +189,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	@Override
 	public ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
 			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
-		final List<AnimalSubject> subjects = subjectService.findBy("subjectId", id);
+		final List<AnimalSubject> subjects = subjectService.findBySubjectId(id);
 		if (subjects == null || subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -193,18 +197,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final AnimalSubject subject) {
-		final AnimalSubject previousStateSubject = subjectService.findById(subject.getId());
-		return new EditableOnlyByValidator<AnimalSubject>().validate(previousStateSubject,
-				subject);
+	    return editableOnlyValidator.validate(subject);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final AnimalSubject subject) {
-		return new EditableOnlyByValidator<AnimalSubject>().validate(subject);
+	    return editableOnlyValidator.validate(subject);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final AnimalSubject subject) {
-		final UniqueValidator<AnimalSubject> uniqueValidator = new UniqueValidator<>(subjectService);
-		return uniqueValidator.validateWithoutId(subject);
+		return uniqueValidator.validate(subject);
 	}
 
 	private FieldErrorMap checkRefsValueExists(final AnimalSubject subject) {

@@ -63,6 +63,7 @@ export class EegClinicalContextComponent implements OnInit {
     public subject: SubjectWithSubjectStudy;
     public columnDefs: any[];
     public hasPosition: boolean;
+    openSubjectStudy: boolean = false;
     
     public coordSystemOptions: Option<CoordSystems>[];
     public coordsystem : string;
@@ -89,7 +90,7 @@ export class EegClinicalContextComponent implements OnInit {
         this.coordSystemOptions = CoordSystems.options;
 
         // No channels => no import
-        if (!this.importDataService.eegImportJob.datasets ) {
+        if (!this.importDataService?.eegImportJob?.datasets) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -162,7 +163,7 @@ export class EegClinicalContextComponent implements OnInit {
     }
     
     private initEventsTable(): void {
-        
+        if (!this.importDataService.eegImportJob) return;
         this.columnDefs = [
             {headerName: "Dataset name", field: "name", type: "string", cellRenderer: function (params: any) {
                     return params.data.dataset_name;
@@ -214,6 +215,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
             this.center = this.study.studyCenterList[0].center;
@@ -226,6 +228,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
             this.acquisitionEquipment = this.center.acquisitionEquipments[0];
@@ -236,6 +239,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
             this.studyService
@@ -320,6 +324,7 @@ export class EegClinicalContextComponent implements OnInit {
         let newSubject = new Subject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.subjectStudyList = [subjectStudy];
+        newSubject.birthDate = null;
         return newSubject;
     }
 
@@ -392,6 +397,7 @@ export class EegClinicalContextComponent implements OnInit {
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
+            && context.subject.subjectStudy.subjectType
             && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !(this.hasPosition))
         );
     }

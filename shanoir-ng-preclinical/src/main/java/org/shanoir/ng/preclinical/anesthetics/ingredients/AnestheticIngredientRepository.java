@@ -20,7 +20,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface AnestheticIngredientRepository extends CrudRepository<AnestheticIngredient, Long>, AnestheticIngredientRepositoryCustom{
+public interface AnestheticIngredientRepository extends CrudRepository<AnestheticIngredient, Long> {
 
 	List<AnestheticIngredient> findByAnesthetic(Anesthetic anesthetic);
 }

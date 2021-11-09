@@ -144,14 +144,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         this.reloadRequiredStyles();
     }
 
-    save(): Promise<void> {
+    save(): Promise<Subject> {
         let savedDate: Date;
         if (this.mode == 'create') {
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         return super.save()
-            .then(() => { if (savedDate) this.subject.birthDate = savedDate })
+            .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
     }
 

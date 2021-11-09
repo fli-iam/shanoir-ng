@@ -29,9 +29,7 @@ import org.shanoir.ng.preclinical.references.Reference;
  *
  */
 public interface SubjectPathologyRepositoryCustom {
-	
-	List<SubjectPathology> findBy(String fieldName, Object value);
-	
+		
 	List<SubjectPathology> findAllByPathology(Pathology pathology);
 	
 	List<SubjectPathology> findAllByPathologyModel(PathologyModel model);

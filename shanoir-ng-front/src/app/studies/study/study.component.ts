@@ -194,6 +194,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
+            'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': []
@@ -224,12 +225,12 @@ export class StudyComponent extends EntityComponent<Study> {
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
-
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
+        study.tags = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;
@@ -365,8 +366,8 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
-            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+            { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
             { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)}
         ];
     }
@@ -405,16 +406,16 @@ export class StudyComponent extends EntityComponent<Study> {
 
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
-            this.study.studyUserList.push(backedUpStudyUser);
+            this.study.studyUserList.unshift(backedUpStudyUser);
         } else {
             let studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
             studyUser.userName = selectedUser.username;
-            studyUser.receiveAnonymizationReport = false;
+            studyUser.receiveStudyUserReport = false;
             studyUser.receiveNewImportReport = false;
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
-            this.study.studyUserList.push(studyUser);
+            this.study.studyUserList.unshift(studyUser);
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
@@ -527,8 +528,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.updateValueAndValidity();
     }
 
-    save(): Promise<void> {
-        let prom = super.save().then(result => {
+    save(): Promise<Study> {
+        return super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
@@ -541,8 +542,17 @@ export class StudyComponent extends EntityComponent<Study> {
                     this.dataUserAgreement = null;
                 });
             }
+            return result;
+        }).then(study => {
+            this.confirmDialogService.confirm('Create a Study Card', 
+                'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
+                .then(userChoice => {
+                    if (userChoice) {
+                        this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                    }
+                });
+            return study;
         });
-        return prom;
     }
 
     getFileName(element): string {
@@ -593,5 +603,9 @@ export class StudyComponent extends EntityComponent<Study> {
    
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
+    }
+
+    onTagListChange() {
+        this.study.tags = [].concat(this.study.tags); // hack : force change detection
     }
 }

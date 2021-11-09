@@ -27,20 +27,15 @@ import { findLastIndex } from '../utils/app.utils';
 export class ImportComponent {
 
     hasOneStudy: boolean = true;
-    importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '';
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
-            private rightsService: StudyRightsService,
-            private route: ActivatedRoute) {
+            private rightsService: StudyRightsService) {
 
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
-        setTimeout(()=> {
-            this.importMode = this.getImportMode();
-        });
     }
 
-    getImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '' {
+    get importMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;

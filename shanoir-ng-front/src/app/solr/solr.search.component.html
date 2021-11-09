@@ -43,6 +43,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [allFacetPage]="allFacetResultPages[2]"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-criterion>
+        
+        <solr-criterion
+                label="Tags"
+                [currentFacetPage]="facetResultPages[7]"
+                [allFacetPage]="allFacetResultPages[7]"
+                (onChange)="updateSelections(); refreshTable()">
+        </solr-criterion>
 
         <div class="dates">
             <div class="title">
@@ -145,7 +152,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             <div class="tab-body" [hidden]="tab != 'results'" *ngIf="loaded">
                 <shanoir-table #table
-                    identifier="results"
                     [getPage]="getPage.bind(this)" 
                     [maxResults]="50"
                     [columnDefs]="columnDefs" 
@@ -153,20 +159,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [browserSearch]="false"
                     [selectionAllowed]="true"
                     [selection]="selectedDatasetIds"
-                    (selectionChange)="onSelectionChange($event)"
-                    [enableSettings]="true">
+                    (selectionChange)="onSelectionChange($event)">
                 </shanoir-table>
             </div>
             <div class="tab-body selected" [hidden]="tab != 'selected'" *ngIf="loaded">
                 <shanoir-table #selectionTable
-                    identifier="selected"
                     [getPage]="getSelectedPage.bind(this)" 
                     [maxResults]="50"
                     [columnDefs]="selectionColumnDefs" 
                     [customActionDefs]="selectionCustomActionDefs"
                     (rowClick)="onRowClick($event)"
-                    [browserSearch]="false"
-                    [enableSettings]="true">
+                    [browserSearch]="false">
                 </shanoir-table>
             </div>
             <div *ngIf="!loaded">Loading ...</div>
