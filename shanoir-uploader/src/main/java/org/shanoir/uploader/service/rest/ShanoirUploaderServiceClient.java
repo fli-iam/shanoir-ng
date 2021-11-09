@@ -212,34 +212,39 @@ public class ShanoirUploaderServiceClient {
 		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
 	}
 	
-	public List<Study> findStudiesNamesAndCenters() {
+	public List<Study> findStudiesNamesAndCenters() throws IOException {
 		long startTime = System.currentTimeMillis();
-		CloseableHttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    logger.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-			List<Study> studies = Util.getMappedList(response, Study.class);
-			return studies;
-		} else {
-			return null;
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters)) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<Study> studies = Util.getMappedList(response, Study.class);
+				return studies;
+			} else {
+				logger.error("Could not get study names and centers (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
+			}
 		}
 	}
 
-	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) {
+	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws IOException {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
 			long startTime = System.currentTimeMillis();
-			CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false);
-			long stopTime = System.currentTimeMillis();
-		    long elapsedTime = stopTime - startTime;
-		    logger.info("findStudyCardsByStudyIds: " + elapsedTime + "ms");
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
-				return studyCards;
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false)) {
+				long stopTime = System.currentTimeMillis();
+			    long elapsedTime = stopTime - startTime;
+			    logger.info("findStudyCardsByStudyIds: " + elapsedTime + "ms");
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
+					return studyCards;
+				} else {
+					logger.error("Could not get study cards for studyIds (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
@@ -247,38 +252,45 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
-		CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"));
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-			Subject subjectDTO = Util.getMappedObject(response, Subject.class);
-			return subjectDTO;
-		} else {
-			return null;
+	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws IOException {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				Subject subjectDTO = Util.getMappedObject(response, Subject.class);
+				return subjectDTO;
+			} else {
+				logger.warn("Could not find subject with identifier (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
+			}
 		}
 	}
 	
-	public String createTempDir() throws Exception {
-		CloseableHttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir);
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-			String importTempDirId = Util.getMappedObject(response, String.class);
-			return importTempDirId;
-		} else {
-			return null;
+	public String createTempDir() throws IOException {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				String importTempDirId = Util.getMappedObject(response, String.class);
+				return importTempDirId;
+			} else {
+				logger.error("Could not create tempDir on server (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
+			}
 		}
 	}
 		
-	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
+	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws IOException {
 		if (subjectId != null) {
-			CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId);
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-//				ResponseHandler<String> handler = new BasicResponseHandler();
-//				String body = handler.handleResponse(response);
-//				logger.info(body);
-				List<Examination> examinations = Util.getMappedList(response, Examination.class);
-				return examinations;
+			try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+	//				ResponseHandler<String> handler = new BasicResponseHandler();
+	//				String body = handler.handleResponse(response);
+	//				logger.info(body);
+					List<Examination> examinations = Util.getMappedList(response, Examination.class);
+					return examinations;
+				} else {
+					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+				}
 			}
 		}
 		return null;
@@ -290,47 +302,53 @@ public class ShanoirUploaderServiceClient {
 			URIBuilder b = new URIBuilder(this.serviceURLSubjectsByStudyId + studyId + "/allSubjects");
 			b.addParameter("preclinical",  "null");
 			URL url = b.build().toURL();
-			CloseableHttpResponse response = httpService.get(url.toString());
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				List<Subject> subjects = Util.getMappedList(response, Subject.class);
-				for(Subject subject : subjects) {
-					List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
-					if(ids != null) {
-						datasetIds.addAll(ids);
+			try (CloseableHttpResponse response = httpService.get(url.toString())) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<Subject> subjects = Util.getMappedList(response, Subject.class);
+					for(Subject subject : subjects) {
+						List<Long> ids = findDatasetIdsBySubjectIdStudyId(subject.getId(), studyId);
+						if(ids != null) {
+							datasetIds.addAll(ids);
+						}
 					}
+					return datasetIds;
+				} else {
+					logger.error("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
-				return datasetIds;
-			} else {
-				logger.error("Could not get subjects ids from study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
 		}
 		return null;
 	}
 
-	public List<Long> findDatasetIdsBySubjectId(Long subjectId) throws Exception {
+	public List<Long> findDatasetIdsBySubjectId(Long subjectId) throws IOException {
 		if (subjectId != null) {
-			CloseableHttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId);
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				List<Long> datasetIds = Util.getMappedList(response, Long.class);
-				return datasetIds;
-			} else {
-				logger.error("Could not get dataset ids from subject id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<Long> datasetIds = Util.getMappedList(response, Long.class);
+					return datasetIds;
+				} else {
+					logger.error("Could not get dataset ids from subject id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		}
 		return null;
 	}
 
-	public List<Long> findDatasetIdsBySubjectIdStudyId(Long subjectId, Long studyId) throws Exception {
+	public List<Long> findDatasetIdsBySubjectIdStudyId(Long subjectId, Long studyId) throws IOException {
 		if (subjectId != null) {
-			CloseableHttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId + "/study/" + studyId);
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				List<Long> datasetIds = Util.getMappedList(response, Long.class);
-				return datasetIds;
-			} else {
-				logger.error("Could not get dataset ids from subject id " + subjectId + " and study id " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService
+					.get(this.serviceURLDatasets + "subject/" + subjectId + "/study/" + studyId)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<Long> datasetIds = Util.getMappedList(response, Long.class);
+					return datasetIds;
+				} else {
+					logger.error("Could not get dataset ids from subject id " + subjectId + " and study id " + studyId
+							+ " (status code: " + code + ", message: "
+							+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		}
 		return null;
@@ -338,37 +356,48 @@ public class ShanoirUploaderServiceClient {
 
 	public List<AcquisitionEquipment> findAcquisitionEquipments() throws Exception {
 		long startTime = System.currentTimeMillis();
-		CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipments);
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    logger.info("findAcquisitionEquipments: " + elapsedTime + "ms");
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-			List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response, AcquisitionEquipment.class);
-			return acquisitionEquipments;
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipments)) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findAcquisitionEquipments: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
+						AcquisitionEquipment.class);
+				return acquisitionEquipments;
+			} else {
+				logger.error("Could not find acquisition equipments (status code: " + code + ", message: "
+						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
 		}
 		return null;
 	}
 	
 	public void uploadFile(String tempDirId, File file) throws Exception {
-		CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId, file);
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-		} else {
-			logger.error("Error in uploadFile: with tempDirId " + tempDirId + " with file (path: " + file.getAbsolutePath()
-			+ ", size in bytes: " + Files.size(file.toPath()) + "), status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-			throw new Exception("Error in uploadFile");
+		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId,
+				file)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+			} else {
+				logger.error("Error in uploadFile: with tempDirId " + tempDirId + " with file (path: "
+						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
+						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in uploadFile");
+			}
 		}
 	}
 	
 	public void startImportJob(String importJobJsonStr) throws Exception {
-		CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr, false);
-		int code = response.getCode();
-		if (code == HttpStatus.SC_OK) {
-		} else {
-			logger.error("Error in startImportJob: with json " + importJobJsonStr
-			+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-			throw new Exception("Error in startImportJob");
+		try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
+				false)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				logger.info("Import job successfully started on server.");
+			} else {
+				logger.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
+						+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				throw new Exception("Error in startImportJob");
+			}
 		}
 	}
 
@@ -442,16 +471,20 @@ public class ShanoirUploaderServiceClient {
 			} else {
 				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId=" + centerId, json, false);
 			}
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
-				return subjectDTOCreated;
-			} else {
-				logger.error("Error in createSubject: with subject " + subject.getName()
-					+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (response) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
+					return subjectDTOCreated;
+				} else {
+					logger.error("Error in createSubject: with subject " + subject.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
 	}
@@ -468,16 +501,19 @@ public class ShanoirUploaderServiceClient {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subject);
-			CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json);
-			int code = response.getCode();
-			if (code == HttpStatus.SC_NO_CONTENT) {
-				return subject;
-			} else {
-				logger.error("Error in createSubjectStudy: with subject " + subject.getName()
-				+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_NO_CONTENT) {
+					return subject;
+				} else {
+					logger.error("Error in createSubjectStudy: with subject " + subject.getName()
+					+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
 	}
@@ -492,17 +528,21 @@ public class ShanoirUploaderServiceClient {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(examinationDTO);
-			CloseableHttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false);
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				Examination examinationDTOCreated = Util.getMappedObject(response, Examination.class);
-				return examinationDTOCreated;
-			} else {
-				logger.error("Error in createExamination: with examinationDTO " + examinationDTO.getComment()
-				+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");				
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Examination examinationDTOCreated = Util.getMappedObject(response, Examination.class);
+					return examinationDTOCreated;
+				} else {
+					logger.error("Error in createExamination: with examinationDTO " + examinationDTO.getComment()
+							+ " (status code: " + code + ", message: "
+							+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
 	}

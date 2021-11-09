@@ -225,6 +225,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			return message;
 		}
 		saveResponseToFile(destDir, response);
+		response.close();
 		return message;
 	}
 
@@ -245,6 +246,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			return message;
 		}
 		saveResponseToFile(destDir, response);
+		response.close();
 		return message;
 	}
 
@@ -258,6 +260,7 @@ public final class ShanoirDownloader extends ShanoirCLI {
 			return message;
 		}
 		saveResponseToFile(destDir, response);
+		response.close();
 		return message;
 	}
 
