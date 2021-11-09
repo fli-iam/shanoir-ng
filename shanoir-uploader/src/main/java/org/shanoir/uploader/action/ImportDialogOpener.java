@@ -2,6 +2,7 @@ package org.shanoir.uploader.action;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -170,7 +171,7 @@ public class ImportDialogOpener {
 		}
 	}
 
-	private List<StudyCard> getAllStudyCards(List<Study> studies) {
+	private List<StudyCard> getAllStudyCards(List<Study> studies) throws IOException {
 		IdList idList = new IdList();
 		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 			Study study = (Study) iterator.next();
