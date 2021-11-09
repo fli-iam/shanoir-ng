@@ -8,9 +8,9 @@ Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences w
 This is important, that all scripts .sh or .bat find the correct version to start and create
 the correct folder.
 
-####### Delivery of new Executable Jar #############
-1) Remove the 3 system path libraries lines from the pom.xml dependencies
-as they do not be contained in the assembly.
+####### Delivery of new Executable Jar version #############
+1) Remove the 2 system path libraries lines from the pom.xml dependencies
+as they should not be contained in the assembly.
 2) Build latest version for delivery using the below mvn command:
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
