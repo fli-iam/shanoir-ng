@@ -165,12 +165,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private createColumnDefs() {
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
         function checkNullValue(value: any) {
             if(value){
                 return value;
@@ -187,19 +181,19 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
         this.inputDatasetsColumnDefs = [
             {headerName: "ID", field: "id", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.id);
+                return checkNullValue(params.data.id);
             }},
             {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.name);
             }},
             {headerName: "Dataset type", field: "type", type: "string", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.type);
+                return checkNullValue(params.data.type);
             }},
             {headerName: "Study", field: "study", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.study);
+                return checkNullValue(params.data.study.name);
             }},
             {headerName: "Subject", field: "subject", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.subject);
+                return checkNullValue(params.data.subject.name);
             }},
             {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);
