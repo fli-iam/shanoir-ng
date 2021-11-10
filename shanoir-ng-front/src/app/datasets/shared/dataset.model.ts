@@ -30,7 +30,7 @@ export abstract class Dataset extends Entity {
     type: DatasetType;
     datasetAcquisition: DatasetAcquisition
     //datasetExpressions: List<DatasetExpression>
-    //datasetProcessing: DatasetProcessing
+    datasetProcessing: DatasetProcessing
     //groupOfSubjectsId: number;
     //inputOfDatasetProcessings: Array<InputOfDatasetProcessing>
     //referencedDatasetForSuperimposition: Dataset;

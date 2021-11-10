@@ -28,7 +28,6 @@ import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enu
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../shared/dataset-type.model';
 
-
 @Component({
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html'

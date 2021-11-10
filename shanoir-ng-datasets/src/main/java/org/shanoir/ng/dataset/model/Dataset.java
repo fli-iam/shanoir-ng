@@ -40,7 +40,6 @@ import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.ProcessedDataset;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
 import org.shanoir.ng.dataset.modality.SpectDataset;
@@ -79,7 +78,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
 		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
-		@JsonSubTypes.Type(value = ProcessedDataset.class, name = "Processed"),
 		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template") })
 public abstract class Dataset extends AbstractEntity {
 
@@ -323,11 +321,10 @@ public abstract class Dataset extends AbstractEntity {
 	@Transient
 	public Long getStudyId() {
 		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-			return null;
+			return studyId;
 		}
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
-
 
 	/**
 	 * @return the subjectId

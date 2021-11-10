@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 		</li>
-		<li *ngIf="mode == 'view'">
+		<li *ngIf="mode == 'view' && dataset && dataset.datasetAcquisition">
 			<label>Dataset Acquisition</label>
 			<span class="right-col">
 				<a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">

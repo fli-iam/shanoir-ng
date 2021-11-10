@@ -61,7 +61,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
 	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
-	@Type(value = ProcessedDatasetAcquisition.class, name = "Processed"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 

@@ -64,7 +64,6 @@ import { DatasetProcessingService } from './datasets/shared/dataset-processing.s
 import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
 import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
-import { ProcessedDatasetComponent } from './datasets/dataset/processed/dataset.processed.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
@@ -306,7 +305,6 @@ import { TagInputComponent } from './tags/tag.input.component';
         StudyNamePipe,
         DatasetComponent,
         EegDatasetComponent,
-		ProcessedDatasetComponent,
         DatasetListComponent,
         DatasetProcessingComponent,
         DatasetProcessingListComponent,

@@ -67,7 +67,7 @@ export class FinishProcessedDatasetImportComponent {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
-                            that.msgService.log('info', 'The data has been successfully imported')
+                            that.msgService.log('info', 'The import sucessfully started')
                         }, 0);
                         // go back to the first step of import
                         this.router.navigate(['/imports/processed-dataset']);

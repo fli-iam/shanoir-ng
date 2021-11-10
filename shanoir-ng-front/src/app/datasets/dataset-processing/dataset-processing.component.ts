@@ -24,6 +24,7 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { Study } from '../../studies/shared/study.model';
+import { Subject } from '../../subjects/shared/subject.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
@@ -42,6 +43,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public datasetProcessingTypes: Option<DatasetProcessingType>[] = DatasetProcessingType.options;
     public study: Study;
+    public subject: Subject;
     public studyOptions: Option<Study>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
     private inputDatasetsPromise: Promise<any>;
@@ -113,12 +115,16 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private prefill() {
+        if (this.breadcrumbsService.currentStep.isPrefilled('subject')) {
+            let contextSubject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
+            this.subject = contextSubject;
+        }
         if (this.breadcrumbsService.currentStep.isPrefilled('study')) {
             let study = this.breadcrumbsService.currentStep.getPrefilledValue('study');
             this.studyOptions = [new Option<Study>(study, study.name)];
             this.study = study;
             this.datasetProcessing.studyId = this.study.id;
-            this.datasetService.getByStudyId(this.study.id).then(datasets=> {
+            this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets=> {
                 for(let dataset of datasets) {
                     this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
                 }   

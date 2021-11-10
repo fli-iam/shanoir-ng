@@ -23,7 +23,6 @@ import { DatasetUtils } from './dataset.utils';
 import { MrDataset, EchoTime, FlipAngle, InversionTime, MrDatasetMetadata, RepetitionTime, MrQualityProcedureType, MrDatasetNature } from '../dataset/mr/dataset.mr.model';
 import { DiffusionGradient } from '../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import { Channel, Event, EegDataset } from '../dataset/eeg/dataset.eeg.model';
-import { ProcessedDataset } from '../dataset/processed/dataset.processed.model';
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
@@ -58,6 +57,11 @@ export class DatasetDTOService {
                     processing => result.processings.push(processing))
                 );
             }
+        }
+        if (dto.datasetProcessing) {
+    	    promises.push(this.datasetProcessingService.get(dto.datasetProcessing.id).then(
+                processing => result.datasetProcessing = processing
+            ));
         }
         return Promise.all(promises).then(([]) => {
             return result;
@@ -138,6 +142,11 @@ export class DatasetDTOService {
                 entity.processings.push(processing);
             }
         }
+		if (dto.datasetProcessing) {
+			let process = new DatasetProcessing();
+            process.id = dto.datasetProcessing.id;
+			entity.datasetProcessing = process;
+		}
         return entity;
     }
 
@@ -165,10 +174,6 @@ export class DatasetDTOService {
         entity.coordinatesSystem = dto.coordinatesSystem;
         return entity
     }
-    static mapSyncFieldsProcessed(dto: ProcessedDatasetDTO, entity: ProcessedDataset): ProcessedDataset {
-        entity.processedType = dto.processedType
-        return entity
-    }
 }
 
 export class DatasetDTO {
@@ -183,6 +188,7 @@ export class DatasetDTO {
 	name: string;
     type: DatasetType;
     processings: {id: number}[];
+	datasetProcessing: {id: number};
     datasetAcquisition: DatasetAcquisitionDTO;
 
     constructor(dataset?: Dataset) {
@@ -194,6 +200,7 @@ export class DatasetDTO {
             this.subjectId = dataset.subject ? dataset.subject.id : null;
             this.updatedMetadata = dataset.updatedMetadata;
             this.name = dataset.name;
+            this.datasetProcessing = dataset.datasetProcessing;
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return { id: p.id } } );
             if(dataset.datasetAcquisition) {
@@ -225,10 +232,6 @@ export class EegDatasetDTO extends DatasetDTO {
     events: Event[];
     coordinatesSystem: string;
     selected: boolean;
-}
-
-export class ProcessedDatasetDTO extends DatasetDTO {
-    processedType: string;
 }
 
 export class MrDatasetMetadataDTO {

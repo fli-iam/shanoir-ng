@@ -27,12 +27,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.modality.MegDataset;
@@ -40,7 +39,6 @@ import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.ProcessedDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.RegistrationDataset;
 import org.shanoir.ng.dataset.modality.SegmentationDataset;
@@ -55,8 +53,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.ProcessedDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -531,28 +527,55 @@ public class ImporterService {
 
 		try {
 			DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
-			ProcessedDataset dataset = new ProcessedDataset();
-			dataset.setProcessedType(importJob.getDatasetType());
-
+			Dataset dataset = null;
+			
+			switch(importJob.getDatasetType()) {
+				case CalibrationDataset.datasetType:
+					dataset = new CalibrationDataset();
+					break;
+				case CtDataset.datasetType:
+					dataset = new CtDataset();
+					break;
+				case EegDataset.datasetType:
+					dataset = new EegDataset();
+					break;
+				case MegDataset.datasetType:
+					dataset = new MegDataset();
+					break;
+				case MeshDataset.datasetType:
+					dataset = new MeshDataset();
+					break;
+				case MrDataset.datasetType:
+					dataset = new MrDataset();
+					break;
+				case ParameterQuantificationDataset.datasetType:
+					dataset = new ParameterQuantificationDataset();
+					break;
+				case PetDataset.datasetType:
+					dataset = new PetDataset();
+					break;
+				case RegistrationDataset.datasetType:
+					dataset = new RegistrationDataset();
+					break;
+				case SegmentationDataset.datasetType:
+					dataset = new SegmentationDataset();
+					break;
+				case SpectDataset.datasetType:
+					dataset = new SpectDataset();
+					break;
+				case StatisticalDataset.datasetType:
+					dataset = new StatisticalDataset();
+					break;
+				case TemplateDataset.datasetType:
+					dataset = new TemplateDataset();
+					break;
+				default:
+				break;
+			}
+			
 			datasetProcessing.addOutputDataset(dataset);
 			dataset.setDatasetProcessing(datasetProcessing);
-			
-			ProcessedDatasetAcquisition procDatasetAcquisition = new ProcessedDatasetAcquisition();
-			procDatasetAcquisition.setParentAcquisitions(new ArrayList<>());
-			procDatasetAcquisition.setDatasets(Collections.singletonList(dataset));
-
-			List<Long> parentIds = datasetProcessing.getInputDatasets().stream().map(Dataset::getId).collect(Collectors.toList());
-			List<Dataset> parents = datasetService.findByIdIn(parentIds);
-
-			for (Dataset parent: parents) {
-				procDatasetAcquisition.getParentAcquisitions().add(parent.getDatasetAcquisition());
-			}
-
-			// Set examination
-			procDatasetAcquisition.setAcquisitionEquipmentId(parents.get(0).getDatasetAcquisition().getAcquisitionEquipmentId());
-			procDatasetAcquisition.setExamination(parents.get(0).getDatasetAcquisition().getExamination());
-
-			dataset.setDatasetAcquisition(procDatasetAcquisition);
+			dataset.setStudyId(importJob.getStudyId());
 
 			// Metadata
 			DatasetMetadata originMetadata = new DatasetMetadata();
@@ -584,13 +607,12 @@ public class ImporterService {
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 
-			datasetAcquisitionService.create(dataset.getDatasetAcquisition());
+			datasetService.create(dataset);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage("Success");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			
 		} catch (Exception e) {
 			LOG.error("Error while importing processed dataset: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
