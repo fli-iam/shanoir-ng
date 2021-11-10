@@ -135,9 +135,9 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     buildForm(): FormGroup {
         this.prefill();
         return this.formBuilder.group({
-            'study': [this.study ? this.study.name : ''],
-            'processingType': [this.datasetProcessing.datasetProcessingType],
-            'processingDate': [this.datasetProcessing.processingDate],
+            'study': [this.study ? this.study.name : '', Validators.required],
+            'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
+            'processingDate': [this.datasetProcessing.processingDate, Validators.required],
             // 'inputDatasetList': [this.datasetProcessing.inputDatasets],
             // 'outputDatasetList': [this.datasetProcessing.outputDatasets],
             'comment': [this.datasetProcessing.comment]

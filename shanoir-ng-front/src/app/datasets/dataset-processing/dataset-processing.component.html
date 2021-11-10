@@ -37,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label class="required-label">Research study</label>
 					<span class="right-col">
 						<select-box 
-								formControlName="study" [(ngModel)]="study" [options]="studyOptions">
+								formControlName="study" [(ngModel)]="study" [options]="studyOptions" [disabled]="study">
 						</select-box>
 					</span>
 				</li>

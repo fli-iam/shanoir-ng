@@ -610,13 +610,15 @@ public class ImporterService {
 			datasetService.create(dataset);
 
 			event.setStatus(ShanoirEvent.SUCCESS);
-			event.setMessage("Success");
+			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
+					+": Successfully created processed dataset for subject " + importJob.getSubjectName() + " in dataset "
+					+ dataset.getId());
 			event.setProgress(1f);
 			eventService.publishEvent(event);
 		} catch (Exception e) {
 			LOG.error("Error while importing processed dataset: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("An unexpected error occured, please contact an administrator.");
+			event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
 			throw e;

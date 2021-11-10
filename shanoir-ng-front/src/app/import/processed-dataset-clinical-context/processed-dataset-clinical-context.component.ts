@@ -63,7 +63,6 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     ];
     public importMode: ImportMode;
 
-    // public isAdminOfStudy: boolean[] = [];
     openSubjectStudy: boolean = false;
     
     constructor(
@@ -124,9 +123,6 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             if(processedDatasetComment) {
                 this.processedDatasetComment = processedDatasetComment;
             }
-            if(datasetProcessing) {
-                this.datasetProcessing = datasetProcessing;
-            }
             let study = this.importDataService.contextBackup.study;
             let subject = this.importDataService.contextBackup.subject;
             if (study) {
@@ -135,19 +131,22 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                 if (studyOption) {
                     this.study = studyOption.value;
                 }
+                this.onSelectStudy();
                 if (subject) {
                     this.subject = subject;
                     this.onSelectSubject();
+                    if(datasetProcessing) {
+                        this.datasetProcessing = datasetProcessing;
+                    }
                 }
-                this.onSelectStudy();
             }
         }
     }
 
     private getStudiesAndDatasetProcessings(): void {
         
-        Promise.all([this.studyService.getStudyNamesAndCenters(), this.datasetProcessingService.getAll()])
-        .then(([allStudies, allDatasetProcessings]) => {
+        Promise.all([this.studyService.getStudyNamesAndCenters()])
+        .then(([allStudies]) => {
             this.studyOptions = [];
             for (let study of allStudies) {
                 let studyOption: Option<Study> = new Option(study, study.name);
@@ -159,14 +158,14 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                     }
                 }
             }
-            this.datasetProcessings = allDatasetProcessings;
             this.reloadSavedData();
             this.onContextChange();
         });
     }
-    
+
     public onSelectStudy(): void {
         this.subjects = [];
+        this.subject = null;
         if(this.study != null && this.study.id != null) {
             this.studyService.findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
@@ -178,7 +177,15 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
         if (!this.subject) {
             this.openSubjectStudy = false;
         }
+        this.datasetProcessing = null;
+        this.loadProcessings();
         this.onContextChange();
+    }
+
+    loadProcessings(): void {
+	    this.datasetProcessingService.findAllByStudyIdAndSubjectId(this.study.id, this.subject.id).then(
+		    processings => this.datasetProcessings = processings
+	    );
     }
 
     public onContextChange() {
@@ -187,7 +194,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             this.importDataService.contextData = this.getContext();
         }
     }
-    
+
     private getContext(): ContextData {
         return new ContextData(this.study, null, null, null, null,
                             this.subject, null, null, null,
@@ -240,6 +247,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             context.study != null
             && context.subject != null
             && context.datasetType != null
+			&& context.processedDatasetName != null
             && context.processedDatasetFilePath != null
             && context.processedDatasetType != null
             && context.datasetProcessing != null

@@ -63,9 +63,16 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
         };
         return [
             { headerName: 'Message', field: 'message', width: '100%', type:'link',
-				route: (task: Task) => task.status === 1 && task.eventType === 'importDataset.event' ? 
-				'/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length)) :
-				'/home'},
+				route: (task: Task) => {
+					if (task.status === 1 && task.eventType === 'importDataset.event') {
+						if (task.message.indexOf('in examination') != -1) {
+                            return '/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length))
+						} else if (task.message.indexOf('in dataset') != -1) {
+                            return '/dataset/details/' + task.message.slice(task.message.lastIndexOf('in dataset ') + ('in dataset '.length))
+						}
+					}
+				return '/home';
+				}},
             { headerName: 'Status', field: 'status', width: '70px', type: 'Status', cellRenderer: function (params: any) {
                     if (params.data.status == 0) {
                         return "In progress"
