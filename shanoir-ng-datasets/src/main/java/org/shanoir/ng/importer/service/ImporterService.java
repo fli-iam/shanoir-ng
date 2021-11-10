@@ -593,12 +593,27 @@ public class ImporterService {
 			File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
 			// Save file
+			Path location = null;
 			try {
 				destFile.getParentFile().mkdirs();
-				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				location = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				LOG.error("IOException generating Processed Dataset Expression", e);
 			}
+			DatasetFile datasetFile = new DatasetFile();
+			datasetFile.setPacs(false);
+			datasetFile.setPath(location.toUri().toString());
+			
+			DatasetExpression expression = new DatasetExpression();
+			expression.setDataset(dataset);
+			expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+			expression.setDatasetProcessingType(datasetProcessing.getDatasetProcessingType());
+			
+			datasetFile.setDatasetExpression(expression);
+			
+			expression.setDatasetFiles(Collections.singletonList(datasetFile));
+			
+			dataset.setDatasetExpressions(Collections.singletonList(expression));
 
 			// Fill dataset with informations
 			dataset.setCreationDate(LocalDate.now());
