@@ -132,7 +132,7 @@ public class RabbitMQDatasetsService {
 			for (Tag tag : stud.getTags()) {
 				tag.setStudy(stud);
 			}
-			this.studyRepository.save(stud);
+			Study studyDb = this.studyRepository.save(stud);
 
 			// SUBJECT_STUDY
 			if (stud.getSubjectStudyList() != null) {
@@ -145,6 +145,18 @@ public class RabbitMQDatasetsService {
 			}
 			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
 				sustu.setStudy(stud);
+				for (Tag tag : sustu.getTags()) {
+					if (tag.getId() == null) {
+						Tag dbTag = studyDb.getTags().stream().filter(upTag -> 
+								upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
+						).findFirst().orElse(null);
+						if (dbTag != null) {
+							tag.setId(dbTag.getId());							
+						} else {
+							throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+						}
+					}
+				}
 			}
 			
 			this.studyRepository.save(stud);

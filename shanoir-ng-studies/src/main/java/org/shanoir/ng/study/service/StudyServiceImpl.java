@@ -127,11 +127,9 @@ public class StudyServiceImpl implements StudyService {
 			}
 
 		}
-		if (study.getSubjectStudyList() != null) {
-			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-				subjectStudy.setStudy(study);
-			}
-			// Check for tags to update ?
+		
+		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+			subjectStudy.setStudy(study);
 		}
 
 		if (study.getTags() != null) {
@@ -151,7 +149,18 @@ public class StudyServiceImpl implements StudyService {
 				studyUser.setStudy(study);
 			}
 		}
+		
+		List<SubjectStudy> subjectStudyListSave = study.getSubjectStudyList();
+		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
+		studyDb.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		
+		if (subjectStudyListSave != null) {
+			study.setSubjectStudyList(subjectStudyListSave);
+			studyDb = updateTags(study, studyDb);
+			studyDb = studyRepository.save(studyDb);
+		}
+		
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 
 		if (studyDb.getStudyUserList() != null) {
@@ -178,7 +187,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final Study studyDb = studyRepository.findById(study.getId()).orElse(null);
+		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		boolean updateStudyValue = false;
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
@@ -213,13 +222,6 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
-		if (study.getSubjectStudyList() != null) {
-			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
-				subjectStudy.setStudy(studyDb);
-			}
-		}
-
 		if (studyDb.getProtocolFilePaths() != null) {
 			for (String filePath : studyDb.getProtocolFilePaths()) {
 				if (!study.getProtocolFilePaths().contains(filePath)) {
@@ -239,9 +241,38 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		Study updatedStudy = studyRepository.save(studyDb);
+		
+		if (study.getSubjectStudyList() != null) {
+			studyDb = updateTags(study, updatedStudy);
+			ListDependencyUpdate.updateWith(updatedStudy.getSubjectStudyList(), study.getSubjectStudyList());
+			for (SubjectStudy subjectStudy : updatedStudy.getSubjectStudyList()) {
+				subjectStudy.setStudy(updatedStudy);
+			}
+			updatedStudy = studyRepository.save(studyDb);
+		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
 
+		return studyDb;
+	}
+	
+	private Study updateTags(Study study, Study studyDb) {
+		if (study.getSubjectStudyList() != null) {
+			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				for (Tag tag : subjectStudy.getTags()) {
+					if (tag.getId() == null) {
+						Tag dbTag = studyDb.getTags().stream().filter(upTag -> 
+								upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
+						).findFirst().orElse(null);
+						if (dbTag != null) {
+							tag.setId(dbTag.getId());							
+						} else {
+							throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+						}
+					}
+				}
+			}	
+		} 
 		return studyDb;
 	}
 

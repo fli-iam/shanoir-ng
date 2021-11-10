@@ -35,6 +35,7 @@ public class ListDependencyUpdate {
 	 */
 	public static <T extends AbstractEntity> void updateWith(List<T> oldValues, List<T> newValues) {
 		if (newValues == null) throw new IllegalArgumentException("newValues cannot be null");
+		if (oldValues == null) throw new IllegalArgumentException("oldValues cannot be null");
 		
 		// Find updated ids
 		Set<Long> updatedIds = new HashSet<>();
