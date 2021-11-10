@@ -100,6 +100,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     }
 
     getFontColor(colorInp: string): boolean {
+        if (!colorInp) return false;
         var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
         var r = parseInt(color.substring(0, 2), 16); // hexToR
         var g = parseInt(color.substring(2, 4), 16); // hexToG

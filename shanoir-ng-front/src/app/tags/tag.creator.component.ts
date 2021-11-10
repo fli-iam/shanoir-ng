@@ -56,13 +56,17 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
             let newTag = new Tag();
             newTag.color = this.selectedColor;
             newTag.name = this.text;
-            this.model.push(newTag);
-            this.text = null;
-            this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16); // random color
-            this.addTagVisible = false;
-            this.displayedTags.add({tag: newTag, used: this.tagUsed(newTag), darkFont: this.getFontColor(newTag.color)});
-            this.propagateChange(this.model);
-            this.onChange.emit(this.model);
+            if (this.model.find(tag => tag.color == newTag.color && tag.name == newTag.name)) {
+                this.dialogService.error('Error', 'A tag with this color and name already exist !');
+            } else {
+                this.model.push(newTag);
+                this.text = null;
+                this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16); // random color
+                this.addTagVisible = false;
+                this.displayedTags.add({tag: newTag, used: this.tagUsed(newTag), darkFont: this.getFontColor(newTag.color)});
+                this.propagateChange(this.model);
+                this.onChange.emit(this.model);
+            }
         }
     }
 
