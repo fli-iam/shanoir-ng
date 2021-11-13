@@ -93,7 +93,7 @@ export class CarminClientService {
     if (executionIdentifier === null || executionIdentifier === undefined) {
       throw new Error('Required parameter executionIdentifier was null or undefined when calling getExecution.');
     }
-    return this.httpClient.get(`${this.basePath}/executions/${executionIdentifier}`);
+    return this.httpClient.get<Execution>(`${this.basePath}/executions/${executionIdentifier}`);
   }
 
   /**

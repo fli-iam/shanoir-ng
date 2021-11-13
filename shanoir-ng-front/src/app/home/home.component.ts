@@ -25,6 +25,7 @@ import { StudyService } from '../studies/shared/study.service';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
+import { CarminClientService } from '../carmin/shared/carmin-client.service';
 
 @Component({
     selector: 'home',
@@ -54,13 +55,26 @@ export class HomeComponent {
             private studyService: StudyService,
             private keycloakService: KeycloakService,
             private userService: UserService,
-            private taskService: TaskService) {
+            private taskService: TaskService,
+            private carminService: CarminClientService
+            ) {
         //this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
         this.load();
     }
 
     load() {
+
+        //testing carmin client 
+        this;this.carminService.listExecutions().subscribe(
+            list=>{
+                console.log("list");
+            },
+            error=>{
+                console.error(error);
+            }
+        )
+
         this.studyService.getMyDUA().then(duas => {
             this.challengeDua = null;
             this.notifications = null;
