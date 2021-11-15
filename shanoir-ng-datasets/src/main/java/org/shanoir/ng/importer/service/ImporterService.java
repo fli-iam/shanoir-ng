@@ -56,6 +56,7 @@ import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -237,7 +238,7 @@ public class ImporterService {
 	 * @param generatedAcquisitions
 	 */
 	private void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
-		SuccessImportEmail generatedMail = new SuccessImportEmail();
+		EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
 		Map<Long, String> datasets = new HashMap<>();
 		if (CollectionUtils.isEmpty(generatedAcquisitions)) {
@@ -286,6 +287,7 @@ public class ImporterService {
 
 		// Get all recpients
 		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
+
 		for (StudyUser user : users) {
 			if (user.isReceiveNewImportReport()) {
 				recipients.add(user.getUserId());

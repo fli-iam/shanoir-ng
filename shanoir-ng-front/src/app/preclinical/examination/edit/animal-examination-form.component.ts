@@ -207,13 +207,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
 
-    public save(): Promise<void> {
+    public save(): Promise<Examination> {
         return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
-        });;
+            }
+            return result;         
+        });
     }
 
     manageExaminationAnesthetic(examination_id : number) {
@@ -266,7 +267,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 });
             }else{
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioData)
-                .subscribe(physioData => {
+                .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
                     	.subscribe(res => {
@@ -294,7 +295,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 });
             }else{
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.bloodGasData)
-                	.subscribe(bloodGasData => {
+                	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
                     		.subscribe(res => {

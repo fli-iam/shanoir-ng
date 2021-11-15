@@ -157,7 +157,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    save(): Promise<void> {
+    save(): Promise<AcquisitionEquipment> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         return super.save();
     }

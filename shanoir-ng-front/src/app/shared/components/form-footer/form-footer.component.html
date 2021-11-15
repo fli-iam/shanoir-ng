@@ -23,9 +23,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <button type="button" (click)="onCancel()" class="Button right-icon">Cancel<i class="fas fa-ban"></i></button>
             <button type="button" i18n="Edit center|Update button label@@updateButton" (click)="onUpdate()" class="Button right-icon" [disabled]="!state.valid">
                 Update<span *ngIf="!state.loading">
-                    <i class="far fa-save"></i>
+                    <i class="far fa-save"></i> 
                 </span><span *ngIf="state.loading">
-                    <i class="fa fa-cog fa-spin"></i>
+                    <i class="fa fa-cog fa-spin"></i> 
                 </span>
             </button>
         </ng-template>

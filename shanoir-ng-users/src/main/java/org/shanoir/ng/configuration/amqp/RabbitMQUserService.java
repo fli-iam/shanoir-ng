@@ -14,14 +14,12 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.shanoir.ng.email.DatasetImportEmail;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +47,6 @@ public class RabbitMQUserService {
 	@Autowired
 	EmailService emailService;
 
-	Map<Long, List<String>> series = new HashMap<>();
-
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
 	 * @param commandArrStr the task as a json string.
@@ -75,7 +71,7 @@ public class RabbitMQUserService {
 	}
 
 	/**
-	 * Receives an import end event as a json object, thus send a mail to study Manager to notice him
+	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
@@ -85,12 +81,31 @@ public class RabbitMQUserService {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule());
 		try {
-			DatasetImportEmail mail = mapper.readValue(generatedMailAsString, DatasetImportEmail.class);
+			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
 			if (mail.getErrorMessage() == null) {
 				this.emailService.notifyStudyManagerDataImported(mail);
 			} else {
 				this.emailService.notifyStudyManagerImportFailure(mail);
 			}
+		} catch (Exception e) {
+			LOG.error("Something went wrong deserializing the import event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+		}
+	}
+	
+	/**
+	 * Receives an study user report as a json object, thus send a mail to study manager to notice him
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE)
+	@RabbitHandler
+	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		try {
+			EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
+			this.emailService.notifyStudyManagerStudyUsersAdded(mail);
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
