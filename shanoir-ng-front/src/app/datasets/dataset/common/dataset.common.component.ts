@@ -82,6 +82,7 @@ export class CommonDatasetComponent implements OnChanges {
                 this.fetchOneStudy();
             }
         } else if(changes['dataset'] && this.mode == 'edit') {
+	        this.parentFormGroup.markAsDirty();
             this.parentFormGroup.updateValueAndValidity();
         }
     }

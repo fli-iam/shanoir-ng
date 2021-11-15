@@ -255,6 +255,8 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }else{
             this.toggleFormAI = true;
         }
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
     
     private editIngredient = (item: AnestheticIngredient) => {
