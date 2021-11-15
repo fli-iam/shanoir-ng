@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
@@ -130,7 +131,7 @@ public interface EmailService {
 	 *  This method notifies a study manager that san import fail for a given study
 	 * @param generatedMail: The object containing all the mail informations
 	 */
-	void notifyStudyManagerImportFailure(DatasetImportEmail generatedMail);
+	void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail);
 
 
 }

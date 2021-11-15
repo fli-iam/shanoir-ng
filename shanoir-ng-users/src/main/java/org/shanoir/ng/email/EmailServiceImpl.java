@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
@@ -428,7 +429,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerImportFailure(DatasetImportEmail generatedMail) {
+	public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
         // Find user that imported
         User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
 

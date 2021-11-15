@@ -35,14 +35,14 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.shared.email.EmailBase;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.mail.ImportEmail;
-import org.shanoir.ng.shared.mail.ImportFailureEmail;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,7 +177,7 @@ public class ImporterManagerService {
 	}
 
 	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
-		ImportFailureEmail generatedMail = new ImportFailureEmail();
+		EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
 		generatedMail.setExaminationId(importJob.getExaminationId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
 		generatedMail.setSubjectName(importJob.getSubjectName());
@@ -186,7 +186,7 @@ public class ImporterManagerService {
 		
 		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
 
-		sendMail(importJob, generatedMail);
+		sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class ImporterManagerService {
 	 * @param job the imprt job
 	 * @param email the recipients
 	 */
-	private void sendMail(ImportJob job, ImportEmail email) {
+	private void sendMail(ImportJob job, EmailBase email, String queue) {
 		List<Long> recipients = new ArrayList<>();
 
 		// Get all recpients
@@ -211,7 +211,7 @@ public class ImporterManagerService {
 		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE, new ObjectMapper().writeValueAsString(email));
+			rabbitTemplate.convertAndSend(queue, new ObjectMapper().writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}

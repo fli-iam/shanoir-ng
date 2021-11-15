@@ -18,6 +18,8 @@ import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.email.EmailBase;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -82,11 +84,28 @@ public class RabbitMQUserService {
 		mapper.registerModule(new JavaTimeModule());
 		try {
 			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
-			if (mail.getErrorMessage() == null) {
-				this.emailService.notifyStudyManagerDataImported(mail);
-			} else {
-				this.emailService.notifyStudyManagerImportFailure(mail);
-			}
+			this.emailService.notifyStudyManagerDataImported(mail);
+		} catch (Exception e) {
+			LOG.error("Something went wrong deserializing the import event.", e);
+			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+		}
+	}
+	
+	/**
+	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
+	 * that the import failed
+	 * @param commandArrStr the task as a json string.
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE)
+	@RabbitHandler
+	public void receiveImportFailedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		try {
+			EmailDatasetImportFailed mail = mapper.readValue(generatedMailAsString, EmailDatasetImportFailed.class);
+			this.emailService.notifyStudyManagerImportFailure(mail);
+
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the import event.", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
