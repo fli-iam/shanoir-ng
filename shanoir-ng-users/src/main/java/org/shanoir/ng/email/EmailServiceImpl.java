@@ -456,7 +456,7 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
 				variables.put(SERVER_ADDRESS, shanoirServerAddress);
 				final String content = build("notifyStudyAdminImportFailed", variables);
-				LOG.error(content);
+				LOG.info(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message

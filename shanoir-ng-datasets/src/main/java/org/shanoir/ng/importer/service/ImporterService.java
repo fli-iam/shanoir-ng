@@ -179,7 +179,6 @@ public class ImporterService {
 					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 
-
 			// Create BIDS folder
 			try {
 				bidsService.addDataset(examination, importJob.getSubjectName(), importJob.getStudyName());
@@ -189,27 +188,26 @@ public class ImporterService {
 				LOG.error("ERROR: Could not create BIDS folder", e2);
 			}
 			// Manage archive
-			if (importJob.getArchive() == null) {
-				return;
-			}
-			// Copy archive
-			File archiveFile = new File(importJob.getArchive());
-			if (!archiveFile.exists()) {
-				LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
-				return;
-			}
-			MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
-
-			// Add bruker archive as extra data
-			String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
-			if (fileName != null) {
-				List<String> archives = examination.getExtraDataFilePathList();
-				if (archives == null) {
-					archives = new ArrayList<>();
+			if (importJob.getArchive() != null) {
+				// Copy archive
+				File archiveFile = new File(importJob.getArchive());
+				if (!archiveFile.exists()) {
+					LOG.info("Archive file not found, not saved: {}", importJob.getArchive());
+					return;
 				}
-				archives.add(archiveFile.getName());
-				examination.setExtraDataFilePathList(archives);
-				examinationRepository.save(examination);
+				MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
+	
+				// Add bruker archive as extra data
+				String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
+				if (fileName != null) {
+					List<String> archives = examination.getExtraDataFilePathList();
+					if (archives == null) {
+						archives = new ArrayList<>();
+					}
+					archives.add(archiveFile.getName());
+					examination.setExtraDataFilePathList(archives);
+					examinationRepository.save(examination);
+				}
 			}
 
 			// Send success mail
