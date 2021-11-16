@@ -64,9 +64,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     
     writeValue(obj: any): void {
         super.writeValue(obj);
-        if (this.model) {
-            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
-        }
+        this.processHasTags();
         this.updateDisabled();
     }
 
@@ -104,6 +102,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         if (this.compMode == "study") {
             let studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
+            studyCopy.tags = this.study.tags;
             newSubjectStudy.study = studyCopy;
             newSubjectStudy.subject = this.selected as Subject;
         }
@@ -115,7 +114,12 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
+        this.processHasTags();
         this.propagateChange(this.model);
+    }
+
+    private processHasTags() {
+        this.hasTags = !!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {

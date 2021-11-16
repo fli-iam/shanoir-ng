@@ -17,16 +17,18 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { SubjectStudy } from './subject-study.model';
-import { Subject, SubjectDTO } from './subject.model';
+import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
+import { Subject } from './subject.model';
 import { HttpClient } from '@angular/common/http';
+import { SubjectDTO, SubjectDTOService } from './subject.dto';
+import { StudyDTOService } from '../../studies/shared/study.dto';
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
 
     API_URL = AppUtils.BACKEND_API_SUBJECT_URL;
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, protected subjectDTOService: SubjectDTOService) {
         super(http);
     }
 
@@ -38,13 +40,23 @@ export class SubjectService extends EntityService<Subject> {
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
-        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
-            .toPromise();
+        return this.http.get<SubjectDTO>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
+            .toPromise().then(dto => this.mapEntity(dto));
     }
 
     updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {
-        return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .toPromise();
+        return this.http.put<SubjectStudyDTO>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
+            .toPromise().then(StudyDTOService.dtoToSubjectStudy);
+    }
+
+    protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {
+        if (result == undefined) result = this.getEntityInstance();
+        return this.subjectDTOService.toEntity(dto, result);
+    }
+
+    protected mapEntityList = (dtos: SubjectDTO[], result?: Subject[]): Promise<Subject[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.subjectDTOService.toEntityList(dtos, result);
     }
 
     public stringify(entity: Subject) {

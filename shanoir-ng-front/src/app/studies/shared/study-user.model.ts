@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { IdName } from "../../shared/models/id-name.model";
+import { Id } from "../../shared/models/id.model";
 import { User } from "../../users/shared/user.model";
 import { StudyUserRight} from "./study-user-right.enum";
 import { Study } from "./study.model";
@@ -38,5 +40,29 @@ export class StudyUser {
                 user.selected = true;
             }
         }
+    }
+}
+
+export class StudyUserDTO {
+    id: number;
+    study: Id;
+    userId: number;
+    receiveStudyUserReport: boolean;
+    receiveNewImportReport: boolean;
+    studyUserRights: StudyUserRight[];
+    userName: string;
+    user: User;
+    confirmed: boolean = false;
+
+    constructor(studyUser: StudyUser) {
+        this.id = studyUser.id;
+        this.study = new Id(studyUser.study?.id);
+        this.userId = studyUser.userId;
+        this.receiveStudyUserReport = studyUser.receiveStudyUserReport;
+        this.receiveNewImportReport = studyUser.receiveNewImportReport;
+        this.studyUserRights = studyUser.studyUserRights;
+        this.userName = studyUser.userName;
+        this.user = studyUser.user;
+        this.confirmed = studyUser.confirmed;
     }
 }

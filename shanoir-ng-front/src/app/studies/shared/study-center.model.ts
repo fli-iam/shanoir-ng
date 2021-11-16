@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Center } from '../../centers/shared/center.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { Id } from '../../shared/models/id.model';
 import { Study } from './study.model';
 
@@ -25,12 +26,12 @@ export class StudyCenter {
 export class StudyCenterDTO {
     
     id: number;
-    center: Id;
-    study: Id;
+    center: IdName;
+    study: IdName;
    
     constructor(studyCenter: StudyCenter) {
         this.id = studyCenter.id;
-        this.center = studyCenter.center ? new Id(studyCenter.center.id) : null;
-        this.study = studyCenter.study ? new Id(studyCenter.study.id) : null;
+        this.center = studyCenter.center ? new IdName(studyCenter.center.id, studyCenter.center.name) : null;
+        this.study = studyCenter.study ? new IdName(studyCenter.study.id, studyCenter.study.name) : null;
     }
 }

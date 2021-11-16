@@ -18,6 +18,8 @@ import { Subject } from './subject.model';
 import { SubjectType } from './subject.types';
 import { Id } from '../../shared/models/id.model';
 import { Tag } from '../../tags/tag.model';
+import { IdName } from '../../shared/models/id-name.model';
+import { SimpleStudyDTO } from '../../studies/shared/study.dto';
 
 export class SubjectStudy {
     id: number;
@@ -35,8 +37,8 @@ export class SubjectStudy {
 export class SubjectStudyDTO {
     id: number;
     examinations: number[];
-    subject: Id;
-    study: Id;
+    subject: IdName;
+    study: SimpleStudyDTO;
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
@@ -45,8 +47,8 @@ export class SubjectStudyDTO {
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
         this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
-        this.subject = subjectStudy.subject ? new Id(subjectStudy.subject.id) : null;
-        this.study = subjectStudy.study ? new Id(subjectStudy.study.id) : null;
+        this.subject = subjectStudy.subject ? new IdName(subjectStudy.subject.id, subjectStudy.subject.name) : null;
+        this.study = subjectStudy.study ? new SimpleStudyDTO(subjectStudy.study) : null;
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;

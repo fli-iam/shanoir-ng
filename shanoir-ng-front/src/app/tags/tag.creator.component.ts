@@ -56,7 +56,7 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
             let newTag = new Tag();
             newTag.color = this.selectedColor;
             newTag.name = this.text;
-            if (this.model.find(tag => tag.color == newTag.color && tag.name == newTag.name)) {
+            if (this.model.find(tag => (tag as Tag).equals(newTag))) {
                 this.dialogService.error('Error', 'A tag with this color and name already exist !');
             } else {
                 this.model.push(newTag);
@@ -84,7 +84,7 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
 
     private tagUsed(tag: Tag) {
         for (let subjectStudy of this.study.subjectStudyList) {
-            if (subjectStudy.tags.findIndex(element => element.id === tag.id) != -1) {
+            if (subjectStudy.tags.findIndex(element => element.equals(tag)) != -1) {
                 return true;
             }
         }

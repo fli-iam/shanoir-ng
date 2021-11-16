@@ -26,5 +26,14 @@ export class Tag extends Entity {
         tag.color = color;
         return tag;
     }
+
+    public equals(tag: Tag): boolean {
+        if (!tag) return false;
+        else if (this.id && tag.id) {
+            return this.id == tag.id;
+        } else {
+            return tag && tag.name?.trim() == this.name?.trim() && tag.color == this.color;
+        }
+    }
     
 }
