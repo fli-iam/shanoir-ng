@@ -163,7 +163,7 @@ if [ -n "$deploy" ] ; then
 	
 	# 4. infrastructure services
 	step "start: infrastructure services"
-	for infra_ms in rabbitmq preclinical-bruker2dicom solr
+	for infra_ms in rabbitmq preclinical-bruker2dicom solr ohif-viewer
 	do
 		step "start: $infra_ms infrastructure microservice"
 		docker-compose up -d "$infra_ms"

@@ -284,6 +284,23 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
+  # OHIF-Viewer, version 2.0
+  #
+  ohif-viewer:
+    container_name: "${SHANOIR_PREFIX}ohif-viewer"
+    build: ./docker-compose/ohif-viewer
+    environment:
+      - SHANOIR_PREFIX
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_X_FORWARDED
+      - SHANOIR_INSTANCE_NAME
+      - SHANOIR_INSTANCE_COLOR
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "3000:80"      
+  #
   # Nginx
   #
   nginx:
