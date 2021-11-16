@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM node
+FROM node:lts-alpine3.14
 
-RUN apt update -y
-
-RUN apt-get update && apt-get install yarn git
+RUN apk update && apk add yarn git
