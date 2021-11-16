@@ -58,12 +58,15 @@
                                 <span><a tabindex="5" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
                             </#if>
                         </div>
+                        </br>
 						<div>
 						    <a href="${properties.requestExtension!}">Account expired?</a>
 						</div>
+						</br>
                         <div>
                             <a href="${properties.requestAccount!}">Create an account</a>
                         </div>
+                        </br>
                         <div>
                             <a href="${properties.requestChallenge}">Subscribe to a challenge</a>
                         </div>
