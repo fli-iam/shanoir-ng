@@ -66,6 +66,14 @@ public class HttpService {
 			LOG.error(e.getMessage(), e);
 		}
 	}
+	
+	public void closeHttpClient() {
+		try {
+			httpClient.close();
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
 
 	public CloseableHttpResponse get(String url) {
 		try {
