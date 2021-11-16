@@ -138,8 +138,21 @@ public class ShanoirUploaderServiceClient {
 
 		logger.info("ShanoirUploaderService successfully initialized.");
 	}
+
+	public static int testProxy(String testURL) throws IOException {
+		long startTime = System.currentTimeMillis();
+		HttpService httpService = new HttpService(testURL);
+		try (CloseableHttpResponse response = httpService.get(testURL)) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("testProxy: " + elapsedTime + "ms");
+			int code = response.getCode();
+			httpService.closeHttpClient();
+			return code;
+		}
+	}
 	
-	public String loginWithKeycloakForToken(String username, String password) throws JSONException {
+ 	public String loginWithKeycloakForToken(String username, String password) throws JSONException {
 		String keycloakURL = this.serverURL + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();
