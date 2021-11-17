@@ -11,23 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpResponse, HttpEvent, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
-import { Study } from './study.model';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Subscription } from 'rxjs'
 import { CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO } from './study.dto';
-import { StudyCenterDTO } from './study-center.model';
+import { Study } from './study.model';
 
 
 @Injectable()
@@ -39,7 +38,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     
     subscribtions: Subscription[] = [];
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
         super(http)
     }
 
@@ -207,17 +206,17 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     protected mapEntity = (dto: StudyDTO, result?: Study): Promise<Study> => {
         if (result == undefined) result = this.getEntityInstance();
-        return this.studyDTOService.toEntity(dto, result);
+        return StudyDTOService.toEntity(dto, result);
     }
 
     protected mapEntityList = (dtos: StudyDTO[], result?: Study[]): Promise<Study[]> => {
         if (result == undefined) result = [];
-        if (dtos) return this.studyDTOService.toEntityList(dtos, result);
+        if (dtos) return StudyDTOService.toEntityList(dtos, result);
     }
 
     private mapSubjectWithSubjectStudyList = (dtos: SubjectWithSubjectStudyDTO[], result?: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> => {
         if (result == undefined) result = [];
-        if (dtos) return this.studyDTOService.toSubjectWithSubjectStudyList(dtos, result);
+        if (dtos) return StudyDTOService.toSubjectWithSubjectStudyList(dtos, result);
     }
 
     ngOnDestroy() {

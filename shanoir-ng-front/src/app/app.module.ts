@@ -235,7 +235,6 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
-import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 
 @NgModule({
@@ -487,7 +486,6 @@ import { SubjectDTOService } from './subjects/shared/subject.dto';
         SubjectStudyPipe,
         KeycloakSessionService,
 		ExtraDataService,
-        StudyDTOService,
         SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],

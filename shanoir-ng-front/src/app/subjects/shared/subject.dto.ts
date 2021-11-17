@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-import { ExaminationDTOService } from '../../examinations/shared/examination.dto';
+
 import { Examination } from '../../examinations/shared/examination.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyDTOService } from '../../studies/shared/study.dto';
 import { Tag } from '../../tags/tag.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudyDTO } from './subject-study.model';
+import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import { Sex } from './subject.types';
 
@@ -87,7 +87,6 @@ export class SubjectDTOService {
         return tag;
     }
 }
-
 
 export class SubjectDTO {
 

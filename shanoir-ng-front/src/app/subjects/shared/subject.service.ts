@@ -17,11 +17,12 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
+import { SubjectStudy } from './subject-study.model';
 import { Subject } from './subject.model';
 import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
 import { StudyDTOService } from '../../studies/shared/study.dto';
+import { SubjectStudyDTO } from './subject-study.dto';
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -44,9 +45,11 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise().then(dto => this.mapEntity(dto));
     }
 
-    updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {
-        return this.http.put<SubjectStudyDTO>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .toPromise().then(StudyDTOService.dtoToSubjectStudy);
+    updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<void> {
+        return this.http.put<void>(
+                AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, 
+                JSON.stringify(new SubjectStudyDTO(subjectStudy))
+            ).toPromise();
     }
 
     protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {
