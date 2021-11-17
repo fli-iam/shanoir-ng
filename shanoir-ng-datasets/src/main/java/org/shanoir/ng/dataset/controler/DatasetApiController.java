@@ -327,6 +327,9 @@ public class DatasetApiController implements DatasetApi {
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();
 			}
+			if (subjectName.contains("/")) {
+				subjectName = subjectName.replaceAll("/", "_");
+			}
 
 			if (DCM.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
@@ -475,6 +478,9 @@ public class DatasetApiController implements DatasetApi {
 				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
+				if (subjectName.contains("/")) {
+					subjectName = subjectName.replaceAll("/", "_");
+				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();

@@ -44,7 +44,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     isAlreadyAnonymized: boolean;
     firstName: string = "";
     lastName: string = "";
-    pattern: string = '^[ a-zA-Z0-9.!#$%°&’*+=?^_`{|}~-]*';
+    pattern: string = '[^:|<>&\/]+';
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
 
