@@ -41,6 +41,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
 @Component({
     selector: 'study-detail',
@@ -86,7 +87,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyService: StudyService, 
             private subjectService: SubjectService,
             private userService: UserService,  
-            private studyRightsService: StudyRightsService) {
+            private studyRightsService: StudyRightsService,
+            private studyCardService: StudyCardService) {
 
         super(route, 'study');
     }
@@ -544,13 +546,17 @@ export class StudyComponent extends EntityComponent<Study> {
             }
             return result;
         }).then(study => {
-            this.confirmDialogService.confirm('Create a Study Card', 
-                'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
-                .then(userChoice => {
-                    if (userChoice) {
-                        this.router.navigate(['/study-card/create', {studyId: study.id}]);
-                    }
-                });
+            this.studyCardService.getAllForStudy(study.id).then(studyCards => {
+                if (!studyCards || studyCards.length == 0) {
+                    this.confirmDialogService.confirm('Create a Study Card', 
+                        'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
+                        .then(userChoice => {
+                            if (userChoice) {
+                                this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                            }
+                        });
+                }
+            })
             return study;
         });
     }
