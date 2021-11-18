@@ -288,7 +288,7 @@ services:
   #
   ohif-viewer:
     container_name: "${SHANOIR_PREFIX}ohif-viewer"
-    build: ./docker-compose/ohif-viewer
+    image: ohif/viewer:v4.9.8.14493
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
@@ -299,7 +299,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "3000:80"      
+      - "9905:80"    
   #
   # Nginx
   #

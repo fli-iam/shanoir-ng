@@ -70,7 +70,6 @@ public class ExaminationMapperTest {
 	@Test
 	public void examinationToExaminationDTOTest() {
 		SecurityContextUtil.initAuthenticationContext("ROEL_ADMIN");
-
 		final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
 		Assert.assertNotNull(examinationDTO);
 		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
