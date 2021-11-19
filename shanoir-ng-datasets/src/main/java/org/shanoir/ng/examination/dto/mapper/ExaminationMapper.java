@@ -19,6 +19,7 @@ import java.util.List;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
+import org.shanoir.ng.dicom.web.dto.Study;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
@@ -42,6 +43,14 @@ public interface ExaminationMapper {
 	 * @return list of examinations DTO.
 	 */
 	PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
+	
+	/**
+	 *  Map list of @Examination to list of @Study.
+	 *  
+	 * @param examinations
+	 * @return
+	 */
+	PageImpl<Study> examinationsToStudyDTOs(Page<Examination> examinations);
 
 	/**
 	 * Map list of @Examination to not pageable list of @ExaminationDTO.
@@ -49,7 +58,6 @@ public interface ExaminationMapper {
 	 * @param examinations list of examinations.
 	 * @return list of examinations DTO.
 	 */
-
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
 	
     

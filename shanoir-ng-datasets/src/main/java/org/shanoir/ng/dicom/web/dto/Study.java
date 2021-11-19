@@ -50,6 +50,10 @@ public class Study {
     @JsonProperty("StudyTime")    
 	private String studyTime;
     
+    // == number of examination per patient starting with 1
+    @JsonProperty("AccessionNumber")    
+    private String accessionNumber;
+    
     /**
      * PATIENT: 4 attributes
      */
@@ -70,8 +74,7 @@ public class Study {
 	private String patientSex;
 	
     /**
-     * try if OHIF viewer works without 5 required items below:
-    	AccessionNumber
+     * try if OHIF viewer works without 4 required items below:
     	ModalitiesInStudy
 		ReferringPhysicianName
 		NumberOfStudyRelatedSeries
@@ -118,6 +121,14 @@ public class Study {
 
 	public void setStudyTime(String studyTime) {
 		this.studyTime = studyTime;
+	}
+
+	public String getAccessionNumber() {
+		return accessionNumber;
+	}
+
+	public void setAccessionNumber(String accessionNumber) {
+		this.accessionNumber = accessionNumber;
 	}
 
 	public String getPatientName() {

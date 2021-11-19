@@ -18,11 +18,6 @@ import org.shanoir.ng.dicom.web.dto.Study;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,31 +28,20 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class StudiesApiController implements StudiesApi {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StudiesApiController.class);
-
 	@Autowired
 	private ExaminationMapper examinationMapper;
 
 	@Autowired
 	private ExaminationService examinationService;
 
-	@Autowired
-	BIDSService bidsService;
-
-	@Autowired
-	ShanoirEventService eventService;
-
-	@Autowired
-	StudyRepository studyRepository;
-
 	@Override
-	public ResponseEntity<Page<Study>> findExaminations(final Pageable pageable) {
+	public ResponseEntity<Page<Study>> findStudies(final Pageable pageable) {
 		Page<Examination> examinations = examinationService.findPage(pageable, false);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-//		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
-		return null;
+		Page<Study> studies = examinationMapper.examinationsToStudyDTOs(examinations);
+		return new ResponseEntity<Page<Study>>(studies, HttpStatus.OK);
 	}
 
 }

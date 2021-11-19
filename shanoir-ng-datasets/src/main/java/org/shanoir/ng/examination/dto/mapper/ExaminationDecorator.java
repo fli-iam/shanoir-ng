@@ -35,7 +35,6 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 
 	@Override
 	public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
-
 		Page<ExaminationDTO> mappedPage = page.map(new Function<Examination, ExaminationDTO>() {
 			public ExaminationDTO apply(Examination entity) {
 				return examinationToExaminationDTO(entity);
