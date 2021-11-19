@@ -54,7 +54,6 @@ import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.Event;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
@@ -453,12 +452,6 @@ public class ImporterApiController implements ImporterApi {
 		Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
 		Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
 		
-		System.out.println("uploadProcessedDataset: ");
-		System.out.println(imageFileName);
-		System.out.println(headerFileName);
-		System.out.println(isNifti);
-		System.out.println(isAnalyze);
-		
 		if (!isNifti && !isAnalyze) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload.", null));
@@ -472,9 +465,6 @@ public class ImporterApiController implements ImporterApi {
 
 			long n = ImportUtils.createRandomLong();
 			final Long userId = KeycloakUtil.getTokenUserId();
-			System.out.println("uploadProcessedDataset2: ");
-			System.out.println(userId);
-			System.out.println(importDir);
 			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId) + File.separator + Long.toString(n);
 			final File userImportDir = new File(userImportDirFilePath);
 			if (!userImportDir.exists()) {

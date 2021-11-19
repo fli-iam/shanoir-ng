@@ -143,18 +143,7 @@ public class ImporterService {
 
 	private static final String EEG_PREFIX = "eeg";
 	
-	private static int instancesCreated = 0;
-
 	private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
-
-    //This constructor will be called everytime a new bean instance is created
-    public ImporterService() {
-        instancesCreated++;
-    }
-
-    public static int getInstancesCreated() {
-        return ImporterService.instancesCreated;
-    }
 	
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
