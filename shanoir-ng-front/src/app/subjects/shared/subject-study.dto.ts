@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { IdName } from '../../shared/models/id-name.model';
-import { SimpleStudyDTO } from '../../studies/shared/study.dto';
+import { SimpleStudyDTO } from '../../studies/shared/study.dto.model';
 import { Tag } from '../../tags/tag.model';
 import { SubjectStudy } from './subject-study.model';
 import { SubjectType } from './subject.types';

@@ -38,7 +38,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     
     subscribtions: Subscription[] = [];
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
     }
 
@@ -206,17 +206,17 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     protected mapEntity = (dto: StudyDTO, result?: Study): Promise<Study> => {
         if (result == undefined) result = this.getEntityInstance();
-        return StudyDTOService.toEntity(dto, result);
+        return this.studyDTOService.toEntity(dto, result);
     }
 
     protected mapEntityList = (dtos: StudyDTO[], result?: Study[]): Promise<Study[]> => {
         if (result == undefined) result = [];
-        if (dtos) return StudyDTOService.toEntityList(dtos, result);
+        if (dtos) return this.studyDTOService.toEntityList(dtos, result);
     }
 
     private mapSubjectWithSubjectStudyList = (dtos: SubjectWithSubjectStudyDTO[], result?: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> => {
         if (result == undefined) result = [];
-        if (dtos) return StudyDTOService.toSubjectWithSubjectStudyList(dtos, result);
+        if (dtos) return this.studyDTOService.toSubjectWithSubjectStudyList(dtos, result);
     }
 
     ngOnDestroy() {

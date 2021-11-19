@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 
 import { Center } from '../../centers/shared/center.model';
 import { Id } from '../../shared/models/id.model';
-import { StudyCardDTO, StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
+import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
@@ -26,7 +26,9 @@ import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
+import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 
+@Injectable()
 export class StudyDTOService {
 
     constructor(
@@ -37,7 +39,7 @@ export class StudyDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    static toEntity(dto: StudyDTO, result?: Study): Promise<Study> {        
+    public toEntity(dto: StudyDTO, result?: Study): Promise<Study> {        
         if (!result) result = new Study();
         StudyDTOService.mapSyncFields(dto, result);
         return Promise.resolve(result);
@@ -47,7 +49,7 @@ export class StudyDTOService {
      * Convert from a DTO list to an Entity list
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    static toEntityList(dtos: StudyDTO[], result?: Study[]): Promise<Study[]>{
+    public toEntityList(dtos: StudyDTO[], result?: Study[]): Promise<Study[]>{
         if (!result) result = [];
         if (dtos) {
             for (let dto of dtos) {
@@ -59,7 +61,7 @@ export class StudyDTOService {
         return Promise.resolve(result);
     }
 
-    static toSubjectWithSubjectStudyList(dtos: SubjectWithSubjectStudyDTO[], result: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> {
+    public toSubjectWithSubjectStudyList(dtos: SubjectWithSubjectStudyDTO[], result: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> {
         if (!result) result = [];
         if (dtos) {
             for (let dto of dtos) {
@@ -127,7 +129,7 @@ export class StudyDTOService {
         entity.visibleByDefault = dto.visibleByDefault;
         entity.withExamination = dto.withExamination;
         if (dto.studyCards) {
-            entity.studyCardList = dto.studyCards.map(studyCardDTO => StudyCardDTOService.mapSyncFields(studyCardDTO, new StudyCard()));
+            entity.studyCardList = dto.studyCards.map(studyCardDTO => StudyCardDTOServiceAbstract.mapSyncFields(studyCardDTO, new StudyCard()));
         } else {
             entity.studyCardList = [];
         }
@@ -272,18 +274,6 @@ export class StudyDTO {
         this.tags = study.tags;
     }
 
-}
-
-export class SimpleStudyDTO {
-    id: number;
-    name: string;
-    tags: Tag[];
-
-    constructor(study: Study) {
-        this.id = study.id ? study.id : null;
-        this.name = study.name;
-        this.tags = study.tags;
-    }
 }
 
 export class SubjectWithSubjectStudyDTO {

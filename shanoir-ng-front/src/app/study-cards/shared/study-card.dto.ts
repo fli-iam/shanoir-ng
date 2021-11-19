@@ -23,9 +23,11 @@ import { DicomService } from './dicom.service';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
+import { StudyCardDTO } from './study-card.dto.model';
+import { StudyCardDTOServiceAbstract } from './study-card.dto.abstract';
 
 @Injectable()
-export class StudyCardDTOService {
+export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
 
     constructor(
         private acqEqService: AcquisitionEquipmentService,
@@ -33,7 +35,9 @@ export class StudyCardDTOService {
         private niftiService: NiftiConverterService,
         private dicomService: DicomService,
         private coilService: CoilService
-    ) {}
+    ) {
+        super();
+    }
 
     /**
      * Convert from DTO to Entity
@@ -80,10 +84,6 @@ export class StudyCardDTOService {
         }
     }
 
-    static isCoil(assigmentField: string): boolean {
-        return assigmentField.toLowerCase().includes('coil');
-    }
-
     /**
      * Convert from a DTO list to an Entity list
      * @param result can be used to get an immediate temporary result without waiting async data
@@ -126,114 +126,4 @@ export class StudyCardDTOService {
         })
     }
 
-    static mapSyncFields(dto: StudyCardDTO, entity: StudyCard): StudyCard {
-        entity.id = dto.id;
-        entity.name = dto.name;
-        if (dto.studyId) {
-            entity.study = new Study();
-            entity.study.id = dto.studyId;
-        }
-        if (dto.acquisitionEquipmentId) {
-            entity.acquisitionEquipment = new AcquisitionEquipment();
-            entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
-        }
-        if (dto.niftiConverterId) {
-            entity.niftiConverter = new NiftiConverter();
-            entity.niftiConverter.id = dto.niftiConverterId;
-        }
-        entity.rules = [];
-        if (dto.rules) {
-            for (let ruleDTO of dto.rules) {
-                let rule: StudyCardRule = new StudyCardRule();
-                if (ruleDTO.assignments) {
-                    rule.assignments = [];
-                    for (let assigmentDTO of ruleDTO.assignments) {
-                        let assigment: StudyCardAssignment = new StudyCardAssignment();
-                        assigment.field = assigmentDTO.field;
-                        if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
-                            assigment.value = new Coil();
-                            assigment.value.id = +assigmentDTO.value;
-                        } else {
-                            assigment.value = assigmentDTO.value;
-                        }
-                        rule.assignments.push(assigment);
-                    }
-                }
-                if (ruleDTO.conditions) {
-                    rule.conditions = [];
-                    for (let conditionDTO of ruleDTO.conditions) {
-                        let condition: StudyCardCondition = new StudyCardCondition();
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
-                        condition.dicomValue = conditionDTO.dicomValue;
-                        condition.operation = conditionDTO.operation as Operation;
-                        rule.conditions.push(condition);
-                    }
-                }
-                entity.rules.push(rule);
-            }
-        }
-        return entity;
-    }
-}
-
-
-export class StudyCardDTO {
-
-    id: number;
-    name: string;
-    studyId: number;
-    acquisitionEquipmentId: number;
-    niftiConverterId: number;
-    rules: StudyCardRuleDTO[];
-
-    constructor(studyCard?: StudyCard) {
-        if (studyCard) {
-            this.id = studyCard.id;
-            this.name = studyCard.name;
-            this.studyId = studyCard.study ? studyCard.study.id : null;
-            this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
-            this.niftiConverterId = studyCard.niftiConverter.id;
-            this.rules = studyCard.rules.map(rule => {
-                let ruleDTO: StudyCardRuleDTO = new StudyCardRuleDTO();
-                ruleDTO.conditions = rule.conditions.map(cond => {
-                    let condDTO: StudyCardConditionDTO = new StudyCardConditionDTO();
-                    condDTO.dicomTag = cond.dicomTag ? cond.dicomTag.code : null;
-                    condDTO.dicomValue = cond.dicomValue;
-                    condDTO.operation = cond.operation;
-                    return condDTO;
-                });
-                ruleDTO.assignments = rule.assignments.map(ass => {
-                    let assDTO: StudyCardAssignmentDTO = new StudyCardAssignmentDTO();
-                    assDTO.field = ass.field;
-                    if (ass.value instanceof Coil) {
-                        assDTO.value = (ass.value as Coil).id.toString();
-                    } else {
-                        assDTO.value = ass.value as string;
-                    }
-                    return assDTO;
-                });
-                return ruleDTO;
-            });
-        }
-    }
-}
-
-export class StudyCardRuleDTO {
-
-    assignments: StudyCardAssignmentDTO[];
-    conditions: StudyCardConditionDTO[];
-
-}
-
-export class StudyCardConditionDTO {
-
-    dicomTag: number;
-	dicomValue: string;
-	operation: Operation;
-}
-
-export class StudyCardAssignmentDTO {
-    
-    field: string;
-	value: string;
 }
