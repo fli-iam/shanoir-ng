@@ -79,12 +79,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.uploadOpened" class="sub-menu" [@slideDown]="state.uploadOpened">
-        <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
-        <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>From Bruker</li>
-        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>From EEG archives</li>
-        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>From BIDS archive</li>
-        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
-        <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets</li>
+        <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>DICOM</li>
+        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>PACS Neurinfo</li>
+        <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>BIDS</li>
+        <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>Bruker</li>
+        <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>EEG</li>
+        <li routerLink="/imports/processed-dataset" routerLinkActive="active"><i class="fas fa-brain"></i>NIfTI</li>
         <!-- <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
         <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li> -->
     </div>
@@ -99,6 +99,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="bottom-info">
     <div>{{VERSION.raw}}</div>
-    <div>Copyright (C) 2009-2019 Inria</div>
+    <div>Copyright (C) 2009-2022 Inria</div>
     <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
 </div>
