@@ -20,4 +20,10 @@ public interface DicomServiceApi {
 	
 	void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception;
 
+	/**
+	 * Delete associated files from the PACS
+	 * @param url the dataset file URL linked to the dataset
+	 * @throws Exception when the deletion fails
+	 */
+	void deleteDicomFilesFromPacs(String url) throws Exception;
 }

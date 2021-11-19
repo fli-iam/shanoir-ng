@@ -78,11 +78,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -161,6 +163,17 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	@Qualifier("stowrs")
+	DicomServiceApi stowRsService;
+
+	@Autowired
+	@Qualifier("cstore")
+	DicomServiceApi cStoreService;
+	
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
@@ -177,11 +190,29 @@ public class DatasetApiController implements DatasetApi {
 
 		try {
 			Dataset dataset = datasetService.findById(datasetId);
+			
+			// TODO: Change this
+			if (dicomWeb) {
+				for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+					if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+						for (DatasetFile file : expression.getDatasetFiles()) {
+							if (file.isPacs()) {
+								stowRsService.deleteDicomFilesFromPacs(file.getPath());
+							}
+						}
+					}
+				}
+			} else {
+				// Nothing actually happens here as the DICOM server is not ready
+			}
 			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 

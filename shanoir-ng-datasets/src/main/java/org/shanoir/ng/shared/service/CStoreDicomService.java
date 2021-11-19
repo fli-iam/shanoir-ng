@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +104,11 @@ public class CStoreDicomService implements DicomServiceApi {
         int exitCode = process.waitFor();
 		if (exitCode != 0)
 			throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
+	}
+
+	@Override
+	public void deleteDicomFilesFromPacs(String url) throws Exception {
+		throw new NotImplementedException("Dicom cannot be deleted: " + url + "\n. This should not happen.");
 	}
 
 }
