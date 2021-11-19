@@ -123,4 +123,6 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN')")
 	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 
+	void deleteDatasetFromPacs(Dataset dataset);
+
 }

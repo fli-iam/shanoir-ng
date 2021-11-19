@@ -163,17 +163,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
-	@Qualifier("stowrs")
-	DicomServiceApi stowRsService;
-
-	@Autowired
-	@Qualifier("cstore")
-	DicomServiceApi cStoreService;
-	
-	@Value("${dcm4chee-arc.dicom.web}")
-	private boolean dicomWeb;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
@@ -190,21 +179,6 @@ public class DatasetApiController implements DatasetApi {
 
 		try {
 			Dataset dataset = datasetService.findById(datasetId);
-			
-			// TODO: Change this
-			if (dicomWeb) {
-				for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-					if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
-						for (DatasetFile file : expression.getDatasetFiles()) {
-							if (file.isPacs()) {
-								stowRsService.deleteDicomFilesFromPacs(file.getPath());
-							}
-						}
-					}
-				}
-			} else {
-				// Nothing actually happens here as the DICOM server is not ready
-			}
 			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

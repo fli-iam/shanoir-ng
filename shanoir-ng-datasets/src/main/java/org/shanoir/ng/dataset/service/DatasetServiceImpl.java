@@ -23,17 +23,23 @@ import javax.transaction.Transactional;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -62,6 +68,17 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private SolrService solrService;
 
+	@Autowired
+	@Qualifier("stowrs")
+	DicomServiceApi stowRsService;
+
+	@Autowired
+	@Qualifier("cstore")
+	DicomServiceApi cStoreService;
+	
+	@Value("${dcm4chee-arc.dicom.web}")
+	private boolean dicomWeb;
+
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Dataset datasetDb = repository.findById(id).orElse(null);
@@ -70,7 +87,26 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
+		this.deleteDatasetFromPacs(datasetDb);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+	}
+
+	@Override
+	public void deleteDatasetFromPacs(Dataset dataset) {
+		// TODO: Change this
+		if (dicomWeb) {
+			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+				if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+					for (DatasetFile file : expression.getDatasetFiles()) {
+						if (file.isPacs()) {
+							stowRsService.deleteDicomFilesFromPacs(file.getPath());
+						}
+					}
+				}
+			}
+		} else {
+			// Nothing actually happens here as the DICOM server is not ready
+		}
 	}
 	
 	@Override

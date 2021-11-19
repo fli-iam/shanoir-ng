@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.service;
 import java.util.List;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -25,7 +26,6 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +50,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Autowired
 	private SolrService solrService;
+	
+	@Autowired
+	private DatasetService datasetService;
 	
 	@Override
 	public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
@@ -121,6 +124,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		if (entity.getDatasets() != null) {
 			for (Dataset ds : entity.getDatasets()) {
 				solrService.deleteFromIndex(ds.getId());
+				datasetService.deleteDatasetFromPacs(ds);
 			}
 		}
 		repository.deleteById(id);
