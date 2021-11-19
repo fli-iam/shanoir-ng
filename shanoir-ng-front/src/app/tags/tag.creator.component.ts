@@ -61,7 +61,7 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
             } else {
                 this.model.push(newTag);
                 this.text = null;
-                this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16); // random color
+                this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'); // random color
                 this.addTagVisible = false;
                 this.displayedTags.add({tag: newTag, used: this.tagUsed(newTag), darkFont: this.getFontColor(newTag.color)});
                 this.propagateChange(this.model);
