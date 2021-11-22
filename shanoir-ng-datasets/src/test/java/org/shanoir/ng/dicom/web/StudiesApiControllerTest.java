@@ -60,7 +60,7 @@ public class StudiesApiControllerTest {
 	@Autowired
 	private MockMvc mvc;
 
-	@Autowired
+	@MockBean
 	private ExaminationToStudyDTOMapper examinationToStudyDTOMapperMock;
 
 	@MockBean
