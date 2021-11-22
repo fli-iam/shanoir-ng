@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.dicom.web;
 
-import org.shanoir.ng.dicom.web.dto.Study;
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.dicom.web.dto.StudyDTO;
+import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +29,19 @@ import org.springframework.stereotype.Controller;
 public class StudiesApiController implements StudiesApi {
 
 	@Autowired
-	private ExaminationMapper examinationMapper;
+	private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
 
 	@Autowired
 	private ExaminationService examinationService;
 
 	@Override
-	public ResponseEntity<Page<Study>> findStudies(final Pageable pageable) {
+	public ResponseEntity<Page<StudyDTO>> findStudies(final Pageable pageable) {
 		Page<Examination> examinations = examinationService.findPage(pageable, false);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		Page<Study> studies = examinationMapper.examinationsToStudyDTOs(examinations);
-		return new ResponseEntity<Page<Study>>(studies, HttpStatus.OK);
+		Page<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
+		return new ResponseEntity<Page<StudyDTO>>(studies, HttpStatus.OK);
 	}
 
 }

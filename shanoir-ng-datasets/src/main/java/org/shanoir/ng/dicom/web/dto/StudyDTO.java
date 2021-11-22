@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author mkain
  *
  */
-public class Study {
+public class StudyDTO {
 
 	/**
 	 * STUDY: 5 attributes (1 not in standard: studyDescription, but used by OHIF viewer)

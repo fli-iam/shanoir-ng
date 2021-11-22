@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.dicom.web;
 
-import org.shanoir.ng.dicom.web.dto.Study;
+import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,9 +33,9 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/studies")
 public interface StudiesApi {
 
-	@ApiOperation(value = "", notes = "Returns all studies", response = Study.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns all studies", response = StudyDTO.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = Study.class, responseContainer = "List"),
+			@ApiResponse(code = 200, message = "found studies", response = StudyDTO.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no examination found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
@@ -43,6 +43,6 @@ public interface StudiesApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 //	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<Page<Study>> findStudies(Pageable pageable);
+	ResponseEntity<Page<StudyDTO>> findStudies(Pageable pageable);
 
 }

@@ -47,17 +47,6 @@ public class ExaminationMapperTest {
 	@Autowired
 	private ExaminationMapper examinationMapper;
 
-	// @Test
-	// public void examinationsToExaminationDTOsTest() {
-	// 	SecurityContextTestUtil.initAuthenticationContext();
-
-	// 	final List<ExaminationDTO> examinationDTOs = examinationMapper
-	// 			.examinationsToExaminationDTOs(Arrays.asList(createExamination()));
-	// 	Assert.assertNotNull(examinationDTOs);
-	// 	Assert.assertTrue(examinationDTOs.size() == 1);
-	// 	Assert.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
-	// }
-
 	@Test
 	public void examinationsToSubjectExaminationDTOsTest() {
 		final List<SubjectExaminationDTO> examinationDTOs = examinationMapper
@@ -69,7 +58,7 @@ public class ExaminationMapperTest {
 
 	@Test
 	public void examinationToExaminationDTOTest() {
-		SecurityContextUtil.initAuthenticationContext("ROEL_ADMIN");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
 		Assert.assertNotNull(examinationDTO);
 		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class UIDGeneration {
 
-	private static final String ROOT = "1.4.9.12.34.1.8527";
+	public static final String ROOT = "1.4.9.12.34.1.8527";
 
 	private Random rand = new Random();
 

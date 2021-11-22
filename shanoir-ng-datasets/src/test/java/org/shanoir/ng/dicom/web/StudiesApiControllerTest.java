@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -60,8 +60,8 @@ public class StudiesApiControllerTest {
 	@Autowired
 	private MockMvc mvc;
 
-	@MockBean
-	private ExaminationMapper examinationMapperMock;
+	@Autowired
+	private ExaminationToStudyDTOMapper examinationToStudyDTOMapperMock;
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
