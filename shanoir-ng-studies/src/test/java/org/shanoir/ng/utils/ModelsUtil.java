@@ -145,6 +145,13 @@ public final class ModelsUtil {
 		study.getStudyCenterList().add(sc);
 		study.setStudyUserList(new ArrayList<>());
 		study.setTags(new ArrayList<>());
+		study.setSubjectStudyList(new ArrayList<>());
+		return study;
+	}
+	
+	public static Study createStudy(Long id) {
+		Study study = createStudy();
+		study.setId(1L);
 		return study;
 	}
 

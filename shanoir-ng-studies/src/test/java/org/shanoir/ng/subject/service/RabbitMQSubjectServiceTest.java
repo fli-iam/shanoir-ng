@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -71,6 +71,7 @@ public class RabbitMQSubjectServiceTest {
 	@Before
 	public void init() {
 		subject.setId(subjectId);
+		subject.setSubjectStudyList(new ArrayList<>());
 		study.setId(studyId);
 		study.setName(studyName);
 	}
@@ -90,10 +91,8 @@ public class RabbitMQSubjectServiceTest {
 
 	@Test(expected = AmqpRejectAndDontRequeueException.class)
 	public void testGetSubjetsForStudyFail() throws JsonProcessingException {
-		Mockito.when(mapper.writeValueAsString(Mockito.any())).thenCallRealMethod();
-
 		// GIVEN a study ID, retrieve all associated subjects
-		rabbitMQSubjectService.getSubjectsForStudy(studyId.toString());
+		rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
 	}
 
 	@Test
@@ -138,7 +137,7 @@ public class RabbitMQSubjectServiceTest {
 
 	@Test
 	public void testUpdateSubjectStudyFail() throws IOException {
-	
+
 		// WHEN the call fails
 		String name = rabbitMQSubjectService.updateSubjectStudy(mapper.writeValueAsString(idName));
 		
