@@ -26,7 +26,7 @@ window.config = {
     	// Authorization Server URL
     	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
-    	redirect_uri: 'https://shanoir-ng-nginx/callback', // `OHIFStandaloneViewer.js`
+    	redirect_uri: 'https://shanoir-ng-nginx/shanoir-ng/ohif-viewer/callback', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
 		response_type: 'code',

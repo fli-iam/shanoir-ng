@@ -299,7 +299,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-      - "9905:80"   
+      - "9905:9905"
   #
   # Nginx
   #
