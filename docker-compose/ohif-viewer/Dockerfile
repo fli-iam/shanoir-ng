@@ -10,29 +10,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM node:lts-alpine3.14
+FROM ohif/viewer:v4.9.8.14493
 
-RUN apk update && apk add --virtual build-dependencies build-base gcc wget git yarn unzip pigz gzip python2 make
-
-WORKDIR /usr/local/
-COPY Viewers-master.zip /usr/local
-
-RUN unzip Viewers-master.zip
-
-WORKDIR /usr/local/Viewers-master/platform/viewer
-
-# Copied from https://v3-docs.ohif.org/2.0/deployment/recipes/build-for-production
-	# If you haven't already, enable yarn workspaces
-	# Restore dependencies
-	# Build source code for production
-RUN yarn config set workspaces-experimental true \
-	&& yarn install \
-	&& yarn run build
-	
-WORKDIR /usr/local/Viewers-master/platform/viewer/dist/
-
-	# Install http-server as a globally available package
-	# Serve the files in our current directory
-	# Accessible at: `http://localhost:8080`
-RUN yarn global add http-server \
-	&& http-server
+COPY app-config.js /usr/share/nginx/html/
