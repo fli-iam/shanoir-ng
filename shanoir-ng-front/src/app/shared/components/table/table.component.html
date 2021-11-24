@@ -72,21 +72,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.selected]="selectionAllowed && isSelected(item)">
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
-    <ng-container *ngFor="let col of columnDefs" >
+    <ng-container *ngFor="let col of columnDefs" ><ng-container *ngFor="let render of [renderCell(item, col)]"><!-- it's a hack to use a var -->
         <td 
                 *ngIf="!col.hidden"
                 class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
                 [class.bool]="isFieldBoolean(col)"
-                [attr.title]="col.tip != undefined ? col.tip : renderCell(item, col)"
+                [class.progress]="col.type == 'progress'"
+                [attr.title]="col.tip != undefined ? col.tip : (render.text ? render.text : render)"
                 (click)="col.type == 'button' ? null : onRowClick(item)"
+                [style.color]="render.color"
                 >
 
             <!-- default display -->
-            <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col)">{{renderCell(item, col)}}</span>
+            <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col) && col.type != 'progress'">{{render.text ? render.text : render}}</span>
 
             <!-- link -->
             <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
-                [routerLink]="col.route(item)" routerLinkActive="active">{{renderCell(item, col)}}<i class="fas fa-external-link-alt"></i></a>
+                [routerLink]="col.route(item)" routerLinkActive="active">{{render.text ? render.text : render}}<i class="fas fa-external-link-alt"></i></a>
 
             <!-- editable text / number -->
             <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
@@ -119,8 +121,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
                 </span>
             </span>
+
+            <!-- display a progress bar -->
+            <span *ngIf="col.type == 'progress'">
+                <progress-bar [progress]="render" width="100"></progress-bar>
+            </span>
         </td>
-    </ng-container>
+    </ng-container></ng-container>
 </tr>
 <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
 <tr *ngIf="items?.length > 0" class="full-row">

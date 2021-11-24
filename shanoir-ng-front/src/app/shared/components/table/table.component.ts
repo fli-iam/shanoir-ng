@@ -196,10 +196,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: any): string {
+    renderCell(item: Object, col: any): any {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
+        } else if (result.text) {
+            return result;
         } else {
             return "" + result;
         }

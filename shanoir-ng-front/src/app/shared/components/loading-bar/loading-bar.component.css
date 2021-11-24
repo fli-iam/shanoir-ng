@@ -1,5 +1,5 @@
-:host() { position: relative; width: 200px; display: inline-block; height: 18px; border: 1px solid var(--grey); border-radius: 5px; z-index: 1; }
+:host() { position: relative; display: inline-block; height: 18px; border: 1px solid var(--grey); border-radius: 5px; z-index: 1; }
 .inner { background-color: var(--color-b); display: inline-block; height: 100%; overflow: hidden; /*box-shadow: 0 0 5px 0 var(--shadow-color);*/ }
 .inner.done { background-color: green; border-radius: 5px; }
-.left-text { text-align: center; width: 200px; color: var(--very-light-grey); height: 100%; line-height: 18px; }
+.left-text { text-align: center; color: var(--very-light-grey); height: 100%; line-height: 18px; }
 .text { z-index: -1; color: var(--color-a); position: absolute; left: 0; right: 0; top: 0; bottom: 0; text-align: center; vertical-align: middle; line-height: 18px; }
