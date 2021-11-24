@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li class="info" *ngIf="study && useStudyCard && (!studycardOptions || studycardOptions.length == 0)">
+        <li class="info" *ngIf="study && useStudyCard && studycardOptions && studycardOptions.length == 0">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>No study cards are configured on this study, please create one before trying to import MR data.</strong>
             <ng-container *ngIf="!isAdminOfStudy[study.id]">
