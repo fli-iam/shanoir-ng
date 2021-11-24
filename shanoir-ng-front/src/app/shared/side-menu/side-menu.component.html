@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.uploadOpened" class="sub-menu" [@slideDown]="state.uploadOpened">
         <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>DICOM</li>
-        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>PACS Neurinfo</li>
+        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>PACS</li>
         <li routerLink="/imports/bids" routerLinkActive="active"><i class="fas fa-brain"></i>BIDS</li>
         <li routerLink="/imports/bruker" routerLinkActive="active"><i class="fas fa-atom"></i>Bruker</li>
         <li routerLink="/imports/eeg" routerLinkActive="active"><i class="fas fa-bolt"></i>EEG</li>
