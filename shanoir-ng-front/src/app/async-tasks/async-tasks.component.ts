@@ -86,7 +86,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
 				'/home'},
             { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },
             { headerName: 'Status', field: 'status', width: '70px', type: 'Status', cellRenderer: function (params: any) {
-                    if (params.data.status == 0) {
+                    if (params.data.status == 2) {
                         return "In progress"
                     }
                     if (params.data.status == 1) {
