@@ -322,7 +322,7 @@ let routes: Routes = [
         path: 'dataset-processing/edit/:id',
         component: DatasetProcessingComponent,
         data: { mode: 'edit' },
-        canActivate: [AuthAdminOrExpertGuard],
+        canActivate: [AuthAdminGuard],
     },
     {
         path: 'dataset-processing/create',

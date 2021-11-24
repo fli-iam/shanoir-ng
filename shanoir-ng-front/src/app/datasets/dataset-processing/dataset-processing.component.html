@@ -102,19 +102,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 			</ol>
 
-			<ol *ngIf="mode == 'view'">
-				<legend>
-					Output datasets
-					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
-				</legend>
-				<li>
-					<shanoir-table #inputDatasetsTable
-						[getPage]="getOutputDatasetsPage.bind(this)" 
-						[columnDefs]="outputDatasetsColumnDefs">
-					</shanoir-table>
-				</li>
-
-			</ol>
+			<legend>
+				Output datasets
+				<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
+			</legend>
+			<li>
+				<shanoir-table #outputDatasetsTable
+					[getPage]="getOutputDatasetsPage.bind(this)" 
+					[columnDefs]="outputDatasetsColumnDefs">
+				</shanoir-table>
+			</li>
 
 		</fieldset>
 		

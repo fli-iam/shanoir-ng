@@ -93,8 +93,10 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.reloadSavedData();
                     this.datasetProcessing = entity;
                     this.importDataService.contextBackup.datasetProcessing = entity;
+                     this.onContextChange();
                 })
             );
         });
@@ -140,6 +142,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                     }
                 }
             }
+            this.onContextChange();
         }
     }
 
@@ -159,7 +162,6 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                 }
             }
             this.reloadSavedData();
-            this.onContextChange();
         });
     }
 
@@ -170,6 +172,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             this.studyService.findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
         }
+        this.onContextChange();
     }
 
     public onSelectSubject(): void {
@@ -247,7 +250,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             context.study != null
             && context.subject != null
             && context.datasetType != null
-			&& context.processedDatasetName != null
+			&& context.processedDatasetName != null &&  context.processedDatasetName != ""
             && context.processedDatasetFilePath != null
             && context.processedDatasetType != null
             && context.datasetProcessing != null

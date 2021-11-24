@@ -14,38 +14,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">2. Set the clinical context of the processed dataset</div>
 <fieldset class="step" @preventInitialChildAnimations>
-
-    <ol>
-        <legend>
-            Processed dataset details
-        </legend>
-        <li>
-            <label class="required-label">Dataset Type</label> 
-            <span class="right-col">
-                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [options]="DatasetType.options">
-                </select-box>  
-            </span>
-        </li>
-        <li>
-            <label class="required-label">Processed Dataset Type</label> 
-            <span class="right-col">
-                <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
-                        [newDisabled]="true" [options]="ProcessedDatasetType.options"
-                        >
-                </select-box>  
-            </span>
-        </li>
-        <li>
-            <label class="required-label">Name</label>
-            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (userChange)="onContextChange();"/>
-        </li>
-        <li>
-            <label>Comment</label>
-            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
-        </li>
-    </ol> 
-
     <ol>
         <legend>
             Research study
@@ -83,6 +51,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [optionArr]="subjects">
                 </select-box>
             </span>
+        </li>
+    </ol>
+    <ol>
+        <legend>
+            Processed dataset details
+        </legend>
+        <li>
+            <label class="required-label">Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [options]="DatasetType.options">
+                </select-box>  
+            </span>
+        </li>
+        <li>
+            <label class="required-label">Processed Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [options]="ProcessedDatasetType.options"
+                        >
+                </select-box>  
+            </span>
+        </li>
+        <li>
+            <label class="required-label">Name</label>
+            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (userChange)="onContextChange();"/>
+        </li>
+        <li>
+            <label>Comment</label>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
         </li>
     </ol>
     <ol *ngIf="subject">

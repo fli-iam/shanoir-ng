@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<!-- TODO : other types -->
 
 			<div>
-				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && !dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="convertNiftiToggle()">Convert nifti<i class="fas fa-download"></i></button>
 				<node [opened]="false" [hasChildren]="false">
 					<dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
 						<ng-template ngFor let-converter [ngForOf]="converters">

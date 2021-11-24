@@ -148,16 +148,17 @@ export class ExaminationNodeComponent implements OnChanges {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
         );
     }
     
-    mapDatasetNode(dataset: Dataset): DatasetNode {
+    mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
             dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : []
+            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
+            processed
         );
     }
     
@@ -165,7 +166,7 @@ export class ExaminationNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
         );
     }
 }
