@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -21,6 +24,7 @@ import javax.persistence.PersistenceContext;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -31,6 +35,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.solr.service.SolrService;
@@ -43,6 +48,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Dataset service implementation.
@@ -53,12 +59,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetServiceImpl implements DatasetService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-	
+	@PersistenceContext
+	private EntityManager entityManager;
+
 	@Autowired
 	private DatasetRepository repository;
-	
+
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
 
@@ -75,12 +81,12 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	@Qualifier("cstore")
 	DicomServiceApi cStoreService;
-	
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException {
+	public void deleteById(final Long id) throws ShanoirException {
 		final Dataset datasetDb = repository.findById(id).orElse(null);
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
@@ -92,8 +98,7 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public void deleteDatasetFromPacs(Dataset dataset) {
-		// TODO: Change this
+	public void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException {
 		if (dicomWeb) {
 			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
 				if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
@@ -102,13 +107,25 @@ public class DatasetServiceImpl implements DatasetService {
 							stowRsService.deleteDicomFilesFromPacs(file.getPath());
 						}
 					}
+				} else {
+					for (DatasetFile file : expression.getDatasetFiles()) {
+						if (!file.isPacs()) {
+							try {
+								URL url = new URL(file.getPath().replaceAll("%20", " "));
+								File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+								FileUtils.deleteQuietly(srcFile);
+							} catch (MalformedURLException e) {
+								throw new ShanoirException("Error while deleting dataset file", e);
+							}
+						}
+					}
 				}
 			}
 		} else {
-			// Nothing actually happens here as the DICOM server is not ready
+			// Do not delete here -> REST API does not exist.
 		}
 	}
-	
+
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
@@ -149,7 +166,7 @@ public class DatasetServiceImpl implements DatasetService {
 		return ds;
 	}
 
-	
+
 	/**
 	 * Update some values of dataset to save them in database.
 	 * 
@@ -190,7 +207,7 @@ public class DatasetServiceImpl implements DatasetService {
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			
+
 			return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
 		}
 	}
@@ -204,8 +221,8 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Dataset> findByAcquisition(Long acquisitionId) {
 		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
 	}
-	
-  @Override
+
+	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}

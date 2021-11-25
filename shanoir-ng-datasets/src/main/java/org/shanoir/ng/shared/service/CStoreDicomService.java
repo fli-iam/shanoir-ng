@@ -107,7 +107,7 @@ public class CStoreDicomService implements DicomServiceApi {
 	}
 
 	@Override
-	public void deleteDicomFilesFromPacs(String url) throws Exception {
+	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
 		throw new NotImplementedException("Dicom cannot be deleted: " + url + "\n. This should not happen.");
 	}
 

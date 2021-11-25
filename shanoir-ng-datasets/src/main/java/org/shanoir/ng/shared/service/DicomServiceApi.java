@@ -16,6 +16,8 @@ package org.shanoir.ng.shared.service;
 
 import java.io.File;
 
+import org.shanoir.ng.shared.exception.ShanoirException;
+
 public interface DicomServiceApi {
 	
 	void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception;
@@ -25,5 +27,5 @@ public interface DicomServiceApi {
 	 * @param url the dataset file URL linked to the dataset
 	 * @throws Exception when the deletion fails
 	 */
-	void deleteDicomFilesFromPacs(String url) throws Exception;
+	void deleteDicomFilesFromPacs(String url) throws ShanoirException;
 }

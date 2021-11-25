@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -116,12 +117,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Override
 	@Transactional
-	public void deleteById(Long id) throws EntityNotFoundException {
+	public void deleteById(Long id) throws EntityNotFoundException, ShanoirException {
 		final DatasetAcquisition entity = repository.findById(id).orElse(null);
 		if (entity == null) {
 			throw new EntityNotFoundException("Cannot find entity with id = " + id);
 		}
-		// Remove from solr index
+		// Remove from solr index and PACS
 		if (entity.getDatasets() != null) {
 			for (Dataset ds : entity.getDatasets()) {
 				solrService.deleteFromIndex(ds.getId());

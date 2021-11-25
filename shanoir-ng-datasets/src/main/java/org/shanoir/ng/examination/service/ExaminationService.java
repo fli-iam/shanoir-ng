@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -37,9 +38,10 @@ public interface ExaminationService {
 	 * 
 	 * @param id examination id.
 	 * @throws EntityNotFoundException
+	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Delete an examination from a rabbit MQ call, not identified
@@ -47,7 +49,7 @@ public interface ExaminationService {
 	 * @param exam the examination to delete
 	 * @throws EntityNotFoundException
 	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Get a paginated list of examinations reachable by connected user.

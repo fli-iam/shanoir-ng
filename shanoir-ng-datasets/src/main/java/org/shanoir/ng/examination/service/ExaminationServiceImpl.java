@@ -28,6 +28,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -71,7 +72,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private DatasetService datasetService;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException {
+	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (examinationOpt.isEmpty()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -96,7 +97,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException {
+	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException {
 		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		String studyIdAsString = exam.getStudyId().toString();
 		// Iterate over datasets acquisitions and datasets to send events and remove them from solr

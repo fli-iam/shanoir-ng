@@ -101,7 +101,7 @@ public class StowRsDicomService implements DicomServiceApi {
 	}
 
 	@Override
-	public void deleteDicomFilesFromPacs(String url) throws Exception {
+	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
 		String instanceId = this.extractInstanceUID(url, null);
 		String studyId = this.extractStudyUID(url, null);
 		String serieId = this.extractSeriesUIDUID(url, null);
@@ -134,11 +134,9 @@ public class StowRsDicomService implements DicomServiceApi {
 				throw new ShanoirException("Could not delete instance from PACS: " + deleteUrl);
 			}
 		} catch (ClientProtocolException e) {
-			LOG.error("ClientProtocolException during delete from pacs: " + url, e);
-			throw e;
+			throw new ShanoirException("ClientProtocolException during delete from pacs: " + url, e);
 		} catch (IOException e) {
-			LOG.error("IOException during upload into pacs: " + url, e);
-			throw e;
+			throw new ShanoirException("IOException during delete from pacs: " + url, e);
 		}
 	}
 

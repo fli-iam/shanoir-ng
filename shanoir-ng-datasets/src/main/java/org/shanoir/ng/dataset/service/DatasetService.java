@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -36,9 +37,10 @@ public interface DatasetService {
 	 * 
 	 * @param id dataset id.
 	 * @throws EntityNotFoundException
+	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 	
 	/**
 	 * Delete several datasets.
@@ -123,6 +125,6 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN')")
 	List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception;
 
-	void deleteDatasetFromPacs(Dataset dataset);
+	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
 
 }
