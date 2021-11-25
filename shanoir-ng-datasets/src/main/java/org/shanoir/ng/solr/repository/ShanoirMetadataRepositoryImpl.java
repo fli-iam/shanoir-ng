@@ -91,12 +91,39 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
 				+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id", "SolrResult");
-	
+
+		Query processedQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId"
+				+ ", dm.name as datasetName"
+				+ ", dm.dataset_modality_type as datasetType"
+				+ ", null as datasetNature"
+				+ ", d.creation_date as datasetCreationDate"
+				+ ", e.comment as examinationComment"
+				+ ", e.examination_date as examinationDate"
+				+ ", su.name as subjectName"
+				+ ", su.id as subjectId"
+				+ ", st.name as studyName"
+				+ ", e.study_id as studyId"
+				+ ", c.name as centerName"
+				+ ", null as sliceThickness"
+				+ ", null as pixelBandwidth"
+				+ ", null as magneticFieldStrength\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset dp ON dp.id ="
+				+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
+				+ " LEFT JOIN dataset_acquisition da on da.id = dp.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN center c ON c.id = e.center_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
+				+ " WHERE d.origin_metadata_id = dm.id AND d.dataset_processing_id is not null;", "SolrResult");
+
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());
 		result.addAll(ctQuery.getResultList());
 		result.addAll(eegQuery.getResultList());
 		result.addAll(genericQuery.getResultList());
+		result.addAll(processedQuery.getResultList());
 
 		return result;
 	}
@@ -153,14 +180,41 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
 				+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		
+		Query processedQuery = em.createNativeQuery(
+				"SELECT d.id as datasetId"
+				+ ", dm.name as datasetName"
+				+ ", dm.dataset_modality_type as datasetType"
+				+ ", null as datasetNature"
+				+ ", d.creation_date as datasetCreationDate"
+				+ ", e.comment as examinationComment"
+				+ ", e.examination_date as examinationDate"
+				+ ", su.name as subjectName"
+				+ ", su.id as subjectId"
+				+ ", st.name as studyName"
+				+ ", e.study_id as studyId"
+				+ ", c.name as centerName"
+				+ ", null as sliceThickness"
+				+ ", null as pixelBandwidth"
+				+ ", null as magneticFieldStrength\n"
+				+ " FROM dataset d"
+				+ " LEFT JOIN dataset dp ON dp.id ="
+				+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
+				+ " LEFT JOIN dataset_acquisition da on da.id = dp.dataset_acquisition_id"
+				+ " LEFT JOIN examination e ON e.id = da.examination_id"
+				+ " LEFT JOIN study st ON st.id = e.study_id"
+				+ " LEFT JOIN center c ON c.id = e.center_id"
+				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
+				+ " WHERE d.origin_metadata_id = dm.id"
+				+ " AND d.id = " + datasetId
+				+ " AND d.dataset_processing_id is not null;", "SolrResult");
+
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());
 		result.addAll(ctQuery.getResultList());
 		result.addAll(eegQuery.getResultList());
 		result.addAll(genericQuery.getResultList());
+		result.addAll(processedQuery.getResultList());
 
-		
 		if (result.size() != 1) {
 			return null;
 		}

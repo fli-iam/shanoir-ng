@@ -76,6 +76,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -136,6 +137,9 @@ public class ImporterService {
 
 	@Autowired
 	RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	SolrService solrService;
 
 	private static final String SESSION_PREFIX = "ses-";
 
@@ -524,6 +528,11 @@ public class ImporterService {
 			eventService.publishEvent(event);
 			return;
 		}
+		
+		// Metadata
+		DatasetMetadata originMetadata = new DatasetMetadata();
+		originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
+		originMetadata.setName(importJob.getProcessedDatasetName());
 
 		try {
 			DatasetProcessing datasetProcessing = importJob.getDatasetProcessing();
@@ -532,42 +541,55 @@ public class ImporterService {
 			switch(importJob.getDatasetType()) {
 				case CalibrationDataset.datasetType:
 					dataset = new CalibrationDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case CtDataset.datasetType:
 					dataset = new CtDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.CT_DATASET);
 					break;
 				case EegDataset.datasetType:
 					dataset = new EegDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 					break;
 				case MegDataset.datasetType:
 					dataset = new MegDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
 					break;
 				case MeshDataset.datasetType:
 					dataset = new MeshDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case MrDataset.datasetType:
 					dataset = new MrDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 					break;
 				case ParameterQuantificationDataset.datasetType:
 					dataset = new ParameterQuantificationDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case PetDataset.datasetType:
 					dataset = new PetDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.PET_DATASET);
 					break;
 				case RegistrationDataset.datasetType:
 					dataset = new RegistrationDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case SegmentationDataset.datasetType:
 					dataset = new SegmentationDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case SpectDataset.datasetType:
 					dataset = new SpectDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.SPECT_DATASET);
 					break;
 				case StatisticalDataset.datasetType:
 					dataset = new StatisticalDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				case TemplateDataset.datasetType:
 					dataset = new TemplateDataset();
+					originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 					break;
 				default:
 				break;
@@ -576,11 +598,6 @@ public class ImporterService {
 			datasetProcessing.addOutputDataset(dataset);
 			dataset.setDatasetProcessing(datasetProcessing);
 			dataset.setStudyId(importJob.getStudyId());
-
-			// Metadata
-			DatasetMetadata originMetadata = new DatasetMetadata();
-			originMetadata.setProcessedDatasetType(importJob.getProcessedDatasetType());
-			originMetadata.setName(importJob.getProcessedDatasetName());
 
 			// Copy the data somewhere else
 			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
@@ -622,7 +639,9 @@ public class ImporterService {
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 
-			datasetService.create(dataset);
+			dataset = datasetService.create(dataset);
+			
+			solrService.indexDataset(dataset.getId());
 
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
