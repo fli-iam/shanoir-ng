@@ -72,62 +72,70 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.selected]="selectionAllowed && isSelected(item)">
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
-    <ng-container *ngFor="let col of columnDefs" ><ng-container *ngFor="let render of [renderCell(item, col)]"><!-- it's a hack to use a var -->
-        <td 
-                *ngIf="!col.hidden"
-                class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
-                [class.bool]="isFieldBoolean(col)"
-                [class.progress]="col.type == 'progress'"
-                [attr.title]="col.tip != undefined ? col.tip : (render.text ? render.text : render)"
-                (click)="col.type == 'button' ? null : onRowClick(item)"
-                [style.color]="render.color"
-                >
+    <ng-container *ngFor="let col of columnDefs" >
+        <ng-container *ngVar="{
+                render: renderCell(item, col), 
+                route: col.route ? col.route(item) : null,
+                boolean: isFieldBoolean(col),
+                editable: cellEditable(item, col),
+                cellValue: getCellValue(item, col)
+        } as vars">
+            <td 
+                    *ngIf="!col.hidden"
+                    class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
+                    [class.bool]="vars.boolean"
+                    [class.progress]="col.type == 'progress'"
+                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : vars.render)"
+                    (click)="col.type == 'button' ? null : onRowClick(item)"
+                    [style.color]="vars.render.color"
+                    >
+                
+                <!-- default display -->
+                <span *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</span>
 
-            <!-- default display -->
-            <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col) && col.type != 'progress'">{{render.text ? render.text : render}}</span>
+                <!-- link -->
+                <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
+                    [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
 
-            <!-- link -->
-            <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
-                [routerLink]="col.route(item)" routerLinkActive="active">{{render.text ? render.text : render}}<i class="fas fa-external-link-alt"></i></a>
-
-            <!-- editable text / number -->
-            <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
-                <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
-            </span>
-
-            <!-- editable text / number with dropdown -->
-            <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-                <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                    <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
-                </select>
-            </span>
-
-            <!-- display a boolean -->
-            <span *ngIf="isFieldBoolean(col) && (!editMode || !cellEditable(item, col))">
-                <span *ngIf="getCellValue(item, col) && !col.awesome" class="bool-true"><i class="fas fa-check"></i></span>
-                <span *ngIf="!getCellValue(item, col) && !col.awesome" class="bool-false"><i class="fas fa-times"></i></span>
-                <span *ngIf="getCellValue(item, col) && col.awesome" class="bool-true"><i class="fas {{col.awesome}}" [style.color]="col.color"></i></span>
-            </span>
-
-            <!-- editable boolean -->
-            <span *ngIf="isFieldBoolean(col) && editMode && cellEditable(item, col)">
-                <checkbox [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
-            </span>
-            
-            <!-- display a button -->
-            <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
-                <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
-                    <img *ngIf="col.img" src="{{col.img}}" />
-                    <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                <!-- editable text / number -->
+                <span *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+                    <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                 </span>
-            </span>
 
-            <!-- display a progress bar -->
-            <span *ngIf="col.type == 'progress'">
-                <progress-bar [progress]="render" width="100"></progress-bar>
-            </span>
-        </td>
-    </ng-container></ng-container>
+                <!-- editable text / number with dropdown -->
+                <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+                    <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                        <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+                    </select>
+                </span>
+
+                <!-- display a boolean -->
+                <span *ngIf="vars.boolean && (!editMode || !vars.editable)">
+                    <span *ngIf="vars.cellValue && !col.awesome" class="bool-true"><i class="fas fa-check"></i></span>
+                    <span *ngIf="!vars.cellValue && !col.awesome" class="bool-false"><i class="fas fa-times"></i></span>
+                    <span *ngIf="vars.cellValue && col.awesome" class="bool-true"><i class="fas {{col.awesome}}" [style.color]="col.color"></i></span>
+                </span>
+
+                <!-- editable boolean -->
+                <span *ngIf="vars.boolean && editMode && vars.editable">
+                    <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
+                </span>
+                
+                <!-- display a button -->
+                <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
+                    <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
+                        <img *ngIf="col.img" src="{{col.img}}" />
+                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                    </span>
+                </span>
+
+                <!-- display a progress bar -->
+                <span *ngIf="col.type == 'progress'">
+                    <progress-bar [progress]="vars.render" width="100"></progress-bar>
+                </span>
+            </td>
+        </ng-container>
+    </ng-container>
 </tr>
 <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
 <tr *ngIf="items?.length > 0" class="full-row">

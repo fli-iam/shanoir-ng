@@ -501,19 +501,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    // moveDrag(event: MouseEvent) {
-    //     if (this.currentDrag) {
-    //         let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
-    //         if (leftDragWidth < 0) leftDragWidth = 0;
-    //         if (this.currentDrag.totalWidth - leftDragWidth < 10) leftDragWidth = this.currentDrag.totalWidth - 10;
-    //         this.columnDefs[this.currentDrag.leftColIndex].width = (leftDragWidth + 10) + 'px';
-    //         let nextIndex: number = this.columnDefs.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
-    //         if (nextIndex != -1) {
-    //             this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - leftDragWidth) + 'px';
-    //         }
-    //     }
-    // }
-
     stopDrag() {
         if (this.currentDrag) {
             this.currentDrag = null;
@@ -533,6 +520,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.width = this.colSave[i].width;
             col.hidden = this.colSave[i].hidden;
         });
+        this.saveSettings();
     }
 }
 
