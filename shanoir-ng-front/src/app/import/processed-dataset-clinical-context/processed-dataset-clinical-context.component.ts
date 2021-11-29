@@ -177,10 +177,11 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
 
     public onSelectSubject(): void {
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
+        this.datasetProcessing = null;
         if (!this.subject) {
             this.openSubjectStudy = false;
+            return;
         }
-        this.datasetProcessing = null;
         this.loadProcessings();
         this.onContextChange();
     }

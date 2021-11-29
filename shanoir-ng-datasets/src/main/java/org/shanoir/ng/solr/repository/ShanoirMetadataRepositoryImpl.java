@@ -116,7 +116,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ " LEFT JOIN study st ON st.id = e.study_id"
 				+ " LEFT JOIN center c ON c.id = e.center_id"
 				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id AND d.dataset_processing_id is not null;", "SolrResult");
+				+ " WHERE d.origin_metadata_id = dm.id"
+				+ " AND d.dataset_processing_id is not null;", "SolrResult");
 
 		result.addAll(mrQuery.getResultList());
 		result.addAll(petQuery.getResultList());
@@ -195,7 +196,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 				+ ", c.name as centerName"
 				+ ", null as sliceThickness"
 				+ ", null as pixelBandwidth"
-				+ ", null as magneticFieldStrength\n"
+				+ ", null as magneticFieldStrength"
 				+ " FROM dataset d"
 				+ " LEFT JOIN dataset dp ON dp.id ="
 				+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"

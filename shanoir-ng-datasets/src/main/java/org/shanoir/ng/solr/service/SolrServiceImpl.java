@@ -50,6 +50,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -155,8 +157,8 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
-	@Transactional
 	@Override
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void indexDataset(Long datasetId) {
 		// delete dataset if existing
 		solrRepository.deleteByDatasetId(datasetId);

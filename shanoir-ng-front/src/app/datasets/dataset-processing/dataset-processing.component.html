@@ -97,21 +97,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<shanoir-table #inputDatasetsTable
 						[getPage]="getInputDatasetsPage.bind(this)" 
 						[editMode]="mode != 'view'"
-						[columnDefs]="inputDatasetsColumnDefs">
+						[columnDefs]="inputDatasetsColumnDefs"
+						[browserSearch]="false">
 					</shanoir-table>
 				</li>
-			</ol>
 
-			<legend>
-				Output datasets
-				<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
-			</legend>
 			<li>
+				<legend>
+					Output datasets
+					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
+				</legend>
 				<shanoir-table #outputDatasetsTable
 					[getPage]="getOutputDatasetsPage.bind(this)" 
-					[columnDefs]="outputDatasetsColumnDefs">
+					[columnDefs]="outputDatasetsColumnDefs"
+					[browserSearch]="false">
 				</shanoir-table>
 			</li>
+			</ol>
 
 		</fieldset>
 		
