@@ -87,25 +87,31 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        const choose = (): Promise<void> => {
-            switch (this.mode) { 
-                case 'create' : return this.initCreate();
-                case 'edit' : return this.initEdit();
-                case 'view' : return this.initView();
-                default: throw Error('mode has to be set!');
+        //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
+        this.subscribtions.push(this.activatedRoute.params.subscribe(
+            params => {
+                const id = +params['id'];
+                this.id = id;
+                const choose = (): Promise<void> => {
+                    switch (this.mode) { 
+                        case 'create' : return this.initCreate();
+                        case 'edit' : return this.initEdit();
+                        case 'view' : return this.initView();
+                        default: throw Error('mode has to be set!');
+                    }
+                }
+                choose().then(() => {
+                    this.footerState = new FooterState(this.mode);
+                    this.hasEditRight().then(right => this.footerState.canEdit = right);
+                    this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+                    if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                        this.entity = this.breadcrumbsService.currentStep.entity as T;
+                    }
+                    this.breadcrumbsService.currentStep.entity = this.entity;
+                    this.manageFormSubscriptions();
+                });
             }
-        }
-        choose().then(() => {
-            this.footerState = new FooterState(this.mode);
-            this.hasEditRight().then(right => this.footerState.canEdit = right);
-            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.entity = this.breadcrumbsService.currentStep.entity as T;
-            }
-            this.breadcrumbsService.currentStep.entity = this.entity;
-            this.manageFormSubscriptions();
-        });
+        ));
     }
     
     ngOnChanges(changes: SimpleChanges): void {
