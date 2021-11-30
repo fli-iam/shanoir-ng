@@ -107,9 +107,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-container>
 					</span>
 				</li>
-				</ol>
-				</fieldset>
-			<fieldset  *ngIf="isUserAdmin()">
+			</ol>
+		</fieldset>
+		<fieldset *ngIf="isUserAdmin()">
 			<ol>
 				<label>Studies</label>
 				<li *ngFor="let study of studies; let index = index">
