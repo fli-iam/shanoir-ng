@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
@@ -95,6 +96,11 @@ public class WADODownloaderService {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@PostConstruct
+	public void initRestTemplate() {
+		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+	}
+
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
@@ -171,7 +177,6 @@ public class WADODownloaderService {
 	 * @throws IOException
 	 */
 	private byte[] downloadFileFromPACS(final String url) throws IOException {
-		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);
