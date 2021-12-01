@@ -237,6 +237,7 @@ import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
 import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
+import { VarDirective } from './utils/ng-var.directive';
 
 @NgModule({
     imports: [
@@ -399,7 +400,8 @@ import { SubjectDTOService } from './subjects/shared/subject.dto';
         TagCreatorComponent,
         SolrRangeCriterionComponent,
         ChallengeBlockComponent,
-        TagInputComponent
+        TagInputComponent,
+        VarDirective
     ],
     entryComponents: [
         ConfirmDialogComponent,
