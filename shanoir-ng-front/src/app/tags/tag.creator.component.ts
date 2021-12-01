@@ -42,7 +42,7 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
     selectedColor: string;
     text: string = null;
     addTagVisible: boolean = false;
-    displayedTags: Set<{tag: Tag, used: boolean, darkFont: boolean}>;
+    displayedTags: Set<{tag: Tag, darkFont: boolean}>;
     newTagDarkFont: boolean;
 
     constructor(private dialogService: ConfirmDialogService) {
@@ -63,15 +63,15 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
                 this.text = null;
                 this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'); // random color
                 this.addTagVisible = false;
-                this.displayedTags.add({tag: newTag, used: this.tagUsed(newTag), darkFont: this.getFontColor(newTag.color)});
+                this.displayedTags.add({tag: newTag, darkFont: this.getFontColor(newTag.color)});
                 this.propagateChange(this.model);
                 this.onChange.emit(this.model);
             }
         }
     }
 
-    public deleteTag(tag: {tag: Tag, used: boolean, darkFont: boolean}) {
-        if (tag.used) {
+    public deleteTag(tag: {tag: Tag, darkFont: boolean}) {
+        if (this.tagUsed(tag.tag)) {
             this.dialogService.inform('Cannot delete!', 'Sorry, this tag is currently linked to one or more subject(s) in this study.');
             return;
         } else {
@@ -96,13 +96,15 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
         this.displayedTags = new Set();
         if (this.model) {
             (this.model as Tag[]).forEach(tag => 
-                this.displayedTags.add({tag: tag, used: this.tagUsed(tag), darkFont: this.getFontColor(tag.color)})
+                this.displayedTags.add({tag: tag, darkFont: this.getFontColor(tag.color)})
             );
         }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        // ?
+        if (changes.study) {
+            console.log(this.study.subjectStudyList)
+        }
     }
 
     private getFontColor(colorInp: string): boolean {
