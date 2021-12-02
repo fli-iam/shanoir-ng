@@ -46,6 +46,7 @@ export class ExaminationNodeComponent implements OnChanges {
     datasetIds: number[];
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
+    downloading = false;
 
     constructor(
         private router: Router,
@@ -126,22 +127,29 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     download(format: string) {
+        if (this.downloading) {
+            return;
+        }
+        this.downloading = true;
         if (this.datasetIds && this.datasetIds.length == 0) return;
         let datasetIdsReady: Promise<void>;
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
             if (!this.datasetIds || this.datasetIds.length == 0) {
                 this.msgService.log('warn', 'Sorry, no dataset for this examination');
+                this.downloading = false;
                 return;
             }
         } else {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            var self = this;
+            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar, function() {
+                self.downloading = false;
+            })
         });
     }
-
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(

@@ -54,6 +54,9 @@ export class DatasetNodeComponent implements OnChanges {
     }
 
     download(format: string) {
+        if (this.loading) {
+            return;
+        }
         this.loading = true;
         this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
     }
