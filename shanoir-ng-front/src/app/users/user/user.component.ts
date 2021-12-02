@@ -75,16 +75,17 @@ export class UserComponent extends EntityComponent<User> {
             if (user.extensionRequestDemand && user.extensionRequestInfo) {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
-        });
-        this.studyService.findStudiesByUserId().then(studies => {
-            this.studies = studies.filter(study =>  {
-                for( var suser of study.studyUserList) {
-                    // Admin case, we check that the user is part of the study
-                    if (suser.userId === this.entity.id) {
-                        return true;
+        }).then(() => {
+            this.studyService.findStudiesByUserId().then(studies => {
+                this.studies = studies.filter(study =>  {
+                    for( var suser of study.studyUserList) {
+                        // Admin case, we check that the user is part of the study
+                        if (suser.userId === this.entity.id) {
+                            return true;
+                        }
                     }
-                }
-                return false;
+                    return false;
+                });
             });
         });
         Promise.all([userPromise, this.getRoles()]).then(() => {

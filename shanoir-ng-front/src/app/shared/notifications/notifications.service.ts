@@ -18,6 +18,7 @@ import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import * as AppUtils from '../../utils/app.utils';
+import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 
 @Injectable()
 export class NotificationsService {
@@ -29,14 +30,17 @@ export class NotificationsService {
     public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
+    private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
+        this.connect();
     }
 
-    refresh(items = []) {
+    private refresh(items = []) {
         this.isLoading = true;
         if (items.length == 0) {
             this.taskService.getTasks().then(itemsGot => {
+                this.tasksSubject.next(itemsGot);
                 if (itemsGot && itemsGot.length > 0) {
                     this.refresh(itemsGot);
                 }
@@ -61,7 +65,7 @@ export class NotificationsService {
         this.isLoading = false;
     }
 
-    connect(): void {
+    private connect() {
         this.keycloakService.getToken().then(token => {
             this.source = new EventSourcePolyfill(AppUtils.BACKEND_API_UPDATE_TASKS_URL, {
                   headers: {
@@ -73,10 +77,15 @@ export class NotificationsService {
                     this.refresh();
                 }
             });
+            this.refresh();
             this.source.onmessage = (message)=>{
                 let n:Notification = JSON.parse(message.data);
             }     
-        })
+        });
+    }
+
+    public getNotifications(): Observable<Task[]> {
+        return this.tasksSubject;
     }
 
     totalProgress(): number {
