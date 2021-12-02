@@ -425,10 +425,10 @@ public class BIDSServiceImpl implements BIDSService {
 					.append(NEW_LINE);
 
 				// TODO: center_id / comment / weigth / other examination things ?
-				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
+				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes());
 
 			} catch (IOException exception) {
-				LOG.error("File could not be treated: {}", srcFile.getAbsolutePath(), exception);
+				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
 			}
 		}
 	}
