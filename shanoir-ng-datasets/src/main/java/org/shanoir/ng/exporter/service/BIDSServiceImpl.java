@@ -414,6 +414,7 @@ public class BIDSServiceImpl implements BIDSService {
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			try {
 				// Use link to avoid file duplication
+				deleteIfExists(pathToGo.toAbsolutePath().toString());
 				Files.createLink(pathToGo, srcFile.toPath());
 				
 				// Add the file to the scans.tsv reference
@@ -430,6 +431,13 @@ public class BIDSServiceImpl implements BIDSService {
 			} catch (IOException exception) {
 				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
 			}
+		}
+	}
+
+	private void deleteIfExists(String filePath) {
+		File file = new File(filePath);
+		if(file.exists()) {
+			file.delete();
 		}
 	}
 
