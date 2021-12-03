@@ -16,7 +16,11 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.assertj.core.util.Arrays;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -55,6 +59,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,9 +149,10 @@ public class RabbitMQDatasetsService {
 			
 			this.studyRepository.save(stud);
 
-			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
-				updateSolr(sustu.getSubject().getId());
-			}
+			List<Long> subjectIds = new ArrayList<>();
+			stud.getSubjectStudyList().forEach(subStu -> subjectIds.add(subStu.getSubject().getId()));
+			updateSolr(subjectIds);
+
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
@@ -178,7 +184,9 @@ public class RabbitMQDatasetsService {
 			subjectRepository.save(su);
 			
 			// Update solr references
-			updateSolr(su.getId());
+			List<Long> subjectIdList = new ArrayList<Long>();
+			subjectIdList.add(su.getId());
+			updateSolr(subjectIdList);
 			
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
@@ -189,13 +197,17 @@ public class RabbitMQDatasetsService {
 	 * Updates all the solr references for this subject.
 	 * @param subjectId the subject ID updated
 	 */
-	private void updateSolr(final Long subjectId) {
-		for (Examination exam : examinationRepository.findBySubjectId(subjectId)) {
+	private void updateSolr(final List<Long> subjectIds) {
+		Set<Long> datasetsToUpdate = new HashSet<>();
+		for (Examination exam : examinationRepository.findBySubjectIdIn(subjectIds)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetsToUpdate.add(ds.getId());
 				}
 			}
+		}
+		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
+			this.solrService.indexDatasets(new ArrayList<>(datasetsToUpdate));
 		}
 	}
 
@@ -253,11 +265,13 @@ public class RabbitMQDatasetsService {
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
+			List<Long> datasetIds = new ArrayList<>();
 			if (acq != null) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetIds.add(ds.getId());
 				}
 			}
+			solrService.indexDatasets(datasetIds);
 		} catch (Exception e) {
 			LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
