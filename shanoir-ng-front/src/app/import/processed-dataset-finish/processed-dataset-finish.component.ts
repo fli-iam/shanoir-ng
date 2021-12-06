@@ -72,6 +72,8 @@ export class FinishProcessedDatasetImportComponent {
                         // go back to the first step of import
                         this.router.navigate(['/imports/processed-dataset']);
                     }).catch(error => {
+                        // Clean context
+                        this.importDataService.reset();
                         this.importing = false;
                         throw error;
                     });

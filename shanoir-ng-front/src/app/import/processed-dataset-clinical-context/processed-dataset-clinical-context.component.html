@@ -47,7 +47,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="subject" 
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study"
                         [optionArr]="subjects">
                 </select-box>
             </span>
