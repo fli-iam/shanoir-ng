@@ -141,7 +141,7 @@ public class ImporterService {
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
 		ShanoirEvent event = importJob.getShanoirEvent();
-		event.setMessage("Starting import...");
+		event.setMessage("Creating datasets...");
 		eventService.publishEvent(event);
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
@@ -151,7 +151,7 @@ public class ImporterService {
 				int rank = 0;
 				for (Patient patient : importJob.getPatients()) {
 					for (Study study : patient.getStudies()) {
-						float progress = 0f;
+						float progress = 0.5f;
 						for (Serie serie : study.getSeries() ) {
 							if (serie.getSelected() != null && serie.getSelected()) {
 								DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
@@ -160,7 +160,7 @@ public class ImporterService {
 								}
 								rank++;
 							}
-							progress += 1f / study.getSeries().size();
+							progress += 0.5f / study.getSeries().size();
 							event.setMessage("Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId());
 							event.setProgress(progress);
 							eventService.publishEvent(event);

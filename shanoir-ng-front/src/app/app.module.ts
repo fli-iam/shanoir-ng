@@ -236,6 +236,7 @@ import { ExtraDataService } from './preclinical/extraData/extraData/shared/extra
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
+import { VarDirective } from './utils/ng-var.directive';
 
 @NgModule({
     imports: [
@@ -399,7 +400,8 @@ import { StudyUserListComponent } from './studies/studyuser/studyuser-list.compo
         SolrRangeCriterionComponent,
         ChallengeBlockComponent,
         TagInputComponent,
-        StudyUserListComponent
+        StudyUserListComponent,
+        VarDirective
     ],
     entryComponents: [
         ConfirmDialogComponent,
