@@ -544,13 +544,15 @@ export class StudyComponent extends EntityComponent<Study> {
             }
             return result;
         }).then(study => {
-            this.confirmDialogService.confirm('Create a Study Card', 
+            if (this.mode == 'create') {
+               this.confirmDialogService.confirm('Create a Study Card', 
                 'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                 .then(userChoice => {
                     if (userChoice) {
                         this.router.navigate(['/study-card/create', {studyId: study.id}]);
                     }
                 });
+            }
             return study;
         });
     }

@@ -48,10 +48,12 @@ import org.shanoir.ng.importer.model.DiffusionGradient;
 import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.ExpressionFormat;
 import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.DiffusionUtil;
@@ -101,6 +103,9 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@Autowired
 	private ShanoirExec shanoirExec;
+
+	@Autowired
+	private ShanoirEventService shanoirEventService;
 	
 	@Value("${shanoir.import.series.seriesProperties}")
 	private String seriesProperties;
@@ -148,7 +153,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId) throws ShanoirException {
+	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId, ImportJob importJob) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
@@ -160,8 +165,16 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSeries();
+			float progress = 0;
+
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
+
+				progress = progress + (0.5f / series.size());
+				importJob.getShanoirEvent().setProgress(progress);
+				importJob.getShanoirEvent().setMessage("Converting to nifti, serie: " + serie.getProtocolName());
+				shanoirEventService.publishEvent(importJob.getShanoirEvent());
+
 				if (serie.getSelected()) {
 					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 					boolean serieIdentifiedForNotSeparating;

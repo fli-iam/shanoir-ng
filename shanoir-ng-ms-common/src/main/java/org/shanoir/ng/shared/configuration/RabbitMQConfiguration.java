@@ -102,6 +102,9 @@ public class RabbitMQConfiguration {
 
 	/** Send a mail from dataset microservice to ms users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
+
+	/** Send a mail from dataset microservice to ms users for import dataset failure*/
+	public static final String IMPORT_DATASET_FAILED_MAIL_QUEUE = "import-dataset-failed-mail-queue";
 	
 	/** Send a mail from studies microservice to ms users */
 	public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
@@ -338,12 +341,17 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue importDatasetMail() {
+	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importDatasetFailedMailQueue() {
+		return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
 	}
 	
 	@Bean
-	public static Queue studyUserMail() {
+	public static Queue studyUserMailQueue() {
 		return new Queue(STUDY_USER_MAIL_QUEUE, true);
 	}
 
