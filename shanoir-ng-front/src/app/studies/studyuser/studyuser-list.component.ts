@@ -155,7 +155,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback();
         StudyUser.completeMember(item, this.users);
         if (this.userOptions) {
-            let option = this.userOptions.find(opt => opt.value.id == item.user.id);
+            let option = this.userOptions.find(opt => opt.value?.id == item.user?.id);
             if (option) option.disabled = false;
         }
     }
