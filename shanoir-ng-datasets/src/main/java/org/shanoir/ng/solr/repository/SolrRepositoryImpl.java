@@ -60,11 +60,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
-			Criteria subCriteria = new Criteria(Criteria.WILDCARD).expression(Criteria.WILDCARD);
-			for (String value : values) {
-				subCriteria.or(Criteria.where(fieldName).is(value));
-			}
-			criteria = criteria.and(subCriteria);
+			criteria = criteria.and(Criteria.where(fieldName).is(values).setPartIsOr(true););
 		}
 	}
 	
