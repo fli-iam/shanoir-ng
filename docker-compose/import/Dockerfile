@@ -99,6 +99,9 @@ RUN install -m 644 external/dcmtk/dcmdjpeg/linux/lib/dicom.dic /usr/local/lib/
 # install dicom tool dcm2pnm
 RUN install -m 755 external/dcmtk/dcm2pnm/linux/dcm2pnm /usr/local/bin/
 
+# install animaConvertImage to convert Analyze format into nifti
+RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
+
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 

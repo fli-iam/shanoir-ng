@@ -27,6 +27,8 @@ import org.shanoir.ng.dataset.model.Dataset;
 @Entity
 public class MegDataset extends Dataset {
 
+	public static final String datasetType = "Meg";
+
 	/**
 	 * UID
 	 */

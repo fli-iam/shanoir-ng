@@ -87,10 +87,11 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                             return '/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length));
                         } else if (task.message.lastIndexOf('for examination ') != -1) {
                             return '/examination/details/' + task.message.slice(task.message.lastIndexOf('for examination ') + ('for examination '.length));
-                        } else {
-                            return null;
+                        } else if (task.message.indexOf('in dataset') != -1) {
+                            return '/dataset/details/' + task.message.slice(task.message.lastIndexOf('in dataset ') + ('in dataset '.length))
                         }
-                    } else return null;
+                    }
+                    return '/home';
                 }
             },
             { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },

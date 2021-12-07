@@ -51,6 +51,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -124,8 +126,8 @@ public class SolrServiceImpl implements SolrService {
 		indexDocumentsInSolr(shanoirMetadatas);
 	}
 
-	@Transactional
 	@Override
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void indexDataset(Long datasetId) {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
@@ -197,7 +199,6 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
-	@Transactional
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null;

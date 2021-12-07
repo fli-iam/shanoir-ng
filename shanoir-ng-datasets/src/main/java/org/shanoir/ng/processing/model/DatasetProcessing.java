@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.processing;
+package org.shanoir.ng.processing.model;
 
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -126,6 +127,16 @@ public class DatasetProcessing extends AbstractEntity {
 	 */
 	public void setOutputDatasets(List<Dataset> outputDatasets) {
 		this.outputDatasets = outputDatasets;
+	}
+
+	/**
+	 * @param outputDataset the outputDataset to add
+	 */
+	public void addOutputDataset(Dataset outputDataset) {
+		if(this.outputDatasets == null) {
+			this.outputDatasets = new ArrayList<Dataset>();
+		}
+		this.outputDatasets.add(outputDataset);
 	}
 
 	/**

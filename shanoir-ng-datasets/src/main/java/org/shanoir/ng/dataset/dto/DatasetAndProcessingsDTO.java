@@ -26,6 +26,8 @@ public class DatasetAndProcessingsDTO extends DatasetDTO implements DatasetAndPr
 	
 	private DatasetAcquisitionDTO datasetAcquisition;
 
+	private DatasetProcessingDTO datasetProcessing;
+
 	@Override
 	public List<DatasetProcessingDTO> getProcessings() {
 		return processings;
@@ -44,5 +46,15 @@ public class DatasetAndProcessingsDTO extends DatasetDTO implements DatasetAndPr
 	@Override
 	public void setDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition) {
 		this.datasetAcquisition = datasetAcquisition;
+	}
+
+	@Override
+	public DatasetProcessingDTO getDatasetProcessing() {
+		return datasetProcessing;
+	}
+
+	@Override
+	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
+		this.datasetProcessing = datasetProcessing;
 	}
 }

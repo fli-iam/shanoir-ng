@@ -28,7 +28,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

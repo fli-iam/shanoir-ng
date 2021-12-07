@@ -17,15 +17,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [label]="node.label" 
         awesome="fas fa-cog" 
         [(opened)]="node.open"
-        (labelClick)="null"
+        (labelClick)="toggleMenu()"
         [hasChildren]="hasChildren()">
 
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
+        <menu-item label="Details..." awesome="fas fa-eye" (click)="showProcessingDetails()"></menu-item>
+    </dropdown-menu>
+
     <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')"> 
-            <dataset-node
+            <simple-dataset-node
                     node
                     *ngFor="let dataset of node.datasets"
                     [input]="dataset">
-            </dataset-node>
+            </simple-dataset-node>
 
     </ng-container>
 </node>

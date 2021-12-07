@@ -81,7 +81,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 
 	private StudyCard getStudyCard(Long studyCardId) {
 		Optional<StudyCard> studyCard = studyCardRepository.findById(studyCardId);
-		if (studyCard.isEmpty()) {
+		if (!studyCard.isPresent()) {
 			throw new IllegalArgumentException("No study card found with id " + studyCardId);
 		}
 		if (studyCard.get().getAcquisitionEquipmentId() == null) {

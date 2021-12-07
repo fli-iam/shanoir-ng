@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -417,6 +419,74 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
 		} catch (ShanoirImportException e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
+
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws IOException, InterruptedException {
+		String imageName = imageFile.getAbsolutePath();
+		String newImageName = imageName.replace(".img", ".nii.gz");
+		File parentFolder = imageFile.getParentFile().getAbsoluteFile();
+		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + imageName + " -o " + newImageName};
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.directory(parentFolder);
+        Process process = processBuilder.start();
+
+        int exitCode = process.waitFor();
+		if(exitCode != 0) {
+			throw new IOException("Impossible to convert Analyze image to nifti.");
+		}
+		return new File(parentFolder, newImageName);
+	}
+
+	@Override
+	/**
+	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
+	 */
+	public ResponseEntity<String> uploadProcessedDataset(
+		@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
+		@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+		throws RestServiceException {
+			
+		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
+		String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
+		Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
+		Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
+		
+		if (!isNifti && !isAnalyze) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Wrong content type of file upload.", null));
+		}
+
+		try {
+
+			// 1. Save files to user directory
+			
+			//    - Create user directory
+
+			long n = ImportUtils.createRandomLong();
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId) + File.separator + Long.toString(n);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs();
+			}
+			
+			//    - Save files
+			File destinationImageFile = new File(userImportDir.getAbsolutePath(), imageFileName);
+			imageFile.transferTo(destinationImageFile);
+			if(headerFile != null) {
+				File destinationHeaderFile = new File(userImportDir.getAbsolutePath(), headerFileName);
+				headerFile.transferTo(destinationHeaderFile);
+
+				// Convert Analyze format to nifti format
+				destinationImageFile = convertAnalyzeToNifti(destinationImageFile, destinationHeaderFile);
+			}
+
+			return new ResponseEntity<String>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
+		} catch (IOException | InterruptedException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		}
 	}
 
