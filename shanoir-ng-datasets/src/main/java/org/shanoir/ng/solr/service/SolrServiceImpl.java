@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.solr.common.SolrDocument;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -235,7 +234,7 @@ public class SolrServiceImpl implements SolrService {
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
 					|| order.getProperty().equals("tags")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-						order.getDirection(), order.getProperty().concat("_str"));
+						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), "datasetId");
