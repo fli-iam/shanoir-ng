@@ -364,7 +364,7 @@ public class DatasetApiController implements DatasetApi {
 
 			if (DCM.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
 			} else if (NII.equals(format)) {
 				// Check if we want a specific converter
 				if (converterId != null) {
@@ -375,7 +375,7 @@ public class DatasetApiController implements DatasetApi {
 					tmpFile.mkdirs();
 					// Download DICOMs in the temporary folder
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName);
+					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
 					// Convert them, sending to import microservice
 					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
@@ -541,7 +541,7 @@ public class DatasetApiController implements DatasetApi {
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
