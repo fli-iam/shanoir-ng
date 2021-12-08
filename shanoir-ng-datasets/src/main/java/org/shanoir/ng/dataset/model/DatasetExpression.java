@@ -28,7 +28,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**

@@ -1,0 +1,106 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="header command-zone">2. Set the clinical context of the processed dataset</div>
+<fieldset class="step" @preventInitialChildAnimations>
+    <ol>
+        <legend>
+            Research study
+            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+        </legend>
+        <li>
+            <label class="required-label">Select a research study</label> 
+            <span class="right-col">
+                <select-box 
+                        [(ngModel)]="study" 
+                        (userChange)="onSelectStudy(); onContextChange();" 
+                        (onViewClick)="showStudyDetails()" 
+                        [viewDisabled]="!study" 
+                        [options]="studyOptions">
+                </select-box>
+            </span>
+        </li>
+        
+    </ol>
+
+    <ol>
+        <legend>
+            Subject
+            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select a subject</label> 
+            <span class="right-col">
+                <select-box 
+                        [disabled]="!study" 
+                        [(ngModel)]="subject" 
+                        (userChange)="onSelectSubject(); onContextChange();" 
+                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        [optionArr]="subjects">
+                </select-box>
+            </span>
+        </li>
+    </ol>
+    <ol>
+        <legend>
+            Processed dataset details
+        </legend>
+        <li>
+            <label class="required-label">Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [options]="DatasetType.options">
+                </select-box>  
+            </span>
+        </li>
+        <li>
+            <label class="required-label">Processed Dataset Type</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="processedDatasetType" (userChange)="onContextChange();"
+                        [newDisabled]="true" [options]="ProcessedDatasetType.options"
+                        >
+                </select-box>  
+            </span>
+        </li>
+        <li>
+            <label class="required-label">Name</label>
+            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (userChange)="onContextChange();"/>
+        </li>
+        <li>
+            <label>Comment</label>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
+        </li>
+    </ol>
+    <ol *ngIf="subject">
+        <legend>
+            Dataset processing
+            <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
+        </legend>
+
+        <li>
+
+
+            <label class="required-label">Select a dataset processing</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="datasetProcessing" (userChange)="onContextChange();"
+                        (onViewClick)="showDatasetProcessingDetails()" [viewDisabled]="!datasetProcessing"
+                        (onNewClick)="openCreateDatasetProcessing()" [optionArr]="datasetProcessings" [pipe]="datasetProcessingLabelPipe">
+                </select-box>  
+            </span>
+        </li>
+
+    </ol>
+
+</fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>
