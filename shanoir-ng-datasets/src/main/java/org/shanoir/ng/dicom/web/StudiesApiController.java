@@ -14,13 +14,13 @@
 
 package org.shanoir.ng.dicom.web;
 
+import java.util.List;
+
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,13 +35,13 @@ public class StudiesApiController implements StudiesApi {
 	private ExaminationService examinationService;
 
 	@Override
-	public ResponseEntity<Page<StudyDTO>> findStudies(final Pageable pageable) {
-		Page<Examination> examinations = examinationService.findPage(pageable, false);
-		if (examinations.getContent().isEmpty()) {
+	public ResponseEntity<List<StudyDTO>> findStudies() {
+		List<Examination> examinations = examinationService.findAll();
+		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		Page<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
-		return new ResponseEntity<Page<StudyDTO>>(studies, HttpStatus.OK);
+		List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
+		return new ResponseEntity<List<StudyDTO>>(studies, HttpStatus.OK);
 	}
 
 }

@@ -110,6 +110,17 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private String dataDir;
 
 	@Override
+	public List<Examination> findAll() {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return examinationRepository.findAll();
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return examinationRepository.findByStudyIdIn(studyIds);
+		}
+	}
+	
+	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return examinationRepository.findAllByPreclinical(pageable, preclinical);

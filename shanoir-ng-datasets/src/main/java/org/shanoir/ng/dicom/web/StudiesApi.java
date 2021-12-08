@@ -14,12 +14,11 @@
 
 package org.shanoir.ng.dicom.web;
 
+import java.util.List;
+
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +42,6 @@ public interface StudiesApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 //	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<Page<StudyDTO>> findStudies(Pageable pageable);
+	ResponseEntity<List<StudyDTO>> findStudies();
 
 }
