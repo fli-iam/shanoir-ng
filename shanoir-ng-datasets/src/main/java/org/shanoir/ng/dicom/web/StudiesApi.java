@@ -14,8 +14,7 @@
 
 package org.shanoir.ng.dicom.web;
 
-import java.util.List;
-
+import org.shanoir.ng.dicom.web.dto.StudiesDTO;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +41,6 @@ public interface StudiesApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 //	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<StudyDTO>> findStudies();
+	ResponseEntity<StudiesDTO> findStudies();
 
 }

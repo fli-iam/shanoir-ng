@@ -1,6 +1,6 @@
 window.config = {
   // default: '/'
-  routerBasename: '/',
+  routerBasename: '/shanoir-ng/ohif-viewer',
   extensions: [],
   showStudyList: true,
   filterQueryParam: false,
@@ -20,21 +20,21 @@ window.config = {
     ],
   },
   // This is an array, but we'll only use the first entry for now
-  oidc: [
-    {
+//  oidc: [
+//    {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
-    	client_id: 'ohif-viewer',
-    	redirect_uri: 'https://shanoir-ng-nginx/shanoir-ng/ohif-viewer/callback', // `OHIFStandaloneViewer.js`
+//   	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
+//    	client_id: 'ohif-viewer',
+//    	redirect_uri: 'https://shanoir-ng-nginx/shanoir-ng/ohif-viewer/', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
-		response_type: 'code',
-		scope: 'openid', // email profile openid
+//		response_type: 'code',
+//		scope: 'openid', // email profile openid
 		// ~ OPTIONAL
-		post_logout_redirect_uri: '/logout-redirect.html'
-    }
-  ],
+//		post_logout_redirect_uri: '/logout-redirect.html'
+//    }
+//  ],
   // Extensions should be able to suggest default values for these?
   // Or we can require that these be explicitly set
   hotkeys: [

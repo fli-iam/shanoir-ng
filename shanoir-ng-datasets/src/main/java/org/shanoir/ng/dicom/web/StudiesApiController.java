@@ -16,6 +16,7 @@ package org.shanoir.ng.dicom.web;
 
 import java.util.List;
 
+import org.shanoir.ng.dicom.web.dto.StudiesDTO;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
@@ -35,13 +36,15 @@ public class StudiesApiController implements StudiesApi {
 	private ExaminationService examinationService;
 
 	@Override
-	public ResponseEntity<List<StudyDTO>> findStudies() {
+	public ResponseEntity<StudiesDTO> findStudies() {
 		List<Examination> examinations = examinationService.findAll();
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
-		return new ResponseEntity<List<StudyDTO>>(studies, HttpStatus.OK);
+		StudiesDTO studiesDTO = new StudiesDTO();
+		studiesDTO.setStudies(studies);
+		return new ResponseEntity<StudiesDTO>(studiesDTO, HttpStatus.OK);
 	}
 
 }
