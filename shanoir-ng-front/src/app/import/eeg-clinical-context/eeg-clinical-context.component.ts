@@ -38,6 +38,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { Option } from '../../shared/select/select.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -76,6 +77,8 @@ export class EegClinicalContextComponent implements OnInit {
         new Option<string>('PATIENT', 'Patient'),
         new Option<string>('PHANTOM', 'Phantom')
     ];
+
+    private subscribtions: Subscription[] = [];
     
     constructor(
             private studyService: StudyService,
@@ -273,7 +276,7 @@ export class EegClinicalContextComponent implements OnInit {
     
     private getContext(): ContextData {
         return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem);
+            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
 
     private getPrefilledCenter(): Center {
@@ -342,9 +345,10 @@ export class EegClinicalContextComponent implements OnInit {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+                }));
         });
     }
 
@@ -404,6 +408,12 @@ export class EegClinicalContextComponent implements OnInit {
 
     public next() {
         this.router.navigate(['imports/eegfinish']);
+    }
+    
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }
 

@@ -90,7 +90,8 @@ export class DatasetNode implements ShanoirNode {
         public id: number,
         public label: string,
         public type: string,
-        public processings: ProcessingNode[] | UNLOADED
+        public processings: ProcessingNode[] | UNLOADED,
+        public processed: boolean
     ) {}
 
     public open: boolean = false;

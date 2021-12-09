@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.solr.common.SolrDocument;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -51,6 +50,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -124,8 +125,8 @@ public class SolrServiceImpl implements SolrService {
 		indexDocumentsInSolr(shanoirMetadatas);
 	}
 
-	@Transactional
 	@Override
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void indexDataset(Long datasetId) {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
@@ -197,7 +198,6 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
-	@Transactional
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null;
@@ -235,7 +235,7 @@ public class SolrServiceImpl implements SolrService {
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
 					|| order.getProperty().equals("tags")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-						order.getDirection(), order.getProperty().concat("_str"));
+						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), "datasetId");

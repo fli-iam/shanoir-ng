@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.dataset.dto.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
-import org.shanoir.ng.processing.DatasetProcessing;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
 @Mapper(componentModel = "spring", uses = { DatasetMapper.class })
@@ -30,5 +32,12 @@ public interface DatasetProcessingMapper {
 	 */
 	DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
 
-
+	/**
+	 * Map list of @DatasetProcessing to list of @DatasetProcessingDTO.
+	 * 
+	 * @param dataset processings
+	 *            list of dataset processings.
+	 * @return list of dataset processings DTO.
+	 */
+	List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings);
 }

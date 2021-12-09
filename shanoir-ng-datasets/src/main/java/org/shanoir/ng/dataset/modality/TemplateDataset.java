@@ -27,6 +27,8 @@ import org.shanoir.ng.dataset.model.Dataset;
 @Entity
 public class TemplateDataset extends Dataset {
 
+	public static final String datasetType = "Template";
+
 	/**
 	 * UID
 	 */

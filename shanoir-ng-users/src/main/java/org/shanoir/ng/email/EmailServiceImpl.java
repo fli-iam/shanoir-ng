@@ -467,6 +467,7 @@ public class EmailServiceImpl implements EmailService {
 
 	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
         // Find user that edited the study
+    	// We may come from challenge, the user then does not exists.
         User user = userRepository.findById(email.getUserId()).orElse(null);
 
 		// Get the list of recipients
@@ -478,13 +479,13 @@ public class EmailServiceImpl implements EmailService {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
-				messageHelper.setCc(user.getEmail());
+				messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
 				messageHelper.setTo(studyAdmin.getEmail());
 				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
 				variables.put(FIRSTNAME, studyAdmin.getFirstName());
 				variables.put(LASTNAME, studyAdmin.getLastName());
-				variables.put(EMAIL, user.getEmail());
+				variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
 				variables.put(STUDY_NAME, email.getStudyName());
 				variables.put(STUDY_USERS, newStudyUsers);
 				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());

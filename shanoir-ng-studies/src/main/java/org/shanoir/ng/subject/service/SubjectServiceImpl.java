@@ -101,7 +101,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		Iterable<Subject> subjects;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			subjects = subjectRepository.findAll();
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();

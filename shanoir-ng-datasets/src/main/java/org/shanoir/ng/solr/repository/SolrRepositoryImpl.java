@@ -60,7 +60,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
-			criteria = criteria.and(Criteria.where(fieldName).is(values));
+			List<String> valuesList = new ArrayList<String>(values);
+			Criteria subCrit =  Criteria.where(fieldName).is(valuesList.get(0));
+			for (int i = 1; i < valuesList.size(); i++) {
+				subCrit = subCrit.or(Criteria.where(fieldName).is(valuesList.get(i)));
+				i++;
+			}
+			criteria = criteria.and(subCrit);
 		}
 	}
 	

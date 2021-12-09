@@ -14,7 +14,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <fieldset *ngIf="parentFormGroup" [formGroup]="parentFormGroup">
 	<ol>
-		<li>
+	   <li *ngIf="mode == 'view' && dataset && dataset.datasetProcessing">
+            <legend>Processed dataset</legend>
+            <label>Processing</label>
+            <span class="right-col">
+                <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
+                    Dataset processing n°{{dataset.datasetProcessing?.id}}
+                </a>
+            </span>
+        </li>
+        <li>
 			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'create'">
@@ -25,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 		</li>
-		<li *ngIf="mode == 'view'">
+		<li *ngIf="mode == 'view' && dataset && dataset.datasetAcquisition">
 			<label>Dataset Acquisition</label>
 			<span class="right-col">
 				<a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
