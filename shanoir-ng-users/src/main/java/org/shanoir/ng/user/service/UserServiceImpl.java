@@ -25,6 +25,9 @@ import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
@@ -32,10 +35,12 @@ import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -72,6 +77,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
     ApplicationEventPublisher publisher;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	ShanoirEventService eventService;
 
 	@Override
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
@@ -113,6 +124,10 @@ public class UserServiceImpl implements UserService {
 		}
 		userRepository.deleteById(id);
 		publisher.publishEvent(new UserDeleteEvent(id));
+		
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
+		eventService.publishEvent(event);
+
 		keycloakClient.deleteUser(user.getKeycloakId());
 	}
 
@@ -261,6 +276,9 @@ public class UserServiceImpl implements UserService {
 		if (userDb == null) {
 			throw new EntityNotFoundException(User.class, user.getId());
 		}
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.UPDATE_USER_EVENT, user.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
+		eventService.publishEvent(event);
+
 		return updateUserOnAllSystems(userDb, user);
 	}
 	

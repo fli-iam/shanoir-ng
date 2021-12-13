@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +37,12 @@ public interface StudyUserService {
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	boolean hasOneStudyToImport();
+
+	/**
+	 * Deletes all study_user in study microservice when deleting a user.
+	 * @param eventAsString
+	 * @throws AmqpRejectAndDontRequeueException
+	 */
+	void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
 
 }
