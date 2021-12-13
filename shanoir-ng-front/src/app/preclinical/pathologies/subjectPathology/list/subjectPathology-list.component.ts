@@ -12,18 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, Input, ViewChild, forwardRef, EventEmitter} from '@angular/core'
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import {Component} from '@angular/core'
 
 import { SubjectPathology } from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
-import { TableComponent } from '../../../../shared/components/table/table.component';
-import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ShanoirError } from '../../../../shared/models/error.model';
-import { ServiceLocator } from '../../../../utils/locator.service';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -32,11 +26,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'subject-pathology-list',
     templateUrl: 'subjectPathology-list.component.html',
     providers: [
-       { 
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SubjectPathologiesListComponent),
-          multi: true
-        },
         SubjectPathologyService
     ]
 })

@@ -12,17 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Entity } from "../../shared/components/entity/entity.abstract";
 import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
 import { Dataset } from "./dataset.model";
 
-export class DatasetProcessing {
+export class DatasetProcessing extends Entity {
 
     id: number;
     comment: string;
     datasetProcessingType: DatasetProcessingType;
-    inputDatasets: Dataset[];
-    outputDatasets: Dataset[];
+    inputDatasets: Dataset[] = [];
+    outputDatasets: Dataset[] = [];
 	processingDate: Date;
     studyId: number;
-    
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
@@ -66,6 +67,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String SUBJECT = "subject";
 	
 	private static final String EXAMINATION = "examination";
+	
+	private static final String FAILURE_MESSAGE = "failureMessage";
 	
 	private static final String EXAM_DATE = "exam_date";
 
@@ -426,8 +429,45 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
+	public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
+        // Find user that imported
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+		for (User admin : admins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(USERNAME, u.getUsername());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SUBJECT, generatedMail.getSubjectName());
+				variables.put(EXAMINATION, examDetail);
+				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminImportFailed", variables);
+				LOG.info(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			mailSender.send(messagePreparator);
+		}
+	}
+
 	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
         // Find user that edited the study
+    	// We may come from challenge, the user then does not exists.
         User user = userRepository.findById(email.getUserId()).orElse(null);
 
 		// Get the list of recipients
@@ -439,13 +479,13 @@ public class EmailServiceImpl implements EmailService {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
-				messageHelper.setCc(user.getEmail());
+				messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
 				messageHelper.setTo(studyAdmin.getEmail());
 				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
 				variables.put(FIRSTNAME, studyAdmin.getFirstName());
 				variables.put(LASTNAME, studyAdmin.getLastName());
-				variables.put(EMAIL, user.getEmail());
+				variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
 				variables.put(STUDY_NAME, email.getStudyName());
 				variables.put(STUDY_USERS, newStudyUsers);
 				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());

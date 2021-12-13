@@ -56,6 +56,7 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSServiceImpl;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -141,6 +142,9 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private RabbitTemplate rabbitTemplate;
+	
+	@MockBean
+	private ImporterService importerService;
 
 	private Subject subject = new Subject(3L, "name");
 	private Study study = new Study(1L, "studyName");

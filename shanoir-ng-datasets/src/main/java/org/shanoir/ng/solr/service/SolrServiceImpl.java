@@ -50,7 +50,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author yyao
@@ -111,57 +114,20 @@ public class SolrServiceImpl implements SolrService {
 
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
-		Iterator<ShanoirMetadata> docIt = documents.iterator();
-
-		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
-
-		while (docIt.hasNext()) {
-			ShanoirMetadata shanoirMetadata = docIt.next();
-
-			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
-
-			solrDocuments.add(doc);
-		}
-
-		List<SubjectStudy> subjstuds = Utils.toList(subjectStudyRepo.findAll());
-
-		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
-
-		for (SubjectStudy subjstud : subjstuds) {
-			if (tags.get(subjstud.getStudy().getId()) == null) {
-				tags.put(subjstud.getStudy().getId(), new HashMap<>());
-			}
-			tags.get(subjstud.getStudy().getId()).put(subjstud.getSubject().getName(), subjstud.getTags() != null ? subjstud.getTags() : Collections.emptyList());
-		}
-
-		// Update tags
-		for (ShanoirSolrDocument doc : solrDocuments) {
-			if (doc != null && tags != null && tags.get(doc.getStudyId()) != null) {
-				List<Tag> list = tags.get(doc.getStudyId()).get(doc.getSubjectName());
-				if (list != null && !list.isEmpty()) {
-					doc.setTags(list.stream().map(Tag::getName).collect(Collectors.toList()));
-				}				
-			}
-		}
-
-		this.addAllToIndex(solrDocuments);
-	}
-
-	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
-		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
-				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
-				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
+		indexDocumentsInSolr(documents);
 	}
 
 	@Transactional
 	@Override
-	public void indexDataset(Long datasetId) {
-		// delete dataset if existing
-		solrRepository.deleteByDatasetId(datasetId);
-
+	public void indexDatasets(List<Long> datasetIds) {
 		// Get all associated datasets and index them to solr
+		List<ShanoirMetadata> shanoirMetadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
+		indexDocumentsInSolr(shanoirMetadatas);
+	}
+
+	@Override
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
+	public void indexDataset(Long datasetId) {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
@@ -185,7 +151,53 @@ public class SolrServiceImpl implements SolrService {
 		solrRepository.save(doc);
 	}
 
-	@Transactional
+	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) {
+		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
+
+		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
+
+		while (docIt.hasNext()) {
+			ShanoirMetadata shanoirMetadata = docIt.next();
+			ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
+			solrDocuments.add(doc);
+		}
+
+		if (CollectionUtils.isEmpty(solrDocuments)) {
+			return;
+		}
+
+		List<SubjectStudy> subjstuds = Utils.toList(subjectStudyRepo.findAll());
+
+		Map<Long, Map<String, List<Tag>>> tags = new HashMap<>();
+
+		for (SubjectStudy subjstud : subjstuds) {
+			if (tags.get(subjstud.getStudy().getId()) == null) {
+				tags.put(subjstud.getStudy().getId(), new HashMap<>());
+			}
+			tags.get(subjstud.getStudy().getId()).put(subjstud.getSubject().getName(), subjstud.getTags() != null ? subjstud.getTags() : Collections.emptyList());
+		}
+		
+		// Update tags
+		for (ShanoirSolrDocument doc : solrDocuments) {
+			if (doc != null && tags != null && tags.get(doc.getStudyId()) != null) {
+				List<Tag> list = tags.get(doc.getStudyId()).get(doc.getSubjectName());
+				if (list != null && !list.isEmpty()) {
+					doc.setTags(list.stream().map(Tag::getName).collect(Collectors.toList()));
+				}				
+			}
+		}
+
+		this.addAllToIndex(solrDocuments);
+	}
+
+	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
+		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
+				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
+				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
+				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
+	}
+
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
 		SolrResultPage<ShanoirSolrDocument> result = null;
@@ -223,7 +235,7 @@ public class SolrServiceImpl implements SolrService {
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
 					|| order.getProperty().equals("tags")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-						order.getDirection(), order.getProperty().concat("_str"));
+						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), "datasetId");

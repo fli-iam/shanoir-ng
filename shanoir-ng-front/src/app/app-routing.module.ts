@@ -25,6 +25,8 @@ import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
+import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { HomeComponent } from './home/home.component';
@@ -33,6 +35,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -51,6 +54,7 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
+import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
@@ -80,6 +84,7 @@ import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-
 import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
+import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
 
 let routes: Routes = [
@@ -136,6 +141,10 @@ let routes: Routes = [
                 component: QueryPacsComponent,
                 canActivate: [CanImportFromPACSGuard]
             }, {
+                path: 'processed-dataset',
+                component: ImportProcessedDatasetComponent,
+                data: {importMode: 'Processed Dataset'}
+            }, {
                 path: 'series',
                 component: SelectSeriesComponent
             }, {
@@ -148,14 +157,18 @@ let routes: Routes = [
                 path: 'eegcontext',
                 component: EegClinicalContextComponent
             }, {
+                path: 'processed-dataset-context',
+                component: ProcessedDatasetClinicalContextComponent
+            }, {
                 path: 'finish',
                 component: FinishImportComponent
-            }
-            , {
+            }, {
                 path: 'eegfinish',
                 component: FinishEegImportComponent
-            }
-            , {
+            }, {
+                path: 'processed-dataset-finish',
+                component: FinishProcessedDatasetImportComponent
+            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent
             }, {
@@ -290,6 +303,30 @@ let routes: Routes = [
     {
         path: 'dataset/create',
         component: DatasetComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'dataset-processing',
+        redirectTo: 'dataset-processing/list',
+    },
+    {
+        path: 'dataset-processing/list',
+        component: DatasetProcessingListComponent,
+    },
+    {
+        path: 'dataset-processing/details/:id',
+        component: DatasetProcessingComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'dataset-processing/edit/:id',
+        component: DatasetProcessingComponent,
+        data: { mode: 'edit' },
+        canActivate: [AuthAdminGuard],
+    },
+    {
+        path: 'dataset-processing/create',
+        component: DatasetProcessingComponent,
         data: { mode: 'create' },
     },
     {
