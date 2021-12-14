@@ -42,7 +42,7 @@ export class SolrCriterionComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.allFacetPage && this.allFacetPage) {
-            this.sortAllAlphabetically();
+            this.sortAllByNumber();
             this.loaded = true;
         }
         if (changes.currentFacetPage && this.currentFacetPage && this.allFacetPage) {
@@ -52,7 +52,7 @@ export class SolrCriterionComponent implements OnChanges {
     }
 
     update() {
-        //this.sortAll();
+        this.sortAllByNumber();
         this.filter();
         this.displayedFacets = [];
         this.selectedFacets = [];
