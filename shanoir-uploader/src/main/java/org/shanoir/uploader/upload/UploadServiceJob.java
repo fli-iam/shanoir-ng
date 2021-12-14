@@ -14,17 +14,13 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,7 +64,7 @@ public class UploadServiceJob implements Job {
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) {
-		final List<File> folders = ShanoirUtil.listFolders(workFolder);
+		final List<File> folders = Util.listFolders(workFolder);
 		logger.debug("Found " + folders.size() + " folders in work folder.");
 		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			final File folder = (File) foldersIt.next();
@@ -95,7 +91,7 @@ public class UploadServiceJob implements Job {
 			final File uploadJobFile, CurrentNominativeDataController currentNominativeDataController) {
 		NominativeDataUploadJobManager nominativeDataUploadJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
-		final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
+		final Collection<File> files = Util.listFiles(folder, null, false);
 		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
 			// do not transfer nominativeDataUploadJob as only for display in ShUp
@@ -170,12 +166,12 @@ public class UploadServiceJob implements Job {
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
+			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
 			uploadJob.setUploadState(UploadState.ERROR);
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
+			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
 			logger.error("An error occured during upload : " + e.getMessage());
 		}

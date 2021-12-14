@@ -3,7 +3,7 @@ package org.shanoir.uploader.dicom.query;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.shanoir.util.IShanoirConfigBean;
+import org.shanoir.uploader.utils.IShanoirConfigBean;
 
 /**
  * 
