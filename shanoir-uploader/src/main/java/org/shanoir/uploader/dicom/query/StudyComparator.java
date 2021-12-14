@@ -3,8 +3,8 @@ package org.shanoir.uploader.dicom.query;
 import java.util.Comparator;
 import java.util.Map.Entry;
 
-import org.shanoir.dicom.model.DicomTreeNode;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * Dicom Study comparator based on their study date.
@@ -23,7 +23,7 @@ public class StudyComparator implements Comparator<Entry<String, DicomTreeNode>>
 		final String date2 = ((Study) study2.getValue()).getDescriptionMap().get("date");
 		if (date1 != null && !date1.equals("")) {
 			if (date2 != null && !date2.equals("")) {
-				return ShanoirUtil.convertStringDicomDateToDate(date1).compareTo(ShanoirUtil.convertStringDicomDateToDate(date2));
+				return Util.convertStringDicomDateToDate(date1).compareTo(Util.convertStringDicomDateToDate(date2));
 			} else {
 				return -1;
 			}

@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 
@@ -39,12 +39,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private String filePathDicomDir;
 
-	private Set<org.shanoir.dicom.importer.Serie> selectedSeries;
+	private Set<org.shanoir.uploader.dicom.Serie> selectedSeries;
 
 	private DicomDataTransferObject dicomData;
 	
 	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, final String filePathDicomDir,
-		final Set<org.shanoir.dicom.importer.Serie> selectedSeries, final DicomDataTransferObject dicomData) {
+		final Set<org.shanoir.uploader.dicom.Serie> selectedSeries, final DicomDataTransferObject dicomData) {
 		this.isFromPACS = isFromPACS;
 		this.dicomServerClient = dicomServerClient; // used with PACS import
 		if(!isFromPACS && filePathDicomDir != null) {

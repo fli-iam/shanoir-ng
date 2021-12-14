@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.query.Patient;
 import org.shanoir.uploader.dicom.query.Study;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class holds data received within the DICOM query,
@@ -95,11 +95,11 @@ public class DicomDataTransferObject {
 		// when the tree could display and select multiple patients
 		final String dicomBirthDate = patient.getDescriptionMap().get(BIRTH_DATE);
 		if (dicomBirthDate != null && !"".equals(dicomBirthDate)) {
-			birthDate = ShanoirUtil.convertStringDicomDateToDate(dicomBirthDate);
+			birthDate = Util.convertStringDicomDateToDate(dicomBirthDate);
 		}
 		final String name = patient.getDescriptionMap().get(NAME);
-		firstName = ShanoirUtil.computeFirstName(name);
-		lastName = ShanoirUtil.computeLastName(name);
+		firstName = Util.computeFirstName(name);
+		lastName = Util.computeLastName(name);
 		sex = patient.getDescriptionMap().get(SEX);
 		IPP = patient.getDescriptionMap().get(ID);
 
@@ -109,7 +109,7 @@ public class DicomDataTransferObject {
 		studyInstanceUID = study.getDescriptionMap().get(ID);
 		String dicomStudyDate = study.getDescriptionMap().get(DATE);
 		if (dicomStudyDate != null && !"".equals(dicomStudyDate)) {
-			studyDate = ShanoirUtil.convertStringDicomDateToDate(dicomStudyDate);
+			studyDate = Util.convertStringDicomDateToDate(dicomStudyDate);
 		} else if (mainWindow != null) {
 			logger.error("Study date could not be used for import.");
 			JOptionPane.showMessageDialog(mainWindow.frame,

@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -26,6 +25,7 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.upload.UploadJob;
 
 /**
  * This class implements the logic when the start import button is clicked.

@@ -12,13 +12,13 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.upload.UploadState;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

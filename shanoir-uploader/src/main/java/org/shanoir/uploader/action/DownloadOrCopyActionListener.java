@@ -94,7 +94,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
-		final Set<org.shanoir.dicom.importer.Serie> selectedSeries = mainWindow.getSAL().getSelectedSeries();
+		final Set<org.shanoir.uploader.dicom.Serie> selectedSeries = mainWindow.getSAL().getSelectedSeries();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, filePathDicomDir, selectedSeries, dicomData);
 		Thread thread = new Thread(runnable);
 		thread.start();

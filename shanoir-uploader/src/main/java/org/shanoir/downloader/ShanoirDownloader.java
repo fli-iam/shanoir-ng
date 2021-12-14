@@ -23,7 +23,6 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpResponse;
 import org.json.JSONException;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;

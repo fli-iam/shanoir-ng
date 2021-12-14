@@ -8,8 +8,8 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.Patient;
 import org.shanoir.uploader.dicom.query.Study;

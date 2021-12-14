@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
-import org.shanoir.dicom.importer.Serie;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 //import org.shanoir.dicom.query.DicomQueryHelper;
 //import org.shanoir.services.dicom.server.ConfigBean;
@@ -20,7 +19,7 @@ import org.shanoir.uploader.dicom.query.DicomQueryHelper;
 import org.shanoir.uploader.dicom.query.Echo;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class is the communication interface to the DICOM server.
@@ -153,7 +152,7 @@ public class DicomServerClient implements IDicomServerClient {
 		final List<DicomObject> list;
 		try{
 			String[] argsArray = dQH.buildCommand("-S", true, null, studyInstanceUID, seriesInstanceUID);
-			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + ShanoirUtil.arrayToString(argsArray)+"\n\n");
+			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + Util.arrayToString(argsArray)+"\n\n");
 			list = dcmqr.query(argsArray);
 			logger.debug("\n\n Dicom Query list:\n "+list.toString()+"\n");
 		} catch (final Exception e) {

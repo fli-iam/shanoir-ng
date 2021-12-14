@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.util.runtime.exec.StreamGobbler;
+import org.shanoir.uploader.utils.StreamGobbler;
 
 /**
  * This class is used for pseudonymization. Pseudonymization is a data management and

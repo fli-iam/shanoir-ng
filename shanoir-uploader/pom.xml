@@ -12,7 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>9</java.version>
+		<java.version>11</java.version>
 		<keycloak.version>13.0.1</keycloak.version>
 		<jackson.version>2.8.3</jackson.version>
 		<javax.activation.version>1.2.0</javax.activation.version>
@@ -73,14 +73,6 @@
 			        <artifactId>*</artifactId>
 			    </exclusion>
 			</exclusions>
-		</dependency>
-		<!-- dependency Shanoir -->
-		<dependency>
-			<groupId>org.shanoir</groupId>
-			<artifactId>shanoir</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/shanoir-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency Shanoir ng anonymization -->
 		<dependency>
@@ -181,8 +173,6 @@
 			<groupId>dcm4che2.tool</groupId>
 			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
 			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/dcm4che2-tool-dcmqr-custom-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency DCM4CHE tool dcmrcv -->
 		<dependency>

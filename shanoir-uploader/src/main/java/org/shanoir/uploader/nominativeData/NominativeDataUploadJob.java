@@ -3,7 +3,7 @@ package org.shanoir.uploader.nominativeData;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.shanoir.dicom.importer.UploadState;
+import org.shanoir.uploader.upload.UploadState;
 
 /**
  * This class contains Nominative date that will be displayed in the current

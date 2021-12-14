@@ -7,11 +7,11 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -29,6 +29,7 @@ import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 
