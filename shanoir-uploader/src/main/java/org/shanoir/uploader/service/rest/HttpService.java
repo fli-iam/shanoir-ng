@@ -200,11 +200,13 @@ public class HttpService {
 					.setSslContext(sslContextDev)
 					.setTlsVersions(TLS.V_1_2)
 					.build();
+			LOG.info("DEV SSLSocketFactory used.");
 		} else {
 			sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
 					.setHostnameVerifier(new CustomHostnameVerifier())
 					.setTlsVersions(TLS.V_1_2)
 					.build();
+			LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
 		}
 		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
 					.setSSLSocketFactory(sslSocketFactory)
@@ -213,9 +215,12 @@ public class HttpService {
 			final CloseableHttpClient httpClient = HttpClients.custom()
 					.setConnectionManager(connectionManager)
 					.setConnectionManagerShared(true)
-					.setProxy(proxyHost)
 					.setDefaultCredentialsProvider(credentialsProvider)
+					.setProxy(proxyHost)
 					.build();
+			LOG.info("CloseableHttpClient created with proxyHost: "
+					+ proxyHost.getHostName() + ":" + proxyHost.getPort()
+					+ " and credentialsProvider: " + credentialsProvider.toString() + ".");
 			return httpClient;			
 		} else {
 			if (proxyHost != null) {
@@ -224,12 +229,17 @@ public class HttpService {
 						.setConnectionManagerShared(true)
 						.setProxy(proxyHost)
 						.build();
+				LOG.info("CloseableHttpClient created with proxyHost: "
+						+ proxyHost.getHostName() + ":" + proxyHost.getPort()
+						+ " and without a credentialsProvider.");
 				return httpClient;			
 			} else {
 				final CloseableHttpClient httpClient = HttpClients.custom()
 						.setConnectionManager(connectionManager)
 						.setConnectionManagerShared(true)
 						.build();
+				LOG.info("CloseableHttpClient created without proxyHost"
+						+ " and without a credentialsProvider.");
 				return httpClient;			
 			}		
 		}
