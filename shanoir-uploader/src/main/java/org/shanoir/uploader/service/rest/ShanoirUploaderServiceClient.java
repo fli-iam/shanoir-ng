@@ -140,13 +140,16 @@ public class ShanoirUploaderServiceClient {
 	}
 
 	public static int testProxy(String testURL) throws IOException {
+		int code = 0;
 		long startTime = System.currentTimeMillis();
 		HttpService httpService = new HttpService(testURL);
 		try (CloseableHttpResponse response = httpService.get(testURL)) {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
-			logger.info("testProxy: " + elapsedTime + "ms");
-			int code = response.getCode();
+			logger.info("Proxy test with URL: " + testURL + ", duration: " + elapsedTime + "ms.");
+			if (response != null) {
+				code = response.getCode();
+			}
 			httpService.closeHttpClient();
 			return code;
 		}
