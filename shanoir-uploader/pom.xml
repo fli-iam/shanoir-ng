@@ -173,6 +173,8 @@
 			<groupId>dcm4che2.tool</groupId>
 			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
 			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/dcm4che2-tool-dcmqr-custom-1.0.0.jar</systemPath>
 		</dependency>
 		<!-- dependency DCM4CHE tool dcmrcv -->
 		<dependency>
