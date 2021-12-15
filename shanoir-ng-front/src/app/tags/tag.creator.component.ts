@@ -11,15 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, Input, forwardRef, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core'; // First, import Input
-
-import { Tag } from "./tag.model";
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { Study } from '../studies/shared/study.model';
-import { AbstractInput } from '../shared/form/input.abstract';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { AbstractInput } from '../shared/form/input.abstract';
+import { Study } from '../studies/shared/study.model';
+import { Tag } from './tag.model';
+
 
 export type Mode =  "view" | "edit" | "create";
 @Component({
@@ -35,7 +34,7 @@ export type Mode =  "view" | "edit" | "create";
 ]
 })
 
-export class TagCreatorComponent extends AbstractInput implements OnChanges {
+export class TagCreatorComponent extends AbstractInput {
     @Input() study: Study;
     @Input() mode: Mode;
     @Output() onChange: EventEmitter<any> = new EventEmitter();
@@ -98,12 +97,6 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
             (this.model as Tag[]).forEach(tag => 
                 this.displayedTags.add({tag: tag, darkFont: this.getFontColor(tag.color)})
             );
-        }
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.study) {
-            console.log(this.study.subjectStudyList)
         }
     }
 

@@ -233,13 +233,12 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
-
+		
 		updateStudyUsers(studyDb, study);
 
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
-
 		Study updatedStudy = studyRepository.save(studyDb);
 		
 		if (study.getSubjectStudyList() != null) {
@@ -259,17 +258,19 @@ public class StudyServiceImpl implements StudyService {
 	private Study updateTags(Study study, Study studyDb) {
 		if (study.getSubjectStudyList() != null) {
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-				for (Tag tag : subjectStudy.getTags()) {
-					if (tag.getId() == null) {
-						Tag dbTag = studyDb.getTags().stream().filter(upTag -> 
-								upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-						).findFirst().orElse(null);
-						if (dbTag != null) {
-							tag.setId(dbTag.getId());							
-						} else {
-							throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+				if (subjectStudy.getTags() != null) {
+					for (Tag tag : subjectStudy.getTags()) {
+						if (tag.getId() == null) {
+							Tag dbTag = studyDb.getTags().stream().filter(upTag -> 
+							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
+									).findFirst().orElse(null);
+							if (dbTag != null) {
+								tag.setId(dbTag.getId());							
+							} else {
+								throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
+							}
 						}
-					}
+					}					
 				}
 			}	
 		} 

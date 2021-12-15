@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { IdName } from '../../shared/models/id-name.model';
+import { Id } from '../../shared/models/id.model';
 import { SimpleStudyDTO } from '../../studies/shared/study.dto.model';
-import { Tag } from '../../tags/tag.model';
+import { SubjectStudyTagDTO, Tag } from '../../tags/tag.model';
 import { SubjectStudy } from './subject-study.model';
 import { SubjectType } from './subject.types';
 
@@ -26,6 +27,7 @@ export class SubjectStudyDTO {
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
+    subjectStudyTags: SubjectStudyTagDTO[];
     tags: Tag[];
 
     constructor(subjectStudy: SubjectStudy) {
@@ -36,6 +38,6 @@ export class SubjectStudyDTO {
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
-        this.tags = subjectStudy.tags;
+        this.subjectStudyTags = subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag));
     }
 }

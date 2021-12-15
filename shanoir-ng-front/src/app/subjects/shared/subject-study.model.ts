@@ -11,19 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { Study } from '../../studies/shared/study.model';
+import { SimpleStudy } from '../../studies/shared/study.model';
+import { Tag } from '../../tags/tag.model';
 import { Subject } from './subject.model';
 import { SubjectType } from './subject.types';
-import { Tag } from '../../tags/tag.model';
+
 
 export class SubjectStudy {
     id: number;
     examinations: SubjectExamination[];
     subject: Subject;
     subjectId: number;
-    study: Study;
+    study: SimpleStudy;
     studyId: number;
     subjectStudyIdentifier: string;
     subjectType: SubjectType;

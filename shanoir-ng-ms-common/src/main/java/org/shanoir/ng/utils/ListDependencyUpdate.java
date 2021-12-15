@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 public class ListDependencyUpdate {
@@ -52,8 +55,9 @@ public class ListDependencyUpdate {
 		for (T newEntity : newValues) {
 			if (newEntity.getId() != null) {
 				T updated = oldValuesMap.get(newEntity.getId());
-				if (updated == null) throw new IllegalArgumentException("The new list contains an entity with an id that did not exist previously.");
-				BeanUtils.copyProperties(newEntity, updated, newEntity.getClass());
+				if (updated != null) {
+					BeanUtils.copyProperties(newEntity, updated, newEntity.getClass());					
+				}
 			} else {
 				oldValues.add(newEntity);
 			}
@@ -61,6 +65,4 @@ public class ListDependencyUpdate {
 		
 	}
 	
-	
-
 }

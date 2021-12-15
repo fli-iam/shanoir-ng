@@ -49,6 +49,7 @@ export class StudyNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
+                    console.log(3, subjectStudy);
                     return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED);
                 });
                 let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {

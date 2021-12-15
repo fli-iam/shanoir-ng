@@ -58,3 +58,16 @@ export class Study extends Entity {
         }
     }
 }
+export class SimpleStudy {
+    id: number;
+    name: string;
+    tags: Tag[];
+    studyUserList: StudyUser[];
+
+    constructor(study: Study) {
+        this.id = study.id ? study.id : null;
+        this.name = study.name;
+        this.tags = study.tags;
+        this.studyUserList = study.studyUserList;
+    }
+}

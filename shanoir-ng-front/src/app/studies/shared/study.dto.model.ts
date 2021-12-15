@@ -13,7 +13,7 @@
  */
 
 import { Tag } from "../../tags/tag.model";
-import { Study } from "./study.model";
+import { SimpleStudy, Study } from "./study.model";
 
 
 export class SimpleStudyDTO {
@@ -21,7 +21,7 @@ export class SimpleStudyDTO {
     name: string;
     tags: Tag[];
 
-    constructor(study: Study) {
+    constructor(study: Study | SimpleStudy) {
         this.id = study.id ? study.id : null;
         this.name = study.name;
         this.tags = study.tags;
