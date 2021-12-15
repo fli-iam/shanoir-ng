@@ -161,7 +161,7 @@ public class HttpService {
 		// In case of proxy: generate credentials provider with correct host
 		HttpHost proxyHost = null;
 		BasicCredentialsProvider credentialsProvider = null;
-		if (serviceConfiguration.isProxyEnable()) {
+		if (serviceConfiguration.isProxyEnabled()) {
 			// Host and port are given
 			if (serviceConfiguration.getProxyHost() != null && serviceConfiguration.getProxyPort() != null) {
 				proxyHost = new HttpHost(serviceConfiguration.getProxyHost(),
