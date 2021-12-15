@@ -101,6 +101,10 @@ public class ShanoirUploaderServiceClient {
 
 	private Map<Integer, String> apiResponseMessages;
 
+	/**
+	 * Constructor: used after profile has been selected to init one
+	 * HttpService with the final server's URL.
+	 */
 	public ShanoirUploaderServiceClient() {
 		
 		apiResponseMessages = new HashMap<Integer, String>();
@@ -139,6 +143,15 @@ public class ShanoirUploaderServiceClient {
 		logger.info("ShanoirUploaderService successfully initialized.");
 	}
 
+	/**
+	 * We use separate HttpService here, as the proxy test comes before the profile
+	 * selection, where we learn later the final address of the Shanoir server to
+	 * communicate with.
+	 * 
+	 * @param testURL
+	 * @return
+	 * @throws IOException
+	 */
 	public static int testProxy(String testURL) throws IOException {
 		int code = 0;
 		long startTime = System.currentTimeMillis();
