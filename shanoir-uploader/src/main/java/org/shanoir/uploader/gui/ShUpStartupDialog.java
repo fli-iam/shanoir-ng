@@ -132,7 +132,7 @@ public class ShUpStartupDialog extends JFrame {
 		ServiceConfiguration sc = ServiceConfiguration.getInstance();
 		additionalPanel.removeAll();
 		proxyPanel.httpConnect.setEnabled(true);
-		proxyPanel.enableProxyCB.setSelected(sc.isProxyEnable());
+		proxyPanel.enableProxyCB.setSelected(sc.isProxyEnabled());
 		proxyPanel.secureSslProxyCB.setSelected(sc.isProxySecure());
 		String proxyHost = sc.getProxyHost();
 		if (proxyHost != null)
