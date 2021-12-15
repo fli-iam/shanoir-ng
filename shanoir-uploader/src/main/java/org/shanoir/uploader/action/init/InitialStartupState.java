@@ -54,7 +54,8 @@ public class InitialStartupState implements State {
 		initShanoirUploaderFolder();
 		initLogging();
 		logger.info("Start running of ShanoirUploader...");
-		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);	
+		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
+		logger.info("Release Date: " + ShUpConfig.RELEASE_DATE);
 		logger.info(System.getProperty("java.vendor"));
 		logger.info(System.getProperty("java.vendor.url"));
 		logger.info(System.getProperty("java.version"));
