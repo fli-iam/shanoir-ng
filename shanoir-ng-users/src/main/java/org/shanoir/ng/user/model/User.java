@@ -91,6 +91,7 @@ public class User extends HalEntity implements UserDetails {
 	private Boolean extensionRequestDemand;
 	
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	@NotNull
 	private Boolean firstExpirationNotificationSent;
 	
 	@NotBlank
@@ -111,6 +112,7 @@ public class User extends HalEntity implements UserDetails {
 	private Role role;
 	
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	@NotNull
 	private Boolean secondExpirationNotificationSent;
 
 	@NotBlank
