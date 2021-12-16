@@ -88,6 +88,7 @@ public class User extends HalEntity implements UserDetails {
 	private ExtensionRequestInfo extensionRequestInfo;
 
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	@NotNull
 	private Boolean extensionRequestDemand;
 	
 	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
