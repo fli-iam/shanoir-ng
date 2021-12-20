@@ -32,6 +32,11 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import springfox.documentation.spring.web.json.Json;
+
 /**
  * @author yyao
  *
@@ -218,8 +223,15 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		result.addAll(eegQuery.getResultList());
 		result.addAll(genericQuery.getResultList());
 		result.addAll(processedQuery.getResultList());
-
+		
+		List<ShanoirMetadata> processedResult = processedQuery.getResultList();
+		
+		if (!processedResult.isEmpty()) {
+			return processedResult.get(0);
+		}
+		
 		if (result.size() != 1) {
+			System.err.println("Solr query returned multiple result for a single query. Please check database consistency.");
 			return null;
 		}
 		
