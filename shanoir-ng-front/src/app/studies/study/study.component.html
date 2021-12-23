@@ -227,6 +227,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</div>
 						</span>
 					</li>
+					<li *ngIf="mode != 'view'">
+					   <label></label>
+					   <ol>
+					       <legend 
+			                class="clickable"
+			                (click)="openPrefix = !openPrefix">
+			                 <i class="fas fa-chevron-down"></i> Subject prefix for centers <span class="optional">(optional)</span>
+			               </legend>
+				             <div *ngIf="openPrefix" @slideDown>
+	  					   	     <li *ngFor="let studyCenter of study.studyCenterList">
+		                            <p>{{studyCenter.center.name + ": "}}
+		                            <span>
+		                                <input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" [ngModelOptions]="{standalone: true}"/>
+		                            </span>
+		                            </p>
+		                         </li>
+		                        </div>
+                        </ol>
+					</li>
 				</ol>
 			</fieldset>
 			<fieldset>

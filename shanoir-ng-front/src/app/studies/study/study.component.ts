@@ -72,6 +72,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    
+    public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
     userOptions: Option<User>[];

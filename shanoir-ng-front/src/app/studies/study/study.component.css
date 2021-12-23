@@ -12,3 +12,4 @@ dataset-download { margin-left: 5px; }
 .dl-button { border: none; margin-left: 7px; }
 .files { margin-top: 10px; }
 toggle-switch { margin: 0 7px; }
+.clickable { cursor: pointer; }
