@@ -101,7 +101,7 @@ import org.springframework.web.util.UriUtils;
 import io.swagger.annotations.ApiParam;
 
 @Controller
-public class DatasetApiController implements DatasetApi{
+public class DatasetApiController implements DatasetApi {
 
 	private static final String EEG = "eeg";
 
