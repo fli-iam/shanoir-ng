@@ -9,7 +9,6 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { ModelObject } from './modelObject';
 import { ParameterType } from './parameterType';
 
 export interface PipelineParameter { 
@@ -20,6 +19,6 @@ export interface PipelineParameter {
     /**
      * Default value. It must be consistent with the parameter type.
      */
-    defaultValue?: ModelObject;
+    defaultValue?: any; // @alaeessaki not described in swagger in java client, it's described as an Object, but i think to avoid errors for now i'll make it any. TODO specify the tyoe.
     description?: string;
 }

@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-export interface Execution { 
+export class Execution { 
     /**
      * execution id. Must always be present in responses.
      */
@@ -30,7 +30,7 @@ export interface Execution {
     /**
      * The status of the execution. Must always be present in responses.
      */
-    readonly status?: Execution.StatusEnum;
+    readonly status?: StatusEnum;
     /**
      * Represents the input as a key/value object. The types should respect the parameters of the pipeline used for the execution.
      */
@@ -50,16 +50,17 @@ export interface Execution {
      */
     readonly endDate?: number;
 }
-export namespace Execution {
-    export type StatusEnum = 'Initializing' | 'Ready' | 'Running' | 'Finished' | 'InitializationFailed' | 'ExecutionFailed' | 'Unknown' | 'Killed';
-    export const StatusEnum = {
-        Initializing: 'Initializing' as StatusEnum,
-        Ready: 'Ready' as StatusEnum,
-        Running: 'Running' as StatusEnum,
-        Finished: 'Finished' as StatusEnum,
-        InitializationFailed: 'InitializationFailed' as StatusEnum,
-        ExecutionFailed: 'ExecutionFailed' as StatusEnum,
-        Unknown: 'Unknown' as StatusEnum,
-        Killed: 'Killed' as StatusEnum
-    };
-}
+export type StatusEnum = 'Initializing' | 'Ready' | 'Running' | 'Finished' | 'InitializationFailed' | 'ExecutionFailed' | 'Unknown' | 'Killed';
+
+// export namespace Execution {
+//     export const StatusEnum = {
+//         Initializing: 'Initializing' as StatusEnum,
+//         Ready: 'Ready' as StatusEnum,
+//         Running: 'Running' as StatusEnum,
+//         Finished: 'Finished' as StatusEnum,
+//         InitializationFailed: 'InitializationFailed' as StatusEnum,
+//         ExecutionFailed: 'ExecutionFailed' as StatusEnum,
+//         Unknown: 'Unknown' as StatusEnum,
+//         Killed: 'Killed' as StatusEnum
+//     };
+// }

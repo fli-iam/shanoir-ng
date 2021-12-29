@@ -454,7 +454,6 @@ import { TagInputComponent } from './tags/tag.input.component';
     	ImportBrukerService,
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-        CarminClientService,
 	BreadcrumbsService,
         Router,
         GlobalService,
