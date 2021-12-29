@@ -33,5 +33,3 @@ services:
 
 networks:
   shanoir_ng_network:
-
-
