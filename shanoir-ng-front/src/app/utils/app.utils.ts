@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -118,7 +118,7 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // carmin
-// TODO change the url !!
+// TODO change the url
 export const CARMIN_BASE_URL : string = "https://shanoir-ng-nginx/vip/vip-portal-2.1-SNAPSHOT-local/rest";
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
@@ -137,13 +137,13 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string){
-    if (navigator.msSaveBlob) {
+    if (navigator.msSaveBlob) { 
         // IE 10+
         navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute
-        if (link.download !== undefined)
+        if (link.download !== undefined) 
         {
             var url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
@@ -265,4 +265,4 @@ export function deepEquals(x, y) {
       }
       return true;
     }
-  };
+};
