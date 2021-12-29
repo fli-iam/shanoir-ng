@@ -44,7 +44,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -59,8 +58,6 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.carmin.GetPathResponse;
-import org.shanoir.ng.dataset.model.carmin.UploadData;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -104,7 +101,7 @@ import org.springframework.web.util.UriUtils;
 import io.swagger.annotations.ApiParam;
 
 @Controller
-public class DatasetApiController implements DatasetApi, CarminDataApi {
+public class DatasetApiController implements DatasetApi{
 
 	private static final String EEG = "eeg";
 
@@ -577,40 +574,6 @@ public class DatasetApiController implements DatasetApi, CarminDataApi {
 			FileUtils.deleteQuietly(zipFile);
 		}
 	}
-
-	// CARMIN DATA
-	@Override
-	public ResponseEntity<?> getPath(@ApiParam(value = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @ApiParam(value = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
-			,allowableValues = "properties, exists, list, md5, content", defaultValue = "content") @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action, HttpServletResponse response) throws IOException, RestServiceException {
-		// TODO implement those actions
-		switch (action){
-			case "exists":
-			case "list":
-			case "md5":
-			case "properties":
-				return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
-			case "content":{
-				downloadDatasetById(Long.parseLong(completePath),null, DCM, response);
-				return new ResponseEntity<Void>(HttpStatus.OK);
-			}
-		}
-		return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-	}
-
-	@Override
-	public ResponseEntity<org.shanoir.ng.dataset.model.carmin.Path> uploadPath(@ApiParam(value = "The complete path on which to upload data. It can contain non-encoded slashes.", required=true) @PathVariable("completePath") String completePath, @ApiParam(value = "") @Valid @RequestBody UploadData body) {
-		// TODO To implement
-		return new ResponseEntity<org.shanoir.ng.dataset.model.carmin.Path>(HttpStatus.NOT_IMPLEMENTED);
-	}
-
-	@Override
-	public ResponseEntity<Void> deletePath(@ApiParam(value = "The complete path to delete. It can contain non-encoded slashes.", required=true) @PathVariable("completePath") String completePath) {
-		// TODO to implement
-		return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
-	}
-
-
-
 
 	/**
 	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
