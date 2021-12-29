@@ -14,11 +14,10 @@ version: '3'
 services:
 
   nginx:
-    environment:
+    environment: 
       - SHANOIR_DEV=TRUE
     depends_on:
       - "front-dev"
-
   front-dev:
     container_name: front-dev
     build: ./docker-compose/front-dev
@@ -30,7 +29,6 @@ services:
     tty: true
     networks:
       - shanoir_ng_network
-
 networks:
   shanoir_ng_network:
       

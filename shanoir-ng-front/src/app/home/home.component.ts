@@ -54,15 +54,13 @@ export class HomeComponent {
             private studyService: StudyService,
             private keycloakService: KeycloakService,
             private userService: UserService,
-            private taskService: TaskService            
-            ) {
+            private taskService: TaskService) {
         //this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
         this.load();
     }
 
     load() {
-
         this.studyService.getMyDUA().then(duas => {
             this.challengeDua = null;
             this.notifications = null;
