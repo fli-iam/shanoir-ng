@@ -17,11 +17,12 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends CrudRepository<Study, Long> {
+public interface StudyRepository extends JpaRepository<Study, Long> {
 
 	/**
 	 * Get all studies

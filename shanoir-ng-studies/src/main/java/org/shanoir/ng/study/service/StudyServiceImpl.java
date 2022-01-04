@@ -44,6 +44,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -188,7 +189,6 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
-		boolean updateStudyValue = false;
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
 		}
@@ -198,9 +198,6 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setEndDate(study.getEndDate());
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			studyDb.setChallenge(study.isChallenge());
-		}
-		if (!study.getName().equals(studyDb.getName())) {
-			updateStudyValue = true;
 		}
 		studyDb.setName(study.getName());
 		studyDb.setStudyStatus(study.getStudyStatus());
@@ -239,15 +236,25 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
 			studyDb.setDataUserAgreementPaths(study.getDataUserAgreementPaths());
 		}
-		Study updatedStudy = studyRepository.save(studyDb);
+		
+		for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
+			for (SubjectStudyTag sstag : subjectStudy.getSubjectStudyTags()) {
+				System.out.println("#####################---" + sstag.getTag().getId() + " # " + sstag.getSubjectStudy().getId());
+			}
+		}
+		Study updatedStudy = studyRepository.saveAndFlush(studyDb);
+		
 		
 		if (study.getSubjectStudyList() != null) {
-			studyDb = updateTags(study, updatedStudy);
-			ListDependencyUpdate.updateWith(updatedStudy.getSubjectStudyList(), study.getSubjectStudyList());
-			for (SubjectStudy subjectStudy : updatedStudy.getSubjectStudyList()) {
-				subjectStudy.setStudy(updatedStudy);
+			studyDb = updateTags(study, studyDb);
+			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
+			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
+				subjectStudy.setStudy(studyDb);
+				for (SubjectStudyTag sstag : subjectStudy.getSubjectStudyTags()) {
+					System.out.println("########################" + sstag.getTag().getId() + " # " + sstag.getSubjectStudy().getId());
+				}
 			}
-			updatedStudy = studyRepository.save(studyDb);
+			updatedStudy = studyRepository.saveAndFlush(studyDb);
 		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(updatedStudy));
