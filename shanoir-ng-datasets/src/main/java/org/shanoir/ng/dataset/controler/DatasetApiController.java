@@ -44,7 +44,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -608,9 +607,6 @@ public class DatasetApiController implements DatasetApi, CarminDataApi {
 		// TODO to implement
 		return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
 	}
-
-
-
 
 	/**
 	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
