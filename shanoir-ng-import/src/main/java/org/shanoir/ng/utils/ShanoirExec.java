@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,9 @@ public class ShanoirExec {
 	@Value("${ms.url.dicom2nifti}")
 	private String dicomifierMsUrl;
 
+	@Value("${shanoir.conversion.converters.mriConverter}")
+	private String mriConverterPath;
+	
 	@Autowired
 	RestTemplate restTemplate;
 	
@@ -616,6 +620,16 @@ public class ShanoirExec {
 			return ERROR_DICOM2NIFTI_REQUEST;
 		}
 		return "Dicomifier: converting dicom to nifti, success.";
+	}
+
+	/**
+	 * This method converts a dicom using MRIConvert
+	 * @param inputFolder the nput folder
+	 * @param outputFolder the output folder
+	 * @return the olg to display.
+	 */
+	public String mriConverter(String inputFolder, String outputFolder) {
+		throw new NotImplementedException();
 	}
 
 }

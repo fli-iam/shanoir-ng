@@ -22,3 +22,5 @@ INSERT IGNORE INTO nifticonverter (id, name, nifti_converter_type, is_active) VA
 INSERT IGNORE INTO nifticonverter (id, name, nifti_converter_type, is_active) VALUES (5, 'mcverter_2.1.0',2,1);
 INSERT IGNORE INTO nifticonverter (id, name, nifti_converter_type, is_active) VALUES (6, 'dcm2niix',1,1);
 INSERT IGNORE INTO nifticonverter (id, name, nifti_converter_type, is_active) VALUES (7, 'dicomifier',5,1);
+INSERT IGNORE INTO nifticonverter (id, name, nifti_converter_type, is_active) VALUES (8, 'mriconverter',6,1);
+
