@@ -13,6 +13,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
+/**
+ * @author Alae Es-saki
+ */
+
 @Api(value = "carmin-data")
 public interface CarminDataApi {
 
