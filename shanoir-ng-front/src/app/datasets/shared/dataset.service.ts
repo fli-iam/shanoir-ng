@@ -102,25 +102,27 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         }
     }
 
-    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent, callback?) {
+    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent): Promise<HttpEvent<any>> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-        this.subscribtions.push(
-           this.http.post(
-           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
+        
+        let postResponse: Observable<HttpEvent<any>> = this.http.post(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
                 reportProgress: true,
                 observe: 'events',
                 responseType: 'blob'
-           }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar, callback),
-            error =>  {
-                this.errorService. handleError(error);
-                progressBar.progress = 0;
-                if (callback) {
-                    callback();
+        });
+        this.subscribtions.push(
+            postResponse.subscribe(
+                (event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+                error =>  {
+                    this.errorService. handleError(error);
+                    progressBar.progress = 0;
                 }
-            })
-         );
+            )
+        );
+        return postResponse.toPromise();
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string, progressBar: LoadingBarComponent) {
