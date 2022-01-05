@@ -51,8 +51,8 @@ public class ShanoirEventsService {
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
 	private void deletePeriodically( ) {
 		Date now = new Date();
-		Long nowMinusSevenDays = now.getTime() - DateUtils.MILLIS_PER_DAY * 180;
-		repository.deleteByLastUpdateBefore(new Date(nowMinusSevenDays));
+		Long nowMinusOneYear = now.getTime() - DateUtils.MILLIS_PER_DAY * 361;
+		repository.deleteByLastUpdateBefore(new Date(nowMinusOneYear));
 	}
 
 	/**
