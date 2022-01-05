@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import io.jsonwebtoken.lang.Collections;
+
 /**
  * Implementation of email service.
  * 
@@ -467,35 +469,59 @@ public class EmailServiceImpl implements EmailService {
 
 	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
         // Find user that edited the study
+    	// We may come from challenge, the user then does not exists.
         User user = userRepository.findById(email.getUserId()).orElse(null);
 
-		// Get the list of recipients
-		List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
-		
-		List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
-		
-		for (User studyAdmin : studyAdmins) {
+        List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
+
+        if (!Collections.isEmpty(email.getRecipients())) {
+	        // Get the list of recipients
+			List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
+					
+			for (User studyAdmin : studyAdmins) {
+				MimeMessagePreparator messagePreparator = mimeMessage -> {
+					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+					messageHelper.setFrom(administratorEmail);
+					messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
+					messageHelper.setTo(studyAdmin.getEmail());
+					messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
+					final Map<String, Object> variables = new HashMap<>();
+					variables.put(FIRSTNAME, studyAdmin.getFirstName());
+					variables.put(LASTNAME, studyAdmin.getLastName());
+					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+					variables.put(STUDY_NAME, email.getStudyName());
+					variables.put(STUDY_USERS, newStudyUsers);
+					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+					LOG.info(content);
+					messageHelper.setText(content, true);
+				};
+				// Send the message
+				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+				mailSender.send(messagePreparator);
+			}
+        }
+
+		// Also send email to every added user
+		for (User studyUser : newStudyUsers) {
 			MimeMessagePreparator messagePreparator = mimeMessage -> {
 				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 				messageHelper.setFrom(administratorEmail);
-				messageHelper.setCc(user.getEmail());
-				messageHelper.setTo(studyAdmin.getEmail());
-				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
+				messageHelper.setTo(studyUser.getEmail());
+				messageHelper.setSubject("[Shanoir] Welcome to " + email.getStudyName());
 				final Map<String, Object> variables = new HashMap<>();
-				variables.put(FIRSTNAME, studyAdmin.getFirstName());
-				variables.put(LASTNAME, studyAdmin.getLastName());
-				variables.put(EMAIL, user.getEmail());
+				variables.put(FIRSTNAME, studyUser.getFirstName());
+				variables.put(LASTNAME, studyUser.getLastName());
 				variables.put(STUDY_NAME, email.getStudyName());
-				variables.put(STUDY_USERS, newStudyUsers);
-				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
-				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+				final String content = build("notifyUserAddedToStudy", variables);
 				LOG.info(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
-			LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+			LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
 			mailSender.send(messagePreparator);
 		}
 	}
+
 
 }

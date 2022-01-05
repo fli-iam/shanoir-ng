@@ -41,6 +41,8 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 @Entity
 public class MrDataset extends Dataset {
 
+	public static final String datasetType = "Mr";
+
 	/**
 	 * UID
 	 */

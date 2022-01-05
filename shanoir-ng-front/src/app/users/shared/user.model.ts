@@ -16,6 +16,7 @@ import { AccountRequestInfo } from '../account-request-info/account-request-info
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { Role } from '../../roles/role.model';
+import { StudyUser } from '../../studies/shared/study-user.model';
 
 export class User extends Entity {
     id: number;
@@ -37,4 +38,5 @@ export class User extends Entity {
     username: string;
     valid: boolean;
     selected: boolean = false;
+    studyUserList: StudyUser[];
 }

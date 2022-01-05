@@ -44,7 +44,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     isAlreadyAnonymized: boolean;
     firstName: string = "";
     lastName: string = "";
-    private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    pattern: string = '[^:|<>&\/]+';
+    private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
 
     catOptions: Option<ImagedObjectCategory>[] = [
