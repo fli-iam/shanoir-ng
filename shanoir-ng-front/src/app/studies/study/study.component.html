@@ -277,25 +277,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode != 'view'">
+			<fieldset>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
-				<ol>
-					<li>
-						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
-						<span class="right-col">
-							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)" [options]="userOptions">
-							</select-box>
-						</span>
-					</li>
-					<li>
-						<shanoir-table #memberTable
-							[getPage]="getPage.bind(this)" 
-							[columnDefs]="columnDefs"
-							[editMode]="true"
-							(rowEdit)="onStudyUserEdit()">
-						</shanoir-table>
-					</li>
-				</ol>
+				<studyuser-list
+				    formControlName="studyUserList"
+					[(ngModel)]="study.studyUserList"
+					[users]="users"
+					[mode]="mode">					
+				</studyuser-list>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
 				<legend>Tree</legend>
