@@ -29,13 +29,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.shanoir.ng.solr.model.ShanoirMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import springfox.documentation.spring.web.json.Json;
 
 /**
  * @author yyao
@@ -47,6 +44,8 @@ import springfox.documentation.spring.web.json.Json;
 public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryCustom {
 	@PersistenceContext
 	private EntityManager em;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ShanoirMetadataRepositoryImpl.class);
 	
 	@Override
 	public List<ShanoirMetadata> findAllAsSolrDoc() {
@@ -231,7 +230,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		}
 		
 		if (result.size() != 1) {
-			System.err.println("Solr query returned multiple result for a single query. Please check database consistency.");
+			LOG.error("Solr query returned multiple result for a single query. Please check database consistency.");
 			return null;
 		}
 		
