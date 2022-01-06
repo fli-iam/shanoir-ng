@@ -27,7 +27,7 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
-	th.pager { padding: 0 5px; overflow: initial; }
+	th.pager { padding: 0 5px; overflow: initial;  text-align: center; }
 	th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
 		th.status-bar input { width: 150px; }
 		th.status-bar .options { border-right: 0; }
