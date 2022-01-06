@@ -168,7 +168,7 @@ public class NIfTIConverter extends HalEntity {
 	}
 
 	public boolean isMriConverter() {
-		return NIfTIConverterType.DICOMIFIER.equals(this.getNIfTIConverterType());
+		return NIfTIConverterType.MRICONVERTER.equals(this.getNIfTIConverterType());
 	}
 
 }
