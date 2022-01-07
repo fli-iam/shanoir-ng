@@ -192,7 +192,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
+				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
 				<ol>
 					<li>
 						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
@@ -203,48 +203,49 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true"></toggle-switch>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (userChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
+						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
 							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li *ngIf="mode != 'view' && !study.monoCenter">
-						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI">Current centers and investigators</label>
-						<span class="right-col study-center-list">
-							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
-							<div *ngFor="let studyCenter of study.studyCenterList">
-								{{studyCenter.center.name}}
-								<span class="icon icon-clickable" (click)="goToCenter(studyCenter.center.id)"><i class="fas fa-external-link-alt"></i></span>
-								<span *ngIf="study.studyCenterList.length > 1" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)"><i class="fas fa-ban"></i></span>
-							</div>
+					<li *ngIf="mode != 'view' && study.monoCenter">
+						<label>Subject prefix for this center</label>
+						<span class="right-col">
+							<input *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" [ngModelOptions]="{standalone: true}"/>
 						</span>
 					</li>
-					<li *ngIf="mode != 'view'">
-					   <label></label>
-					   <ol>
-					       <legend 
-			                class="clickable"
-			                (click)="openPrefix = !openPrefix">
-			                 <i class="fas fa-chevron-down"></i> Subject prefix for centers <span class="optional">(optional)</span>
-			               </legend>
-				             <div *ngIf="openPrefix" @slideDown>
-	  					   	     <li *ngFor="let studyCenter of study.studyCenterList">
-		                            <p>{{studyCenter.center.name + ": "}}
-		                            <span>
-		                                <input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" [ngModelOptions]="{standalone: true}"/>
-		                            </span>
-		                            </p>
-		                         </li>
-		                        </div>
-                        </ol>
+					<li *ngIf="mode != 'view' && !study.monoCenter">
+						<span class="study-center-list">
+							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
+							<table>
+								<tr>
+									<th>Center</th>
+									<th></th>
+									<th>Subject Prefix (optional) <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip></th>
+									<th></th>
+								</tr>
+								<tr *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+									<td>{{studyCenter.center.name}}</td>
+									<td class="icon icon-clickable center-link" (click)="goToCenter(studyCenter.center.id)">
+										<i class="fas fa-external-link-alt"></i>
+									</td>
+									<td>
+										{{study.name}}-<input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" (change)="form.get('studyCenterList').markAsDirty()" [ngModelOptions]="{standalone: true}"/>
+									</td>
+									<td *ngIf="study.studyCenterList.length > 1" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)">
+										<i class="fas fa-times"></i>
+									</td>
+								</tr>
+							</table>
+						</span>
 					</li>
 				</ol>
 			</fieldset>

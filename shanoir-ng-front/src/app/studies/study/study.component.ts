@@ -241,8 +241,9 @@ export class StudyComponent extends EntityComponent<Study> {
     }
     
     /** Center section management  **/
-    private onMonoMultiChange() {
-        if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
+    onMonoMultiChange() {
+        if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
+            this.study.studyCenterList = [this.study.studyCenterList[0]];
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
             if (option) this.selectedCenter = option.value; 
         }
@@ -259,9 +260,8 @@ export class StudyComponent extends EntityComponent<Study> {
             studyCenter.center.id = this.selectedCenter.id;
             studyCenter.center.name = this.selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
-    
-            let option = this.centerOptions.find(option => option.value.id == this.selectedCenter.id);
-            if (option) option.disabled = true;
+
+            this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
@@ -289,8 +289,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.monoCenter = true;
             this.onMonoMultiChange();
         }
-        let option = this.centerOptions.find(option => option.value.id == centerId);
-        if (option) option.disabled = false;
+        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
