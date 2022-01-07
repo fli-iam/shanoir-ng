@@ -69,12 +69,8 @@ export class EegUploadComponent {
         this.importService.uploadEegFile(formData)
             .then((importJob: EegImportJob) => {
                 this.importDataService.eegImportJob = importJob;
+                this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
-                this.importService.analyseEegFile(importJob).then((importJobAnalysed: EegImportJob) => {
-                    this.importDataService.eegImportJob = importJobAnalysed;
-                    this.setArchiveStatus('uploaded');
-                    this.errorMessage = "";
-                });
             }).catch(error => {
                 this.setArchiveStatus('error');
                 if (error && error.error && error.error.message) {

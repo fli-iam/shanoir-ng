@@ -50,7 +50,7 @@ public class ShanoirExec {
 	@Value("${ms.url.dicom2nifti}")
 	private String dicomifierMsUrl;
 
-	@Value("${shanoir.conversion.converters.mriconverter}")
+	@Value("${shanoir.conversion.converters.mriConverter}")
 	private String mriConverterPath;
 	
 	@Autowired
@@ -639,7 +639,9 @@ public class ShanoirExec {
 			.append(" ")
 			.append(outputFolder)
 			.append(" PatientName/StudyName/CreationDate-SeqNumber-Protocol-SequenceName-AcquisitionTime [ExportOptions]00000");
-				
+		
+		LOG.error("COUCOUCUUUUUUUUUUUUUUUUUUUUUU" + buffer.toString());
+		
 		logs.concat(buffer.toString());
 		
 		final String result = exec(buffer.toString().split(" "));
