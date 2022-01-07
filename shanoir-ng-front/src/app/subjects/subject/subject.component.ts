@@ -81,8 +81,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
             this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
-            this.subjectNamePrefix = this.breadcrumbsService.currentStep.data.subjectNamePrefix;
-	        if (this.subjectNamePrefix) {
+            if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
+            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
+	        if (this.breadcrumbsService.currentStep.data.patientName) this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.patientName + '-';
+            if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
 	        }
         }
@@ -218,7 +220,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     public toggleAnonymised() {
-        if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
+        if (this.subjectNamePrefix) {
+            this.subject.name = this.subjectNamePrefix;
+        } else if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
             this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
         }
     }
