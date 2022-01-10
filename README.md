@@ -47,6 +47,15 @@ The installation of Shanoir NG has two steps :
 * BUILD (COMPILE): with Maven 3
 * DEPLOY: with docker-compose, version 3
 
+## Intialize Shanoir Downloader
+
+Clone the shanoir-ng repository, the shanoir-downloader/ folder will be empty ; two commands must be run to get the code:
+
+  - `git submodule init` to initialize your local configuration file
+  - `git submodule update` to fetch all the data from shanoir and check out the appropriate commit listed in `shanoir_downloader`
+
+Then the shanoir-downloader project can be simply managed as a normal git repo (as if it were a separated project) ; meaning that once your are in the shanoir-downloader/ folder, you can just `git pull` to get the latest changes, and commit some changes.
+
 ## BUILD (COMPILE)
 * Install Maven 3 on your machine/on the server
 * Download or git clone the shanoir-ng code. The `master` branch should be the most stable while `develop` will contain the newests functionalities if you are interested in testing thoses.
