@@ -149,28 +149,6 @@ public class ImporterApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testUploadEEGZipFile() throws Exception {
-		String filePath = "./src/main/resources/tests/eeg/brainvision (copy).zip";
-		File f = new File(filePath);
-
-		if (f.exists() && !f.isDirectory()) {
-			MockMultipartFile multipartFile = new MockMultipartFile("file", "brainvision (copy).zip", "application/zip",	new FileInputStream(new File(filePath)));
-
-			// Check that we return an EEGImport Job with adapted informations.
-			mvc.perform(MockMvcRequestBuilders.fileUpload(UPLOAD_EEG_PATH).file(multipartFile))
-			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("\"name\":\"Fp1\"")))
-			.andExpect(content().string(containsString("\"z\":2.5810034")))
-			.andExpect(content().string(containsString("brainvision (copy)")))
-			.andExpect(content().string(containsString("ROBEEG_BACGU020_dlpfc_l_0002.vhdr")));
-		} else {
-			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testUploadEEGZipFileNotZip() throws Exception {
 		// Wrong file
 		String filePath = "./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.pos";
