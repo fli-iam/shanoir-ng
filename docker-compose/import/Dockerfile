@@ -73,10 +73,6 @@ RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii
 RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
 RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
 
-RUN cp -n -r           external/mriconverter /opt/nifti-converters
-RUN chmod 777 /opt/nifti-converters/mriconverter
-RUN chmod 777 /opt/nifti-converters/mriconverter/MRIManager.jar
-
 RUN mkdir -m 1777 /.dcm2nii_2008-03-31
 RUN mkdir -m 1777 /.dcm2nii_2014-08-04
 

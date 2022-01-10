@@ -629,22 +629,7 @@ public class ShanoirExec {
 	 * @return the olg to display.
 	 */
 	public String mriConverter(String inputFolder, String outputFolder) {
-		String logs = "mriConverter: ";
-		StringBuffer buffer = new StringBuffer();
-		//java -classpath MRIFileManager/MRIManager.jar DicomToNifti inputFolder outputFolder PatientName/StudyName/CreationDate-SeqNumber-Protocol-SequenceName-AcquisitionTime [ExportOptions]00000
-		buffer.append("java -classpath ")
-			.append(mriConverterPath)
-			.append(" DicomToNifti ")
-			.append(inputFolder)
-			.append(" ")
-			.append(outputFolder)
-			.append(" PatientName/StudyName/CreationDate-SeqNumber-Protocol-SequenceName-AcquisitionTime [ExportOptions]00000");
-				
-		logs.concat(buffer.toString());
-		
-		final String result = exec(buffer.toString().split(" "));
-		
-		return logs.concat("\n Result: " + result);
-		}
+		throw new NotImplementedException();
+	}
 
 }
