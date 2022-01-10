@@ -42,7 +42,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
@@ -360,8 +359,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			// dcm2nii
 		} else if (converter.isDicomifier()) {
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
-		} else if (converter.isMriConverter()) {
-			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder);
 		} else {
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);

@@ -30,9 +30,7 @@ public enum NIfTIConverterType {
 	
 	DICOM2NIFTI(4),
 
-	DICOMIFIER(5),
-	
-	MRICONVERTER(6);
+	DICOMIFIER(5);
 	
 	private int id;
 
