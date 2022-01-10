@@ -48,6 +48,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     pattern: string = '[^:|<>&\/]+';
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
+    dicomPatientName: string;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -83,7 +84,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
             if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
             if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
-	        if (this.breadcrumbsService.currentStep.data.patientName) this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.patientName + '-';
+	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
 	        }
@@ -220,10 +221,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     public toggleAnonymised() {
-        if (this.subjectNamePrefix) {
+        if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
-        } else if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
-            this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
+        } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
+            this.subject.name = this.subjectNamePrefix + this.dicomPatientName + '-';
         }
     }
 }

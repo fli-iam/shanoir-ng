@@ -96,6 +96,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ng-template>
                         </span>
 					</li>
+					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'" @slideDown>
+						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>. 
+						However the prefix is optional and if you know what you are doing please just ignore this message.
+					</li>
 					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
 						<li *ngIf="mode == 'create' || mode == 'view'">
 							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>

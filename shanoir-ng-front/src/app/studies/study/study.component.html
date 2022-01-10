@@ -219,7 +219,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view' && study.monoCenter">
 						<label>Subject prefix for this center</label>
 						<span class="right-col">
-							<input *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" [ngModelOptions]="{standalone: true}"/>
+							<span class="prefix">{{study.name}}-</span><input class="prefix-input" *ngIf="study.studyCenterList[0]" type="text" [(ngModel)]="study.studyCenterList[0].subjectNamePrefix" [ngModelOptions]="{standalone: true}"/>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view' && !study.monoCenter">
@@ -238,7 +238,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										<i class="fas fa-external-link-alt"></i>
 									</td>
 									<td>
-										{{study.name}}-<input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" (change)="form.get('studyCenterList').markAsDirty()" [ngModelOptions]="{standalone: true}"/>
+										<span class="prefix">{{study.name}}-</span><input type="text" [(ngModel)]="studyCenter.subjectNamePrefix" (change)="form.get('studyCenterList').markAsDirty()" [ngModelOptions]="{standalone: true}"/>
 									</td>
 									<td *ngIf="study.studyCenterList.length > 1" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)">
 										<i class="fas fa-times"></i>

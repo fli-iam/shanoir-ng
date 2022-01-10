@@ -17,7 +17,8 @@
 .study-center-list td { padding: 4px 5px; }
 .study-center-list table tr td:last-child { padding-left: 13px; padding-right: 13px; }
 .add-center td { text-align: center; cursor: pointer; }
-
+.prefix { color: var(--grey); }
+.prefix-input { width: auto; }
 
 .icon { margin-left: 5px; vertical-align: middle; }
 .icon-clickable { cursor: pointer;  }
@@ -29,4 +30,4 @@ dataset-download { margin-left: 5px; }
 .files { margin-top: 10px; }
 toggle-switch { margin: 0 7px; }
 .clickable { cursor: pointer; }
-.center-link { color: var(--grey); }
+.center-link { color: var(--color-b-light2); }
