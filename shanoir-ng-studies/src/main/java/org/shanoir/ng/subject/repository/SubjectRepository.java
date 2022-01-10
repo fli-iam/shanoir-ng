@@ -53,7 +53,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Subject findByIdentifier(String identifier);
 	
-	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode ORDER BY name DESC LIMIT 1", nativeQuery = true)
+	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
 	
 	/**
