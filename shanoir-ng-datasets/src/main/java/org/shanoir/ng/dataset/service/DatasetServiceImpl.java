@@ -102,7 +102,10 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) {
 		Dataset ds = repository.save(dataset);
-		solrService.indexDataset(ds.getId());
+		// Do not index processed dataset for the moment
+		if (ds.getDatasetProcessing() == null) {
+			solrService.indexDataset(ds.getId());
+		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
@@ -131,7 +134,7 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
 		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
-		//datasetDb.setProcessings(dataset.getProcessings());
+		datasetDb.setProcessings(dataset.getProcessings());
 		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());

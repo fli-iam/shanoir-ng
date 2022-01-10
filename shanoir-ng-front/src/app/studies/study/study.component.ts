@@ -59,14 +59,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     subjects: IdName[];
     selectedCenter: IdName;
-    
-    private browserPaging: BrowserPaging<StudyUser>;
-    columnDefs: any[];
     users: User[] = [];
     
-    private studyUsersPromise: Promise<any>;
-    private freshlyAddedMe: boolean = false;
-    private studyUserBackup: StudyUser[] = [];
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
 
@@ -74,7 +68,6 @@ export class StudyComponent extends EntityComponent<Study> {
     protected hasDownloadRight: boolean;
 
     centerOptions: Option<IdName>[];
-    userOptions: Option<User>[];
     studyStatusOptions: Option<string>[] = [
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
@@ -102,7 +95,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        return this.studyService.get(this.id).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
             this.study = study;
             this.study.subjectStudyList = this.study.subjectStudyList.sort(
                 function(a: SubjectStudy, b:SubjectStudy) {
@@ -110,17 +103,20 @@ export class StudyComponent extends EntityComponent<Study> {
                     let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
                     return aname.localeCompare(bname);
                 });
-            }); 
+            return study;
+        });
+        Promise.all([
+            studyPromise,
+            this.fetchUsers()
+        ]).then(([study, users]) => {
+            Study.completeMembers(study, users);
+        });
+        return studyPromise.then(() => null);
     }
 
     initEdit(): Promise<void> {
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => this.study = study);
         this.getSubjects();
-
-        this.createColumnDefs();
-        this.studyUsersPromise = studyPromise.then(study => {
-            this.browserPaging = new BrowserPaging(study.studyUserList, this.columnDefs);
-        });
         
         this.protocolFiles = [];
 
@@ -129,13 +125,6 @@ export class StudyComponent extends EntityComponent<Study> {
             this.fetchUsers()
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
-            this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
-            if (study.studyUserList) {
-                study.studyUserList.forEach(studyUser => {
-                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.userId);
-                    if (option) option.disabled = true;
-                });
-            }
         });
         
         Promise.all([
@@ -155,28 +144,17 @@ export class StudyComponent extends EntityComponent<Study> {
         this.dataUserAgreement = null;
         this.getSubjects();
 
-        this.createColumnDefs();
-        this.studyUsersPromise = Promise.resolve().then(() => {
-            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
-        });
-
         this.fetchUsers().then(users => {
             // Add the connected user by default
             let connectedUser: User = users.find(user => this.isMe(user));
-            this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
+            this.addMe(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
         });
         return Promise.resolve();
     }
 
     private fetchUsers(): Promise<User[]> {
         return this.userService.getAll().then(users => {
-            this.users = users.sort(function(a: User, b:User) {
-                return a.username.localeCompare(b.username);
-            })
-            this.userOptions = [];
-            if (users) {
-                users.forEach(user => this.userOptions.push(new Option<User>(user, user.username + ' (' +user.lastName + ' ' + user.firstName + ')')));
-            }
+            this.users = users;
             return users;
         });
     }
@@ -197,7 +175,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
-            'dataUserAgreement': []
+            'dataUserAgreement': [],
+            'studyUserList': [this.study.studyUserList]
         });
         return formGroup;
     }
@@ -329,119 +308,20 @@ export class StudyComponent extends EntityComponent<Study> {
         return false;
     }
 
-    /** StudyUser management **/
-    getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
-        return new Promise((resolve) => {
-            this.studyUsersPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-
     isMe(user: User): boolean {
         return user.id == KeycloakService.auth.userId;
     }
 
-    disableEdit(studyUser: StudyUser): boolean {
-        return !this.freshlyAddedMe && studyUser.userId == KeycloakService.auth.userId;
-    }
-
-    private createColumnDefs() {
-        this.columnDefs = [
-            { headerName: 'Username', field: 'userName' },
-            { headerName: 'First Name', field: 'user.firstName' },
-            { headerName: 'Last Name', field: 'user.lastName' },
-            { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
-            { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
-            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
-                //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
-            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
-            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)}
-        ];
-    }
-
-    /**
-     * On select/unselect given right for the given study user 
-     */
-    private onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
-        if (!su.studyUserRights.includes(right) && selected) {
-            su.studyUserRights.push(right);
-        }
-        else if (su.studyUserRights.includes(right) && !selected) {
-            const index = su.studyUserRights.indexOf(right, 0);
-            if (index > -1) su.studyUserRights.splice(index, 1);
-        }
-    }
-
-    public onUserAdd(selectedUser: User) {
-        if (!selectedUser) {
-            return;
-        }
-        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
-            return;   
-        }
-        if (this.isMe(selectedUser)) {
-            this.freshlyAddedMe = true;
-        }
-        this.addUser(selectedUser);
-    }
-
-    private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
-        if (this.userOptions) {
-            let option = this.userOptions.find(opt => opt.value.id == selectedUser.id);
-            if (option) option.disabled = true;
-        }
-
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
-        if (backedUpStudyUser) {
-            this.study.studyUserList.unshift(backedUpStudyUser);
-        } else {
-            let studyUser: StudyUser = new StudyUser();
-            studyUser.userId = selectedUser.id;
-            studyUser.userName = selectedUser.username;
-            studyUser.receiveAnonymizationReport = false;
-            studyUser.receiveNewImportReport = false;
-            studyUser.studyUserRights = rights;
-            studyUser.completeMember(this.users);
-            this.study.studyUserList.unshift(studyUser);
-        }
-        this.browserPaging.setItems(this.study.studyUserList);
-        this.table.refresh();
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
-    }
-
-    private removeStudyUser = (item: StudyUser) => {
-        const index: number = this.study.studyUserList.indexOf(item);
-        if (index !== -1) {
-            this.study.studyUserList.splice(index, 1);
-        }
-        this.browserPaging.setItems(this.study.studyUserList);
-        this.table.refresh();
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
-        StudyUser.completeMember(item, this.users);
-        if (this.userOptions) {
-            let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = false;
-        }
-    }
-
-    onStudyUserEdit() {
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
+    private addMe(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
+        let studyUser: StudyUser = new StudyUser();
+        studyUser.userId = selectedUser.id;
+        studyUser.userName = selectedUser.username;
+        studyUser.receiveStudyUserReport = false;
+        studyUser.receiveNewImportReport = false;
+        studyUser.studyUserRights = rights;
+        studyUser.user = selectedUser;
+        this.study.studyUserList.unshift(studyUser);
+        this.study.studyUserList = this.study.studyUserList;
     }
 
     studyStatusStr(studyStatus: string) {
@@ -544,13 +424,15 @@ export class StudyComponent extends EntityComponent<Study> {
             }
             return result;
         }).then(study => {
-            this.confirmDialogService.confirm('Create a Study Card', 
+            if (this.mode == 'create') {
+               this.confirmDialogService.confirm('Create a Study Card', 
                 'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                 .then(userChoice => {
                     if (userChoice) {
                         this.router.navigate(['/study-card/create', {studyId: study.id}]);
                     }
                 });
+            }
             return study;
         });
     }

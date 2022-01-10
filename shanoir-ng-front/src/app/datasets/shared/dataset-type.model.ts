@@ -12,20 +12,34 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export const DatasetTypes = [
-  'Calibration',
-  'Ct',
-  'Eeg',
-  'Meg',
-  'Mesh',
-  'Mr',
-  'ParameterQuantification',
-  'Pet',
-  'Registration',
-  'Segmentation',
-  'Spect',
-  'Statistical',
-  'Template'
-] as const;
+import { Option } from "../../shared/select/select.component";
+import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
 
-export type DatasetType = typeof DatasetTypes[number];
+
+export enum DatasetType {
+
+  Calibration = 'Calibration',
+  Ct = 'Ct',
+  Eeg = 'Eeg',
+  Meg = 'Meg',
+  Mesh = 'Mesh',
+  Mr = 'Mr',
+  ParameterQuantification = 'ParameterQuantification',
+  Pet = 'Pet',
+  Registration = 'Registration',
+  Segmentation = 'Segmentation',
+  Spect = 'Spect',
+  Statistical = 'Statistical',
+  Template = 'Template',
+} export namespace DatasetType {
+  
+  export function all(): Array<DatasetType> {
+      return allOfEnum<DatasetType>(DatasetType);
+  }
+
+  export function getLabel(type: DatasetType): string {
+      return capitalsAndUnderscoresToDisplayable(type);
+  }
+
+  export var options: Option<DatasetType>[] = all().map(prop => new Option<DatasetType>(prop, getLabel(prop)));
+}

@@ -18,7 +18,7 @@ delimiter //
 
 create procedure getStatistics(IN studyNameInRegExp VARCHAR(255), IN studyNameOutRegExp VARCHAR(255), IN subjectNameInRegExp VARCHAR(255), IN subjectNameOutRegExp VARCHAR(255))
 begin
-    select 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'protocol_type'
+    select 'patient_id', 'shanoir_name', 'double_hash', 'birthname1', 'birthname2', 'birthname3', 'lastname1', 'lastname2', 'lastname3', 'firstname1', 'firstname2', 'firstname3', 'birthdate1', 'sex', 'birth_year', 'study_id', 'study_name', 'sequence_id', 'norm_sequence_name', 'sequence_name', 'center_id', 'center', 'device_manufacturer', 'device_model', 'device_field_strength', 'device_serial_number', 'examination_id', 'examination_date', 'import_date', 'creation_date', 'protocol_type'
     union all
     select distinct
     sb.id as patient_id, 
@@ -49,6 +49,8 @@ begin
     ac_eq.serial_number as device_serial_number,
     ex.id as examination_id,
     date(ex.examination_date) as examination_date,
+    date(dt_acq.creation_date) as import_date,
+    date(dt.creation_date) as creation_date,
     pr_md.name as protocol_type
 
     from studies.subject as sb

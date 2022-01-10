@@ -18,9 +18,15 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.service.SubjectStudyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +43,14 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 	@Autowired
 	private SubjectStudyService subjectStudyService;
 
+	@Autowired
+	private SubjectService subjectService;
+
+	@Autowired
+	private SubjectMapper subjectMapper;
+
+	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyApiController.class);
+
 	@Override
 	public ResponseEntity<Void> updateSubjectStudy(
 			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
@@ -51,10 +65,19 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 
 		try {
 			subjectStudyService.update(subjectStudy);
+
+			Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
+			
+			// Update datasets side
+			subjectService.updateSubjectName(subjectMapper.subjectToSubjectDTO(subject));
+			
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not save subject study to dataset microservice", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

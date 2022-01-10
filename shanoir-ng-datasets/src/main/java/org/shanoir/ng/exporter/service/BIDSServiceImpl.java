@@ -427,6 +427,7 @@ public class BIDSServiceImpl implements BIDSService {
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			try {
 				// Use link to avoid file duplication
+				deleteIfExists(pathToGo.toAbsolutePath().toString());
 				Files.createLink(pathToGo, srcFile.toPath());
 
 				// Add the file to the scans.tsv reference
@@ -437,11 +438,19 @@ public class BIDSServiceImpl implements BIDSService {
 				.append(dataset.getDatasetAcquisition().getExamination().getId())
 				.append(NEW_LINE);
 
+				// TODO: center_id / comment / weigth / other examination things ?
 				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 
 			} catch (IOException exception) {
-				LOG.error("File could not be treated: {}", srcFile.getAbsolutePath(), exception);
+				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
 			}
+		}
+	}
+
+	private void deleteIfExists(String filePath) {
+		File file = new File(filePath);
+		if(file.exists()) {
+			file.delete();
 		}
 	}
 
@@ -594,7 +603,7 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer = new StringBuilder();
 		buffer.append("{\n")
 		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
-		.append("\"EEGCoordinateUnits\": ").append("\"" +CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
+		.append("\"EEGCoordinateUnits\": ").append("\"" + CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
 		.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
