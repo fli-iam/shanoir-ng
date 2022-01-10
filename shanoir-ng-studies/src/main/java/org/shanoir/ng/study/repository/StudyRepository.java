@@ -16,20 +16,26 @@ package org.shanoir.ng.study.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
+public interface StudyRepository extends CrudRepository<Study, Long> {
 
 	/**
 	 * Get all studies
 	 * 
 	 * @return list of studies.
 	 */
+	@Override
 	List<Study> findAll();
+
+	/**
+	 * Get all studies with isChallenge flag to true
+	 * @return the liost of challenges
+	 */
+	List<Study> findByChallengeTrue();
 
 	/**
 	 * Get studies linked to an user.
@@ -39,8 +45,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 * @return list of studies.
 	 */
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
-	
-	
+		
 	/**
 	 * Get studies linked to an user.
 	 * 
@@ -48,16 +53,6 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUseRightId);
-	
-	
-	/**
-	 * Find id and name for all studies in which user has a defined role
-	 * 
-	 * @param userId
-	 * @param studyUserRightId
-	 * @return
-	 */
-	List<IdName> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUserRightId);
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
 
 }

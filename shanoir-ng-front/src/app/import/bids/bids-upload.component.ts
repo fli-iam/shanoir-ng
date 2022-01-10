@@ -16,9 +16,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../shared/dicom-archive.service';
 import { ImportJob } from '../shared/dicom-data.model';
-import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { StudyService } from '../../studies/shared/study.service';
 
@@ -32,38 +30,33 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class BidsUploadComponent {
     
-    protected archiveStatus: Status = 'none';
+    public archiveStatus: Status = 'none';
     protected extensionError: boolean;
     private modality: string;
-    protected errorMessage: string;
+    public errorMessage: string;
 
     constructor(
-            private importService: ImportService, 
-            private bidsArchiveService: DicomArchiveService,
+            private importService: ImportService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService,
             private studyService: StudyService) {
         
-        breadcrumbsService.nameStep('1. Upload');
-        breadcrumbsService.markMilestone();
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = '1. Upload';
+            breadcrumbsService.currentStep.importStart = true;
+            breadcrumbsService.currentStep.importMode = 'BIDS';
+        });
     }
 
-    private uploadArchive(fileEvent: any): void {
-        this.setArchiveStatus('uploading');
-        this.loadInMemory(fileEvent);   
-        this.uploadToServer(fileEvent.target.files);
-    }
-
-    private loadInMemory(fileEvent: any) {
-    	this.bidsArchiveService.clearFileInMemory();
-    	this.bidsArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
-                this.bidsArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
-                    this.importDataService.inMemoryExtracted = response;
-                });
-            });
+    public uploadArchive(fileEvent: any): void {
+        if (fileEvent.target.files.length > 0) {
+            this.setArchiveStatus('uploading');
+            this.uploadToServer(fileEvent.target.files);
+        } else {
+            this.setArchiveStatus('none');
+            this.modality = null;
+        }
     }
 
     private uploadToServer(file: any) {
@@ -92,6 +85,6 @@ export class BidsUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    data = {'frontStudyId': 10,'studyCardId': 68,'frontAcquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
+    data = {'studyId': 10,'studyCardId': 68,'acquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
 }
     

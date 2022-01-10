@@ -11,30 +11,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-
-import { Observable } from 'rxjs';
-
+import { Injectable, ComponentFactoryResolver, ComponentRef } from '@angular/core';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
+import { ServiceLocator } from '../../../utils/locator.service';
+
 
 @Injectable()
 export class ConfirmDialogService {
+    
+    constructor(private componentFactoryResolver: ComponentFactoryResolver) {
+    }
 
-    constructor(private dialog: MatDialog) { }
+    public confirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
+        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
+        let dialog: ConfirmDialogComponent = ref.instance;
+        return dialog.openConfirm(title, message, buttons).then(answer => {
+            ref.destroy();
+            return answer;
+        });
+    }
 
-    public confirm(title: string, message: string, viewContainerRef: ViewContainerRef): Observable<boolean> {
-        let dialogRef: MatDialogRef<ConfirmDialogComponent>;
-        let config = new MatDialogConfig();
-        config.viewContainerRef = viewContainerRef;
+    public inform(title: string, message: string): Promise<boolean> {
+        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
+        let dialog: ConfirmDialogComponent = ref.instance;
+        return dialog.openInfo(title, message).then(answer => {
+            ref.destroy();
+            return answer;
+        });
+    }
 
-        dialogRef = this.dialog.open(ConfirmDialogComponent, config);
-
-        dialogRef.componentInstance.title = title;
-        dialogRef.componentInstance.message = message;
-
-        return dialogRef.afterClosed();
+    public error(title: string, message: string): Promise<boolean> {
+        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
+        let dialog: ConfirmDialogComponent = ref.instance;
+        return dialog.openError(title, message).then(answer => {
+            ref.destroy();
+            return answer;
+        });
     }
     
 }

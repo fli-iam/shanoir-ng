@@ -15,6 +15,7 @@
 package org.shanoir.ng.center.controler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -34,6 +35,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -83,12 +85,11 @@ public class CenterApiController implements CenterApi {
 	@Override
 	public ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
-		
-		final Center center = centerService.findById(centerId);
-		if (center == null) {
+		final Optional<Center> center = centerService.findById(centerId);
+		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center), HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center.orElseThrow()), HttpStatus.OK);
 	}
 
 	@Override
@@ -111,7 +112,8 @@ public class CenterApiController implements CenterApi {
 	
 
 	@Override
-	public ResponseEntity<List<IdName>> findCentersNames(Long studyId) {
+	public ResponseEntity<List<IdName>> findCentersNames(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -123,7 +125,8 @@ public class CenterApiController implements CenterApi {
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
+		
+		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 
 		/* Save center in db. */
@@ -137,7 +140,8 @@ public class CenterApiController implements CenterApi {
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
 			@ApiParam(value = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-
+		
+		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 
 		try {
@@ -148,9 +152,8 @@ public class CenterApiController implements CenterApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
+		} 
 	}
-	
 	
 	private void validate(Center center, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()
@@ -160,6 +163,14 @@ public class CenterApiController implements CenterApi {
 		if (!errors.isEmpty()) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
+		}
+	}
+	
+	private void forceCentersOfStudyCenterList(Center center) {
+		if (center.getStudyCenterList() != null) {
+			for (StudyCenter sc : center.getStudyCenterList()) {
+				sc.setCenter(center);
+			}
 		}
 	}
 }

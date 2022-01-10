@@ -24,6 +24,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-list',
@@ -34,7 +35,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 export class DatasetListComponent extends EntityListComponent<Dataset>{
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private datasetService: DatasetService,
@@ -44,6 +45,10 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         super('dataset');
         this.fetchStudies();
         this.fetchSubjects();
+    }
+
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
     }
     
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
@@ -59,12 +64,16 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             return null;
         };
         return [
-            {headerName: "Id", field: "id", type: "number", width: "30px", defaultSortCol: true, defaultAsc: false},
+            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
             {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
-            {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => this.getSubjectName(params.data.subjectId)},
-            {headerName: "Study", field: "studyId", cellRenderer: (params: any) => this.getStudyName(params.data.studyId)},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
+            {headerName: "Subject", field: "subject.name",
+				route: (ds: Dataset) =>  '/subject/details/' + ds.subject.id
+			},
+            {headerName: "Study", field: "study.name",
+				route: (ds: Dataset) => '/study/details/' + ds.study.id
+			},
+            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
     }
@@ -81,22 +90,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         });
     }
 
-    private getSubjectName(id: number): string {
-        if (!this.subjects || this.subjects.length == 0 || !id) return id ? id+'' : '';
-        for (let subject of this.subjects) { 
-            if (subject.id == id) return subject.name;
-        }
-        throw new Error('Cannot find subject for id = ' + id);
-    }
-    
-    private getStudyName(id: number): string {
-        if (!this.studies || this.studies.length == 0 || !id) return id+'';
-        for (let study of this.studies) {
-            if (study.id == id) return study.name;
-        }
-        throw new Error('Cannot find study for id = ' + id);
-    }
-
     getCustomActionsDefs(): any[] {
         return [];
     }
@@ -111,11 +104,10 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     canEdit(ds: Dataset): boolean {
-        let study: Study = this.studies.filter(study => study.id == ds.studyId)[0];
         return this.keycloakService.isUserAdmin() || (
-            study &&
-            study.studyUserList && 
-            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
+            ds.study &&
+            ds.study.studyUserList && 
+            ds.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
     }
 

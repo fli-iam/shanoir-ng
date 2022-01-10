@@ -21,7 +21,6 @@ import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.s
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
-import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExtraData }    from '../../extraData/extraData/shared/extradata.model';
 import { BloodGasData }    from '../../extraData/bloodGasData/shared/bloodGasData.model';
 import { BloodGasDataFile }    from '../../extraData/bloodGasData/shared/bloodGasDataFile.model';
@@ -42,19 +41,23 @@ import { ActivatedRoute } from '@angular/router';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { AnimalExaminationService } from '../shared/animal-examination.service';
+import { ExaminationNode } from '../../../tree/tree.model';
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
-    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, AnimalExaminationService],
+    providers: [ExtraDataService, ContrastAgentService, ExaminationAnestheticService, ExaminationService],
     styleUrls: ['animal-examination.component.css']
 })
 @ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
-	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    
+	@ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
+    @ViewChild('input', { static: false }) private fileInput: ElementRef;
+
     urlupload: string;
     physioData: PhysiologicalData;
     examinationPhysioData: PhysiologicalData = new PhysiologicalData();
@@ -68,12 +71,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     examinationExtradatas: ExtraData[] = [];
     centers: IdName[] = [];
     studies: IdName[] = [];
-    private subjects: SubjectWithSubjectStudy[];
+    public subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
-    private inImport: boolean; 
+    private inImport: boolean;
+    private files: File[] = [];
     
     constructor(
         private route: ActivatedRoute,
+        private examinationService: ExaminationService, 
         private animalExaminationService: AnimalExaminationService, 
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
@@ -81,7 +86,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private animalSubjectService: AnimalSubjectService, 
         private centerService: CenterService,
         private studyService: StudyService, 
-        protected breadcrumbsService: BreadcrumbsService) 
+        public breadcrumbsService: BreadcrumbsService) 
     {
 
         super(route, 'preclinical-examination');
@@ -92,8 +97,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     get examination(): Examination { return this.entity; }
     set examination(examination: Examination) { this.entity = examination; }
 
+    getService(): EntityService<Examination> {
+        return this.animalExaminationService;
+    }
+
     initView(): Promise<void> {
-        return this.animalExaminationService.get(this.id).then(examination => {
+        return this.examinationService.get(this.id).then(examination => {
             this.examination = examination; 
             this.updateExam();
             //this.loadExaminationAnesthetic();
@@ -111,7 +120,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.animalExaminationService.get(this.id).then(examination => {
+        return this.examinationService.get(this.id).then(examination => {
             this.examination = examination;
             this.updateExam();
             //this.loadExaminationAnesthetic(this.id);
@@ -135,6 +144,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     buildForm(): FormGroup {
+        let numericRegex = /\-?\d*\.?\d{1,2}/;
+
         return this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
@@ -142,14 +153,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
+            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]]
         });
     }
 
-    private instAssessment() {
-    }
-
-    private attachNewFiles() {
+    public instAssessment() {
     }
 
     private updateExam(): void{
@@ -159,17 +167,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             this.examination.subjectStudy.name = this.examination.subject.name;
         }
     }
-
-    private updateExamForSave(): void{
-        this.examination.centerId = this.examination.center.id;
-        this.examination.studyId = this.examination.study.id;
-        this.examination.subjectId = this.examination.subject.id;
-    }
     
     private getCenters(): void {
         this.centers = [];
         this.centerService
-            .getCentersNamesForExamination()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
             });
@@ -185,7 +187,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
     
     
-    private getSubjects(): void {
+    public getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
             .findSubjectsByStudyIdPreclinical(this.examination.study.id, this.examination.preclinical)
@@ -205,9 +207,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
 
-    protected save(): Promise<void> {
-        this.updateExamForSave();
-        return super.save();
+    public save(): Promise<Examination> {
+        return super.save().then(result => {
+            // Once the exam is saved, save associated files
+            for (let file of this.files) {
+                this.examinationService.postFile(file, this.entity.id);
+            }
+            return result;         
+        });
     }
 
     manageExaminationAnesthetic(examination_id : number) {
@@ -253,8 +260,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
                     	.subscribe(res => {
                     		this.examinationExtradatas.push(physioData);
-                    	}, (err: String) => {
-                    		console.log('error in posting File ' + err);
                     	});
                     }
                     //Add extra data to array
@@ -262,13 +267,11 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 });
             }else{
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioData)
-                .subscribe(physioData => {
+                .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
                     	.subscribe(res => {
                     		this.examinationExtradatas.push(physioData);
-                    	}, (err: String) => {
-                    		console.log('error in posting File ' + err);
                     	});
                     }
                     //Add extra data to array
@@ -286,21 +289,17 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
                     		.subscribe(res => {
                     			this.examinationExtradatas.push(bloodGasData);
-                    		}, (err: String) => {
-                    			console.log('error in posting File ' + err);
                     		});
                     }
                     this.examinationExtradatas.push(bloodGasData);
                 });
             }else{
             	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.bloodGasData)
-                	.subscribe(bloodGasData => {
+                	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
                     	this.extradatasService.postFile(this.bloodGasDataFile.bloodGasDataFile, bloodGasData)
                     		.subscribe(res => {
                     			this.examinationExtradatas.push(bloodGasData);
-                    		}, (err: String) => {
-                    			console.log('error in posting File ' + err);
                     		});
                     }
                     this.examinationExtradatas.push(bloodGasData);
@@ -335,7 +334,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData.extradatatype = "Blood gas data"
     }
     
-    protected exportBruker() {
+    public exportBruker() {
         this.animalExaminationService.getBrukerArchive(this.examination.id)
             .then(response => {this.downloadIntoBrowser(response);});;
     }
@@ -366,13 +365,39 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     closePopin(instAssessmentId?: number) {
         this.instAssessmentModal.hide();
     }
-
-    closeAttachedFilePopin(id?: number) {
-        this.attachNewFilesModal.hide();
+    
+    public async hasEditRight(): Promise<boolean> {
+        return false;
     }
     
-    public hasEditRight(): boolean {
+    public async hasDeleteRight(): Promise<boolean> {
         return false;
+    }
+    
+    // Extra data file management
+    
+    public setFile() {
+        this.fileInput.nativeElement.click();
+    }
+    
+    getFileName(element: string): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+    
+    public deleteFile(file: any) {
+        this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+    }
+
+    public attachNewFile(event: any) {
+        let newFile = event.target.files[0];
+        this.examination.extraDataFilePathList.push(newFile.name);
+        this.files.push(newFile);
+    }
+
+    onExaminationNodeInit(node: ExaminationNode) {
+        node.open = true;
+        this.breadcrumbsService.currentStep.data.examinationNode = node;
     }
 
 }

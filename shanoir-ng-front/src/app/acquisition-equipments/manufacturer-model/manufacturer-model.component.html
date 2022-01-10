@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -31,7 +31,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ol>
                     <li>
 						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">Modality type</label> 
-						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" (change)="onModalityChange($event)" formControlName="datasetModalityType"></select-dataset-type>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.datasetModalityType}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select-box formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType" [options]="datasetModalityTypes"
+									(userChange)="onModalityChange($event)" formControlName="datasetModalityType">
+								</select-box>
+							</ng-template>
+						</span>
                     </li>
 					<li>
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">Manufacturer</label> 
@@ -42,8 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()">
-									<select-option *ngFor="let manufacturer of manufs" [value]="manufacturer">{{manufacturer.name}}</select-option>
+								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()" [optionArr]="manufs">
 								</select-box>
 							</ng-template>
 						</span>
@@ -55,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{manufModel.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name" (change)="isNameUniqueError=false"/>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name"/>
 								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
@@ -81,6 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
+                (delete)="delete()"
 				(edit)="goToEdit()"
 				(cancel)="goToView()"
 				(back)="goBack()"

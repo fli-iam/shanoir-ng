@@ -1,0 +1,39 @@
+:host() { display: block; position: relative; white-space: nowrap; }
+.conditions { text-align: right; }
+.separator { width: 100px; color: purple; text-align: center; }
+.actions { text-align: left; }
+
+.conditions, .separator, .actions { vertical-align: middle; display: inline-block; position: relative; }
+
+.conditions::ng-deep .condition:not(:first-child) condition::before { display: inline; content: "and" }
+
+condition, action, .add, .always {
+    border: 1px solid var(--grey);
+    border-radius: 10px;
+    margin: 3px 0;
+    padding: 0px 7px; }
+
+condition, action { position: relative; display: inline-block; }
+
+condition.edit:hover, action.edit:hover { border-color: var(--color-b); }
+
+.add { text-align: left; color: var(--color-b); border-style: dashed; cursor: pointer; display: inline-block; padding: 1px 8px; }
+.add i { margin-right: 7px; color: var(--color-c); }
+.add:hover { background-color: var(--color-b); color: white; }
+
+.always { text-align: left; color: var(--color-a); display: inline-block; padding: 1px 8px; }
+.always i { margin-right: 7px; color: var(--color-a); }
+
+.rule-controls i { margin: 0 5px; color: var(--grey); width: 12px; }
+.rule-controls i:hover { cursor: pointer; }
+.rule-controls i:hover { color: var(--color-a); }
+.rule-delete i:hover { color: var(--color-error); } 
+
+.rule-controls { opacity: 0; position: absolute; left: 0; right: 0; transition: opacity 0.3s; }
+.rule-controls.top { bottom: 14px; padding: 10px 10px 0; }
+.rule-controls.bottom { top: 14px; padding: 0 10px 10px; }
+.separator:hover .rule-controls { opacity: 1; }
+.sep-symbol { padding: 20px; }
+
+.error { background-color: var(--color-error); color: white; }
+.error i { color: white; }

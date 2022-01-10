@@ -33,6 +33,8 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Option } from '../../../../shared/select/select.component';
 
 @Component({
     selector: 'anesthetic-form',
@@ -44,17 +46,17 @@ import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 @ModesAware
 export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    @ViewChild('ingredientsTable') table: TableComponent; 
+    @ViewChild('ingredientsTable', { static: false }) table: TableComponent; 
 
-    private anestheticTypes: Enum[] = [];
+    AnestheticType = AnestheticType;
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
-    private isAnestheticUnique: Boolean = true;
+    isAnestheticUnique: Boolean = true;
     names: Reference[];
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    private columnDefs: any[];
+    public columnDefs: any[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -67,7 +69,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private anestheticService: AnestheticService,
         private ingredientService: AnestheticIngredientService,
         private referenceService: ReferenceService,
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
         super(route, 'preclinical-anesthetic');
         this.manageSaveEntity();
@@ -76,13 +78,15 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     get anesthetic(): Anesthetic { return this.entity; }
     set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
+    getService(): EntityService<Anesthetic> {
+        return this.anestheticService;
+    }
 
     initView(): Promise<void> {
         this.createColumnDefs();
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -106,7 +110,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.entity = new Anesthetic();
@@ -133,7 +136,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.ingredientsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
         });
-        this.getEnum();
         this.loadUnits();
         this.loadNames();  
         this.createColumnDefs();
@@ -190,12 +192,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }
     }
 
-    
-
-    getEnum(): void {
-        this.anestheticTypes = this.enumUtils.getEnumArrayFor('AnestheticType');
-    }
-
     loadUnits(){
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
      }
@@ -230,7 +226,6 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     refreshName(generatedName: string) {
-
         if (this.anesthetic && this.anesthetic.anestheticType && generatedName.indexOf(AnestheticType[this.anesthetic.anestheticType]) < 0) {
             generatedName = AnestheticType[this.anesthetic.anestheticType].concat(' ').concat(generatedName);
         }
@@ -248,12 +243,9 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             }
         }
         this.anesthetic.name = generatedName;
-
     }
 
-    
-
-    goToAddIngredient(){
+    goToAddIngredient() {
         this.ingredientSelected = new AnestheticIngredient();
         this.createAIMode = true;
         if(this.toggleFormAI==false){

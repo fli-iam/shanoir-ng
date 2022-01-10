@@ -23,7 +23,7 @@ import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -98,11 +97,24 @@ public interface ImporterApi {
 		@ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
 		@ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
     @PostMapping(value = "/upload_eeg/",
-	    produces = { "application/json" },
 	    consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile) throws RestServiceException;
 
+    @ApiOperation(value = "Upload a NIfTI file or an Analyze data item", notes = "Upload .nii, .nii.gz or .hdr/.img files", response = Void.class, tags={ "Upload .nii, .nii.gz or .hdr/.img files", })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
+        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+    @PostMapping(value = "/upload_processed_dataset/",
+        consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<String> uploadProcessedDataset(
+        @ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
+        @ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+        throws RestServiceException;
+    
     @ApiOperation(value = "Import one DICOM .zip file", notes = "Import DICOM .zip file already uploaded", response = Void.class, tags = {
 			"Import one DICOM .zip file", })
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
@@ -122,7 +134,7 @@ public interface ImporterApi {
     @PostMapping(value = "/start_import_job/",
         produces = { "application/json" },
         consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getFrontStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 
     @ApiOperation(value = "Start import EEG job", notes = "Start import eeg job", response = Void.class, tags={ "Start import eeg job", })
@@ -133,10 +145,9 @@ public interface ImporterApi {
     @PostMapping(value = "/start_import_eeg_job/",
         produces = { "application/json" },
         consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getFrontStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> startImportEEGJob(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
-    
     @ApiOperation(value = "ImportFromPACS: Query PACS", notes = "ImportFromPACS: Query PACS", response = Void.class, tags={ "ImportFromPACS: Query PACS", })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "query the PACS started", response = Void.class),
@@ -148,14 +159,14 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
     ResponseEntity<ImportJob> queryPACS(@ApiParam(value = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
 
-    @ApiOperation(value = "Import datasets from a BIDS folder", notes = "Import from bids", response = ImportJob.class, tags={ "BIDS", "Import" })
+    
+    @ApiOperation(value = "Get dicom image", notes = "Get dicom image", response = Void.class, tags={ "", })
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "import from bids", response = Void.class),
+        @ApiResponse(code = 200, message = "get dicom image", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @PostMapping(value = "/importAsBids/",
-        produces = { "application/json" },
-        consumes = { "multipart/form-data" })
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<ImportJob> importAsBids(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile bidsZipFile) throws RestServiceException, ShanoirException, IOException;
+    @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
+        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
+
 }

@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,8 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,42 +64,41 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	private MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
-	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+	private StudyCardProcessingService studyCardProcessingService;
 	
 	@Autowired
-	private StudyCardService studyCardService;
+	private DatasetStrategy<MrDataset> mrDatasetStrategy;
+
+	@Autowired
+	private StudyCardRepository studyCardRepository;
+
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
-		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}",serie.getSequenceName(), serie.getProtocolName(), rank);
+		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		Attributes dicomAttributes = null;
 		try {
-			// TODO ATO : should always be a dicom: add check
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhancedMR());
+			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
 		} catch (IOException e) {
-			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
+			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
 		}
+		mrDatasetAcquisition.setCreationDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
+		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
-		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-		StudyCard studyCard = studyCardService.findByName(importJob.getStudyCardName());
-		if (studyCard != null) {
+		StudyCard studyCard = null;
+		if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
+			studyCard = getStudyCard(importJob.getStudyCardId());
 			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+			importJob.setStudyCardName(studyCard.getName());
 		} else {
-			if (importJob.getFrontAcquisitionEquipmentId() != null) {
-				// todo: remove this later, when studycards are in web GUI import integrated
-				mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-			} else {
-				throw new Exception("StudyCard/AcqEqu referenced in importJob not found by name in database.");
-			}
+			LOG.warn("No studycard given for this import");
 		}
-		
-		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
+		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
-		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.
 		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		List<Dataset> genericizedList = new ArrayList<>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
@@ -118,9 +119,21 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 		
+		if (studyCard != null) {
+			studyCardProcessingService.applyStudyCard(mrDatasetAcquisition, studyCard, dicomAttributes);
+		}
+		
 		return mrDatasetAcquisition;
 	}
-	
-	
 
+	private StudyCard getStudyCard(Long studyCardId) {
+		StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
+		if (studyCard == null) {
+			throw new IllegalArgumentException("No study card found with id " + studyCardId);
+		}
+		if (studyCard.getAcquisitionEquipmentId() == null) {
+			throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+		}
+		return studyCard;
+	}
 }

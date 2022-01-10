@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.acquisitionequipment.service;
 
+import java.util.List;
+
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,6 +31,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<AcquisitionEquipment> implements AcquisitionEquipmentService {
 
+	@Autowired
+	AcquisitionEquipmentRepository repository;
 
 	@Override
 	protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
@@ -36,4 +42,14 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 		return to;
 	}
 
+	@Override
+	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
+		return this.repository.findByCenterId(centerId);
+	}
+	
+	@Override
+	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
+		return this.repository.findByCenterStudyCenterListStudyId(studyId);
+	}
+	
 }

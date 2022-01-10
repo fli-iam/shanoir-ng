@@ -19,6 +19,7 @@ import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -29,12 +30,16 @@ import { StudyService } from '../shared/study.service';
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
         private studyService: StudyService) {
             
         super('study');
+    }
+    
+    getService(): EntityService<Study> {
+        return this.studyService;
     }
 
     getEntities(): Promise<Study[]> {
@@ -42,27 +47,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getColumnDefs(): any[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
             {
-                headerName: "Start date", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.startDate);
+                headerName: "Start date", field: "startDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.startDate);
                 }
             },
             {
-                headerName: "End date", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.endDate);
+                headerName: "End date", field: "endDate", type: "date", cellRenderer: (params: any) => {
+                    return this.dateRenderer(params.data.endDate);
                 }
             },
             {
@@ -84,7 +83,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
-            delete: this.keycloakService.isUserAdminOrExpert()
+            delete: false
         };
     }
 
@@ -93,9 +92,5 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             study.studyUserList && 
             study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
-    }
-
-    canDelete(study: Study): boolean {
-        return this.canEdit(study);
     }
 }

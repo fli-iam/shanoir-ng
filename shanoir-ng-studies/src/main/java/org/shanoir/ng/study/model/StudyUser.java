@@ -45,11 +45,19 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	 */
 	private static final long serialVersionUID = 5813071870148636187L;
 
-	/** is the anonymization report to be sent to the user. */
-	private boolean receiveAnonymizationReport;
+	/** Inform an user about changes on study_user: creation */
+	private boolean receiveStudyUserReport;
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
+	
+	/**
+	 * With the introduction of a Data User Agreement form, a study
+	 * responsible can add an user to a study, but his StudyUser is
+	 * not confirmed as long, as the user has not validated the DUA.
+	 * The default is true, in case no DUA is existing.
+	 */
+	private boolean confirmed = true;
 
 	/** Study id. */
 	@ManyToOne
@@ -69,20 +77,20 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	private String userName;
 
 	/**
-	 * @return the receiveAnonymizationReport
+	 * @return the receiveStudyUserReport
 	 */
 	@Override
-	public boolean isReceiveAnonymizationReport() {
-		return receiveAnonymizationReport;
+	public boolean isReceiveStudyUserReport() {
+		return receiveStudyUserReport;
 	}
 
 	/**
-	 * @param receiveAnonymizationReport
-	 *            the receiveAnonymizationReport to set
+	 * @param receiveStudyUserReport
+	 *            the receiveStudyUserReport to set
 	 */
 	@Override
-	public void setReceiveAnonymizationReport(boolean receiveAnonymizationReport) {
-		this.receiveAnonymizationReport = receiveAnonymizationReport;
+	public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
+		this.receiveStudyUserReport = receiveStudyUserReport;
 	}
 
 	/**
@@ -100,6 +108,14 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@Override
 	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
 		this.receiveNewImportReport = receiveNewImportReport;
+	}
+
+	public boolean isConfirmed() {
+		return confirmed;
+	}
+
+	public void setConfirmed(boolean confirmed) {
+		this.confirmed = confirmed;
 	}
 
 	/**

@@ -31,8 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
 								</label>
-								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId">
-									<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId" [options]="studyOptions">
 								</select-box> 
 					</li>
 					<li class="required">

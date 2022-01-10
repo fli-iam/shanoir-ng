@@ -40,8 +40,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import groovyjarjarcommonscli.MissingArgumentException;
-
 /**
  * This class does the user(s) management for Shanoir-NG in relation with
  * Keycloak and its dedicated microservice. This class reads command line
@@ -98,10 +96,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${KEYCLOAK_USER}")
+	@Value("${SHANOIR_KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${KEYCLOAK_PASSWORD}")
+	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
 	@Value("${keycloak.realm}")
@@ -151,7 +149,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		}
 	}
 
-	private void initKeycloakAdminClient() throws MissingArgumentException {
+	private void initKeycloakAdminClient() {
 			keycloak = Keycloak.getInstance(
 				kcAdminClientServerUrl,
 				kcAdminClientRealm,
@@ -180,6 +178,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				credential.setType(CredentialRepresentation.PASSWORD);
 				String newPassword = PasswordUtils.generatePassword();
 				credential.setValue(newPassword);
+				credential.setTemporary(true);
 				final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
 				userResource.resetPassword(credential);
 				final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());

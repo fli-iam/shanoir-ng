@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="AnestheticFormComponent content-component">
+<div #formContainer class="AnestheticFormComponent content-component">
     <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -32,22 +32,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<td>
 					<fieldset>
 					<ol>
-						<label *ngIf="isAnestheticUnique==false" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
+						<label *ngIf="!isAnestheticUnique" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
 						<li class="required">
-							<label i18n="Edit anesthetic|Name label" class="required-label">Name</label> 
+							<label i18n="Edit anesthetic|Name label" >Name</label> 
 							<!-- <input type="text" id="name" formControlName="name" [(ngModel)]="anesthetic.name"/> -->
 							<label class="label_light" *ngIf="anesthetic.name == undefined || anesthetic.name == ''">Name is automatically generated</label>
 							<label id="name" *ngIf="anesthetic.name">{{anesthetic.name}}</label> 
 						</li>
 						<li class="required">
-							<label i18n="Edit anesthetic|AnestheticType label" class="required-label">Type</label> 
+							<label i18n="Edit anesthetic|AnestheticType label">Type</label> 
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
-										{{enumUtils.getEnumValue(anestheticTypes,anesthetic.anestheticType)}}
+									{{AnestheticType.getLabel(anesthetic.anestheticType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="anestheticType" required [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()">
-                                        <select-option *ngFor="let anestheticType of anestheticTypes" [value]="anestheticType.key">{{anestheticType.value}}</select-option>
+                                    <select-box formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (userChange)="onChangeType()" [options]="AnestheticType.options">
                                     </select-box>
 									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
 								</ng-template>
@@ -100,6 +99,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+                (delete) = "delete()"
 				(cancel)="goToView()"
 				(back)="goBack()">
 		</form-footer>

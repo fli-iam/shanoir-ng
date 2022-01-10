@@ -85,9 +85,9 @@ public class ShanoirEventsService {
             try {
                 emitter.send("{}", MediaType.APPLICATION_JSON);
             } catch (Exception e) {
+            	// This happens when the user's connection reset, do not log anything.
             	emitter.complete();
                 sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while keeping connection alive. ", e);
             }
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);

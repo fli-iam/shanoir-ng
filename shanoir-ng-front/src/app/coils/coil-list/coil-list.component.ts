@@ -18,6 +18,7 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'coil-list',
@@ -26,12 +27,16 @@ import { CoilService } from '../shared/coil.service';
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private coilService: CoilService) {
                 
         super('coil');
+    }
+    
+    getService(): EntityService<Coil> {
+        return this.coilService;
     }
 
     getOptions() {
@@ -51,12 +56,12 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             
-            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/manufacturer-model/details/' + coil.manufacturerModel.id])
+            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name",
+            route: (coil: Coil) => '/manufacturer-model/details/' + coil.manufacturerModel.id
             },
            
-            { headerName: "Center", field: "center.name" , type: "link", 
-            action: (coil: Coil) => this.router.navigate(['/center/details/' + coil.center.id])
+            { headerName: "Center", field: "center.name",
+            route: (coil: Coil) => '/center/details/' + coil.center.id
             },
 
             { headerName: "Coil Type", field: "coilType" },

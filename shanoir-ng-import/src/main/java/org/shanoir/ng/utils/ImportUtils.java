@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -33,8 +34,12 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.io.Files;
 
@@ -47,7 +52,23 @@ import com.google.common.io.Files;
 public class ImportUtils {
 
 	private static final String INTO = " into ";
+
 	private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
+
+	private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+	private static final String APPLICATION_ZIP = "application/zip";
+
+	private static final String ZIP_FILE_SUFFIX = ".zip";
+
+	private static final String FILE_POINT = ".";
+
+	private static final String DICOMDIR = "DICOMDIR";
+
+	private static final String UPLOAD_FILE_SUFFIX = ".upload";
+
+	private static final SecureRandom RANDOM = new SecureRandom();
+
 	/**
 	 * @todo: read from application.yml -> Yao
 	 */
@@ -126,20 +147,17 @@ public class ImportUtils {
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static boolean checkZipContainsFile(final String fileName, final File file) throws IOException {
-		boolean result = false;
-		ZipEntry entry;
-		ZipFile zipfile = new ZipFile(file);
-		final Enumeration<? extends ZipEntry> e = zipfile.entries();
-		boolean found = false;
-		while (e.hasMoreElements() && !found) {
-			entry = e.nextElement();
-			if (entry.getName().toUpperCase().endsWith(fileName.toUpperCase())) {
-				found = true;
-				result = true;
+		ZipFile zipFile = new ZipFile(file);
+		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+		while (entries.hasMoreElements()) {
+			ZipEntry entry = entries.nextElement();
+			if (entry.getName().toUpperCase().equals(fileName.toUpperCase())) {
+				zipFile.close();
+				return true;
 			}
 		}
-		zipfile.close();
-		return result;
+		zipFile.close();
+		return false;
 	}
 
 	/**
@@ -219,6 +237,26 @@ public class ImportUtils {
         }
         fis.close();
     }
+   
+	/**
+	 * Check if sent file is of type .zip.
+	 *
+	 * @param file
+	 */
+	public static boolean isZipFile(final MultipartFile file) {
+		return file.getOriginalFilename().endsWith(ZIP_FILE_SUFFIX) || file.getContentType().equals(APPLICATION_ZIP)
+				|| file.getContentType().equals(APPLICATION_OCTET_STREAM);
+	}
+
+	public static File getUserImportDir(String importDir) {
+		final Long userId = KeycloakUtil.getTokenUserId();
+		final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+		final File userImportDir = new File(userImportDirFilePath);
+		if (!userImportDir.exists()) {
+			userImportDir.mkdirs(); // create if not yet existing
+		} // else is wanted case, user has already its import directory
+		return userImportDir;
+	}
 
 	private static void createDirectory(File outdir, String path) {
 		File d = new File(outdir, path);
@@ -453,5 +491,64 @@ public class ImportUtils {
 		return newName;
 	}
 
+	/**
+	 * This method stores an uploaded zip file in a temporary file, creates a new
+	 * folder with the same name and unzips the content into this folder, and gives
+	 * back the folder with the content.
+	 * 
+	 * @param tempFile
+	 * @param dicomZipFile
+	 * @return
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
+	public static File saveTempFileCreateFolderAndUnzip(final File tempFile, final MultipartFile dicomZipFile,
+			final boolean fromDicom) throws IOException, RestServiceException {
+		String fileName = tempFile.getName();
+		int pos = fileName.lastIndexOf(FILE_POINT);
+		if (pos > 0) {
+			fileName = fileName.substring(0, pos);
+		}
+		File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+		if (!unzipFolderFile.exists()) {
+			unzipFolderFile.mkdirs();
+		} else {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Error while unzipping file: folder already exists.", null));
+		}
+		ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+		tempFile.delete();
+		return unzipFolderFile;
+	}
+
+	/**
+	 * This method takes a multipart file and stores it in a configured upload
+	 * directory in relation with the userId with a random name and the suffix
+	 * .upload
+	 *
+	 * @param file
+	 * @throws IOException
+	 */
+	public static File saveTempFile(final File userImportDir, final MultipartFile file) throws IOException {
+		long n = createRandomLong();
+		File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
+		file.transferTo(uploadFile);
+		return uploadFile;
+	}
+
+	/**
+	 * This method creates a random long number.
+	 * 
+	 * @return long: random number
+	 */
+	public static long createRandomLong() {
+		long n = RANDOM.nextLong();
+		if (n == Long.MIN_VALUE) {
+			n = 0; // corner case
+		} else {
+			n = Math.abs(n);
+		}
+		return n;
+	}
 
 }

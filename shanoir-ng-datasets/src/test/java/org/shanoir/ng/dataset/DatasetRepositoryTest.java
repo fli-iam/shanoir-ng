@@ -81,7 +81,7 @@ public class DatasetRepositoryTest {
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
-		Dataset founded = repository.findOne(id);
+		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
@@ -105,7 +105,7 @@ public class DatasetRepositoryTest {
 		assertNotNull(result.getId());
 		Long id = result.getId();
 		
-		Dataset founded = repository.findOne(id);
+		Dataset founded = repository.findById(id).orElse(null);
 		assertTrue(founded instanceof MrDataset);
 		MrDataset foundedMr = (MrDataset) founded;
 		assertEquals(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME, foundedMr.getMrQualityProcedureType());
@@ -128,7 +128,7 @@ public class DatasetRepositoryTest {
 		PetDataset pet1 = ModelsUtil.createPetDataset();
 		Long pet1Id = repository.save(pet1).getId();
 
-		List<Dataset> all = Utils.toList(repository.findAll(Arrays.asList(mr1Id, mr2Id, pet1Id)));
+		List<Dataset> all = Utils.toList(repository.findAllById(Arrays.asList(mr1Id, mr2Id, pet1Id)));
 		assertEquals(3, all.size());
 		
 		Dataset foundedMr1 = all.get(0);
@@ -145,6 +145,12 @@ public class DatasetRepositoryTest {
 		assertEquals(pet1Id, foundedPet1.getId());
 		assertTrue(foundedPet1 instanceof PetDataset);
 		assertEquals("Pet", ((PetDataset)foundedPet1).getType());
+	}
+	
+	@Test
+	public void loadingStrategyTest() throws ShanoirException {
+		assertNotNull(repository.findById(1L).orElse(null).getDatasetAcquisition());
+		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
 	}
 	
 }

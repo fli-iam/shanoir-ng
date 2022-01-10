@@ -11,13 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Dataset } from "../../shared/dataset.model";
-import { allOfEnum } from '../../../utils/app.utils';
-
-declare type MrQualityProcedureType = 'MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME' | 'MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME';
+import { Option } from '../../../shared/select/select.component';
+import { allOfEnum, capitalsAndUnderscoresToDisplayable } from '../../../utils/app.utils';
+import { Dataset } from '../../shared/dataset.model';
+import { DiffusionGradient } from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import { DatasetType } from '../../shared/dataset-type.model';
 
 export class MrDataset extends Dataset {
+    diffusionGradients: DiffusionGradient[];
     echoTime: EchoTime[];
     flipAngle: FlipAngle[];
     inversionTime: InversionTime[];
@@ -25,6 +26,12 @@ export class MrDataset extends Dataset {
     mrQualityProcedureType: MrQualityProcedureType;
     originMrMetadata: MrDatasetMetadata;
     updatedMrMetadata: MrDatasetMetadata = new MrDatasetMetadata();
+	firstImageAcquisitionTime: string;
+    lastImageAcquisitionTime: string;
+    constructor() {
+        super();
+        this.type = DatasetType.Mr;
+    }
 }
 
 export class EchoTime {
@@ -73,35 +80,31 @@ export enum MrDatasetNature {
 
 } export namespace MrDatasetNature {
     
-    const allMrDatasetNatures: any[] = [
-        { value: MrDatasetNature.T1_WEIGHTED_MR_DATASET, label: "T1WeightedMRDataset" },
-        { value: MrDatasetNature.T2_WEIGHTED_MR_DATASET, label: "T2WeightedMRDataset" },
-        { value: MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET, label: "T2StarWeightedMRDataset" },
-        { value: MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET, label: "ProtonDensityWeightedMRDataset" },
-        { value: MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET, label: "DiffusionWeightedMRDataset" },
-        { value: MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET, label: "VelocityEncodedAngioMRDataset" },
-        { value: MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET, label: "TimeOfFlightMRDataset" },
-        { value: MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET, label: "ContrastAgentUsedAngioMRDataset" },
-        { value: MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET, label: "SpinTaggingPerfusionMRDataset" },
-        { value: MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET, label: "T1WeightedDCEMRDataset" },
-        { value: MrDatasetNature.T2_WEIGHTED_DCE_MR_DATASET, label: "T2WeightedDCEMRDataset" },
-        { value: MrDatasetNature.T2_STAR_WEIGHTED_DCE_MR_DATASET, label: "T2StarWeightedDCEMRDataset" },
-        { value: MrDatasetNature.FIELD_MAP_DATASET_SHORT_ECHO_TIME, label: "FieldMapDatasetShortEchoTime" },
-        { value: MrDatasetNature.FIELD_MAP_DATASET_LONG_ECHO_TIME, label: "FieldMapDatasetLongEchoTime" },
-        { value: MrDatasetNature.H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET, label: "H1SinglevoxelSpectroscopyDataset" },
-        { value: MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET, label: "H1SpectroscopicImagingDataset" }
-    ];
-    
     export function all(): Array<MrDatasetNature> {
         return allOfEnum<MrDatasetNature>(MrDatasetNature);
     }
 
-    export function getLabel(nature: MrDatasetNature) {
-        let founded = allMrDatasetNatures.filter(entry => entry.value == nature)[0];
-        return founded ? founded.label : undefined;
+    export function getLabel(type: MrDatasetNature): string {
+        return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export function getValueLabelJsonArray() {
-        return allMrDatasetNatures;
+    export var options: Option<MrDatasetNature>[] = all().map(prop => new Option<MrDatasetNature>(prop, getLabel(prop)));
+}
+
+export enum MrQualityProcedureType {
+
+    MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME = "MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME",
+    MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME = 'MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME'
+
+} export namespace MrQualityProcedureType {
+    
+    export function all(): Array<MrQualityProcedureType> {
+        return allOfEnum<MrQualityProcedureType>(MrQualityProcedureType);
     }
+
+    export function getLabel(type: MrQualityProcedureType): string {
+        return capitalsAndUnderscoresToDisplayable(type);
+    }
+
+    export var options: Option<MrQualityProcedureType>[] = all().map(prop => new Option<MrQualityProcedureType>(prop, getLabel(prop)));
 }

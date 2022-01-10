@@ -16,7 +16,7 @@ services:
   # Keycloak: database and service
   #
   keycloak-database:
-    container_name: keycloak-database
+    container_name: "${SHANOIR_PREFIX}keycloak-database"
     build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
@@ -25,9 +25,17 @@ services:
     networks:
       - shanoir_ng_network
   keycloak:
-    container_name: keycloak
-    env_file:
-      - ./.env
+    container_name: "${SHANOIR_PREFIX}keycloak"
+    environment:
+      - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_ADMIN_NAME
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_MIGRATION
+      - SHANOIR_KEYCLOAK_USER
+      - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_ALLOWED_ADMIN_IPS
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -39,7 +47,7 @@ services:
   # RabbitMQ: inter-microservices communication
   #  
   rabbitmq:
-    container_name: rabbitmq
+    container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.7.7-management-alpine
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
@@ -52,10 +60,13 @@ services:
   # Database for all other microservices
   #
   database:
-    container_name: database
+    container_name: "${SHANOIR_PREFIX}database"
     build: ./docker-compose/database
+    command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
+    environment:
+      - SHANOIR_MIGRATION
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -66,21 +77,18 @@ services:
   # Users microservice
   #
   users:
-    container_name: users
+    container_name: "${SHANOIR_PREFIX}users"
     build: ./docker-compose/users
     environment:
-      - keycloak.auth-server-url
-      - kc.admin.client.server.url
-      - kc.admin.client.realm
-      - kc.admin.client.client.id
-      - KEYCLOAK_USER
-      - KEYCLOAK_PASSWORD
-      - front.server.url
-      - front.server.address
-      - spring.mail.host
-      - administrator.email
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_KEYCLOAK_USER
+      - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_CERTIFICATE
+      - SHANOIR_MIGRATION
+      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -90,25 +98,24 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
   #
   # Studies microservice
   #
   studies:
-    container_name: studies
+    container_name: "${SHANOIR_PREFIX}studies"
     build: ./docker-compose/studies
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_MIGRATION
+      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -116,7 +123,6 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -124,14 +130,13 @@ services:
   # Import microservice
   #
   import:
-    container_name: import
+    container_name: "${SHANOIR_PREFIX}import"
     build: ./docker-compose/import
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_MIGRATION
+      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -142,7 +147,6 @@ services:
      - "9903:9903"
      - "9913:9913"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -150,14 +154,13 @@ services:
   # Datasets microservice
   #
   datasets:
-    container_name: datasets
+    container_name: "${SHANOIR_PREFIX}datasets"
     build: ./docker-compose/datasets
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_MIGRATION
+      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -169,33 +172,29 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
-  #
-  # Preclinical microservice
-  #
+
   preclinical:
-    container_name: preclinical
+    container_name: "${SHANOIR_PREFIX}preclinical"
     build: ./docker-compose/preclinical
     environment:
-      - keycloak.auth-server-url
-      - front.server.url
-      - front.server.address
-      - spring.jpa.hibernate.ddl-auto
-      - spring.datasource.initialize
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_MIGRATION
+      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
+      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
      - "9909:9909"
      - "9915:9915"
     depends_on:
-      - "keycloak"
       - "database"
       - "rabbitmq"
       - "users"
@@ -203,9 +202,9 @@ services:
   # Bruker2Dicom, Dicom2Nifti microservice
   #
   preclinical-bruker2dicom:
-    container_name: preclinical-bruker2dicom
-    image: dicomifier.ws
-    command: ["python3", "/root/run.py"]
+    container_name: "${SHANOIR_PREFIX}preclinical-bruker2dicom"
+    image: jcomedouteau/dicomifier.ws:1.3
+    command: ["python3", "/opt/dicomifier.ws/run.py"]
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
@@ -213,30 +212,24 @@ services:
       - shanoir_ng_network
     ports:
      - "5000:5000"
-    depends_on:
-      - "preclinical"
   #
   # Solr microservice for Shanoir-NG search
   #
-#  solr:
-#    container_name: solr
-#    image: solr
-#    volumes:
-#      - "solr-data:/opt/solr/server/solr/mycores"
-#    networks:
-#      - shanoir_ng_network
-#    ports:
-#      - "8983:8983"
-#    entrypoint:
-#      - docker-entrypoint.sh
-#      - solr-precreate
-#      - mycore
-#
-  #
+  solr:
+    container_name: "${SHANOIR_PREFIX}solr"
+    build: ./docker-compose/solr
+    environment:
+      - SOLR_LOG_LEVEL=SEVERE
+    volumes:
+      - "solr-data:/var/solr"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "8983:8983"
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
-    container_name: ldap
+    container_name: "${SHANOIR_PREFIX}ldap"
     image: dcm4che/slapd-dcm4chee:2.4.44-13.0
     logging:
       driver: json-file
@@ -251,7 +244,7 @@ services:
       - "dcm4chee-ldap-data:/var/lib/ldap"
       - "dcm4chee-sldap-data:/etc/ldap/slapd.d"
   dcm4chee-database:
-    container_name: dcm4chee-database
+    container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:10.0-13
     logging:
       driver: json-file
@@ -265,7 +258,7 @@ services:
     volumes:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
-    container_name: dcm4chee-arc
+    container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
     image: dcm4che/dcm4chee-arc-psql:5.13.0
     logging:
       driver: json-file
@@ -281,8 +274,9 @@ services:
       - "2575:2575"
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
+      POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       WILDFLY_CHOWN: /opt/wildfly/standalone /storage
-      WILDFLY_WAIT_FOR: ldap:389 dcm4chee-database:5432
+      WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
       - "ldap"
       - "dcm4chee-database"
@@ -295,20 +289,26 @@ services:
   nginx:
     container_name: shanoir-ng-nginx
     build: ./docker-compose/nginx
+    environment:
+      - SHANOIR_PREFIX
+      - SHANOIR_URL_HOST
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_X_FORWARDED
+      - SHANOIR_INSTANCE_NAME
+      - SHANOIR_INSTANCE_COLOR
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
     networks:
-      - shanoir_ng_network    
+      - shanoir_ng_network
     ports:
      - "443:443"
     depends_on:
-      - "keycloak"
       - "users"
       - "studies"
       - "import"
       - "datasets"
-      - "dcm4chee-arc"
+      - "preclinical"
       - "rabbitmq"
 
 volumes:
@@ -316,6 +316,8 @@ volumes:
   rabbitmq-data:
   database-data:
   datasets-data:
+  extra-data:
+  studies-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:

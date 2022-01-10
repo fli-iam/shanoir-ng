@@ -11,35 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author JcomeD
  *
  */
-public class EegImportJob {
+public class EegImportJob extends ImportJob {
 
-	/** Folder where source data is stored. */
-	@JsonProperty("workFolder")
-	private String workFolder;
+	private static final long serialVersionUID = 2425683448060201704L;
 
-	/** Corresponding examination. */
-	@JsonProperty("examinationId")
-	private Long examinationId;
-
-	/** Corresponding study. */
-	@JsonProperty("frontStudyId")
-	private Long frontStudyId;
-
-	/** Corresponding subject. */
+	/** List of associated datasets. */
 	@JsonProperty("subjectId")
 	private Long subjectId;
-
-	/** Corresponding subject name. */
-	@JsonProperty("subjectName")
-	private String subjectName;
-
-	/** Corresponding study name. */
-	@JsonProperty("studyName")
-	private String studyName;
-
-	/** Not mandatyory, acquisition equipement. */
-	@JsonProperty("frontAcquisitionEquipmentId")
-	private Long frontAcquisitionEquipmentId;
 
 	/** List of associated datasets. */
 	@JsonProperty("datasets")
@@ -59,54 +37,5 @@ public class EegImportJob {
 
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
-	}
-
-	public Long getExaminationId() {
-		return examinationId;
-	}
-
-	public void setExaminationId(Long examinationId) {
-		this.examinationId = examinationId;
-	}
-
-	public Long getFrontStudyId() {
-		return frontStudyId;
-	}
-
-	public void setFrontStudyId(Long frontStudyId) {
-		this.frontStudyId = frontStudyId;
-	}
-
-	public Long getFrontAcquisitionEquipmentId() {
-		return frontAcquisitionEquipmentId;
-	}
-
-	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
-		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
-	}
-
-	public String getWorkFolder() {
-		return workFolder;
-	}
-
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
-	}
-
-	public String getSubjectName() {
-		return subjectName;
-	}
-
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
-
-	public String getStudyName() {
-		return studyName;
-	}
-
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
-	
+	}	
 }

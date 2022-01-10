@@ -38,10 +38,7 @@ public class CurrentNominativeDataModel extends Observable {
 
 	public void addUpload(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
 		getCurrentUploads().put(absolutePath, nominativeDataUploadJob);
-		if (nominativeDataUploadJob.getUploadPercentage() == null
-				|| nominativeDataUploadJob.getUploadPercentage().equals("")) {
-			nominativeDataUploadJob.setUploadPercentage("0 %");
-		} else if (nominativeDataUploadJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
+		if (nominativeDataUploadJob.getUploadPercentage().equals("FINISHED_UPLOAD")) {
 			nominativeDataUploadJob.setUploadPercentage("FINISHED");
 		}
 		String[] msg = { "add", absolutePath };

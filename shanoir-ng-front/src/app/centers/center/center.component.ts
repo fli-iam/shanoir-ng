@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'center-detail',
@@ -29,9 +30,9 @@ import { CenterService } from '../shared/center.service';
 
 export class CenterComponent extends EntityComponent<Center> {
 
-    private isNameUniqueError: boolean = false;
-    private phoneNumberPatternError: boolean = false;
-    private openAcqEq: boolean = true;
+    isNameUniqueError: boolean = false;
+    phoneNumberPatternError: boolean = false;
+    openAcqEq: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -42,6 +43,10 @@ export class CenterComponent extends EntityComponent<Center> {
 
     get center(): Center { return this.entity; }
     set center(center: Center) { this.entity = center; }
+
+    getService(): EntityService<Center> {
+        return this.centerService;
+    }
 
     initView(): Promise<void> {
         return this.centerService.get(this.id).then(center => {
@@ -72,11 +77,11 @@ export class CenterComponent extends EntityComponent<Center> {
         });
     }
 
-    private goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
+    goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
         this.router.navigate(['/acquisition-equipment/details/' + acqE.id]);
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 

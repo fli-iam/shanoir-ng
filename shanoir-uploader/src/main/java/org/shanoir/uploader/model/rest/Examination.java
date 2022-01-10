@@ -10,7 +10,7 @@ public class Examination {
 
 	private Long id;
 
-	private IdName center;
+	private Long centerId;
 
 	private String comment;
 
@@ -19,9 +19,9 @@ public class Examination {
 
 	private String note;
 
-	private IdName study;
+	private Long studyId;
 
-	private IdName subject;
+	private Long subjectId;
 
 	private Double subjectWeight;
 
@@ -91,37 +91,6 @@ public class Examination {
 		this.note = note;
 	}
 
-	public IdName getCenter() {
-		return center;
-	}
-
-	public void setCenter(IdName center) {
-		this.center = center;
-	}
-
-	public IdName getStudy() {
-		return study;
-	}
-
-	public void setStudy(IdName study) {
-		this.study = study;
-	}
-
-	/**
-	 * @return the subject
-	 */
-	public IdName getSubject() {
-		return subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(IdName subject) {
-		this.subject = subject;
-	}
-
 	/**
 	 * @return the subjectWeight
 	 */
@@ -148,6 +117,30 @@ public class Examination {
 	public String toString() {
 		final String examinationDate = ShUpConfig.formatter.format(this.getExaminationDate());
 		return examinationDate + ", " + this.getComment() + " (id = " + this.getId() + ")";
+	}
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 
 }

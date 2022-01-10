@@ -21,7 +21,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for relations between a study and an user.
@@ -36,7 +35,10 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
 	Iterable<StudyUser> findByUserIdAndStudyIdIn(Long userId, Set<Long> studyIds);
 
 	Iterable<StudyUser> findByUserId(Long userId);
+	
+	Iterable<StudyUser> findByStudyId(Long studyId);
 
 	@Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-	List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") int right);
+	List<Long> findDistinctStudyIdByUserId(Long userId, int right);
+
 }

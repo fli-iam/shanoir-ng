@@ -59,12 +59,13 @@ public class StudyUserUpdateService {
 			}
         }
         
-        Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAll(toBeUpdated.keySet());
+        Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAllById(toBeUpdated.keySet());
         for (StudyUser existingSu : toBeUpdatedDb) {
         	StudyUser replacingSu = toBeUpdated.get(existingSu.getId());
-			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
+			existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
+			existingSu.setConfirmed(replacingSu.isConfirmed());
         }
         
         if (!toBeCreated.isEmpty()) {
@@ -81,12 +82,12 @@ public class StudyUserUpdateService {
         			}
         		}
         	}
-        	studyUserRepository.save(toBeCreated);
+        	studyUserRepository.saveAll(toBeCreated);
         }
         int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
         if (updateSize > 0) {
         	LOG.debug("Updating {} study-user(s)", updateSize);
-        	studyUserRepository.save(toBeUpdatedDb);
+        	studyUserRepository.saveAll(toBeUpdatedDb);
         }
         if (!toBeDeleted.isEmpty()) {
         	LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());

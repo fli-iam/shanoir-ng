@@ -11,71 +11,107 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { ApplicationRef, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
-
-import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { GlobalService } from '../../services/global.service';
+import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import * as shajs from 'sha.js';
+
 
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-
-export class TableComponent implements OnInit {
-    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
+export class TableComponent implements OnInit, OnChanges, OnDestroy {
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
-    selection: Map<number, any> = new Map();
     @Input() selectionAllowed: boolean = false;
-    @Output() selectionChange: EventEmitter<Object[]> = new EventEmitter<Object[]>();
+    @Input() selection: Set<number> = new Set();
+    @Output() selectionChange: EventEmitter<Set<number>> = new EventEmitter<Set<number>>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
-
-    private page: Page<Object>;
-    private isLoading: boolean = false;
-    private maxResultsField: number;
-    private maxResults: number = 20;
-    private lastSortedCol: Object = null;
-    private lastSortedAsc: boolean = true;
-    private currentPage: number = 1;
-    private filter: Filter;
-    private loaderImageUrl: string = "assets/images/loader.gif";
-    
+    @Input() maxResults: number = 20;
+    page: Page<Object>;
+    isLoading: boolean = false;
+    maxResultsField: number;
+    lastSortedCol: Object = null;
+    lastSortedAsc: boolean = true;
+    currentPage: number = 1;
+    loaderImageUrl: string = "assets/images/loader.gif";
+    isError: boolean = false;
+    filter: Filter = new Filter(null, null);
+    firstLoading: boolean = true;
+    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
+    currentDrag: {leftOrigin: number, totalWidth: number, leftColIndex: number};
+    private subscriptions: Subscription[] = [];
+    private hash: string;
+    private colSave: { width: string, hidden: boolean }[];
 
     constructor(
-            private applicationRef: ApplicationRef,
-            private breadcrumbsService: BreadcrumbsService) {
+            private elementRef: ElementRef,
+            private breadcrumbsService: BreadcrumbsService,
+            private globalClickService: GlobalService) {
         this.maxResultsField = this.maxResults;
     }
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['selection'] && !changes['selection'].isFirstChange()) {
+            this.saveSelection();
+        }
+        if (changes.columnDefs && this.columnDefs) {
+            this.colSave = this.columnDefs.map(col => { return { width: col.width, hidden: col.hidden } });
+            this.hash = this.getHash();
+            this.reloadSettings();
+            this.reloadPreviousState();
+        }
+    }
 
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(sub => sub.unsubscribe());
+    }
 
     ngOnInit() {
-        let savedState = this.breadcrumbsService.currentStep.data.tableState;
+        this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
+    }
+
+    private reloadPreviousState() {
+        let currentStep = this.breadcrumbsService.currentStep
+        let savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.hash] : null;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+            if (savedState.selection && Symbol.iterator in Object(savedState.selection)) {
+                this.selection = new Set();
+                savedState.selection.forEach(id => this.selection.add(id));
+                this.emitSelectionChange();
+            }
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+                .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1);
+            this.goToPage(1)
+                .then(() => this.firstLoading = false);
         }
     }
-
     
-    private get items(): Object[] {
+    get items(): Object[] {
         return this.page ? this.page.content : [];
     }
     
 
-    private sortBy(col: Object): void {
+    sortBy(col: Object): void {
         if (col['suppressSorting'] || col["type"] == "button") return;
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
@@ -85,15 +121,16 @@ export class TableComponent implements OnInit {
     }
 
 
-    private onSearchChange(filter: Filter) {
+    onSearchChange(filter: Filter) {
         this.filter = filter;
         this.clearSelection();
         this.goToPage(1);
     }
 
 
-    private onRowClick(item: Object) {
-        this.rowClick.emit(item);
+    onRowClick(item: Object) {
+        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
 
@@ -102,15 +139,20 @@ export class TableComponent implements OnInit {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
-        } else if (col.field == undefined) {
+        } else if (!col.field) {
             return null;
         } else {
-            return this.getFieldRawValue(item, col["field"]);
+            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) return fieldValue;
+            else if (col.defaultField) 
+                return this.getFieldRawValue(item, col["defaultField"]);
+            else
+                return;
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        if (path == undefined || path == null) return;
+        if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -118,14 +160,14 @@ export class TableComponent implements OnInit {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    private getCellValue(item: Object, col: any): any {
+    getCellValue(item: Object, col: any): any {
         return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
-    private getFieldRawValue(obj: Object, path: string): any {
+    getFieldRawValue(obj: Object, path: string): any {
         return TableComponent.getFieldRawValue(obj, path);
     }
 
@@ -145,7 +187,7 @@ export class TableComponent implements OnInit {
     /** 
      * Triggered when a field is edited
      */
-    private onFieldEdit(obj: Object, col: Object, value: any) {
+    onFieldEdit(obj: Object, col: Object, value: any) {
         this.setFieldRawValue(obj, col['field'], value); 
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
@@ -154,10 +196,12 @@ export class TableComponent implements OnInit {
     /**
      * Convert a cell content to a displayable string
      */
-    private renderCell(item: Object, col: any): string {
-        let result: any = TableComponent.getCellValue(item, col);
+    renderCell(item: Object, col: any): any {
+        let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
+        } else if (result.text) {
+            return result;
         } else {
             return "" + result;
         }
@@ -166,13 +210,13 @@ export class TableComponent implements OnInit {
     /**
      * Test if a cell content is a boolean
      */
-    private isFieldBoolean(col: any): boolean {
+    isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
-        let val = TableComponent.getCellValue(this.items[0], col);
+        let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
-    private isColumnText(col: any): boolean {
+    isColumnText(col: any): boolean {
         return !this.isFieldBoolean(col)
             && col.type != 'link'
             && col.type != 'button'
@@ -180,7 +224,7 @@ export class TableComponent implements OnInit {
             && col.type != 'number';
     }
 
-    private isColumnNumber(col: any): boolean {
+    isColumnNumber(col: any): boolean {
         return col.type == 'number';
     }
 
@@ -196,7 +240,7 @@ export class TableComponent implements OnInit {
     /**
      * Get a column type attribute
      */
-    private getColType(col: any): string {
+    getColType(col: any): string {
         if (col.type != undefined) {
             return col.type;
         } else {
@@ -207,7 +251,7 @@ export class TableComponent implements OnInit {
     /**
      * Get a column type and format it to be used a dom element class
      */
-    private getColTypeStr(col: any): string {
+    getColTypeStr(col: any): string {
         let type: string = this.getColType(col);
         return type != null ? "col-" + type : "";
     }
@@ -215,36 +259,44 @@ export class TableComponent implements OnInit {
     /** 
      * Get a cell type and format it to be used a dom element class
      */
-    private getCellTypeStr(col: any): string {
+    getCellTypeStr(col: any): string {
         let type: string = this.getColType(col);
         return type != null ? "cell-" + type : "";
     }
 
-    private goToPage(p: number): void {
+    goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
-        this.getPage(this.getPageable()).then(page => {
+        return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
+            this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
-            setTimeout(() => this.isLoading = false, 200);
+            setTimeout(() => {
+                this.isError = false;
+                this.isLoading = false;
+            }, 200);
+        }).catch(reason => {
+            setTimeout(() => {
+                this.isError = true;
+                this.isLoading = false;
+                throw reason;
+            }, 200);
         });
     }
 
     /**
      * Call to refresh from outsilde
      */
-    public refresh() {
-        this.goToPage(this.currentPage);
+    public refresh(page?: number): Promise<void> {
+        if (page == undefined) {
+            return this.goToPage(this.currentPage, true);
+        } else {
+            return this.goToPage(page, true);
+        }
     }
 
     private getPageable(): Pageable {
-        this.breadcrumbsService.currentStep.data.tableState = {
-            lastSortedCol: this.lastSortedCol,
-            lastSortedAsc: this.lastSortedAsc,
-            filter: this.filter,
-            currentPage: this.currentPage,
-            maxResults: this.maxResults
-        };
+        this.saveState();
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -271,12 +323,54 @@ export class TableComponent implements OnInit {
         }
     }
 
-    private updateMaxResults(): void {
+    private saveState() {
+        let currentStep = this.breadcrumbsService.currentStep
+        if(currentStep) {
+            if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+            this.breadcrumbsService.currentStep.data.tableState[this.hash] = {
+                lastSortedCol: this.lastSortedCol,
+                lastSortedAsc: this.lastSortedAsc,
+                filter: this.filter,
+                currentPage: this.currentPage,
+                maxResults: this.maxResults,
+                selection: []
+            };
+            this.saveSettings();
+            this.saveSelection();
+        }
+    }
+
+    saveSettings() {
+        let pref: TablePreferences = new TablePreferences();
+        pref.colWidths = this.columnDefs.map(col => { return {width: col.width, hidden: col.hidden}; });
+        pref.pageSize = this.maxResultsField;
+        localStorage.setItem(this.hash, JSON.stringify(pref));
+    }
+
+    reloadSettings() {
+        let prefStr: string = localStorage.getItem(this.hash);
+        if (prefStr) {
+            let pref: TablePreferences = JSON.parse(prefStr);
+            this.maxResults = pref.pageSize;
+            this.columnDefs.forEach((col, i) => {
+                col.width = pref.colWidths[i].width;
+                col.hidden = pref.colWidths[i].hidden;
+            });
+        }
+    }
+
+    saveSelection() {
+        if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+        this.breadcrumbsService.currentStep.data.tableState[this.hash].selection = [...this.selection];
+    }
+
+    updateMaxResults(): void {
         this.maxResults = this.maxResultsField;
+        this.saveSettings();
         this.goToPage(1);
     }
 
-    private getNbSelected(): number {
+    public getNbSelected(): number {
         return this.selection ? this.selection.size : 0;
     }
 
@@ -301,7 +395,7 @@ export class TableComponent implements OnInit {
             //     this.selection = new Map();
             //     page.content.forEach(elt => this.selection.set(elt.id, elt));
             // });
-            this.page.content.forEach(elt => this.selection.set(elt['id'], elt));
+            this.page.content.forEach(elt => this.selection.add(elt['id']));
             this.emitSelectionChange();
         } else if (this.selectAll == false) {
             this.page.content.forEach(elt => {
@@ -311,32 +405,36 @@ export class TableComponent implements OnInit {
         }
     }
 
+    unSelectAll() {
+    }
+
     clearSelection() {
-        this.selection = new Map();
+        this.selection = new Set();
         this.emitSelectionChange();
         this.selectAll = false;
     }
 
     computeSelectAll() {
-        let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.get(row['id']) != undefined);
-        if (selectedOnCurrentPage.length == this.page.content.length) {
-            this.selectAll = true;
-        } else if (selectedOnCurrentPage.length == 0) {
-            this.selectAll = false;
-        } else {
-            this.selectAll = 'indeterminate';
+        if (this.page && this.page.content) {
+            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
+            if (selectedOnCurrentPage.length == this.page.content.length) {
+                this.selectAll = true;
+            } else if (selectedOnCurrentPage.length == 0) {
+                this.selectAll = false;
+            } else {
+                this.selectAll = 'indeterminate';
+            }
         }
     }
 
     emitSelectionChange() {
-        let arr = [];
-        this.selection.forEach(sel => arr.push(sel));
-        this.selectionChange.emit(arr);
+        this.saveSelection();
+        this.selectionChange.emit(this.selection);
     }
 
     onSelectChange(item: Object, selected: boolean) {
         if (selected) {
-            if (item['id']) this.selection.set(item['id'], item);
+            if (item['id']) this.selection.add(item['id']);
         } else {
             this.selection.delete(item['id']);
         }
@@ -349,7 +447,7 @@ export class TableComponent implements OnInit {
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
         }
-        return this.selection.get(item['id']) != undefined;
+        return this.selection.has(item['id']);
     }
 
     private getDefaultSorting() {
@@ -362,12 +460,72 @@ export class TableComponent implements OnInit {
         }
     }
 
-    private cellEditable(item, col) {
-        let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
+    cellEditable(item, col) {
+        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 
-    private rowDisabled(item): boolean {
+    rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
     }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('table items', this.items);
+        }
+    }
+
+    startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent) {
+        this.currentDrag = {
+            leftOrigin: event.pageX - thRef.offsetWidth + 10, 
+            totalWidth: (thRef.nextElementSibling as HTMLElement).offsetWidth + thRef.offsetWidth - 22, 
+            leftColIndex: leftColIndex
+        };
+    }
+
+    moveDrag(event: MouseEvent) {
+        if (this.currentDrag) {
+            let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
+            let nextIndex: number = this.columnDefs.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
+            if (leftDragWidth >= 10) {
+                this.columnDefs[this.currentDrag.leftColIndex].width = (leftDragWidth + 0) + 'px';
+                if (this.currentDrag.totalWidth - leftDragWidth < 10 && nextIndex != -1) {
+                    this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = 10 + 'px';
+                } else {
+                    this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - leftDragWidth) + 'px';
+                }
+            } else {
+                this.columnDefs[this.currentDrag.leftColIndex].width = 10 + 'px';
+                this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - 10) + 'px';
+            }
+        }
+    }
+
+    stopDrag() {
+        if (this.currentDrag) {
+            this.currentDrag = null;
+            this.saveSettings();
+        }
+    }
+
+    private getHash(): string {
+        let stringToBeHashed: string = this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
+        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        let hex = hash.substring(0, 30);
+        return hex;
+    }
+
+    resetColumns() {
+        this.columnDefs.forEach((col, i) => {
+            col.width = this.colSave[i].width;
+            col.hidden = this.colSave[i].hidden;
+        });
+        this.saveSettings();
+    }
+}
+
+export class TablePreferences {
+
+    colWidths: {width: number, hidden: boolean}[];
+    pageSize: number;
 }

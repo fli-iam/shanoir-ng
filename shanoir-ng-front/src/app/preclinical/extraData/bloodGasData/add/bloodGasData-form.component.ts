@@ -26,6 +26,7 @@ import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -54,6 +55,9 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     get bloodGasData(): BloodGasData { return this.entity; }
     set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
     
+    getService(): EntityService<BloodGasData> {
+        return this.extradatasService;
+    }
    
     initView(): Promise<void> {
         this.entity = new BloodGasData();
@@ -91,16 +95,18 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
 
-    protected save(): Promise<void> {
-        this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).subscribe((bloodGasData) => {
+    public save(): Promise<BloodGasData> {
+        return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
             this.msgBoxService.log('info', 'The new preclinical-bloodgasdata has been successfully saved under the number ' + bloodGasData.id);
+            return bloodGasData;
         });
-        return Promise.resolve();
     }
     
-    
-  
+    downloadFile() {
+        this.extradatasService.downloadFile(this.entity.id);
+    }
+
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.bloodGasData.filename= this.fileToUpload.name;
@@ -112,5 +118,10 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     	 }
       	this.bloodGasData = new BloodGasData();
     }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
+    }
+
     
 }

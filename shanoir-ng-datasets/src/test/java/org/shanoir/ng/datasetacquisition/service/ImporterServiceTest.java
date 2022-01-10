@@ -4,15 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +34,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
@@ -41,6 +42,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
+import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -52,6 +54,7 @@ import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -77,8 +80,8 @@ public class ImporterServiceTest {
 	private DatasetAcquisitionContext datasetAcquisitionContext;
 	
 	@Mock
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+	private DatasetAcquisitionService datasetAcquisitionService;
+
 	@Mock
 	private DicomPersisterService dicomPersisterService;
 
@@ -87,11 +90,20 @@ public class ImporterServiceTest {
 
 	@Mock
 	private ShanoirEventService taskService;
+	
+	@Mock
+	StudyUserRightsRepository studyUserRightRepo;
+
+	private Examination exam;
 
 	@Before
 	public void setUp() throws IOException {
+		exam = new Examination();
+		exam.setExaminationDate(LocalDate.now());
+		exam.setId(1l);
         PowerMockito.mockStatic(KeycloakUtil.class);
         given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
+        given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
 	}
 
 	@Test
@@ -121,9 +133,9 @@ public class ImporterServiceTest {
 		dataset.setChannels(Collections.singletonList(chan));
 		dataset.setEvents(Collections.singletonList(event));
 		importJob.setSubjectId(Long.valueOf(1));
-		importJob.setFrontStudyId(Long.valueOf(1));
+		importJob.setStudyId(Long.valueOf(1));
 		importJob.setExaminationId(Long.valueOf(1));
-		importJob.setFrontAcquisitionEquipmentId(Long.valueOf(1));
+		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName("What about us");
 		dataset.setName("Charles Trenet");
 		importJob.setWorkFolder("Julien Clerc");
@@ -141,7 +153,7 @@ public class ImporterServiceTest {
 		assertTrue(task.getStatus() == 1);
 
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcquisitionCapturer.capture());
+		verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
 		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 		
 		EegDataset ds = (EegDataset) hack.getDatasets().get(0);
@@ -178,8 +190,12 @@ public class ImporterServiceTest {
 		Dataset dataset = new Dataset();
 		List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
 		ExpressionFormat expressionFormat = new ExpressionFormat();
+		List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
+		DatasetFile datasetFile = new DatasetFile();
 		
-		expressionFormats.add(expressionFormat );
+		datasetFiles.add(datasetFile);
+		expressionFormat.setDatasetFiles(datasetFiles);
+		expressionFormats.add(expressionFormat);
 		dataset.setExpressionFormats(expressionFormats);
 		datasets.add(dataset );
 		serie.setDatasets(datasets );
@@ -192,12 +208,20 @@ public class ImporterServiceTest {
 		ImportJob importJob = new ImportJob();
 		importJob.setPatients(patients );
 		importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
-		importJob.setExaminationId(Long.valueOf(1));
+		importJob.setExaminationId(Long.valueOf(2));
+		importJob.setSubjectName("subjectName");
+		importJob.setStudyName("studyName");
+		importJob.setStudyId(1L);
+		importJob.setStudyCardName("SCname");
+		importJob.setShanoirEvent(new ShanoirEvent());
 		
 		Examination examination = new Examination();
-		when(examinationRepository.findOne(importJob.getExaminationId())).thenReturn(examination);
+		examination.setId(2L);
+		examination.setExaminationDate(LocalDate.now());
+		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq );
+		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
+		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 		
 		// WHEN we treat this importjob
 		service.createAllDatasetAcquisition(importJob, 1L);
@@ -208,10 +232,13 @@ public class ImporterServiceTest {
 		List<ShanoirEvent> values = argument.getAllValues();
 		ShanoirEvent task = values.get(0);
 		assertTrue(task.getStatus() == 1);
+		// NOTE: This test is important as we use the message to send an mail to study admin further.
+		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
+		assertEquals("studyName(1): Successfully created datasets for subject subjectName in examination 2", task.getMessage());
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).save(datasetAcq);
+		verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 

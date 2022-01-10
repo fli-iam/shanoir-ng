@@ -4,18 +4,21 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="import", password="password", database="import", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "import",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
+        database    = os.environ.get("TGT_DATABASE")    or "import",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
-
-
-print("Delete nifticonverter: start")
-query = "DELETE FROM nifticonverter"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete nifticonverter: end")
 
 
 print("Delete study_user_study_user_rights: start")
@@ -30,14 +33,6 @@ query = "DELETE FROM study_user"
 targetCursor.execute(query)
 targetConn.commit()
 print("Delete study_user: end")
-
-
-print("Import nifticonverter: start")
-sourceCursor.execute("SELECT NIFTI_CONVERTER_ID, COMMENT, IS_ACTIVE, NAME, REF_NIFTI_CONVERTER_TYPE_ID FROM NIFTI_CONVERTER")
-query = "INSERT INTO nifticonverter (id, comment, is_active, name, nifti_converter_type) VALUES (%s, %s, %s, %s, %s)"
-targetCursor.executemany(query, sourceCursor.fetchall())
-targetConn.commit()
-print("Import nifticonverter: end")
 
 
 print("Import study_user: start")    

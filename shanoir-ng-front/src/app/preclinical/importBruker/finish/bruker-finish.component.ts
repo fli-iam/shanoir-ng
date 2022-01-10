@@ -34,9 +34,9 @@ export class BrukerFinishImportComponent {
     private importJob: ImportJob;
     private selectedPatients: PatientDicom[];
     private context: ContextData;
-    private importing: boolean = false;
+    public importing: boolean = false;
     private step: Step;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    public readonly ImagesUrlUtil = ImagesUrlUtil;
 
     constructor(
             private importService: ImportService,
@@ -65,7 +65,7 @@ export class BrukerFinishImportComponent {
         return this.selectedPatients[0];
     }
     
-    private startImportJob(): void {
+    public startImportJob(): void {
         this.subjectService
             .updateSubjectStudyValues(this.context.subject.subjectStudy)
             .then(() => {
@@ -104,9 +104,9 @@ export class BrukerFinishImportComponent {
             importJob.subjectName = this.context.subject.name;
             importJob.studyName = this.context.study.name;
             importJob.examinationId = this.context.examination.id;
-            importJob.frontStudyId = this.context.study.id;
-            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
-            importJob.frontConverterId = this.context.niftiConverter.id;
+            importJob.studyId = this.context.study.id;
+            importJob.acquisitionEquipmentId = this.context.acquisitionEquipment.id;
+            importJob.converterId = this.context.niftiConverter.id;
             importJob.archive = this.importJob.archive;
             return this.importService.startImportJob(importJob);
         }

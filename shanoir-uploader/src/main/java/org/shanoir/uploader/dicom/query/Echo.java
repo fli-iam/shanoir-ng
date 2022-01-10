@@ -24,6 +24,7 @@ public class Echo {
 		dcmecho.setRemoteHost(config.getDicomServerHost());
 		dcmecho.setRemotePort(config.getDicomServerPort());
 		dcmecho.setCalledAET(config.getDicomServerAETCalled(), false);
+		dcmecho.setCalling(config.getLocalDicomServerAETCalling());
 		if (config.isDicomServerEnableTLS3DES()) {
 			dcmecho.setTlsNeedClientAuth(false);
 			dcmecho.setTls3DES_EDE_CBC();

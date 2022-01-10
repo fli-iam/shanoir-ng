@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.controler;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -24,8 +25,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +70,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudy().getId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
 	ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
@@ -125,6 +124,7 @@ public interface ExaminationApi {
 	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Saves a new examination", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -133,7 +133,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudy().getId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<ExaminationDTO> saveNewExamination(
 			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException;
@@ -146,7 +146,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
@@ -161,35 +161,22 @@ public interface ExaminationApi {
 	@PostMapping(value = "extra-data-upload/{examinationId}",
 	produces = { "application/json" },
     consumes = { "multipart/form-data" })
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> addExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Download extra data from an examination", response = ByteArrayResource.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination updated", response = ByteArrayResource.class),
+	@ApiOperation(value = "", notes = "Download extra data from an examination", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, message = "examination updated"),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "extra-data-download/{examinationId}/{fileName:.+}/")
-	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<ByteArrayResource> downloadExtraData(
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	void downloadExtraData(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName) throws RestServiceException, IOException;
-
-	@ApiOperation(value = "", notes = "If exists, returns the bruker archive of the examination corresponding to the given id", response = Resource.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examination", response = Examination.class),
-	        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-	        @ApiResponse(code = 401, message = "unauthorized"),
-	        @ApiResponse(code = 403, message = "forbidden"),
-	        @ApiResponse(code = 404, message = "no dataset found"),
-	        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/preclinical/examinationId/{examinationId}/export",
-		produces = { "application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<ByteArrayResource> exportExaminationById(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws RestServiceException, IOException;
+			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

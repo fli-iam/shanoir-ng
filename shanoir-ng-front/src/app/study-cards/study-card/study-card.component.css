@@ -1,0 +1,12 @@
+.layout { min-width: 410px; }
+
+.rules { width: 100%; }
+
+.option-section select-option caption { display: none; }
+.option-section select-option:not(.hidden) ~ caption { display: flex; }
+
+.show-errors { background-color: var(--color-c); }
+.show-errors:hover { background-color: var(--color-c-light); }
+.show-errors:disabled { background-color: var(--grey); }
+
+.center:not(:first-child)::before { content: ","; }

@@ -15,7 +15,7 @@
 import { Component, Input, Output, EventEmitter} from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+// import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { SubjectTherapy }    from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -32,6 +32,7 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'subject-therapy-form',
@@ -59,7 +60,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         private  subjectTherapyService: SubjectTherapyService, 
         private therapyService: TherapyService,
         private referenceService: ReferenceService, 
-        private enumUtils: EnumUtils
+        public enumUtils: EnumUtils
         ) {
 
             super(route, 'preclinical-subject-therapy');
@@ -67,6 +68,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
 
     get subjectTherapy(): SubjectTherapy { return this.entity; }
     set subjectTherapy(subjectTherapy: SubjectTherapy) { this.entity = subjectTherapy; }
+
+    getService(): EntityService<SubjectTherapy> {
+        return this.subjectTherapyService;
+    }
 
     initView(): Promise<void> {
         return new  Promise<void>(resolve => {
@@ -215,8 +220,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
    
     addTherapy(): Promise<void> {
-        if (!this.subjectTherapy) { 
-            console.log('nothing to create');
+        if (!this.subjectTherapy) {
             return; 
         }
         if(this.preclinicalSubject.therapies === undefined){
@@ -230,8 +234,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
     
     updateTherapy(): void {
-        if (!this.subjectTherapy) { 
-            console.log('nothing to update');
+        if (!this.subjectTherapy) {
             return; 
         }
         if (this.onEvent.observers.length > 0) {

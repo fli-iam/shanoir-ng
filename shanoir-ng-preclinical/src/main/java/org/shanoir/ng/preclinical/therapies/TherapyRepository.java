@@ -20,7 +20,7 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface TherapyRepository extends CrudRepository<Therapy, Long>, TherapyRepositoryCustom{
+public interface TherapyRepository extends CrudRepository<Therapy, Long> {
 	
 	Optional<Therapy> findByName(String name);
 	

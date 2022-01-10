@@ -12,7 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../../utils/app.utils";
+import { Option } from "../../../shared/select/select.component";
+
 export enum AnestheticType {
-    GAS = <any> "Gas",
-    INJECTION = <any> "Injection"
+    GAS = "GAS",
+    INJECTION = "INJECTION"
+
+} export namespace AnestheticType {
+    
+    export function all(): Array<AnestheticType> {
+        return allOfEnum<AnestheticType>(AnestheticType);
+    }
+
+    export function getLabel(type: AnestheticType): string {
+        return capitalsAndUnderscoresToDisplayable(type);
+    }
+    
+    export var options: Option<AnestheticType>[] = all().map(prop => new Option<AnestheticType>(prop, getLabel(prop)));
 }

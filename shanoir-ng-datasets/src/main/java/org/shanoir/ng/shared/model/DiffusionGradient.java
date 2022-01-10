@@ -23,6 +23,8 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * This class represents a diffusion gradient. It is used in the MR protocol to
  * list and rank all the diffusion gradients of the acquisition.
@@ -39,11 +41,13 @@ public class DiffusionGradient extends AbstractEntity {
 	private static final long serialVersionUID = -426008108821946235L;
 
 	/** MR protocol. */
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "mr_protocol_id")
 	private MrProtocol mrProtocol;
 
 	/** MR dataset. */
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
 	private MrDataset mrDataset;

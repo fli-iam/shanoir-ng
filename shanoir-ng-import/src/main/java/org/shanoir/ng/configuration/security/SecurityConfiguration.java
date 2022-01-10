@@ -18,11 +18,9 @@ import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.shanoir.ng.importer.dicom.ImageViewerServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +30,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -53,13 +50,13 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
-	
+
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
 	 * manager.
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 
@@ -69,7 +66,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	@Bean
 	@Override
 	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+		return new NullAuthenticatedSessionStrategy();
 	}
 
 	@Override
@@ -90,7 +87,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	public KeycloakConfigResolver keycloakConfigResolver() {
 		return new KeycloakSpringBootConfigResolver();
 	}
-	
+
 	@Bean
 	public FilterRegistrationBean corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -104,13 +101,4 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;
 	}
-	
-	@Bean
-	public ServletRegistrationBean exampleServletBean() {
-	    ServletRegistrationBean bean = new ServletRegistrationBean(
-	      new ImageViewerServlet(), "/viewer/ImageViewerServlet/*");
-	    bean.setLoadOnStartup(1);
-	    return bean;
-	}
-
 }

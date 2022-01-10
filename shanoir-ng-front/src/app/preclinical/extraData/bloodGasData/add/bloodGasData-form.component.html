@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="BloodGasDataFormComponent content-component" >
+<div #formContainer class="BloodGasDataFormComponent content-component" >
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'"> 
@@ -31,6 +31,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template  [ngSwitchCase]="'view'">
 							{{bloodGasData?.filename}}
+                           <button *ngIf="bloodGasData?.filename" class="button-picto clickable" (click)="downloadFile()">
+                                <i class="fas fa-download"></i>
+                            </button>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'create'">
 							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />

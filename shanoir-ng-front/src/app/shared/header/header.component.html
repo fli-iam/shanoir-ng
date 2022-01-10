@@ -13,12 +13,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header-component">
-    <div *ngIf="isAuthenticated()" class="logo"><a [routerLink]="['/home']"><img [src]="shanoirLogoUrl" /></a></div>
-    <div *ngIf="!isAuthenticated()" class="logo"><img [src]="shanoirLogoUrl" /></div>
-    <div *ngIf="isAuthenticated()" class="right">
-        <span class="welcome">Welcome {{username}} !</span> 
-        <span class="logout">
-            <button (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout</button>
-        </span>
-    </div>
+    <div class="logo"><img [src]="shanoirLogoUrl" /></div>
 </div>

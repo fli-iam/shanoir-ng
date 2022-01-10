@@ -12,32 +12,36 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-
-
-<h1>Bids</h1>
-
-<ng-template #recursiveList let-datas>
-    <node *ngFor="let item of datas" 
-    [label]="getFileName(item.path)" 
-    [dataRequest]="(item.elements && item.elements.length > 0) ? true : false" 
-    [nodeParams]="item" 
-    [deploy]="false"
-    [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
-    (labelClick)="getContent(item)"
-    (openClick)="getDetail($event)">
-      <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements }"></ng-container>
+<ng-template #recursiveList let-datas let-id="id">
+    <node *ngFor="let item of datas; let i = index" 
+        [label]="getFileName(item.path)" 
+        [deploy]="false"
+        [awesome]="(!item.file) ? 'far fa-folder' : 'fas fa-brain'"
+        (labelClick)="getContent(item, id + i)"
+        [buttonPicto]="hasDownloadRights() ? 'fas fa-save' : undefined"
+        (buttonClick)="download(item)"
+        (openClick)="getDetail($event)"
+        [hasChildren]="item.elements && item.elements.length > 0"
+        [class.selected]="selectedIndex == id + i">
+      <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.elements, id: id + i }"></ng-container>
     </node>
 </ng-template>
 
-<node label="Bids" awesome="far fa-folder" [deploy]="true" >
-  <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
+<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' ">
+    <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
 </node>
 
-<p *ngIf="json">
+<div *ngIf="json" class="content">
     <b> {{title}} </b> <br/>
-    <ngx-json-viewer  [json]="json"></ngx-json-viewer>
-</p>
-<p *ngIf="tsv">
+    <ngx-json-viewer [json]="json"></ngx-json-viewer>
+</div>
+<div *ngIf="tsv" class="content">
     <b> {{title}} </b> <br/>
-    {{tsv}}
-</p>
+    <table>
+        <tr *ngFor="let line of tsv">
+            <td *ngFor="let col of line; let i=index" [class.first]="i == 0" [class.last]="i == line.length - 1">
+                {{col}}
+            </td>
+        </tr>
+    </table>
+</div>

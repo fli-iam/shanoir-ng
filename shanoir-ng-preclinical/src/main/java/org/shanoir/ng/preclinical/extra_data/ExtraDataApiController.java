@@ -15,31 +15,32 @@
 package org.shanoir.ng.preclinical.extra_data;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
+import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
+import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -59,12 +60,34 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Autowired
 	private ExtraDataService<ExaminationExtraData> extraDataService;
+	
 	@Autowired
 	private ExtraDataService<PhysiologicalData> physioDataService;
+	
 	@Autowired
 	private ExtraDataService<BloodGasData> bloodGasDataService;
+
+	@Value("${preclinical.uploadExtradataFolder}")
+	private String extraDataPath;
+
+	private final HttpServletRequest request;
+
+	@org.springframework.beans.factory.annotation.Autowired
+	public ExtraDataApiController(final HttpServletRequest request) {
+		this.request = request;
+	}
+
 	@Autowired
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	private ExtraDataUniqueConstraintManager uniqueConstraintManager;
+	
+	@Autowired
+	private PhysioDataUniqueConstraintManager physioConstraintManager;
+	
+	@Autowired
+	private BloogGasUniqueConstraintManager bloodGasConstraintManager;
+
+	@Autowired
+	private ExtraDataEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -103,7 +126,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = this.uniqueConstraintManager.validate(extradata);
 
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -131,7 +154,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = physioConstraintManager.validate(extradata);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -151,7 +174,6 @@ public class ExtraDataApiController implements ExtraDataApi {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
 		}
-
 	}
 
 	@Override
@@ -162,7 +184,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(extradata);
+		final FieldErrorMap uniqueErrors = this.bloodGasConstraintManager.validate(extradata);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -230,30 +252,30 @@ public class ExtraDataApiController implements ExtraDataApi {
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadExtraData(
-			@ApiParam(value = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id)
+	public void downloadExtraData(
+			@ApiParam(value = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
+			HttpServletResponse response)
 			throws RestServiceException {
 
 		final ExaminationExtraData extradata = extraDataService.findById(id);
 		if (extradata != null) {
 			try {
 				File toDownload = new File(extradata.getFilepath());
-				Path path = Paths.get(toDownload.getAbsolutePath());
-				ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
 
-				HttpHeaders header = new HttpHeaders();
-				header.setContentType(MediaType.APPLICATION_PDF);
-				header.set(HttpHeaders.CONTENT_DISPOSITION,
-						"attachment; filename=" + extradata.getFilename().replace(" ", "_"));
+				// Try to determine file's content type
+				String contentType = request.getServletContext().getMimeType(toDownload.getAbsolutePath());
 
-				return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
-						.contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
+				try (InputStream is = new FileInputStream(toDownload);) {
+					response.setHeader("Content-Disposition", "attachment;filename=" + toDownload.getName());
+					response.setContentType(contentType);
+				    response.setContentLengthLong(toDownload.length());
+					org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+					response.flushBuffer();
+				}
 			} catch (IOException ioe) {
 				LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -269,8 +291,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(physioData);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(physioData);
+		// Check unique constraint
+		final FieldErrorMap uniqueErrors = this.physioConstraintManager.validate(physioData);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -304,7 +326,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(bloodGasData);
+		final FieldErrorMap uniqueErrors = bloodGasConstraintManager.validate(bloodGasData);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -325,34 +347,24 @@ public class ExtraDataApiController implements ExtraDataApi {
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final ExaminationExtraData extradata) {
-		return new EditableOnlyByValidator<ExaminationExtraData>().validate(extradata);
+		return editableOnlyValidator.validate(extradata);
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ExaminationExtraData extraData) {
-		final ExaminationExtraData previousStateExtraData = extraDataService.findById(extraData.getId());
-		return new EditableOnlyByValidator<ExaminationExtraData>()
-				.validate(previousStateExtraData, extraData);
-	}
-
-	@SuppressWarnings("unchecked")
-	private FieldErrorMap getUniqueConstraintErrors(final ExaminationExtraData extradata) {
-		final UniqueValidator<ExaminationExtraData> uniqueValidator = new UniqueValidator<>(
-				extraDataService);
-		return uniqueValidator.validate(extradata);
+		return editableOnlyValidator.validate(extraData);
 	}
 
 	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)
 			throws IOException {
-		// Create corresponding folders
-		Path path = Paths.get(preclinicalConfig.getUploadExtradataFolder() + extradata.getExaminationId() + File.pathSeparator
-				+ extradata.getClass().getSimpleName());
-		Files.createDirectories(path);
+		
+		File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
+		createdFolder.mkdirs();
 		// Path to file
-		Path pathToFile = Paths.get(path.toString() + File.pathSeparator + file.getOriginalFilename());
-		byte[] bytes = file.getBytes();
-		Files.write(pathToFile, bytes);
+		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+		file.transferTo(fileToGet);
+
 		extradata.setFilename(file.getOriginalFilename());
-		extradata.setFilepath(pathToFile.toString());
+		extradata.setFilepath(fileToGet.getAbsolutePath());
 		return extradata;
 	}
 

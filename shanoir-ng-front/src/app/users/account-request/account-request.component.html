@@ -12,16 +12,80 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<user-detail *ngIf="!requestSent" [requestAccountMode]="true" (closing)="closeAccountRequest($event)"></user-detail>
-<div *ngIf="requestSent" class="EditUserComponent">
-    <form class="EditUserContent max-content content" novalidate>
-        <h2 class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an account</h2>
-        <fieldset>
-            <label *ngIf="!errorOnRequest" i18n="Account request|Request sent@@accountRequestRequestSent">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
-            <label *ngIf="errorOnRequest" i18n="Account request|Error on request@@accountRequestErrorOnRequest">An error occurs.<br/>Please try again later.</label>
-        </fieldset>
-        <div class="footer command-zone">
-            <button i18n="Account request|Ok button label@@okButton" class="Button" (click)="getOut()">OK</button>
-        </div>
-    </form>
+<h2 class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an account</h2>
+<div class="rgpd">
+    <div class="language">
+        <span [class.selected]="language == 'english'" (click)="language = 'english'">english</span>
+        <span [class.selected]="language == 'french'" (click)="language = 'french'">français</span>
+    </div>
+    <div class="mention" *ngIf="language == 'english'">
+        <p>Inria is committed to protecting personal data in accordance with the General Data Protection Regulation (GDPR).</p>
+        <p>Inria uses this software in order to import, manage and share medical imaging data, on the legal basis of consent.</p>
+        <p>The recipients of this data are the system administrators. This data will be kept for 10 years and will not be transferred outside the European Union. This data collection is voluntary and does not involve automated decision-making.</p>
+        <p>You can access your data, request their deletion, exercise your rights of opposition, rectification and limitation of data processing. To exercise these rights or for any questions about the processing of your data, you can contact the DPO via <a href="mailto:dpo@inria.fr">dpo@inria.fr</a> .
+        However, if you believe that your rights are not respected or that the processing of your data is not compliant, you can submit a complaint to the CNIL</p>
+    </div>
+    <div class="mention" *ngIf="language == 'french'">
+        <p>Inria est engagé dans une démarche de protection des données personnelles en accord avec le Règlement Général sur la Protection des Données (RGPD).</p>
+        <p>Inria utilise ce logiciel afin d'importer, gérer et partager des images médicales et leurs données, sur la base légale du consentement.</p>
+        <p>Les destinataires de ces données sont les administrateurs de la plateforme. Ces données seront conservées pendant10 ans et ne seront pas transférées hors de l’Union Européenne [à adapter] . Cette collecte de données s’effectue sur la base du volontariat et n’engendre pas de prise de décision automatisée.</p>
+        <p>Vous pouvez accéder à vos données, demander leur effacement, exercer vos droits d’opposition, de rectification et à la limitation du traitement de vos données. Pour exercer ces droits ou pour toute question sur le traitement de vos données, vous pouvez contacter la DPO via <a href="mailto:dpo@inria.fr">dpo@inria.fr</a> .
+        Toutefois, si vous estimez que vos droits ne sont pas respectés ou que le traitement de vos données n’est pas conforme, vous pouvez  adresser une réclamation à la CNIL.</p>
+    </div>
 </div>
+<form *ngIf="form && !requestSent" [formGroup]="form" class="max-content" novalidate>
+    <fieldset>
+        <ol>
+            <li>
+                <label i18n="Edit user|First name label@@editUserFirstName" class="required-label">First Name</label>
+                <span class="right-col">
+                    <input type="text" id="firstName" formControlName="firstName" [(ngModel)]="user.firstName"/>
+                    <label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
+                    <label *ngIf="hasError('firstName', ['length'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be between 2 and 50!</label>
+                </span>
+            </li>
+            <li>
+                <label i18n="Edit user|Last name label@@editUserLastName" class="required-label">Last Name</label>
+                <span class="right-col">
+                    <input type="text" id="lastName" formControlName="lastName" [(ngModel)]="user.lastName"/>
+                    <label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
+                    <label *ngIf="hasError('lastName', ['length'])" class="form-validation-alert" i18n="Edit user|Last name length error@@editUserLastNameLengthError">Last Name length must be between 2 and 50!</label>
+                </span>
+            </li>
+            <li>
+                <label i18n="Edit user|Email label@@editUserEmail" class="required-label">Email</label>
+                <span class="right-col">
+                    <input type="email" id="email" formControlName="email" [(ngModel)]="user.email"/>
+                    <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
+                    <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
+                    <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
+                </span>
+            </li>
+            <li class="info">
+                <i class="fas fa-exclamation-triangle"></i>
+                Please use your professional or institutional email address here. For legal compliance reasons we will not accepted other addresses.
+            </li>
+        </ol>
+    </fieldset>
+
+    <span>
+        <account-request-info formControlName="accountRequestInfo" [(ngModel)]="user.accountRequestInfo" [editMode]="true" (valid)="onInfoValidityUpdate($event)"></account-request-info>
+    </span>
+        
+    <div class="footer command-zone">
+        <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>
+        <button type="submit" i18n="Edit user|Request account button label@@requestAccountButton" (click)="accountRequest()"
+            class="Button" [disabled]="!form.valid">Request Account</button>
+    </div>
+
+</form>
+
+<form class="EditUserContent max-content content" novalidate *ngIf="requestSent" class="EditUserComponent">
+    <fieldset>
+        <label *ngIf="!errorOnRequest" i18n="Account request|Request sent@@accountRequestRequestSent">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
+        <label *ngIf="errorOnRequest" i18n="Account request|Error on request@@accountRequestErrorOnRequest">An error occurs.<br/>Please try again later.</label>
+    </fieldset>
+    <div class="footer command-zone">
+        <button i18n="Account request|Ok button label@@okButton" class="Button" (click)="getOut()">OK</button>
+    </div>
+</form>

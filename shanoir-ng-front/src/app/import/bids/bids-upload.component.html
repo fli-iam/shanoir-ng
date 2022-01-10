@@ -25,10 +25,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
      - - - shanoir-import.json <br/>
      - - - DICOM <br/>
      - - - - [list of images] <br/>
-     - - - BRUKER <br/>
-     - - - - [list of images] <br/>
-     - - - EEG <br/>
-     - - - - [list of images]</p>
 
     <p> dataset_description.json: https://bids-specification.readthedocs.io/en/latest/03-modality-agnostic-files.html#dataset-description </p>    
     
@@ -46,9 +42,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p> shanoir-import.json is a json constructed following the further example:</p>
     <p>
     {{'{'}} <br/>
-    &nbsp;&nbsp;&nbsp;"frontStudyId" : 10,  <i> => Study ID</i><br/>
+    &nbsp;&nbsp;&nbsp;"studyId" : 10,  <i> => Study ID</i><br/>
     &nbsp;&nbsp;&nbsp;"examinationId": 0, <i>=> Examination ID (can be null or set to 0 to be created)</i><br/>
-    &nbsp;&nbsp;&nbsp;"frontAcquisitionEquipmentId": 1 <i>=> ID of the equipement</i><br/>
+    &nbsp;&nbsp;&nbsp;"studyCardId": 1 <i>=> ID of the studyCard (must not be null)</i><br/>
     {{'}'}}
     </p>
     <p>
@@ -58,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </fieldset>
 
 <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-    
+<label *ngIf="archiveStatus == 'uploaded'" > Data sucessufully imported.</label>
 <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
 {{errorMessage}}
 </label>

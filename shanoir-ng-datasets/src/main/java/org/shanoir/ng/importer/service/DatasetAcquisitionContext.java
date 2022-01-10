@@ -17,8 +17,11 @@ package org.shanoir.ng.importer.service;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,27 +39,32 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	@Autowired
 	private MrDatasetAcquisitionStrategy mrDatasetAcquisitionStrategy;
 	
-	// add other strategies for other modalities here
+	@Autowired
+	private CtDatasetAcquisitionStrategy ctDatasetAcquisitionStrategy;
 	
-	private DatasetAcquisitionStrategy datasetAcquisitionStrategy;
-
-	/**
-	 * 1) Call first with the given modality to choose the right strategy.
-	 * @param modality
-	 */
-	public void setDatasetAcquisitionStrategy(String modality) {
-		if ("MR".equals(modality)) {
-			this.datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
-		}
-		// else... add other modalities here
-	}
+	@Autowired
+	private PetDatasetAcquisitionStrategy petDatasetAcquisitionStrategy;
+	
+	@Autowired
+	private GenericDatasetAcquisitionStrategy genericDatasetAcquisitionStrategy;
+	
+	// add other strategies for other modalities here
 
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
-		if (datasetAcquisitionStrategy != null) {
-			return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob);
-		}
-		return null;
+		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
+		String modality = serie.getModality();
+		if ("MR".equals(modality)) {
+			datasetAcquisitionStrategy = mrDatasetAcquisitionStrategy;
+		} else if ("CT".equals(modality)) {
+			datasetAcquisitionStrategy = ctDatasetAcquisitionStrategy;
+		} else if ("PT".equals(modality)) {
+			datasetAcquisitionStrategy = petDatasetAcquisitionStrategy;
+		} else {
+			// By default we just create a generic dataset acquisition
+			datasetAcquisitionStrategy = genericDatasetAcquisitionStrategy;
+		}		
+		return datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 	}
 	
 }

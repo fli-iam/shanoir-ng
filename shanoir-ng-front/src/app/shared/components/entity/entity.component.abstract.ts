@@ -11,45 +11,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
+
+import { ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, Directive } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../../breadcrumbs/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { ShanoirError } from '../../models/error.model';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
-import { ShanoirError } from '../../models/error.model';
-import { Router } from '../../../breadcrumbs/router';
+import { EntityService } from './entity.abstract.service';
+
 
 export type Mode =  "view" | "edit" | "create";
-export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
-
-    protected id: number;
+@Directive()
+export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
+    
     private _entity: T;
     @Input() mode: Mode;
+    @Input() id: number; // optional
     @Output() close: EventEmitter<any> = new EventEmitter();
-    protected footerState: FooterState;
+    footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
-    protected form: FormGroup;
+    form: FormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
-    @ViewChild('formContainer') formContainerElement: ElementRef;
+    @ViewChild('formContainer', { static: false }) formContainerElement: ElementRef;
 
     /* services */
+    protected confirmDialogService: ConfirmDialogService;
     private entityRoutes: EntityRoutes;
     protected router: Router;
     private location: Location;
     protected formBuilder: FormBuilder;
-    protected keycloakService: KeycloakService;
+    public keycloakService: KeycloakService;
     protected msgBoxService: MsgBoxService; 
-    protected breadcrumbsService: BreadcrumbsService;
+    public breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
     abstract initView(): Promise<void>;
@@ -58,9 +63,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     abstract buildForm(): FormGroup;
 
     constructor(
-            private activatedRoute: ActivatedRoute,
+            protected activatedRoute: ActivatedRoute,
             private readonly ROUTING_NAME: string) {
-        
+        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.location = ServiceLocator.injector.get(Location);
@@ -70,19 +75,19 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         
         this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.id = +this.activatedRoute.snapshot.params['id'];
         this.addBCStep();
     }
 
-    protected get entity(): T {
+    public get entity(): T {
         return this._entity;
     }
 
-    protected set entity(entity: T) {
+    public set entity(entity: T) {
         this._entity = entity;
     }
 
     ngOnInit(): void {
+        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
         const choose = (): Promise<void> => {
             switch (this.mode) { 
                 case 'create' : return this.initCreate();
@@ -93,7 +98,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         choose().then(() => {
             this.footerState = new FooterState(this.mode);
-            this.footerState.canEdit = this.hasEditRight();
+            this.hasEditRight().then(right => this.footerState.canEdit = right);
+            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
                 this.entity = this.breadcrumbsService.currentStep.entity as T;
             }
@@ -101,12 +107,21 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.manageFormSubscriptions();
         });
     }
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if ((changes['id'] && !changes['id'].isFirstChange())
+                || (changes['mode'] && !changes['mode'].isFirstChange())) 
+            this.ngOnInit();
+    }
 
     private manageFormSubscriptions() {
         this.form = this.buildForm();
         if (this.form) {
             this.subscribtions.push(
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create'))
+                this.form.statusChanges.subscribe(status => {
+                    this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
+                    this.footerState.dirty = this.form.dirty;
+                })
             );
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
@@ -178,7 +193,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && control.touched && !control.valid) {
+        if (control && (control.touched || this.mode != 'create') && !control.valid) {
             return control.errors;
         }
     }
@@ -196,45 +211,52 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     /**
      * Chooses between create() and update(), saves the entity and return a promise
      */
-    private modeSpecificSave(): Promise<void> {
+    private modeSpecificSave(): Promise<T> {
         if (this.mode == 'create') {
-            return this.entity.create().then((entity) => {
+            return this.getService().create(this.entity).then((entity) => {
                 this.entity.id = entity.id;
                 this.onSave.next(entity);
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
                 this._entity.id = entity.id;
+                return entity;
             });
         }
         else if (this.mode == 'edit') {
-            return this.entity.update().then(() => {
+            return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
+                return this.entity;
             });
         }
     }
 
-    protected save(): Promise<void> {
+    save(): Promise<T> {
         this.footerState.loading = true;
         return this.modeSpecificSave()
-            .then(() => {
+            .then(study => {
                 this.footerState.loading = false;
+                return study;
             })
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
                 this.footerState.loading = false;
-                if (reason && reason.error && reason.error.code == 422) {
-                    this.saveError = new ShanoirError(reason);
-                    for (let managedField of this.onSubmitValidatedFields) {
-                        let fieldControl: AbstractControl = this.form.get(managedField);
-                        if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
-                        fieldControl.updateValueAndValidity({emitEvent : false});
-                        if (!fieldControl.valid) fieldControl.markAsTouched();
-                    }
-                    this.footerState.valid = this.form.status == 'VALID';
-                } else throw reason;
+                return this.catchSavingErrors(reason);
             });
+    }
+
+    protected catchSavingErrors = (reason: any): Promise<any> => {
+        if (reason && reason.error && reason.error.code == 422) {
+            this.saveError = new ShanoirError(reason);
+            for (let managedField of this.onSubmitValidatedFields) {
+                let fieldControl: AbstractControl = this.form.get(managedField);
+                if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+                fieldControl.updateValueAndValidity({emitEvent : false});
+                if (!fieldControl.valid) fieldControl.markAsTouched();
+            }
+            this.footerState.valid = this.form.status == 'VALID';
+        } throw reason;
     }
 
     /**
@@ -268,7 +290,39 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     delete(): void {
-        this.entity.delete();
+        this.openDeleteConfirmDialog(this.entity)
+    }
+
+    protected openDeleteConfirmDialog = (entity: T) => {
+        this.confirmDialogService
+            .confirm(
+                'Delete ' + this.ROUTING_NAME, 
+                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+            ).then(res => {
+                if (res) {
+                    this.getService().delete(entity.id).then(() => {
+                        this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                        this.goToList();
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            if (reason.error.code != 422) {
+                               throw Error(reason); 
+                            } else {
+                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else if (reason && reason.status) {
+                            if (reason.status != 422) {
+                               throw Error(reason); 
+                            } else {
+                                this.msgBoxService.log('warn', 'This ' + this.ROUTING_NAME + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else {
+                            console.error(reason);
+                        }
+                    });                    
+                }
+            })
     }
 
     goToView(id?: number): void {
@@ -307,7 +361,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.location.back();
     }
 
-    private compareEntities(e1: Entity, e2: Entity) : boolean {
+    public compareEntities(e1: Entity, e2: Entity) : boolean {
         return e1 && e2 && e1.id === e2.id;
     }
 
@@ -322,8 +376,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * Default is true and this method should be overriden when rights control is needed.
      * It is called after initialization so the entity value can be used inside.
      */
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return true;
+    }
+
+    /**
+     * Says if current user has the right to display the delete button.
+     * Default is true and this method should be overriden when rights control is needed.
+     * It is called after initialization so the entity value can be used inside.
+     */
+    public async hasDeleteRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
@@ -332,4 +395,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             console.log('entity', this.entity);
         }
     }
+
+    abstract getService(): EntityService<T>;
 }

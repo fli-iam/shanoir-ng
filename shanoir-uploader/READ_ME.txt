@@ -1,8 +1,17 @@
 ##############################################
-Getting Started
+Hints on working with ShanoirUploader
 ##############################################
 
-####### Build latest version for delivery ####
+####### Version update #############
+For a new version, e.g. from v6.0.4 to v7.0.1:
+Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences with 7.0.1.
+This is important, that all scripts .sh or .bat find the correct version to start and create
+the correct folder.
+
+####### Delivery of new Executable Jar #############
+1) Remove the 3 system path libraries lines from the pom.xml dependencies
+as they do not be contained in the assembly.
+2) Build latest version for delivery using the below mvn command:
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
 ####### Complete your Maven repository #######

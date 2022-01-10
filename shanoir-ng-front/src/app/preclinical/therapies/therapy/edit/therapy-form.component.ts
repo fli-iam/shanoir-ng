@@ -11,20 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component } from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
+import { FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { Therapy }    from '../shared/therapy.model';
-import { TherapyService } from '../shared/therapy.service';
-import { ReferenceService } from '../../../reference/shared/reference.service';
-
-import { Enum } from "../../../../shared/utils/enum";
-import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { slideDown } from '../../../../shared/animations/animations';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ReferenceService } from '../../../reference/shared/reference.service';
+import { TherapyType } from '../../../shared/enum/therapyType';
+import { ModesAware } from '../../../shared/mode/mode.decorator';
+import { Therapy } from '../shared/therapy.model';
+import { TherapyService } from '../shared/therapy.service';
+
 
 
 @Component({
@@ -36,14 +35,13 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 @ModesAware
 export class TherapyFormComponent extends EntityComponent<Therapy>{
 
-    therapyTypes: Enum[] = [];
-    private isTherapyUnique: Boolean = true;
+    TherapyType = TherapyType;
+    public isTherapyUnique: Boolean = true;
     
     constructor(
         private route: ActivatedRoute,
         private therapyService: TherapyService, 
-        private referenceService: ReferenceService,
-        private enumUtils: EnumUtils) {
+        private referenceService: ReferenceService) {
 
             super(route, 'preclinical-therapy');
         }
@@ -51,31 +49,26 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
     get therapy(): Therapy { return this.entity; }
     set therapy(therapy: Therapy) { this.entity = therapy; }
 
+    getService(): EntityService<Therapy> {
+        return this.therapyService;
+    }
 
     initView(): Promise<void> {
-        this.getEnums();
         return this.therapyService.get(this.id).then(therapy => {
             this.therapy = therapy;
         });
     }
 
     initEdit(): Promise<void> {
-        this.getEnums();
         return this.therapyService.get(this.id).then(therapy => {
             this.therapy = therapy;
         });
     }
 
     initCreate(): Promise<void> {
-        this.getEnums();
         this.entity = new Therapy();
         return Promise.resolve();
     }
-
-    getEnums(): void {
-        this.therapyTypes = this.enumUtils.getEnumArrayFor('TherapyType');
-    }
-
 
     buildForm(): FormGroup {
         return this.formBuilder.group({

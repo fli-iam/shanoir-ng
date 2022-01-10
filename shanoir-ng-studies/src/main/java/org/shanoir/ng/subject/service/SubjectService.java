@@ -18,7 +18,11 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -48,7 +52,6 @@ public interface SubjectService {
 	 * @return a list of subjects.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
 	List<IdName> findNames();
 
 	
@@ -146,10 +149,13 @@ public interface SubjectService {
 	 *
 	 * @param subject subject to update.
 	 * @return updated subject.
-	 * @throws EntityNotFoundException 
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException
+	 * @throws ShanoirException
+	 * @throws RestServiceException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
-	Subject update(Subject subject) throws EntityNotFoundException;
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	Subject update(Subject subject) throws ShanoirException;
 
 	/**
 	 * Delete a subject.
@@ -159,5 +165,20 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
+
+
+	/**
+	 * This method should not be used directly. Same as findAllSubjectsOfStudy but with no roles
+	 * @param studyId
+	 * @return
+	 */
+	List<SimpleSubjectDTO> findAllSubjectsOfStudyId(Long studyId);
+
+	/**
+	 * Update subject name and values for other microservices.
+	 * @param subjectToSubjectDTO the subject DTO to update
+	 * @throws MicroServiceCommunicationException 
+	 */
+	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 
 }

@@ -12,19 +12,88 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="root" [class.disabled]="disabled">
-    <span class="frame">
-        <span [class.hidden]="!this.selectedOption" #label class="label" (click)="open = !disabled && !open"></span>
-        <span *ngIf="options.length > 0 && !this.selectedOption" class="label placeholder" (click)="open = !disabled && !open">{{placeholder ? placeholder : 'Select an option...'}}</span>
-        <span *ngIf="options.length == 0" class="label empty">Empty list</span>
+<div class="root" [class.disabled]="disabled" *ngIf="!readOnly" >
+    <span class="frame" *ngIf="!compactMode"> 
+        <span class="input-container">
+            <span class="fake-input">{{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}</span>
+            <input #input
+                *ngIf="options?.length > 0"
+                type="text" 
+                tabindex="-1" 
+                class="label" 
+                [ngModel]="inputText" 
+                (ngModelChange)="onTypeText($event)" 
+                [placeholder]="placeholder ? placeholder : 'Select an option...'" 
+                (click)="isOpen() ? close() : open()"
+                (focus)="onInputFocus()">
+        </span>
+        <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
         <span class="commands">
-            <span class="open button" (click)="open = !open"><i class="fas fa-chevron-down"></i></span>
-            <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !ngModel" class="button"><i class="fas fa-eye"></i></span>
-            <span *ngIf="onNewClick.observers.length > 0 && !newHidden" (click)="clickNew()" [class.disabled]="newDisabled" class="button"><i class="far fa-file"></i></span>
-            <span *ngIf="onAddClick.observers.length > 0 && !addwHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
+            <span class="clear button" *ngIf="inputText" (click)="onTypeText(null)"><i class="fas fa-times"></i></span>
+            <span class="open button" (click)="isOpen() ? close() : open()"><i class="fas fa-chevron-down"></i></span>
+            <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fas fa-eye"></i></span>
+            <span *ngIf="onNewClick.observers.length > 0 && !newHidden" (click)="clickNew()" [class.disabled]="newDisabled" class="button new-file"><i class="far fa-file"></i><i class="fas fa-plus"></i></span>
+            <span *ngIf="onAddClick.observers.length > 0 && !addHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
         </span>
     </span>
-    <div *ngIf="open" [class.hidden-list]="hideToComputeHeight" class="list" [class.down]="way=='down'" [class.up]="way=='up'">
-        <ng-content></ng-content>
+    <span class="frame" *ngIf="compactMode">
+        <span class="commands">
+            <span class="open button compact-button" (click)="isOpen() ? close() : open()"><i class="fas fa-plus"></i></span>
+        </span>
+    </span>
+    <div *ngIf="displayedOptions?.length > 0" 
+            [class.hidden-list]="hideToComputeHeight" 
+            class="list" 
+            [class.down]="way=='down'" 
+            [class.up]="way=='up'" 
+            (wheel)="onWheel($event)" 
+            [class.scrollable]="scrollable" 
+            [style.width]="maxWidth"
+            (mouseleave)="focusedOptionIndex = null"
+            (dragover)="allowDrop($event)"
+            (dragend)="dragging = false">
+        <div class="option" 
+                *ngFor="let option of displayedOptions; let i = index" 
+                (click)="onUserSelectedOption(option)" 
+                [class.selected]="isOptionSelected(option)" 
+                [class.disabled]="option.disabled" 
+                [class.compatible]="option.compatible"
+                [class.not-compatible]="option.compatible != undefined && !option.compatible"
+                [class.focused]="i == focusedOptionIndex"
+                (mousemove)="focusedOptionIndex = i"
+                [style.color]="option.color"
+                [style.background-color]="option.backgroundColor">
+            {{option.label}}
+        </div>
+        <div *ngIf="scrollable" class="scrollbar">
+            <div class="top-scroll-button" 
+                    (mousedown)="scrollButtonOn('up')" 
+                    (mouseup)="scrollButtonOff()"
+                    (mouseleave)="scrollButtonOff()"
+                ><i class="fas fa-chevron-up"></i></div>
+            <div class="scrollzone" (click)="onScrollZoneClick($event)">
+                <div class="lift" [style.top.px]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
+            </div>
+            <div class="bottom-scroll-button"
+                    (mousedown)="scrollButtonOn('down')" 
+                    (mouseup)="scrollButtonOff()"
+                    (mouseleave)="scrollButtonOff()"
+                ><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div *ngIf="dragging" class="list-drag-extend" (dragover)="allowDrop($event)"></div>
     </div>
+    <div *ngIf="noResult" class="list down empty empty-list">
+        No results - <span class="reset" (click)="onTypeText(null)">reset search</span>
+    </div>
+</div>
+<div #hiddenOption id="hiddenOption" class="option"></div>
+
+
+<div class="root" [class.disabled]="disabled" *ngIf="readOnly">
+    <span class="frame">
+        <span class="input-container">{{inputText}}</span>
+        <span class="commands">
+            <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fas fa-eye"></i></span>
+        </span>
+    </span>
 </div>

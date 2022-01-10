@@ -19,12 +19,14 @@ export class ImportJob {
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;
     fromPacs: boolean;
+    fromBruker: boolean;
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;
-    frontStudyId: number;
-    frontAcquisitionEquipmentId: number;
-    frontConverterId: number;
+    studyId: number;
+    studyCardId: number;
+    acquisitionEquipmentId: number;
+    converterId: number;
     archive: string;
     subjectName: String;
     studyName: String;
@@ -36,6 +38,8 @@ export class PatientDicom {
     patientName: string;
     patientBirthDate: Date;
     patientSex: Sex;
+    patientIdentityRemoved: boolean;
+    deIdentificationMethod: string;
     studies: StudyDicom[];
 }
 
@@ -61,7 +65,7 @@ export class SerieDicom {
     institution: InstitutionDicom;
     isCompressed: boolean;
     isSpectroscopy: boolean;
-    isEnhancedMR: boolean;
+    isEnhanced: boolean;
     isMultiFrame: boolean;
     multiFrameCount: number;
     nonImages: any[];

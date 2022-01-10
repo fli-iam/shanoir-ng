@@ -16,15 +16,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span [ngSwitch]="state.mode">
         <button i18n="View subject|Back button label@@backButton" class="Button left-icon" (click)="onBack()"><i class="fas fa-angle-left"></i>Back</button>
         <ng-template [ngSwitchCase]="'view'" *ngIf="state.canEdit">
-            <button type="button" i18n="View subject|Edit button label@@editButton" (click)="onEdit()" class="Button right-icon">Edit<i class="far fa-edit"></i></button>
+                <button *ngIf="state.canEdit" type="button" i18n="View subject|Edit button label@@editButton" (click)="onEdit()" class="Button right-icon">Edit<i class="far fa-edit"></i></button>
+                <button type="button" *ngIf="state.canDelete" i18n="Delete subject|Delete button label@@deleteButton" (click)="onDelete()" class="Button right-icon">Delete<i class="fas fa-trash"></i></button>
         </ng-template>
         <ng-template [ngSwitchCase]="'edit'">
             <button type="button" (click)="onCancel()" class="Button right-icon">Cancel<i class="fas fa-ban"></i></button>
             <button type="button" i18n="Edit center|Update button label@@updateButton" (click)="onUpdate()" class="Button right-icon" [disabled]="!state.valid">
                 Update<span *ngIf="!state.loading">
-                    <i class="far fa-save"></i>
+                    <i class="far fa-save"></i> 
                 </span><span *ngIf="state.loading">
-                    <i class="fa fa-cog fa-spin"></i>
+                    <i class="fa fa-cog fa-spin"></i> 
                 </span>
             </button>
         </ng-template>

@@ -15,28 +15,19 @@
 import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core';
 
 import { PreclinicalSubject } from '../animalSubject/shared/preclinicalSubject.model';
-import { Frequency } from "../shared/enum/frequency";
 import { ModesAware } from "../shared/mode/mode.decorator";
 import { TableComponent } from '../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ShanoirError } from '../../shared/models/error.model';
-import { ServiceLocator } from '../../utils/locator.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { ControlValueAccessor } from '@angular/forms';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 
 @Component({
-    providers:  [{
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SubjectAbstractListInput),
-      multi: true
-    }]
+    selector: 'abstract-subject-pathology-list',
+    templateUrl: 'subjectEntity-list-input.abstract.html',
 })
 
 @ModesAware
-export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> implements ControlValueAccessor {
+export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {
 
     @Input() canModify: Boolean = false;
     @Input() preclinicalSubject: PreclinicalSubject;
@@ -47,9 +38,8 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     public toggleForm: boolean = false;
     public createMode: boolean = false;
     public selectedEntity: T;
-    private entityList: T[] = [];
 
-   @ViewChild('subjectEntityTable') table: TableComponent;
+    @ViewChild('subjectEntityTable') table: TableComponent;
 
     public abstract getEntityName();
 
@@ -106,7 +96,6 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
             if (!subjectEntity.id && create) {
                 this.addToCache(this.getEntityName() + "ToCreate", subjectEntity);
                 this.onAdd.next(subjectEntity);
-                this.writeValue(subjectEntity);
             } else  if (subjectEntity.id && !create) {
                 this.addToCache(this.getEntityName() + "ToUpdate", subjectEntity);
             }
@@ -147,23 +136,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
         }
     }
 
-    protected onRowClick(entity: T) {
+    public onRowClick(entity: T) {
         // do nothing to avoid wrong route
-    }
-
-    writeValue(value: any): void {
-        this.entityList.push(value);
-    }
-
-    registerOnChange(fn: any): void {
-        this.propagateChange = fn;
-    }
-
-    registerOnTouched(fn: any): void {
-        this.propagateTouched = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        //Nothing to do
     }
 }

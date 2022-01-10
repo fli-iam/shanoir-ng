@@ -26,10 +26,12 @@ import javax.persistence.OneToMany;
 import org.shanoir.ng.score.Score;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Variable assessment.
  * 
- * @author ifakhfakh
+ * @author ifakhfakh, JCome
  *
  */
 @Entity
@@ -43,11 +45,13 @@ public class VariableAssessment extends AbstractEntity {
 	/** Instrument Based Assessment. */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "instrument_based_assessment_id", nullable = false, updatable = true)
+	@JsonIgnore
 	private InstrumentBasedAssessment instrumentBasedAssessment;
 
 	/** The variable. */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "instrument_variable_id", nullable = false, updatable = true)
+	@JsonIgnore
 	private InstrumentVariable instrumentVariable;
 
 	/** The score list. */

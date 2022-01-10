@@ -1,21 +1,25 @@
-<button (click)="prepareDownload()"> Download datasets </button> <img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
+<button (click)="prepareDownloadAll()" [disabled]="progressBar.progress != 0" class="right-icon">Download all datasets<i class="fas fa-download"></i></button>
+<button (click)="prepareDownloadSelected()" [disabled]="progressBar.progress != 0 || !datasetIds || datasetIds.length <= 0" class="right-icon">Download selected datasets<i class="fas fa-download"></i></button> 
+<div [hidden]="progressBar.progress == 0">
+    <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+</div>
 <app-modal #downloadDialog >
     <div class="main">
     <div class="header">Massive download</div>
-    <div *ngIf="inError"> class="body" {{errorMessage}}</div>
+    <div *ngIf="inError" class="body">{{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
-        <p>Please select download options</p>
-        <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
-        <div *ngIf="!useBids">
-        <p> Please select dataset type (only for DICOM / NIFTI datasets): </p>
-        <select-box [(ngModel)]="type">
-            <select-option selected value="nii">Nifti</select-option>
-            <select-option value="dcm">Dicom</select-option>
-        </select-box>
-        </div>
+        <ng-container *ngIf="mode == 'all'">
+            <p>Please select download options</p>
+            <checkbox [(ngModel)]="useBids" > </checkbox> <label> Use bids format (experimental)</label>
+        </ng-container>
+        <ng-container *ngIf="!useBids">
+            <p> Please select dataset type (only for DICOM / NIFTI datasets) :</p>
+            <select-box [(ngModel)]="type" [options]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]">
+            </select-box>
+        </ng-container>
     </div>
     <div class="footer">
-        <button *ngIf="!inError" type="button" (click)="download()" >OK</button>
+        <button *ngIf="!inError" type="button" (click)="download()" [disabled]="!type">OK</button>
         <button type="button" (click)="cancel()">Cancel</button>
     </div>
 </div>

@@ -56,7 +56,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	 * manager.
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 
@@ -75,13 +75,15 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		http
 			.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				.and()
+			.and()
 			.csrf()
 				.disable()
 			.authorizeRequests()
 				.antMatchers("/accountrequest").permitAll()
+				.antMatchers("/extensionrequest").permitAll()
 				.antMatchers("/last_login_date").permitAll()
 				.anyRequest().authenticated();
+		// the swagger API of is not exposed here for security reasons (MK)
 	}
 
 	@Bean

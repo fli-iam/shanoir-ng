@@ -16,63 +16,35 @@ import { EntityListComponent } from "./entity-list.component.abstract";
 import { Entity } from "./entity.abstract";
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
-import { OnInit } from "@angular/core";
+import { OnInit, Directive } from "@angular/core";
 
-export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit{
+@Directive()
+export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
-    private entitiesPromise: Promise<void>;
-    private browserPaging: BrowserPaging<T>;
-    private entities: T[];
+    protected entitiesPromise: Promise<void>;
+    protected browserPaging: BrowserPaging<T>;
 
     ngOnInit() {
+        this.loadEntities();
+    }
+    
+    private loadEntities(): Promise<void> {
         this.entitiesPromise = this.getEntities().then((entities) => {
-            this.entities = entities;
-            this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
+            this.browserPaging = new BrowserPaging(entities, this.columnDefs)
         });
-        this.manageAfterDelete();
-        this.manageAfterAdd();
+        return this.entitiesPromise;
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<T>> {
-        return new Promise((resolve) => {
-            this.entitiesPromise.then(() => {
-                this.browserPaging.setItems(this.entities);
-                resolve(this.browserPaging.getPage(pageable));
-            });
+    getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
+        return this.entitiesPromise.then(() => {
+            if (forceRefresh) {
+                return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
+            } else {
+                return this.browserPaging.getPage(pageable);
+            }
         });
     }
 
     abstract getEntities(): Promise<T[]>;
 
-    protected reloadData() {
-        this.getEntities().then((entities) => {
-            this.entities = entities;
-        });
-    }
-
-    private manageAfterDelete() {
-        this.subscribtions.push(
-            this.onDelete.subscribe(response => {
-                if (this.instanceOfEntity(response)) {
-                    if (response.id) {
-                        this.entities = this.entities.filter(item => item.id != response.id);
-                    } else {
-                        this.entities = this.entities.filter(item => item != response);
-                    }
-                }
-            })
-        );
-    }
-    
-    private manageAfterAdd() {
-        this.subscribtions.push(
-            this.onAdd.subscribe(response => {
-               this.entities.push(response);
-            })
-        );
-    }
-
-    private instanceOfEntity(obj: any): boolean {
-        return obj.create && obj.delete && obj.update;
-    }
 }

@@ -1,4 +1,5 @@
 /**
+
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -37,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -45,14 +46,13 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
 /**
- * User security service test.
+ * DatasetAPI security test.
  * 
  * @author jlouis
  * 
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @ActiveProfiles("test")
 public class DatasetApiSecurityTest {
 	
@@ -65,6 +65,8 @@ public class DatasetApiSecurityTest {
 	
 	@MockBean
 	StudyRightsService commService;
+
+	MockHttpServletResponse response;
 	
 	@Before
 	public void setup() {
@@ -77,11 +79,10 @@ public class DatasetApiSecurityTest {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		
 		assertAccessDenied(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 		assertAccessDenied(api::findDatasetById, 1L);
-		assertAccessDenied(t -> { try { api.findDatasets(t); } catch (RestServiceException e) { fail(e.toString()); }}, new PageRequest(0, 10));
-		assertAccessDenied((t, u) -> { try { api.downloadDatasetById(t, u); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, "dcm");
+		assertAccessDenied(t -> { try { api.findDatasets(t); } catch (RestServiceException e) { fail(e.toString()); }}, PageRequest.of(0, 10));
+		assertAccessDenied((t, u, v) -> { try { api.downloadDatasetById(t, u, v, response); } catch (IOException | RestServiceException e) { fail(e.toString()); }}, 1L, 1L, "dcm");
 		assertAccessDenied((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDataset(1L), mockBindingResult);
 	}
 	
@@ -102,11 +103,10 @@ public class DatasetApiSecurityTest {
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(t -> { try { api.deleteDataset(t); } catch (RestServiceException e) { }}, 1L);
 		assertAccessAuthorized(api::findDatasetById, 1L);
-		assertAccessAuthorized(t -> { try { api.findDatasets(t); } catch (RestServiceException e) {  }}, new PageRequest(0, 10));
-		assertAccessAuthorized((t, u) -> { try { api.downloadDatasetById(t, u); } catch (IOException | RestServiceException e) { }}, 1L, "dcm");
+		assertAccessAuthorized(t -> { try { api.findDatasets(t); } catch (RestServiceException e) {  }}, PageRequest.of(0, 10));
+		assertAccessAuthorized((t, u, v) -> { try { api.downloadDatasetById(t, u, v, response); } catch (IOException | RestServiceException e) { }}, 1L, 1L, "dcm");
 		assertAccessAuthorized((t, u, v) -> { try { api.updateDataset(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDataset(1L), mockBindingResult);
 	}
-	
 	
 	private MrDataset mockDataset(Long id) {
 		MrDataset ds = ModelsUtil.createMrDataset();

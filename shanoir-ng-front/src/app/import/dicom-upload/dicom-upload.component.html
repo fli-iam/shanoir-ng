@@ -15,20 +15,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="header command-zone">1. Select DICOM archive</div>
 <fieldset class="step dicom">
     <p>Please select a DICOM zip archive to import.</p>
-    <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Important notice :</strong> this archive must contain a DICOMDIR file at its root!</p>
+    <p>This archive may contain a DICOMDIR file at its root :</p>
+    <ul>
+        <li>If a DICOMDIR is present, it will be used to import the data. </li>
+        <li>If not, one will be automatically generated from DICOM images <strong>at the root of the archive.</strong></li>
+    </ul>
     <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-    
+    <div [hidden]="progressBar.progress == 0">
+        <progress-bar #progressBar [text]="'Preparing upload'"></progress-bar>
+    </div>
     <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
         A DICOM zip archive is required!
     </label>
     <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">
         DICOMDIR is missing in .zip file!
-    </label>  
+    </label>
+    <label *ngIf="fileTooBigError" class="form-validation-alert" i18n="Import|fileTooBigError label">
+        The uploaded file is too big, it should be less then 5Gb.
+    </label> 
     
     <p *ngIf="modality" class="modality">
-        The modality of the dataset(s) that you are importing is
-        <span *ngIf="modality=='MR'">MRI</span>
-        <span *ngIf="modality=='PET'">PET</span>
+        The modality of the dataset(s) that you are importing is {{modality}}
     </p>
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

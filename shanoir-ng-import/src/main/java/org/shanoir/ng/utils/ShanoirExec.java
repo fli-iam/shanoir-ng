@@ -18,14 +18,26 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ShanoirExec {
 	
+	/** Dicomifier error. */
+	private static final String ERROR_DICOM2NIFTI_REQUEST = "Error on dicom2nifti microservice request";
+
 	/**
 	 * Logger
 	 */
@@ -33,6 +45,12 @@ public class ShanoirExec {
 	
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
     private String clidcmPathLib;
+
+	@Value("${ms.url.dicom2nifti}")
+	private String dicomifierMsUrl;
+
+	@Autowired
+	RestTemplate restTemplate;
 	
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
@@ -121,7 +139,7 @@ public class ShanoirExec {
 
 		if(dcm2niiPath.contains("dcm2niix")){
 			cmd = new String[22];
-			cmd[0] = dcm2niiPath;
+			cmd[0] = "dcm2niix";
 			//BIDS sidecar
 			cmd[1] = "-b";
 			cmd[2] = "y";
@@ -146,9 +164,9 @@ public class ShanoirExec {
 			cmd[11] = "-s";
 			cmd[12] = "n";
 
-			// no gzip compression
+			// gzip compression
 			cmd[13] = "-z";
-			cmd[14] = "n";
+			cmd[14] = "y";
 
 			// output directory
 			cmd[15] = "-o";
@@ -202,9 +220,9 @@ public class ShanoirExec {
 			cmd[11] = "-p";
 			cmd[12] = "y";
 
-			// no gzip compression
+			// gzip compression
 			cmd[13] = "-g";
-			cmd[14] = "n";
+			cmd[14] = "y";
 
 			// no file source name in destination file name
 			cmd[15] = "-f";
@@ -565,6 +583,39 @@ public class ShanoirExec {
 		LOG.debug("exec : return result {}", result);
 
 		return result;
+	}
+
+	/**
+	 * Execute dicomifier conversion DICOM => NIFTI
+	 * @param inputFolder the input folder where the DICOM are
+	 * @param outputFolder the output folder where to set the nifti
+	 * @return Informations about the conversion
+	 * @throws RestServiceException when the request fails.
+	 */
+	public String dicomifier(String inputFolder, String outputFolder) {
+		String requestJson = "{\"source\":\"" + inputFolder
+				+ "\", \"destination\":\"" + outputFolder
+				+ "\", \"zip\": true }";
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		// HttpEntity represents the request
+		HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+
+		// Post to dicomifier to start conversion
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.exchange(dicomifierMsUrl, HttpMethod.POST, entity, String.class);
+		} catch (Exception e) {
+			LOG.error(ERROR_DICOM2NIFTI_REQUEST, e);
+			return ERROR_DICOM2NIFTI_REQUEST;
+		}
+
+		if (!HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+			return ERROR_DICOM2NIFTI_REQUEST;
+		}
+		return "Dicomifier: converting dicom to nifti, success.";
 	}
 
 }

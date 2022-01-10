@@ -40,6 +40,17 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	Page<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
 
 	/**
+	 * Get a paginated list of examinations for a list of studies.
+	 * 
+	 * @param studyIds
+	 *            list of study ids.
+	 * @param pageable
+	 *            pagination data.
+	 * @return list of examinations.
+	 */
+	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable pageable);
+
+	/**
 	 * Get a list of examinations for a subject.
 	 * 
 	 * @param subjectId
@@ -51,8 +62,16 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	List<Examination> findBySubjectId(Long subjectId);
 	
 	/**
+	 * Get a list of examinations for a list of subjects.
 	 * 
-	 * @param subjectId: 
+	 * @param subjectIds
+	 * @return list of examinations.
+	 */
+	List<Examination> findBySubjectIdIn(List<Long> subjectId);
+	
+	/**
+	 * 
+	 * @param subjectId:
 	 * @param studyId
 	 * @return list of examinations.
 	 */
@@ -67,5 +86,25 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return list of examinations.
 	 */
 	Page<Examination> findByStudyIdInAndPreclinical(List<Long> studyIds, boolean preclinical, Pageable pageable);
+	
+	/**
+	 * Get a paginated list of examinations
+	 * 
+	 * @param preclinical preclinical examination
+	 * @param pageable pagination data.
+	 * @return list of examinations.
+	 */
+	Page<Examination> findAllByPreclinical(Pageable pageable, boolean preclinical);
+
+	/**
+	 * Get a list of examinations for a study.
+	 * 
+	 * @param subjectId
+	 * @return
+	 * @author yyao
+	 *            subject id.
+	 * @return list of examinations.
+	 */
+	List<Examination> findByStudyId(Long studyId);
 
 }

@@ -24,8 +24,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,12 @@ public class RefsApiController implements RefsApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private ReferenceUniqueValidator uniqueValidator;
+
+	@Autowired
+	private RefsEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<Reference> createReferenceValue(
@@ -201,18 +205,10 @@ public class RefsApiController implements RefsApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Reference reference) {
-		final Reference previousStateReference = referenceService.findById(reference.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Reference>().validate(previousStateReference,
-				reference);
-		return accessErrors;
-	}
-
-	private FieldErrorMap getCreationRightsErrors(final Reference reference) {
-		return new EditableOnlyByValidator<Reference>().validate(reference);
+	    return editableOnlyValidator.validate(reference);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Reference reference) {
-		final UniqueValidator<Reference> uniqueValidator = new UniqueValidator<Reference>(referenceService);
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(reference);
 		return uniqueErrors;
 	}

@@ -12,11 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
-import { BrowserPaginEntityListComponent } from '../shared/components/entity/entity-list.browser.component.abstract';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { TableComponent } from '../shared/components/table/table.component';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
+import { EntityService } from '../shared/components/entity/entity.abstract.service';
+import { NotificationsService } from '../shared/notifications/notifications.service';
+import { EntityListComponent } from '../shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from '../shared/components/table/pageable.model';
+import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 
 
 @Component({
@@ -25,30 +29,49 @@ import { TaskService } from './task.service';
     styleUrls: ['async-tasks.component.css']
 })
 
-export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
+export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {
     
-    @ViewChild('table') table: TableComponent;
-    
-    private tasks: Task[];
+    @ViewChild('table', { static: false }) table: TableComponent;
+    private tasks: Task[] = [];
+
     constructor(
-        private taskService: TaskService) {       
+            private taskService: TaskService,
+            private notificationsService: NotificationsService) {
         super('task');
     }
+
+    ngAfterViewInit(): void {
+        this.subscribtions.push(
+            this.notificationsService.getNotifications().subscribe(tasks => {
+                this.tasks = tasks;
+                this.table.refresh();
+            })
+        );
+    }
     
-    ngOnInit() {
-        super.ngOnInit();
-        this.getEntities().then(entities => { this.tasks = entities});
+    getService(): EntityService<Task> {
+        return this.taskService;
     }
 
     getOptions() {
-        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload':true};
+        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload': true, id: false};
     }
 
-    getEntities(): Promise<Task[]> {
-        return this.taskService.getTasks();
+    getPage(pageable: Pageable): Promise<Page<Task>> {
+        return Promise.resolve(new BrowserPaging(this.tasks, this.columnDefs).getPage(pageable));
     }
 
-    // Grid columns definition
+
+    // getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<Task>> {
+    //     return this.entitiesPromise.then(() => {
+    //         if (forceRefresh) {
+    //             return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
+    //         } else {
+    //             return this.browserPaging.getPage(pageable);
+    //         }
+    //     });
+    // }
+
     getColumnDefs(): any[] {
         function dateRenderer(date: number) {
             if (date) {
@@ -57,30 +80,40 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
             return null;
         };
         return [
-            { headerName: 'Message', field: 'message'},
-            { headerName: 'Status', field: 'status', type: 'Status', cellRenderer: function (params: any) {
-                    if (params.data.status == 0) {
+            { headerName: 'Message', field: 'message', width: '100%', type:'link',
+				route: (task: Task) => {
+                    if (task.eventType === 'importDataset.event') {
+                        if (task.message.lastIndexOf('in examination ') != -1) {
+                            return '/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length));
+                        } else if (task.message.lastIndexOf('for examination ') != -1) {
+                            return '/examination/details/' + task.message.slice(task.message.lastIndexOf('for examination ') + ('for examination '.length));
+                        } else if (task.message.indexOf('in dataset') != -1) {
+                            return '/dataset/details/' + task.message.slice(task.message.lastIndexOf('in dataset ') + ('in dataset '.length))
+                        }
+                    }
+                    return '/home';
+                }
+            },
+            { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },
+            { headerName: 'Status', field: 'status', width: '70px', type: 'Status', cellRenderer: function (params: any) {
+                    if (params.data.status == 2) {
                         return "In progress"
                     }
                     if (params.data.status == 1) {
-                        return "Success"
+                        return {text: 'Success', color: 'darkgreen'}
                     }
                     if (params.data.status == -1) {
-                        return "Error"
+                        return {text: 'Error', color: 'red'}
                     }
-                } 
-            },
-            { headerName: 'Progress', field: 'progress', type: 'progress', cellRenderer: function (params: any) {
-                    return params.data.progress * 100 + '%';
                 } 
             },
             {
-                headerName: "Creation", field: "creationDate", cellRenderer: function (params: any) {
+                headerName: "Creation", field: "creationDate", width: '130px', cellRenderer: function (params: any) {
                     return dateRenderer(params.data.creationDate);
                 }
             },
             {
-                headerName: "Last update", field: "lastUpdate", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
+                headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                     return dateRenderer(params.data.lastUpdate);
                 }
             },
@@ -88,11 +121,7 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
     }
     
     getCustomActionsDefs(): any[] {
-        return [{title: "Refresh",awesome: "fa-sync", action: item => {
-            this.reloadData();
-            this.table.refresh();
-            }
-        }];
+        return [];
     }
 
 }

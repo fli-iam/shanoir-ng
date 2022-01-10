@@ -54,20 +54,45 @@ public class IdentifierCalculator {
 
 	/**
 	 * This method calculates a subject identifier on using three direct values.
-	 * This subject identifier is currently used by Neurinfo.
+	 * This subject identifier is currently used by Neurinfo for not-anonymised
+	 * imports.
 	 * 
 	 * @param firstName
 	 * @param lastName
 	 * @param birthDate
 	 * @return
 	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
 	 */
-	public String calculateIdentifier(final String firstName, final String lastName, final Date birthDate) throws NoSuchAlgorithmException {
+	public String calculateIdentifier(final String firstName, final String lastName, final Date birthDate) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		final String subjectIdentifierSeed = firstName + lastName + birthDate;
+		String hex = calculateSHA(subjectIdentifierSeed);
+		return hex;
+	}
+
+	/**
+	 * This method calculates a subject identifier on using two direct values.
+	 * This subject identifier is currently used by Neurinfo for already anonymised
+	 * imports.
+	 * 
+	 * @param newPatientID
+	 * @param birthDate
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 */
+	public String calculateIdentifier(final String newPatientID, final Date birthDate) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		final String subjectIdentifierSeed = newPatientID + birthDate;
+		String hex = calculateSHA(subjectIdentifierSeed);
+		return hex;
+	}
+	
+	private String calculateSHA(final String subjectIdentifierSeed)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		String hex = "";
 		int hashInt = -1;
 		final MessageDigest msgDigest = MessageDigest.getInstance(SHA);
-		msgDigest.update(subjectIdentifierSeed.getBytes());
+		msgDigest.update(subjectIdentifierSeed.getBytes(UTF_8));
 		byte[] hash = msgDigest.digest();
 		for (int i = 0; i < hash.length; i++) {
 			hashInt = hash[i] & 0xFF;

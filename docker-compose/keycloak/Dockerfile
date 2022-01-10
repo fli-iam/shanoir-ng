@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM jboss/keycloak:4.6.0.Final
+FROM jboss/keycloak:12.0.3
 
 COPY themes/. /opt/jboss/keycloak/themes
 
@@ -18,4 +18,11 @@ COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
 
 COPY cfg/. /opt/jboss/keycloak/
 
-CMD ["-b", "0.0.0.0", "-bmanagement", "0.0.0.0", "-Dkeycloak.import=/opt/jboss/keycloak/shanoir-ng-realm.json", "-Dkeycloak.migration.strategy=IGNORE_EXISTING","-Dkeycloak.profile.feature.scripts=enabled"]
+COPY entrypoint entrypoint_common oneshot /bin/
+
+# unset the env var, so that the default value is set by the entrypoint script
+# (like all other env vars)
+ENV PROXY_ADDRESS_FORWARDING ""
+
+ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
+	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]

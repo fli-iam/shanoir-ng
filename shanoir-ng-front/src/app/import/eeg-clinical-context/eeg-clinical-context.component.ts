@@ -11,17 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { CoordSystems } from '../../enum/coord-system.enum';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
 import { slideDown } from '../../shared/animations/animations';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
@@ -31,9 +36,9 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { TableComponent } from '../../shared/components/table/table.component';
-import { Event }from '../../datasets/dataset/eeg/dataset.eeg.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { Option } from '../../shared/select/select.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -45,26 +50,35 @@ import { FilterablePageable, Page } from '../../shared/components/table/pageable
 
 export class EegClinicalContextComponent implements OnInit {
     
-    @ViewChild('eventsTable') table: TableComponent;
+    @ViewChild('eventsTable', { static: false }) table: TableComponent;
     
-    protected studies: Study[] = [];
-    protected centers: Center[] = [];
-    protected acquisitionEquipments: AcquisitionEquipment[] = [];
-    protected examinations: SubjectExamination[] = [];
-    protected study: Study;
-    protected center: Center;
-    protected acquisitionEquipment: AcquisitionEquipment;
-    protected examination: SubjectExamination;
-    protected subjects: SubjectWithSubjectStudy[] = [];
-    protected subject: SubjectWithSubjectStudy;
-    protected columnDefs: any[];
-    protected hasPosition: boolean;
+    public studies: Study[] = [];
+    public centers: Center[] = [];
+    public acquisitionEquipments: AcquisitionEquipment[] = [];
+    public examinations: SubjectExamination[] = [];
+    public study: Study;
+    public center: Center;
+    public acquisitionEquipment: AcquisitionEquipment;
+    public examination: SubjectExamination;
+    public subjects: SubjectWithSubjectStudy[] = [];
+    public subject: SubjectWithSubjectStudy;
+    public columnDefs: any[];
+    public hasPosition: boolean;
+    openSubjectStudy: boolean = false;
     
-    protected CoordSystems = CoordSystems;
-    protected coordsystem : string;
+    public coordSystemOptions: Option<CoordSystems>[];
+    public coordsystem : string;
 
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;
+
+    public subjectTypes: Option<string>[] = [
+        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
+        new Option<string>('PATIENT', 'Patient'),
+        new Option<string>('PHANTOM', 'Phantom')
+    ];
+
+    private subscribtions: Subscription[] = [];
     
     constructor(
             private studyService: StudyService,
@@ -72,10 +86,14 @@ export class EegClinicalContextComponent implements OnInit {
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            public acqEqPipe: AcquisitionEquipmentPipe,
+            public subjectExaminationPipe: SubjectExaminationPipe) {
+
+        this.coordSystemOptions = CoordSystems.options;
 
         // No channels => no import
-        if (!this.importDataService.eegImportJob.datasets ) {
+        if (!this.importDataService?.eegImportJob?.datasets) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -148,7 +166,7 @@ export class EegClinicalContextComponent implements OnInit {
     }
     
     private initEventsTable(): void {
-        
+        if (!this.importDataService.eegImportJob) return;
         this.columnDefs = [
             {headerName: "Dataset name", field: "name", type: "string", cellRenderer: function (params: any) {
                     return params.data.dataset_name;
@@ -190,7 +208,7 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-   protected getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
+   public getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
         return new Promise((resolve) => {
             this.eventsPromise.then(() => {
                 resolve(this.browserPaging.getPage(pageable));
@@ -198,8 +216,9 @@ export class EegClinicalContextComponent implements OnInit {
         });
     }
 
-    private onSelectStudy(): void {
+    public onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
             this.center = this.study.studyCenterList[0].center;
@@ -210,8 +229,9 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectCenter(): void {
+    public onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
             this.acquisitionEquipment = this.center.acquisitionEquipments[0];
@@ -220,8 +240,9 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectAcquisitonEquipment(): void {
+    public onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
             this.studyService
@@ -230,7 +251,7 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectSubject(): void {
+    public onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -240,13 +261,13 @@ export class EegClinicalContextComponent implements OnInit {
         }
     }
 
-    private onSelectExam(): void {
+    public onSelectExam(): void {
     }
 
-    private onSelectCoord(): void {
+    public onSelectCoord(): void {
     }
 
-    private onContextChange() {
+    public onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -254,8 +275,8 @@ export class EegClinicalContextComponent implements OnInit {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem);
+        return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
+            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
 
     private getPrefilledCenter(): Center {
@@ -273,7 +294,7 @@ export class EegClinicalContextComponent implements OnInit {
         return center;
     }
 
-    private openCreateAcqEqt() {
+    public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -289,7 +310,7 @@ export class EegClinicalContextComponent implements OnInit {
         return acqEpt;
     }
 
-    private openCreateSubject = () => {
+    public openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
@@ -306,6 +327,7 @@ export class EegClinicalContextComponent implements OnInit {
         let newSubject = new Subject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.subjectStudyList = [subjectStudy];
+        newSubject.birthDate = null;
         return newSubject;
     }
 
@@ -319,13 +341,14 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectWithSubjectStudy;
     }
 
-    private openCreateExam = () => {
+    public openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+                }));
         });
     }
 
@@ -350,28 +373,24 @@ export class EegClinicalContextComponent implements OnInit {
         return subjectExam;
     }
 
-    private showStudyDetails() {
+    public showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    private showCenterDetails() {
+    public showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    private showAcquistionEquipmentDetails() {
+    public showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    private showSubjectDetails() {
+    public showSubjectDetails() {
         window.open('subject/details/' + this.subject.id, '_blank');
     }
 
-    private showExaminationDetails() {
+    public showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
-    }
-    
-    public get systemCoordKeys() {
-        return Object.keys(CoordSystems);
     }
 
     get valid(): boolean {
@@ -382,12 +401,19 @@ export class EegClinicalContextComponent implements OnInit {
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
+            && context.subject.subjectStudy.subjectType
             && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !(this.hasPosition))
         );
     }
 
-    private next() {
+    public next() {
         this.router.navigate(['imports/eegfinish']);
+    }
+    
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }
 
@@ -395,23 +421,4 @@ export class EventContext {
     public description: string;
     public number: number;
     public dataset_name: string;
-}
-
-export enum CoordSystems {
-    ACPC = "ACPC",
-    Allen= "Allen",     
-    Analyze= "Analyze",  
-    BTi_4D= "BTi/4D",
-    CTF_MRI= "CTF MRI", 
-    CTF_gradiometer = "CTF gradiometer",
-    CapTrak= "CapTrak",
-    Chieti= "Chieti",
-    DICOM= "DICOM",
-    FreeSurfer= "FreeSurfer",  
-    MNI= "MNI",
-    NIfTI= "NIfTI",
-    Neuromag_Elekta= "Neuromag/Elekta",
-    Paxinos_Franklin= "Paxinos-Franklin",
-    Talairach_Tournoux= "Talairach-Tournoux", 
-    Yokogawa= "Yokogawa"
 }

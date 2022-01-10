@@ -97,6 +97,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
+
 		Map<String, String> seriesInstanceUIDs = new HashMap<>();
 		Map<String, String> studyInstanceUIDs = new HashMap<>();
 		Map<String, String> studyIds = new HashMap<>();
@@ -123,10 +124,13 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			String patientBirthDate) {
 		anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
+
 		// patient birth date
-		if (patientBirthDate != null && patientBirthDate.length() != 0) {
+		if (patientBirthDate != null && patientBirthDate.length() >= 4) {
 			String newDate = patientBirthDate.substring(0, 4) + "01" + "01";
 			anonymizeTagAccordingToVR(attributes, Tag.PatientBirthDate, newDate);
+		} else {
+			anonymizeTagAccordingToVR(attributes, Tag.PatientBirthDate, "19000101");
 		}
 	}
 
@@ -198,8 +202,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				if (intgggg % 2 == 1) {
 					String action = anonymizationMap.get(PRIVATE_TAGS);
 					String value = datasetAttributes.getString(tagInt);
-					if (value != null && !value.isEmpty()) {
-						checkForPHI(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value);
+					// only act below in case of K: keep, if X: delete for private tags, no need
+					if (value != null && !value.isEmpty() && action.equals("K")) {
+						action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value, action);
 						action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
 					}
 					anonymizeTag(tagInt, action, datasetAttributes);
@@ -286,28 +291,35 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * @param value
 	 * @throws Exception
 	 */
-	private void checkForPHI(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
-			String patientBirthDateAttr, int tagInt, String value) throws Exception {
+	private String checkForPHIInPrivateTags(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
+			String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
 		// check for patient name elements
 		for (int i = 0; i < patientNameArrayAttr.length; i++) {
 			String patientNamePart = patientNameArrayAttr[i];
-			checkContains(tagInt, value, patientNamePart);
+			if(checkTagContainsValuePHI(tagInt, value, patientNamePart)) {
+				return "X";
+			}
 		}
-		checkContains(tagInt, value, patientIDAttr);
-		checkContains(tagInt, value, patientBirthNameAttr);
-		checkContains(tagInt, value, patientBirthDateAttr);
+		if (checkTagContainsValuePHI(tagInt, value, patientIDAttr)
+			|| checkTagContainsValuePHI(tagInt, value, patientBirthNameAttr)
+			|| checkTagContainsValuePHI(tagInt, value, patientBirthDateAttr)) {
+			return "X";
+		}
+		return action;
 	}
 
 	/**
 	 * @param tagInt
 	 * @param value
-	 * @param patientNamePart
+	 * @param compareValuePHI
 	 * @throws Exception
 	 */
-	private void checkContains(int tagInt, String value, String patientNamePart) throws Exception {
-		if (patientNamePart != null && !patientNamePart.isEmpty() && patientNamePart.length() > 2 && value.contains(patientNamePart)) {
-			throw new Exception("Potential PHI found in private tag: " + tagInt + ": " + value);
+	private boolean checkTagContainsValuePHI(int tagInt, String value, String compareValuePHI) throws Exception {
+		if (compareValuePHI != null && !compareValuePHI.isEmpty() && compareValuePHI.length() > 2 && value.contains(compareValuePHI)) {
+			LOG.warn("Potential PHI found in private tag (--> remove/delete): " + tagInt + ": " + value);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -436,6 +448,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 */
 	private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
 		VR vr = attributes.getVR(tag);
+		if (vr == null) {
+			return;
+		}
 		// VR.AT = Attribute Tag
 		// VR.SL = Signed Long || VR.UL = Unsigned Long
 		// VR.SS = Signed Short || VR.US = Unsigned Short

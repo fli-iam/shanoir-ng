@@ -40,7 +40,16 @@ export class StudyRightsService {
 
     public getMyRightsForStudy(studyId: number): Promise<StudyUserRight[]> {
         return this.http.get<StudyUserRight[]>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/' + studyId)
-            .toPromise();
+            .toPromise()
+            .then(rights => rights ? rights : []);
+    }
+
+    public getMyRights(): Promise<Map<number, StudyUserRight[]>> {
+        return this.http.get<Map<number, StudyUserRight[]>>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/all')
+            .toPromise()
+            .then(rights => {
+                return rights ? Object.entries(rights).reduce((map: Map<number, StudyUserRight[]>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            });
     }
 
     hasOnStudyToImport(): Promise<boolean> {

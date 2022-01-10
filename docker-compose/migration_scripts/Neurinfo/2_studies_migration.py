@@ -4,8 +4,18 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="", database="neurinfo", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="studies", password="password", database="studies", charset="utf8")
+sourceConn = pymysql.connect(
+        host        = os.environ.get("SRC_HOST")        or "localhost",
+        user        = os.environ.get("SRC_USER")        or "root",
+        password    = os.environ.get("SRC_PASSWORD")    or "",
+        database    = os.environ.get("SRC_DATABASE")    or "neurinfo",
+        charset     = os.environ.get("SRC_CHARSET")     or "utf8")
+targetConn = pymysql.connect(
+        host        = os.environ.get("TGT_HOST")        or "localhost",
+        user        = os.environ.get("TGT_USER")        or "studies",
+        password    = os.environ.get("TGT_PASSWORD")    or "password",
+        database    = os.environ.get("TGT_DATABASE")    or "studies",
+        charset     = os.environ.get("TGT_CHARSET")     or "utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
@@ -26,17 +36,17 @@ targetCursor.execute(query)
 targetConn.commit()
 print("Delete coil: end")
 
-print("Delete acquisition_equipment: start")
-query = "DELETE FROM acquisition_equipment"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete acquisition_equipment: end")
+#print("Delete acquisition_equipment: start")
+#query = "DELETE FROM acquisition_equipment"
+#targetCursor.execute(query)
+#targetConn.commit()
+#print("Delete acquisition_equipment: end")
 
-print("Delete center: start")
-query = "DELETE FROM center"
-targetCursor.execute(query)
-targetConn.commit()
-print("Delete center: end")
+#print("Delete center: start")
+#query = "DELETE FROM center"
+#targetCursor.execute(query)
+#targetConn.commit()
+#print("Delete center: end")
 
 
 ######## STUDY ###################
@@ -131,20 +141,20 @@ print("######## CLEANING OF TARGET DB MS STUDIES: FINISHED ###################")
 
 
 print("######## IMPORTING OF TARGET DB MS STUDIES: START ###################")
-print("Import centers: start")
-sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM CENTER")
-query = "INSERT INTO center (id, city, country, name, phone_number, postal_code, street, website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-targetCursor.executemany(query, sourceCursor.fetchall())
-targetConn.commit()
-print("Import centers: end")
+#print("Import centers: start")
+#sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM CENTER")
+#query = "INSERT INTO center (id, city, country, name, phone_number, postal_code, street, website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+#targetCursor.executemany(query, sourceCursor.fetchall())
+#targetConn.commit()
+#print("Import centers: end")
 
 
 print("Reimport studies: start")    
 sourceCursor.execute("""SELECT STUDY_ID, IS_CLINICAL, COORDINATOR_ID, IS_DOWNLOADABLE_BY_DEFAULT, END_DATE, IS_MONO_CENTER, NAME,
     START_DATE, REF_STUDY_STATUS_ID, REF_STUDY_TYPE_ID, IS_VISIBLE_BY_DEFAULT, IS_WITH_EXAMINATION FROM STUDY""")
 query = """INSERT INTO study
-    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)"""
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 print("Reimport studies: end")
@@ -159,7 +169,7 @@ print("Reimport study_center: end")
 
 
 print("Reimport study_user: start")    
-sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, U.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
+sourceCursor.execute("SELECT REL_STUDY_USER_ID, IS_RECEIVE_ANONYMIZATION_REPORT, IS_RECEIVE_NEW_IMPORT_REPORT, STUDY_ID, rsu.USER_ID, u.USERNAME FROM REL_STUDY_USER rsu JOIN USERS u WHERE rsu.USER_ID = u.USER_ID")
 query = "INSERT INTO study_user (id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name) VALUES (%s, %s, %s, %s, %s, %s)"
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -191,12 +201,12 @@ targetConn.commit()
 print("Import group_of_subjects: end")
 
 
-#print("Import coil: start")    
-#sourceCursor.execute("SELECT COIL_ID, CENTER_ID, REF_COIL_TYPE_ID, MANUFACTURER_MODEL_ID, NAME, NUMBER_OF_CHANNELS, SERIAL_NUMBER FROM COIL")
-#query = "INSERT INTO coil (id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-#targetCursor.executemany(query, sourceCursor.fetchall())
-#targetConn.commit()
-#print("Import coil: end")
+print("Import coil: start")    
+sourceCursor.execute("SELECT COIL_ID, CENTER_ID, REF_COIL_TYPE_ID, MANUFACTURER_MODEL_ID, NAME, NUMBER_OF_CHANNELS, SERIAL_NUMBER FROM COIL")
+query = "INSERT INTO coil (id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+print("Import coil: end")
 
 
 print("Import timepoint: start")    

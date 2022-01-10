@@ -1,0 +1,60 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<div [hidden]="progressBar.progress == 0">
+    <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+</div>
+<node
+        *ngIf="node"
+        [class.selected]="this.menuOpened"
+        [clickable] = "this.node.id != null"
+        [label]="node.label" 
+        awesome="fas fa-stethoscope" 
+        [(opened)]="node.open"
+        (labelClick)="menuOpened = !menuOpened"
+        (firstOpen)="firstOpen()"
+        [hasChildren]="hasChildren()">
+
+    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
+        <menu-item label="Details..." awesome="fas fa-eye" (click)="showExaminationDetails()"></menu-item>
+        <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
+        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0)" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
+        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0)" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+    </dropdown-menu>
+
+    <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')"> 
+        <dataset-acquisition-node
+                node
+                *ngFor="let datasetAcq of node.datasetAcquisitions"
+                [input]="datasetAcq"
+                (selectedChange)="selectedChange.emit()"
+                [hasBox]="hasBox">
+        </dataset-acquisition-node>
+    </ng-container>
+
+    <node 
+            *ngIf="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+            label="Extra data files"
+            awesome="far fa-folder-open"
+            [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+            [(opened)]="node.extraDataOpen">
+        <node 
+                *ngFor="let file of node.extraDataFilePathList" 
+                label="{{file}}" 
+                awesome="fas fa-file" 
+                [buttonPicto]="'fas fa-download'" 
+                (buttonClick)=downloadFile(file)
+                [hasChildren]="false">
+        </node>
+    </node>
+</node>

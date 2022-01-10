@@ -18,10 +18,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </legend>
 <ol>
     <li>
-        <label>List of the {{legend | lowercase}} available</label>
+        <label>List of {{legend | lowercase}} available</label>
         <span class="right-col">
-            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()">
-                <select-option *ngFor="let object of selectableList" [value]="object" [disabled]="object?.selected">{{object.name}}</select-option>
+            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()" [options]="optionList">
             </select-box>
         </span>
     </li>
@@ -29,7 +28,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <table>
             <thead>
                 <tr>
-                    <th class="label-col">{{columnName}}</th>
+                    <th class="label-col">
+                    <!-- {{columnName}} -->
+                    </th>
+                    <th class="input-col" *ngIf="hasTags">Tags</th>
                     <th class="input-col">Subject id for this study</th>
                     <th class="chkbx-col" title="Physically Involved">PI</th>
                     <th *ngIf="displaySubjectType" class="dropdown-col">Subject Type</th>
@@ -37,10 +39,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
             </thead>  
             <tbody>
-                <tr *ngFor="let subjectStudy of model; let i = index">
-                    <td class="label-col">
+                <tr *ngFor="let subjectStudy of model; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                    <td class="dropdown-col">
                         <span *ngIf="compMode == 'study'">{{subjectStudy.subject.name}}</span>
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
+                    </td>
+                    <td class="dropdown-col tag-cell" *ngIf="hasTags">
+                        <tag-list [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}" (onChange)="onChange()"></tag-list>
                     </td>
                     <td class="input-col">
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>
@@ -55,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
                         </select>
                     </td>
-                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
+                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-times"></i></span>
                 </tr>
             </tbody>
         </table>

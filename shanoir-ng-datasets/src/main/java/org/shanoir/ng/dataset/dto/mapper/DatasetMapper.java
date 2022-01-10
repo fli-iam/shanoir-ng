@@ -17,9 +17,13 @@ package org.shanoir.ng.dataset.dto.mapper;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Named;
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -30,7 +34,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class })
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class }) 
 @DecoratedWith(DatasetDecorator.class)
 public interface DatasetMapper {
 
@@ -50,6 +54,7 @@ public interface DatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "standard")
 	DatasetDTO datasetToDatasetDTO(Dataset dataset);
 	
 	/**
@@ -59,6 +64,17 @@ public interface DatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@Named(value = "withProcessings")
+	DatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(Dataset dataset);
+	
+	/**
+	 * Map a @Dataset to a @DatasetDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	@IterableMapping(qualifiedByName = "standard")
 	List<DatasetDTO> datasetToDatasetDTO(List<Dataset> datasets);
 
 	/**
@@ -68,8 +84,9 @@ public interface DatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
+	@IterableMapping(qualifiedByName = "standard")
 	public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
-
+	
 	/**
 	 * Map a @Dataset to a @IdNameDTO.
 	 * 

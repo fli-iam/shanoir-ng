@@ -1,26 +1,29 @@
  :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
-caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-th { width: 100%; white-space: normal; }
+caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
+caption { overflow: hidden; }
+th { width: 100%; white-space: normal; position: relative; height: 1px; min-width: 10px; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
-		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
-			.controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
+			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+			.controls button:disabled { opacity: 0.5; }
 			.controls button span { vertical-align: middle; }
 			.controls button img { height: 16px; vertical-align: middle; }
+			.command-block + .command-block { margin-left: 10px; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
-				.controls .awesome svg { vertical-align: -1; color: var(--color-c); }
+				.controls .awesome i { color: var(--color-c); }
 		.controls input,
 		.controls select { height: 20px; vertical-align: middle; }
 		.controls input { padding: 0 5px; width: 150px; }
 		.controls select { width: 150px; margin-right: 5px; }
 		.controls .text-search,
 		.controls .options,
-		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 5px;vertical-align: bottom; }
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 20px 0 5px; vertical-align: baseline; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
-	th.checkbox-col { width: 17px; }
+	th.checkbox-col { width: 20px; }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -33,10 +36,13 @@ th { width: 100%; white-space: normal; }
 tr { height: 20px; }
 	/* tr.even { background-color: var(--light-grey); }
 	tr.odd { background-color: var(--lighter-grey); } */
-	tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
+	tr:not(.disabled):not(.edit):hover td:not(.loading):not(.empty) { background-color: var(--color-b-light); cursor: pointer; }
+	tr.selected:not(.disabled):not(.edit):hover td:not(.loading):not(.empty) { background-color: var(--grey); cursor: pointer; }
+ 	tr.selected { background-color: lightsteelblue; }
+tr.disabled { opacity: 0.7; }
 td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
-	td.bool { text-align: center; }
+	td.bool, td.progress { text-align: center; }
 	td.cell input:not([type='checkbox']), td.cell select { width: 100%; border: none; }
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
@@ -51,16 +57,41 @@ td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-o
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
 
 a.link { text-decoration: none; color: inherit; }
-	a.link svg { font-size: 10px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
-	a.link svg:hover { color: var(--color-a); }
+	a.link i { font-size: 9px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
+	a.link:hover i,
+	a.link:hover { color: var(--color-a); text-decoration: underline; }
 
-.cell-button svg:hover { color: var(--color-a); }
+.cell-button i:hover { color: var(--color-a); }
 
-checkbox { height: 13px; width: 13px; margin: 1px 0; }
+checkbox { vertical-align: middle; }
+td checkbox { transform: scale(0.8); }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
-.triangle.up { bottom: 100%; }
-.triangle.down { top: 100%; }
+.triangle.up { top: -12px; }
+.triangle.down { bottom: -8px; }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
 .col-title { z-index: 1; }
+.click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+
+.clickable { cursor: pointer; }
+.refresh { color: var(--greyer); }
+.refresh i, .error i { margin-left: 7px; }
+.bottom-refresh { padding: 0 !important; }
+.error { color: var(--color-error); font-weight: bold; }
+
+tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;} 
+.col-settings-button { display: block; opacity: 0; position: absolute; left: -21px; top: 1px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
+
+app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
+app-modal .header, app-modal .footer { text-align: center; padding: 10px 0; }
+app-modal .header { font-size: 16px; }
+app-modal .body { margin: 15px 10px; }
+app-modal input { width: 37px; }
+app-modal table td { padding: 1 5px; }
+
+.resizer { display: block; position: absolute; top: 0; bottom: 0; right: -5px; width: 10px; z-index: 1; }
+thead th:not(:first-child) { border-left: 1px solid grey; }
+
+.resizing, .resizer { cursor: col-resize !important; user-select: none; }
+progress-bar { vertical-align: middle; }

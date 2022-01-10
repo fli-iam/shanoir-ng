@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.model;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -35,6 +36,8 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.studycard.model.StudyCard;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -53,10 +56,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @DatasetsModalityTypeCheck
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({  
-	@Type(value = CtDatasetAcquisition.class, name = "Ct"),  
+@JsonSubTypes({
+	@Type(value = CtDatasetAcquisition.class, name = "Ct"),
 	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
+	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
@@ -68,7 +72,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	/** Related Acquisition Equipment. */
 	@NotNull
 	private Long acquisitionEquipmentId;
-
+	
 	/** Datasets. */
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
@@ -78,6 +82,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@ManyToOne
 	@JoinColumn(name = "examination_id")
 	private Examination examination;
+	
+	/** Applied study card. */
+	@ManyToOne
+	@JoinColumn(name = "studycard_id")
+	private StudyCard studyCard;
+	
+	/** Used to know if the study card that was applied matches the study card's last version or anterior */
+	private Long studyCardTimestamp;
 
 	/** Rank of the session in the examination protocol. */
 	private Integer rank;
@@ -87,6 +99,10 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/** (0020,0011) Series number from dicom tags. */
 	private Integer sortingIndex;
+
+	/** Represents the date the acquisition was created on shanoir AND NOT the acquisition date in itself. */
+	@LocalDateAnnotations
+	private LocalDate creationDate;
 
 	/**
 	 * @return the acquisitionEquipmentId
@@ -176,6 +192,36 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	 */
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
+	}
+	
+	public StudyCard getStudyCard() {
+		return studyCard;
+	}
+
+	public void setStudyCard(StudyCard studyCard) {
+		this.studyCard = studyCard;
+	}
+
+	public Long getStudyCardTimestamp() {
+		return studyCardTimestamp;
+	}
+
+	public void setStudyCardTimestamp(Long studyCardTimestamp) {
+		this.studyCardTimestamp = studyCardTimestamp;
+	}
+
+	/**
+	 * @return the creationDate
+	 */
+	public LocalDate getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(LocalDate creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	/**

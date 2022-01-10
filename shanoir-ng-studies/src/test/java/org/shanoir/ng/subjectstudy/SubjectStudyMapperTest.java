@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * Subject - study mapper test.
@@ -63,11 +65,12 @@ public class SubjectStudyMapperTest {
 	}
 
 	private SubjectStudy createSubjectStudy() {
-		final SubjectStudy center = new SubjectStudy();
+		final SubjectStudy subjectStudy = new SubjectStudy();
 		final Subject subject = new Subject();
 		subject.setId(SUBJECT_ID);
-		center.setSubject(subject);
-		return center;
+		subjectStudy.setSubject(subject);
+		subjectStudy.setStudy(new Study());
+		return subjectStudy;
 	}
 
 }

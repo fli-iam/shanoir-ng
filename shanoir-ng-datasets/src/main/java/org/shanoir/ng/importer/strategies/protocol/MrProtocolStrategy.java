@@ -42,14 +42,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MrProtocolStrategy implements ProtocolStrategy {
+public class MrProtocolStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	@Override
-	public MrProtocol generateMrProtocolForSerie(Attributes attributes, Serie serie) {
-		if (Boolean.TRUE.equals(serie.getIsEnhancedMR())) {
+	public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) {
+		// dcm4che3 does not support MultiframeExtraction for MRS
+		if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
 			// MultiFrameExtractor is only used in case of EnhancedMR MRI.
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
@@ -60,7 +60,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		mrProtocol.setOriginMetadata(mrProtocolMetadata);
 
 		// Imaged nucleus
-		final ImagedNucleus imagedNucleus = getImagedNucleus(attributes, serie.getIsEnhancedMR());
+		final ImagedNucleus imagedNucleus = getImagedNucleus(attributes, serie.getIsEnhanced());
 		if (imagedNucleus != null) {
 			LOG.debug("extractMetadata : imagedNucleus=" + imagedNucleus.toString());
 			mrProtocol.setImagedNucleus(imagedNucleus);
@@ -75,6 +75,11 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		final Double imagingFrequency = attributes.getDouble(Tag.ImagingFrequency, 0);
 		LOG.debug("extractMetadata : imagingFrequency=" + imagingFrequency);
 		mrProtocol.setImagingFrequency(imagingFrequency);
+
+		// Magnetic field strength
+		final Double magneticFieldStrength = attributes.getDouble(Tag.MagneticFieldStrength, 0);
+		LOG.debug("extractMetadata : magneticFieldStrength=" + magneticFieldStrength);
+		mrProtocol.setMagneticFieldStrength(magneticFieldStrength);
 
 		// Acquisition duration
 		final Double acquisitionDuration = attributes.getDouble(Tag.AcquisitionDuration, 0);
@@ -118,7 +123,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		mrProtocol.setSliceSpacing(sliceSpacing);
 
 		// Acquisition Resolution X & Y
-		final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(attributes, serie.getIsEnhancedMR());
+		final Integer[] acquisitionMatrixDimension = getAcquisitionResolution(attributes, serie.getIsEnhanced());
 		if (acquisitionMatrixDimension != null && acquisitionMatrixDimension.length == 2) {
 			final Integer acquisitionResolutionX = acquisitionMatrixDimension[0];
 			final Integer acquisitionResolutionY = acquisitionMatrixDimension[1];
@@ -146,7 +151,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 			mrProtocol.setFovY(fovY);
 		}
 
-		if (serie.getIsEnhancedMR()) {
+		if (serie.getIsEnhanced()) {
 			Integer acquisitionResolutionX = null;
 			Integer acquisitionResolutionY = null;
 			final String inPlanePhaseEncodingDirection = attributes.getString(Tag.InPlanePhaseEncodingDirection);
@@ -210,7 +215,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		mrProtocol.setPatientPosition(patientPosition);
 
 		Field[] fieldArrayMrProtocol = mrProtocol.getClass().getDeclaredFields();
-		Field[] fieldArrayMrProtocolMetadata = mrProtocol.getOriginMetadata().getClass().getDeclaredFields();
+		Field[] fieldArrayMrProtocolMetadata = new MrProtocolMetadata().getClass().getDeclaredFields();
 		
 	    SortedSet<Field> fields = new TreeSet<>(new FieldComparator());
 	    fields.addAll(Arrays.asList(concat(fieldArrayMrProtocol, fieldArrayMrProtocolMetadata)));
@@ -282,7 +287,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		final String receivingCoilName = attributes.getString(Tag.ReceiveCoilName);
 		final String receivingCoilType = attributes.getString(Tag.ReceiveCoilType);
 		if (receivingCoilName != null && !receivingCoilName.equals("")
-				|| receivingCoilType != null && !receivingCoilType.equals("")) {
+				&& receivingCoilType != null && !receivingCoilType.equals("")) {
 			receivingCoil = new CoilDTO();
 			receivingCoil.setName(receivingCoilName);
 			receivingCoil.setCoilType(CoilType.valueOf(receivingCoilType));
@@ -296,7 +301,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		final String transmittingCoilName = attributes.getString(Tag.TransmitCoilName);
 		final String transmittingCoilType = attributes.getString(Tag.TransmitCoilType);
 		if (transmittingCoilName != null && !transmittingCoilName.equals("")
-				|| transmittingCoilType != null && !transmittingCoilType.equals("")) {
+				&& transmittingCoilType != null && !transmittingCoilType.equals("")) {
 			transmittingCoil = new CoilDTO();
 			transmittingCoil.setName(transmittingCoilName);
 			if (transmittingCoilType != null) {
@@ -382,7 +387,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		}
 
 		// K-Space fill
-		mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(attributes, serie.getIsEnhancedMR()));
+		mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(attributes, serie.getIsEnhanced()));
 
 		return mrProtocolMetadata;
 	}

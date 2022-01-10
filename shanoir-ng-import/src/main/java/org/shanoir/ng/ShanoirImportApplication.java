@@ -20,10 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Shanoir application.
- *
- * @author ifakhfakh
- *
+ * Shanoir-NG microservice import application.
  */
 @SpringBootApplication
 @EnableSwagger2

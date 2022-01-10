@@ -15,8 +15,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <h2 i18n="Manage studies|Title@@studyListTitle">Manage studies</h2>
 
 <shanoir-table #table
+    [class.narrow]="windowService.isWide()"
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
     [customActionDefs]="customActionDefs" 
     (rowClick)="onRowClick($event)">
 </shanoir-table>
+
+<!-- <study-detail *ngIf="selectedId" [id]="selectedId" mode="view"></study-detail> -->

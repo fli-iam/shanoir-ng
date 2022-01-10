@@ -52,10 +52,11 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	private String frontServerUrl;
 
 	/**
-	 * Registers the KeycloakAuthenticationProvider with the authentication manager.
+	 * Registers the KeycloakAuthenticationProvider with the authentication
+	 * manager.
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(keycloakAuthenticationProvider());
 	}
 
@@ -71,12 +72,19 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
-				.authorizeRequests().antMatchers("/**").authenticated().anyRequest().permitAll();
+		http
+			.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
+			.csrf()
+				.disable()
+			.authorizeRequests()
+				.antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
+				.anyRequest().authenticated();
 	}
 
 	@Bean
-	public KeycloakConfigResolver KeycloakConfigResolver() {
+	public KeycloakConfigResolver keycloakConfigResolver() {
 		return new KeycloakSpringBootConfigResolver();
 	}
 

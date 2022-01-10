@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Serie {
 
 	@JsonProperty("selected")
-	private Boolean selected;
+	private boolean selected;
 
 	@JsonProperty("seriesInstanceUID")
 	private String seriesInstanceUID;
@@ -75,12 +75,13 @@ public class Serie {
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
 
-	@JsonProperty("isEnhancedMR")
-	private Boolean isEnhancedMR;
+	@JsonProperty("isEnhanced")
+	private Boolean isEnhanced;
 
 	@JsonProperty("isMultiFrame")
 	private Boolean isMultiFrame;
 
+	// TODO rename to frameCount, as can be 1 too
 	@JsonProperty("multiFrameCount")
 	private Integer multiFrameCount;
 
@@ -107,6 +108,7 @@ public class Serie {
 
 	public Serie(Attributes attributes) {
 		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		this.sopClassUID = attributes.getString(Tag.SOPClassUID);
 		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
 		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
 		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
@@ -120,11 +122,11 @@ public class Serie {
 		setEquipment(equipmentDicom);
 	}
 
-	public Boolean getSelected() {
+	public boolean getSelected() {
 		return selected;
 	}
 
-	public void setSelected(Boolean selected) {
+	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
 
@@ -288,12 +290,12 @@ public class Serie {
 		this.isSpectroscopy = isSpectroscopy;
 	}
 
-	public Boolean getIsEnhancedMR() {
-		return isEnhancedMR;
+	public Boolean getIsEnhanced() {
+		return isEnhanced;
 	}
 
-	public void setIsEnhancedMR(Boolean isEnhancedMR) {
-		this.isEnhancedMR = isEnhancedMR;
+	public void setIsEnhanced(Boolean isEnhanced) {
+		this.isEnhanced = isEnhanced;
 	}
 
 	public String getSequenceName() {

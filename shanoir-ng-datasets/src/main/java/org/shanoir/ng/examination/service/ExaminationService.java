@@ -16,13 +16,13 @@ package org.shanoir.ng.examination.service;
 
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Examination service.
@@ -42,6 +42,14 @@ public interface ExaminationService {
 	void deleteById(Long id) throws EntityNotFoundException;
 
 	/**
+	 * Delete an examination from a rabbit MQ call, not identified
+	 * 
+	 * @param exam the examination to delete
+	 * @throws EntityNotFoundException
+	 */
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
+
+	/**
 	 * Get a paginated list of examinations reachable by connected user.
 	 * 
 	 * @param pageable pagination data.
@@ -49,7 +57,7 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPage(Pageable pageable);
+	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
 
 	/**
 	 * Find examination by its id.
@@ -62,6 +70,7 @@ public interface ExaminationService {
 	Examination findById(Long id);
 
 	/**
+	 * Find examinations related to particular subject
 	 * @param subjectId
 	 * @return
 	 * @author yyao
@@ -69,6 +78,14 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
 	List<Examination> findBySubjectId(Long subjectId);
+
+	/**
+	 * Find examinations related to particular study
+	 * @param subjectId
+	 * @return
+	 * @author yyao
+	 */
+	List<Examination> findByStudyId(Long studyId);
 
 	/**
 	 * Find examinations related to particular subject and study
@@ -88,15 +105,6 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination save(Examination examination);
-
-	/**
-	 * Save an examination.
-	 *
-	 * @param examinationDTO examination to create.
-	 * @return created examination.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudy().getId(), 'CAN_IMPORT'))")
-	Examination save(ExaminationDTO examinationDTO);
 	
 	/**
 	 * Update an examination.
@@ -105,19 +113,17 @@ public interface ExaminationService {
 	 * @return updated examination.
 	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException;
 
 	/**
-	 * Get a paginated list of preclinical examinations reachable by connected user, for a given
-	 * preclinical value.
-	 * 
-	 * @param isPreclinical preclinical examination
-	 * @param pageable pagination data.
-	 * @return list of preclinical examinations.
+	 * Add an extra data file to examination
+	 * @param examinationId the examination ID
+	 * @param file the file to add
+	 * @return true if it's a success, false otherwise
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPreclinicalPage(boolean isPreclinical, Pageable pageable);
+	String addExtraData(Long examinationId, MultipartFile file);
 
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
+	String getExtraDataFilePath(Long examinationId, String fileName);
 }

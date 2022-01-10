@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
@@ -28,14 +29,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Shanoir application.
- *
- * @author msimon
- *
+ * Shanoir-NG microservice datasets application.
  */
 @SpringBootApplication
-@EnableSwagger2
 @EnableSpringDataWebSupport
+@EnableScheduling
+@EnableSwagger2
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {

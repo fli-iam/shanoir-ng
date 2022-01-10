@@ -19,16 +19,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
+import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +62,10 @@ public class KeycloakClient {
 	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
 
-	@Value("${KEYCLOAK_USER}")
+	@Value("${SHANOIR_KEYCLOAK_USER}")
 	private String kcAdminClientUsername;
 
-	@Value("${KEYCLOAK_PASSWORD}")
+	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 	
 	@Value("${keycloak.realm}")
@@ -104,14 +108,39 @@ public class KeycloakClient {
 			userResource.resetPassword(credential);
 
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
-			// Add realm role
-			userResource.roles().realmLevel().add(Arrays
-					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-			return keycloakId;
+			Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
+			if (roleOpt.isPresent()) {
+				final String userRoleName = roleOpt.get().getName();
+				// Add realm role
+				userResource.roles().realmLevel().add(Arrays
+						.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+				return keycloakId;
+			} else {
+				throw new NoSuchElementException("Role not found in roleRepository.");
+			}
 		} catch (Exception e) {
 			throw new SecurityException("Could not register the new user into Keycloak.", e);
 		}
+	}
+
+	/**
+	 * This methods resets the password of th given user and sets a temporary password.
+	 * @param keycloakId the keycloak ID of the user to update.
+	 * @return the password newly created
+	 */
+	public String resetPassword(String keycloakId) {
+		// Create new temporary password
+		String newPassword = PasswordUtils.generatePassword();
+
+		final CredentialRepresentation credential = new CredentialRepresentation();
+		credential.setType(CredentialRepresentation.PASSWORD);
+		credential.setTemporary(Boolean.TRUE);
+		credential.setValue(newPassword);
+
+		final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
+		userResource.resetPassword(credential);
+		
+		return newPassword;
 	}
 	
 	/**
@@ -162,7 +191,7 @@ public class KeycloakClient {
 				}
 			}
 			// Get user role
-			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
+			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays
 					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));

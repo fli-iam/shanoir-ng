@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
@@ -22,51 +22,59 @@ import { ExtensionRequestInfo } from './extension-request-info.model';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { Subscription } from 'rxjs';
+import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'extensionRequest',
-    templateUrl: 'extension-request.component.html'
+    templateUrl: 'extension-request.component.html',
+    styleUrls: ['extension-request.component.css']
 })
 
-export class ExtensionRequestComponent implements OnInit {
+export class ExtensionRequestComponent implements OnInit, OnDestroy {
     @Output() closing = new EventEmitter();
     public extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
     extensionRequestForm: FormGroup;
     isDateValid: boolean = true;
     userId: number;
     selectedDateNormal: string = '';
+    private infoSubscription: Subscription;
+    requestSent: boolean = false;
+    errorMessage: string;
 
     constructor(private router: Router, private route: ActivatedRoute,
         private userService: UserService, private fb: FormBuilder) {
     }
 
     ngOnInit(): void {
-        this.getUser();
         this.buildForm();
     }
 
-     getUser(): void {
-        this.userService.get(KeycloakService.auth.userId)
-        .then((user: User) => {
-            this.extensionRequestInfo.extensionDate = new Date();
-            if (user.expirationDate) {
-                this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
-            }
-            this.getDateToDatePicker(this.extensionRequestInfo);
-        });
+    cancelExtensionRequest(): void {
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     extensionRequest(): void {
         this.submit();
         this.userService.requestExtension(this.extensionRequestInfo)
-            .then(() => {
-                this.router.navigate(['/home']);
+            .then((res) => {
+                this.requestSent = true;
+                this.errorMessage = null;
+            }).catch(exception => {
+                if (exception.status == 406) {
+                    this.requestSent = true;
+                    this.errorMessage = "This account is not disabled or has already an extension request pending. Please contact an administrator for more information."
+                } else if (exception.status == 400) {
+                    this.errorMessage = "No account associated to this email, please enter a valid email address."
+                } else {
+                    throw exception;
+                }
+                
             });
     }
 
     submit(): void {
         this.extensionRequestInfo = this.extensionRequestForm.value;
-        this.setDateFromDatePicker();
     }
 
     isEditUserFormValid(): boolean {
@@ -77,14 +85,14 @@ export class ExtensionRequestComponent implements OnInit {
         }
     }
 
-   buildForm(): void {
+    buildForm(): void {
         this.extensionRequestForm = this.fb.group({
+            'email': [this.extensionRequestInfo.email, [Validators.required]],
             'extensionDate': [this.extensionRequestInfo.extensionDate, [Validators.required]],
-            'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]],
-            'extensionRequest': new FormControl('true')
-        });
+            'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]]
+            });
 
-        this.extensionRequestForm.valueChanges
+        this.infoSubscription = this.extensionRequestForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
     }
@@ -109,47 +117,14 @@ export class ExtensionRequestComponent implements OnInit {
         'extensionMotivation': ''
     };
 
-    public myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.formatted;
-        }
-    }
-
-    onInputFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            this.selectedDateNormal = null;
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            var from = this.selectedDateNormal.valueOf().split("/");
-            var f0 = from[0]; 
-            var f1 = +from[1] - 1; 
-            var f2 = from[2];
-            this.extensionRequestInfo.extensionDate = new Date(+f2, f1, +f0);
-        } else {
-            this.extensionRequestInfo.extensionDate = null;
-        }
-    }
-
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
             let date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
+    }
+
+    ngOnDestroy() {
+        if (this.infoSubscription) this.infoSubscription.unsubscribe();
     }
 }

@@ -11,24 +11,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Injectable } from '@angular/core';
+
+import * as AppUtils from '../../utils/app.utils';
+
+
 
 declare var Keycloak: any;
 
 @Injectable()
 export class KeycloakService {
     static auth: any = {};
+    // static auth: any = { loggedIn: true };
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
     static init(): Promise<any> {
+
+        if (window.location.href.endsWith('/account-request')) {
+            return Promise.resolve();
+        }
+
         const keycloakAuth: any = Keycloak({
-            url: process.env.KEYCLOAK_BASE_URL,
+            url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
             clientId: 'shanoir-ng-front',
         });
-        KeycloakService.auth.loggedIn = false;
+        KeycloakService.auth.loggedIn = true; // false;
 
         return new Promise((resolve, reject) => {
             keycloakAuth.init({ onLoad: 'login-required' })
@@ -38,8 +47,8 @@ export class KeycloakService {
                     // Connected user id
                     KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
                     KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
-                        + process.env.LOGOUT_REDIRECT_URL;
-                    resolve();
+                        + AppUtils.LOGOUT_REDIRECT_URL;
+                    resolve(null);
                 })
                 .error(() => {
                     reject();
@@ -48,7 +57,7 @@ export class KeycloakService {
     }
 
     logout() {
-        KeycloakService.auth.authz.logout();
+        if(KeycloakService.auth && KeycloakService.auth.authz) KeycloakService.auth.authz.logout();
     }
     
     getToken(): Promise<string> {

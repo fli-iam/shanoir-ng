@@ -11,20 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Injectable } from '@angular/core';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { CenterDTO, CenterDTOService } from './center.dto';
 import { Center } from './center.model';
-import { Study } from '../../studies/shared/study.model';
-import { StudyCenter } from 'src/app/studies/shared/study-center.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class CenterService extends EntityService<Center> {
 
     API_URL = AppUtils.BACKEND_API_CENTER_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    private centerDTOService: CenterDTOService = ServiceLocator.injector.get(CenterDTOService);
 
     getEntityInstance() { return new Center(); }
 
@@ -38,8 +43,20 @@ export class CenterService extends EntityService<Center> {
             .toPromise();
     }
 
-    getCentersNamesForExamination(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
+    protected mapEntity = (dto: CenterDTO, result?: Center): Promise<Center> => {
+        if (result == undefined) result = this.getEntityInstance();
+        return this.centerDTOService.toEntity(dto, result);
+    }
+
+    protected mapEntityList = (dtos: CenterDTO[], result?: Center[]): Promise<Center[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.centerDTOService.toEntityList(dtos, result);
+    }
+
+    public stringify(entity: Center) {
+        let dto = new CenterDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
     }
 }

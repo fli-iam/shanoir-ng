@@ -19,6 +19,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -26,13 +28,16 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Instrument variable.
  * 
- * @author ifakhfakh
+ * @author ifakhfakh, JCome
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class InstrumentVariable extends AbstractEntity {
 
 	/**
@@ -49,6 +54,7 @@ public class InstrumentVariable extends AbstractEntity {
 	/** Instrument. */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "instrument_id", nullable = false, updatable = true)
+	@JsonIgnore
 	private Instrument instrument;
 
 	/** The domain explored by the variable. */
@@ -74,6 +80,7 @@ public class InstrumentVariable extends AbstractEntity {
 
 	/** The Variable Assessment list. */
 	@OneToMany(mappedBy = "instrumentVariable", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<VariableAssessment> variableAssessments;
 
 	/**

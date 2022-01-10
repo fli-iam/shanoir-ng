@@ -14,12 +14,15 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
 
 /**
  * Email service.
  * 
- * @author msimon
+ * @author msimon, mkain
  *
  */
 public interface EmailService {
@@ -39,6 +42,14 @@ public interface EmailService {
 	 *            created user.
 	 */
 	void notifyAdminAccountRequest(User user);
+
+	/**
+	 * Send an email to administrators to indicate an account extension request.
+	 * 
+	 * @param user
+	 *            updated user.
+	 */
+	void notifyAdminAccountExtensionRequest(User user);
 
 	/**
 	 * Send an email to the user and all administrators on account request validation.
@@ -101,5 +112,26 @@ public interface EmailService {
 	 *            new password.
 	 */
 	void notifyUserResetPassword(User user, String password);
+
+	/**
+	 *  This method notifies a study manager that some data was imported in the study.
+	 * @param generatedMail: The object containing all the mail informations
+	 */
+	void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail);
+
+	/**
+	 * This method notifies a study manager that one ore more new members, StudyUsers,
+	 * have been added to his study.
+	 * 
+	 * @param mail
+	 */
+	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
+
+	/**
+	 *  This method notifies a study manager that san import fail for a given study
+	 * @param generatedMail: The object containing all the mail informations
+	 */
+	void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail);
+
 
 }

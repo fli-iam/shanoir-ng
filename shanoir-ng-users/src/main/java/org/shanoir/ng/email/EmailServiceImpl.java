@@ -15,13 +15,21 @@
 package org.shanoir.ng.email;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -34,20 +42,42 @@ import org.thymeleaf.context.Context;
 /**
  * Implementation of email service.
  * 
- * @author msimon
+ * @author msimon, mkain
  *
  */
 @Service
 public class EmailServiceImpl implements EmailService {
+
+	private static final String STUDY_USERS = "studyUsers";
+
+	private static final String EMAIL = "email";
 
 	private static final String EXPIRATION_DATE = "expirationDate";
 
 	private static final String LASTNAME = "lastname";
 
 	private static final String FIRSTNAME = "firstname";
+	
+	private static final String USERNAME = "username";
 
 	private static final String SERVER_ADDRESS = "serverAddress";
+	
+	private static final String STUDY_NAME = "studyName";
+	
+	private static final String SUBJECT = "subject";
+	
+	private static final String EXAMINATION = "examination";
+	
+	private static final String FAILURE_MESSAGE = "failureMessage";
+	
+	private static final String EXAM_DATE = "exam_date";
 
+	private static final String STUDY_CARD = "study_card";
+
+	private static final String SERIES = "series";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
+	
 	@Autowired
 	private JavaMailSender mailSender;
 
@@ -62,6 +92,9 @@ public class EmailServiceImpl implements EmailService {
 
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
 
@@ -104,6 +137,25 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
+	public void notifyAdminAccountExtensionRequest(User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account extension request from " + shanoirServerAddress);
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put("user", user);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			final String content = build("notifyAdminAccountExtensionRequest", variables);
+			messageHelper.setText(content, true);
+		};
+		mailSender.send(messagePreparator);
+	}
+
+	@Override
 	public void notifyAccountRequestAccepted(final User user) {
 		notifyUserAccountRequestAccepted(user);
 		notifyAdminAccountRequestAccepted(user);
@@ -137,6 +189,7 @@ public class EmailServiceImpl implements EmailService {
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put(FIRSTNAME, user.getFirstName());
 			variables.put(LASTNAME, user.getLastName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyCreateUser", variables);
@@ -158,7 +211,8 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
-			final String content = build("notifyNewUser", variables);
+			variables.put(SERVER_ADDRESS, shanoirServerAddress);
+			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
@@ -325,6 +379,124 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
+	}
+
+	@Override
+	public void notifyStudyManagerDataImported(EmailDatasetsImported generatedMail) {
+        // Find user that imported
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		
+		List<DatasetDetail> datasetLinks = new ArrayList<>();
+		for (Entry<Long, String> dataset :  generatedMail.getDatasets().entrySet()) {
+			DatasetDetail detail = new DatasetDetail();
+			detail.setName(dataset.getValue());
+			detail.setUrl(this.shanoirServerAddress + "dataset/details/" + dataset.getKey());
+			datasetLinks.add(detail);
+		}
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+		for (User admin : admins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(USERNAME, u.getUsername());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SUBJECT, generatedMail.getSubjectName());
+				variables.put(SERIES, datasetLinks);
+				variables.put(EXAMINATION, examDetail);
+				variables.put(EXAM_DATE, generatedMail.getExamDate());
+				variables.put(STUDY_CARD, generatedMail.getStudyCard());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminDataImported", variables);
+				LOG.info(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			mailSender.send(messagePreparator);
+		}
+	}
+
+	@Override
+	public void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail) {
+        // Find user that imported
+        User u = userRepository.findById(generatedMail.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> admins = (List<User>) this.userRepository.findAllById(generatedMail.getRecipients());
+		
+		DatasetDetail examDetail = new DatasetDetail();
+		examDetail.setName(generatedMail.getExaminationId());
+		examDetail.setUrl(shanoirServerAddress + "examination/details/" + generatedMail.getExaminationId());
+
+		for (User admin : admins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setTo(admin.getEmail());
+				messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(LASTNAME, admin.getLastName());
+				variables.put(FIRSTNAME, admin.getFirstName());
+				variables.put(USERNAME, u.getUsername());
+				variables.put(STUDY_NAME, generatedMail.getStudyName());
+				variables.put(SUBJECT, generatedMail.getSubjectName());
+				variables.put(EXAMINATION, examDetail);
+				variables.put(FAILURE_MESSAGE, generatedMail.getErrorMessage());
+				variables.put(SERVER_ADDRESS, shanoirServerAddress);
+				final String content = build("notifyStudyAdminImportFailed", variables);
+				LOG.info(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
+			mailSender.send(messagePreparator);
+		}
+	}
+
+	public void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email) {
+        // Find user that edited the study
+    	// We may come from challenge, the user then does not exists.
+        User user = userRepository.findById(email.getUserId()).orElse(null);
+
+		// Get the list of recipients
+		List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
+		
+		List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
+		
+		for (User studyAdmin : studyAdmins) {
+			MimeMessagePreparator messagePreparator = mimeMessage -> {
+				final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+				messageHelper.setFrom(administratorEmail);
+				messageHelper.setCc(user!= null ? user.getEmail(): administratorEmail);
+				messageHelper.setTo(studyAdmin.getEmail());
+				messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
+				final Map<String, Object> variables = new HashMap<>();
+				variables.put(FIRSTNAME, studyAdmin.getFirstName());
+				variables.put(LASTNAME, studyAdmin.getLastName());
+				variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+				variables.put(STUDY_NAME, email.getStudyName());
+				variables.put(STUDY_USERS, newStudyUsers);
+				variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+				final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+				LOG.info(content);
+				messageHelper.setText(content, true);
+			};
+			// Send the message
+			LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+			mailSender.send(messagePreparator);
+		}
 	}
 
 }

@@ -19,13 +19,15 @@ import { ActivatedRoute } from '@angular/router';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -34,22 +36,27 @@ import { Center } from '../../centers/shared/center.model';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    private manufModels: ManufacturerModel[];
-    private centers: IdName[];
-    private datasetModalityTypeEnumValue: string;
+    public manufModels: ManufacturerModel[];
+    public centers: IdName[];
+    public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
-    private get acqEquip(): AcquisitionEquipment { return this.entity; }
-    private set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
+    get acqEquip(): AcquisitionEquipment { return this.entity; }
+    set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
     
     constructor(
             private route: ActivatedRoute, 
             private acqEquipService: AcquisitionEquipmentService, 
             private manufModelService: ManufacturerModelService,
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
+    }
+
+    getService(): EntityService<AcquisitionEquipment> {
+        return this.acqEquipService;
     }
 
     async initView(): Promise<void> {
@@ -89,13 +96,14 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): FormGroup {
         this.prefill();
         let form: FormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator]],
+            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
         });
@@ -108,24 +116,28 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             .then(manufModels => this.manufModels = manufModels);
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+                })
+            );
         });
     }
 
     private registerManufAndSerialUnicityValidator(form: FormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
-        form.get('manufacturerModel').valueChanges.subscribe(value => {
-            form.get('serialNumber').updateValueAndValidity();
-        })
+        this.subscribtions.push(
+            form.get('manufacturerModel').valueChanges.subscribe(value => {
+                form.get('serialNumber').updateValueAndValidity();
+            })
+        );
     }
 
     private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
@@ -137,12 +149,20 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    save(): Promise<void> {
+    private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
+        let valueStr: string = control.value;
+        if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
+            return { spaces: true }
+        }
+        return null;
+    }
+
+    save(): Promise<AcquisitionEquipment> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         return super.save();
     }
 
-    private viewCenter(center: Center) {
+    viewCenter(center: Center) {
         this.router.navigate(['center/details/' + center.id]);
     }
 }

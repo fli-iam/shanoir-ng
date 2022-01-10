@@ -18,16 +18,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 /**
- * Shanoir application.
- *
- * @author msimon
- *
+ * Shanoir-NG microservice users application.
+ * MK: @EnableSwagger2 removed explicitly - only for ms users - to protect the best the interface.
  */
 @SpringBootApplication
-@EnableSwagger2
 @EnableScheduling
 public class ShanoirUsersApplication {
 

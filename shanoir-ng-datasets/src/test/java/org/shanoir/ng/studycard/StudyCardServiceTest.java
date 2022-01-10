@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +35,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Study card service test.
@@ -50,7 +52,7 @@ public class StudyCardServiceTest {
 	@Mock
 	private StudyCardRepository studyCardRepository;
 
-	@Mock
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
@@ -59,14 +61,14 @@ public class StudyCardServiceTest {
 	@Before
 	public void setup() {
 		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
-		given(studyCardRepository.findOne(TEMPLATE_ID)).willReturn(ModelsUtil.createStudyCard());
+		given(studyCardRepository.findById(TEMPLATE_ID)).willReturn(Optional.of(ModelsUtil.createStudyCard()));
 		given(studyCardRepository.save(Mockito.any(StudyCard.class))).willReturn(ModelsUtil.createStudyCard());
 	}
 
 	@Test
 	public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		studyCardService.deleteById(TEMPLATE_ID);
-		Mockito.verify(studyCardRepository, Mockito.times(1)).delete(Mockito.anyLong());
+		Mockito.verify(studyCardRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -82,9 +84,8 @@ public class StudyCardServiceTest {
 	public void findByIdTest() {
 		final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
 		Assert.assertNotNull(studyCard);
-		Assert.assertTrue(ModelsUtil.STUDY_CARD_NAME.equals(studyCard.getName()));
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test

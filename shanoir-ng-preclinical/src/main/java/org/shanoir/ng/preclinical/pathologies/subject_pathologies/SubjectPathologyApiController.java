@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
+import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -25,8 +27,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +49,18 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 	@Autowired
 	private SubjectPathologyService pathosService;
 	@Autowired
+	private PathologyModelService pathosModelService;
+	@Autowired
 	private AnimalSubjectService subjectService;
 	@Autowired
 	private PathologyService pathologyService;
+	@Autowired
+	private SubjectPathologyValidator uniqueValidator;
+	
+	@Autowired
+	private SubjectPathologyEditableByManager editableOnlyValidator;
 
+	@Override
 	public ResponseEntity<SubjectPathology> addSubjectPathology(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
@@ -96,6 +104,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteSubjectPathology(
 			@ApiParam(value = "Animal Subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "pathology id to delete", required = true) @PathVariable("pid") Long pid)
@@ -119,6 +128,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	}
 
+	@Override
 	public ResponseEntity<Void> deleteSubjectPathologies(
 			@ApiParam(value = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
@@ -136,6 +146,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 		}
 	}
 
+	@Override
 	public ResponseEntity<SubjectPathology> getSubjectPathologyById(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of subject pathology that needs to be fetched", required = true) @PathVariable("pid") Long pid)
@@ -152,6 +163,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 		}
 	}
 
+	@Override
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
 			@ApiParam(value = "animalSubject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
@@ -164,6 +176,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 		}
 	}
 
+	@Override
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathology(
 			@ApiParam(value = "pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException {
@@ -179,6 +192,19 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 		}
 	}
 
+	@Override
+	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
+			@ApiParam(value = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId) {
+		PathologyModel patMod = pathosModelService.findById(pathoModelId);
+		List<SubjectPathology> subPathology = pathosService.findByPathologyModel(patMod);
+		if (subPathology == null || subPathology.isEmpty()) {
+			return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<List<SubjectPathology>>(subPathology, HttpStatus.OK);
+		}
+	}
+
+	@Override
 	public ResponseEntity<Void> updateSubjectPathology(
 			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "ID of subject pathology that needs to be updated", required = true) @PathVariable("pid") Long pid,
@@ -213,18 +239,14 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final SubjectPathology pathos) {
-		final SubjectPathology previousStatePathos = pathosService.findById(pathos.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<SubjectPathology>().validate(previousStatePathos,
-				pathos);
-		return accessErrors;
+	    return editableOnlyValidator.validate(pathos);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final SubjectPathology pathos) {
-		return new EditableOnlyByValidator<SubjectPathology>().validate(pathos);
+	    return editableOnlyValidator.validate(pathos);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final SubjectPathology pathos) {
-		final UniqueValidator<SubjectPathology> uniqueValidator = new UniqueValidator<SubjectPathology>(pathosService);
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(pathos);
 		return uniqueErrors;
 	}

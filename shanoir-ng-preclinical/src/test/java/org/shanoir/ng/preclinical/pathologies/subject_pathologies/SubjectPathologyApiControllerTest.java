@@ -27,10 +27,12 @@ import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SubjectPathologyApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
 public class SubjectPathologyApiControllerTest {
@@ -85,6 +87,13 @@ public class SubjectPathologyApiControllerTest {
 	private PathologyService pathologiesServiceMock;
 	@MockBean
 	private RefsService refsServiceMock;
+	@MockBean
+    private PathologyModelService pathoService;
+	@MockBean
+	private SubjectPathologyValidator uniqueValidator;
+	@MockBean
+	private SubjectPathologyEditableByManager editableOnlyValidator;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -101,6 +110,10 @@ public class SubjectPathologyApiControllerTest {
 				.willReturn(Arrays.asList(new SubjectPathology()));
 		given(subPathosServiceMock.findById(1L)).willReturn(new SubjectPathology());
 		given(subPathosServiceMock.save(Mockito.mock(SubjectPathology.class))).willReturn(new SubjectPathology());
+		
+
+		given(uniqueValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
+		given(editableOnlyValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

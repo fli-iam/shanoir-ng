@@ -15,9 +15,11 @@
 package org.shanoir.ng.shared.core.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -36,7 +38,7 @@ public interface BasicEntityService<T extends AbstractEntity> {
 	 * @return an entity or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	T findById(Long id);
+	Optional<T> findById(Long id);
 	
 	/**
 	 * Get all entities.
@@ -61,6 +63,7 @@ public interface BasicEntityService<T extends AbstractEntity> {
 	 * @param entity the entity to update.
 	 * @return updated entity.
 	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException 
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	T update(T entity) throws EntityNotFoundException;

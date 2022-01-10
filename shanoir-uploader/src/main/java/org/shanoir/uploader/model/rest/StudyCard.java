@@ -94,9 +94,14 @@ public class StudyCard {
 	}
 	
 	public String toString() {
-		String displayString = this.getName() + " (" + acquisitionEquipment.toString() + ")";
+		String displayString = this.getName();
+		if (acquisitionEquipment != null) {
+			displayString = displayString + " (" + acquisitionEquipment.toString() + ")";
+		} else {
+			displayString = displayString + " (missing equipment)";
+		}
 		if (compatible != null && compatible) {
-			return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + displayString;
+			return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + displayString;
 		} else {
 			return displayString;
 		}

@@ -23,6 +23,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 
@@ -40,6 +41,10 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
         private subjectTherapyService: SubjectTherapyService) {
             super('preclinical-therapy');
         }
+
+    getService(): EntityService<Therapy> {
+        return this.therapyService;
+    }
 
     getOptions() {
         return {
@@ -77,8 +82,7 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
     			hasSubjects = subjectTherapies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
-                		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted', 
-                        ServiceLocator.rootViewContainerRef)
+                		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted')
     			}else{
     				this.openDeleteTherapyConfirmDialog(entity);
     			}
@@ -86,8 +90,8 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
     			this.openDeleteTherapyConfirmDialog(entity);
     		}
     	}).catch((error) => {
-    		console.log(error);
-    		this.openDeleteTherapyConfirmDialog(entity);
+            this.openDeleteTherapyConfirmDialog(entity);
+            throw error;
     	});    
     }   
 
@@ -95,11 +99,10 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-therapy n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete', 'Are you sure you want to delete preclinical-therapy n° ' + entity.id + ' ?'
+            ).then(res => {
                 if (res) {
-                    entity.delete().then(() => {
+                    this.getService().delete(entity.id).then(() => {
                         this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The preclinical-therapy sucessfully deleted');

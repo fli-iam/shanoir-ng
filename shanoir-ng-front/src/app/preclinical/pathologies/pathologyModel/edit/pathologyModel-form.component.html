@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<ol>
 						<label *ngIf="isModelUnique==false" class="form-validation-alert" i18n="Edit model|PathologyModelUniqueError label">This pathology model already exists!</label>
 						<li class="required">
-							<label i18n="Edit model|Name label" class="required-label">Name</label>
+							<label i18n="Edit model|Name label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{model?.name}}
@@ -46,14 +46,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit model|Pathology label" class="required-label">Pathology</label>
+							<label i18n="Edit model|Pathology label">Pathology</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{model?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box formControlName="pathology" [(ngModel)]="model.pathology">
-                                        <select-option *ngFor="let pathology of pathologies" [value]="pathology">{{pathology.name}}</select-option>
+                                    <select-box formControlName="pathology" [(ngModel)]="model.pathology" [optionArr]="pathologies">
                                     </select-box>
 									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
 										<i class="fas fa-plus-square"></i>
@@ -99,6 +98,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<form-footer
 				[state]="footerState"
 				(save)="save()"
+                (delete) = "delete()"
 				(edit)="goToEdit()"
 				(back)="goBack()">
 		</form-footer>

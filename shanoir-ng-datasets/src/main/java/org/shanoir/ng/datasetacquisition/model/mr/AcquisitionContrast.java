@@ -31,6 +31,8 @@ public enum AcquisitionContrast {
 	// T2 star
 	T2STAR(3),
 
+	T2_STAR(3),
+	
 	// Spin density
 	SPIN_DENSITY(4),
 	
@@ -53,7 +55,9 @@ public enum AcquisitionContrast {
 	
 	UNKNOWN(13),
 	
-	MIXED(14);
+	MIXED(14),
+	
+	SPECTROSCOPY(15);
 
 	private int id;
 
@@ -97,7 +101,11 @@ public enum AcquisitionContrast {
 		if (type == null) {
 			return null;
 		}
-		return AcquisitionContrast.valueOf(type);
+		try {
+			return AcquisitionContrast.valueOf(type);
+		} catch (IllegalArgumentException e) {
+			return AcquisitionContrast.UNKNOWN;
+		}
 	}
 	
 	/**

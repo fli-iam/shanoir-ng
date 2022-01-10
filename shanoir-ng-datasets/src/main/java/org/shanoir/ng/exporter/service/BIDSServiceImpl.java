@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,22 +35,19 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.Subject;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriUtils;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -63,7 +59,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-@Scope("prototype")
 public class BIDSServiceImpl implements BIDSService {
 	
 	private static final String TABULATION = "\t";
@@ -90,10 +85,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private String bidsStorageDir;
 
 	@Autowired
-	private MicroserviceRequestsService microservicesRequestsService;
-
-	@Autowired
-	private RestTemplate restTemplate;
+    private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private ExaminationService examService;
@@ -136,12 +128,12 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Override
 	public void deleteDataset(Dataset dataset) {
-		Long examId = dataset.getDatasetAcquisition().getExamination().getId();
-		Long subjectId = dataset.getSubjectId();
-		Long studyId = dataset.getStudyId();
-
-		File fileToDelete = null;
 		try {
+			Long examId = dataset.getDatasetAcquisition().getExamination().getId();
+			Long subjectId = dataset.getSubjectId();
+			Long studyId = dataset.getStudyId();
+	
+			File fileToDelete = null;
 			// Get study folder
 			fileToDelete = getFileFromId(studyId.toString(), new File(bidsStorageDir));
 			// Get subject folder
@@ -160,7 +152,11 @@ public class BIDSServiceImpl implements BIDSService {
 				for (DatasetFile dataFile : expr.getDatasetFiles()) {
 					if (!dataFile.isPacs()) {
 						// Get FileName path object
-				        Path path = Paths.get(dataFile.getPath());
+						String dataFilePath = dataFile.getPath();
+						if (dataFilePath.startsWith("file://")) {
+							dataFilePath = dataFile.getPath().replace("file://", "");
+						}
+						Path path = Paths.get(dataFilePath);
 				        Path fileName = path.getFileName();
 						FileUtils.deleteQuietly(new File(fileToDelete + File.separator + fileName));
 
@@ -169,27 +165,30 @@ public class BIDSServiceImpl implements BIDSService {
 					}
 				}
 			}
+			
+			if (fileToDelete == null || !fileToDelete.exists()) {
+				return;
+			}
 
 			// And delete metadata files created for bids
 			for (File metaDataFile : fileToDelete.listFiles()) {
-				if (metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
+				if (metaDataFile.getName() != null && metaDataFile.getName().contains("_" + dataset.getId() + "_")) {
 					metaDataFile.delete();
 				}
 			}
-			
-		} catch (IOException e) {
-			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", fileToDelete, e);
+		} catch (Exception e) {
+			LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", e);
+			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void deleteExam(Long examId) {
-		Examination exam = examService.findById(examId);
+	public void deleteExam(Examination exam) {
 		if (exam == null) {
 			// Not found, just get back
 			return;
 		}
-
+		
 		File fileToDelete = null;
 		try {
 			// Get study folder
@@ -210,10 +209,10 @@ public class BIDSServiceImpl implements BIDSService {
 
 			// delete from scans.tsv searching by examination ID
 			File scans = getScansFile(fileToDelete);
-			deleteLineFromFile(scans, examId, ".*");
+			deleteLineFromFile(scans, exam.getId(), ".*");
 
 			// Get exam folder
-			fileToDelete = getFileFromId(examId.toString(), fileToDelete);
+			fileToDelete = getFileFromId(exam.getId().toString(), fileToDelete);
 
 
 			// Delete all the folder
@@ -260,31 +259,19 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Get a list of subject from the study ID.
 	 * @param studyId the study ID to get the subject for
 	 * @return a list of users associated to the study
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
-	private List<Subject> getSubjectsForStudy(final Long studyId) {
-		HttpEntity<Object> entity = null;
-		entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
 
-		// Request to study MS to get list of subjects related to study ID
-		// With preclinical=null precise that we want ALL (preclinical and not) subjects
-		ResponseEntity<Subject[]> response = null;
-		try {
-			response = restTemplate.exchange(
-					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.SUBJECT + "/" + studyId +"/allSubjects?preclinical=null", HttpMethod.GET,
-					entity, Subject[].class);
-		} catch (RestClientException e) {
-			LOG.error("Error on study microservice request - {}", e.getMessage());
-		}
+		/// Get the list of subjects
+		String response = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, studyId);
+		ObjectMapper objectMapper = new ObjectMapper();
 
-		List<Subject> subjects = new ArrayList<>();
-		if (response != null && response.getBody() != null) {
-			if (HttpStatus.OK.equals(response.getStatusCode()) || HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-				subjects = Arrays.asList(response.getBody());
-			} else {
-				LOG.error("Error on study microservice response - status code: {}", response.getStatusCode());
-			}
-		}
-		return subjects;
+		List<Subject> myObjects = objectMapper.readValue(response, new TypeReference<List<Subject>>(){});
+
+		return myObjects;
 	}
 
 	/**
@@ -422,7 +409,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
+			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
 			try {

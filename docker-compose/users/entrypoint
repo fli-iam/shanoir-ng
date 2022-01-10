@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -e
+
+. /bin/entrypoint_common
+
+optional SHANOIR_PREFIX
+require  SHANOIR_MIGRATION
+require  SHANOIR_URL_HOST
+require  SHANOIR_URL_SCHEME
+
+require	 SHANOIR_ADMIN_EMAIL
+require	 SHANOIR_SMTP_HOST
+
+optional SHANOIR_CERTIFICATE
+
+handle_microservice_migration
+
+case "$SHANOIR_MIGRATION" in
+dev|init)
+	sync="--syncAllUsersToKeycloak=true" #FIXME: why can't we use an env var here?
+	;;
+*)
+	sync="--syncAllUsersToKeycloak=false"
+	;;
+esac
+
+
+# TLS server certificate management
+# ---------------------------------
+#
+# SHANOIR_CERTIFICATE my have two possible values:
+#
+# - auto   (for development) -> shanoir automatically generates a self-signed certificate
+# - manual (for production)  -> certificate is provided by the sysadmin
+#
+# Notes: 
+#  - the cert generation is performed in the 'users' container because it is the first one to be
+#    started (all other containers needing this cert are launched afterwards)
+#  - in mode 'auto' the certificate is also automatically re-generated when the value of
+#    SHANOIR_URL_HOST changes
+keystore="/etc/ssl/certs/java/cacerts"
+crt="/etc/ssl/certs/java/shanoir-ng-nginx.crt"
+key="/etc/ssl/certs/java/shanoir-ng-nginx.key"
+
+if [ "$SHANOIR_CERTIFICATE" = auto ]
+then
+	if [ ! -f "$crt" ] || [ "`openssl x509 -in "$crt"  -subject|grep ^subject=`" \
+				!= "subject=CN = $SHANOIR_URL_HOST" ]
+	then
+		echo "generating a self-signed certificate with CN=$SHANOIR_URL_HOST..."
+		openssl genrsa 2048 > /tmp/key
+		openssl req -new -key /tmp/key -out /tmp/csr -batch -subj "/CN=$SHANOIR_URL_HOST"
+		openssl x509 -req -days 730 -in /tmp/csr -signkey /tmp/key -out /tmp/crt
+		rm -f /tmp/store
+		# FIXME: does the alias need to match the host name ?
+		keytool -importcert -file /tmp/crt -alias shanoir-ng-nginx -keystore /tmp/store \
+			-storepass changeit -noprompt -trustcacerts
+		mv /tmp/store "$keystore"
+		mv /tmp/key   "$key"
+		mv /tmp/crt   "$crt"
+	fi
+fi
+
+
+abort_if_error
+
+run_microservice "$@" "$sync"

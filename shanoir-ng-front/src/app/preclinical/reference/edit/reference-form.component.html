@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="RefFormComponent content-component">
+<div #formContainer class="RefFormComponent content-component">
     <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<fieldset>
 					<ol>
 						<li class="required">
-							<label i18n="Edit reference|Category label" class="required-label">Category</label>
+							<label i18n="Edit reference|Category label">Category</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{reference?.category}}
@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<ng-template ngSwitchDefault>
 									<span *ngIf="!isEditableCategory">{{reference?.category}}</span>
 									<input [hidden]="!(isFreeCategory && isEditableCategory)" type="text" id="category" formControlName="category" [(ngModel)]="reference.category"/>
-									<select [hidden]="!(!isFreeCategory && isEditableCategory)" required id="category" formControlName="category" [(ngModel)]="reference.category" (change)="onChangeCategory()">
+									<select [hidden]="!(!isFreeCategory && isEditableCategory)" id="category" formControlName="category" [(ngModel)]="reference.category" (change)="onChangeCategory()">
 										<option *ngFor="let category of categories" [ngValue]="category">{{category}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin() && !isFreeCategory && isEditableCategory" i18n="Edit reference|Create new category" (click)="switchToCreate('category')">
@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit reference|Type label" class="required-label">Type</label>
+							<label i18n="Edit reference|Type label">Type</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{reference?.reftype}}
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<ng-template ngSwitchDefault>
 									<span *ngIf="!isEditableRefType">{{reference?.reftype}}</span>
 									<input *ngIf="isFreeRefType && isEditableRefType" type="text" id="reftype" formControlName="reftype" [(ngModel)]="reference.reftype"/>
-									<select *ngIf="!isFreeRefType  && isEditableRefType" id="reftype" required formControlName="reftype" [(ngModel)]="reference.reftype">
+									<select *ngIf="!isFreeRefType  && isEditableRefType" id="reftype" formControlName="reftype" [(ngModel)]="reference.reftype">
 										<option *ngFor="let reftype of reftypes" [ngValue]="reftype">{{reftype}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin() && !isFreeRefType && isEditableRefType" i18n="Edit reference|Create new reftype" (click)="switchToCreate('reftype')">
@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li class="required">
-							<label i18n="Edit reference|Value label" class="required-label">Value</label>
+							<label i18n="Edit reference|Value label">Value</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'"> 
 										{{reference?.value}}
@@ -95,6 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<form-footer
 				[state]="footerState"
 				(save)="save()"
+                (delete)="delete()"
 				(edit)="goToEdit()"
 				(back)="goBack()">
 		</form-footer>

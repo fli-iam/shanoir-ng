@@ -11,21 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { Component, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { Location } from '@angular/common';
-
-import { Pathology }    from '../shared/pathology.model';
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { ModesAware } from '../../../shared/mode/mode.decorator';
+import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
 
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
-import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
-import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'pathology-form',
@@ -34,6 +29,9 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 })
 @ModesAware
 export class PathologyFormComponent extends EntityComponent<Pathology>{
+
+    public isPathologyUnique = true;
+    public isModelUnique = true;
 
     constructor(
         private route: ActivatedRoute,
@@ -44,6 +42,10 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
 
     get pathology(): Pathology { return this.entity; }
     set pathology(pathology: Pathology) { this.entity = pathology; }
+
+    getService(): EntityService<Pathology> {
+        return this.pathologyService;
+    }
 
     initView(): Promise<void> {
         return this.pathologyService.get(this.id).then(pathology => {

@@ -25,6 +25,8 @@ import javax.persistence.OneToOne;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * MR protocol.
  * 
@@ -98,6 +100,7 @@ public class MrProtocol extends AbstractEntity {
 	private Double imagingFrequency;
 
 	/** The MR Dataset acquisition. */
+	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "mrProtocol")
 	private MrDatasetAcquisition mrDatasetAcquisition;
 
@@ -176,7 +179,7 @@ public class MrProtocol extends AbstractEntity {
 	 * The unit of measure of the slice thickness must be in mm.
 	 */
 	private Double sliceThickness;
-
+	
 	/**
 	 * Functional only. From (0020,0110) Time delta between Images in a dynamic
 	 * or functional set of Images. The unit of measure of the temporal
@@ -184,8 +187,14 @@ public class MrProtocol extends AbstractEntity {
 	 */
 	private Double temporalResolution;
 
+	/**
+	* (0018,0087) Magnetic Field Strength
+	* The Magnetic field strength.
+	*/
+	private Double magneticFieldStrength;
+
 	/** Metadata updated by study card. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocolSCMetadata updatedMetadata;
 
 	/**
@@ -569,6 +578,14 @@ public class MrProtocol extends AbstractEntity {
 	 */
 	public void setUpdatedMetadata(MrProtocolSCMetadata updatedMetadata) {
 		this.updatedMetadata = updatedMetadata;
+	}
+	
+	public Double getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(Double magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
 }

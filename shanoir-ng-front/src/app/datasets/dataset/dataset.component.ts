@@ -13,6 +13,7 @@
  */
 
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
@@ -21,6 +22,10 @@ import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
+import { NiftiConverterService } from 'src/app/niftiConverters/nifti.converter.service';
+import { MrDataset, MrDatasetMetadata } from './mr/dataset.mr.model';
 
 
 @Component({
@@ -31,41 +36,64 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
-    private papayaParams: any;
+    papayaParams: any;
     private blob: Blob;
     private filename: string;
-    private hasDownloadRight: boolean = false;
+    hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
-    
-    constructor(
-            private datasetService: DatasetService,
-            private route: ActivatedRoute,
-            private dicomArchiveService: DicomArchiveService,
-            private studyRightsService: StudyRightsService) {
+    public downloading: boolean = false;
+    public papayaLoaded: boolean = false;
+    public converters: NiftiConverter[];
+    public converterId: number;
+    public menuOpened = false;
+    isMRS: boolean = false; // MR Spectroscopy
 
+    constructor(
+        private datasetService: DatasetService,
+        private route: ActivatedRoute,
+        private dicomArchiveService: DicomArchiveService,
+        private studyRightsService: StudyRightsService,
+        private niftiConverterService: NiftiConverterService) {
         super(route, 'dataset');
+        niftiConverterService.getAll().then(result => this.converters = result);
     }
 
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
-    
+
+    getService(): EntityService<Dataset> {
+        return this.datasetService;
+    }
+
     initView(): Promise<void> {
         return this.fetchDataset().then(dataset => {
+            this.dataset = dataset;
+            this.isMRS = this.isSpectro(dataset);
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
                 this.hasDownloadRight = true;
-                this.loadDicomInMemory();
-                this.dataset = dataset;
                 return;
             } else {
-                return this.studyRightsService.getMyRightsForStudy(dataset.studyId).then(rights => {
+                return this.studyRightsService.getMyRightsForStudy(dataset.study.id).then(rights => {
                     this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
                     this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                    if (this.hasDownloadRight) this.loadDicomInMemory();
-                    this.dataset = dataset;
                 });
             }
         });
+    }
+
+    private isSpectro(dataset: Dataset): boolean {
+        if (dataset.type != 'Mr') return false;
+        else {
+            const mrDataset = dataset as MrDataset;
+            if (mrDataset.updatedMrMetadata && mrDataset.updatedMrMetadata.mrDatasetNature) {
+                return mrDataset.updatedMrMetadata.mrDatasetNature.includes('SPECTRO');
+            } else if (mrDataset.originMrMetadata && mrDataset.originMrMetadata.mrDatasetNature) {
+                return mrDataset.originMrMetadata.mrDatasetNature.includes('SPECTRO');
+            } else {
+                return false;
+            }
+        }
     }
 
     initEdit(): Promise<void> {
@@ -81,7 +109,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     buildForm(): FormGroup {
         return this.formBuilder.group({});
     }
-    
+
     private fetchDataset(): Promise<Dataset> {
         if (this.mode != 'create') {
             return this.datasetService.get(this.id).then((dataset: Dataset) => {
@@ -90,20 +118,33 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             });
         }
     }
-    
-    private download(format: string) {
-        this.datasetService.download(this.dataset, format);
+
+    toggleMenu() {
+        this.menuOpened = !this.menuOpened;
+    }
+    convertNiftiToggle() {
+        this.toggleMenu();
+    }
+    convertNifti(id: number) {
+        this.downloading = true;
+        this.datasetService.download(this.dataset, 'nii', id).then(() => this.downloading = false);
     }
 
-    private loadDicomInMemory() {
-        this.datasetService.downloadToBlob(this.id, 'nii').subscribe(blobReponse => {
+    download(format: string) {
+        this.downloading = true;
+        this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
+    }
+
+    public loadDicomInMemory() {
+        this.papayaLoaded = true;
+        this.datasetService.downloadToBlob(this.id, 'nii').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             this.dicomArchiveService.importFromZip(blobReponse.body)
-                .subscribe(response => {
+                .then(response => {
                     this.dicomArchiveService.extractFileDirectoryStructure()
-                    .subscribe(response => {
-                        this.initPapaya(response);
-                    });
+                        .then(response => {
+                            this.initPapaya(response);
+                        });
                 });
         });
     }
@@ -111,7 +152,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private initPapaya(dataFiles: any): void {
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
-            if(key.indexOf(".nii") != -1) {
+            if (key.indexOf(".nii") != -1) {
                 buffs.push(dataFiles.files[key].async("arraybuffer"));
             }
         });
@@ -123,7 +164,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
-    public hasEditRight(): boolean {
+    public async hasEditRight(): Promise<boolean> {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

@@ -1,10 +1,5 @@
-/***********************/
-/* Edit user component */
-/***********************/
-.EditUserComponent { display: inline-block; }
-
 .important-text {
     color: var(--color-important);
 }
 
-button svg { vertical-align: -1; margin-left: 7px; }
+button i { margin-left: 7px; }

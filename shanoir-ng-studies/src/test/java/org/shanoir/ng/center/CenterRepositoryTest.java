@@ -91,8 +91,15 @@ public class CenterRepositoryTest {
 
 	@Test
 	public void findOneTest() throws Exception {
-		Center centerDb = repository.findOne(CENTER_TEST_1_ID);
+		Center centerDb = repository.findById(CENTER_TEST_1_ID).orElse(null);
 		assertThat(centerDb.getName()).isEqualTo(CENTER_TEST_1_NAME);
+	}
+	
+	@Test
+	public void findNamesByStudyIdTest() throws Exception {
+		List<IdName> centersDb = repository.findIdsAndNames(1L);
+		assertNotNull(centersDb);
+		assertThat(centersDb.size()).isEqualTo(2);
 	}
 	
 }

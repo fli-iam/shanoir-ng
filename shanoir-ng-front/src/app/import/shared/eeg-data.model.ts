@@ -14,15 +14,15 @@
 
 import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
-import { EegDataset } from "../../datasets/dataset/eeg/dataset.eeg.model"
+import { EegDatasetDTO } from "../../datasets/shared/dataset.dto"
 
 export class EegImportJob {
     workFolder: string;
     examinationId: number;
-    frontStudyId: number;
+    studyId: number;
     subjectId: number;
-    frontAcquisitionEquipmentId: number;
-    datasets: EegDataset[];
+    acquisitionEquipmentId: number;
+    datasets: EegDatasetDTO[];
     coordinatesSystem: String;
     subjectName: String;
     studyName: String;

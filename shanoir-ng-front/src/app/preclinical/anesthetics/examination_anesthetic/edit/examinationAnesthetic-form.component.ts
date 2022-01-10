@@ -27,9 +27,8 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { resolve } from 'path';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -58,7 +57,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private examAnestheticService: ExaminationAnestheticService,
         private referenceService: ReferenceService,
         private anestheticService: AnestheticService,
-        private enumUtils: EnumUtils) 
+        public enumUtils: EnumUtils) 
     {
         super(route, 'preclinical-examination-anesthetics');
     }
@@ -66,7 +65,9 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }
     set examinationAnesthetic(examinationAnesthetic: ExaminationAnesthetic) { this.entity = examinationAnesthetic; }
 
-    
+    getService(): EntityService<ExaminationAnesthetic> {
+        return this.examAnestheticService;
+    }    
 
     initView(): Promise<void> {
         this.getEnums();
@@ -186,38 +187,38 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.router.navigate(['/preclinical-anesthetic/create']);
     }
 
-    protected save(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            if (this.examinationAnesthetic.id){
-                this.updateExaminationAnesthetic().then(() => {
-                    this.onSave.next(this.examinationAnesthetic);
-                    this.chooseRouteAfterSave(this.entity);
-                    this.msgBoxService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
-                });
-            }else{
-                this.addExaminationAnesthetic().then( () => {
-                    this.onSave.next(this.examinationAnesthetic);
-                    this.chooseRouteAfterSave(this.entity);
-                    this.msgBoxService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
-                });
-                
-            }
-            resolve();
-        });
-    }
-
-    addExaminationAnesthetic(): Promise<void> {
-        if (!this.examinationAnesthetic) { 
-            return Promise.resolve(); 
+    public save(): Promise<ExaminationAnesthetic> {
+        if (this.examinationAnesthetic.id) {
+            return this.updateExaminationAnesthetic().then(exam => {
+                this.onSave.next(this.examinationAnesthetic);
+                this.chooseRouteAfterSave(this.entity);
+                this.msgBoxService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
+                return exam;
+            });
+        } else {
+            return this.addExaminationAnesthetic().then(exam => {
+                this.onSave.next(this.examinationAnesthetic);
+                this.chooseRouteAfterSave(this.entity);
+                this.msgBoxService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
+                return exam;
+            });
         }
-        Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic))
-        .then(() =>resolve());
     }
 
-    updateExaminationAnesthetic(): Promise<void> {
-        return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic);
+    addExaminationAnesthetic(): Promise<ExaminationAnesthetic> {
+        if (!this.examinationAnesthetic) { 
+            return Promise.resolve(null); 
+        } else {
+            return Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic));
+        }
     }
 
+    updateExaminationAnesthetic(): Promise<ExaminationAnesthetic> {
+        return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic).then(() => this.examinationAnesthetic);
+    }
 
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
+    }
 
 }

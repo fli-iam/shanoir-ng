@@ -106,6 +106,16 @@ public interface SubjectPathologyApi {
 			@ApiParam(value = "pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException;
 
+	@ApiOperation(value = "List all subjects for pathology model", notes = "", response = SubjectPathology.class, responseContainer = "List", tags = {
+			"SubjectPathology", })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "An array of subject pathologies", response = SubjectPathology.class),
+			@ApiResponse(code = 500, message = "Unexpected error", response = SubjectPathology.class) })
+	@RequestMapping(value = "/subject/all/pathology/model/{pathoModelId}/", produces = {
+			"application/json" }, method = RequestMethod.GET)
+	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
+			@ApiParam(value = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId);
+
 	@ApiOperation(value = "Update an existing subject pathology", notes = "", response = Void.class, tags = {
 			"SubjectPathology", })
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),

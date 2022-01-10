@@ -1,0 +1,9 @@
+.loader { 
+    color: var(--greyer);
+    font-size: 30px;
+    display: inline-block;
+    position: fixed; 
+    top: 0; right: 0;
+    z-index: 1000;
+    overflow: hidden;
+}

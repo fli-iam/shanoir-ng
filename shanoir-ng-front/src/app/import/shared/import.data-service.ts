@@ -20,52 +20,56 @@ import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ImportJob, PatientDicom } from './dicom-data.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { EegImportJob } from './eeg-data.model';
+import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
+import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
+import { DatasetType } from '../../datasets/shared/dataset-type.model';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 
 export class ContextData {
     
     constructor (
         public study: Study,
+        public studyCard: StudyCard,
+        public useStudyCard: boolean,
         public center: Center, 
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
         public niftiConverter: NiftiConverter,
-        public coordinatesSystem: string
+        public coordinatesSystem: string,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
     ) {}
 }
 
 @Injectable()
 export class ImportDataService {
 
-    private _inMemoryExtracted: any;      // 1. upload
     private _archiveUploaded: ImportJob;  // 1. upload    
     private _patientList: ImportJob;   // 1. upload or pacs
     private _eegImportJob: EegImportJob;   // 1. upload
+    private _processedDatasetImportJob: ProcessedDatasetImportJob;   // 1. upload
     private _patients: PatientDicom[];    // 2. series
     private _contextData: ContextData;    // 3. context
     public contextBackup: ContextData;
 
 
     public reset() {
-        this._inMemoryExtracted = undefined;
         this._archiveUploaded = undefined;
         this._patientList = undefined;
         this._patients = undefined;
         this._eegImportJob = undefined;
+        this._processedDatasetImportJob = undefined;
         this._contextData = undefined;
         this.contextBackup = undefined;
     }
-
-    public get inMemoryExtracted(): any {
-        return this._inMemoryExtracted;
-    }
-
-    public set inMemoryExtracted(extracted: any) {
-        this._inMemoryExtracted = extracted;
-        this.patients = undefined;
-    }
-
+    
     public get archiveUploaded(): ImportJob {
         return this._archiveUploaded;
     }
@@ -80,6 +84,14 @@ export class ImportDataService {
 
     public set eegImportJob(job: EegImportJob) {
         this._eegImportJob = job;
+    }
+
+    public get processedDatasetImportJob(): ProcessedDatasetImportJob {
+        return this._processedDatasetImportJob;
+    }
+
+    public set processedDatasetImportJob(processedFilePath: ProcessedDatasetImportJob) {
+        this._processedDatasetImportJob = processedFilePath;
     }
 
     public get patientList(): ImportJob {

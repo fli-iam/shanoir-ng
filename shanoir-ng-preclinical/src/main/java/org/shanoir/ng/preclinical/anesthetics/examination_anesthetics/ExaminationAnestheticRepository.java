@@ -20,7 +20,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ExaminationAnestheticRepository
-		extends CrudRepository<ExaminationAnesthetic, Long>, ExaminationAnestheticRepositoryCustom {
+		extends CrudRepository<ExaminationAnesthetic, Long> {
 
 	List<ExaminationAnesthetic> findByExaminationId(Long examinationId);
 

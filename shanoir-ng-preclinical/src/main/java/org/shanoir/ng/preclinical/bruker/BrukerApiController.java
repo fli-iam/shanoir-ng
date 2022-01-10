@@ -28,7 +28,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -68,8 +67,8 @@ public class BrukerApiController implements BrukerApi {
 	@Value("${ms.url.bruker2dicom}")
 	private String bruker2DicomMsUrl;
 
-	@Autowired
-	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	@Value("${preclinical.uploadBrukerFolder}")
+	private String brukerFolder;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -173,7 +172,7 @@ public class BrukerApiController implements BrukerApi {
 	 */
 	private Path createBrukerTempFile(String fileName) throws IOException {
 		int index = 0;
-		String pathFile = preclinicalConfig.getUploadBrukerFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
+		String pathFile = brukerFolder + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
 				+ FOLDER_SEP + fileName;
 		// if the folder exists, create a new folder by adding a figure at the end of
 		// the folder name

@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
-		<form *ngIf="form" [formGroup]="form" novalidate>
+		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<input type="text" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -75,9 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus">
-									<select-option value="IN_PROGRESS">In Progress</select-option>
-									<select-option value="FINISHED">Finished</select-option>
+								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus" [options]="studyStatusOptions">
 								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
@@ -95,6 +93,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li *ngIf="keycloakService.isUserAdmin()">
+                        <label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
+                                <span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+                            </ng-template>
+                        </span>
+                    </li>
 					<li>
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -105,6 +115,46 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
 							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
+					Data User Agreement (DUA)
+					<tool-tip class="larger">
+						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
+						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
+						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
+					</tool-tip>
+				</legend>
+				<ol>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
+							<button class="left-icon" (click)="setDuaFile()">
+								<i class="fas fa-upload"></i>Choose file
+							</button>
+						</span>
+					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+					 		{{study.dataUserAgreementPaths[0]}}
+							<button class="dl-button" (click)="deleteDataUserAgreement()">
+								<i class="fas fa-trash"></i>
+							</button>
+						</span>
+					</li>
+					<li *ngIf="mode == 'view'">
+						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+						<div [hidden]="DUAprogressBar.progress == 0">
+                            <progress-bar #DUAprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
+                        <span class="right-col">
+							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
+								{{study.dataUserAgreementPaths[0]}}
+								<button class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
+							</span>
+							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
 					</li>
 				</ol>
@@ -138,7 +188,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view'">
+			<fieldset *ngIf="mode !== 'view' && study?.subjectStudyList">
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
@@ -161,8 +211,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" formcontrolname="center" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
-								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
+							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
@@ -170,6 +219,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view' && !study.monoCenter">
 						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI">Current centers and investigators</label>
 						<span class="right-col study-center-list">
+							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
 							<div *ngFor="let studyCenter of study.studyCenterList">
 								{{studyCenter.center.name}}
 								<span class="icon icon-clickable" (click)="goToCenter(studyCenter.center.id)"><i class="fas fa-external-link-alt"></i></span>
@@ -180,29 +230,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Protocol files</legend>
+				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
-						<span  *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]" class="right-col">
-						    <input #input hidden formControlName="protocolFile" type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="click()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-						</span>
-                        <span  *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]" class="right-col">
-                            <p> {{study.protocolFilePaths[0]}}
-                            <button (click)="deleteFile()" class="left-icon"><i class="fas fa-trash"></i></button>
-                            <p>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                            <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
+                            <ul class="files">
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                </li>
+                            </ul>
                         </span>
-                        
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Protocol file</label>
+                        <div [hidden]="PFprogressBar.progress == 0">
+                            <progress-bar #PFprogressBar [text]="'Preparing download'"></progress-bar>
+                        </div>
                         <span class="right-col">
-                            <p *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">{{study.protocolFilePaths[0]}}
-                            <button (click)="downloadFile()"><i class="fas fa-save"></i></button>
-                            </p>
-                            <p *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-
-                            </p>
+                            <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
+                                <ul>
+                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
+                                  </li>
+                                </ul>
+							</span>
+                            <span *ngIf="!study.protocolFilePaths || !study.protocolFilePaths[0]">-</span>
                         </span>
                     </li>
 				</ol>
@@ -213,8 +264,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)">
-								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
+							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)" [options]="userOptions">
 							</select-box>
 						</span>
 					</li>
@@ -223,26 +273,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							[getPage]="getPage.bind(this)" 
 							[columnDefs]="columnDefs"
 							[editMode]="true"
-							[disableCondition]="disableEdit.bind(this)"
 							(rowEdit)="onStudyUserEdit()">
 						</shanoir-table>
 					</li>
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
-				<study-tree [study]="study"></study-tree>
+				<legend>Tree</legend>
+				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
+						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
+            <fieldset *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+                <legend>Study tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+            </fieldset>
             <fieldset *ngIf="mode == 'view'">
-                <bids-tree [(list)]="bidsStructure"></bids-tree>
+				        <legend>BIDS tree</legend>
+                <bids-tree [studyId]="id"></bids-tree>
             </fieldset>
 			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(cancel)="goToView()"
-				(back)="goBack()"
-			></form-footer>
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(delete) = "delete()"
+					(cancel)="goToView()"
+					(back)="goBack()">
+				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+			</form-footer>
 		</form>
-        <dataset-download [studyId]="id" > </dataset-download>
 	</div>
 </div>

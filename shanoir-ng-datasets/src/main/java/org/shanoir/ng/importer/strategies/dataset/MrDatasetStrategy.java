@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
+import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -80,6 +83,8 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 		// TODO ATO : implement MrDAtasetAcquisitionHome.createMrDataset (issue by
 		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset dataset : serie.getDatasets()) {
+			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
+
 			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			MrDataset mrDataset = new MrDataset();
 			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
@@ -133,11 +138,9 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 		// Set the study and the subject
 		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
-		mrDataset.setStudyId(importJob.getFrontStudyId());
 
 		// Set the modality from dicom fields
-		// TODO  :VERIFY NOT NEEDED ANY MORE ?
-		 mrDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
+		mrDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
 		if (mrDataset.getSubjectId() != null) {
@@ -178,6 +181,19 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 				rt.setMrDataset(mrDataset);
 			}
 		}
+		
+		if (serie.getIsSpectroscopy()) {
+			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
+			int rows = dicomAttributes.getInt(Tag.Rows, 0);
+			int columns = dicomAttributes.getInt(Tag.Columns, 0);
+			if (rows == 1 && columns == 1) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET);
+			} else {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET);
+			}
+			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
+		}
+		
 
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
@@ -210,6 +226,12 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			datasetExpression.setDataset(mrDataset);
 			mrDataset.getDatasetExpressions().add(datasetExpression);
 		}
+		
+		DatasetMetadata originalDM = mrDataset.getOriginMetadata();
+		mrDataset.setUpdatedMetadata(originalDM);
+		MrDatasetMetadata originalMDM = mrDataset.getOriginMrMetadata();
+		mrDataset.setUpdatedMrMetadata(originalMDM);
+		
 		return mrDataset;
 	}
 

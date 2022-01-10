@@ -43,11 +43,11 @@ export class SelectOptionComponent {
 
     constructor(public elt: ElementRef) { }
 
-    private select() {
+    select() {
         if (!this.disabled) this.parent.onSelectedOptionChange(this);
     }
 
-    private over() {
+    over() {
         if (!this.disabled) this.parent.onOptionOver(this);
     }
 

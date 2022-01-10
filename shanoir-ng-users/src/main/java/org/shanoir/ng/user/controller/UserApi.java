@@ -20,7 +20,6 @@ import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -102,16 +101,17 @@ public interface UserApi {
 	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
 	ResponseEntity<List<User>> findUsers();
 
-	@ApiOperation(value = "", notes = "Requests a date extension for current user", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "request ok", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/extension", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
-	ResponseEntity<Void> requestExtension(
-			@ApiParam(value = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
-
+	@ApiOperation(value = "", notes = "Returns all the users on account request", response = User.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found users", response = User.class),
+			@ApiResponse(code = 204, message = "no user found", response = User.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = User.class),
+			@ApiResponse(code = 403, message = "forbidden", response = User.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
+	@RequestMapping(value = "/accountRequests", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
+	ResponseEntity<List<User>> findAccountRequests();
+	
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = User.class),

@@ -30,6 +30,7 @@ import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'subject-pathology-form',
@@ -69,6 +70,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     get subjectPathology(): SubjectPathology { return this.entity; }
     set subjectPathology(subjectPathology: SubjectPathology) { this.entity = subjectPathology; }
 
+    getService(): EntityService<SubjectPathology> {
+        return this.subjectPathologyService;
+    }
 
     initView(): Promise<void> {
         return new  Promise<void>(resolve => {
@@ -245,7 +249,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
 
     addPathology(): Promise<void> {
         if (!this.subjectPathology) { 
-            console.log('nothing to create');
             return; 
         }
         if(this.preclinicalSubject.pathologies === undefined){
@@ -259,8 +262,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
     
     updatePathology(): void {
-        if (!this.subjectPathology) { 
-            console.log('nothing to update');
+        if (!this.subjectPathology) {
             return; 
         }
         if (this.onEvent.observers.length > 0) {

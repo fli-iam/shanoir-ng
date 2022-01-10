@@ -14,13 +14,14 @@
 
 package org.shanoir.ng.acquisitionequipment.controler;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
-import org.shanoir.ng.shared.core.service.BasicEntityService;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -40,8 +41,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
-
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -51,7 +50,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 	
 	@Autowired
-	private BasicEntityService<AcquisitionEquipment> acquisitionEquipmentService;
+	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -71,7 +70,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
-		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId);
+		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId).orElse(null);
 		if (equipment == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -81,6 +80,24 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	@Override
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -97,8 +114,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		
 		/* Save acquisition equipment in db. */
 		try {
-			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
-					acquisitionEquipmentService.create(acquisitionEquipment));
+			AcquisitionEquipment newAcqEquipment = acquisitionEquipmentService.create(acquisitionEquipment);
+			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(newAcqEquipment);
 			
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipementCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(equipementCreated, HttpStatus.OK);
@@ -138,8 +155,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 	
 	private void checkDataIntegrityException(DataIntegrityViolationException e, AcquisitionEquipment acquisitionEquipment) throws RestServiceException {
-		if (e.getRootCause() instanceof MySQLIntegrityConstraintViolationException) {
-			MySQLIntegrityConstraintViolationException rootEx = (MySQLIntegrityConstraintViolationException) e.getRootCause();
+		if (e.getRootCause() instanceof SQLIntegrityConstraintViolationException) {
+			SQLIntegrityConstraintViolationException rootEx = (SQLIntegrityConstraintViolationException) e.getRootCause();
 			if (rootEx.getMessage().contains("model_number_idx")) {
 				FieldErrorMap errorMap = new FieldErrorMap();
 				List<FieldError> errors = new ArrayList<>();

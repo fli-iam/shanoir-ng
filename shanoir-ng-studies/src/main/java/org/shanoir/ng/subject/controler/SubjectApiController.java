@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.controler;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.shanoir.ng.bids.service.StudyBIDSService;
@@ -25,7 +26,9 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -104,6 +107,7 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@RequestBody Subject subject,
@@ -116,24 +120,28 @@ public class SubjectApiController implements SubjectApi {
 		} else {
 			createdSubject = subjectService.createAutoIncrement(subject, centerId);
 		}
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+
 		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
 		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
 
+	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException {
+			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
 		try {
-			// Update subject BIDS
-			bidsService.updateSubjectBids(subjectId, subject);
 			subjectService.update(subject);
+
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 
@@ -150,6 +158,14 @@ public class SubjectApiController implements SubjectApi {
 		if (simpleSubjectDTOList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		simpleSubjectDTOList.sort(new Comparator<SimpleSubjectDTO>() {
+			@Override
+			public int compare(SimpleSubjectDTO o1, SimpleSubjectDTO o2) {
+				String aname = o1.getSubjectStudy().getSubjectStudyIdentifier() != null ? o1.getSubjectStudy().getSubjectStudyIdentifier() : o1.getName();
+				String bname = o2.getSubjectStudy().getSubjectStudyIdentifier() != null ? o2.getSubjectStudy().getSubjectStudyIdentifier() : o2.getName();
+				return aname.compareToIgnoreCase(bname);
+			}
+		});
 		return new ResponseEntity<>(simpleSubjectDTOList, HttpStatus.OK);
 	}
 

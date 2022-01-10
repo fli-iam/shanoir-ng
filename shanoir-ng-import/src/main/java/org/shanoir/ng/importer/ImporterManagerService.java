@@ -34,6 +34,14 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.shared.email.EmailBase;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -45,7 +53,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,15 +98,21 @@ public class ImporterManagerService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	private ShanoirEventService eventService;
+	
+	@Autowired
+	StudyUserRightsRepository studyUserRightRepo;
+
 	@Value("${shanoir.import.directory}")
 	private String importDir;
-	
-	@Value("${ms.url.shanoir-ng-datasets}")
-	private String datasetsMsUrl;
 	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
 		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+		eventService.publishEvent(event);
+		importJob.setShanoirEvent(event);
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
@@ -110,21 +123,26 @@ public class ImporterManagerService {
 			}
 			List<Patient> patients = importJob.getPatients();
 			// In PACS import the dicom files are still in the PACS, we have to download them first
+			// and then analyze them: what gives us a list of images for each serie.
 			final File importJobDir;
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
 				// convert instances to images, as already done after zip file upload
-			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
+			} else if (importJob.isFromShanoirUploader()) {
+				importJobDir = new File(importJob.getWorkFolder());
+				// convert instances to images, as already done after zip file upload
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			} else if (importJob.isFromDicomZip()) {
+				// images creation and analyze of dicom files has been done after upload already
 				importJobDir = new File(importJob.getWorkFolder());
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-
-			// convert instances to images, done here for all kinds of import
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), importJob.isFromPacs());
-
+			event.setMessage("Anonymizing dicom..");
+			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
@@ -138,21 +156,65 @@ public class ImporterManagerService {
 						throw new ShanoirException("Error during anonymization.");
 					}
 				}
-				Long converterId = importJob.getFrontConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
+				Long converterId = importJob.getConverterId();
+				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
 	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
 	            message.getMessageProperties().setHeader("x-user-id",
 	            		KeycloakUtil.getTokenUserId());
 	            return message;
 	        });
-			this.rabbitTemplate.convertAndSend("importer-queue-dataset", objectMapper.writeValueAsString(importJob));
-		} catch (RestClientException e) {
-			LOG.error("Error on dataset microservice request", e);
-		} catch (ShanoirException | FileNotFoundException | AmqpException | JsonProcessingException e) {
-			LOG.error(e.getMessage(), e);
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
+		} catch (Exception e) {
+			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
+			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
+			event.setStatus(ShanoirEvent.ERROR);
+			event.setProgress(1f);
+			eventService.publishEvent(event);
+			sendFailureMail(importJob, userId, e.getMessage());
 		}
 		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
+	}
+
+	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+		EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
+		generatedMail.setExaminationId(importJob.getExaminationId().toString());
+		generatedMail.setStudyId(importJob.getStudyId().toString());
+		generatedMail.setSubjectName(importJob.getSubjectName());
+		generatedMail.setStudyName(importJob.getStudyName());
+		generatedMail.setUserId(userId);
+		
+		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
+
+		sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+	}
+
+	/**
+	 * Sends the given mail in entry to all recipients in a given study
+	 * @param job the imprt job
+	 * @param email the recipients
+	 */
+	private void sendMail(ImportJob job, EmailBase email, String queue) {
+		List<Long> recipients = new ArrayList<>();
+
+		// Get all recpients
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
+		for (StudyUser user : users) {
+			if (user.isReceiveNewImportReport()) {
+				recipients.add(user.getUserId());
+			}
+		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recipients
+			return;
+		}
+		email.setRecipients(recipients);
+
+		try {
+			rabbitTemplate.convertAndSend(queue, new ObjectMapper().writeValueAsString(email));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send email for this import. ", e);
+		}
 	}
 	
 	/**

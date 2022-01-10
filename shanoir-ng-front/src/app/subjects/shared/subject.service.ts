@@ -18,28 +18,23 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
 import { SubjectStudy } from './subject-study.model';
-import { Subject } from './subject.model';
+import { Subject, SubjectDTO } from './subject.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
 
     API_URL = AppUtils.BACKEND_API_SUBJECT_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http);
+    }
+
     getEntityInstance() { return new Subject(); }
 
     getSubjectsNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
         .toPromise();
-    }
-
-    getCentersNames(): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
-    }
-
-    getCentersNamesForExamination(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
@@ -50,5 +45,12 @@ export class SubjectService extends EntityService<Subject> {
     updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
             .toPromise();
+    }
+
+    public stringify(entity: Subject) {
+        let dto = new SubjectDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
     }
 }

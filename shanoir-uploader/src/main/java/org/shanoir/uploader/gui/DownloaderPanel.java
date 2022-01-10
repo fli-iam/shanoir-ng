@@ -22,11 +22,10 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.text.NumberFormatter;
 
 import org.shanoir.downloader.ShanoirDownloader;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 
 public class DownloaderPanel extends JPanel {
@@ -37,13 +36,6 @@ public class DownloaderPanel extends JPanel {
         super(false);
         this.setLayout(gBLPanel);
 
-		NumberFormat format = NumberFormat.getInstance();
-		NumberFormatter formatter = new NumberFormatter(format);
-		formatter.setValueClass(Long.class);
-		formatter.setMinimum(Long.MIN_VALUE);
-		formatter.setMaximum(Long.MAX_VALUE);
-		formatter.setAllowsInvalid(true);
-
 		int posY = 0;
 		JLabel downloadDatasetIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.datasetIDLabel"));
 		downloadDatasetIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -53,8 +45,10 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadDatasetIDLabel.gridx = 0;
 		gbc_downloadDatasetIDLabel.gridy = posY;
 		this.add(downloadDatasetIDLabel, gbc_downloadDatasetIDLabel);
+		
+		NumberFormat integerFormat = NumberFormat.getIntegerInstance();
 
-		JFormattedTextField downloadDatasetIDTF = new JFormattedTextField(formatter);
+		JFormattedTextField downloadDatasetIDTF = new JFormattedTextField(integerFormat);
 		downloadDatasetIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadDatasetIDTF = new GridBagConstraints();
 		gbc_downloadDatasetIDTF.insets = new Insets(10, 10, 10, 10);
@@ -63,7 +57,6 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadDatasetIDTF.gridy = posY++;
 		this.add(downloadDatasetIDTF, gbc_downloadDatasetIDTF);
 		downloadDatasetIDTF.setColumns(15);
-		downloadDatasetIDTF.setText("");
 
 		JLabel downloadSubjectIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.subjectIDLabel"));
 		downloadSubjectIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -74,7 +67,7 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadSubjectIDLabel.gridy = posY;
 		this.add(downloadSubjectIDLabel, gbc_downloadSubjectIDLabel);
 
-		JFormattedTextField downloadSubjectIDTF = new JFormattedTextField(formatter);
+		JFormattedTextField downloadSubjectIDTF = new JFormattedTextField(integerFormat);
 		downloadSubjectIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadSubjectIDTF = new GridBagConstraints();
 		gbc_downloadSubjectIDTF.insets = new Insets(10, 10, 10, 10);
@@ -83,7 +76,6 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadSubjectIDTF.gridy = posY++;
 		this.add(downloadSubjectIDTF, gbc_downloadSubjectIDTF);
 		downloadSubjectIDTF.setColumns(15);
-		downloadSubjectIDTF.setText("");
 
 		JLabel downloadStudyIDLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studyIDLabel"));
 		downloadStudyIDLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -94,7 +86,7 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadStudyIDLabel.gridy = posY;
 		this.add(downloadStudyIDLabel, gbc_downloadStudyIDLabel);
 
-		JFormattedTextField downloadStudyIDTF = new JFormattedTextField(formatter);
+		JFormattedTextField downloadStudyIDTF = new JFormattedTextField(integerFormat);
 		downloadStudyIDTF.setFocusLostBehavior(javax.swing.JFormattedTextField.COMMIT);
 		GridBagConstraints gbc_downloadStudyIDTF = new GridBagConstraints();
 		gbc_downloadStudyIDTF.insets = new Insets(10, 10, 10, 10);
@@ -103,7 +95,6 @@ public class DownloaderPanel extends JPanel {
 		gbc_downloadStudyIDTF.gridy = posY++;
 		this.add(downloadStudyIDTF, gbc_downloadStudyIDTF);
 		downloadStudyIDTF.setColumns(15);
-		downloadStudyIDTF.setText("");
 
 		JLabel formatLabel = new JLabel(resourceBundle.getString("shanoir.uploader.formatLabel"));
 		formatLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -213,13 +204,13 @@ public class DownloaderPanel extends JPanel {
 						Long subjectId = null;
 
 						if (!downloadDatasetIDTF.getText().isEmpty()) {
-							datasetId = Long.parseLong(downloadDatasetIDTF.getText());
+							datasetId = ((Number)downloadDatasetIDTF.getValue()).longValue();
 						}
 						if (!downloadStudyIDTF.getText().isEmpty()) {
-							studyId = Long.parseLong(downloadStudyIDTF.getText());
+							studyId = ((Number)downloadStudyIDTF.getValue()).longValue();
 						}
 						if (!downloadSubjectIDTF.getText().isEmpty()) {
-							subjectId = Long.parseLong(downloadSubjectIDTF.getText());
+							subjectId = ((Number)downloadSubjectIDTF.getValue()).longValue();
 						}
 
 						if(datasetId == null && studyId == null && subjectId == null) {
@@ -230,7 +221,7 @@ public class DownloaderPanel extends JPanel {
 						// File outputDirectory = new File(outputDirectoryTF.getText());
 						File outputDirectory = new File(System.getProperty("user.home"));
 
-						ShanoirUploaderServiceClientNG shng = ShUpOnloadConfig.getShanoirUploaderServiceClientNG();
+						ShanoirUploaderServiceClient shng = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 						
 						String message = "";
 

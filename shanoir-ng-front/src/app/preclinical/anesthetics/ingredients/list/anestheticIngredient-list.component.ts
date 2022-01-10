@@ -11,19 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
-import {Component, Input, Output, EventEmitter, ViewChild} from '@angular/core'
-
-import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
-import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
-import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
-import { AnestheticType } from "../../../shared/enum/anestheticType";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
+import {
+    BrowserPaginEntityListComponent,
+} from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { AnestheticType } from '../../../shared/enum/anestheticType';
+import { ModesAware } from '../../../shared/mode/mode.decorator';
+import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
+import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
+import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
+
 
 export type Mode =  "view" | "edit" | "create";
 
@@ -46,14 +49,18 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     public ingredientSelected : AnestheticIngredient;
     @Output() onIngredientAdded = new EventEmitter();
     @Output() onIngredientDeleted = new EventEmitter();
-    @ViewChild('ingredientsTable') table: TableComponent;
+    @ViewChild('ingredientsTable', { static: false }) table: TableComponent;
 
     
 
     constructor(
         private ingredientsService: AnestheticIngredientService) {
             super('preclinical-anesthetic-ingredient');
-     }
+    }
+
+    getService(): EntityService<AnestheticIngredient> {
+        return this.ingredientsService;
+    }
     
     getEntities(): Promise<AnestheticIngredient[]> {
         if (this.anesthetic && this.anesthetic.id){
@@ -128,9 +135,8 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         this.getSelectedIngredient(entity.id).then(selectedIngredient => {
             this.confirmDialogService
                 .confirm(
-                    'Delete', 'Are you sure you want to delete preclinical-anesthetic-ingredient n° ' + entity.id + ' ?',
-                    ServiceLocator.rootViewContainerRef
-                ).subscribe(res => {
+                    'Delete', 'Are you sure you want to delete preclinical-anesthetic-ingredient n° ' + entity.id + ' ?'
+                ).then(res => {
                     if (res) {
                         this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then((response) => {
                             this.getAnestheticIngredient(selectedIngredient)

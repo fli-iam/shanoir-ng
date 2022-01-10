@@ -26,6 +26,7 @@ import { EnumUtils } from "../../shared/enum/enumUtils";
 import { slideDown } from '../../../shared/animations/animations';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'contrast-agent-form',
@@ -54,7 +55,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         private route: ActivatedRoute,
         private contrastAgentsService: ContrastAgentService,
         private referenceService: ReferenceService, 
-        private enumUtils: EnumUtils) {
+        public enumUtils: EnumUtils) {
 
         super(route, 'preclinical-contrast-agent');
     }
@@ -62,6 +63,9 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
     get agent(): ContrastAgent { return this.entity; }
     set agent(agent: ContrastAgent) { this.entity = agent; }
 
+    getService(): EntityService<ContrastAgent> {
+        return this.contrastAgentsService;
+    }
 
     initView(): Promise<void> {
         this.entity = new ContrastAgent();
@@ -162,6 +166,10 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
             }
         }
         return null;
+    }
+
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
     }
 
 }

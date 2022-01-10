@@ -13,18 +13,23 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
 import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../../shared/components/table/pageable.model';
-
+import { ExaminationDTO, ExaminationDTOService } from '../../../examinations/shared/examination.dto';
 
 @Injectable()
 export class AnimalExaminationService extends EntityService<Examination>{
     API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
 
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
+    
     getEntityInstance() { return new Examination(); }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
@@ -40,6 +45,18 @@ export class AnimalExaminationService extends EntityService<Examination>{
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
     }
+    
+    postFile(fileToUpload: File, examId: number): Observable<any> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + examId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return this.http.post<any>(endpoint, formData);
+    }
 
-
+    public stringify(entity: Examination) {
+        let dto = new ExaminationDTO(entity);
+        return JSON.stringify(dto, (key, value) => {
+            return this.customReplacer(key, value, dto);
+        });
+    }
 }

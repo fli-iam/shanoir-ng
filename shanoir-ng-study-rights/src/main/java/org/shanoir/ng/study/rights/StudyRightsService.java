@@ -44,7 +44,27 @@ public class StudyRightsService {
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
 		return
 				founded.getStudyUserRights() != null
-				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr));
+				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
+				&& founded.isConfirmed();
+    }
+    
+    /**
+	 * Check that the connected user has one of the given rights for the given study.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasOneRightOnStudy(Long studyId, String... rightStrs) {
+		Long userId = KeycloakUtil.getTokenUserId();
+		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+		if (founded.getStudyUserRights() != null) {
+			for (String rightStr : rightStrs) {
+				if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.isConfirmed()) return true;
+			}
+		}
+		return false;
     }
 
     /**
@@ -62,7 +82,7 @@ public class StudyRightsService {
 		Iterable<StudyUser> founded = repo.findByUserIdAndStudyIdIn(userId, studyIds);
 		Set<Long> validIds = new HashSet<>();
 		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) {
+			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 				validIds.add(su.getStudyId());
 			}
 		}
@@ -82,7 +102,7 @@ public class StudyRightsService {
 		}
 		Iterable<StudyUser> founded = repo.findByUserId(userId);
 		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))) {
+			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
 				return true;
 			}
 		}

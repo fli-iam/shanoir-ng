@@ -24,7 +24,6 @@ import org.shanoir.ng.coil.model.CoilType;
 import org.shanoir.ng.manufacturermodel.model.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -106,19 +105,6 @@ public final class ModelsUtil {
 
 
 	/**
-	 * Create a DTO with ids.
-	 * 
-	 * @return DTO with ids.
-	 */
-	public static CommonIdsDTO createCommonIdsDTO() {
-		final CommonIdsDTO commonIdsDTO = new CommonIdsDTO();
-		commonIdsDTO.setCenterId(1L);
-		commonIdsDTO.setStudyId(1L);
-		commonIdsDTO.setSubjectId(1L);
-		return commonIdsDTO;
-	}
-
-	/**
 	 * Create a manufacturer model.
 	 * 
 	 * @return manufacturer model.
@@ -158,6 +144,7 @@ public final class ModelsUtil {
 		sc.setStudy(study); sc.setCenter(createCenter()); sc.setId(1L);
 		study.getStudyCenterList().add(sc);
 		study.setStudyUserList(new ArrayList<>());
+		study.setTags(new ArrayList<>());
 		return study;
 	}
 
