@@ -14,6 +14,4 @@ FROM ohif/viewer:v4.12.9.17613
 
 COPY default.conf /etc/nginx/conf.d/
 
-COPY index.html /usr/share/nginx/html/
-
 COPY app-config.js /usr/share/nginx/html/

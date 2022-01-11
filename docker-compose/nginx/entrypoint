@@ -27,6 +27,7 @@ src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
 dst="/etc/nginx/server.conf"
 sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
 
+sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/server.conf
 
 configure_instance()
 {
