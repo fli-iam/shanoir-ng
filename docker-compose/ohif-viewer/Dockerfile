@@ -10,8 +10,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM ohif/viewer:v4.9.8.14493
+FROM ohif/viewer:v4.12.9.17613
 
 COPY default.conf /etc/nginx/conf.d/
+
+COPY index.html /usr/share/nginx/html/
 
 COPY app-config.js /usr/share/nginx/html/

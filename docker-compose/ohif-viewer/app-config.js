@@ -4,6 +4,16 @@ window.config = {
   extensions: [],
   showStudyList: true,
   filterQueryParam: false,
+  disableServersCache: false,
+  studyPrefetcher: {
+    enabled: true,
+    order: 'closest',
+    displaySetCount: 3,
+    preventCache: false,
+    prefetchDisplaySetsTimeout: 300,
+    displayProgress: true,
+    includeActiveDisplaySet: true,
+  },
   servers: {
     dicomWeb: [
       {
@@ -15,26 +25,26 @@ window.config = {
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
         enableStudyLazyLoad: true,
-        supportsFuzzyMatching: true
+        supportsFuzzyMatching: true,
       },
     ],
   },
   // This is an array, but we'll only use the first entry for now
-//  oidc: [
-//    {
+  oidc: [
+  	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-//   	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
-//    	client_id: 'ohif-viewer',
-//    	redirect_uri: 'https://shanoir-ng-nginx/shanoir-ng/ohif-viewer/', // `OHIFStandaloneViewer.js`
+    	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
+    	client_id: 'ohif-viewer',
+    	redirect_uri: 'https://shanoir-ng-nginx/shanoir-ng/ohif-viewer/', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
-//		response_type: 'code',
-//		scope: 'openid', // email profile openid
+		response_type: 'code',
+		scope: 'email', // email profile openid
 		// ~ OPTIONAL
-//		post_logout_redirect_uri: '/logout-redirect.html'
-//    }
-//  ],
+		post_logout_redirect_uri: '/shanoir-ng/'
+    }
+  ],
   // Extensions should be able to suggest default values for these?
   // Or we can require that these be explicitly set
   hotkeys: [
@@ -139,6 +149,6 @@ window.config = {
   // If the server is particularly slow to respond to series metadata
   //  requests as it extracts the metadata from raw files everytime,
   //  try setting this to even lower value
-  // Leave it undefined for no limit, sutiable for HTTP/2 enabled servers
+  // Leave it undefined for no limit, suitable for HTTP/2 enabled servers
   // maxConcurrentMetadataRequests: 5,
 };
