@@ -149,25 +149,6 @@ public class ImporterApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testUploadEEGZipFileNotZip() throws Exception {
-		// Wrong file
-		String filePath = "./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.pos";
-		File f = new File(filePath);
-
-		if (f.exists() && !f.isDirectory()) {
-			MockMultipartFile multipartFile = new MockMultipartFile("file", "brainvision (copy).zip", "application/zip",	new FileInputStream(new File(filePath)));
-
-			// Check that we return an EEGImport Job with adapted informations.
-			mvc.perform(MockMvcRequestBuilders.fileUpload(UPLOAD_EEG_PATH).file(multipartFile))
-			.andExpect(status().isUnprocessableEntity());
-		} else {
-			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testStartImportEEGJob() throws Exception {
 		ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
 
