@@ -1,6 +1,6 @@
 window.config = {
   // default: '/'
-  routerBasename: '/shanoir-ng/ohif-viewer',
+  routerBasename: '/',
   extensions: [],
   showStudyList: true,
   filterQueryParam: false,
@@ -34,15 +34,15 @@ window.config = {
   	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'https://shanoir-ng-nginx/auth/realms/shanoir-ng',
+    	authority: 'https://viewer.shanoir-ng-nginx/auth/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
-    	redirect_uri: 'https://ohif.shanoir-ng-nginx', // `OHIFStandaloneViewer.js`
+    	redirect_uri: 'https://viewer.shanoir-ng-nginx', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
 		response_type: 'code',
 		scope: 'email', // email profile openid
 		// ~ OPTIONAL
-		post_logout_redirect_uri: '/shanoir-ng/'
+		post_logout_redirect_uri: 'https://shanoir-ng-nginx/'
     }
   ],
   // Extensions should be able to suggest default values for these?

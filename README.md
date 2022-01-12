@@ -103,7 +103,7 @@ Before deploying, some configuration is required:
 * add the following line in your **/etc/hosts** (so that
   https://shanoir-ng-nginx/ is reachable from your web browser):
   ```
-  127.0.0.1  shanoir-ng-nginx
+  127.0.0.1  shanoir-ng-nginx viewer.shanoir-ng-nginx
   ```
 * if docker is not running natively and thus you are using docker-machine
   (windows/macos users), you will need to tune the virtualbox machine:
