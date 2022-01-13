@@ -222,9 +222,9 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     public toggleAnonymised() {
         if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
-            this.subject.name = this.subjectNamePrefix + this.dicomPatientName + '-';
+            this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
         } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
-            this.subject.name = this.subjectNamePrefix;
+            this.subject.name = this.subjectNamePrefix; 
         }
     }
 }
