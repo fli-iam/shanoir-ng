@@ -82,9 +82,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
             this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
-            if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
-            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
 	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
+            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
+                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
+                this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
+            }
             if (this.subjectNamePrefix) {
                 this.subject.name = this.subjectNamePrefix;
 	        }
