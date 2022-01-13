@@ -32,7 +32,6 @@ import { ExaminationComponent } from './examinations/examination/examination.com
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
@@ -53,13 +52,10 @@ import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
-import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
 import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
 import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
@@ -160,23 +156,11 @@ let routes: Routes = [
                 path: 'processed-dataset-context',
                 component: ProcessedDatasetClinicalContextComponent
             }, {
-                path: 'finish',
-                component: FinishImportComponent
-            }, {
-                path: 'eegfinish',
-                component: FinishEegImportComponent
-            }, {
-                path: 'processed-dataset-finish',
-                component: FinishProcessedDatasetImportComponent
-            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent
             }, {
                 path: 'brukerseries',
                 component: BrukerSelectSeriesComponent
-            }, {
-                path: 'brukerfinish',
-                component: BrukerFinishImportComponent
             }
         ]
     }, {

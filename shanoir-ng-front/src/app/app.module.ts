@@ -82,15 +82,12 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
-import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -230,7 +227,6 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 // import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
@@ -335,9 +331,6 @@ import { VarDirective } from './utils/ng-var.directive';
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        FinishImportComponent,
-        FinishEegImportComponent,
-        FinishProcessedDatasetImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         AsyncTasksComponent,
@@ -390,8 +383,7 @@ import { VarDirective } from './utils/ng-var.directive';
     	PhysiologicalDataFormComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent,
+        BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
         ExaminationNodeComponent,
