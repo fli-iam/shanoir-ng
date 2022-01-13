@@ -53,6 +53,6 @@ public interface SolrService {
 
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
 
-	Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable);
+	Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable) throws RestServiceException;
 
 }

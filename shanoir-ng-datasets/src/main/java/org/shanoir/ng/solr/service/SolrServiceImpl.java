@@ -186,7 +186,7 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Override
-	public Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable) {
+	public Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable) throws RestServiceException {
 		Page<FacetFieldEntry> result = null;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findFacetFieldEntries(facetName, pageable);

@@ -16,6 +16,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrFacet;
 import org.shanoir.ng.utils.Range;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.UncategorizedSolrException;
 import org.springframework.data.solr.core.SolrTemplate;
@@ -25,6 +26,7 @@ import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Node;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
 import org.springframework.data.solr.core.query.StatsOptions;
+import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
@@ -166,5 +168,40 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			node = node.and(combineCriteria(node.getParent()));
 		}
 		return (Criteria) node;
+	}
+
+	@Override
+	public Page<FacetFieldEntry> findFacetFieldEntries(String facetName, Pageable pageable) throws RestServiceException {
+		Criteria criteria = new Criteria(Criteria.WILDCARD).expression(Criteria.WILDCARD);
+		return getFacets(criteria, facetName, pageable);
+	}
+
+	@Override
+	public Page<FacetFieldEntry> findFacetFieldEntriesWithStudyIdIn(String facetName, List<Long> studyIds,
+			Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private Page<FacetFieldEntry> getFacets(Criteria criteria, String facetName, Pageable pageable) throws RestServiceException {
+		//addAndPredicateToCriteria(criteria, facetName, ???);
+		
+		criteria = combineCriteria(criteria);
+
+		SimpleFacetQuery query = ((FacetQuery) new SimpleFacetQuery(criteria)
+				.setPageRequest(pageable))
+				.setFacetOptions(new FacetOptions()
+						.addFacetOnField(facetName)
+						.setFacetLimit(-1)
+						.setPageable(pageable)
+		);
+
+		try {
+			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);
+			return result.getFacetResultPage(facetName);
+		} catch (UncategorizedSolrException e) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			throw new RestServiceException(e, error);
+		}
 	}
 }
