@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -49,8 +51,8 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = ManufacturerApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@WebMvcTest(controllers = {ManufacturerApiController.class, ControlerSecurityService.class})
+@AutoConfigureMockMvc(addFilters = false)
 public class ManufacturerApiControllerTest {
 
 	private static final String REQUEST_PATH = "/manufacturers";
@@ -70,14 +72,14 @@ public class ManufacturerApiControllerTest {
 	@Before
 	public void setup() {
 		gson = new GsonBuilder().create();
-
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
-		given(manufacturerServiceMock.findById(1L)).willReturn(new Manufacturer());
+		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(new Manufacturer()));
 		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
 		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void findManufacturerByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

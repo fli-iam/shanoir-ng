@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.solr.common.params.FacetParams.FacetRangeInclude;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -36,13 +35,15 @@ import org.springframework.http.HttpStatus;
  *
  */
 public class SolrRepositoryImpl implements SolrRepositoryCustom {
-	private static final String DATASET_NATURE_FACET = "datasetNature_s_lower";
-	private static final String DATASET_TYPE_FACET = "datasetType_s_lower";
-	private static final String DATASET_NAME_FACET = "datasetName_s_lower";
-	private static final String EXAMINATION_COMMENT_FACET = "examinationComment_s_lower";
-	private static final String SUBJECT_NAME_FACET = "subjectName_s_lower";
-	private static final String STUDY_NAME_FACET = "studyName_s_lower";
-	private static final String CENTER_NAME_FACET = "centerName_s_lower";
+	private static final String DATASET_NATURE_FACET = "datasetNature";
+	private static final String DATASET_TYPE_FACET = "datasetType";
+	private static final String DATASET_NAME_FACET = "datasetName";
+	private static final String EXAMINATION_COMMENT_FACET = "examinationComment";
+	private static final String SUBJECT_NAME_FACET = "subjectName";
+	private static final String STUDY_NAME_FACET = "studyName";
+	private static final String CENTER_NAME_FACET = "centerName";
+    private static final String TAGS_FACET = "tags";
+
 	@Resource
 	private SolrTemplate solrTemplate;
 
@@ -62,7 +63,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addAndPredicateToCriteria(Criteria criteria, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
-			criteria = criteria.and(Criteria.where(fieldName).is(values));
+			List<String> valuesList = new ArrayList<String>(values);
+			Criteria subCrit =  Criteria.where(fieldName).is(valuesList.get(0));
+			for (int i = 1; i < valuesList.size(); i++) {
+				subCrit = subCrit.or(Criteria.where(fieldName).is(valuesList.get(i)));
+				i++;
+			}
+			criteria = criteria.and(subCrit);
 		}
 	}
 	
@@ -82,6 +89,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addAndPredicateToCriteria(criteria, DATASET_TYPE_FACET, facet.getDatasetType());
 		addAndPredicateToCriteria(criteria, DATASET_NATURE_FACET, facet.getDatasetNature());
 		addAndPredicateToCriteria(criteria, CENTER_NAME_FACET, facet.getCenterName());
+		addAndPredicateToCriteria(criteria, TAGS_FACET, facet.getTags());
 		addAndPredicateToCriteria(criteria, "sliceThickness", facet.getSliceThickness());
 		addAndPredicateToCriteria(criteria, "pixelBandwidth", facet.getPixelBandwidth());
 		addAndPredicateToCriteria(criteria, "magneticFieldStrength", facet.getMagneticFieldStrength());
@@ -95,10 +103,10 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		
 		if (facet.getSearchText() != null && !facet.getSearchText().trim().isEmpty()) {
 			if (facet.isExpertMode()) {
-				addExpertClause(criteria, facet.getSearchText());	
+				addExpertClause(criteria, facet.getSearchText());
 			} else {
-				addSearchInAllClause(criteria, facet.getSearchText());			
-			}			
+				addSearchInAllClause(criteria, facet.getSearchText());
+			}
 		}
 
 		criteria = combineCriteria(criteria);
@@ -113,10 +121,11 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 						.addFacetOnField(DATASET_TYPE_FACET)
 						.addFacetOnField(DATASET_NATURE_FACET)
 						.addFacetOnField(CENTER_NAME_FACET)
+						.addFacetOnField(TAGS_FACET)
 						.setFacetLimit(-1));
 
 		try {
-			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage(query, ShanoirSolrDocument.class);			
+			FacetPage<ShanoirSolrDocument> result = solrTemplate.queryForFacetPage("shanoir", query, ShanoirSolrDocument.class);			
 			return (SolrResultPage<ShanoirSolrDocument>) result;
 		} catch (UncategorizedSolrException e) {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
@@ -131,13 +140,13 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private void addSearchInAllClause(Criteria criteria, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] fields = {STUDY_NAME_FACET, SUBJECT_NAME_FACET, DATASET_NAME_FACET, EXAMINATION_COMMENT_FACET, DATASET_TYPE_FACET, DATASET_NATURE_FACET, CENTER_NAME_FACET};
-			String[] specialChars = {"&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
-			String escapedSearchStr = searchStr.trim();			
+			String[] fields = {STUDY_NAME_FACET, SUBJECT_NAME_FACET, DATASET_NAME_FACET, EXAMINATION_COMMENT_FACET, DATASET_TYPE_FACET, DATASET_NATURE_FACET, CENTER_NAME_FACET, TAGS_FACET};
+			String[] specialChars = {"+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "\"", "~", "*", "?", ":", "/"};
+			String escapedSearchStr = searchStr;
 			for (String specialChar : specialChars) {
 				escapedSearchStr = escapedSearchStr.replace(specialChar, '\\' + specialChar);
 			}
-			String[] searchTerms = escapedSearchStr.split(" "); 
+			String[] searchTerms = escapedSearchStr.trim().split(" ");
 			
 			List<String> termInAnyFieldFormattedStrList = new ArrayList<>();
 			for (String term : searchTerms) {

@@ -82,7 +82,8 @@ export class SolrSearchComponent implements AfterViewChecked{
         'examinationComment',
         'datasetName',
         'datasetType',
-        'datasetNature'
+        'datasetNature',
+        'tags'
     ];
 
     constructor(
@@ -396,6 +397,7 @@ export class SolrSearchComponent implements AfterViewChecked{
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-shield-alt", color: "goldenrod", suppressSorting: true},
             {headerName: "Name", field: "datasetName"},
+            {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},

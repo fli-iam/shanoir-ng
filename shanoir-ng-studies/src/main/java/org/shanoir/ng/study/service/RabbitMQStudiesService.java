@@ -127,11 +127,13 @@ public class RabbitMQStudiesService {
 			Long userId = event.getUserId();
 			Long studyId = Long.valueOf(event.getObjectId());
 			// Get the study
-			Study studyToUpdate = studyRepo.findOne(studyId);
+			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
 			// Create a new StudyUser
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);
 			subscription.setUserId(userId);
+			subscription.setReceiveNewImportReport(false);
+			subscription.setReceiveStudyUserReport(false);
 			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
 			subscription.setUserName(event.getMessage());
 			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {

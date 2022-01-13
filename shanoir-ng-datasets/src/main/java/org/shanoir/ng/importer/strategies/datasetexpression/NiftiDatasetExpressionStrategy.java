@@ -16,7 +16,6 @@ package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,7 +28,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,12 +81,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 
 				File srcFile;
-				try {
-					srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
-				} catch (UnsupportedEncodingException e1) {
-					LOG.error("Could not decode nifti path file: {}", datasetFile.getPath());
-					srcFile = new File(datasetFile.getPath().replace("file:" , ""));
-				}
+				srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
 				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
 				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 				

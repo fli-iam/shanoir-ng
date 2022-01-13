@@ -48,6 +48,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { ImportMode } from '../../import/import.component';
 
 @Component({
     selector: 'clinical-context',
@@ -74,7 +75,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public examination: SubjectExamination;
     public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
-    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
+    public importMode: ImportMode;
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -231,6 +232,14 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
+        this.studycardOptions = null;
+        if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
+            if (this.keycloakService.isUserAdmin) {
+                this.isAdminOfStudy[this.study.id] = true;
+            } else {
+                this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
+            }
+        }
         let end: Promise<void> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
@@ -302,9 +311,6 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        if (this.isAdminOfStudy[this.study.id] == undefined) {
-            this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
-        }
         this.onContextChange();
     }
 
@@ -398,7 +404,7 @@ export class ClinicalContextComponent implements OnDestroy {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter, null);
+            this.subject, this.examination, this.niftiConverter, null, null, null, null, null, null, null);
     }
 
     public openCreateCenter = () => {
@@ -459,7 +465,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {
-                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as Subject));
+                        this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     } else {
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     }
@@ -663,6 +669,17 @@ export class ClinicalContextComponent implements OnDestroy {
     public editStudyCard(studycard: StudyCard) {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
+                    this.importDataService.contextBackup.studyCard = entity as StudyCard;
+                })
+            );
+        });
+    }
+
+    public createStudyCard() {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(success => {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
                     this.importDataService.contextBackup.studyCard = entity as StudyCard;

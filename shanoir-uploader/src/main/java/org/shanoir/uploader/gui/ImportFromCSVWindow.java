@@ -25,7 +25,7 @@ import org.shanoir.uploader.action.ImportFromCsvActionListener;
 import org.shanoir.uploader.action.UploadFromCsvActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.model.CsvImport;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 public class ImportFromCSVWindow extends JFrame {
 
@@ -49,14 +49,14 @@ public class ImportFromCSVWindow extends JFrame {
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
-	ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
+	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 
-	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
-		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
+		this.shanoirUploaderServiceClient = shanoirUploaderServiceClientNG;
 		this.scrollPaneUpload = scrollPaneUpload;
 
 		// Create the frame.

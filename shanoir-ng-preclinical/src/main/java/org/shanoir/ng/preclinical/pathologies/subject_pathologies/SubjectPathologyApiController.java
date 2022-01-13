@@ -27,8 +27,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +54,11 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 	private AnimalSubjectService subjectService;
 	@Autowired
 	private PathologyService pathologyService;
+	@Autowired
+	private SubjectPathologyValidator uniqueValidator;
+	
+	@Autowired
+	private SubjectPathologyEditableByManager editableOnlyValidator;
 
 	@Override
 	public ResponseEntity<SubjectPathology> addSubjectPathology(
@@ -193,7 +196,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
 			@ApiParam(value = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId) {
 		PathologyModel patMod = pathosModelService.findById(pathoModelId);
-		List<SubjectPathology> subPathology = pathosService.findBy("pathologyModel", patMod);
+		List<SubjectPathology> subPathology = pathosService.findByPathologyModel(patMod);
 		if (subPathology == null || subPathology.isEmpty()) {
 			return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NO_CONTENT);
 		} else {
@@ -236,18 +239,14 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final SubjectPathology pathos) {
-		final SubjectPathology previousStatePathos = pathosService.findById(pathos.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<SubjectPathology>().validate(previousStatePathos,
-				pathos);
-		return accessErrors;
+	    return editableOnlyValidator.validate(pathos);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final SubjectPathology pathos) {
-		return new EditableOnlyByValidator<SubjectPathology>().validate(pathos);
+	    return editableOnlyValidator.validate(pathos);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final SubjectPathology pathos) {
-		final UniqueValidator<SubjectPathology> uniqueValidator = new UniqueValidator<SubjectPathology>(pathosService);
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(pathos);
 		return uniqueErrors;
 	}

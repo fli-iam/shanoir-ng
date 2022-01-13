@@ -66,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 			</ol>
 		</fieldset>
-		<fieldset *ngIf="isUserAdmin()">
+		<fieldset>
 			<ol>
 				<li>
 					<label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
@@ -107,10 +107,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-container>
 					</span>
 				</li>
-				<label>Studies</label>
+			</ol>
+		</fieldset>
+		<fieldset *ngIf="isUserAdmin()">
+			<legend>Joined studies</legend>
+			<ol>
 				<li *ngFor="let study of studies; let index = index">
-					<label></label>
-					<span class="right-col">{{study.name + '(' + study.id + ')'}}</span>
+					<span>{{study.name + ' (' + study.id + ')'}}</span>
 				</li>
 			</ol>
 		</fieldset>

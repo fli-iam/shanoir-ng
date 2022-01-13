@@ -27,6 +27,8 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
@@ -76,15 +78,17 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private StudyUserRepository studyUserRepository;
+
+	@Autowired SubjectMapper subjectMapper;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		if (subjectRepository.findOne(id) == null) {
+		if (subjectRepository.findById(id) == null) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
-		subjectRepository.delete(id);
+		subjectRepository.deleteById(id);
 	}
 
 	@Override
@@ -97,7 +101,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		Iterable<Subject> subjects;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			subjects = subjectRepository.findAll();
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
@@ -121,7 +125,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject findById(final Long id) {
-		return subjectRepository.findOne(id);
+		return subjectRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -138,7 +142,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -167,7 +171,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subject.setName(subjectName);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -176,7 +180,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject update(final Subject subject) throws ShanoirException {
-		final Subject subjectDb = subjectRepository.findOne(subject.getId());
+		final Subject subjectDb = subjectRepository.findById(subject.getId()).orElse(null);
 		if (subjectDb == null) {
 			throw new EntityNotFoundException(Subject.class, subject.getId());
 		}
@@ -185,6 +189,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		updateSubjectValues(subjectDb, subject);
 		subjectRepository.save(subjectDb);
+		updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		return subjectDb;
 	}
 
@@ -196,10 +201,6 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @return database template with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
-
-		if (!subject.getName().equals(subjectDb.getName())) {
-			updateSubjectName(new IdName(subject.getId(), subject.getName()));
-		}
 		subjectDb.setName(subject.getName());
 		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
@@ -220,7 +221,7 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
-	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
+	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
 					new ObjectMapper().writeValueAsString(subject));
@@ -238,7 +239,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyId(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -258,7 +259,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, boolean preclinical) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findById(studyId).orElse(null));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
 				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();

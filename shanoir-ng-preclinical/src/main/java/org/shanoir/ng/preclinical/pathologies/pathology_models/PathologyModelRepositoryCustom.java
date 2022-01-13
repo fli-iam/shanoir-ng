@@ -28,8 +28,6 @@ import org.shanoir.ng.preclinical.pathologies.Pathology;
  */
 public interface PathologyModelRepositoryCustom {
 	
-	List<PathologyModel> findBy(String fieldName, Object value);
-	
 	List<PathologyModel> findByPathology(Pathology pathology);
 
 }

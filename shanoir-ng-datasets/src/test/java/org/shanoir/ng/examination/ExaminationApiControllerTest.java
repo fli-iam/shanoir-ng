@@ -59,7 +59,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -78,7 +77,7 @@ import com.google.gson.GsonBuilder;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ExaminationApiController.class)
-@AutoConfigureMockMvc(secure = false)
+@AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
 public class ExaminationApiControllerTest {
@@ -186,6 +185,7 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void findExaminationByIdTest() throws Exception {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
@@ -194,11 +194,12 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void findExaminationsTest() throws Exception {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(new PageRequest(0, 10))))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
 		.andExpect(status().isOk());
 	}
 
@@ -206,9 +207,10 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
 		Examination exam = new Examination();
+		exam.setId(Long.valueOf(123));
 		exam.setStudyId(3L);
-		exam.setId(2L);
-		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
+		given(examinationServiceMock.findById(1L)).willReturn(exam);
+		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
@@ -236,7 +238,7 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testAddExtraData() throws IOException {
 		// GIVEN a file to add to an examination
 		File importZip = tempFolder.newFile("test-import-extra-data.zip");
@@ -246,8 +248,6 @@ public class ExaminationApiControllerTest {
 			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
 
 			// WHEN The file is added to the examination
-
-
 			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
 			.andExpect(status().isNotAcceptable());
 
@@ -260,13 +260,11 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDownloadExtraDataNotExisting() throws IOException {
 		// GIVEN an examination with no extra-data
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
 		given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
-
 		// WHEN we download extra-data
 		try {
 			// THEN we have a "no content" answer.
@@ -279,7 +277,7 @@ public class ExaminationApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDownloadExtraData() throws IOException {
 		// GIVEN an examination with extra-data files
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());

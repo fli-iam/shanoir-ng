@@ -35,7 +35,6 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
-
     constructor(protected http: HttpClient) {
         super(http)
     }
@@ -70,6 +69,21 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
+
+    getByStudyId(studyId: number): Promise<Dataset[]> {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
+    getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
+		if (!subjectId) {
+			return this.getByStudyId(studyId);
+		}
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/find/subject/' + subjectId + '/study/' + studyId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
     
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
@@ -84,7 +98,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 saveAs(event.body, this.getFilename(event));
         }
     }
- 
+
     public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
@@ -95,7 +109,11 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 reportProgress: true,
                 observe: 'events',
                 responseType: 'blob'
-           }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
+           }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+            error =>  {
+                this.errorService. handleError(error);
+                progressBar.progress = 0;
+            })
          );
     }
 
@@ -108,8 +126,12 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 observe: 'events',
                 responseType: 'blob',
                 params: params
-            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
-        );
+            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+             error =>  {
+                this.errorService. handleError(error);
+                progressBar.progress = 0;
+            })
+         );
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -137,7 +159,9 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             response => {
                 this.downloadIntoBrowser(response);
             }
-        );
+        ).catch(error => {
+            this.errorService. handleError(error);
+        });
     }
 
     downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {

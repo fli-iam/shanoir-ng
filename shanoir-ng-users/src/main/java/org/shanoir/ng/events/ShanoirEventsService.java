@@ -51,8 +51,8 @@ public class ShanoirEventsService {
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
 	private void deletePeriodically( ) {
 		Date now = new Date();
-		Long nowMinusSevenDays = now.getTime() - DateUtils.MILLIS_PER_DAY * 180;
-		repository.deleteByLastUpdateBefore(new Date(nowMinusSevenDays));
+		Long nowMinusOneYear = now.getTime() - DateUtils.MILLIS_PER_DAY * 361;
+		repository.deleteByLastUpdateBefore(new Date(nowMinusOneYear));
 	}
 
 	/**
@@ -84,15 +84,11 @@ public class ShanoirEventsService {
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
             try {
                 emitter.send("{}", MediaType.APPLICATION_JSON);
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
             	// This happens when the user's connection reset, do not log anything.
             	emitter.complete();
                 sseEmitterListToRemove.add(emitter);
-            } catch (IOException e) {
-            	emitter.complete();
-                sseEmitterListToRemove.add(emitter);
-                LOG.error("Error while keeping connection alive. ", e);
-			}
+            }
         });
         AsyncTaskApiController.emitters.removeAll(sseEmitterListToRemove);
 	}

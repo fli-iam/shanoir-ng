@@ -44,7 +44,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     isAlreadyAnonymized: boolean;
     firstName: string = "";
     lastName: string = "";
-    private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
+    pattern: string = '[^:|<>&\/]+';
+    private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
 
     catOptions: Option<ImagedObjectCategory>[] = [
@@ -144,14 +145,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         this.reloadRequiredStyles();
     }
 
-    save(): Promise<void> {
+    save(): Promise<Subject> {
         let savedDate: Date;
         if (this.mode == 'create') {
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         return super.save()
-            .then(() => { if (savedDate) this.subject.birthDate = savedDate })
+            .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
             .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
     }
 

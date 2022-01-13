@@ -14,7 +14,7 @@ import { ExaminationPipe } from "../examinations/shared/examination.pipe";
  */
 
 import { SubjectExamination } from "../examinations/shared/subject-examination.model";
-
+import { Tag } from '../tags/tag.model';
 
 interface ShanoirNode {
     open: boolean;
@@ -50,6 +50,7 @@ export class SubjectNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
+        public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED
     ) {}
         
@@ -89,7 +90,8 @@ export class DatasetNode implements ShanoirNode {
         public id: number,
         public label: string,
         public type: string,
-        public processings: ProcessingNode[] | UNLOADED
+        public processings: ProcessingNode[] | UNLOADED,
+        public processed: boolean
     ) {}
 
     public open: boolean = false;
@@ -184,6 +186,7 @@ export class ReverseStudyNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
+        public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED
     ) {}
         

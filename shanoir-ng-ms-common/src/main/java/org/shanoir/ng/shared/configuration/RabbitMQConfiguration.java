@@ -100,8 +100,14 @@ public class RabbitMQConfiguration {
 	/** Queue used to get information for study_examination deletion relationship.*/
 	public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
 
-	/** Send a mail from dataset microservice to study users */
+	/** Send a mail from dataset microservice to ms users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
+
+	/** Send a mail from dataset microservice to ms users for import dataset failure*/
+	public static final String IMPORT_DATASET_FAILED_MAIL_QUEUE = "import-dataset-failed-mail-queue";
+	
+	/** Send a mail from studies microservice to ms users */
+	public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
 	/** Queue to re-convert using a different nifti converter */
 	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
@@ -335,7 +341,18 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue importDatasetMail() {
+	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue importDatasetFailedMailQueue() {
+		return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue studyUserMailQueue() {
+		return new Queue(STUDY_USER_MAIL_QUEUE, true);
+	}
+
 }

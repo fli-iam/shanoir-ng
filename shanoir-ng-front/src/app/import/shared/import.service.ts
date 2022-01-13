@@ -12,28 +12,38 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
 import { ImportJob, DicomQuery } from './dicom-data.model';
 import { EegImportJob } from './eeg-data.model';
+import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class ImportService {
 
     constructor(private http: HttpClient) { }
 
-    uploadFile(formData: FormData): Promise<ImportJob> {
-        return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
-            .toPromise();
+    uploadFile(formData: FormData): Observable<HttpEvent<ImportJob>> {
+           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData,
+                {reportProgress: true,
+                observe: 'events'});
     }
 
-    uploadEegFile(formData: FormData): Promise<EegImportJob> {
-        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
+    uploadEegFile(formData: FormData): Observable<HttpEvent<EegImportJob>> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData,
+        {reportProgress: true,
+                observe: 'events'});
     }
 
     uploadBidsFile(formData: FormData): Promise<Object> {
         return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
+    }
+
+    uploadProcessedDataset(formData: FormData): Promise<string> {
+        return this.http.post<string>(AppUtils.BACKEND_API_UPLOAD_PROCESSED_DATASET_URL, formData, { responseType: 'text' as 'json'} )
+            .toPromise();
     }
 
     async startImportJob(importJob: ImportJob): Promise<Object> {
@@ -49,6 +59,16 @@ export class ImportService {
     async startEegImportJob(importJob: EegImportJob): Promise<Object> {
         try {
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+            .toPromise();
+        }
+        catch (error) {
+            return Promise.reject(error.message || error);
+        }
+    }
+    
+    async startProcessedDatasetImportJob(importJob: ProcessedDatasetImportJob): Promise<Object> {
+        try {
+            return this.http.post(AppUtils.BACKEND_API_PROCESSED_DATASET_URL, JSON.stringify(importJob))
             .toPromise();
         }
         catch (error) {

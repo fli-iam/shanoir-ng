@@ -17,7 +17,6 @@ package org.shanoir.ng.preclinical.therapies;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
 
@@ -27,7 +26,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author sloury
  *
  */
-public interface TherapyService extends UniqueCheckableService<Therapy> {
+public interface TherapyService {
 
 	/**
 	 * Delete a therapy.

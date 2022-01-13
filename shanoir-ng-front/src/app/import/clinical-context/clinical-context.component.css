@@ -13,3 +13,5 @@ legend i { margin-right: 7px; }
 .subject-study label { color: var(--color-b-light2); }
 .subject-study legend.disabled { color: var(--grey); }
 .optional { opacity: 0.6; }
+.warn i { color: orange; }
+a { text-decoration: underline; }

@@ -15,6 +15,7 @@
 package org.shanoir.ng.manufacturermodel.controler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -45,11 +46,11 @@ public class ManufacturerApiController implements ManufacturerApi {
 
 	@Override
 	public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
-		final Manufacturer manufacturer = manufacturerService.findById(manufacturerId);
-		if (manufacturer == null) {
+		final Optional<Manufacturer> manufacturerOpt = manufacturerService.findById(manufacturerId);
+		if (manufacturerOpt.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(manufacturer, HttpStatus.OK);
+		return new ResponseEntity<>(manufacturerOpt.orElseThrow(), HttpStatus.OK);
 	}
 
 	@Override

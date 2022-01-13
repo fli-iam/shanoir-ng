@@ -24,8 +24,6 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,12 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+	@Autowired
+	private AnestheticUniqueValidator uniqueValidator;
+	
+	@Autowired
+	private AnestheticEditableByManager editableOnlyValidator;
+
 
 	@Override
 	public ResponseEntity<Anesthetic> createAnesthetic(
@@ -161,17 +165,14 @@ public class AnestheticApiController implements AnestheticApi {
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final Anesthetic anesthetic) {
-		final Anesthetic previousStateAnesthetic = anestheticsService.findById(anesthetic.getId());
-		return new EditableOnlyByValidator<Anesthetic>().validate(previousStateAnesthetic,
-				anesthetic);
+	    return editableOnlyValidator.validate(anesthetic);
 	}
 
 	private FieldErrorMap getCreationRightsErrors(final Anesthetic anesthetic) {
-		return new EditableOnlyByValidator<Anesthetic>().validate(anesthetic);
+	    return editableOnlyValidator.validate(anesthetic);
 	}
 
 	private FieldErrorMap getUniqueConstraintErrors(final Anesthetic anesthetic) {
-		final UniqueValidator<Anesthetic> uniqueValidator = new UniqueValidator<>(anestheticsService);
 		return uniqueValidator.validate(anesthetic);
 	}
 

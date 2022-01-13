@@ -11,35 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author JcomeD
  *
  */
-public class EegImportJob {
+public class EegImportJob extends ImportJob {
 
-	/** Folder where source data is stored. */
-	@JsonProperty("workFolder")
-	private String workFolder;
+	private static final long serialVersionUID = 2425683448060201704L;
 
-	/** Corresponding examination. */
-	@JsonProperty("examinationId")
-	private Long examinationId;
-
-	/** Corresponding study. */
-	@JsonProperty("studyId")
-	private Long studyId;
-
-	/** Corresponding subject. */
+	/** List of associated datasets. */
 	@JsonProperty("subjectId")
 	private Long subjectId;
-
-	/** Corresponding subject name. */
-	@JsonProperty("subjectName")
-	private String subjectName;
-
-	/** Corresponding study name. */
-	@JsonProperty("studyName")
-	private String studyName;
-
-	/** Not mandatyory, acquisition equipement. */
-	@JsonProperty("acquisitionEquipmentId")
-	private Long acquisitionEquipmentId;
 
 	/** List of associated datasets. */
 	@JsonProperty("datasets")
@@ -59,54 +37,5 @@ public class EegImportJob {
 
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
-	}
-
-	public Long getExaminationId() {
-		return examinationId;
-	}
-
-	public void setExaminationId(Long examinationId) {
-		this.examinationId = examinationId;
-	}
-
-	public Long getStudyId() {
-		return studyId;
-	}
-
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
-
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
-
-	public String getWorkFolder() {
-		return workFolder;
-	}
-
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
-	}
-
-	public String getSubjectName() {
-		return subjectName;
-	}
-
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
-
-	public String getStudyName() {
-		return studyName;
-	}
-
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
-	
+	}	
 }

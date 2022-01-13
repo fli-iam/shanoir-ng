@@ -18,7 +18,7 @@ RUN set -ex && \
     apt update -y && \
     apt install -t \
       stretch-backports \
-      openjdk-8-jre-headless \
+      openjdk-11-jre-headless \
       ca-certificates-java -y
 
 RUN apt-get update && apt-get install openssl
@@ -28,10 +28,10 @@ ADD shanoir-ng-users.jar shanoir-ng-users.jar
 COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and development profile purpose
-#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9911,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9911,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
 
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
 	kc.admin.client.realm="master"
 
-ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/shanoir-ng-users.jar"]
+ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/shanoir-ng-users.jar"]
