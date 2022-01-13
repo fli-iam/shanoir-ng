@@ -275,6 +275,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
+    onPrefixChange() {
+        this.form.get('studyCenterList').markAsDirty();
+        this.form.get('studyCenterList').updateValueAndValidity();
+    }
+
     private validateCenter = (control: AbstractControl): ValidationErrors | null => {
         if (!this.study.studyCenterList || this.study.studyCenterList.length == 0) {
             return { noCenter: true}
