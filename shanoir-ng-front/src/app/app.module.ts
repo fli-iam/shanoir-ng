@@ -244,6 +244,7 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
+import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 
 @NgModule({
@@ -415,6 +416,7 @@ import { VarDirective } from './utils/ng-var.directive';
         SolrRangeCriterionComponent,
         ChallengeBlockComponent,
         TagInputComponent,
+        StudyUserListComponent,
         VarDirective
     ],
     entryComponents: [

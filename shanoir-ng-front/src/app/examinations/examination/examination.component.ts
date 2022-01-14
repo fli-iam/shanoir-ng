@@ -57,6 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
+    pattern: string = '[^:|<>&\/]+';
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -136,7 +137,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
-            'comment': [this.examination.comment],
+            'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight]
         });
