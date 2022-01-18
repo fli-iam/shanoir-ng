@@ -80,15 +80,15 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     private static final Map<String, BidsDataType> dataTypeMapping;
     static {
         Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
-        aMap.put("ANGIO_TIME", BidsDataType.BIDS_ANAT);
-        aMap.put("CINE", BidsDataType.BIDS_ANAT);
-        aMap.put("DIFFUSION", BidsDataType.BIDS_DWI);
-        aMap.put("FLUID_ATTENUATED", BidsDataType.BIDS_ANAT);
-        aMap.put("FMRI", BidsDataType.BIDS_FUNC);
-        aMap.put("MULTIECHO ", BidsDataType.BIDS_ANAT);
-        aMap.put("T1", BidsDataType.BIDS_ANAT);
-        aMap.put("T2", BidsDataType.BIDS_ANAT);
-        aMap.put("T2_STAR", BidsDataType.BIDS_ANAT);
+        aMap.put("ANGIO_TIME", BidsDataType.ANAT);
+        aMap.put("CINE", BidsDataType.ANAT);
+        aMap.put("DIFFUSION", BidsDataType.DWI);
+        aMap.put("FLUID_ATTENUATED", BidsDataType.ANAT);
+        aMap.put("FMRI", BidsDataType.FUNC);
+        aMap.put("MULTIECHO ", BidsDataType.ANAT);
+        aMap.put("T1", BidsDataType.ANAT);
+        aMap.put("T2", BidsDataType.ANAT);
+        aMap.put("T2_STAR", BidsDataType.ANAT);
         //TODO: To be completed by an expert
         dataTypeMapping = Collections.unmodifiableMap(aMap);
     }
@@ -139,7 +139,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 		}
 
-		// Here use mapping done by lord and saviour Clement Acquitter to get BIDs data type from enhanced DICOM tag
 		// Can be overridden by study cards
 		String imageType = dicomAttributes.getString(Tag.ImageType, 2);		
 		if (imageType != null && dataTypeMapping.get(imageType) != null) {

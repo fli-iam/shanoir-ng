@@ -204,7 +204,6 @@ public enum AssignmentField implements DatasetFieldUpdater {
 			BidsDataType dataType = BidsDataType.valueOf(updatedValue);
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				MrSequenceApplication mrSequenceApplication = MrSequenceApplication.valueOf(updatedValue);
 				if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
 				mrDsAcq.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataType);
 			} else {
