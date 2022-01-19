@@ -122,6 +122,9 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 // Preclinical http api
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
+// carmin
+// TODO change the url
+export const CARMIN_BASE_URL : string = BACKEND_API_URL + "/vip/rest";
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -267,4 +270,4 @@ export function deepEquals(x, y) {
       }
       return true;
     }
-  };
+};

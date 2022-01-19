@@ -476,7 +476,7 @@ import { VarDirective } from './utils/ng-var.directive';
     	ImportBrukerService,
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-        BreadcrumbsService,
+	    BreadcrumbsService,
         Router,
         GlobalService,
         ImportDataService,
@@ -517,4 +517,4 @@ export class AppModule {
     constructor(private injector: Injector) {
         ServiceLocator.injector = injector;
     }
- }
+}
