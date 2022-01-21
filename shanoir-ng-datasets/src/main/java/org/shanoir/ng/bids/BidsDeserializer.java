@@ -53,7 +53,7 @@ public class BidsDeserializer {
 				deserializeElement((BidsFolder) fileElement);
 			} else {
 				fileElement = new BidsFile(file.getAbsolutePath());
-				if (fileElement.getPath().endsWith(".tsv") || fileElement.getPath().endsWith(".json")) {
+				if (fileElement.getPath().endsWith(".tsv") || fileElement.getPath().endsWith(".json") || fileElement.getPath().endsWith("README")) {
 					String content = String.join("\n", Files.readAllLines(Paths.get(file.getAbsolutePath())));
 					((BidsFile)fileElement).setContent(content);
 				}

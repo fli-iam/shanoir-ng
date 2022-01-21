@@ -26,6 +26,10 @@ public class DatasetDescription {
 	
 	@JsonProperty("BIDSVersion")
 	private String BIDSVersion = "1.6.1";
+	
+	@JsonProperty("DatasetType")
+	private String DatasetType = "raw";
+		
 
 	public String getName() {
 		return name;

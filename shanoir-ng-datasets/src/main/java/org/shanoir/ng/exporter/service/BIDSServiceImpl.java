@@ -304,7 +304,6 @@ public class BIDSServiceImpl implements BIDSService {
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
-		getScansFile(subjectFolder);
 		return subjectFolder;
 	}
 
@@ -332,6 +331,7 @@ public class BIDSServiceImpl implements BIDSService {
 			List<Dataset> datasets = acq.getDatasets();
 			for (Dataset ds : datasets) {
 				try {
+					getScansFile(examDir);
 					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
 				} catch (IOException e) {
 					LOG.error(e.getMessage());
@@ -431,7 +431,7 @@ public class BIDSServiceImpl implements BIDSService {
 				Files.createLink(pathToGo, srcFile.toPath());
 
 				// Add the file to the scans.tsv reference
-				File scansTsvFile = getScansFile(workDir.getParentFile());
+				File scansTsvFile = getScansFile(workDir);
 				StringBuilder buffer = new StringBuilder();
 				buffer.append(pathToGo.getFileName()).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
@@ -614,6 +614,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private void participantsSerializer(File parentFolder, List<Subject> subjs) {
 		File csvFile = new File(parentFolder.getAbsolutePath() + File.separator + "participants.tsv");
+		int index = 1;
 
 		if (csvFile.exists()) {
 			// Recreate it everytime
@@ -626,10 +627,10 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 		buffer.append(CSV_SPLITTER);
 
-		for (Subject stubject : subjs) {
+		for (Subject subject : subjs) {
 			// Write in the file the values
-			buffer.append(stubject.getName()).append(CSV_SEPARATOR)
-			.append(stubject.getId()).append(CSV_SEPARATOR)
+			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subject.getName()).append(CSV_SEPARATOR)
+			.append(subject.getId()).append(CSV_SEPARATOR)
 			.append(CSV_SPLITTER);
 		}
 
