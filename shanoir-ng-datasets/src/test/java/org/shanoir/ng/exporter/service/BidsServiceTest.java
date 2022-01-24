@@ -129,16 +129,11 @@ public class BidsServiceTest {
 		assertTrue(studyFile.exists());
 
 		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1_" + subject.getName());
-		System.err.println(subjectFile.getAbsolutePath());
-		System.err.println(subjectFile.exists());
 		assertTrue(subjectFile.exists());
 
 		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
 		// No exam files as there is only one datasetAcquisition
 		assertFalse(examFile.exists());
-		
-		File bidsDataFile = new File(subjectFile.getAbsolutePath() + "/sub-1_name_scans.tsv");
-		assertTrue(bidsDataFile.exists());
 	}
 
 	@After
