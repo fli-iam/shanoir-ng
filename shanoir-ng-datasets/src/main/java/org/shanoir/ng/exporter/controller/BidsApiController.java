@@ -18,8 +18,13 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
+import org.shanoir.ng.bids.BidsDeserializer;
+import org.shanoir.ng.bids.model.BidsElement;
+import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +48,12 @@ public class BidsApiController implements BidsApi {
 
 	@Autowired
 	BIDSService bidsService;
+	
+	@Autowired
+	BidsDeserializer bidsDeserializer;
+	
+	@Autowired
+	StudyRepository studyRepo;
 
 	private final HttpServletRequest request;
 
@@ -83,11 +94,21 @@ public class BidsApiController implements BidsApi {
 		// Add timestamp to get a "random" difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		File tmpFile = new File(userDir + File.separator + formatter.format(new DateTime().toDate()) + File.separator);
-		tmpFile.mkdirs();
+
+		File fileDir = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName());
+		fileDir.mkdirs();
+
+		// Copy the file into the temp dir
+		if (fileToBeZipped.isDirectory()) {
+			FileUtils.copyDirectory(fileToBeZipped, new File(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+		} else {
+			Files.copy(Paths.get(fileToBeZipped.getPath()), Paths.get(fileDir.getPath() + File.separator + fileToBeZipped.getName()));
+		}
+		
 		File zipFile = new File(tmpFile.getAbsolutePath() + File.separator + fileToBeZipped.getName() + ZIP);
 		zipFile.createNewFile();
 
-		zip(fileToBeZipped.getAbsolutePath(), zipFile.getAbsolutePath());
+		zip(fileDir.getAbsolutePath(), zipFile.getAbsolutePath());
 		
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
@@ -113,6 +134,20 @@ public class BidsApiController implements BidsApi {
 		return userImportDir;
 	}
 
+	@Override
+	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, IOException {
+
+		BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");
+		Study study = studyRepo.findById(studyId).orElse(null);
+		if (study != null) {
+			studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+		}
+
+		return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+	}
+	
 	/**
 	 * Zip
 	 * 
@@ -124,7 +159,6 @@ public class BidsApiController implements BidsApi {
 		Path p = Paths.get(zipFilePath);
 		// 1. Create an outputstream (zip) on the destination
 		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-			
 			// 2. "Walk" => iterate over the source file
 			Path pp = Paths.get(sourceDirPath);
 			try(Stream<Path> walker = Files.walk(pp)) {
