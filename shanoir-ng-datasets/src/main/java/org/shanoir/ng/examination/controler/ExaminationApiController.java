@@ -36,7 +36,6 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -75,9 +74,6 @@ public class ExaminationApiController implements ExaminationApi {
 	private ExaminationService examinationService;
 
 	@Autowired
-	BIDSService bidsService;
-
-	@Autowired
 	ShanoirEventService eventService;
 
 	@Autowired
@@ -95,22 +91,17 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
 		try {
-			// delete bids folder
-			Examination exam = this.examinationService.findById(examinationId);
-			bidsService.deleteExam(exam);
-			
 			// Delete extra data
+			Long studyId = examinationService.findById(examinationId).getStudyId();
 			String dataPath = examinationService.getExtraDataFilePath(examinationId, "");
 			File fileToDelete = new File(dataPath);
 			if (fileToDelete.exists()) {
 				FileUtils.deleteDirectory(fileToDelete);
 			}
-			
-			Long studyId = exam.getStudyId();
-			
+	
 			examinationService.deleteById(examinationId);
-			
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" +studyId, ShanoirEvent.SUCCESS));
+
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "" + studyId, ShanoirEvent.SUCCESS, studyId));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -162,7 +153,6 @@ public class ExaminationApiController implements ExaminationApi {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		
-		// TODO: Get all related datasets to the subject/study
 		// Load study-dataset association (dataset database)
 		Study study = studyRepository.findById(studyId).orElse(null);
 		
@@ -230,7 +220,7 @@ public class ExaminationApiController implements ExaminationApi {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		// NB: Message as studyID is important in RabbitMQStudiesService
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS, examinationDTO.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
@@ -242,7 +232,7 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examinationId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

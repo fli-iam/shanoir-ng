@@ -48,8 +48,6 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
-export const BACKEND_API_STUDY_BIDS_EXPORT_URL: string = BACKEND_API_STUDY_URL + '/exportBIDS';
-export const BACKEND_API_STUDY_BIDS_STRUCTURE_URL: string = BACKEND_API_STUDY_URL + '/bidsStructure';
 
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';
@@ -84,6 +82,9 @@ export const BACKEND_API_SOLR_INDEX_URL: string = BACKEND_API_SOLR_URL + '/index
 export const BACKEND_API_SOLR_FULLTEXT_SEARCH_URL: string = BACKEND_API_SOLR_URL + '/search';
 // BIDS http api
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
+export const BACKEND_API_BIDS_EXPORT_URL: string = BACKEND_API_BIDS_URL + '/exportBIDS';
+export const BACKEND_API_BIDS_STRUCTURE_URL: string = BACKEND_API_BIDS_URL + '/bidsStructure';
+
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
 export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/updateTasks';
 

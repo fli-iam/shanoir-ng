@@ -3,9 +3,6 @@ package org.shanoir.ng.exporter.service;
 import java.io.File;
 import java.io.IOException;
 
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.examination.model.Examination;
-
 /**
  * Interface defining the BIDS service methods.
  * -> Generate full BIDS folder (base + data)
@@ -26,27 +23,18 @@ public interface BIDSService {
 	public File exportAsBids(Long studyId, String studyName) throws IOException ;
 
 	/**
-	 * When importing a dataset, add it to the current BIDS folder
-	 * @param exam the examination/dataset to add.
-	 * @param subjectName the subject name
-	 * @param studyName the studyName
-	 * @return the folder File named [study_id]_[study_name]
-	 * @throws IOException when an error happens when adding the files
+	 * Outdates a study (or deletes it simply) when an update is performed on the study:
+	 * Update, delete subject & study
+	 * Add or delete dataset / examination
+	 * @param  the shnoir event
 	 */
-	File addDataset(Examination exam, String subjectName, String studyName) throws IOException;
+	public void deleteBids(String event);
 
 	/**
-	 * Deletes a dataset from a BIDS folder.
-	 * @param dataset the dataset to delete
-	 * @return true if deleted, false otherwise
+	 * Deletes the folder of a given study to update / delete
+	 * @param studyId the given study ID
+	 * @param studyName the given study name
 	 */
-	public void deleteDataset(Dataset dataset);
-
-	/**
-	 * Deletes all datasets linked to an examination in a BIDS folder
-	 * @param exam the examination to delete
-	 * @return true if deleted, false otherwise
-	 */
-	public void deleteExam(Examination exam);
+	void deleteBidsFolder(Long studyId, String studyName);
 
 }
