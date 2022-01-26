@@ -153,7 +153,7 @@ public class CarminDataApiController implements CarminDataApi{
 
             if (DCM.equals(format)) {
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-                downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
+                downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
             } else if (NII.equals(format)) {
                 // Check if we want a specific converter
                 if (converterId != null) {
@@ -164,7 +164,7 @@ public class CarminDataApiController implements CarminDataApi{
                     tmpFile.mkdirs();
                     // Download DICOMs in the temporary folder
                     DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-                    downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName);
+                    downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
 
                     // Convert them, sending to import microservice
                     boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
