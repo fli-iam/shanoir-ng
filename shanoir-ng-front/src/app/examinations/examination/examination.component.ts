@@ -57,6 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
+    pattern: string = '[^:|<>&\/]+';
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -136,7 +137,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
-            'comment': [this.examination.comment],
+            'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight]
         });
@@ -202,14 +203,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    public save(): Promise<void> {
-        let prom = super.save().then(result => {
+    public save(): Promise<Examination> {
+        return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
+            }
+            return result;            
         });
-        return prom;
     }
 
     getFileName(element): string {

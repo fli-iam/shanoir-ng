@@ -87,25 +87,31 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        const choose = (): Promise<void> => {
-            switch (this.mode) { 
-                case 'create' : return this.initCreate();
-                case 'edit' : return this.initEdit();
-                case 'view' : return this.initView();
-                default: throw Error('mode has to be set!');
+        //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
+        this.subscribtions.push(this.activatedRoute.params.subscribe(
+            params => {
+                const id = +params['id'];
+                this.id = id;
+                const choose = (): Promise<void> => {
+                    switch (this.mode) { 
+                        case 'create' : return this.initCreate();
+                        case 'edit' : return this.initEdit();
+                        case 'view' : return this.initView();
+                        default: throw Error('mode has to be set!');
+                    }
+                }
+                choose().then(() => {
+                    this.footerState = new FooterState(this.mode);
+                    this.hasEditRight().then(right => this.footerState.canEdit = right);
+                    this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+                    if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                        this.entity = this.breadcrumbsService.currentStep.entity as T;
+                    }
+                    this.breadcrumbsService.currentStep.entity = this.entity;
+                    this.manageFormSubscriptions();
+                });
             }
-        }
-        choose().then(() => {
-            this.footerState = new FooterState(this.mode);
-            this.hasEditRight().then(right => this.footerState.canEdit = right);
-            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.entity = this.breadcrumbsService.currentStep.entity as T;
-            }
-            this.breadcrumbsService.currentStep.entity = this.entity;
-            this.manageFormSubscriptions();
-        });
+        ));
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -211,7 +217,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     /**
      * Chooses between create() and update(), saves the entity and return a promise
      */
-    private modeSpecificSave(): Promise<void> {
+    private modeSpecificSave(): Promise<T> {
         if (this.mode == 'create') {
             return this.getService().create(this.entity).then((entity) => {
                 this.entity.id = entity.id;
@@ -219,6 +225,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
                 this._entity.id = entity.id;
+                return entity;
             });
         }
         else if (this.mode == 'edit') {
@@ -226,15 +233,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
+                return this.entity;
             });
         }
     }
 
-    save(): Promise<void> {
+    save(): Promise<T> {
         this.footerState.loading = true;
         return this.modeSpecificSave()
-            .then(() => {
+            .then(study => {
                 this.footerState.loading = false;
+                return study;
             })
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {

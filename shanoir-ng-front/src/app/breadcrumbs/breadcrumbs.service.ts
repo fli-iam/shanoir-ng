@@ -17,6 +17,7 @@ import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Event, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { ImportMode } from '../import/import.component';
 
 @Injectable()
 export class BreadcrumbsService {
@@ -184,7 +185,7 @@ export class BreadcrumbsService {
     //     this.ignoreNavigationEnd = true;
     // }
 
-    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+    public findImportMode(): ImportMode {
         for (let i=this.currentStepIndex; i>=0; i--) {
             if (this.steps[i].importStart) return this.steps[i].importMode;
         }
@@ -212,7 +213,7 @@ export class Step {
     public entity: any;
     public data: any = {};
     public importStart: boolean = false;
-    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
+    public importMode: ImportMode;
 
     private onSave(): Subject<any> {
         this.subscribers++;

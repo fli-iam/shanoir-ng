@@ -44,7 +44,7 @@ import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-
+import { BidsDataType } from '../../enum/bids-data-type.enum';
 
 @Component({
     selector: 'study-card-rules',
@@ -99,7 +99,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             new AssignmentField('Dataset comment', 'COMMENT'),
             new AssignmentField('MR sequence name', 'MR_SEQUENCE_NAME'),
             new AssignmentField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.options),
-            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options)
+            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options),
+			new AssignmentField('BIDS data type', 'BIDS_DATA_TYPE', BidsDataType.options)
         ];
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 

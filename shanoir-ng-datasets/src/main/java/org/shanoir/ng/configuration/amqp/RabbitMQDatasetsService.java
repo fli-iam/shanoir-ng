@@ -16,13 +16,18 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.assertj.core.util.Arrays;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -55,6 +60,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,6 +100,9 @@ public class RabbitMQDatasetsService {
 	
 	@Autowired
 	private StudyCardRepository studyCardRepository;
+
+	@Autowired
+	private BIDSService bidsService;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -101,7 +110,7 @@ public class RabbitMQDatasetsService {
 			value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_DATASET, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
-			)
+	)
 	public void receiveMessage(String commandArrStr) {
 		listener.receiveMessageImport(commandArrStr);
 	}
@@ -112,9 +121,11 @@ public class RabbitMQDatasetsService {
 	public void receiveStudyNameUpdate(final String studyStr) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
 		try {
 			Study received = objectMapper.readValue(studyStr, Study.class);
+			bidsService.deleteBidsFolder(received.getId(), null);
+			Study stud = receiveAndUpdateIdNameEntity(studyStr, Study.class, studyRepository);
+
 			// TAGS
 			if (stud.getTags() != null) {
 				stud.getTags().clear();
@@ -144,9 +155,9 @@ public class RabbitMQDatasetsService {
 			
 			this.studyRepository.save(stud);
 
-			for (SubjectStudy sustu : stud.getSubjectStudyList()) {
-				updateSolr(sustu.getSubject().getId());
-			}
+			List<Long> subjectIds = new ArrayList<>();
+			stud.getSubjectStudyList().forEach(subStu -> subjectIds.add(subStu.getSubject().getId()));
+			updateSolr(subjectIds);
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
@@ -178,7 +189,19 @@ public class RabbitMQDatasetsService {
 			subjectRepository.save(su);
 			
 			// Update solr references
-			updateSolr(su.getId());
+			List<Long> subjectIdList = new ArrayList<Long>();
+			subjectIdList.add(su.getId());
+			updateSolr(subjectIdList);
+			
+			// Update BIDS
+			Set<Long> studyIds = new HashSet<>();
+
+			for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+				studyIds.add(exam.getStudyId());
+			}
+			for (Study stud : studyRepository.findAllById(studyIds)) {
+				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+			}
 			
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
@@ -189,13 +212,17 @@ public class RabbitMQDatasetsService {
 	 * Updates all the solr references for this subject.
 	 * @param subjectId the subject ID updated
 	 */
-	private void updateSolr(final Long subjectId) {
-		for (Examination exam : examinationRepository.findBySubjectId(subjectId)) {
+	private void updateSolr(final List<Long> subjectIds) {
+		Set<Long> datasetsToUpdate = new HashSet<>();
+		for (Examination exam : examinationRepository.findBySubjectIdIn(subjectIds)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetsToUpdate.add(ds.getId());
 				}
 			}
+		}
+		if (!CollectionUtils.isEmpty(datasetsToUpdate)) {
+			this.solrService.indexDatasets(new ArrayList<>(datasetsToUpdate));
 		}
 	}
 
@@ -253,11 +280,13 @@ public class RabbitMQDatasetsService {
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
+			List<Long> datasetIds = new ArrayList<>();
 			if (acq != null) {
 				for (Dataset ds : acq.getDatasets()) {
-					solrService.indexDataset(ds.getId());
+					datasetIds.add(ds.getId());
 				}
 			}
+			solrService.indexDatasets(datasetIds);
 		} catch (Exception e) {
 			LOG.error("Could not index datasets while creating new Dataset acquisition: ", e);
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
@@ -280,14 +309,24 @@ public class RabbitMQDatasetsService {
 		mapper.registerModule(new JavaTimeModule());
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
+
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
+			Set<Long> studyIds = new HashSet<>();
 
 			// Delete associated examinations and datasets from solr repository
 			for (Examination exam : examinationRepository.findBySubjectId(Long.valueOf(event.getObjectId()))) {
 				examinationService.deleteFromRabbit(exam);
+				studyIds.add(exam.getStudyId());
 			}
+			
+			// Update BIDS folder
+			for (Study stud : studyRepository.findAllById(studyIds)) {
+				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+			}
+			
 			// Delete subject from datasets database
 			subjectRepository.deleteById(Long.valueOf(event.getObjectId()));
+			
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
@@ -299,7 +338,7 @@ public class RabbitMQDatasetsService {
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-			key = "deleteStudy.event",
+			key = ShanoirEventType.DELETE_STUDY_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))

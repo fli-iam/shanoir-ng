@@ -58,8 +58,6 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.carmin.GetPathResponse;
-import org.shanoir.ng.dataset.model.carmin.UploadData;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -67,7 +65,8 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -142,13 +141,13 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private ExaminationService examinationService;
 
+	@Autowired
+	private ImporterService importerService;
+
 	private final HttpServletRequest request;
 
 	@Autowired
 	private WADODownloaderService downloader;
-
-	@Autowired
-	private BIDSService bidsService;
 
 	@Autowired
 	private DatasetSecurityService datasetSecurityService;
@@ -179,8 +178,6 @@ public class DatasetApiController implements DatasetApi {
 					throws RestServiceException {
 
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -194,10 +191,6 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody(required = true) List<Long> datasetIds)
 					throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
-			for (Dataset dataset : datasets) {
-				bidsService.deleteDataset(dataset);
-			}
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -273,26 +266,55 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-
-		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		
+		final List<Examination> examinations = examinationService.findByStudyId(studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		List<Long> datasetIds = new ArrayList<Long>();
+		List<Dataset> datasets = new ArrayList<Dataset>();
 		for(Examination examination : examinations) {
 			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
 			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
 				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasetIds.add(dataset.getId());
+					datasets.add(dataset);
 				}
 			}
 		}
-		return new ResponseEntity<>(datasetIds, HttpStatus.OK);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+		return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
+	}
+
+	public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+	}
+
+	private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
+		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+
+		List<Dataset> datasets = new ArrayList<>();
+		for(Examination examination : examinations) {
+			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+				for(Dataset dataset : datasetAcquisition.getDatasets()) {
+					datasets.add(dataset);
+				}
+			}
+		}
+		return datasets;
+	}
+	
 	@Override
 	public void downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
@@ -330,10 +352,14 @@ public class DatasetApiController implements DatasetApi {
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();
 			}
+			if (subjectName.contains("/")) {
+				subjectName = subjectName.replaceAll("/", "_");
+			}
 
 			if (DCM.equals(format)) {
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
+
 			} else if (NII.equals(format)) {
 				// Check if we want a specific converter
 				if (converterId != null) {
@@ -343,6 +369,7 @@ public class DatasetApiController implements DatasetApi {
 					File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
 					tmpFile.mkdirs();
 					// Download DICOMs in the temporary folder
+
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName);
 
@@ -405,6 +432,14 @@ public class DatasetApiController implements DatasetApi {
 			FileUtils.deleteQuietly(workFolder);
 			FileUtils.deleteQuietly(zipFile);
 		}
+	}
+
+	@Override
+	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+		importerService.createProcessedDataset(importJob);
+		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
+		importerService.cleanTempFiles(originalNiftiName.getParent());
+		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
 	@Override
@@ -478,6 +513,9 @@ public class DatasetApiController implements DatasetApi {
 				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
+				if (subjectName.contains("/")) {
+					subjectName = subjectName.replaceAll("/", "_");
+				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();
@@ -503,6 +541,7 @@ public class DatasetApiController implements DatasetApi {
 				} else if (DCM.equals(format)) {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
+
 				} else if (NII.equals(format)) {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);

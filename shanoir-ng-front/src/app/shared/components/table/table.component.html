@@ -36,33 +36,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
 </caption>
 <!-- Headers -->
-<thead>
+<thead (mousemove)="moveDrag($event)">
 <tr class="full-row">
-    <th *ngIf="selectionAllowed" class="checkbox-col">
-        <div *ngIf="enableSettings" class="col-set-button-wrapper">
-            <div class="col-settings-button" (click)="settingsDialog.show()"><i class="fas fa-cog"></i></div>
-        </div>
-    </th>
+    <th *ngIf="selectionAllowed" class="checkbox-col"></th>
     <ng-container *ngFor="let col of columnDefs; let i = index">
         <th 
                 *ngIf="!col.hidden"
-                (click)="sortBy(col)"
                 class="{{getColTypeStr(col)}}"
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
                 [class.active]="lastSortedCol==col"
                 [attr.title]="col.tip != undefined ? col.tip : col.headerName"
                 [style.width]="col.width"
-                >
+                #refTh>
             <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="$any(lastSortedCol)?.field==$any(col).field && !col.suppressSorting && col.type!='button'">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                     <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
                     <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
                 </svg>
             </span>
+            <div class="click-dummy" (click)="sortBy(col)" [class.resizing]="currentDrag"></div>
             <span class="col-title">{{col.headerName}}</span>
-            <div *ngIf="enableSettings && !selectionAllowed && i == 0" class="col-set-button-wrapper">
-                <div class="col-settings-button" (click)="settingsDialog.show()"><i class="fas fa-cog"></i></div>
-            </div>
+            <div *ngIf="i < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(i, refTh, $event)" (mouseup)="stopDrag()"></div>
         </th>
     </ng-container>
 </tr>
@@ -79,53 +73,68 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <ng-container *ngFor="let col of columnDefs" >
-        <td 
-                *ngIf="!col.hidden"
-                class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
-                [class.bool]="isFieldBoolean(col)"
-                [attr.title]="col.tip != undefined ? col.tip : renderCell(item, col)"
-                (click)="col.type == 'button' ? null : onRowClick(item)"
-                >
+        <ng-container *ngVar="{
+                render: renderCell(item, col), 
+                route: col.route ? col.route(item) : null,
+                boolean: isFieldBoolean(col),
+                editable: cellEditable(item, col),
+                cellValue: getCellValue(item, col)
+        } as vars">
+            <td 
+                    *ngIf="!col.hidden"
+                    class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
+                    [class.bool]="vars.boolean"
+                    [class.progress]="col.type == 'progress'"
+                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : vars.render)"
+                    (click)="col.type == 'button' ? null : onRowClick(item)"
+                    [style.color]="vars.render.color"
+                    >
+                
+                <!-- default display -->
+                <span *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</span>
 
-            <!-- default display -->
-            <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route && !isFieldBoolean(col)">{{renderCell(item, col)}}</span>
+                <!-- link -->
+                <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
+                    [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
 
-            <!-- link -->
-            <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
-                [routerLink]="col.route(item)" routerLinkActive="active">{{renderCell(item, col)}}<i class="fas fa-external-link-alt"></i></a>
-
-            <!-- editable text / number -->
-            <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
-                <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
-            </span>
-
-            <!-- editable text / number with dropdown -->
-            <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-                <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                    <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
-                </select>
-            </span>
-
-            <!-- display a boolean -->
-            <span *ngIf="isFieldBoolean(col) && (!editMode || !cellEditable(item, col))">
-                <span *ngIf="getCellValue(item, col) && !col.awesome" class="bool-true"><i class="fas fa-check"></i></span>
-                <span *ngIf="!getCellValue(item, col) && !col.awesome" class="bool-false"><i class="fas fa-times"></i></span>
-                <span *ngIf="getCellValue(item, col) && col.awesome" class="bool-true"><i class="fas {{col.awesome}}" [style.color]="col.color"></i></span>
-            </span>
-
-            <!-- editable boolean -->
-            <span *ngIf="isFieldBoolean(col) && editMode && cellEditable(item, col)">
-                <checkbox [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
-            </span>
-            
-            <!-- display a button -->
-            <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
-                <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
-                    <img *ngIf="col.img" src="{{col.img}}" />
-                    <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                <!-- editable text / number -->
+                <span *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+                    <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                 </span>
-            </span>
-        </td>
+
+                <!-- editable text / number with dropdown -->
+                <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+                    <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                        <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+                    </select>
+                </span>
+
+                <!-- display a boolean -->
+                <span *ngIf="vars.boolean && (!editMode || !vars.editable)">
+                    <span *ngIf="vars.cellValue && !col.awesome" class="bool-true"><i class="fas fa-check"></i></span>
+                    <span *ngIf="!vars.cellValue && !col.awesome" class="bool-false"><i class="fas fa-times"></i></span>
+                    <span *ngIf="vars.cellValue && col.awesome" class="bool-true"><i class="fas {{col.awesome}}" [style.color]="col.color"></i></span>
+                </span>
+
+                <!-- editable boolean -->
+                <span *ngIf="vars.boolean && editMode && vars.editable">
+                    <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
+                </span>
+                
+                <!-- display a button -->
+                <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
+                    <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
+                        <img *ngIf="col.img" src="{{col.img}}" />
+                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                    </span>
+                </span>
+
+                <!-- display a progress bar -->
+                <span *ngIf="col.type == 'progress'">
+                    <progress-bar [progress]="vars.render" width="100"></progress-bar>
+                </span>
+            </td>
+        </ng-container>
     </ng-container>
 </tr>
 <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
@@ -155,6 +164,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+                <span (click)="settingsDialog.show()" class="clickable left-icon"><i class="fas fa-cog"></i>Columns settings</span>
+                <span (click)="resetColumns()" class="clickable left-icon"><i class="fas fa-undo-alt"></i>Reset columns</span>
             </ng-container>
         </span>
     </th>
@@ -184,7 +195,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </tr>
 </tbody>
 
-<app-modal #settingsDialog *ngIf="enableSettings">
+<app-modal #settingsDialog>
     <div class="main">
         <div class="header">Table settings</div>
         <div class="body">
@@ -197,6 +208,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </table>
         </div>
         <div class="footer">
+            <button type="button" (click)="resetColumns()">Reset</button>
             <button type="button" (click)="settingsDialog.hide()">Close</button>
         </div>
     </div>

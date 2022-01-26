@@ -13,7 +13,7 @@
  */
 
 import { Option } from "../shared/select/select.component";
-import { capitalsAndUnderscoresToDisplayable, allOfEnum } from "../utils/app.utils";
+import { allOfEnum } from "../utils/app.utils";
 
 export enum ProcessedDatasetType {
 
@@ -27,7 +27,11 @@ export enum ProcessedDatasetType {
     }
 
     export function getLabel(type: ProcessedDatasetType): string {
-        return capitalsAndUnderscoresToDisplayable(type);
+        if(type == ProcessedDatasetType.RECONSTRUCTEDDATASET) {
+            return 'Reconstructed'
+        } else {
+            return 'Non-reconstructed'
+        }
     }
 
     export var options: Option<ProcessedDatasetType>[] = all().map(prop => new Option<ProcessedDatasetType>(prop, getLabel(prop)));
