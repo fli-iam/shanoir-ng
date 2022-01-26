@@ -540,7 +540,7 @@ public class DatasetApiController implements DatasetApi {
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else if (DCM.equals(format)) {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 
 				} else if (NII.equals(format)) {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
