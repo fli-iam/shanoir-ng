@@ -210,7 +210,7 @@ public class DatasetApiControllerTest {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
 		File userDir = testFolder.newFile("user-dir-temp");
-
+		userDir.mkdirs();
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
@@ -262,6 +262,7 @@ public class DatasetApiControllerTest {
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
 		File userDir = testFolder.newFile("user-dir-temp");
+		userDir.mkdir();
 
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
@@ -384,7 +385,6 @@ public class DatasetApiControllerTest {
 		File userDir = testFolder.newFile("user-dir-temp");
 
 		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
-		doNothing().when(datasetFileUtils).copyNiftiFilesForURLs(new ArrayList<URL>(), datasetFile, new MrDataset(), Mockito.anyString());
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
