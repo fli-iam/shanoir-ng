@@ -76,6 +76,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     public importMode: ImportMode;
+    public subjectNamePrefix: string;
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -329,6 +330,10 @@ export class ClinicalContextComponent implements OnDestroy {
 
     public onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
+        if (this.center) {
+            let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
+            this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+        }
         this.openSubjectStudy = false;
         this.acquisitionEquipmentOptions =  [];
         this.subjects =  [];
@@ -462,6 +467,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             this.breadcrumbsService.currentStep.data.patientName = this.patient.patientName;
             this.breadcrumbsService.currentStep.data.forceStudy = this.study;
+            this.breadcrumbsService.currentStep.data.subjectNamePrefix = this.subjectNamePrefix;
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {

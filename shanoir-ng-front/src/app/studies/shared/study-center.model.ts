@@ -20,6 +20,7 @@ export class StudyCenter {
     center: Center;
     id: number;
     study: Study;
+    subjectNamePrefix: string;
 }
 
 export class StudyCenterDTO {
@@ -27,10 +28,12 @@ export class StudyCenterDTO {
     id: number;
     center: Id;
     study: Id;
+    subjectNamePrefix: string;
    
     constructor(studyCenter: StudyCenter) {
         this.id = studyCenter.id;
         this.center = studyCenter.center ? new Id(studyCenter.center.id) : null;
         this.study = studyCenter.study ? new Id(studyCenter.study.id) : null;
+        this.subjectNamePrefix = studyCenter.subjectNamePrefix;
     }
 }
