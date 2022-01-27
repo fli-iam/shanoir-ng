@@ -45,6 +45,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -124,8 +125,8 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private WADODownloaderService downloader;
 
-	@InjectMocks
-	private DatasetFileUtils datasetFileUtils;
+	@Spy
+	private DatasetFileUtils datasetFileUtils = new DatasetFileUtils();
 	
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
