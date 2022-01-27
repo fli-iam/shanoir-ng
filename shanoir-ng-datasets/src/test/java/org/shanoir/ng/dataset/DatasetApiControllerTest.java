@@ -19,8 +19,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -121,6 +123,7 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private WADODownloaderService downloader;
 
+	@Autowired
 	@MockBean
 	private DatasetFileUtils datasetFileUtils;
 	
@@ -209,6 +212,8 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
+		File userDir = testFolder.newFile("user-dir-temp");
+		userDir.mkdirs();
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
@@ -230,8 +235,10 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
+		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
+		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// WHEN we export all the datasets
 		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
@@ -258,9 +265,14 @@ public class DatasetApiControllerTest {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
+		File userDir = testFolder.newFile("user-dir-temp");
+		userDir.mkdir();
+
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
+		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
+		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -280,7 +292,7 @@ public class DatasetApiControllerTest {
 
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
-		
+
 		// WHEN we export all the datasets
 		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
 				.param("format", "nii")
@@ -394,6 +406,7 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
+		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// GIVEN a study with some datasets to export in nii format
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
