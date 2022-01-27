@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -161,13 +162,14 @@ public class DatasetApiControllerTest {
 	private Examination exam = new Examination();
 
 	@Before
-	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, MalformedURLException {
+	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
 		doNothing().when(datasetFileUtils).getDatasetFilePathURLs(new MrDataset(),new ArrayList<URL>(), DatasetExpressionFormat.EEG);
+		doNothing().when(datasetFileUtils).zip(Mockito.anyString(), Mockito.anyString());
 
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
@@ -209,10 +211,13 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
+		File userDir = testFolder.newFile("user-dir-temp");
+
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
+		
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
@@ -229,6 +234,7 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
+		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
 
@@ -263,7 +269,7 @@ public class DatasetApiControllerTest {
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
-		doNothing().when(datasetFileUtils).copyNiftiFilesForURLs(new ArrayList<URL>(), datasetFile, new MrDataset(), Mockito.anyString());
+		doNothing().when(datasetFileUtils).copyNiftiFilesForURLs(new ArrayList<URL>(), userDir, new MrDataset(), Mockito.anyString());
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
