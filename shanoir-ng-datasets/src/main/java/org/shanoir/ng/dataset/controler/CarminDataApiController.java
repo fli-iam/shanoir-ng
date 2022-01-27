@@ -84,6 +84,10 @@ public class CarminDataApiController implements CarminDataApi{
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private DatasetFileUtils datasetFileUtils;
+
+
     private final HttpServletRequest request;
 
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
@@ -133,9 +137,9 @@ public class CarminDataApiController implements CarminDataApi{
 
         /* Create folder and file */
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-        File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+        File userDir = datasetFileUtils.getUserImportDir(tmpDir);
 
-        String datasetName = DatasetFileUtils.generateDatasetName(dataset);
+        String datasetName = datasetFileUtils.generateDatasetName(dataset);
 
         String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
@@ -152,7 +156,7 @@ public class CarminDataApiController implements CarminDataApi{
             }
 
             if (DCM.equals(format)) {
-                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+                datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
                 downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
             } else if (NII.equals(format)) {
                 // Check if we want a specific converter
@@ -163,7 +167,7 @@ public class CarminDataApiController implements CarminDataApi{
                     File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
                     tmpFile.mkdirs();
                     // Download DICOMs in the temporary folder
-                    DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+                    datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
                     downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
 
                     // Convert them, sending to import microservice
@@ -176,12 +180,12 @@ public class CarminDataApiController implements CarminDataApi{
                     tmpFilePath = tmpFile.getAbsolutePath();
                     workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
                 } else  {
-                    DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-                    DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                    datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+                    datasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
                 }
             } else if (EEG.equals(format)) {
-                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+                datasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
             } else {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -205,7 +209,7 @@ public class CarminDataApiController implements CarminDataApi{
         File zipFile = new File(tmpFilePath + ZIP);
         zipFile.createNewFile();
 
-        DatasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+        datasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
         // Try to determine file's content type
         String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());

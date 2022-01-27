@@ -8,6 +8,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
 
 import javax.mail.MessagingException;
@@ -25,12 +26,13 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Component
 public class DatasetFileUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
 
 
-    public static File getUserImportDir(String importDir) {
+    public File getUserImportDir(String importDir) {
         final Long userId = KeycloakUtil.getTokenUserId();
         final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
         final File userImportDir = new File(userImportDirFilePath);
@@ -46,7 +48,7 @@ public class DatasetFileUtils {
      * @param pathURLs
      * @throws MalformedURLException
      */
-    public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
+    public void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
         List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
         for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
             DatasetExpression datasetExpression = itExpressions.next();
@@ -69,7 +71,7 @@ public class DatasetFileUtils {
      * @throws IOException
      * @throws MessagingException
      */
-    public static void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+    public void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
         int index = 0;
         for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             URL url =  iterator.next();
@@ -111,7 +113,7 @@ public class DatasetFileUtils {
      * @param zipFilePath
      * @throws IOException
      */
-    public static void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
+    public void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
         Path p = Paths.get(zipFilePath);
         // 1. Create an outputstream (zip) on the destination
         try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
@@ -137,7 +139,7 @@ public class DatasetFileUtils {
         }
     }
 
-    public static String generateDatasetName(Dataset dataset){
+    public String generateDatasetName(Dataset dataset){
         String datasetName = "";
         datasetName += dataset.getId() + "-" + dataset.getName();
         if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
