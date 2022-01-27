@@ -67,6 +67,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -115,6 +116,9 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private WADODownloaderService downloader;
+
+	@MockBean
+	private DatasetFileUtils datasetFileUtils;
 	
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;
