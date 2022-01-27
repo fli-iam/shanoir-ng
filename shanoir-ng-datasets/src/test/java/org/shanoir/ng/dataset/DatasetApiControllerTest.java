@@ -124,9 +124,6 @@ public class DatasetApiControllerTest {
 
 	@MockBean
 	private WADODownloaderService downloader;
-
-	@Spy
-	private DatasetFileUtils datasetFileUtils = new DatasetFileUtils();
 	
 	@MockBean(name = "datasetSecurityService")
 	private DatasetSecurityService datasetSecurityService;

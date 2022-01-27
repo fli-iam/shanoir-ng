@@ -164,15 +164,15 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
-	@Autowired
 	private DatasetFileUtils datasetFileUtils;
 
 	/** Number of downloadable datasets. */
 	private static final int DATASET_LIMIT = 50;
 
 	@org.springframework.beans.factory.annotation.Autowired
-	public DatasetApiController(final HttpServletRequest request) {
+	public DatasetApiController(final HttpServletRequest request, DatasetFileUtils datasetFileUtils) {
 		this.request = request;
+		this.datasetFileUtils = datasetFileUtils;
 	}
 
 	@Override

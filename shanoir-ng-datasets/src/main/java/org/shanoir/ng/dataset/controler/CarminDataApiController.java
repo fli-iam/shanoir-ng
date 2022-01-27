@@ -84,7 +84,6 @@ public class CarminDataApiController implements CarminDataApi{
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Autowired
     private DatasetFileUtils datasetFileUtils;
 
 
@@ -92,9 +91,11 @@ public class CarminDataApiController implements CarminDataApi{
 
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
 
-    public CarminDataApiController(final HttpServletRequest request) {
+    @Autowired
+    public CarminDataApiController(final HttpServletRequest request, DatasetFileUtils datasetFileUtils) {
         this.request = request;
-    }
+        this.datasetFileUtils = datasetFileUtils;
+    }   
 
     @Override
     public ResponseEntity<?> getPath(@ApiParam(value = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @ApiParam(value = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
