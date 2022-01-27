@@ -170,9 +170,9 @@ public class DatasetApiController implements DatasetApi {
 	private static final int DATASET_LIMIT = 50;
 
 	@org.springframework.beans.factory.annotation.Autowired
-	public DatasetApiController(final HttpServletRequest request, DatasetFileUtils datasetFileUtils) {
+	public DatasetApiController(final HttpServletRequest request) {
 		this.request = request;
-		this.datasetFileUtils = datasetFileUtils;
+        this.datasetFileUtils = new DatasetFileUtils();
 	}
 
 	@Override

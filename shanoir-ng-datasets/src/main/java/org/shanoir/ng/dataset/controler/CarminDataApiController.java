@@ -92,9 +92,9 @@ public class CarminDataApiController implements CarminDataApi{
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
 
     @Autowired
-    public CarminDataApiController(final HttpServletRequest request, DatasetFileUtils datasetFileUtils) {
+    public CarminDataApiController(final HttpServletRequest request) {
         this.request = request;
-        this.datasetFileUtils = datasetFileUtils;
+        this.datasetFileUtils = new DatasetFileUtils();
     }   
 
     @Override
