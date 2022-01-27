@@ -209,8 +209,6 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
-		File userDir = testFolder.newFile("user-dir-temp");
-		userDir.mkdirs();
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
@@ -232,7 +230,6 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
-		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
 
@@ -261,13 +258,9 @@ public class DatasetApiControllerTest {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
-		File userDir = testFolder.newFile("user-dir-temp");
-		userDir.mkdir();
-
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
-		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
