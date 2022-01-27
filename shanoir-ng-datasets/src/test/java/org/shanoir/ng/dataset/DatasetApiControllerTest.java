@@ -168,8 +168,6 @@ public class DatasetApiControllerTest {
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
-		doNothing().when(datasetFileUtils).getDatasetFilePathURLs(new MrDataset(),new ArrayList<URL>(), DatasetExpressionFormat.EEG);
-		doNothing().when(datasetFileUtils).zip(Mockito.anyString(), Mockito.anyString());
 
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
@@ -269,7 +267,6 @@ public class DatasetApiControllerTest {
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
-		doNothing().when(datasetFileUtils).copyNiftiFilesForURLs(new ArrayList<URL>(), userDir, new MrDataset(), Mockito.anyString());
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
