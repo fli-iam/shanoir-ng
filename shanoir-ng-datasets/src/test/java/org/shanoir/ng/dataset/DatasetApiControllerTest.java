@@ -233,7 +233,6 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
-		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
 
@@ -266,7 +265,6 @@ public class DatasetApiControllerTest {
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
-		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
