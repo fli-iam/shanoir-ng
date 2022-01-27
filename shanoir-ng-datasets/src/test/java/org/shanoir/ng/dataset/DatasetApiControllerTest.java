@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -123,8 +124,7 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private WADODownloaderService downloader;
 
-	@Autowired
-	@MockBean
+	@InjectMocks
 	private DatasetFileUtils datasetFileUtils;
 	
 	@MockBean(name = "datasetSecurityService")
@@ -212,8 +212,6 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
-		File userDir = testFolder.newFile("user-dir-temp");
-		userDir.mkdirs();
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
@@ -238,7 +236,6 @@ public class DatasetApiControllerTest {
 		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
-		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// WHEN we export all the datasets
 		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
@@ -265,14 +262,11 @@ public class DatasetApiControllerTest {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
 		File datasetFile = testFolder.newFile("test.nii");
-		File userDir = testFolder.newFile("user-dir-temp");
-		userDir.mkdir();
 
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
-		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -387,9 +381,6 @@ public class DatasetApiControllerTest {
 		datasetFile.getParentFile().mkdirs();
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
-		File userDir = testFolder.newFile("user-dir-temp");
-
-		given(datasetFileUtils.getUserImportDir(anyString())).willReturn(userDir);
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -406,7 +397,6 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
-		doCallRealMethod().when(datasetFileUtils).getDatasetFilePathURLs(Mockito.any(Dataset.class), new ArrayList<URL>(), Mockito.any(DatasetExpressionFormat.class));
 
 		// GIVEN a study with some datasets to export in nii format
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
