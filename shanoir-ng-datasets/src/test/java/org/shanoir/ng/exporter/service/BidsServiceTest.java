@@ -21,24 +21,20 @@ import org.mockito.Spy;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.Subject;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test class for BIDS service class.
@@ -53,7 +49,7 @@ public class BidsServiceTest {
 	private ExaminationService examService;
 
 	@Mock
-	private RabbitTemplate rabbitTemplate;
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@InjectMocks
 	@Spy
@@ -112,14 +108,15 @@ public class BidsServiceTest {
 	}
 
 	@Test
-	public void testExportAsBids() throws IOException {
+	public void testExportAsBids() throws IOException, InterruptedException {
 		//GIVEN a study full of data
 
 		// Mock on rest template to get the list of subjects
-		Subject[] subjects = {subject};
-		ObjectMapper mapper = new ObjectMapper();
-		String value = mapper.writeValueAsString(subjects);
-		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
+		List<SubjectStudy> subjectStudies = new ArrayList<>();
+		SubjectStudy susu = new SubjectStudy();
+		susu.setSubject(this.subject);
+		subjectStudies.add(	susu);
+		given(subjectStudyRepository.findByStudyId(exam.getStudyId())).willReturn(subjectStudies);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
@@ -130,114 +127,13 @@ public class BidsServiceTest {
 		// THEN the bids folder is generated with study - subject - exam - data
 		File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "_" + studyName);
 		assertTrue(studyFile.exists());
-		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
+
+		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1_" + subject.getName());
 		assertTrue(subjectFile.exists());
+
 		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
-		assertTrue(examFile.exists());
-		File bidsDataFile = new File(examFile.getAbsolutePath() + "/anat/test.test");
-		assertTrue(bidsDataFile.exists());
-	}
-
-	@Test
-	public void testAddDataset() throws IOException {
-		// GIVEN a study with existing BIDS folder
-		// Mock on rest template to get the list of subjects
-		Subject[] subjects = {subject};
-		ObjectMapper mapper = new ObjectMapper();
-		String value = mapper.writeValueAsString(subjects);
-		given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_QUEUE, exam.getStudyId())).willReturn(value);
-		
-		// Mock on examination service to get the list of subject
-		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
-
-		// Create bids folder
-		service.exportAsBids(exam.getStudyId(), studyName);
-
-		// WHEN we add a dataset to the study
-
-		Examination exam2 = ModelsUtil.createExamination();
-		exam2.setId(Long.valueOf("6584169874"));
-		exam2.setSubjectId(subject.getId());
-
-		EegDataset ds2 = new EegDataset();
-		//ds2.setStudyId(exam2.getStudyId());
-		ds2.setSubjectId(exam2.getSubjectId());
-		ds2.setId(Long.valueOf("16843"));
-		ds2.setChannels(Collections.emptyList());
-		ds2.setEvents(Collections.emptyList());
-
-		EegDatasetAcquisition dsa2 = new EegDatasetAcquisition();
-		dsa2.setExamination(exam2);
-		dsa2.setDatasets(Collections.singletonList(ds2));
-
-		ds2.setDatasetAcquisition(dsa2);
-
-		List<DatasetAcquisition> datasetAcqs = new ArrayList<>();
-		datasetAcqs.add(dsa2);
-		exam2.setDatasetAcquisitions(datasetAcqs);
-
-		// Create some dataFile and register it to be copied
-		File dataFile2 = new File(tempFolderPath + "test.test");
-		if (!dataFile2.exists()) {
-			dataFile2.createNewFile();
-		}
-
-		DatasetExpression dsExpr2 = new DatasetExpression();
-		DatasetFile dsFile2 = new DatasetFile();
-		dsFile2.setDatasetExpression(dsExpr2);
-		dsFile2.setPacs(false);
-		dsFile2.setPath("file://" + dataFile2.getAbsolutePath());
-		dsExpr2.setDatasetFiles(Collections.singletonList(dsFile2));
-
-		ds2.setDatasetExpressions(Collections.singletonList(dsExpr2));
-		
-		//HERE
-		service.addDataset(exam2, subject.getName(), studyName);
-		
-		// THEN the data is added too
-		File studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
-		assertTrue(studyFile.exists());
-		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
-		assertTrue(subjectFile.exists());
-		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam2.getId());
-		assertTrue(examFile.exists());
-		File bidsDataFile = new File(examFile.getAbsolutePath() + "/eeg/test.test");
-		assertTrue(bidsDataFile.exists());
-		File scansFile = new File(subjectFile.getAbsolutePath() + File.separator + subjectFile.getName() + "_scans.tsv");
-		assertTrue(scansFile.exists());
-
-		// WHEN we delete a dataset
-		service.deleteDataset(ds2);
-		
-		// THEN it is also deleted in the BIDS folder
-		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
-		assertTrue(studyFile.exists());
-		subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
-		assertTrue(subjectFile.exists());
-		examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam2.getId());
-		assertTrue(examFile.exists());
-		bidsDataFile = new File(examFile.getAbsolutePath() + "/eeg/test.test");
-		assertFalse(bidsDataFile.exists());
-
-		service.deleteExam(exam2);
-		
-		// THEN it is also deleted in the BIDS folder
-		studyFile = new File(tempFolderPath + "stud-" + exam2.getStudyId() + "_" + studyName);
-		assertTrue(studyFile.exists());
-		subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + "_" + subject.getName());
-		assertTrue(subjectFile.exists());
-		examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam2.getId());
+		// No exam files as there is only one datasetAcquisition
 		assertFalse(examFile.exists());
-	}
-
-	@Test
-	public void testDeleteDataset() {
-		// See testAddDataset
-	}
-
-	@Test
-	public void testDeleteExamination() {
-		// See testAddDataset
 	}
 
 	@After

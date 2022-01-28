@@ -12,12 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { Component, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -34,7 +36,7 @@ export class EegUploadComponent {
     protected extensionError: boolean;
     private modality: string;
     public errorMessage: string;
-
+    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     constructor(
             private importService: ImportService, 
@@ -67,16 +69,35 @@ export class EegUploadComponent {
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadEegFile(formData)
-            .then((importJob: EegImportJob) => {
-                this.importDataService.eegImportJob = importJob;
-                this.setArchiveStatus('uploaded');
-                this.errorMessage = "";
-            }).catch(error => {
+            .subscribe(
+                event => {
+                if (event.type === HttpEventType.Sent) {
+                    this.progressBar.progress = -1;
+                } else if (event.type === HttpEventType.UploadProgress) {
+                    this.progressBar.progress = (event.loaded / event.total);
+                } else if (event instanceof HttpResponse) {
+                    this.importDataService.eegImportJob =  event.body;
+                    this.setArchiveStatus('uploaded');
+                    this.errorMessage = "";
+                }
+            }, error => {
                 this.setArchiveStatus('error');
                 if (error && error.error && error.error.message) {
                         this.errorMessage = error.error.message;
                     }
-            });
+            })
+    }
+
+    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
+       switch (event.type) {
+            case HttpEventType.Sent:
+              progressBar.progress = -1;
+              break;
+            case HttpEventType.UploadProgress:
+              break;
+            case HttpEventType.Response:
+                progressBar.progress = 0;
+        }
     }
 
     private setArchiveStatus(status: Status) {

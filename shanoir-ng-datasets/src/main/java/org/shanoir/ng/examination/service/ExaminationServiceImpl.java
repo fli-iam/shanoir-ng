@@ -80,12 +80,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 		for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 			for (Dataset ds : dsAcq.getDatasets())  {
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
 			}
 		}
 
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
 		// Delete examination
 		examinationRepository.deleteById(id);
 	}
@@ -98,11 +98,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 			for (Dataset ds : dsAcq.getDatasets())  {
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
 			}
 		}
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, exam.getStudyId()));
 		examinationRepository.deleteById(exam.getId());
 	}
 
