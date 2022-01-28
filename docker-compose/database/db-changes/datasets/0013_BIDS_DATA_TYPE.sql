@@ -1,1 +1,1 @@
-ALTER TABLE study_user CHANGE receive_anonymization_report receive_study_user_report bit(1);
+ALTER TABLE mr_protocol_metadata ADD COLUMN bids_data_type varchar(255);
