@@ -68,11 +68,6 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		if (!centerOpt.get().getStudyCenterList().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "studies"));
 		}
-		boolean isEmpty =  (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DELETE_CENTER_QUEUE, id);
-		if (!isEmpty) {
-			errors.add(new FieldError("unauthorized", "Center linked to entities", "examinations"));
-		}
-		
 		if (!errors.isEmpty()) {
 			final FieldErrorMap errorMap = new FieldErrorMap();
 			errorMap.put("delete", errors);
