@@ -115,6 +115,8 @@ public class ExaminationServiceTest {
 
 	@Test
 	public void updateTest() throws ShanoirException {
+		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_EXPERT"));
+
 		final Examination updatedExamination = examinationService.update(createExamination());
 		Assert.assertNotNull(updatedExamination);
 		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
