@@ -22,6 +22,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -51,6 +52,18 @@ public class RabbitMqExaminationService {
 			Examination exam = mapper.readValue(message, Examination.class);
 			exam = examRepo.save(exam);
 			return mapper.writeValueAsString(exam);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_CENTER_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean checkExaminationsFromCenter(String message) {
+		try {
+			Long centerId = mapper.readValue(message, Long.class);
+			return CollectionUtils.isEmpty(examRepo.findByCenterId(centerId));
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}

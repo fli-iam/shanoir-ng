@@ -114,7 +114,10 @@ public class RabbitMQConfiguration {
 
 	/** Queue to consume BIDS related events */
 	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
-	
+
+	/** Queue to check center / examination link when deleting a center. */
+	public static final String DELETE_CENTER_QUEUE = "delete-center-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -351,6 +354,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue bidsEventQueue() {
 		return new Queue(BIDS_EVENT_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue deleteCenterQueue() {
+		return new Queue(DELETE_CENTER_QUEUE, true);
 	}
 
 	@Bean
