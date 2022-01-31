@@ -121,10 +121,27 @@ public class ExaminationServiceTest {
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
 
+	@Test(expected = ShanoirException.class)
+	public void updateTestFails() throws ShanoirException {
+		// We update the subject -> Not admin -> Failure
+		Examination updatedExam = createExamination();
+		updatedExam.setSubjectId(null);
+		final Examination updatedExamination = examinationService.update(updatedExam);
+
+		Mockito.verify(examinationRepository, Mockito.times(0)).save(Mockito.any(Examination.class));
+	}
+
+
 	private Examination createExamination() {
+		Examination oldExam  = ModelsUtil.createExamination();
+
 		final Examination examination = new Examination();
 		examination.setId(EXAMINATION_ID);
 		examination.setComment(UPDATED_EXAMINATION_COMMENT);
+		examination.setCenterId(oldExam.getCenterId());
+		examination.setStudyId(oldExam.getStudyId());
+		examination.setSubjectId(oldExam.getSubjectId());
+
 		return examination;
 	}
 
