@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -124,6 +125,7 @@ public class ExaminationServiceTest {
 	@Test(expected = ShanoirException.class)
 	public void updateTestFails() throws ShanoirException {
 		// We update the subject -> Not admin -> Failure
+		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_EXPERT"));
 		Examination updatedExam = createExamination();
 		updatedExam.setSubjectId(null);
 		final Examination updatedExamination = examinationService.update(updatedExam);
@@ -131,6 +133,18 @@ public class ExaminationServiceTest {
 		Mockito.verify(examinationRepository, Mockito.times(0)).save(Mockito.any(Examination.class));
 	}
 
+	@Test
+	public void updateAsAdminTest() throws ShanoirException {
+		// We update the subject -> admin -> SUCCESS
+		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_ADMIN"));
+		Examination updatedExam = createExamination();
+		updatedExam.setSubjectId(null);
+		final Examination updatedExamination = examinationService.update(updatedExam);
+
+		Assert.assertNotNull(updatedExamination);
+		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
+		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
+	}
 
 	private Examination createExamination() {
 		Examination oldExam  = ModelsUtil.createExamination();
