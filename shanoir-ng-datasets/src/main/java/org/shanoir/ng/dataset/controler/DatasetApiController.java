@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -169,6 +170,12 @@ public class DatasetApiController implements DatasetApi {
 	@org.springframework.beans.factory.annotation.Autowired
 	public DatasetApiController(final HttpServletRequest request) {
 		this.request = request;
+	}
+
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 1mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(60000);
 	}
 
 	@Override
