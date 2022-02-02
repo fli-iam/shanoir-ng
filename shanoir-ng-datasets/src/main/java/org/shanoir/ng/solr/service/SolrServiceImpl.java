@@ -36,7 +36,7 @@ import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
-import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -47,7 +47,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -199,32 +198,16 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
-	@Override
-	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
-		SolrResultPage<ShanoirSolrDocument> result = null;
-		pageable = prepareTextFields(pageable);
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findAllDocsAndFacets(pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new SolrResultPage<>(Collections.emptyList());
-			}
-			result = solrRepository.findByStudyIdIn(studyIds, pageable);
-		}
-		return result;
-	}
-
 	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(facet, pageable);
+			result = solrRepository.findByFacetCriteria(query, pageable);
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, query, pageable);
 		}
 		return result;
 	}
@@ -260,18 +243,6 @@ public class SolrServiceImpl implements SolrService {
 				return new PageImpl<>();
 			}
 			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
-		}
-		return result;
-	}
-
-	@Override
-	public Page<FacetFieldEntry> facetFieldSearch(String facetName, Pageable pageable) throws RestServiceException {
-		Page<FacetFieldEntry> result = null;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findFacetFieldEntries(facetName, pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findFacetFieldEntriesWithStudyIdIn(facetName, studyIds, pageable);
 		}
 		return result;
 	}

@@ -76,11 +76,11 @@ public class ShanoirMetadata {
 	
 	private String centerName;
 	
-	private Float sliceThickness;
+	private Double sliceThickness;
 	
-	private Float pixelBandwidth;
+	private Double pixelBandwidth;
 	
-	private Float magneticFieldStrength;
+	private Double magneticFieldStrength;
 	
 	private Long subjectId;
 	
@@ -90,8 +90,8 @@ public class ShanoirMetadata {
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength, Long subjectId) {
+			String subjectName, String studyName, Long studyId, String centerName, Double sliceThickness,
+			Double pixelBandwidth, Double magneticFieldStrength, Long subjectId) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -273,27 +273,27 @@ public class ShanoirMetadata {
 		this.centerName = centerName;
 	}
 
-	public Float getSliceThickness() {
+	public Double getSliceThickness() {
 		return sliceThickness;
 	}
 
-	public void setSliceThickness(Float sliceThickness) {
+	public void setSliceThickness(Double sliceThickness) {
 		this.sliceThickness = sliceThickness;
 	}
 
-	public Float getPixelBandwidth() {
+	public Double getPixelBandwidth() {
 		return pixelBandwidth;
 	}
 
-	public void setPixelBandwidth(Float pixelBandwidth) {
+	public void setPixelBandwidth(Double pixelBandwidth) {
 		this.pixelBandwidth = pixelBandwidth;
 	}
 
-	public Float getMagneticFieldStrength() {
+	public Double getMagneticFieldStrength() {
 		return magneticFieldStrength;
 	}
 
-	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+	public void setMagneticFieldStrength(Double magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
 

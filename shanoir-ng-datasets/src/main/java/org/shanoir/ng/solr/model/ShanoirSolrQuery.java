@@ -16,14 +16,18 @@ package org.shanoir.ng.solr.model;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 
+import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.utils.Range;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author yyao
  *
  */
-public class ShanoirSolrFacet {
+public class ShanoirSolrQuery {
 	
 	private Collection<String> studyName;
 	
@@ -56,6 +60,8 @@ public class ShanoirSolrFacet {
 	private Range<Float> pixelBandwidth;
 	
 	private Range<Float> magneticFieldStrength;
+	
+	private Map<String, FacetPageable> facetPaging;
 	
 	/**
 	 * @return the studyName
@@ -247,5 +253,17 @@ public class ShanoirSolrFacet {
 	 */
 	public void setTags(Collection<String> tags) {
 		this.tags = tags;
+	}
+
+	public Map<String, FacetPageable> getFacetPaging() {
+		return facetPaging;
+	}
+
+	public void setFacetPaging(Map<String, FacetPageable> facetPaging) {
+		this.facetPaging = facetPaging;
+	}
+	
+	public Range<LocalDate> getDatasetDateRange() {
+		return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
 	}
 }
