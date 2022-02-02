@@ -558,6 +558,9 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
+		// add to scans.tsv
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		
 		// Create events.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
@@ -575,7 +578,10 @@ public class BIDSServiceImpl implements BIDSService {
 			.append(sample).append(NEW_LINE);
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-
+		
+		// add to scans.tsv
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		
 		// If no coordinates system, don't create electrode.csv & _coordsystem.json files
 		if (dataset.getCoordinatesSystem() == null) {
 			return;
@@ -596,6 +602,9 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
+		// add to scans.tsv
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+
 		// Create _coordsystem.json file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
@@ -607,6 +616,21 @@ public class BIDSServiceImpl implements BIDSService {
 		.append("}");
 
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
+		
+		// add to scans.tsv
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+	}
+	
+	private void addToTsvFile(File parentFolder, String fileName, Dataset dataset) throws IOException {
+		File scansTsvFile = getScansFile(parentFolder);
+
+		StringBuilder buffer = new StringBuilder();
+		buffer.append(fileName).append(TABULATION)
+		.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
+		.append(dataset.getDatasetAcquisition().getExamination().getId())
+		.append(NEW_LINE);
+
+		Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 	}
 
 	/**
