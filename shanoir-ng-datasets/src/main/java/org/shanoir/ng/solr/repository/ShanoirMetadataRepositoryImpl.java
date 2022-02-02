@@ -29,6 +29,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.shanoir.ng.solr.model.ShanoirMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -42,6 +44,8 @@ import org.springframework.util.CollectionUtils;
 public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryCustom {
 	@PersistenceContext
 	private EntityManager em;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ShanoirMetadataRepositoryImpl.class);
 	
 	@Override
 	public List<ShanoirMetadata> findAllAsSolrDoc() {
@@ -218,8 +222,15 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 		result.addAll(eegQuery.getResultList());
 		result.addAll(genericQuery.getResultList());
 		result.addAll(processedQuery.getResultList());
-
+		
+		List<ShanoirMetadata> processedResult = processedQuery.getResultList();
+		
+		if (!processedResult.isEmpty()) {
+			return processedResult.get(0);
+		}
+		
 		if (result.size() != 1) {
+			LOG.error("Solr query returned multiple result for a single query. Please check database consistency.");
 			return null;
 		}
 		
