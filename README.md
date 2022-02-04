@@ -179,6 +179,8 @@ Name                  | Value             | Description                         
 `SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate |
 `SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below). |
 `SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts |
+`VIEWER_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
+`VIEWER_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable     |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
@@ -187,7 +189,7 @@ Name                  | Value             | Description                         
   * in development this is achieved by:
     * adding the following line to your **/etc/hosts**
       ```
-      127.0.0.1  shanoir-ng-nginx
+      127.0.0.1  shanoir-ng-nginx viewer
       ```
     * ensuring that the nginx container name is equals to the value of
       `SHANOIR_URL_HOST` (in the default setup, they both use:
