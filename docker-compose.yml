@@ -80,6 +80,7 @@ services:
     container_name: "${SHANOIR_PREFIX}users"
     build: ./docker-compose/users
     environment:
+      - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_KEYCLOAK_USER
@@ -88,7 +89,6 @@ services:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -107,10 +107,10 @@ services:
     container_name: "${SHANOIR_PREFIX}studies"
     build: ./docker-compose/studies
     environment:
+      - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -132,10 +132,10 @@ services:
     container_name: "${SHANOIR_PREFIX}import"
     build: ./docker-compose/import
     environment:
+      - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -156,10 +156,12 @@ services:
     container_name: "${SHANOIR_PREFIX}datasets"
     build: ./docker-compose/datasets
     environment:
+      - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - VIEWER_URL_HOST
+      - VIEWER_URL_SCHEME
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -179,10 +181,10 @@ services:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build: ./docker-compose/preclinical
     environment:
+      - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -288,6 +290,9 @@ services:
   ohif-viewer:
     container_name: "${SHANOIR_PREFIX}ohif-viewer"
     build: ./docker-compose/ohif-viewer 
+    environment:
+      - VIEWER_URL_HOST
+      - VIEWER_URL_SCHEME
     networks:
       - shanoir_ng_network
     ports:
@@ -302,6 +307,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - VIEWER_URL_HOST
+      - VIEWER_URL_SCHEME
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR

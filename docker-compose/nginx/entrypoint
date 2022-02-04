@@ -23,9 +23,13 @@ set -e
 
 require SHANOIR_URL_SCHEME
 require SHANOIR_URL_HOST
+require VIEWER_URL_SCHEME
+require VIEWER_URL_HOST
 src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
 dst="/etc/nginx/server.conf"
 sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
+
+sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/server.conf
 
 sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/server.conf
 

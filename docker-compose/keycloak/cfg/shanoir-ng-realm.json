@@ -1003,10 +1003,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://viewer.shanoir-ng-nginx/*"
+        "VIEWER_URL_SCHEME://VIEWER_URL_HOST/*"
       ],
       "webOrigins": [
-        "https://viewer.shanoir-ng-nginx"
+        "VIEWER_URL_SCHEME://VIEWER_URL_HOST"
       ],
       "notBefore": 0,
       "bearerOnly": false,

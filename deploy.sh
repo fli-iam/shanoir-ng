@@ -3,6 +3,8 @@
 
 export SHANOIR_URL_HOST=shanoir-ng-nginx
 export SHANOIR_URL_SCHEME=https
+export VIEWER_URL_HOST=viewer
+export VIEWER_URL_SCHEME=https
 export SHANOIR_PREFIX=
 export SHANOIR_ADMIN_EMAIL="nobody@inria.fr"
 export SHANOIR_KEYCLOAK_USER=admin

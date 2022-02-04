@@ -18,9 +18,9 @@ window.config = {
     dicomWeb: [
       {
         name: 'SHANOIR-NG',
-        wadoUriRoot: 'https://shanoir-ng-nginx/shanoir-ng/datasets/studies',
-        qidoRoot: 'https://shanoir-ng-nginx/shanoir-ng/datasets/studies',
-        wadoRoot: 'https://shanoir-ng-nginx/shanoir-ng/datasets/studies',
+        wadoUriRoot: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/shanoir-ng/datasets/studies',
+        qidoRoot: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/shanoir-ng/datasets/studies',
+        wadoRoot: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/shanoir-ng/datasets/studies',
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
@@ -34,15 +34,15 @@ window.config = {
   	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'https://viewer.shanoir-ng-nginx/auth/realms/shanoir-ng',
+    	authority: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/auth/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
-    	redirect_uri: 'https://viewer.shanoir-ng-nginx', // `OHIFStandaloneViewer.js`
+    	redirect_uri: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
 		response_type: 'code',
 		scope: 'email', // email profile openid
 		// ~ OPTIONAL
-		post_logout_redirect_uri: 'https://shanoir-ng-nginx/'
+		post_logout_redirect_uri: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST'
     }
   ],
   // Extensions should be able to suggest default values for these?
