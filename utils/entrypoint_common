@@ -63,6 +63,8 @@ require()
             SHANOIR_PREFIX)         match "$name" '^([a-zA-Z0-9][a-zA-Z0-9_.-]*)$'      ;;
             SHANOIR_URL_SCHEME)     match "$name" '^(http|https)$'                      ;;
             SHANOIR_URL_HOST)       match "$name" '^([a-z0-9.-]+)$'                     ;;
+            VIEWER_URL_SCHEME)      match "$name" '^(http|https)$'                      ;;
+            VIEWER_URL_HOST)        match "$name" '^([a-z0-9.-]+)$'                     ;;
             SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
             SHANOIR_MIGRATION)      match "$name" '^(auto|init|never|dev|import|export)$' ;;
             SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;

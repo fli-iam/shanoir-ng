@@ -31,6 +31,8 @@ services:
       - SHANOIR_ADMIN_NAME
       - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - VIEWER_URL_SCHEME
+      - VIEWER_URL_HOST
       - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
@@ -291,8 +293,8 @@ services:
     container_name: "${SHANOIR_PREFIX}ohif-viewer"
     build: ./docker-compose/ohif-viewer 
     environment:
-      - VIEWER_URL_HOST
       - VIEWER_URL_SCHEME
+      - VIEWER_URL_HOST
     networks:
       - shanoir_ng_network
     ports:

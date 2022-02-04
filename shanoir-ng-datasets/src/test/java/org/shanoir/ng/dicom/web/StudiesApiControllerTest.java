@@ -82,7 +82,7 @@ public class StudiesApiControllerTest {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
-		.andExpect(status().isOk());
+		.andExpect(status().isNotFound());
 	}
 
 }
