@@ -12,10 +12,12 @@
 
 FROM ohif/viewer:v4.12.9.17613
 
-COPY entrypoint entrypoint_common /bin/
+COPY entrypoint_common /bin/
+
+COPY entrypoint.sh /usr/src/
+
+RUN chmod 777 /usr/src/entrypoint.sh
 
 COPY default.conf /etc/nginx/conf.d/
 
 COPY app-config.js /usr/share/nginx/html/
-
-ENTRYPOINT ["/bin/entrypoint"]
