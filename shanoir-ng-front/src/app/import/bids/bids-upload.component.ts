@@ -85,6 +85,5 @@ export class BidsUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    data = {'studyId': 10,'studyCardId': 68,'acquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
 }
     

@@ -115,6 +115,9 @@ public class RabbitMQConfiguration {
 	/** Queue to consume BIDS related events */
 	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
 	
+	/** Queue to create examination extra data from import */
+	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
+	
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -143,6 +146,8 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
+	
+	private static final String NULL = "";
 
 	////////////////// EXCHANGES //////////////////
 
@@ -351,6 +356,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue bidsEventQueue() {
 		return new Queue(BIDS_EVENT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue examinationExtraDataQueue() {
+		return new Queue(EXAMINATION_EXTRA_DATA_QUEUE, true);
 	}
 
 	@Bean

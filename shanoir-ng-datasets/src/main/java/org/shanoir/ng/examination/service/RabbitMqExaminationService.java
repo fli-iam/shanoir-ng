@@ -44,13 +44,24 @@ public class RabbitMqExaminationService {
 	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public String findCenterIdFromAcquisitionEquipement(String message) {
+	public String createExamination(String message) {
 		try {
 			mapper.registerModule(new JavaTimeModule());
 
 			Examination exam = mapper.readValue(message, Examination.class);
 			exam = examRepo.save(exam);
 			return mapper.writeValueAsString(exam);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+	
+	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public void addExaminationExtraData(String path) {
+		try {
+			// add examination extra-data
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}

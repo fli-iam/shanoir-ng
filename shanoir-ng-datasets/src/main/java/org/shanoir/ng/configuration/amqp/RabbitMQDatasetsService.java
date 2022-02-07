@@ -246,7 +246,6 @@ public class RabbitMQDatasetsService {
 				T entity =  repository.save(existing);
 				return entity;
 			} else {
-				// create new entity
 				try {
 					T newOne = clazz.newInstance();
 					newOne.setId(received.getId());
@@ -367,5 +366,12 @@ public class RabbitMQDatasetsService {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public void importBIDSData(String message) {
+		// Create dataset acquisition, dataset, dataset expression, dataset file ?
 	}
 }
