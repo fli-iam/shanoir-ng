@@ -29,8 +29,8 @@ services:
     environment:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_ADMIN_NAME
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - VIEWER_URL_SCHEME
       - VIEWER_URL_HOST
       - SHANOIR_SMTP_HOST
@@ -83,8 +83,8 @@ services:
     build: ./docker-compose/users
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_SMTP_HOST
@@ -110,8 +110,8 @@ services:
     build: ./docker-compose/studies
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -135,8 +135,8 @@ services:
     build: ./docker-compose/import
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -159,10 +159,10 @@ services:
     build: ./docker-compose/datasets
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_URL_HOST
       - VIEWER_URL_SCHEME
+      - VIEWER_URL_HOST
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -184,8 +184,8 @@ services:
     build: ./docker-compose/preclinical
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -293,6 +293,8 @@ services:
     container_name: "${SHANOIR_PREFIX}ohif-viewer"
     build: ./docker-compose/ohif-viewer 
     environment:
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - VIEWER_URL_SCHEME
       - VIEWER_URL_HOST
     networks:
@@ -307,10 +309,10 @@ services:
     build: ./docker-compose/nginx
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_URL_HOST
       - VIEWER_URL_SCHEME
+      - VIEWER_URL_HOST
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
