@@ -116,6 +116,7 @@ public class RabbitMQSubjectService {
 	 */
 	@RabbitListener(queues = RabbitMQConfiguration.DATASET_SUBJECT_QUEUE)
 	@RabbitHandler
+	@Transactional
 	public String getSubjectsForStudy(String studyId) {
 		try {
 			return mapper.writeValueAsString(subjectService.findAllSubjectsOfStudyId(Long.valueOf(studyId)));
