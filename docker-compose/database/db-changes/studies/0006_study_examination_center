@@ -1,0 +1,9 @@
+# Drop old study_examination table
+DELETE FROM study_examination;
+DROP TABLE study_examination;
+
+# Create new table with new fields
+#CREATE TABLE study_examination 
+
+# Fill it with data
+#INSERT INTO study_examination (study_id, examination_id, center_id, subject_id) SELECT study_id, id, center_id, subject_id from datasets.examination;

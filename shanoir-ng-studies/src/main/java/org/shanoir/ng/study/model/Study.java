@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
@@ -85,10 +86,8 @@ public class Study extends HalEntity {
 	private LocalDate endDate;
 
 	/** List of the examinations related to this study. */
-	@ElementCollection
-	@CollectionTable(name = "study_examination")
-	@Column(name = "examination_id")
-	private Set<Long> examinationIds;
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<StudyExamination> examinations;
 
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
@@ -225,16 +224,16 @@ public class Study extends HalEntity {
 	/**
 	 * @return the examinationIds
 	 */
-	public Set<Long> getExaminationIds() {
-		return examinationIds;
+	public Set<StudyExamination> getExaminations() {
+		return examinations;
 	}
 
 	/**
 	 * @param examinationIds
 	 *            the examinationIds to set
 	 */
-	public void setExaminationIds(Set<Long> examinationIds) {
-		this.examinationIds = examinationIds;
+	public void setExaminations(Set<StudyExamination> examinations) {
+		this.examinations = examinations;
 	}
 
 	/**

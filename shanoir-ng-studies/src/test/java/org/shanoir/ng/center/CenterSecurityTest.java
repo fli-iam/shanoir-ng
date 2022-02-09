@@ -25,20 +25,16 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.center.service.CenterService;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,9 +65,6 @@ public class CenterSecurityTest {
 	
 	@MockBean
 	private CenterRepository repository;
-
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 	
 	@Before
 	public void setup() {
@@ -140,8 +133,6 @@ public class CenterSecurityTest {
 		final long ID = 666L;
 		Center center = ModelsUtil.createCenter();
 		center.setId(ID);
-
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DELETE_CENTER_QUEUE, ID)).thenReturn(true);
 		List<AcquisitionEquipment> acqs = new ArrayList<>();
 		acqs.add(new AcquisitionEquipment());
 		center.setAcquisitionEquipments(acqs);
@@ -155,31 +146,9 @@ public class CenterSecurityTest {
 		final long ID = 69L;
 		Center center = ModelsUtil.createCenter();
 		center.setId(ID);
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DELETE_CENTER_QUEUE, ID)).thenReturn(true);
-
 		List<StudyCenter> studyCenterList = new ArrayList<>();
 		studyCenterList.add(new StudyCenter());
 		center.setStudyCenterList(studyCenterList);
-		given(repository.findById(ID)).willReturn(Optional.of(center));
-		service.deleteByIdCheckDependencies(ID);
-	}
-
-	@Test(expected = UndeletableDependenciesException.class)
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
-	public void testDependenciesCheckExamination() throws EntityNotFoundException, UndeletableDependenciesException {
-		final long ID = 69L;
-		Center center = ModelsUtil.createCenter();
-		center.setId(ID);
-		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DELETE_CENTER_QUEUE, ID)).thenReturn(false);
-
-		List<StudyCenter> studyCenterList = new ArrayList<>();
-		studyCenterList.add(new StudyCenter());
-		center.setStudyCenterList(studyCenterList);
-
-		List<AcquisitionEquipment> acqs = new ArrayList<>();
-		acqs.add(new AcquisitionEquipment());
-		center.setAcquisitionEquipments(acqs);
-
 		given(repository.findById(ID)).willReturn(Optional.of(center));
 		service.deleteByIdCheckDependencies(ID);
 	}
