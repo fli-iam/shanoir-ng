@@ -48,7 +48,6 @@ public final class ModelsUtil {
 	public static final Long EXAMINATION_INVESTIGATOR_ID = 1L;
 	public static final String EXAMINATION_NOTE = "test examination";
 	public static final Long EXAMINATION_STUDY_ID = 1L;
-	public static final Long EXAMINATION_SUBJECT_ID = 1L;
 
 	// Study card data
 	public static final String STUDY_CARD_NAME = "name";
@@ -110,7 +109,6 @@ public final class ModelsUtil {
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
-		examination.setSubjectId(EXAMINATION_SUBJECT_ID);
 		examination.setPreclinical(false);
 		examination.setDatasetAcquisitions(Collections.emptyList());
 		return examination;

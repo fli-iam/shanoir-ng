@@ -41,48 +41,48 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li>
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
-						<span class="right-col">
-							<ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', examination.study?.id]">
 									{{examination.study?.name}}
-								</a>
+								</a>		
 							</ng-template>
-							<ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
+							<ng-template ngSwitchDefault>
 								<select-box formControlName="study" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
-						</span> 
+						</span>
 					</li>
 					<li>
 						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-						  <span class="right-col">
-                            <ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
-                                <a [routerLink]="['/subject/details/', examination.subject?.id]">
-                                    {{examination?.subject?.name}}
-                                </a>
-                            </ng-template>
-                            <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-                                <select-box formControlName="subject" [(ngModel)]="examination.subject" [optionArr]="subjects">
-                                </select-box>
-                                <label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
-                            </ng-template>
-                        </span> 
-    				</li>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/subject/details/', examination.subject?.id]">
+									{{examination?.subject?.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="subject" [(ngModel)]="examination.subject" [optionArr]="subjects">
+								</select-box>
+								<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
+							</ng-template>
+						</span>
+					</li>
 					<li>
 						<label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
-						<span class="right-col">
-                            <ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
-                                <a [routerLink]="['/center/details/', examination.center?.id]">
-                                    {{examination?.center?.name}}
-                                </a>
-                            </ng-template>
-                            <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-                                <select-box formControlName="center" [(ngModel)]="examination.center" [optionArr]="centers">
-                                </select-box>
-                                <label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
-                            </ng-template>
-                        </span>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/center/details/', examination.center?.id]">
+									{{examination?.center?.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="center" [(ngModel)]="examination.center" [optionArr]="centers">
+								</select-box>
+								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+							</ng-template>
+						</span>
 					</li>
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
