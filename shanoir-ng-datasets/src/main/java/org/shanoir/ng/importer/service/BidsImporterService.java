@@ -41,7 +41,8 @@ public class BidsImporterService {
 	 * @param importJob the import job
 	 * @param userId the user id
 	 */
-	public void createAllBidsDatasetAcquisition(BidsImportJob importJob, Long userId) {
+	public void createAllBidsDatasetAcquisition() {
+		/*
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
@@ -151,6 +152,6 @@ public class BidsImporterService {
 			eventService.publishEvent(event);
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
-
+	*/
 	}
 }
