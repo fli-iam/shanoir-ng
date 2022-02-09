@@ -40,7 +40,6 @@ public class StudyCardRule extends AbstractEntity {
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
 	
-
 	public List<StudyCardAssignment> getAssignments() {
 		return assignments;
 	}

@@ -29,6 +29,8 @@ public class StudyCenterDTO {
 	private IdName center;
 	
 	private IdName study;
+	
+	private String subjectNamePrefix;
 
 	/** Investigator. */
 	// private Long investigator_id;
@@ -71,5 +73,13 @@ public class StudyCenterDTO {
 	 */
 	public void setCenter(IdName center) {
 		this.center = center;
+	}
+
+	public String getSubjectNamePrefix() {
+		return subjectNamePrefix;
+	}
+
+	public void setSubjectNamePrefix(String subjectNamePrefix) {
+		this.subjectNamePrefix = subjectNamePrefix;
 	}
 }

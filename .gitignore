@@ -40,6 +40,7 @@ shanoir-ng-front/package-lock.json
 *.project
 **/webapp
 *.js
+.attach_pid*
 .env.bak
 /docker-compose/nginx/webapp/
 /docker-compose/*/shanoir-ng-*.jar
@@ -50,3 +51,5 @@ shanoir-ng-tests/tests/.Python
 shanoir-ng-tests/tests/include/
 shanoir-ng-tests/tests/lib/
 shanoir-ng-tests/tests/pip-selfcheck.json
+.idea/
+*.iml

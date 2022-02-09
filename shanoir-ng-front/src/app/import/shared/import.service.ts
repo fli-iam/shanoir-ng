@@ -31,8 +31,10 @@ export class ImportService {
                 observe: 'events'});
     }
 
-    uploadEegFile(formData: FormData): Promise<EegImportJob> {
-        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
+    uploadEegFile(formData: FormData): Observable<HttpEvent<EegImportJob>> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData,
+        {reportProgress: true,
+                observe: 'events'});
     }
 
     analyseEegFile(importJob: EegImportJob): Promise<EegImportJob> {

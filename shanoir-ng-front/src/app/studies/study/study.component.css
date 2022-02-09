@@ -3,6 +3,23 @@
 .section label { font-weight: bold}
 .study-data { background-color: var(--light-grey); color: var(--color-b); font-size: 20px; font-weight: bold; padding: 10px 15px; }
 .study-center-list { display: inline-block; }
+.study-center-list table { margin-top: 10px; }
+.study-center-list input { width: 100px; }
+
+.study-center-list table { margin-top: 15px; padding: 5px 0; width: 100%; font-weight: normal; border-collapse: collapse; background-color: var(--very-light-grey); }
+.study-center-list th { color: var(--color-a); padding: 10px 5px; }
+.study-center-list th, .study-center-list td { text-align: left; }
+.study-center-list tr { height: 33px; }
+.study-center-list tr.even { background-color: beige; }
+/* tr.odd { background-color: var(--color-b-light); } */
+.study-center-list tr td:first-child { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
+.study-center-list tr td:last-child { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
+.study-center-list td { padding: 4px 5px; }
+.study-center-list table tr td:last-child { padding-left: 13px; padding-right: 13px; }
+.add-center td { text-align: center; cursor: pointer; }
+.prefix { color: var(--grey); }
+.prefix-input { width: auto; }
+
 .icon { margin-left: 5px; vertical-align: middle; }
 .icon-clickable { cursor: pointer;  }
 .data-loading img { height: 20px; vertical-align: bottom; }
@@ -12,3 +29,6 @@ dataset-download { margin-left: 5px; }
 .dl-button { border: none; margin-left: 7px; }
 .files { margin-top: 10px; }
 toggle-switch { margin: 0 7px; }
+.clickable { cursor: pointer; }
+.center-link { color: var(--color-b-light2); }
+.center-list { min-height: 0px;}

@@ -14,11 +14,12 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -70,16 +71,21 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 	}
 	
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+		List<Dataset> dss = this.findByIdIn(ids);
+		Map<Long, Long> datasetStudyMap = new HashMap<>();
+		for (Dataset ds : dss) {
+			datasetStudyMap.put(ds.getId(), ds.getStudyId());
+		}
 		repository.deleteByIdIn(ids);
 		solrService.deleteFromIndex(ids);
 		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
 		}
 	}
 
@@ -100,7 +106,7 @@ public class DatasetServiceImpl implements DatasetService {
 		if (ds.getDatasetProcessing() == null) {
 			solrService.indexDataset(ds.getId());
 		}
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
 
@@ -112,7 +118,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
 	}
 

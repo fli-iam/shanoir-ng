@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,12 +82,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 		for (DatasetAcquisition dsAcq : examination.getDatasetAcquisitions()) {
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 			for (Dataset ds : dsAcq.getDatasets())  {
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
 			}
 		}
 
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, id.toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, examination.getStudyId()));
 		// Delete examination
 		examinationRepository.deleteById(id);
 	}
@@ -98,11 +100,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 		for (DatasetAcquisition dsAcq : exam.getDatasetAcquisitions()) {
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, dsAcq.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
 			for (Dataset ds : dsAcq.getDatasets())  {
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
 			}
 		}
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, exam.getStudyId()));
 		examinationRepository.deleteById(exam.getId());
 	}
 
@@ -143,10 +145,19 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public Examination update(final Examination examination) throws EntityNotFoundException {
+	public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException {
 		final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
 		if (examinationDb == null) {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
+		}
+		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getCenterId().equals(examination.getCenterId())) {
+			throw new ShanoirException("Cannot update the center of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+		}
+		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getStudyId().equals(examination.getStudyId())) {
+			throw new ShanoirException("Cannot update the study of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+		}
+		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getSubjectId().equals(examination.getSubjectId())) {
+			throw new ShanoirException("Cannot update the subject of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
 		}
 		updateExaminationValues(examinationDb, examination);
 		examinationRepository.save(examinationDb);

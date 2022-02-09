@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
@@ -44,9 +44,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     isAlreadyAnonymized: boolean;
     firstName: string = "";
     lastName: string = "";
+    subjectNamePrefix: string = "";
     pattern: string = '[^:|<>&\/]+';
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
+    dicomPatientName: string;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -80,6 +82,14 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             this.firstName = this.breadcrumbsService.currentStep.data.firstName;
             this.lastName = this.breadcrumbsService.currentStep.data.lastName;
             this.forceStudy = this.breadcrumbsService.currentStep.data.forceStudy;
+	        if (this.breadcrumbsService.currentStep.data.patientName) this.dicomPatientName = this.breadcrumbsService.currentStep.data.patientName;
+            if (this.breadcrumbsService.currentStep.data.subjectNamePrefix) {
+                if (this.forceStudy?.name) this.subjectNamePrefix = this.forceStudy.name + '-';
+                this.subjectNamePrefix += this.breadcrumbsService.currentStep.data.subjectNamePrefix + '-';
+            }
+            if (this.subjectNamePrefix) {
+                this.subject.name = this.subjectNamePrefix;
+	        }
         }
     }
 
@@ -104,7 +114,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
+            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix]))],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -126,7 +136,19 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
                 this.updateFormControl(subjectForm);
             })
         );
+        if (!this.subject.name && this.subjectNamePrefix) {
+            this.subject.name = this.subjectNamePrefix;
+        }
         return subjectForm;
+    }
+    
+    private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
+      return (c: AbstractControl): { [key: string]: boolean } | null => {
+        if (forbiddenValues.indexOf(c.value) !== -1) {
+          return { 'subjectNamePrefix': true };
+        }
+        return null;
+      };
     }
 
     private updateFormControl(formGroup: FormGroup) {
@@ -201,8 +223,10 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     public toggleAnonymised() {
-        if (this.isAlreadyAnonymized && this.breadcrumbsService.currentStep.data.patientName) {
-            this.subject.name = this.breadcrumbsService.currentStep.data.patientName;
+        if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
+            this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
+        } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
+            this.subject.name = this.subjectNamePrefix; 
         }
     }
 }
