@@ -207,7 +207,7 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
 		Examination exam = new Examination();
-		exam.setId(Long.valueOf(123));
+		exam.setId(123L);
 		exam.setStudyId(3L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
@@ -222,7 +222,7 @@ public class ExaminationApiControllerTest {
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(exam.getStudyId().toString(), event.getStudyId());
+		assertEquals(exam.getStudyId(), event.getStudyId());
 		assertEquals(exam.getId().toString(), event.getObjectId());
 		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
 		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + exam.getSubjectId(), event.getMessage());

@@ -37,6 +37,10 @@ public class StudyExamination extends AbstractEntity {
 	@JoinColumn(name = "subject_id")
 	private Subject subject;
 
+	public StudyExamination() {
+		// default constructor
+	}
+
 	public StudyExamination(Long examinationId, Study study, Center center, Subject subject) {
 		super();
 		this.examinationId = examinationId;
