@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -20,6 +21,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.FacetParams;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -40,10 +42,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.SimpleField;
-import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SimpleFacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author yyao
@@ -138,12 +140,12 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	
 	private <T> void addFilterQueryFromRange(SolrQuery query, String fieldName, Range<T> range) {
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
-			query.addFilterQuery(fieldName + ":[" 
-					+ range.getLowerBound() != null ? range.getLowerBound().toString() : "*"
-					+ ","
-					+ range.getUpperBound() != null ? range.getUpperBound().toString() : "*"  	
-					+ "]"
-			);
+			String rangeQueryStr = fieldName + ":[" 
+					+ (range.getLowerBound() != null ? range.getLowerBound().toString() : "*")
+					+ " TO "
+					+ (range.getUpperBound() != null ? range.getUpperBound().toString() : "*") 	
+					+ "]";	
+			query.addFilterQuery(rangeQueryStr);
 		}
 	}
 	
@@ -183,13 +185,18 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		/* query Solr server */
 		QueryResponse response;
 		try {
+			LOG.debug("Solr search : " + query);
 			response = client.query("shanoir", query);
-		} catch (SolrServerException | IOException e) {
+			LOG.debug("Solr response : " + response);
+		} catch (IOException e) {
 			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
+		} catch (SolrException | SolrServerException e) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			throw new RestServiceException(e, error);
 		}
 
 		/* build the page object */
-		return buildShanoirSolrPage(response, pageable);
+		return buildShanoirSolrPage(response, pageable, shanoirQuery.getFacetPaging());
 	}
 	
 	private void addUserFiltering(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
@@ -216,7 +223,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		}
 	}
 
-	private SolrResultPage<ShanoirSolrDocument> buildShanoirSolrPage(QueryResponse response, Pageable pageable) {
+	private SolrResultPage<ShanoirSolrDocument> buildShanoirSolrPage(QueryResponse response, Pageable pageable, Map<String, FacetPageable> facetPaging) {
 		
 		SolrDocumentList documents = response.getResults();
 		if (documents == null) documents = new SolrDocumentList();
@@ -235,7 +242,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			  solrDoc.setStudyName((String) document.getFirstValue("studyName"));
 			  solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
 			  solrDoc.setCenterName((String) document.getFirstValue("centerName"));
-			  solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness"));
+			  solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
 			  solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
 			  solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
 			  solrDocuments.add(solrDoc);
@@ -245,7 +252,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		if (response.getFacetFields() != null) {
 			for (FacetField facetField : response.getFacetFields()) {
 				if (facetField.getValueCount() > 0) {
-					Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(buildFacetResultPage(facetField));
+					Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(buildFacetResultPage(facetField, facetPaging.get(facetField.getName())));
 					page.addFacetResultPage(facetPage, new SimpleField(facetField.getName()));
 				}
 				
@@ -254,10 +261,10 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		return page;
 	}
 	
-	private Page<FacetFieldEntry> buildFacetResultPage(FacetField facetField) {
+	private Page<FacetFieldEntry> buildFacetResultPage(FacetField facetField, FacetPageable facetPageable) {
 		List<FacetFieldEntry> content = new ArrayList<>();
 		for (FacetField.Count facetFieldCount : facetField.getValues()) {
-			Field field = new SimpleField(facetFieldCount.getName());
+			Field field = new SimpleField(facetField.getName());
 			FacetFieldEntry facetFieldEntry = new SimpleFacetFieldEntry(
 					field, 
 					facetFieldCount.getName(), 
@@ -265,9 +272,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			content.add(facetFieldEntry);
 		}
 		
-		Pageable fakePageable = new SolrPageRequest(3, 3);
-		
-		Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(content, fakePageable, facetField.getValueCount());
+		Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(content, facetPageable, facetField.getValueCount());
 		return facetPage;
 	}
 	
@@ -279,9 +284,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addSearchInAllClause(SolrQuery query, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] searchTerms = ClientUtils.escapeQueryChars(searchStr).trim().split(" ");
-			
-			List<String> termInAnyFieldFormattedStrList = new ArrayList<>();
+			String[] searchTerms = ClientUtils.escapeQueryChars(searchStr).trim().split(" ");		
 			for (String term : searchTerms) {
 				List<String> termInFieldFormattedStrList = new ArrayList<>();
 				for (String field : TEXTUAL_FACET_LIST) {
@@ -297,26 +300,27 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 						.append("(")
 						.append(String.join(" OR ", termInFieldFormattedStrList))
 						.append(")");
-				termInAnyFieldFormattedStrList.add(termInAnyFieldFormattedStr.toString());
+				query.addFilterQuery(termInAnyFieldFormattedStr.toString());
 			}
-			query.addFilterQuery(String.join(" AND ", termInAnyFieldFormattedStrList));
 		}
 	}
 	
 	private void addFacetPaging(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
 		if (shanoirQuery.getFacetPaging() != null) {
 			query.setFacetMinCount(0);
+			query.set("facet.numTerms", true);
 			for (String facetName : TEXTUAL_FACET_LIST) {
 				if (shanoirQuery.getFacetPaging().containsKey(facetName)) {
 					query.addFacetField(facetName); // needed ?
 					FacetPageable facetPageable = shanoirQuery.getFacetPaging().get(facetName);	
-					query.set( "f." + facetName + "." + FacetParams.FACET_LIMIT, facetPageable.getPageSize());
-					query.set( "f." + facetName + "." + FacetParams.FACET_OFFSET, facetPageable.getPageNumber() * facetPageable.getPageSize());
+					query.set("f." + facetName + "." + FacetParams.FACET_LIMIT, facetPageable.getPageSize());
+					query.set("f." + facetName + "." + FacetParams.FACET_OFFSET, (facetPageable.getPageNumber() - 1) * facetPageable.getPageSize());
+					query.set("f." + facetName + ".numTerms", true);
 					if (facetPageable.getFilter() != null && !facetPageable.getFilter().isEmpty()) {
 						query.set("f." + facetName + "." + FacetParams.FACET_CONTAINS_IGNORE_CASE, true);
 						query.set("f." + facetName + "." + FacetParams.FACET_CONTAINS, ClientUtils.escapeQueryChars(facetPageable.getFilter()).trim());
 					}
-					if (facetPageable.getFacetOrder() != null) {;				
+					if (facetPageable.getFacetOrder() != null) {
 						query.set("f." + facetName + "." + FacetParams.FACET_SORT, facetPageable.getFacetOrder().equals(FacetOrder.COUNT) ? "count" : "index");
 					}
 				}

@@ -41,10 +41,10 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
 			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class),
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
+			@ColumnResult(name="subjectId", type = Long.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class),
-			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class),
-			@ColumnResult(name="subjectId", type = Long.class)
+			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Double.class),
+			@ColumnResult(name="pixelBandwidth", type = Double.class), @ColumnResult(name="magneticFieldStrength", type = Double.class)
 	})
 })
 public class ShanoirMetadata {
@@ -90,8 +90,8 @@ public class ShanoirMetadata {
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Double sliceThickness,
-			Double pixelBandwidth, Double magneticFieldStrength, Long subjectId) {
+			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Double sliceThickness,
+			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -100,14 +100,14 @@ public class ShanoirMetadata {
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
+		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-		this.subjectId = subjectId;
-	}
+	}	
 	
 	/**
 	 * @return the datasetId

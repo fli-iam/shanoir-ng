@@ -17,7 +17,7 @@ import { Injectable } from '@angular/core';
 import { Order, Page, Pageable, Sort } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
-import { FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 
 
 @Injectable()
@@ -34,25 +34,25 @@ export class SolrService {
     }
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
-        let serializedSolrRequest: string = JSON.stringify(solrReq);
-        if (serializedSolrRequest == '{}') {
-            return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
-            .toPromise();
-        } else {
-            return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, serializedSolrRequest, { 'params': pageable.toParams() })    
-            .toPromise();
-        }
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() })    
+        .toPromise();
     }
 
     public getFacets(): Promise<SolrResultPage> {
-        let pageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
-        return this.http.get<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, { 'params': pageable.toParams() })    
-            .toPromise();
+        let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
+        let solrRequest: SolrRequest = new SolrRequest();
+        solrRequest.facetPaging = new Map();
+        solrRequest.facetPaging.set('datasetName', new FacetPageable(1, 10));
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrRequest), { 'params': fakePageable.toParams() })    
+        .toPromise();
     }
 
-    public getFacet(facetName: string, pageable: Pageable): Promise<FacetResultPage> {
-        return this.http.get<FacetResultPage>(AppUtils.BACKEND_API_SOLR_URL + '/facet/' + facetName, { 'params': pageable.toParams() })    
-            .toPromise();
+    public getFacet(facetName: string, pageable: FacetPageable, mainRequest: SolrRequest): Promise<FacetResultPage> {
+        let fakePageable: Pageable = new Pageable(1, 0, new Sort([new Order('DESC', 'id')]));
+        mainRequest.facetPaging = new Map();
+        mainRequest.facetPaging.set(facetName, pageable);
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })  
+            .toPromise().then(solrResPage => solrResPage && solrResPage.facetResultPages ? solrResPage.facetResultPages[0] : null);
     }
 
     public getByDatasetIds(datasetIds: number[], pageable: Pageable): Promise<Page<SolrDocument>> {
@@ -63,6 +63,21 @@ export class SolrService {
                 if (page) page.content.forEach(solrDoc => solrDoc.id = solrDoc.datasetId);
                 return page;
             });
+    }
+
+    private stringifySolrRequest(solrRequest: SolrRequest): string {
+        return JSON.stringify(solrRequest, (key, value) => {
+            // write a Map as a key value object
+            if(value instanceof Map) {
+                let res: any = {};
+                value.forEach((v, k) => res[k] = v);
+                return res;
+            } else if (key.endsWith('Date') && value == 'invalid') {
+                return null;
+            } else {
+                return value;
+            }
+        })
     }
 
 }

@@ -22,7 +22,7 @@ export class Pageable {
 
     public toParams(): any {
         let params: any = {
-            'page': this.pageNumber-1,
+            'page': this.pageNumber - 1,
             'size': this.pageSize
         };
         if (this.sort && this.sort.orders && this.sort.orders.length > 0) {

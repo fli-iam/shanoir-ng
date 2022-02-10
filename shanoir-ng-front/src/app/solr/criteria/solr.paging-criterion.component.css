@@ -1,0 +1,10 @@
+.min-list { max-height: 286px; margin: 5px 0; }
+.loader { text-align: center; }
+.remove-selected { cursor: pointer; }
+.selections { margin: 5px 0; transition:height .5s ease-in-out; }
+.selection { border: 1px solid var(--grey); border-radius: 10px; padding: 0 5px; display: inline-block; margin: 2px 4px 2px 0; background-color: palegoldenrod; overflow: hidden; white-space: nowrap; max-width: calc(100% - 10px); text-overflow: ellipsis; }
+.selection i { margin-right: 3px; }
+.clear-selection { color: var(--greyer); margin: 2px 0 0 2px; }
+.disabled { color: var(--grey); }
+.pager { text-align: center; }
+.pager span { padding: 0 10px; }

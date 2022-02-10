@@ -12,37 +12,47 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
+<ng-template #pager>
+    <div class="pager" *ngIf="maxPage > 1">
+        <span [class.clickable]="currentPage.number > 1" [class.disabled]="currentPage.number <= 1" (click)="currentPage.number > 1 ? goToPage(currentPage.number - 1) : null"><i class="fas fa-angle-left"></i></span>
+        <span>{{currentPage.number}}</span>
+        <span [class.clickable]="currentPage.number < maxPage" class="clickable" [class.disabled]="currentPage.number >= maxPage" (click)="currentPage.number < maxPage ? goToPage(currentPage.number + 1) : null"><i class="fas fa-angle-right"></i></span>
+    </div>
+</ng-template>
+
 <div class="title">
     {{label}}
-    <span *ngIf="!open" class="colapse" (click)="open = true"><i class="fas fa-chevron-down"></i></span>
-    <span *ngIf="open" class="colapse" (click)="open = false"><i class="fas fa-chevron-up"></i></span>
+    <span *ngIf="!open" class="colapse" (click)="doOpen()"><i class="fas fa-chevron-down"></i></span>
+    <span *ngIf="open" class="colapse" (click)="doClose()"><i class="fas fa-chevron-up"></i></span>
 </div>
-<div *ngIf="open" @slideDown class="content">
+<div *ngIf="open && loaded" @slideDown class="content">
     <div>
         <div class="filter-frame">
             <input [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
             <span class="left-icon clickable clear" (click)="clearFilter()"><i class="fas fa-times"></i>clear</span>
         </div>
     </div>
-    <div [class.non-visible]="!hasChecked" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-times"></i>clear selection</div>
-    <ul *ngIf="loaded && selectedFacets" class="selected-list">
-        <li *ngFor="let item of selectedFacets">
-            <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange()"></checkbox>
-            <span class="facet" [title]="item.value">{{item.value}}</span><span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span>
-        </li>
+    <ul *ngIf="loaded && hasChecked" class="selections">
+        <span *ngFor="let item of selectedFacets" class="selection" [title]="item.value">
+            <span class="remove-selected" (click)="item.checked = false; onCheckChange(item);"><i class="fas fa-times"></i></span>
+            {{item.value}}
+            <!-- <span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span> -->
+        </span>
+        <div [class.non-visible]="this.selectedFacets.length < 2" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="far fa-times-circle"></i>clear all</div>
     </ul>
-    <ul *ngIf="loaded" class="min-list">
+    <ng-template [ngTemplateOutlet]="pager"></ng-template>
+    <ul *ngIf="loaded" class="min-list" [@slideRight]="loading">
         <ng-container *ngFor="let item of displayedFacets">
             <li *ngIf="!item.hidden">
-                <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange()"></checkbox>
+                <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange(item)"></checkbox>
                 <span class="facet" [title]="item.value">{{item.value}}</span><span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span>
             </li>
         </ng-container>
+        <!-- <li *ngIf="!pagesEnded" class="loader">
+            <span *ngIf="loading">
+                <i class="fa fa-cog fa-spin"></i>
+            </span>
+        </li> -->
     </ul>
-    <div *ngIf="expandable && !expanded" (click)="expand()" class="clickable more">+ more ...</div>
-    <div *ngIf="displayedFacets.length > minSize && expanded" (click)="shrink()" class="clickable left-icon less"><i class="fas fa-caret-up"></i>hide</div>
-    <div *ngIf="loaded" class="count">
-        <span *ngIf="filteredCount != null" class="filtered">filtered : {{filteredCount}}</span>
-        <span class="total">total : {{totalCount}}</span>
-    </div>
+    <ng-template [ngTemplateOutlet]="pager"></ng-template>
 </div>

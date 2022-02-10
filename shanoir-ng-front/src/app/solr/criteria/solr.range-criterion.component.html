@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span *ngIf="!open" class="colapse" (click)="open = true"><i class="fas fa-chevron-down"></i></span>
     <span *ngIf="open" class="colapse" (click)="open = false"><i class="fas fa-chevron-up"></i></span>
 </div>
-<div class="body content" *ngIf="open" @slideDown>
+<div class="body content" *ngIf="open && range" @slideDown>
     <span>from : </span>
     <input type="number" [(ngModel)]="range.lowerBound" (change)="change()"/>
     <span>to : </span>

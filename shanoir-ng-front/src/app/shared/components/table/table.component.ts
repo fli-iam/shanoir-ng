@@ -19,6 +19,7 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
+import { SolrResultPage } from '../../../solr/solr.document.model';
 
 
 @Component({
@@ -28,7 +29,7 @@ import * as shajs from 'sha.js';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<SolrResultPage>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
@@ -264,7 +265,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "cell-" + type : "";
     }
 
-    goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
+    goToPage(p: number, forceRefresh: boolean = false): Promise<SolrResultPage> {
         this.currentPage = p;
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
@@ -275,19 +276,20 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 this.isError = false;
                 this.isLoading = false;
             }, 200);
+            return page;
         }).catch(reason => {
             setTimeout(() => {
                 this.isError = true;
                 this.isLoading = false;
-                throw reason;
             }, 200);
+            throw reason;
         });
     }
 
     /**
      * Call to refresh from outsilde
      */
-    public refresh(page?: number): Promise<void> {
+    public refresh(page?: number): Promise<SolrResultPage> {
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {

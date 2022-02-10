@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { DatePipe } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -32,10 +32,13 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
+import { SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 
-
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
+export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
@@ -47,8 +50,8 @@ import { Range } from '../shared/models/range.model';
 export class SolrSearchComponent implements AfterViewChecked{
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
-
-    facetResultPages: FacetResultPage[] = [];
+    @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
+    //facetResultPages: FacetResultPage[] = [];
     keyword: string;
     expertMode: boolean = false;
     selections: SelectionBlock[] = [];
@@ -60,31 +63,16 @@ export class SolrSearchComponent implements AfterViewChecked{
     @ViewChild('table', { static: false }) table: TableComponent;
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
-    allFacetResultPages: FacetResultPage[] = [];
-    clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
+    //clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
-    datasetStartDate: Date | 'invalid';
-    datasetEndDate: Date | 'invalid';
     dateOpen: boolean = false;
-    sliceThicknessRange: Range = new Range(null, null);
-    pixelBandwidthRange: Range = new Range(null, null);
-    magneticFieldStrengthRange: Range = new Range(null, null);
 
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
     loaded: boolean = false;
     viewChecked: boolean = false;
-
-    private requestKeys: string[] = [
-        'studyName',
-        'subjectName',
-        'examinationComment',
-        'datasetName',
-        'datasetType',
-        'datasetNature',
-        'tags'
-    ];
+    solrRequest: SolrRequest = new SolrRequest();
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
@@ -98,14 +86,14 @@ export class SolrSearchComponent implements AfterViewChecked{
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
         
-        this.getFacets().then(() => {
-            if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
-                let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
-                this.loadState(savedRequest);
-                this.updateSelections();
-            }
-            this.loaded = true;
-        });
+        // this.getFacets().then(() => {
+        // });
+        if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+            let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+            //this.loadState();
+            this.updateSelections();
+        }
+        this.loaded = true;
 
         this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
@@ -155,8 +143,8 @@ export class SolrSearchComponent implements AfterViewChecked{
     buildForm(): FormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
-            'startDate': [this.datasetStartDate, [DatepickerComponent.validator]],
-            'endDate': [this.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
+            'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
+            'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
         });
         return formGroup;
     }
@@ -180,111 +168,120 @@ export class SolrSearchComponent implements AfterViewChecked{
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.datasetStartDate && this.datasetEndDate 
-            && this.datasetStartDate > this.datasetEndDate) {
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate 
+            && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
                 return { order: true }
         }
         return null;
     }
 
-    updateWithKeywords(solrRequest: SolrRequest): SolrRequest {
-        solrRequest.searchText = this.keyword.trim();
-        solrRequest.expertMode = this.expertMode;
-        return solrRequest;
+    // updateWithKeywords(solrRequest: SolrRequest): SolrRequest {
+    //     solrRequest.searchText = this.keyword.trim();
+    //     solrRequest.expertMode = this.expertMode;
+    //     return solrRequest;
+    // }
+
+    // updateWithFields(solrRequest: SolrRequest): SolrRequest {
+    //     this.allFacetResultPages.forEach(facetResultPage => {
+    //         facetResultPage.content.forEach(facetResult => {
+    //             if (facetResult.checked) {
+    //                 const key: string = facetResult.key.name.split('_')[0];
+    //                 if (!solrRequest[key]) solrRequest[key] = [];
+    //                 solrRequest[key].push(facetResult.value);
+    //             }
+    //         });
+    //     });
+    //     if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
+    //         solrRequest.datasetStartDate = this.datasetStartDate;
+    //     }
+    //     if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
+    //         solrRequest.datasetEndDate = this.datasetEndDate;
+    //     }
+    //     if (this.sliceThicknessRange.hasBound()) {
+    //         solrRequest.sliceThickness = this.sliceThicknessRange;
+    //     }
+    //     if (this.pixelBandwidthRange.hasBound()) {
+    //         solrRequest.pixelBandwidth = this.pixelBandwidthRange;
+    //     }
+    //     if (this.magneticFieldStrengthRange.hasBound()) {
+    //         solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
+    //     }
+    //     return solrRequest;
+    // }
+
+    private saveState() {
+        this.breadcrumbsService.currentStep.data.solrRequest = this.solrRequest;
     }
 
-    updateWithFields(solrRequest: SolrRequest): SolrRequest {
-        this.allFacetResultPages.forEach(facetResultPage => {
-            facetResultPage.content.forEach(facetResult => {
-                if (facetResult.checked) {
-                    const key: string = facetResult.key.name.split('_')[0];
-                    if (!solrRequest[key]) solrRequest[key] = [];
-                    solrRequest[key].push(facetResult.value);
-                }
-            });
-        });
-        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
-            solrRequest.datasetStartDate = this.datasetStartDate;
-        }
-        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
-            solrRequest.datasetEndDate = this.datasetEndDate;
-        }
-        if (this.sliceThicknessRange.hasBound()) {
-            solrRequest.sliceThickness = this.sliceThicknessRange;
-        }
-        if (this.pixelBandwidthRange.hasBound()) {
-            solrRequest.pixelBandwidth = this.pixelBandwidthRange;
-        }
-        if (this.magneticFieldStrengthRange.hasBound()) {
-            solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
-        }
-        return solrRequest;
-    }
-
-    private saveState(solrRequest: SolrRequest) {
-        this.breadcrumbsService.currentStep.data.solrRequest = solrRequest;
-    }
-
-    private loadState(solrRequest: SolrRequest) {
-        if (solrRequest && Object.keys(solrRequest).length != 0) {
-            this.allFacetResultPages.forEach(facetResult => {
-                if (facetResult.content.length > 0) {
-                    let key: string = facetResult.content[0].field.name.replace('_str', '');
-                    facetResult.content.forEach(field => {
-                        field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
-                    })
-                }
-            });
-            if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
-            if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
-            if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
-            if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
-            if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
-            this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
-            this.keyword = solrRequest.searchText;
-            this.expertMode = solrRequest.expertMode;
-        }
-    }
+    // private loadState() {
+    //     console.log(this.pagingCriterion)
+    //     if (solrRequest && Object.keys(solrRequest).length != 0) {
+    //         this.allFacetResultPages.forEach(facetResult => {
+    //             if (facetResult.content.length > 0) {
+    //                 let key: string = facetResult.content[0].field.name;
+    //                 facetResult.content.forEach(field => {
+    //                     field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
+    //                 })
+    //             }
+    //         });
+    //         if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
+    //         if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
+    //         if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
+    //         if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
+    //         if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
+    //         this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
+    //         this.keyword = solrRequest.searchText;
+    //         this.expertMode = solrRequest.expertMode;
+    //     }
+    // }
     
     updateSelections() {
         this.selections = [];
-        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + this.datePipe.transform(this.datasetStartDate, 'dd/MM/yyy'),
-                    () => this.datasetStartDate = null
+                    'from: ' + this.datePipe.transform(this.solrRequest.datasetStartDate, 'dd/MM/yyy'),
+                    () => this.solrRequest.datasetStartDate = null
             ));
         }
-        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
+        if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + this.datePipe.transform(this.datasetEndDate, 'dd/MM/yyy'),
-                    () => this.datasetEndDate = null 
+                    'to: ' + this.datePipe.transform(this.solrRequest.datasetEndDate, 'dd/MM/yyy'),
+                    () => this.solrRequest.datasetEndDate = null 
             ));
         }
-        this.allFacetResultPages.forEach(facetRes => {
-            this.selections = this.selections.concat(
-                facetRes.content
-                    .filter(facetField => facetField.checked)
-                    .map(facetField => new FacetSelectionBlock(facetField))
-            );
+        TextualFacetNames.forEach(facetName => {
+            if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
+                (this.solrRequest[facetName] as []).forEach((facetVal, index) => {
+                    this.selections = this.selections.concat(
+                        new SimpleValueSelectionBlock(facetVal, () => { 
+                            this.solrRequest[facetName].splice(index, 1);
+                        })
+                    );
+
+                })
+            }
         })
-        if (this.sliceThicknessRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('S. Thickness', this.sliceThicknessRange));
+        
+        if (this.solrRequest.sliceThickness?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('S. Thickness', this.solrRequest.sliceThickness));
         }
-        if (this.pixelBandwidthRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.pixelBandwidthRange));
+        if (this.solrRequest.pixelBandwidth?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.solrRequest.pixelBandwidth));
         }
-        if (this.magneticFieldStrengthRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.magneticFieldStrengthRange));
+        if (this.solrRequest.magneticFieldStrength?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.solrRequest.magneticFieldStrength));
         }
     }
 
     refreshTable() {
-        if (this.tab != 'results') {
-            this.openResultTab();
-            this.table.refresh(1);
-        } else {
-            this.table.refresh(1);
-        }
+        if (this.tab != 'results') this.openResultTab();
+        this.table.refresh(1).then((page: SolrResultPage) => {
+            if (page) {
+                this.pagingCriterion.forEach(criterionComponent => {
+                    criterionComponent.refresh(page.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName))
+                });
+            }
+        });
     }
 
     openResultTab() {
@@ -308,7 +305,7 @@ export class SolrSearchComponent implements AfterViewChecked{
     removeAllFacets() {
         this.selections.forEach(selection => selection.remove());
         this.selections = [];
-        this.clearTextSearch();
+        this.solrRequest = new SolrRequest();
     }
 
     removeSelection(index: number) {
@@ -318,22 +315,28 @@ export class SolrSearchComponent implements AfterViewChecked{
 
     getPage(pageable: Pageable): Promise<SolrResultPage> {
         if (this.form.valid) {
-            let solrRequest: SolrRequest = new SolrRequest();
-            if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
-            solrRequest = this.updateWithFields(solrRequest);
-            this.saveState(solrRequest);
-
-            return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
-                if (solrResultPage) { 
-                    solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-                    this.facetResultPages = solrResultPage.facetResultPages;
-                }
+            this.saveState();
+            this.solrRequest.facetPaging = new Map();
+            if (this.pagingCriterion) { // add facet request
+                this.pagingCriterion.forEach(criterion => {
+                    if (criterion.open) {
+                        this.solrRequest.facetPaging.set(criterion.facetName, criterion.getCurrentPageable());
+                    }
+                });
+            }
+            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+                // if (solrResultPage) { 
+                //     solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
+                //     this.facetResultPages = solrResultPage.facetResultPages;
+                // }
                 return solrResultPage;
             }).catch(reason => {
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
+            }).finally(() => {
+                this.solrRequest.facetPaging = null;
             });
         } else {
             return Promise.resolve(new SolrResultPage());
@@ -474,39 +477,41 @@ export class SolrSearchComponent implements AfterViewChecked{
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
     }
 
-    onSearchTextChange(search: {searchTxt: string, expertMode: boolean}) {
-        this.keyword = search.searchTxt;
-        this.expertMode = search.expertMode;
-        this.refreshTable();
-    }
-
-    getFacets(): Promise<SolrResultPage> {
-        return this.solrService.getFacets().then(solrResultPage => {
-            if (solrResultPage) { 
-                solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-                this.allFacetResultPages = solrResultPage.facetResultPages;
-            }
-            return solrResultPage;
-        });
-    }
+    // getFacets(): Promise<SolrResultPage> {
+    //     return this.solrService.getFacets().then(solrResultPage => {
+    //         if (solrResultPage) { 
+    //             solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
+    //             this.allFacetResultPages = solrResultPage.facetResultPages;
+    //         }
+    //         return solrResultPage;
+    //     });
+    // }
 
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {
         return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
     }
 
-    registerTextResetCallback(resetTextCallback: () => void) {
-        this.clearTextSearch = resetTextCallback;
-    }
+    // registerTextResetCallback(resetTextCallback: () => void) {
+    //     this.clearTextSearch = resetTextCallback;
+    // }
 
-    getDatasetNamePage(pageable: Pageable): Promise<FacetResultPage> {
-        return this.solrService.getFacet('datasetName', pageable);
+    getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
+        return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
-
 }
 
 export interface SelectionBlock {
     label: string;
     remove(): void;
+}
+
+export class SimpleValueSelectionBlock implements SelectionBlock {
+
+    constructor(private _label: string, public remove: () => void) {}
+
+    get label(): string {
+        return this._label;
+    }
 }
 
 export class FacetSelectionBlock implements SelectionBlock {
