@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Solr search</li>
     <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
-        <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>
+        <li routerLink="/study/list" routerLinkActive="active"><i class="fa-regular fa-folder-open"></i>Studies</li>
         <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
         <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Examinations</li>
         <li routerLink="/dataset-acquisition/list" routerLinkActive="active"><i class="fas fa-procedures"></i>Dataset acquisitions</li>

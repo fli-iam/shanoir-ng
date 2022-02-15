@@ -14,8 +14,9 @@
 import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { slideDown, slideRight } from '../../shared/animations/animations';
-import { FilterablePageable, Page, Pageable } from '../../shared/components/table/pageable.model';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
+import * as shajs from 'sha.js';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -31,48 +32,49 @@ import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.mod
         }]  
 })
 
-export class SolrPagingCriterionComponent implements ControlValueAccessor {
+export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {
    
-    minSize: number = 5;
     @Input() getPage: (pageable: FacetPageable, facetName: string) => Promise<FacetResultPage>;
     displayedFacets: FacetField[] = [];
     selectedFacets: FacetField[] = [];
     @Input() label: string = "";
+    @Input() awesome: string;
     @Input() facetName: string;
     hasChecked: boolean = false;
     filterText: string;
     loaded: boolean = false;
+    loadedPromise: Promise<void> = new Promise((resolve, reject) => this.loadedPromiseResolve = resolve);
+    private loadedPromiseResolve: () => void;
     loading: boolean = false;
     @Output() onChange: EventEmitter<string[]> = new EventEmitter();
     private _open: boolean = false;
     currentPage: FacetResultPage;
     maxPage: number = Infinity ;
-
-    private pageLoading: number = -1; // prevent loading several times a same page
+    sortMode: 'INDEX' | 'COUNT' = 'INDEX';
+    @Output() sortModeChange: EventEmitter<'INDEX' | 'COUNT'> = new EventEmitter();
+    static readonly PAGE_SIZE: number = 15;
     filterTimeout: number = 0;
+    private hash: string;
 
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
 
+    constructor(private router: Router) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.facetName) {
+            this.hash = SolrPagingCriterionComponent.getHash(this.facetName, this.router.url);
+            this.reloadSettings();
+        }
+    }
     
     goToPage(pageNumber: number): Promise<void> {
-        let pageable: FacetPageable = new FacetPageable(pageNumber, 15, 'INDEX', this.filterText);
+        let pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
         this.loading = true;
         return this.getPage(pageable, this.facetName).then(page => {
-            if (!page || !page.content || page.content.length == 0) {
-                this.maxPage = this.currentPage ? this.currentPage.number : 1;
-            } else {
-                if (page.content.length < pageable.pageSize) {
-                    this.maxPage = page.number;
-                }
-                this.displayedFacets = [];
-                page.content.forEach(facet => {
-                    facet.checked = this.selectedFacets.findIndex(selectedfacet => selectedfacet.value == facet.value) != -1;
-                    this.displayedFacets.push(facet);
-                });
-                this.currentPage = page;
-            }
+            this.loadPage(page);
             this.loaded = true;
+            this.loadedPromiseResolve();
             this.loading = false;
         }).catch(error => {
             this.loading = false;
@@ -80,8 +82,24 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor {
         });
     }
 
+    loadPage(page: FacetResultPage) {
+        if (!page || !page.content || page.content.length == 0) {
+            this.maxPage = this.currentPage ? this.currentPage.number : 1;
+        } else {
+            if (page.content.length < SolrPagingCriterionComponent.PAGE_SIZE) {
+                this.maxPage = page.number;
+            }
+            this.displayedFacets = [];
+            page.content.forEach(facet => {
+                facet.checked = this.selectedFacets.findIndex(selectedfacet => selectedfacet.value == facet.value) != -1;
+                this.displayedFacets.push(facet);
+            });
+            this.currentPage = page;
+        }
+    }
+
     getCurrentPageable(): FacetPageable {
-        return new FacetPageable(this.currentPage?.number ? this.currentPage?.number : 1, 15, 'INDEX', this.filterText);
+        return new FacetPageable(this.currentPage?.number && this.sortMode == 'INDEX' ? this.currentPage?.number : 1, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
     }
 
     resetList(): Promise<void> {
@@ -89,26 +107,14 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor {
     }
 
     public refresh(page?: FacetResultPage) {
-        if (page && this.currentPage?.content) {
-            // update facet counts with incoming page
-            page.content.forEach((incomingFacetField, index) => {
-                if (this.currentPage.content[index] && incomingFacetField.value == this.currentPage.content[index].value) {
-                    this.currentPage.content[index].valueCount = incomingFacetField.valueCount;
-                }
-            });
+        if (page) {
+            this.loadPage(page);
+            this.loaded = true;
+            this.loadedPromiseResolve();
         } else if (this.open) {
             this.goToPage(this.currentPage ? this.currentPage.number : 1);
         }
     }
-
-    // onScroll(event: any) {
-    //     if (!this.pagesEnded 
-    //             && event.target.offsetHeight + event.target.scrollTop >= (event.target.scrollHeight - 100) // reached scroll end ?
-    //             && this.pageLoading != this.currentPage.number) {
-    //         this.pageLoading = this.currentPage.number ;
-    //         this.appendPage(this.currentPage.number + 2);
-    //     }
-    // }
 
     clearSelection() {
         this.selectedFacets = [];
@@ -142,7 +148,6 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor {
     
     onFilterChange() {
         // wait till the user has stopped typing for 500ms before querying
-        this.loading = true;
         if (this.filterTimeout <= 0) {
             this.filterTimeout = 500;
             let everySecondHandler = setInterval(() => {
@@ -158,26 +163,48 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor {
         }
     }
 
-    doOpen() {
+    doOpen(loadPage: boolean = true) {
         this._open = true;
-        if (!this.loaded) {
+        if (!this.loaded && loadPage) {
             this.resetList();
         }
+        this.saveSettings();
     }
 
     doClose() {
         this._open = false;
+        this.saveSettings();
+    }
+
+    toggle() {
+        if (this._open) this.doClose();
+        else this.doOpen();
     }
 
     get open(): boolean {
         return this._open;
     }
 
-    writeValue(selectedFaceValues: string[]): void {
-        this.selectedFacets = [];
-        this.displayedFacets.forEach(facet => {
-            facet.checked = selectedFaceValues?.includes(facet.value);
-            if (facet.checked) this.selectedFacets.push(facet);
+    writeValue(selectedFacetValues: string[]): void {
+        this.loadedPromise.then(() => {
+            this.selectedFacets = [];
+            if (!selectedFacetValues) selectedFacetValues = [];
+            selectedFacetValues.forEach(val => {
+                let displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
+                if (displayed) {
+                    this.selectedFacets.push(displayed);
+                    displayed.checked = true;
+                } else {
+                    let facetField: FacetField = new FacetField();
+                    facetField.checked = true;
+                    facetField.field = { name: this.facetName };
+                    facetField.key = { name: this.facetName };
+                    facetField.value = val;
+                    facetField.valueCount = 0;
+                    this.selectedFacets.push(facetField);
+                }
+            });
+            this.updateHasChecked();
         });
     }
 
@@ -189,4 +216,40 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor {
         this.propagateTouched = fn;
     }
 
+    toggleSortMode() {
+        this.sortMode = this.sortMode == 'INDEX' ? 'COUNT' : 'INDEX';
+        this.resetList();
+        this.saveSettings();
+    }
+
+    static getHash(facetName: string, routerUrl: string): string {
+        let stringToBeHashed: string = facetName + '-' + routerUrl;
+        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        let hex = hash.substring(0, 30);
+        return hex;
+    }
+
+    reloadSettings() {
+        let prefStr: string = localStorage.getItem(this.hash);
+        if (prefStr) {
+            let pref: FacetPreferences = JSON.parse(prefStr);
+            if (pref.open) {
+                this.doOpen(false);
+            }
+            if (pref.sortMode && pref.sortMode != this.sortMode) this.toggleSortMode();
+        }
+    }
+
+    saveSettings() {
+        let pref: FacetPreferences = new FacetPreferences();
+        pref.open = this.open;
+        pref.sortMode = this.sortMode;
+        localStorage.setItem(this.hash, JSON.stringify(pref));
+    }
+}
+
+export class FacetPreferences {
+
+    open: boolean;
+    sortMode: 'INDEX' | 'COUNT';
 }

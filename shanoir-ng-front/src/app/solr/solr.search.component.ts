@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { DatePipe } from '@angular/common';
-import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -34,7 +34,7 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
-import { SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
+import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -47,13 +47,10 @@ export type TextualFacet = typeof TextualFacetNames[number];
     providers: [DatePipe]
 })
 
-export class SolrSearchComponent implements AfterViewChecked{
+export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
     @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
-    //facetResultPages: FacetResultPage[] = [];
-    keyword: string;
-    expertMode: boolean = false;
     selections: SelectionBlock[] = [];
     columnDefs: any[];
     selectionColumnDefs: any[];
@@ -63,7 +60,6 @@ export class SolrSearchComponent implements AfterViewChecked{
     @ViewChild('table', { static: false }) table: TableComponent;
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
-    //clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
     dateOpen: boolean = false;
 
@@ -71,6 +67,7 @@ export class SolrSearchComponent implements AfterViewChecked{
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
     loaded: boolean = false;
+    firstPageLoaded: boolean = false;
     viewChecked: boolean = false;
     solrRequest: SolrRequest = new SolrRequest();
 
@@ -85,15 +82,6 @@ export class SolrSearchComponent implements AfterViewChecked{
                 
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
-        
-        // this.getFacets().then(() => {
-        // });
-        if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
-            let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
-            //this.loadState();
-            this.updateSelections();
-        }
-        this.loaded = true;
 
         this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
@@ -139,7 +127,15 @@ export class SolrSearchComponent implements AfterViewChecked{
             });
         }
     }
-    
+
+    ngAfterContentInit(): void {
+        if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+            this.loadState();
+            this.updateSelections();
+        }
+        this.loaded = true;
+    }
+
     buildForm(): FormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
@@ -175,65 +171,14 @@ export class SolrSearchComponent implements AfterViewChecked{
         return null;
     }
 
-    // updateWithKeywords(solrRequest: SolrRequest): SolrRequest {
-    //     solrRequest.searchText = this.keyword.trim();
-    //     solrRequest.expertMode = this.expertMode;
-    //     return solrRequest;
-    // }
-
-    // updateWithFields(solrRequest: SolrRequest): SolrRequest {
-    //     this.allFacetResultPages.forEach(facetResultPage => {
-    //         facetResultPage.content.forEach(facetResult => {
-    //             if (facetResult.checked) {
-    //                 const key: string = facetResult.key.name.split('_')[0];
-    //                 if (!solrRequest[key]) solrRequest[key] = [];
-    //                 solrRequest[key].push(facetResult.value);
-    //             }
-    //         });
-    //     });
-    //     if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
-    //         solrRequest.datasetStartDate = this.datasetStartDate;
-    //     }
-    //     if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
-    //         solrRequest.datasetEndDate = this.datasetEndDate;
-    //     }
-    //     if (this.sliceThicknessRange.hasBound()) {
-    //         solrRequest.sliceThickness = this.sliceThicknessRange;
-    //     }
-    //     if (this.pixelBandwidthRange.hasBound()) {
-    //         solrRequest.pixelBandwidth = this.pixelBandwidthRange;
-    //     }
-    //     if (this.magneticFieldStrengthRange.hasBound()) {
-    //         solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
-    //     }
-    //     return solrRequest;
-    // }
-
     private saveState() {
         this.breadcrumbsService.currentStep.data.solrRequest = this.solrRequest;
     }
 
-    // private loadState() {
-    //     console.log(this.pagingCriterion)
-    //     if (solrRequest && Object.keys(solrRequest).length != 0) {
-    //         this.allFacetResultPages.forEach(facetResult => {
-    //             if (facetResult.content.length > 0) {
-    //                 let key: string = facetResult.content[0].field.name;
-    //                 facetResult.content.forEach(field => {
-    //                     field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
-    //                 })
-    //             }
-    //         });
-    //         if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
-    //         if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
-    //         if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
-    //         if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
-    //         if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
-    //         this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
-    //         this.keyword = solrRequest.searchText;
-    //         this.expertMode = solrRequest.expertMode;
-    //     }
-    // }
+    private loadState() {
+        let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+        this.solrRequest = savedRequest;
+    }
     
     updateSelections() {
         this.selections = [];
@@ -275,13 +220,7 @@ export class SolrSearchComponent implements AfterViewChecked{
 
     refreshTable() {
         if (this.tab != 'results') this.openResultTab();
-        this.table.refresh(1).then((page: SolrResultPage) => {
-            if (page) {
-                this.pagingCriterion.forEach(criterionComponent => {
-                    criterionComponent.refresh(page.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName))
-                });
-            }
-        });
+        this.table.refresh(1);
     }
 
     openResultTab() {
@@ -316,19 +255,15 @@ export class SolrSearchComponent implements AfterViewChecked{
     getPage(pageable: Pageable): Promise<SolrResultPage> {
         if (this.form.valid) {
             this.saveState();
-            this.solrRequest.facetPaging = new Map();
-            if (this.pagingCriterion) { // add facet request
-                this.pagingCriterion.forEach(criterion => {
-                    if (criterion.open) {
-                        this.solrRequest.facetPaging.set(criterion.facetName, criterion.getCurrentPageable());
-                    }
-                });
-            }
+            this.solrRequest.facetPaging = this.buildFacetPageable();
             return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
-                // if (solrResultPage) { 
-                //     solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-                //     this.facetResultPages = solrResultPage.facetResultPages;
-                // }
+                // populate criteria
+                if (solrResultPage) {
+                    this.pagingCriterion.forEach(criterionComponent => {
+                        criterionComponent.refresh(solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName))
+                    });
+                }
+                this.firstPageLoaded = true;
                 return solrResultPage;
             }).catch(reason => {
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
@@ -341,6 +276,31 @@ export class SolrSearchComponent implements AfterViewChecked{
         } else {
             return Promise.resolve(new SolrResultPage());
         }
+    }
+
+    private buildFacetPageable(): Map<string, FacetPageable> {
+        let map = new Map();
+        if (!this.firstPageLoaded) { // dig into criterion save states before they load to avoid unneeded requests
+            TextualFacetNames.forEach(facetName => {
+                let hash: string = SolrPagingCriterionComponent.getHash(facetName, this.router.url);
+                let prefStr: string = localStorage.getItem(hash);
+                if (prefStr) {
+                    let pref: FacetPreferences = JSON.parse(prefStr);
+                    if (pref.open) {
+                        map.set(facetName, new FacetPageable(1, SolrPagingCriterionComponent.PAGE_SIZE, pref.sortMode ? pref.sortMode : 'INDEX'));
+                    }
+                }
+            });
+        } else {
+            if (this.pagingCriterion) { // add facet request
+                this.pagingCriterion.forEach(criterion => {
+                    if (criterion.open) {
+                        map.set(criterion.facetName, criterion.getCurrentPageable());
+                    }
+                });
+            }
+        }
+        return map;
     }
 
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
@@ -477,23 +437,13 @@ export class SolrSearchComponent implements AfterViewChecked{
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
     }
 
-    // getFacets(): Promise<SolrResultPage> {
-    //     return this.solrService.getFacets().then(solrResultPage => {
-    //         if (solrResultPage) { 
-    //             solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-    //             this.allFacetResultPages = solrResultPage.facetResultPages;
-    //         }
-    //         return solrResultPage;
-    //     });
-    // }
-
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {
-        return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
+        if (this.selectedDatasetIds && this.selectedDatasetIds.size > 0) {
+            return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
+        } else {
+            return Promise.resolve(null);
+        }
     }
-
-    // registerTextResetCallback(resetTextCallback: () => void) {
-    //     this.clearTextSearch = resetTextCallback;
-    // }
 
     getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
         return this.solrService.getFacet(facetName, pageable, this.solrRequest);

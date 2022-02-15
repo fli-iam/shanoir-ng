@@ -73,7 +73,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.colSave = this.columnDefs.map(col => { return { width: col.width, hidden: col.hidden } });
             this.hash = this.getHash();
             this.reloadSettings();
-            this.reloadPreviousState();
+            setTimeout(() => {
+                this.reloadPreviousState();
+            })
         }
     }
 

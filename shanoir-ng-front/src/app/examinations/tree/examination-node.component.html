@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <node 
             *ngIf="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             label="Extra data files"
-            awesome="far fa-folder-open"
+            awesome="fa-regular fa-folder-open"
             [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             [(opened)]="node.extraDataOpen">
         <node 

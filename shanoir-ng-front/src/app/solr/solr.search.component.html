@@ -18,13 +18,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <h2>Solr Search</h2>
 
         <div class="reset">
-            <button type="button" (click)="removeAllFacets(); keyword = null; refreshTable()" class="left-icon" [disabled]="(!selections || selections.length == 0) && (!keyword || keyword.trim().length == 0)">
+            <button type="button" (click)="removeAllFacets(); refreshTable()" class="left-icon" [disabled]="(!selections || selections.length == 0) && (!solrRequest.searchText || solrRequest.searchText.trim().length == 0)">
                 <i class="fas fa-snowplow"></i>Reset
             </button>
         </div>
 
         <solr-paging-criterion
                 label="Study"
+                awesome="fa-regular fa-folder-open"
                 facetName="studyName"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.studyName"
@@ -58,19 +59,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [ngModelOptions]="{standalone: true}"
                 (onChange)="updateSelections(); refreshTable()"> 
         </solr-paging-criterion>
-        
-        <!-- <solr-criterion
-                label="Tags"
-                [currentFacetPage]="facetResultPages[7]"
-                [allFacetPage]="allFacetResultPages[7]"
-                (onChange)="updateSelections(); refreshTable()">
-        </solr-criterion> -->
 
         <div class="dates">
-            <div class="title">
+            <div class="title" (click)="dateOpen = !dateOpen">
                 Dataset Creation Date
-                <span *ngIf="!dateOpen" class="date-colapse" (click)="dateOpen = true"><i class="fas fa-chevron-down"></i></span>
-                <span *ngIf="dateOpen" class="date-colapse" (click)="dateOpen = false"><i class="fas fa-chevron-up"></i></span>
+                <span *ngIf="!dateOpen" class="date-colapse"><i class="fas fa-chevron-down"></i></span>
+                <span *ngIf="dateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
             </div>
             <div class="date-content" *ngIf="dateOpen" @slideDown>
                 <div class="date-from">
@@ -135,7 +129,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-range-criterion
                 [range]="solrRequest.magneticFieldStrength"
-                label="Magnetic Field Strength"
+                label="Mag. Field Strength"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-range-criterion>
     </div>

@@ -21,38 +21,40 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ng-template>
 
 <div class="title">
-    {{label}}
-    <span *ngIf="!open" class="colapse" (click)="doOpen()"><i class="fas fa-chevron-down"></i></span>
-    <span *ngIf="open" class="colapse" (click)="doClose()"><i class="fas fa-chevron-up"></i></span>
+    <div *ngIf="open && this.selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></div>
+    <div class="clickable left-icon" (click)="toggle()">
+        <i *ngIf="awesome" [class]="awesome"></i>
+        {{label}}
+        <div *ngIf="!open" class="colapse"><i class="fas fa-chevron-down"></i></div>
+        <div *ngIf="open" class="colapse"><i class="fas fa-chevron-up"></i></div>
+    </div>
 </div>
 <div *ngIf="open && loaded" @slideDown class="content">
-    <div>
-        <div class="filter-frame">
-            <input [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
-            <span class="left-icon clickable clear" (click)="clearFilter()"><i class="fas fa-times"></i>clear</span>
-        </div>
-    </div>
     <ul *ngIf="loaded && hasChecked" class="selections">
         <span *ngFor="let item of selectedFacets" class="selection" [title]="item.value">
             <span class="remove-selected" (click)="item.checked = false; onCheckChange(item);"><i class="fas fa-times"></i></span>
             {{item.value}}
             <!-- <span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span> -->
         </span>
-        <div [class.non-visible]="this.selectedFacets.length < 2" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="far fa-times-circle"></i>clear all</div>
     </ul>
+    <div>
+        <div class="filter-frame">
+            <input [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
+            <span class="left-icon clickable clear" (click)="clearFilter()"><i class="fas fa-times"></i>clear</span>
+        </div>
+    </div>
+    <div class="sort-mode">
+        <i title="Sort by index" [class.disabled]="sortMode == 'COUNT'" class="fa-solid fa-arrow-down-a-z" (click)="sortMode == 'COUNT' ? toggleSortMode() : null"></i>
+        <i title="Sort by count" [class.disabled]="sortMode == 'INDEX'" class="fa-solid fa-arrow-down-9-1" (click)="sortMode == 'INDEX' ? toggleSortMode() : null"></i>
+    </div>
     <ng-template [ngTemplateOutlet]="pager"></ng-template>
-    <ul *ngIf="loaded" class="min-list" [@slideRight]="loading">
+    <ul *ngIf="loaded" class="min-list">
         <ng-container *ngFor="let item of displayedFacets">
             <li *ngIf="!item.hidden">
                 <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange(item)"></checkbox>
                 <span class="facet" [title]="item.value">{{item.value}}</span><span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span>
             </li>
         </ng-container>
-        <!-- <li *ngIf="!pagesEnded" class="loader">
-            <span *ngIf="loading">
-                <i class="fa fa-cog fa-spin"></i>
-            </span>
-        </li> -->
     </ul>
     <ng-template [ngTemplateOutlet]="pager"></ng-template>
 </div>
