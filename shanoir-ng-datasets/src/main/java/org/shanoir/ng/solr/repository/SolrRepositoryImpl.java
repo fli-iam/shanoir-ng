@@ -4,6 +4,9 @@
 package org.shanoir.ng.solr.repository;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -141,9 +144,21 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private <T> void addFilterQueryFromRange(SolrQuery query, String fieldName, Range<T> range) {
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
 			String rangeQueryStr = fieldName + ":[" 
-					+ (range.getLowerBound() != null ? range.getLowerBound().toString() : "*")
+					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().toString()) : "*")
 					+ " TO "
-					+ (range.getUpperBound() != null ? range.getUpperBound().toString() : "*") 	
+					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().toString()) : "*") 	
+					+ "]";	
+			query.addFilterQuery(rangeQueryStr);
+		}
+	}
+	
+	private void addFilterQueryFromDateRange(SolrQuery query, String fieldName, Range<LocalDate> range) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
+			String rangeQueryStr = fieldName + ":[" 
+					+ (range.getLowerBound() != null ? ClientUtils.escapeQueryChars(range.getLowerBound().plusDays(1).atStartOfDay().format(formatter)) : "*")
+					+ " TO "
+					+ (range.getUpperBound() != null ? ClientUtils.escapeQueryChars(range.getUpperBound().plusDays(1).atStartOfDay().format(formatter)) : "*") 	
 					+ "]";	
 			query.addFilterQuery(rangeQueryStr);
 		}
@@ -212,7 +227,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addFilterQueryFromRange(query, SLICE_THICKNESS_FACET, shanoirQuery.getSliceThickness());
 		addFilterQueryFromRange(query, PIXEL_BANDWIDTH_FACET, shanoirQuery.getPixelBandwidth());
 		addFilterQueryFromRange(query, MAGNETIC_FIELD_STRENGHT_FACET, shanoirQuery.getMagneticFieldStrength());
-		addFilterQueryFromRange(query, DATASET_CREATION_DATE_FACET, shanoirQuery.getDatasetDateRange());
+		addFilterQueryFromDateRange(query, DATASET_CREATION_DATE_FACET, shanoirQuery.getDatasetDateRange());
 		
 		if (shanoirQuery.getSearchText() != null && !shanoirQuery.getSearchText().trim().isEmpty()) {
 			if (shanoirQuery.isExpertMode()) {
