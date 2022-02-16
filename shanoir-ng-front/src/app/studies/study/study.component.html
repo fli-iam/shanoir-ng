@@ -203,7 +203,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (userChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
