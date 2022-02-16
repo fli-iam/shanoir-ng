@@ -223,7 +223,7 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {

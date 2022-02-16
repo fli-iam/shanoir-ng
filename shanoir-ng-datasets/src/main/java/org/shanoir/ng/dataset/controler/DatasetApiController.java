@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +66,6 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -150,9 +150,6 @@ public class DatasetApiController implements DatasetApi {
 	private WADODownloaderService downloader;
 
 	@Autowired
-	private BIDSService bidsService;
-
-	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	@Autowired
@@ -175,14 +172,18 @@ public class DatasetApiController implements DatasetApi {
 		this.request = request;
 	}
 
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 1mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(60000);
+	}
+
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
 
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -196,10 +197,6 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody(required = true) List<Long> datasetIds)
 					throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
-			for (Dataset dataset : datasets) {
-				bidsService.deleteDataset(dataset);
-			}
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {

@@ -112,6 +112,9 @@ public class RabbitMQConfiguration {
 	/** Queue to re-convert using a different nifti converter */
 	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
 
+	/** Queue to consume BIDS related events */
+	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
+	
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -343,6 +346,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue bidsEventQueue() {
+		return new Queue(BIDS_EVENT_QUEUE, true);
 	}
 
 	@Bean

@@ -199,7 +199,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && (control.touched || this.mode != 'create') && !control.valid) {
+        if (control && control.touched && !control.valid) {
             return control.errors;
         }
     }

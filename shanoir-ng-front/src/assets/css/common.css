@@ -116,12 +116,13 @@ form { color: var(--dark-grey); position: relative; }
     form fieldset li button { height: 21px; }
     form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 440px; border-radius: 2px; }
       form li.info i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
+      form li.info b { font-weight: bold; color: var(--color-a); }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { }
   form .header { padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
   form .required-label:after{ content:" *"; }
-  form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
+  form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; width: 220px; }
   form .right-col { display: inline-block; min-width: 250px; line-height: 20px; vertical-align: top; }
   form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
