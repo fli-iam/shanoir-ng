@@ -21,7 +21,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ng-template>
 
 <div class="title">
-    <div *ngIf="open && this.selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></div>
     <div class="clickable" (click)="toggle()">
         <span class="left-icon">
             <i *ngIf="awesome" [class]="awesome"></i>
@@ -38,6 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{item.value}}
             <!-- <span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span> -->
         </span>
+        <span *ngIf="this.selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></span>
     </ul>
     <div>
         <div class="filter-frame">
