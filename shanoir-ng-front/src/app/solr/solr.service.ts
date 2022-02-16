@@ -38,17 +38,9 @@ export class SolrService {
         .toPromise();
     }
 
-    public getFacets(): Promise<SolrResultPage> {
-        let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
-        let solrRequest: SolrRequest = new SolrRequest();
-        solrRequest.facetPaging = new Map();
-        solrRequest.facetPaging.set('datasetName', new FacetPageable(1, 10));
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrRequest), { 'params': fakePageable.toParams() })    
-        .toPromise();
-    }
-
     public getFacet(facetName: string, pageable: FacetPageable, mainRequest: SolrRequest): Promise<FacetResultPage> {
-        let fakePageable: Pageable = new Pageable(1, 0, new Sort([new Order('DESC', 'id')]));
+        // we can't set paxe size to 0, it would set it to default value (20)
+        let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         mainRequest.facetPaging = new Map();
         mainRequest.facetPaging.set(facetName, pageable);
         return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })  

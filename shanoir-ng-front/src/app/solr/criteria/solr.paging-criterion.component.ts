@@ -163,9 +163,9 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         }
     }
 
-    doOpen(loadPage: boolean = true) {
+    doOpen() {
         this._open = true;
-        if (!this.loaded && loadPage) {
+        if (!this.loaded) {
             this.resetList();
         }
         this.saveSettings();
@@ -217,6 +217,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     toggleSortMode() {
+        console.log('toggle')
         this.sortMode = this.sortMode == 'INDEX' ? 'COUNT' : 'INDEX';
         this.resetList();
         this.saveSettings();
@@ -234,9 +235,9 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         if (prefStr) {
             let pref: FacetPreferences = JSON.parse(prefStr);
             if (pref.open) {
-                this.doOpen(false);
+                this._open = true;
             }
-            if (pref.sortMode && pref.sortMode != this.sortMode) this.toggleSortMode();
+            if (pref.sortMode && pref.sortMode != this.sortMode) this.sortMode = pref.sortMode;
         }
     }
 
