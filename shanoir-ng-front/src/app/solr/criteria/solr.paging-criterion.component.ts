@@ -217,7 +217,6 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     toggleSortMode() {
-        console.log('toggle')
         this.sortMode = this.sortMode == 'INDEX' ? 'COUNT' : 'INDEX';
         this.resetList();
         this.saveSettings();
