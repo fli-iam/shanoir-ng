@@ -30,10 +30,6 @@ INSERT INTO study_center
 VALUES
 	(1, 1, 1);
 
-INSERT INTO study_examination
-	(examination_id, study_id)
-VALUES
-	(1, 1);
 
 INSERT INTO subject
 	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)

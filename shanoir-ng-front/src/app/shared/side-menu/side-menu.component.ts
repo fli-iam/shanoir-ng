@@ -52,7 +52,6 @@ export class SideMenuComponent {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
             this.userId = KeycloakService.auth.userId;
         }
-        this.notificationsService.connect();
 
         let storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;

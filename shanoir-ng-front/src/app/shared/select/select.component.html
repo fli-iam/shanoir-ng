@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="root" [class.disabled]="disabled" *ngIf="!readOnly" >
-    <span class="frame"> 
+    <span class="frame" *ngIf="!compactMode"> 
         <span class="input-container">
             <span class="fake-input">{{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}</span>
             <input #input
@@ -36,6 +36,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span *ngIf="onAddClick.observers.length > 0 && !addHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
         </span>
     </span>
+    <span class="frame" *ngIf="compactMode">
+        <span class="commands">
+            <span class="open button compact-button" (click)="isOpen() ? close() : open()"><i class="fas fa-plus"></i></span>
+        </span>
+    </span>
     <div *ngIf="displayedOptions?.length > 0" 
             [class.hidden-list]="hideToComputeHeight" 
             class="list" 
@@ -55,7 +60,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [class.compatible]="option.compatible"
                 [class.not-compatible]="option.compatible != undefined && !option.compatible"
                 [class.focused]="i == focusedOptionIndex"
-                (mousemove)="focusedOptionIndex = i">
+                (mousemove)="focusedOptionIndex = i"
+                [style.color]="option.color"
+                [style.background-color]="option.backgroundColor">
             {{option.label}}
         </div>
         <div *ngIf="scrollable" class="scrollbar">

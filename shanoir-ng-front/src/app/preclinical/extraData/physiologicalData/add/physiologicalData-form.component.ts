@@ -102,12 +102,12 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         });
     }
 
-    public save(): Promise<void> {
-        this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).subscribe((physioData) => {
+    public save(): Promise<PhysiologicalData> {
+        return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).then((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
             this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);
+            return physioData;
         });
-        return Promise.resolve();
     }
 
     
@@ -136,7 +136,11 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
             this.physioDataReady.emit(physioDataFile);
         }
     }
-  
+    
+    downloadFile() {
+        this.extradatasService.downloadFile(this.entity.id);
+    }
+
     changePhysio(){
         let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
         physioDataFile.filename = this.physioData.filename;

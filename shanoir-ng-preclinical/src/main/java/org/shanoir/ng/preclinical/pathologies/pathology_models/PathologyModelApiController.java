@@ -269,14 +269,14 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
 		// Create corresponding folders
-		Path path = Paths.get(extraDataPath + "models/" + model.getId());
-		Files.createDirectories(path);
+		File createdFolder = new File(extraDataPath + "/models/" + model.getId());
+		createdFolder.mkdirs();
 		// Path to file
-		Path pathToFile = Paths.get(path.toString() + File.separatorChar + file.getOriginalFilename());
-		byte[] bytes = file.getBytes();
-		Files.write(pathToFile, bytes);
+		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+		file.transferTo(fileToGet);
+
 		model.setFilename(file.getOriginalFilename());
-		model.setFilepath(pathToFile.toString());
+		model.setFilepath(fileToGet.getAbsolutePath());
 		return model;
 	}
 

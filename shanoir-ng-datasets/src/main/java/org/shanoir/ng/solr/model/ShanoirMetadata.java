@@ -37,15 +37,16 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  */
 @Entity
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
-	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class), 
+	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
 			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
-			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class), 
+			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class),
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class), 
-			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class), 
+			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class),
+			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class),
+			@ColumnResult(name="subjectId", type = Long.class)
 	})
-}) 
+})
 public class ShanoirMetadata {
 	
 	@Id
@@ -81,14 +82,16 @@ public class ShanoirMetadata {
 	
 	private Float magneticFieldStrength;
 	
+	private Long subjectId;
+	
 	public ShanoirMetadata () {
 		
 	}
 	
-	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature, 
+	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
 			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength) {
+			Float pixelBandwidth, Float magneticFieldStrength, Long subjectId) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -103,6 +106,7 @@ public class ShanoirMetadata {
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
+		this.subjectId = subjectId;
 	}
 	
 	/**
@@ -291,6 +295,20 @@ public class ShanoirMetadata {
 
 	public void setMagneticFieldStrength(Float magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
+	}
+
+	/**
+	 * @return the subjectId
+	 */
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	/**
+	 * @param subjectId the subjectId to set
+	 */
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 	
 }

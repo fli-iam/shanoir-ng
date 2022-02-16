@@ -144,6 +144,7 @@ public final class ModelsUtil {
 		sc.setStudy(study); sc.setCenter(createCenter()); sc.setId(1L);
 		study.getStudyCenterList().add(sc);
 		study.setStudyUserList(new ArrayList<>());
+		study.setTags(new ArrayList<>());
 		return study;
 	}
 

@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +66,8 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -139,13 +141,13 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private ExaminationService examinationService;
 
+	@Autowired
+	private ImporterService importerService;
+
 	private final HttpServletRequest request;
 
 	@Autowired
 	private WADODownloaderService downloader;
-
-	@Autowired
-	private BIDSService bidsService;
 
 	@Autowired
 	private DatasetSecurityService datasetSecurityService;
@@ -170,14 +172,18 @@ public class DatasetApiController implements DatasetApi {
 		this.request = request;
 	}
 
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 1mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(60000);
+	}
+
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
 
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -191,10 +197,6 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody(required = true) List<Long> datasetIds)
 					throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
-			for (Dataset dataset : datasets) {
-				bidsService.deleteDataset(dataset);
-			}
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -283,26 +285,55 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-
-		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		
+		final List<Examination> examinations = examinationService.findByStudyId(studyId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		List<Long> datasetIds = new ArrayList<Long>();
+		List<Dataset> datasets = new ArrayList<Dataset>();
 		for(Examination examination : examinations) {
 			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
 			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
 				for(Dataset dataset : datasetAcquisition.getDatasets()) {
-					datasetIds.add(dataset.getId());
+					datasets.add(dataset);
 				}
 			}
 		}
-		return new ResponseEntity<>(datasetIds, HttpStatus.OK);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+		return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
+	}
+
+	public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+	}
+
+	private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
+		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+
+		List<Dataset> datasets = new ArrayList<>();
+		for(Examination examination : examinations) {
+			List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+			for(DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+				for(Dataset dataset : datasetAcquisition.getDatasets()) {
+					datasets.add(dataset);
+				}
+			}
+		}
+		return datasets;
+	}
+	
 	@Override
 	public void downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
@@ -340,10 +371,13 @@ public class DatasetApiController implements DatasetApi {
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();
 			}
+			if (subjectName.contains("/")) {
+				subjectName = subjectName.replaceAll("/", "_");
+			}
 
 			if (DCM.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName);
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
 			} else if (NII.equals(format)) {
 				// Check if we want a specific converter
 				if (converterId != null) {
@@ -354,7 +388,7 @@ public class DatasetApiController implements DatasetApi {
 					tmpFile.mkdirs();
 					// Download DICOMs in the temporary folder
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName);
+					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
 					// Convert them, sending to import microservice
 					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
@@ -431,6 +465,13 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
+	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+		importerService.createProcessedDataset(importJob);
+		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
+		importerService.cleanTempFiles(originalNiftiName.getParent());
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 	@Override
 	public void massiveDownloadByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
@@ -493,12 +534,25 @@ public class DatasetApiController implements DatasetApi {
 		List<Dataset> failingDatasets = new ArrayList<Dataset>();
 		for (Dataset dataset : datasets) {
 			try {
+				// Ignore non adapted datasets
+				if ("eeg".equals(format) && ! (dataset instanceof EegDataset)) {
+					continue;
+				}
+				if (!"eeg".equals(format) &&  (dataset instanceof EegDataset)) {
+					continue;
+				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
+				if (subjectName.contains("/")) {
+					subjectName = subjectName.replaceAll("/", "_");
+				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
 				Examination exam = dataset.getDatasetAcquisition().getExamination();
-				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId() + "-" + exam.getComment();
+				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
+				if (exam.getComment() != null) {
+					datasetFilePath += "-" + exam.getComment();
+				}
 				datasetFilePath = datasetFilePath. replaceAll("[^a-zA-Z0-9_\\-]", "_");
 				if(datasetFilePath.length() > 255 ){
 					datasetFilePath = datasetFilePath.substring(0, 254);
@@ -516,7 +570,7 @@ public class DatasetApiController implements DatasetApi {
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName);
+					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
@@ -606,14 +660,28 @@ public class DatasetApiController implements DatasetApi {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
+			// Consider processed datasets
+			if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+				File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				index++;
+				continue;
+			}
+
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
-			name.append(subjectName).append("_")
-			.append(dataset.getUpdatedMetadata().getComment()).append("_")
-			.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-			if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-				name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+			name.append(subjectName).append("_");
+			if (dataset instanceof EegDataset) {
+				name.append(dataset.getName()).append("_");
+			} else {
+				if (dataset.getUpdatedMetadata().getComment() != null) {
+					name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				}
+				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+				}
 			}
 			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
 			.append(index)

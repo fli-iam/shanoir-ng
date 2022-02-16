@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.dataset.dto;
 
+import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ExploredEntity;
-import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 
 /**
  * DTO for dataset metadata that could be updated by study card.

@@ -26,6 +26,8 @@ RUN apt-get update -qq \
     unzip \
     pigz \
     gzip \
+    locales \
+    locales-all \
     wget
 
 # Installation of dcm4che to manage the store-scu into the PACS
@@ -36,6 +38,9 @@ RUN unzip dcm4che-5.21.0-bin.zip
 
 # take care of path
 ENV PATH /dcm4che-5.21.0/bin:$PATH
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-datasets.jar shanoir-ng-datasets.jar

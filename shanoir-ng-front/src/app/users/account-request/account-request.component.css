@@ -1,0 +1,3 @@
+.rgpd { margin: 20px 0 0; background-color: var(--color-b-light); padding: 10px 15px 1px; border-radius: 2px; }
+.language span { margin: 0 20px 0 0; color: var(--dark-grey); text-decoration: underline; cursor: pointer; } 
+.language span.selected { color: var(--color-a); font-weight: bold; }

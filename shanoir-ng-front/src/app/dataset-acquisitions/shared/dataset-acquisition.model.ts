@@ -28,7 +28,7 @@ export abstract class DatasetAcquisition extends Entity {
     rank: number;
     softwareRelease: string;
     sortingIndex: number;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg'; // TODO : other types
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed'; // TODO : other types
     protocol: any;
     name: string; // set in ExaminationDatasetAcquisitionDecorator.java
     creationDate: Date;

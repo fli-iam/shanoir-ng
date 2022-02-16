@@ -18,6 +18,7 @@ import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { findLastIndex } from '../utils/app.utils';
 
+export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Processed Dataset';
 
 @Component({
     selector: 'imports',
@@ -27,20 +28,16 @@ import { findLastIndex } from '../utils/app.utils';
 export class ImportComponent {
 
     hasOneStudy: boolean = true;
-    importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '';
+    importMode: ImportMode | '';
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
-            private rightsService: StudyRightsService,
-            private route: ActivatedRoute) {
+            private rightsService: StudyRightsService) {
 
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
-        setTimeout(()=> {
-            this.importMode = this.getImportMode();
-        });
     }
 
-    getImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | '' {
+    getImportMode(): ImportMode | '' {
         let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;

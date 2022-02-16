@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -26,6 +30,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.tag.model.Tag;
 
 /**
  * Relation between the subjects and the studies.
@@ -63,6 +68,26 @@ public class SubjectStudy extends AbstractEntity {
 
 	/** Subject type. */
 	private Integer subjectType;
+
+	/** Tags associated to the subject. */
+    @ManyToMany
+    @JoinTable( name = "subject_study_tag",
+                joinColumns = @JoinColumn( name = "subject_study_id" ))
+	private List<Tag> tags;
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
 
 	/**
 	 * @return the physicallyInvolved

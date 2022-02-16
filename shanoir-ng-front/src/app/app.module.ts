@@ -58,6 +58,11 @@ import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
+import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
+import { DatasetProcessingService } from './datasets/shared/dataset-processing.service';
+import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
+import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
@@ -77,12 +82,12 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -168,6 +173,7 @@ import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-nod
 import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
+import { SimpleDatasetNodeComponent } from './datasets/tree/simple-dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
 import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
@@ -221,7 +227,6 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 // import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
@@ -234,6 +239,11 @@ import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-ca
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
+import { TagCreatorComponent } from './tags/tag.creator.component';
+import { TagInputComponent } from './tags/tag.input.component';
+import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
+import { VarDirective } from './utils/ng-var.directive';
 
 @NgModule({
     imports: [
@@ -296,6 +306,9 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         DatasetComponent,
         EegDatasetComponent,
         DatasetListComponent,
+        DatasetProcessingComponent,
+        DatasetProcessingListComponent,
+        DatasetProcessingPipe,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
@@ -309,8 +322,10 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         EegUploadComponent,
         BidsUploadComponent,
         QueryPacsComponent,
+        ImportProcessedDatasetComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
+        ProcessedDatasetClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -318,8 +333,6 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        FinishImportComponent,
-        FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         AsyncTasksComponent,
@@ -372,13 +385,13 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
     	PhysiologicalDataFormComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent,
+        BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
         ExaminationNodeComponent,
         DatasetAcquisitionNodeComponent,
         DatasetNodeComponent,
+        SimpleDatasetNodeComponent,
         ProcessingNodeComponent,
         StudyNodeComponent,
         CenterNodeComponent,
@@ -394,8 +407,13 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         SolrTextSearchComponent,
         MetadataComponent,
         StudyCardApplyComponent,
+        ChallengeBlockComponent,
+        TagCreatorComponent,
         SolrRangeCriterionComponent,
-        ChallengeBlockComponent
+        ChallengeBlockComponent,
+        TagInputComponent,
+        StudyUserListComponent,
+        VarDirective
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -436,6 +454,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         UserService,
         DicomArchiveService,
         DatasetService,
+        DatasetProcessingService,
+        DatasetProcessingPipe,
         MsgBoxService,
     	PathologyService,
         AnimalSubjectService,
@@ -452,7 +472,7 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
     	ImportBrukerService,
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-        BreadcrumbsService,
+	    BreadcrumbsService,
         Router,
         GlobalService,
         ImportDataService,
@@ -476,12 +496,14 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,
+        DatasetProcessingDTOService,
         SolrService,
         NotificationsService,
         CenterDTOService,
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
+		ExtraDataService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
@@ -491,4 +513,4 @@ export class AppModule {
     constructor(private injector: Injector) {
         ServiceLocator.injector = injector;
     }
- }
+}

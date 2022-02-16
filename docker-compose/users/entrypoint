@@ -17,7 +17,7 @@ optional SHANOIR_CERTIFICATE
 handle_microservice_migration
 
 case "$SHANOIR_MIGRATION" in
-auto|init)
+dev|init)
 	sync="--syncAllUsersToKeycloak=true" #FIXME: why can't we use an env var here?
 	;;
 *)

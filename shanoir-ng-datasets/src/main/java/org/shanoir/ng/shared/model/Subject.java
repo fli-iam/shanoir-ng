@@ -13,11 +13,18 @@
  */
 package org.shanoir.ng.shared.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.shanoir.ng.shared.core.model.IdName;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author yyao
@@ -25,12 +32,17 @@ import org.shanoir.ng.shared.core.model.IdName;
  */
 @Entity
 @Table(name = "subject")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject extends IdName {
 	
 	@Id
 	private Long id;
 	 
 	private String name;
+
+	/** Relations beetween the subjects and the studies. */
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
+	private List<SubjectStudy> subjectStudyList;
 	
 	public Subject() {}
 	
@@ -46,6 +58,7 @@ public class Subject extends IdName {
 	/**
 	 * @return the id
 	 */
+	@Override
 	public Long getId() {
 		return id;
 	}
@@ -53,6 +66,7 @@ public class Subject extends IdName {
 	/**
 	 * @param id the id to set
 	 */
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -60,6 +74,7 @@ public class Subject extends IdName {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -67,8 +82,23 @@ public class Subject extends IdName {
 	/**
 	 * @param name the name to set
 	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 }

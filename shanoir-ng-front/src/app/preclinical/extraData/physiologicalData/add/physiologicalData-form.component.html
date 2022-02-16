@@ -83,7 +83,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label i18n="Edit physiodata|File label">File</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template  [ngSwitchCase]="'view'">
-							{{physioData.filename}}
+                            {{physioData.filename}}
+                            <button *ngIf="physioData?.filename" class="button-picto clickable" (click)="downloadFile()">
+                                <i class="fas fa-download"></i>
+                            </button>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'create'">
 							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />

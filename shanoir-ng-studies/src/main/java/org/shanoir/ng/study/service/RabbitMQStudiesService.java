@@ -132,6 +132,8 @@ public class RabbitMQStudiesService {
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);
 			subscription.setUserId(userId);
+			subscription.setReceiveNewImportReport(false);
+			subscription.setReceiveStudyUserReport(false);
 			subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
 			subscription.setUserName(event.getMessage());
 			if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {

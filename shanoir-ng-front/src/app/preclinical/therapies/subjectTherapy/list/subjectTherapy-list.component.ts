@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core'
+import {Component} from '@angular/core'
 
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -20,14 +20,6 @@ import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSub
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
-import { TableComponent } from '../../../../shared/components/table/table.component';
-import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ShanoirError } from '../../../../shared/models/error.model';
-import { ServiceLocator } from '../../../../utils/locator.service';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-import { ControlValueAccessor } from '@angular/forms';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Mode } from '../../../../shared/components/entity/entity.component.abstract';
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -35,11 +27,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     selector: 'subject-therapy-list',
     templateUrl: './subjectTherapy-list.component.html',
     providers: [
-	{ 
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SubjectTherapiesListComponent),
-          multi: true
-        },
         SubjectTherapyService
     ]
 })

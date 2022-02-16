@@ -30,6 +30,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -45,10 +46,9 @@ import org.shanoir.ng.dataset.modality.SpectDataset;
 import org.shanoir.ng.dataset.modality.StatisticalDataset;
 import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.processing.DatasetProcessing;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -110,7 +110,6 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	private Long groupOfSubjectsId;
 
-	
 	/** Processings for which this dataset is an input. */
 	@ManyToMany(mappedBy="inputDatasets")
 	private List<DatasetProcessing> processings;
@@ -137,7 +136,7 @@ public abstract class Dataset extends AbstractEntity {
 	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
 	private Long importedStudyId;
 	
-	/** Subject. */
+	/** Study. */
 	private Long studyId;
 
 	/** Subject. */
@@ -322,11 +321,10 @@ public abstract class Dataset extends AbstractEntity {
 	@Transient
 	public Long getStudyId() {
 		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-			return null;
+			return studyId;
 		}
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
-
 
 	/**
 	 * @return the subjectId

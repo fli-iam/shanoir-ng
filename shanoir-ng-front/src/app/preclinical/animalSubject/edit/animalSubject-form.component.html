@@ -155,11 +155,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<fieldset>
 					<legend i18n="AniamlSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
 				</fieldset>
-                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.pathologies" formControlName="pathologies" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
+                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
     			<fieldset>
     				<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
     			</fieldset>
-                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.therapies" formControlName="therapies" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
+                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
             </div>
 			<form-footer
 				[state]="footerState"

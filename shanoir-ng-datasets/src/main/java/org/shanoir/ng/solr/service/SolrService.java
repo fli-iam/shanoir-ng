@@ -49,7 +49,11 @@ public interface SolrService {
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException;
 
 	void indexDataset(Long datasetId);
+	
+	void indexDatasets(List<Long> datasetIds);
 
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
+
+	void addAllToIndex(List<ShanoirSolrDocument> documents);
 
 }

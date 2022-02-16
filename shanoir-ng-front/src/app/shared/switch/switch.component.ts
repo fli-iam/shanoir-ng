@@ -30,8 +30,8 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 export class ToggleSwitchComponent implements ControlValueAccessor { 
     
-    @Input() @HostBinding('class.on') ngModel: boolean = null;
-    @Output() ngModelChange = new EventEmitter();
+    @Input() @HostBinding('class.on') state: boolean = null;
+    @Output() userChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -43,37 +43,36 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
     @HostListener('click', []) 
     onClick() {
         if (this.disabled) return; 
-        this.ngModel = !this.ngModel;
-        this.ngModelChange.emit(this.ngModel);
+        this.state = !this.state;
+        this.onChangeCallback(this.state);
+        this.userChange.emit(this.state);
     }
 
     @HostListener('keydown', ['$event']) 
     onKeyPress(event: any) {
         if (this.disabled) return;
         if (' ' == event.key) {
-            this.ngModel = !this.ngModel;
-            this.ngModelChange.emit(this.ngModel);
+            this.state = !this.state;
+            this.onChangeCallback(this.state);
+            this.userChange.emit(this.state);
             event.preventDefault();
         } else if ('ArrowLeft' == event.key) {
-            if (this.ngModel) {
-                this.ngModel = false;
-                this.ngModelChange.emit(this.ngModel);    
+            if (this.state) {
+                this.state = false;
+                this.userChange.emit(this.state);
+                this.onChangeCallback(this.state);    
             }
         } else if ('ArrowRight' == event.key) {
-            if (!this.ngModel) {
-                this.ngModel = true;
-                this.ngModelChange.emit(this.ngModel);    
+            if (!this.state) {
+                this.state = true;
+                this.onChangeCallback(this.state);    
+                this.userChange.emit(this.state);
             }
         }
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel']) {
-            this.onChangeCallback(this.ngModel);
-        }
-    }
     writeValue(obj: any): void {
-        this.ngModel = obj;
+        this.state = obj;
     }
     
     registerOnChange(fn: any): void {

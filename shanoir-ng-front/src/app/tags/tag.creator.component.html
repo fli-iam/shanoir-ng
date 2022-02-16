@@ -1,0 +1,41 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+<div class="tags" *ngIf="displayedTags">
+    <span class="tag" [class.dark]="dtag.darkFont" [style.background]="dtag.tag.color" *ngFor="let dtag of displayedTags">
+        <span *ngIf="mode != 'view'" class="clickable" (click)="deleteTag(dtag)" [class.used]="dtag.used">
+            <i class="fas fa-times"></i>
+        </span>
+        {{dtag.tag.name}}
+    </span>
+    <span *ngIf="!addTagVisible && mode != 'view'" (click)="addTagVisible = true" class="clickable new">
+        <i class="fas fa-plus"></i>
+    </span>
+    <span *ngIf="addTagVisible" class="tag edit-new" [style.background-color]="selectedColor" [class.dark]="newTagDarkFont"> 
+        <span (click)="addTagVisible = false" class="cancel">
+            <i class="fas fa-times"></i>
+        </span>
+        <span class="input-box">
+            <i class="fas fa-paint-roller"></i>
+            <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()"/>
+        </span>
+        <input type="text" [(ngModel)]="text" placeholder="enter tag label..."/>
+        <span (click)="addTag()" class="save" [class.disabled]="text == null || selectedColor == null">
+            <i class="fas fa-save"></i>
+        </span>
+    </span>
+</div>
+<div *ngIf="addTagVisible" class="form-validation-alert warn">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>Warning :</strong> Identifying informations should not be added to tags.
+</div>  

@@ -35,7 +35,9 @@ public class ShanoirSolrFacet {
 	
 	private	Collection<String> centerName;
 	
-	private Collection<Long> studyId; 
+	private	Collection<String> tags;
+	
+	private Collection<Long> studyId;
 	
 	private LocalDate datasetStartDate;
 	
@@ -231,5 +233,19 @@ public class ShanoirSolrFacet {
 
 	public void setMagneticFieldStrength(Range<Float> magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public Collection<String> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(Collection<String> tags) {
+		this.tags = tags;
 	}
 }
