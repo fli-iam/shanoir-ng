@@ -35,6 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Subject"
+                awesome="fa-solid fa-user-injured"
                 facetName="subjectName"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.subjectName"
@@ -44,6 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Dataset"
+                awesome="fa-solid fa-brain"
                 facetName="datasetName"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetName"
@@ -53,6 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Tags"
+                awesome="fa-solid fa-tags"
                 facetName="tags"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.tags"
@@ -62,7 +65,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <div class="dates">
             <div class="title" (click)="dateOpen = !dateOpen">
-                Dataset Creation Date
+                <span class="left-icon">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Creation Date
+                </span>
                 <span *ngIf="!dateOpen" class="date-colapse"><i class="fas fa-chevron-down"></i></span>
                 <span *ngIf="dateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
             </div>
@@ -81,6 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Examination"
+                awesome="fa-solid fa-stethoscope"
                 facetName="examinationComment"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.examinationComment"
@@ -90,6 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Center"
+                awesome="fa-regular fa-hospital"
                 facetName="centerName"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.centerName"
@@ -99,6 +107,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Modality"
+                awesome="fa-solid fa-list-check"
                 facetName="datasetType"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetType"
@@ -108,6 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-paging-criterion
                 label="Mr Dataset Nature"
+                awesome="fa-solid fa-sliders"
                 facetName="datasetNature"
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetNature"
@@ -117,18 +127,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <solr-range-criterion
                 [range]="solrRequest.sliceThickness"
+                awesome="fa-solid fa-pizza-slice"
                 label="Slice Thickness"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-range-criterion>
 
         <solr-range-criterion
                 [range]="solrRequest.pixelBandwidth"
+                awesome="fa-solid fa-wave-square"
                 label="Pixel Bandwidth"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-range-criterion>
 
         <solr-range-criterion
                 [range]="solrRequest.magneticFieldStrength"
+                awesome="fa-solid fa-magnet"
                 label="Mag. Field Strength"
                 (onChange)="updateSelections(); refreshTable()">
         </solr-range-criterion>

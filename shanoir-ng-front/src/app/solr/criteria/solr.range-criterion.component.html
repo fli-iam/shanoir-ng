@@ -13,7 +13,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="title" (click)="open = !open">
-    {{label}}
+    <span class="left-icon">
+        <i *ngIf="awesome" [class]="awesome"></i>
+        {{label}}
+    </span>
     <span *ngIf="!open" class="colapse"><i class="fas fa-chevron-down"></i></span>
     <span *ngIf="open" class="colapse"><i class="fas fa-chevron-up"></i></span>
 </div>

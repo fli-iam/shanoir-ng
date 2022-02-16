@@ -2,6 +2,7 @@
 checkbox { transform: scale(0.8); margin-right: 7px; vertical-align: -4px; }
 
 .title { font-size: 18px; color: var(--color-a); margin-bottom: 2px; text-align: left; }
+.title i {opacity: 0.8; }
 .content { margin-top: 10px; }
 
 .filter-frame { position: relative; display: inline-block; margin-bottom: 10px; }

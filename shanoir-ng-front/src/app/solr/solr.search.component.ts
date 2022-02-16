@@ -358,7 +358,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
         let columnDefs: any = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-shield-alt", color: "goldenrod", suppressSorting: true},
+            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", suppressSorting: true},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
@@ -372,7 +372,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
-            {headerName: "", type: "button", awesome: "fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
+            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
         ];
         return columnDefs;
     }
@@ -381,16 +381,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getColumnDefs() {
         let columnDefs: any[] = this.getCommonColumnDefs();
         if (this.role == 'admin') {
-            columnDefs.push({headerName: "", type: "button", awesome: "fa-trash", action: this.openDeleteConfirmDialog});
+            columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog});
         } else if (this.role == 'expert') {
-            columnDefs.push({headerName: "", type: "button", awesome: "fa-trash", action: this.openDeleteConfirmDialog, condition: solrDoc => this.hasAdminRight(solrDoc.studyId)});
+            columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog, condition: solrDoc => this.hasAdminRight(solrDoc.studyId)});
         }
         return columnDefs;
     }
 
     getSelectionColumnDefs() {
         let columnDefs: any[] = this.getCommonColumnDefs();
-        columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-ban", action: item => {
+        columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
         }}) 
@@ -400,10 +400,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
         );
         return customActionDefs;
     }
@@ -411,14 +411,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getSelectionCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-snowplow", action: () => {
+            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => {
                 this.selectedDatasetIds = new Set();
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
         );
         return customActionDefs;
     }

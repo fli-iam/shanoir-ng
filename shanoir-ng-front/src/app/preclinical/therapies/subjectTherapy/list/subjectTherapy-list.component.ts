@@ -145,10 +145,10 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         ];
         setTimeout(() => {
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                colDef.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectEntity(item) });
+                colDef.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editSubjectEntity(item) });
             }
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                colDef.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectEntity(item) });
+                colDef.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectEntity(item) });
             }
         }, 100)
         return colDef;       

@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showProcessingDetails()"></menu-item>
+        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showProcessingDetails()"></menu-item>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')"> 

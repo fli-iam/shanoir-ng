@@ -22,9 +22,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="title">
     <div *ngIf="open && this.selectedFacets.length > 0" title="Reset" (click)="clearSelection()" class="clear-selection left-icon clickable"><i class="fas fa-snowplow"></i></div>
-    <div class="clickable left-icon" (click)="toggle()">
-        <i *ngIf="awesome" [class]="awesome"></i>
-        {{label}}
+    <div class="clickable" (click)="toggle()">
+        <span class="left-icon">
+            <i *ngIf="awesome" [class]="awesome"></i>
+            {{label}}
+        </span>
         <div *ngIf="!open" class="colapse"><i class="fas fa-chevron-down"></i></div>
         <div *ngIf="open" class="colapse"><i class="fas fa-chevron-up"></i></div>
     </div>
