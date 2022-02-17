@@ -15,7 +15,28 @@ public enum BidsDataType {
 	ANAT("anat"),
 	
 	/* perfusion.*/
-	PERF("perf");
+	PERF("perf"),
+	
+	/* ct.*/
+	CT("ct"),
+	
+	/* MEG.*/
+	MEG("meg"),
+	
+	/* EEG.*/
+	EEG("eeg"),
+	
+	/* IEEG.*/
+	IEEG("ieeg"),
+	
+	/* Behavioural.*/
+	BEH("beh"),
+	
+	/* PET.*/
+	PET("pet"),
+	
+	/* Microscopy.*/
+	MICR("micr");	
 
 	private String folderName;
 

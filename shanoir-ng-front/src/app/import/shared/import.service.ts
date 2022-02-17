@@ -37,8 +37,8 @@ export class ImportService {
                 observe: 'events'});
     }
 
-    uploadBidsFile(formData: FormData): Promise<Object> {
-        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
+    uploadBidsFile(formData: FormData, studyId: number, centerId: number): Promise<Object> {
+        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + centerId + "/", formData).toPromise();
     }
 
     uploadProcessedDataset(formData: FormData): Promise<string> {

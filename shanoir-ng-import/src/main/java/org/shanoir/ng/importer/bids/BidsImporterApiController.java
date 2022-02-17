@@ -14,46 +14,34 @@
 package org.shanoir.ng.importer.bids;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.zip.ZipOutputStream;
+import java.time.LocalDate;
 
 import org.shanoir.ng.importer.ImporterApiController;
-import org.shanoir.ng.importer.dicom.DicomDirCreator;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
-import org.shanoir.ng.importer.dto.StudyCardDTO;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.utils.ImportUtils;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.swagger.annotations.ApiParam;
 
@@ -73,6 +61,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	/**
 	 * This methods import a bunch of datasets from a Shanoir Exchange Format (based
 	 * on BIDS format)
@@ -88,7 +79,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> importAsBids(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile,
-    		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+    		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
 			throws RestServiceException, ShanoirException, IOException {
 		
 		// Analyze folder
@@ -100,17 +92,24 @@ public class BidsImporterApiController implements BidsImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
 		}
+		
+        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+            message.getMessageProperties().setHeader("x-user-id",
+            		KeycloakUtil.getTokenUserId());
+            return message;
+        });
+
 		ImportJob importJob = new ImportJob();
+		importJob.setStudyId(studyId);
 
 		// Create tmp folder and unzip archive
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
-
 		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
-
 		File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
 		
 		importJob.setWorkFolder(importJobDir.getAbsolutePath());
 
+		Long subjectId = null;
 		for (File subjectFile : importJobDir.listFiles()) {
 			String fileName = subjectFile.getName();
 			if (fileName.startsWith("sub-")) {
@@ -118,11 +117,14 @@ public class BidsImporterApiController implements BidsImporterApi {
 				String subjectName = subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
+				// Be carefull here, ID field is used to carry study id information
+				subject.setId(studyId);
+				importJob.setSubjectName(subjectName);
 				
 				System.err.println("We found a subject " + subjectName);
 
 				// Create subject
-				Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, subject);
+				subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 				
 				importJob.setSubjectName(subjectName);
 
@@ -131,46 +133,86 @@ public class BidsImporterApiController implements BidsImporterApi {
 				throw new ShanoirException("The folder should start with sub-");
 			}
 			
+			// Try to find sub-<label>_sessions.tsv file ?
+			File[] sessionFiles = subjectFile.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.equals(fileName + "_sessions.tsv");
+				}
+			});
+			
+			// We found something interesting
+			if (sessionFiles.length == 1) {
+				File sessionFile = sessionFiles[0];
+				// analyze date for every session
+				
+				// Set exam date
+			}
+			
+			// Try to find acqusition_time in scans.tsv ?
+			
 			for (File sessionFile : subjectFile.listFiles()) {
+				boolean examCreated = false;
+				ExaminationDTO examination = null;
+				Long examId = null;
 				if (sessionFile.getName().startsWith("ses-")) {
-					ExaminationDTO examination = new ExaminationDTO();
-					examination.setStudy(null);
-					examination.setSubject(null);
-					examination.setExaminationDate(null);
+					examination = createExam(studyId, centerId, subjectId, LocalDate.now());
+					examCreated = true;
+
 					// Create multiple examination for every session folder
-					Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination );
+					examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 					System.err.println("We found a session " + sessionFile.getName());
+					importJob.setExaminationId(examId);
 
 					for (File dataTypeFile : sessionFile.listFiles()) {
-						importSession(dataTypeFile, examId);
+						importSession(dataTypeFile, importJob);
 					}
 				} else {
-					// Create one examination
-					ExaminationDTO examination = new ExaminationDTO();
-					examination.setStudy(null);
-					examination.setSubject(null);
-					examination.setExaminationDate(null);
-
-					Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination );
-					importSession(sessionFile, examId);
+					// What if we find a extra-data file first ?
+					if (!examCreated) {
+						examination = createExam(studyId, centerId, subjectId, LocalDate.now());
+						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+						importJob.setExaminationId(examId);
+						examCreated = true;
+					}
+					importSession(sessionFile, importJob);
 				}
 			}
 		}
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
-	private void importSession(File dataTypeFile, Long examId) {
+	private ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, LocalDate examDate) {
+		// Create one examination
+		ExaminationDTO examination = new ExaminationDTO();
+		IdName study = new IdName();
+		study.setId(studyId);
+		examination.setStudy(study);
+
+		IdName subj = new IdName();
+		subj.setId(subjectId);
+		examination.setSubject(subj);
+		
+		IdName center = new IdName();
+		center.setId(centerId);
+		examination.setCenter(center);
+
+		// TODO: change
+		// FileTime creationTime = (FileTime) Files.getAttribute(path, "creationTime");
+		examination.setExaminationDate(examDate);
+
+		return examination;
+	}
+
+	private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
 		if (dataTypeFile.isDirectory()) {
+			importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
 			System.err.println("We found a data folder " + dataTypeFile.getName());
-			for (File datasetFile : dataTypeFile.listFiles()) {
-				System.err.println("We found a dataset file " + datasetFile.getName());
-				// Create dataset
-				rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE, datasetFile.getAbsolutePath());
-			}
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
 		} else {
-			// Create examination extra-data
 			System.err.println("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
-			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, dataTypeFile.getAbsolutePath());
+			IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));			
 		}
 	}
 

@@ -32,6 +32,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
      <p>
         Data files will be split by name (there can be two files like nifti/json if the name is the same) 
      </p>
+     <ol>
+        <legend>
+            Research study
+            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+        </legend>
+        <li>
+            <label class="required-label">Select a research study</label> 
+            <span class="right-col">
+                <select-box 
+                        [(ngModel)]="study"
+                        (userChange)="onSelectStudy();"
+                        (onViewClick)="showStudyDetails()" 
+                        [viewDisabled]="!study" 
+                        [options]="studyOptions">
+                </select-box>
+            </span>
+        </li>
+        <li>
+            <label>Select a center</label> 
+            <span class="right-col">
+                <select-box
+                        [disabled]="(!study || !centerOptions)"
+                        [(ngModel)]="center" 
+                        (onViewClick)="showCenterDetails()"
+                        [viewDisabled]="!center"
+                        [options]="centerOptions">
+                </select-box>
+            </span>
+        </li>
+    </ol>
 </fieldset>
 
 <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>

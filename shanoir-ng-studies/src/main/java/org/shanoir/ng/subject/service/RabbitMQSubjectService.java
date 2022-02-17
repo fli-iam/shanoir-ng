@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -25,6 +26,7 @@ import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -124,20 +126,56 @@ public class RabbitMQSubjectService {
 	@Transactional
 	public Long createSubject(String subjectAsString) throws JsonProcessingException {
 		// create a subject
-		Subject subject = mapper.readValue(subjectAsString, Subject.class);
-		
-		// Check subject existence by name
-		Subject existingSubject = this.subjectRepository.findByName(subject.getName());
-		
-		// If it exists, return existing ID
-		if (existingSubject != null) {
-			return existingSubject.getId();
+		try {
+			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+
+			Subject subject = mapper.readValue(subjectAsString, Subject.class);
+
+			// Be carefull, ID field is used to carry the study ID here.
+			Long studyId = subject.getId();
+			Study study = studyRepository.findById(studyId).get();
+			subject.setId(null);
+
+			// Check subject existence by name
+			Subject existingSubject = this.subjectRepository.findByName(subject.getName());
+
+			// If it exists, update subject study list
+			if (existingSubject != null) {
+				if(existingSubject.getSubjectStudyList() == null) {
+					existingSubject.setSubjectStudyList(new ArrayList<>());
+				} else if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
+					SubjectStudy subjectStudy = new SubjectStudy();
+					subjectStudy.setSubject(existingSubject);
+					subjectStudy.setStudy(study);
+					existingSubject.getSubjectStudyList().add(subjectStudy);
+				}
+				subject = existingSubject;
+			} else {
+				if(subject.getSubjectStudyList() == null) {
+					subject.setSubjectStudyList(new ArrayList<>());
+				}
+				SubjectStudy subjectStudy = new SubjectStudy();
+				subjectStudy.setSubject(existingSubject);
+				subjectStudy.setStudy(study);
+				subject.getSubjectStudyList().add(subjectStudy);
+			}
+			
+			// Then create/update the subject
+			subjectService.create(subject);
+
+			// Return subject ID
+			return subject.getId();
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
 		}
-		
-		// Otherwise, create a new subject
-		existingSubject = subjectRepository.save(subject);
-		
-		// Return subject ID
-		return existingSubject.getId();
+	}
+
+	private boolean studyListContains(List<SubjectStudy> subjectStudyList, Long studyId) {
+		for (SubjectStudy sustu : subjectStudyList) {
+			if (sustu.getStudy().getId().equals(studyId)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

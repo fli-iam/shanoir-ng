@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.service;
 
+import java.io.File;
 import java.util.List;
 
 import org.shanoir.ng.examination.model.Examination;
@@ -124,6 +125,9 @@ public interface ExaminationService {
 	 */
 	String addExtraData(Long examinationId, MultipartFile file);
 
+	String addExtraDataFromfile(Long examinationId, File file);
+
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
+
 }

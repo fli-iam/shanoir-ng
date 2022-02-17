@@ -117,7 +117,10 @@ public class RabbitMQConfiguration {
 	
 	/** Queue to create examination extra data from import */
 	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
-	
+
+	/** Queue to create all bids dataset acquisitions */
+	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -156,6 +159,7 @@ public class RabbitMQConfiguration {
 
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -371,6 +375,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyUserMailQueue() {
 		return new Queue(STUDY_USER_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue importBidsDatasetQueue() {
+		return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
 	}
 
 }
