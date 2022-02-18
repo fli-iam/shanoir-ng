@@ -84,6 +84,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService) {
 
         super(route, 'study');
+        this.activeTab = 'general';
     }
 
     public get study(): Study { return this.entity; }

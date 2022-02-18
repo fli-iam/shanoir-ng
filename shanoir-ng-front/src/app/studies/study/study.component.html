@@ -26,7 +26,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
-			<fieldset>
+
+			<ul class="tabs">
+				<li (click)="activeTab = 'general'" [class.active]="activeTab == 'general'">General</li>
+				<li (click)="activeTab = 'files'" [class.active]="activeTab == 'files'">Files</li>
+				<li (click)="activeTab = 'dua'" [class.active]="activeTab == 'dua'">DUA</li>
+				<li (click)="activeTab = 'subjects'" [class.active]="activeTab == 'subjects'">Subjects</li>
+				<li (click)="activeTab = 'centers'" [class.active]="activeTab == 'centers'">Centers</li>
+				<li (click)="activeTab = 'members'" [class.active]="activeTab == 'members'">Members</li>
+				<li (click)="activeTab = 'tags'" [class.active]="activeTab == 'tags'">Tags</li>
+				<li (click)="mode == 'view' ? activeTab = 'tree' : null" [class.active]="activeTab == 'tree'" [class.disabled]="mode != 'view'">Tree</li>
+				<li (click)="mode == 'view' ? activeTab = 'bids' : null" [class.active]="activeTab == 'bids'" [class.disabled]="mode != 'view'" >BIDS</li>
+			</ul>
+
+			<fieldset [class.hidden]="activeTab != 'general'">
 				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
 					<li>
@@ -119,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'dua'">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
 					Data User Agreement (DUA)
 					<tool-tip class="larger">
@@ -159,7 +172,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'general'">
 				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
 				<ol>
 					<li>
@@ -188,10 +201,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && study?.subjectStudyList">
-				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+			<fieldset [class.hidden]="activeTab != 'subjects'">
+				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'centers'">
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
 				<ol>
 					<li>
@@ -255,7 +268,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
@@ -284,7 +297,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'members'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
@@ -293,16 +306,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">					
 				</studyuser-list>
 			</fieldset>
-			<fieldset *ngIf="mode == 'view'">
+			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
 				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
 						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
-            <fieldset *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+            <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
                 <legend>Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
             </fieldset>
-            <fieldset *ngIf="mode == 'view'">
+            <fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'bids'">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id"></bids-tree>
             </fieldset>
