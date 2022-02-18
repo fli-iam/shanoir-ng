@@ -114,7 +114,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
-		//return getSearchResultsWithFacets(criteria, facet, pageable);
 		return getSearchResultsWithFacets(facet, pageable);
 	}
 
