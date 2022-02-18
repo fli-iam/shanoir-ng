@@ -32,6 +32,8 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -66,6 +68,8 @@ public class BidsImporterService {
 
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
+
+	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
 	/**
 	 * Create BIDS dataset.
@@ -128,9 +132,18 @@ public class BidsImporterService {
 				importDataset(importJob, BidsDataType.MICR, DatasetModalityType.MICR_DATASET, event);
 				break;
 			default:
+				if (event != null) {
+					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
+
+					event.setStatus(ShanoirEvent.ERROR);
+					event.setMessage("The data type folder is not recognized. Please update your BIDS archive following the rules.");
+					event.setProgress(1f);
+					eventService.publishEvent(event);
+				}
 				break;
 			}
 		} catch (Exception e) {
+			LOG.error("An unexpected exception occured during the import of a BIDS dataset.", e);
 			if (event != null) {
 				event.setStatus(ShanoirEvent.ERROR);
 				event.setMessage("An unexpected error occured, please contact an administrator.");

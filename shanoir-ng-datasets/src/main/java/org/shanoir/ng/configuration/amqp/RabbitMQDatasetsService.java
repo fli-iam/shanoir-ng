@@ -367,11 +367,4 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
 		}
 	}
-
-	@RabbitListener(queues = RabbitMQConfiguration.CREATE_DATASET_ACQUISITION_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public void importBIDSData(String message) {
-		// Create dataset acquisition, dataset, dataset expression, dataset file ?
-	}
 }

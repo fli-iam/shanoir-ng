@@ -344,7 +344,7 @@ public class BIDSServiceImpl implements BIDSService {
 			List<Dataset> datasets = acq.getDatasets();
 			for (Dataset ds : datasets) {
 				try {
-					getScansFile(examDir);
+					getScansFile(examDir, subjectName);
 					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
 				} catch (IOException e) {
 					LOG.error(e.getMessage());
@@ -456,7 +456,7 @@ public class BIDSServiceImpl implements BIDSService {
 				Files.createLink(pathToGo, srcFile.toPath());
 
 				// Add the file to the scans.tsv reference
-				File scansTsvFile = getScansFile(workDir);
+				File scansTsvFile = getScansFile(workDir, subjectName);
 				StringBuilder buffer = new StringBuilder();
 				buffer.append(pathToGo.getFileName()).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
@@ -478,9 +478,12 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
-	private File getScansFile(File parentFile) throws IOException {
-		// What if we don't have subject name ?
-		File scansFile = new File(parentFile.getAbsolutePath() + File.separator + parentFile.getName() + SCANS_FILE_EXTENSION);
+	private File getScansFile(File parentFile, String subjectName) throws IOException {
+		String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
+		if (!parentFile.getName().contains(subjectName)) {
+			fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
+		}
+		File scansFile = new File(parentFile.getAbsolutePath() + File.separator + fileName);
 		if (!scansFile.exists()) {
 			StringBuilder buffer = new StringBuilder();
 			buffer.append("filename").append(TABULATION)
