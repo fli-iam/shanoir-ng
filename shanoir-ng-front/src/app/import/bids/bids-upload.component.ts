@@ -102,7 +102,7 @@ export class BidsUploadComponent {
 
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
-        this.importService.uploadBidsFile(formData, this.study.id, this.center.id)
+        this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id)
             .then((importJob: ImportJob) => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";

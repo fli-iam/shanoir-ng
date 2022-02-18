@@ -230,7 +230,7 @@ public class BidsImporterService {
 		datasetAcquisition.setDatasets(datasets);
 		datasetAcquisition.setAcquisitionEquipmentId(1L);
 		datasetAcquisitionRepository.save(datasetAcquisition);
-
+		
 		event.setStatus(ShanoirEvent.SUCCESS);
 		event.setMessage("(" + importJob.getStudyId() + ")"
 				+": Successfully created datasets for subject " + importJob.getSubjectName()

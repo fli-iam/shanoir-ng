@@ -99,6 +99,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 	public ResponseEntity<ImportJob> importAsBids(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
 					throws RestServiceException, ShanoirException, IOException {
 
@@ -119,7 +120,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		ImportJob importJob = new ImportJob();
 		importJob.setStudyId(studyId);
-
+		
 		// Create tmp folder and unzip archive
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
 		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
@@ -133,7 +134,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 			String fileName = subjectFile.getName();
 			if (fileName.startsWith("sub-")) {
 				// We found a subject
-				String subjectName = subjectFile.getName().split("sub-")[1];
+				String subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
 				// Be carefull here, ID field is used to carry study id information
@@ -166,9 +167,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 			});
 
 			// Iterate over session files
+			boolean examCreated = false;
 			for (File sessionFile : examFiles) {
 				FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
-				boolean examCreated = false;
 				ExaminationDTO examination = null;
 				Long examId = null;
 

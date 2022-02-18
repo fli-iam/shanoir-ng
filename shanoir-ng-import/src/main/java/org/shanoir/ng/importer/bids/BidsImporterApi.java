@@ -46,12 +46,13 @@ public interface BidsImporterApi {
         @ApiResponse(code = 200, message = "import from bids", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @PostMapping(value = "/{studyId}/{centerId}",
+    @PostMapping(value = "/{studyId}/{studyName}/{centerId}",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<ImportJob> importAsBids(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
     		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
     		@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;
 
 }
